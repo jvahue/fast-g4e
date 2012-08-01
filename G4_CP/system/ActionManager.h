@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 1 $  $Date: 12-07-17 11:32a $
+  $Revision: 3 $  $Date: 12-07-27 3:03p $
 
 **********************************************************************************************/
 
@@ -30,37 +30,27 @@
 /*********************************************************************************************/
 #define MAX_ACTION_DEFINES           8
 #define MAX_ACTION_REQUESTS         32
+/* Action Flags                                                          */
+#define ACTION1                     0x0001
+#define ACTION2                     0x0002
+#define ACTION3                     0x0004
+#define ACTION4                     0x0008
+#define ACTION5                     0x0010
+#define ACTION6                     0x0020
+#define ACTION7                     0x0040
+#define ACTION8                     0x0080
 
-#define ACTION1                     0x00000001
-#define ACTION2                     0x00000002
-#define ACTION3                     0x00000004
-#define ACTION4                     0x00000008
-#define ACTION5                     0x00000010
-#define ACTION6                     0x00000020
-#define ACTION7                     0x00000040
-#define ACTION8                     0x00000080
-
-#define ACTION_WHEN_MET             0x00080000
-#define ACTION_ON_DURATION          0x00040000
-
-// ACKNOWLEDGE AND LATCH
-#define ACTION_LATCH                0x00800000
-#define ACTION_ACK                  0x80000000
-
-#define ACTION_ANY          ( ACTION_ON_DURATION | ACTION_WHEN_MET )
-
-#define ACTION_MASK         ( ACTION1 | ACTION2 | ACTION3 | ACTION4 |\
-                              ACTION5 | ACTION6 | ACTION7 | ACTION8 )
+#define ACTION_ALL                  ( ACTION1 | ACTION2 | ACTION3 | ACTION4 |\
+                                      ACTION5 | ACTION6 | ACTION7 | ACTION8 )
 
 // OUTPUTS
-#define LSS0MASK        0x01
-#define LSS1MASK        0x02
-#define LSS2MASK        0x04
-#define LSS3MASK        0x08
+#define LSS0_INDEX                  0
+#define LSS1_INDEX                  1
+#define LSS2_INDEX                  2
+#define LSS3_INDEX                  3
+#define MAX_OUTPUT_LSS              4
 
-#define MAX_OUTPUT_LSS     4
-
-#define ACTION_NO_REQ   -1
+#define ACTION_NO_REQ               -1
 //********************************************************************************************
 // ACTION CONFIGURATION DEFAULT
 //********************************************************************************************
@@ -83,70 +73,111 @@
 /*                                   Package Typedefs                                        */
 /*********************************************************************************************/
 
+/* Action Types */
 typedef enum
 {
    ACTION_OFF,
-   ON_MET,
-   ON_DURATION
+   ACTION_ON
 } ACTION_TYPE;
 
-///////////////////////////////////////// ACTION //////////////////////////////////////////////
+typedef enum
+{
+   ACT_TRANS_TO_ENG_RUN,
+   ACT_ACKNOWLEDGED
+} ACTION_PERSIST_CLR_TYPE;
+
+typedef enum
+{
+   ACT_RTC_COPY_BAD,
+   ACT_EE_COPY_BAD,
+   ACT_BOTH_COPIES_BAD
+} ACTION_NV_PERSIST_BAD;
+/*---------------------------------------- ACTION -------------------------------------------*/
+#pragma pack(1)
 typedef struct
 {
-   UINT8   UsedMask;
-   UINT8   LSS_Mask;
+   UINT8   nUsedMask;                                 /* LSS Outputs used by action          */
+   UINT8   nLSS_Mask;                                 /* Activate State of the LSS Outputs   */
 } ACTION_OUTPUT;
 
+/* Persistent Action Configuration    */
 typedef struct
 {
-   BOOLEAN       bEnabled;
-   ACTION_OUTPUT Output;
+   BOOLEAN       bEnabled;                            /* Is the persistent action enabled ?  */
+   ACTION_OUTPUT output;                              /* Masks for the persistent output(s)  */
 } ACTION_PERSIST_CFG;
 
+/* Action configuration               */
 typedef struct
 {
-   TRIGGER_INDEX      ACKTrigger;
-   ACTION_OUTPUT      Output[MAX_ACTION_DEFINES];
-   ACTION_PERSIST_CFG Persist;
+   TRIGGER_INDEX      aCKTrigger;                     /* Trigger to Acknowledge Actions      */
+   ACTION_OUTPUT      output[MAX_ACTION_DEFINES];     /* Masks for the action outputs        */
+   ACTION_PERSIST_CFG persist;                        /* persistent action configuration     */
 } ACTION_CFG;
 
+/* Dynamic structure to hold the persistent state                  */
 typedef struct
 {
-   BITARRAY128 ACK;
-   BITARRAY128 Active;
-   BITARRAY128 Latch;
-   BOOLEAN     bState;
-} ACTION_FLAGS;
-
-typedef struct
-{
-   BOOLEAN       bState;
-   BOOLEAN       bLatch;
-   ACTION_OUTPUT Action;
+   BOOLEAN       bState;                              /* Persistent output current state     */
+   BOOLEAN       bLatch;                              /* Is persistent action latched?       */
+   UINT8         actionNum;
+   ACTION_OUTPUT action;                              /* Persistent output state             */
 } ACTION_PERSIST;
 
 typedef struct
 {
-   ACTION_FLAGS    Action[MAX_ACTION_DEFINES];
-   ER_STATE        PrevEngState;
-   ACTION_PERSIST  Persist;
-   UINT8           PriorityMask;
-   INT8            RequestCounter;
+   ACTION_PERSIST_CLR_TYPE clearReason;
+   ACTION_PERSIST          persistState;
+} ACTION_CLR_PERSIST_LOG;
+
+typedef struct
+{
+   RESULT                resultEE;
+   RESULT                resultRTC;
+   ACTION_NV_PERSIST_BAD failureType;
+   ACTION_PERSIST        copyfromEE;
+   ACTION_PERSIST        copyfromRTC;
+} ACTION_PERSIST_NV_FAIL_LOG;
+#pragma pack()
+
+/* Dynamic structure of flags for the state of the action requests */
+typedef struct
+{
+   BITARRAY128 flagACK;                               /* Flags -> request is acknowledable   */
+   BITARRAY128 flagActive;                            /* Flags -> request is Active          */
+   BITARRAY128 flagLatch;                             /* Flags -> request is Latched         */
+   BOOLEAN     bState;                                /* Action output current state         */
+} ACTION_FLAGS;
+
+/* Dynamic state of the actions                                    */
+typedef struct
+{
+   ACTION_FLAGS    action[MAX_ACTION_DEFINES];        /* State of all action flags           */
+   ER_STATE        prevEngState;                      /* Previous engine state               */
+   BOOLEAN         bUpdatePersistOut;
+   BOOLEAN         bNVStored;
+   ACTION_PERSIST  persist;                           /* State of the persistent data        */
+   UINT8           nPriorityMask;                     /* Current Priority mask               */
+   INT8            nRequestCounter;                   /* Request Counter for generating IDs  */
 } ACTION_DATA;
 
+/* Structure that defines the action requests                      */
 typedef struct
 {
-   INT8        Index;
-   UINT32      Action;
-   ACTION_TYPE State;
+   INT8        nID;                                    /* ID of the request                  */
+   UINT16      nAction;                                /* Action flags of the request        */
+   ACTION_TYPE state;                                  /* state of the request ON/OFF        */
+   BOOLEAN     bACK;                                   /* Is Action acknowledgable           */
+   BOOLEAN     bLatch;                                 /* Is Action latched                  */
 } ACTION_REQUEST;
 
+/* FIFO used for Action requests                                   */
 typedef struct
 {
-   FIFO    RecordFIFO;
-   UINT32  RecordCnt;
+   FIFO    recordFIFO;
+   UINT32  nRecordCnt;
    BOOLEAN bOverFlow;
-   UINT16  RecordSize;
+   UINT16  nRecordSize;
 } ACTION_REQUEST_FIFO;
 
 /**********************************************************************************************
@@ -167,13 +198,20 @@ typedef struct
 /**********************************************************************************************
                                   Package Exports Functions
 **********************************************************************************************/
-EXPORT void ActionsInitialize ( void );
-EXPORT INT8 ActionRequest     ( INT8 ReqNum, UINT32 Action, ACTION_TYPE State );
+EXPORT void ActionsInitialize    ( void );
+EXPORT INT8 ActionRequest        ( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
+                                   BOOLEAN bACK, BOOLEAN bLatch );
+EXPORT void ActionResetNVPersist ( void );
 
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
  * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Action Manager Persistent Updates
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:32a
  * Created in $/software/control processor/code/system

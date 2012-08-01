@@ -12,7 +12,7 @@
                   modules.
 
    VERSION
-    $Revision: 27 $  $Date: 12-07-13 3:50p $
+    $Revision: 28 $  $Date: 7/19/12 11:07a $
 
 ******************************************************************************/
 
@@ -101,7 +101,7 @@ EXPORT void    ResetBits(UINT32 mask[], INT32 maskSizeBytes,
 EXPORT BOOLEAN TestBits(UINT32 mask[], INT32 maskSizeBytes,
                         UINT32 data[], INT32 dataSizeBytes,
                         BOOLEAN exact );
-
+EXPORT INT32 CompareVersions(const char* v1,const char* v2);
 
 // Define to activate the sys.dumpmem command
 // #define ENABLE_SYS_DUMP_MEM_CMD
@@ -126,6 +126,11 @@ EXPORT void DumpMemory(UINT8* addr, UINT32 size, CHAR* string);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.h $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-07-13   Time: 3:50p

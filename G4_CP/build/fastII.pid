@@ -1,0 +1,34 @@
+-----------------------------------------------------------------------------------------------
+-- Program ID Control File for the FASTII G4 DPU
+-----------------------------------------------------------------------------------------------
+[Files]
+InputFile   = SREC
+OutputFile  = SREC
+
+[Split]
+DataWidth   = 2
+OutputSplit = 1
+BigEndian   = YES
+
+-----------------------------------------------------------------------------------------------
+-- Application Program Memory Section
+-- EndAdj is -4 for CRC plus -32 for build Data/Time
+-----------------------------------------------------------------------------------------------
+[Section_0]
+SectionSize   = 800000
+StartAddr     = 0x00100000
+EndAddr       = 0x0
+EndAdj        = -36
+FillWith      = 0xFF
+CheckOperand  = 4
+CheckSize     = 0
+CheckAddr     = 0
+CRCoperand    = 1
+CRCsize       = 4
+CRCaddr       = 0
+CRCpoly       = 0x8005
+CRCinit       = 0xFFFFFFFF
+CRCtype       = 32
+OutputSection = YES
+OutputFill    = NO
+

@@ -1,0 +1,2463 @@
+Link Date:	Thu Feb 16 15:08:34 2012
+Host OS:	Windows XP Service Pack 2
+Version:	ELXR 5.0 (c) 1998-2009 Green Hills Software    Build: Nov  9 2009
+
+
+Load Map Thu Feb 16 15:08:34 2012
+Image Summary
+
+  Section              Base      Size(hex)    Size(dec)  SecOffs
+  .bss                 30000000  013b4f44     20664132   00001a0
+  .data                313b4f44  0001ed78       126328   00001a0
+  .pbss                313d3cbc  000002ac          684   001ef18
+  .sdabase             313d3f68  00000000            0   001ef18
+  .sbss                313d3f68  00000000            0   001ef18
+  .stackbase           31f00000  00000000            0   001ef18
+  .stack               31f00000  00100000      1048576   001ef18
+  .vector              00100000  00000416         1046   001ef18
+  .text                00100420  00051ee6       335590   001f338
+  .rodata              00152306  00000000            0   007121e
+  .secinfo             00152308  00000288          648   0071220
+  .fixaddr             00152590  00000000            0   00714a8
+  .fixtype             00152590  00000000            0   00714a8
+  .sdata               00152590  00000000            0   00714a8
+  .syscall             00152590  00000004            4   00714a8
+  .ROM.data            00152594  0001ed78       126328   00001a0
+  .crcDefault          0017130c  00000004            4   00714ac
+  .buildDate           00171310  00000020           32   00714b0
+
+Load Map Thu Feb 16 15:08:34 2012
+Module Summary
+
+  Origin+Size    Section          Module
+00100420+002120  .text            AircraftConfigMgr.o
+313b4f44+00067c  .data            AircraftConfigMgr.o
+3000fcec+0001c8  .bss             AircraftConfigMgr.o
+00102540+001be6  .text            FASTMgr.o
+313b55c0+000750  .data            FASTMgr.o
+3000feb4+0001d4  .bss             FASTMgr.o
+00104128+001954  .text            FASTStateMgr.o
+313b5d10+000614  .data            FASTStateMgr.o
+30010088+000ab8  .bss             FASTStateMgr.o
+00105a7c+001eb6  .text            MSFileXfr.o
+313b6324+0001f8  .data            MSFileXfr.o
+30010b40+004514  .bss             MSFileXfr.o
+00107932+0045c4  .text            UploadMgr.o
+313b651c+0004f4  .data            UploadMgr.o
+30015054+02a40c  .bss             UploadMgr.o
+0010bef8+0027b4  .text            User.o
+3003f460+00200c  .bss             User.o
+0010e6ac+000518  .text            ADC.o
+3004146c+000020  .bss             ADC.o
+0010ebc4+0004e6  .text            Assert.o
+3004148c+000003  .bss             Assert.o
+0010f0aa+00032e  .text            BusTO.o
+313b6a10+000010  .data            BusTO.o
+3004148f+000001  .bss             BusTO.o
+0010f3d8+000548  .text            datareduction.o
+0010f920+0015f4  .text            DIO.o
+313b6a20+000960  .data            DIO.o
+30041490+000009  .bss             DIO.o
+313d3cbc+0001f0  .pbss            DIO.o
+00110f14+00072a  .text            DPRAM.o
+3004149c+010050  .bss             DPRAM.o
+00111640+0006ac  .text            EEPROM.o
+00111cec+000784  .text            Exception.o
+300514ec+00085c  .bss             Exception.o
+00112470+000390  .text            FIFO.o
+00112800+000b94  .text            FPGA.o
+00113394+00038a  .text            PBIT.o
+0011371e+0004bc  .text            ProcessorInit.o
+30051d48+000004  .bss             ProcessorInit.o
+00113bdc+001a7c  .text            QAR.o
+313b7380+000040  .data            QAR.o
+30051d4c+0042f0  .bss             QAR.o
+00115658+000098  .text            RamTest.o
+001156f0+000a58  .text            RTC.o
+3005603c+000004  .bss             RTC.o
+00116148+0025d4  .text            ResultCodes.o
+0011871c+000620  .text            SPI.o
+30056040+00000c  .bss             SPI.o
+00118d3c+00022e  .text            TTMR.o
+3005604c+00000c  .bss             TTMR.o
+00118f6a+001808  .text            UART.o
+313b73c0+000010  .data            UART.o
+30056058+00010c  .bss             UART.o
+0011a772+0001fc  .text            Version.o
+313b73d0+00000c  .data            Version.o
+00171310+000020  .buildDate       Version.o
+0011a96e+00026a  .text            amdfujiscs.o
+0011abd8+00203c  .text            arinc429.o
+30056164+000001  .bss             arinc429.o
+0011cc14+000be4  .text            flash.o
+30056168+00106c  .bss             flash.o
+00100000+000416  .vector          vectors.o
+0011d7f8+0000ac  .text            crt0.o
+0011d8a4+00036e  .text            ind_crt0.o
+0011dc18+003f58  .text            arinc429mgr.o
+313b73dc+0144c4  .data            arinc429mgr.o
+300571d4+0e8534  .bss             arinc429mgr.o
+00121b70+000f18  .text            Box.o
+313cb8a0+0005d8  .data            Box.o
+3013f708+0001e8  .bss             Box.o
+00122a88+0012e4  .text            CBITManager.o
+313cbe78+000160  .data            CBITManager.o
+3013f8f0+000238  .bss             CBITManager.o
+0017130c+000004  .crcDefault      CBITManager.o
+00123d6c+00ae80  .text            CfgManager.o
+3013fb28+01527c  .bss             CfgManager.o
+0012ebec+000c52  .text            ClockMgr.o
+30154da4+000218  .bss             ClockMgr.o
+0012f840+000404  .text            DIOMgr.o
+313cbfd8+0009b8  .data            DIOMgr.o
+0012fc44+002428  .text            DataManager.o
+313cc990+000998  .data            DataManager.o
+30154fbc+10ee97c  .bss             DataManager.o
+0013206c+0007e4  .text            FPGAManager.o
+313cd328+0002b4  .data            FPGAManager.o
+31243938+000014  .bss             FPGAManager.o
+00132850+0004d0  .text            Fault.o
+313cd5dc+000548  .data            Fault.o
+3124394c+000c60  .bss             Fault.o
+00132d20+000816  .text            FaultMgr.o
+313cdb24+000258  .data            FaultMgr.o
+312445ac+0021c8  .bss             FaultMgr.o
+00133536+000538  .text            GSE.o
+31246774+004018  .bss             GSE.o
+00133a70+000b70  .text            InitializationManager.o
+313cdd7c+000004  .data            InitializationManager.o
+3124a78c+000004  .bss             InitializationManager.o
+001345e0+002678  .text            LogManager.o
+313cdd80+0002c0  .data            LogManager.o
+3124a790+09998c  .bss             LogManager.o
+00136c58+000b6c  .text            MSInterface.o
+312e411c+000108  .bss             MSInterface.o
+001377c4+000f3e  .text            MSStsCtl.o
+313ce040+00084c  .data            MSStsCtl.o
+312e4224+002a4c  .bss             MSStsCtl.o
+00138704+001180  .text            MemManager.o
+312e6c70+001080  .bss             MemManager.o
+00139888+002900  .text            Monitor.o
+313ce88c+000058  .data            Monitor.o
+312e7cf0+000014  .bss             Monitor.o
+0013c188+001ee8  .text            NVMgr.o
+313ce8e4+0001e0  .data            NVMgr.o
+312e7d04+041d90  .bss             NVMgr.o
+0013e070+0012ac  .text            PowerManager.o
+313ceac4+000298  .data            PowerManager.o
+31329a94+000034  .bss             PowerManager.o
+313d3eac+0000bc  .pbss            PowerManager.o
+0013f31c+000970  .text            QARManager.o
+313ced5c+000b84  .data            QARManager.o
+31329ac8+002c0c  .bss             QARManager.o
+0013fc8c+000ff0  .text            SpiManager.o
+3132c6d4+0000bc  .bss             SpiManager.o
+00140c7c+0015b4  .text            SystemLog.o
+3132c790+00010a  .bss             SystemLog.o
+00142230+001798  .text            TaskManager.o
+3132c89c+002070  .bss             TaskManager.o
+001439c8+000bfc  .text            UtilRegSetCheck.o
+3132e90c+0109a4  .bss             UtilRegSetCheck.o
+001445c4+000d54  .text            Utility.o
+3133f2b0+00000c  .bss             Utility.o
+00145318+000020  .text            main.o
+00145338+002074  .text            sensor.o
+313cf8e0+001004  .data            sensor.o
+3133f2bc+0025bc  .bss             sensor.o
+001473b0+001228  .text            trigger.o
+313d08e4+000830  .data            trigger.o
+31341878+0031dc  .bss             trigger.o
+001485d8+001de4  .text            UartMgr.o
+313d1114+000794  .data            UartMgr.o
+31344a54+021414  .bss             UartMgr.o
+0014a3bc+003084  .text            F7XProtocol.o
+313d18a8+001ce0  .data            F7XProtocol.o
+31365e68+0049a8  .bss             F7XProtocol.o
+0014d440+0028b4  .text            EMU150Protocol.o
+313d3588+000710  .data            EMU150Protocol.o
+3136a810+04a6e4  .bss             EMU150Protocol.o
+0014fcf4+00003c  .text            WatchDog.o
+0014fd30+000010  .text            libmulti.a
+0014fd40+000068  .text            libansi.a(ccstrccmp.o)
+0014fda8+00009a  .text            libansi.a(ccstrtok.o)
+313b4ef4+000004  .bss             libansi.a(ccstrtok.o)
+0014fe42+00004e  .text            libansi.a(ccstrstr.o)
+0014fe90+00002a  .text            libansi.a(ccstrspn.o)
+0014feba+00002c  .text            libansi.a(ccstrpbr.o)
+0014fee6+000032  .text            libansi.a(ccstrncp.o)
+0014ff18+000036  .text            libansi.a(ccstrncm.o)
+0014ff4e+000018  .text            libansi.a(ccstrlen.o)
+0014ff66+00002a  .text            libansi.a(ccstrcsp.o)
+0014ff90+00001a  .text            libansi.a(ccstrcpy.o)
+0014ffaa+000024  .text            libansi.a(ccstrcmp.o)
+0014ffce+000026  .text            libansi.a(ccstrchr.o)
+0014fff4+000020  .text            libansi.a(ccstrcat.o)
+00150014+000576  .text            libansi.a(ccefgout.o)
+313d3c98+000020  .data            libansi.a(ccefgout.o)
+0015058a+0006ea  .text            libansi.a(ccvsprnt.o)
+00150c74+000090  .text            libansi.a(ccsnprtf.o)
+00150d04+00005c  .text            libansi.a(ccsprntf.o)
+00150d60+000490  .text            libansi.a(ccdocvt.o)
+001511f0+00002e  .text            libansi.a(ccexit.o)
+0015121e+00005e  .text            libansi.a(ccwctomb.o)
+0015127c+00013c  .text            libansi.a(ccstrtul.o)
+001513b8+000160  .text            libansi.a(ccstrtol.o)
+00151518+0000f2  .text            libansi.a(cclocale.o)
+313d3cb8+000004  .data            libansi.a(cclocale.o)
+313b4ef8+000044  .bss             libansi.a(cclocale.o)
+0015160a+000010  .text            libansi.a(ccabs.o)
+0015161a+000018  .text            libansi.a(ccatoi.o)
+00151632+00002c  .text            libansi.a(ccmemcmp.o)
+0015165e+000026  .text            libmath.a(indfabs.o)
+00151688+000578  .text            libmath.a(ccstrtod.o)
+00151c00+000014  .text            libmath.a(ccatof.o)
+00151c14+00013c  .text            libmath.a(indscalbln.o)
+00151d50+000144  .text            libind.a(ind64tod.o)
+00151e94+00009c  .text            libstartup.a(ind_uzip.o)
+00151f30+000054  .text            libstartup.a(ind_mset.o)
+00151f84+00007c  .text            libstartup.a(ind_mcpy.o)
+00152000+0000ae  .text            libsys.a(ind_exit.o)
+313b4f3c+000004  .bss             libsys.a(ind_exit.o)
+001520ae+00002e  .text            libsys.a(ind_errn.o)
+00152590+000004  .syscall         libsys.a(ind_dots.o)
+001520dc+000030  .text            libsys.a(ind_call.o)
+0015210c+00010e  .text            libsys.a(ind_crt1.o)
+0015221a+000088  .text            libsys.a(ind_thrd.o)
+313b4f40+000004  .bss             libsys.a(ind_thrd.o)
+001522b0+000056  .text            libarch.a(indclz32.o)
+
+Load Map Thu Feb 16 15:08:34 2012
+Global Symbols (sorted alphabetically)
+
+ .text            00111dbc A0Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dc2 A1Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dc8 A2Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dce A3Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dd4 A4Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dda A5Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111de0 A6Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111de6 A7Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .data            313b557c ACConfigStatus
+ .data            313ccb44 ACSMode
+ .data            313ccb1c ACSPortType
+ .text            0012fe70 ACS_ShowConfig..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00130072 ACS_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3123ae44 ACS_StatusTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0012fd84 ACS_UserCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0012fc44 ACS_UserForceDownload..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0012fcf2 ACS_UserStopDownload..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313b5568 ACUpdateMethod
+ .text            00100420 AC_CancelCfgHandler
+ .text            00100c38 AC_CancelRecfg
+ .text            001004d6 AC_ClearCfgDirHandler
+ .text            00101e14 AC_CommitCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            0010044c AC_CommitCfgHandler
+ .text            00102298 AC_CopyACCfgToPackedACCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101f82 AC_Error..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00100cf2 AC_FSMAutoRun
+ .text            00100d10 AC_FSMGetState
+ .text            00100984 AC_FileInit
+ .text            00100a48 AC_GetConfigState
+ .text            00100a24 AC_GetConfigStatus
+ .text            00102176 AC_IsAircraftIDSensorsValid..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00102062 AC_MSReqCfgFilesHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001020b4 AC_MSReqCfgStsRspHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00102038 AC_MSReqStartCfgRspHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            0010213e AC_MSRspCancelCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00102106 AC_MSRspShellCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101ba8 AC_ProcessGetCfgLoadSts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101288 AC_ProcessRetrieveCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101e94 AC_Rebooting..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00100b1c AC_SendClearCfgDir
+ .text            001019d8 AC_SendGetCfgLoadSts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101fb2 AC_SetCfgStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001009d4 AC_SetIsGroundServerConnected
+ .text            001009e6 AC_SetIsMSConnected
+ .text            001009f8 AC_SetIsOnGround
+ .text            00101f4e AC_Signal..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00100ed2 AC_StartAuto..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            0010047e AC_StartAutoHandler
+ .text            00100a88 AC_StartAutoRecfg
+ .text            00100f46 AC_StartManual..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001004aa AC_StartManualHandler
+ .text            00100ac0 AC_StartManualRecfg
+ .text            00100d3a AC_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001021ce AC_UpdateEESensorValues..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            0010158a AC_ValidateAcID..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101ef8 AC_Wait..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101dba AC_WaitForCommitCommand..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101cd0 AC_WaitLogUploadBeforeCommit..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001010a0 AC_WaitMSSIMRdy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00101102 AC_WaitVPNConnection..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            0010e7c2 ADC_GetACBattVoltage
+ .text            0010e77c ADC_GetACBusVoltage
+ .text            0010e84e ADC_GetBoardTemp
+ .text            0010e808 ADC_GetLiBattVoltage
+ .text            0010eb3a ADC_GetValue
+ .text            0010e6ac ADC_Init
+ .text            0010e910 ADC_ReadACBattVoltage
+ .text            0010e894 ADC_ReadACBusVoltage
+ .text            0010e9aa ADC_ReadBoardTemp
+ .text            0010e976 ADC_ReadLiBattVoltage
+ .text            0010e9f2 ADC_ReadRaw
+ .text            0010e75a ADC_Registers
+ .text            0010ea90 ADC_SensorTest
+ .data            313b6a10 AccessType
+ .data            313ccbb4 AcsCfgTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313cc990 AcsCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313ccdc4 AcsStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00113463 Actual..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .data            313b4f44 AircraftCfgCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .data            313b51ac AircraftCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001006e6 AircraftConfigInitialization
+ .bss             3013f778 AircraftConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .data            313b5338 AircraftReconfigCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .data            313b5288 AircraftSensorCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            001005be AircraftShowConfig
+ .data            313b5498 AircraftTaskStateEnum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .text            00100502 AircraftUserCfg
+ .text            0011ab90 AmdFujiSCS_ChipErase
+ .text            0011aa36 AmdFujiSCS_GetStatus
+ .text            0011a98e AmdFujiSCS_Program
+ .text            0011a9f2 AmdFujiSCS_ProgramBufferToFlash
+ .text            0011a96e AmdFujiSCS_Reset
+ .text            0011ab76 AmdFujiSCS_SectorEraseCmd
+ .text            0011ab38 AmdFujiSCS_SectorEraseSetup
+ .text            0011aa0c AmdFujiSCS_WriteBufferAbortReset
+ .text            0011a9c4 AmdFujiSCS_WriteToBuffer
+ .bss             30010b38 AnEnum
+ .data            313b7460 Arinc429CfgRxTbl
+ .data            313b73dc Arinc429CfgTbl
+ .bss             3005c520 Arinc429CfgTemp_RxChan..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             3005d988 Arinc429CfgTemp_TxChan..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .data            313b77fc Arinc429CfgTxTbl
+ .data            313cb138 Arinc429DebugTbl
+ .text            0011b160 Arinc429DrvCfgLFR
+ .text            0011b200 Arinc429DrvCfgRxChan
+ .text            0011b376 Arinc429DrvCfgTxChan
+ .text            0011b516 Arinc429DrvCheckBITStatus
+ .text            0011b4fc Arinc429DrvFPGA_OK
+ .text            0011afa4 Arinc429DrvFlushHWFIFO
+ .text            0011abd8 Arinc429DrvInitialize
+ .text            0011b622 Arinc429DrvLogFpgaRegs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011adb0 Arinc429DrvProcessISR_Rx
+ .text            0011ae9a Arinc429DrvProcessISR_Tx
+ .text            0011afdc Arinc429DrvRead
+ .text            0011b0c2 Arinc429DrvReconfigure
+ .text            0011b70a Arinc429DrvRestoreStartupCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011b5e2 Arinc429DrvRxGetCounts
+ .text            0011b0d0 Arinc429DrvSetIMR1_2
+ .bss             300572f4 Arinc429DrvStatusTemp_Rx..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             3005730c Arinc429DrvStatusTemp_Tx..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011b052 Arinc429DrvStatus_OK
+ .text            0011b784 Arinc429DrvTest_FIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011c62a Arinc429DrvTest_LFR..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011c830 Arinc429DrvTest_LoopBack..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011ba08 Arinc429DrvTest_Rx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011c182 Arinc429DrvTest_Tx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011b602 Arinc429DrvTxGetCounts
+ .text            001201f4 Arinc429MgrAddPrevCBITHealthStatus
+ .text            00120c42 Arinc429MgrApplyProtocol..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011f18e Arinc429MgrBITTask
+ .text            00120134 Arinc429MgrCalcDiffCBITHealthStatus
+ .text            001204c2 Arinc429MgrCfgReduction..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0012116e Arinc429MgrCheckPW305AB_MFD_Timeout..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0012105c Arinc429MgrCheckParameterLostTimeout..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00120eec Arinc429MgrConvertEngToMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00121606 Arinc429MgrCreateTimeOutSystemLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00120d0c Arinc429MgrDataReduction..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            001216d6 Arinc429MgrDetermineSSMFailure..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00121b60 Arinc429MgrDisableLiveStream
+ .text            0011f480 Arinc429MgrDisplaySWBufferTask
+ .text            0012009a Arinc429MgrGetCBITHealthStatus
+ .text            0011fb8c Arinc429MgrGetFileHdr
+ .text            00121a1a Arinc429MgrGetReduceHdr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011fc66 Arinc429MgrGetSystemHdr
+ .text            0011e6e6 Arinc429MgrInitTasks
+ .text            0011ecb0 Arinc429MgrInitialize
+ .text            0012002a Arinc429MgrInterfaceValid
+ .text            0012123a Arinc429MgrInvalidateParameter..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00121476 Arinc429MgrParameterTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            001209c0 Arinc429MgrParseBCD..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00120798 Arinc429MgrParseGPA_GPB..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00120894 Arinc429MgrParseMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011eef6 Arinc429MgrProcessMsgsTask
+ .text            0011f0fa Arinc429MgrProcessMsgsTaskShutdown
+ .text            001212cc Arinc429MgrProcessPW305ABEngineMFD..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00120b22 Arinc429MgrReadBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011f9aa Arinc429MgrReadFilteredRaw
+ .text            0011fa12 Arinc429MgrReadFilteredRawSnapshot
+ .text            00121794 Arinc429MgrReadReduceSnapshot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011fd88 Arinc429MgrReadWord
+ .text            001202aa Arinc429MgrReconfigureHW..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011fd16 Arinc429MgrSensorSetup
+ .text            0011fefe Arinc429MgrSensorTest
+ .text            00120bae Arinc429MgrStoreLabelData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011fb32 Arinc429MgrSyncTime
+ .text            00121500 Arinc429MgrUpdateLabelFilter..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00121416 Arinc429MgrWriteBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011ddea Arinc429Msg_CfgRx
+ .text            0011dee4 Arinc429Msg_CfgTx
+ .text            0011dfe6 Arinc429Msg_Reconfigure
+ .text            0011dc18 Arinc429Msg_RegisterRx
+ .text            0011dc7e Arinc429Msg_RegisterTx
+ .text            0011e006 Arinc429Msg_ShowConfig
+ .text            0011dce2 Arinc429Msg_StateRx
+ .text            0011dd6a Arinc429Msg_StateTx
+ .data            313ba5c8 Arinc429P0Tbl
+ .data            313c0ce8 Arinc429P100Tbl
+ .data            313c0df0 Arinc429P101Tbl
+ .data            313c0ef8 Arinc429P102Tbl
+ .data            313c1000 Arinc429P103Tbl
+ .data            313c1108 Arinc429P104Tbl
+ .data            313c1210 Arinc429P105Tbl
+ .data            313c1318 Arinc429P106Tbl
+ .data            313c1420 Arinc429P107Tbl
+ .data            313c1528 Arinc429P108Tbl
+ .data            313c1630 Arinc429P109Tbl
+ .data            313bb018 Arinc429P10Tbl
+ .data            313c1738 Arinc429P110Tbl
+ .data            313c1840 Arinc429P111Tbl
+ .data            313c1948 Arinc429P112Tbl
+ .data            313c1a50 Arinc429P113Tbl
+ .data            313c1b58 Arinc429P114Tbl
+ .data            313c1c60 Arinc429P115Tbl
+ .data            313c1d68 Arinc429P116Tbl
+ .data            313c1e70 Arinc429P117Tbl
+ .data            313c1f78 Arinc429P118Tbl
+ .data            313c2080 Arinc429P119Tbl
+ .data            313bb120 Arinc429P11Tbl
+ .data            313c2188 Arinc429P120Tbl
+ .data            313c2290 Arinc429P121Tbl
+ .data            313c2398 Arinc429P122Tbl
+ .data            313c24a0 Arinc429P123Tbl
+ .data            313c25a8 Arinc429P124Tbl
+ .data            313c26b0 Arinc429P125Tbl
+ .data            313c27b8 Arinc429P126Tbl
+ .data            313c28c0 Arinc429P127Tbl
+ .data            313c29c8 Arinc429P128Tbl
+ .data            313c2ad0 Arinc429P129Tbl
+ .data            313bb228 Arinc429P12Tbl
+ .data            313c2bd8 Arinc429P130Tbl
+ .data            313c2ce0 Arinc429P131Tbl
+ .data            313c2de8 Arinc429P132Tbl
+ .data            313c2ef0 Arinc429P133Tbl
+ .data            313c2ff8 Arinc429P134Tbl
+ .data            313c3100 Arinc429P135Tbl
+ .data            313c3208 Arinc429P136Tbl
+ .data            313c3310 Arinc429P137Tbl
+ .data            313c3418 Arinc429P138Tbl
+ .data            313c3520 Arinc429P139Tbl
+ .data            313bb330 Arinc429P13Tbl
+ .data            313c3628 Arinc429P140Tbl
+ .data            313c3730 Arinc429P141Tbl
+ .data            313c3838 Arinc429P142Tbl
+ .data            313c3940 Arinc429P143Tbl
+ .data            313c3a48 Arinc429P144Tbl
+ .data            313c3b50 Arinc429P145Tbl
+ .data            313c3c58 Arinc429P146Tbl
+ .data            313c3d60 Arinc429P147Tbl
+ .data            313c3e68 Arinc429P148Tbl
+ .data            313c3f70 Arinc429P149Tbl
+ .data            313bb438 Arinc429P14Tbl
+ .data            313c4078 Arinc429P150Tbl
+ .data            313c4180 Arinc429P151Tbl
+ .data            313c4288 Arinc429P152Tbl
+ .data            313c4390 Arinc429P153Tbl
+ .data            313c4498 Arinc429P154Tbl
+ .data            313c45a0 Arinc429P155Tbl
+ .data            313c46a8 Arinc429P156Tbl
+ .data            313c47b0 Arinc429P157Tbl
+ .data            313c48b8 Arinc429P158Tbl
+ .data            313c49c0 Arinc429P159Tbl
+ .data            313bb540 Arinc429P15Tbl
+ .data            313c4ac8 Arinc429P160Tbl
+ .data            313c4bd0 Arinc429P161Tbl
+ .data            313c4cd8 Arinc429P162Tbl
+ .data            313c4de0 Arinc429P163Tbl
+ .data            313c4ee8 Arinc429P164Tbl
+ .data            313c4ff0 Arinc429P165Tbl
+ .data            313c50f8 Arinc429P166Tbl
+ .data            313c5200 Arinc429P167Tbl
+ .data            313c5308 Arinc429P168Tbl
+ .data            313c5410 Arinc429P169Tbl
+ .data            313bb648 Arinc429P16Tbl
+ .data            313c5518 Arinc429P170Tbl
+ .data            313c5620 Arinc429P171Tbl
+ .data            313c5728 Arinc429P172Tbl
+ .data            313c5830 Arinc429P173Tbl
+ .data            313c5938 Arinc429P174Tbl
+ .data            313c5a40 Arinc429P175Tbl
+ .data            313c5b48 Arinc429P176Tbl
+ .data            313c5c50 Arinc429P177Tbl
+ .data            313c5d58 Arinc429P178Tbl
+ .data            313c5e60 Arinc429P179Tbl
+ .data            313bb750 Arinc429P17Tbl
+ .data            313c5f68 Arinc429P180Tbl
+ .data            313c6070 Arinc429P181Tbl
+ .data            313c6178 Arinc429P182Tbl
+ .data            313c6280 Arinc429P183Tbl
+ .data            313c6388 Arinc429P184Tbl
+ .data            313c6490 Arinc429P185Tbl
+ .data            313c6598 Arinc429P186Tbl
+ .data            313c66a0 Arinc429P187Tbl
+ .data            313c67a8 Arinc429P188Tbl
+ .data            313c68b0 Arinc429P189Tbl
+ .data            313bb858 Arinc429P18Tbl
+ .data            313c69b8 Arinc429P190Tbl
+ .data            313c6ac0 Arinc429P191Tbl
+ .data            313c6bc8 Arinc429P192Tbl
+ .data            313c6cd0 Arinc429P193Tbl
+ .data            313c6dd8 Arinc429P194Tbl
+ .data            313c6ee0 Arinc429P195Tbl
+ .data            313c6fe8 Arinc429P196Tbl
+ .data            313c70f0 Arinc429P197Tbl
+ .data            313c71f8 Arinc429P198Tbl
+ .data            313c7300 Arinc429P199Tbl
+ .data            313bb960 Arinc429P19Tbl
+ .data            313ba6d0 Arinc429P1Tbl
+ .data            313c7408 Arinc429P200Tbl
+ .data            313c7510 Arinc429P201Tbl
+ .data            313c7618 Arinc429P202Tbl
+ .data            313c7720 Arinc429P203Tbl
+ .data            313c7828 Arinc429P204Tbl
+ .data            313c7930 Arinc429P205Tbl
+ .data            313c7a38 Arinc429P206Tbl
+ .data            313c7b40 Arinc429P207Tbl
+ .data            313c7c48 Arinc429P208Tbl
+ .data            313c7d50 Arinc429P209Tbl
+ .data            313bba68 Arinc429P20Tbl
+ .data            313c7e58 Arinc429P210Tbl
+ .data            313c7f60 Arinc429P211Tbl
+ .data            313c8068 Arinc429P212Tbl
+ .data            313c8170 Arinc429P213Tbl
+ .data            313c8278 Arinc429P214Tbl
+ .data            313c8380 Arinc429P215Tbl
+ .data            313c8488 Arinc429P216Tbl
+ .data            313c8590 Arinc429P217Tbl
+ .data            313c8698 Arinc429P218Tbl
+ .data            313c87a0 Arinc429P219Tbl
+ .data            313bbb70 Arinc429P21Tbl
+ .data            313c88a8 Arinc429P220Tbl
+ .data            313c89b0 Arinc429P221Tbl
+ .data            313c8ab8 Arinc429P222Tbl
+ .data            313c8bc0 Arinc429P223Tbl
+ .data            313c8cc8 Arinc429P224Tbl
+ .data            313c8dd0 Arinc429P225Tbl
+ .data            313c8ed8 Arinc429P226Tbl
+ .data            313c8fe0 Arinc429P227Tbl
+ .data            313c90e8 Arinc429P228Tbl
+ .data            313c91f0 Arinc429P229Tbl
+ .data            313bbc78 Arinc429P22Tbl
+ .data            313c92f8 Arinc429P230Tbl
+ .data            313c9400 Arinc429P231Tbl
+ .data            313c9508 Arinc429P232Tbl
+ .data            313c9610 Arinc429P233Tbl
+ .data            313c9718 Arinc429P234Tbl
+ .data            313c9820 Arinc429P235Tbl
+ .data            313c9928 Arinc429P236Tbl
+ .data            313c9a30 Arinc429P237Tbl
+ .data            313c9b38 Arinc429P238Tbl
+ .data            313c9c40 Arinc429P239Tbl
+ .data            313bbd80 Arinc429P23Tbl
+ .data            313c9d48 Arinc429P240Tbl
+ .data            313c9e50 Arinc429P241Tbl
+ .data            313c9f58 Arinc429P242Tbl
+ .data            313ca060 Arinc429P243Tbl
+ .data            313ca168 Arinc429P244Tbl
+ .data            313ca270 Arinc429P245Tbl
+ .data            313ca378 Arinc429P246Tbl
+ .data            313ca480 Arinc429P247Tbl
+ .data            313ca588 Arinc429P248Tbl
+ .data            313ca690 Arinc429P249Tbl
+ .data            313bbe88 Arinc429P24Tbl
+ .data            313ca798 Arinc429P250Tbl
+ .data            313ca8a0 Arinc429P251Tbl
+ .data            313ca9a8 Arinc429P252Tbl
+ .data            313caab0 Arinc429P253Tbl
+ .data            313cabb8 Arinc429P254Tbl
+ .data            313cacc0 Arinc429P255Tbl
+ .data            313bbf90 Arinc429P25Tbl
+ .data            313bc098 Arinc429P26Tbl
+ .data            313bc1a0 Arinc429P27Tbl
+ .data            313bc2a8 Arinc429P28Tbl
+ .data            313bc3b0 Arinc429P29Tbl
+ .data            313ba7d8 Arinc429P2Tbl
+ .data            313bc4b8 Arinc429P30Tbl
+ .data            313bc5c0 Arinc429P31Tbl
+ .data            313bc6c8 Arinc429P32Tbl
+ .data            313bc7d0 Arinc429P33Tbl
+ .data            313bc8d8 Arinc429P34Tbl
+ .data            313bc9e0 Arinc429P35Tbl
+ .data            313bcae8 Arinc429P36Tbl
+ .data            313bcbf0 Arinc429P37Tbl
+ .data            313bccf8 Arinc429P38Tbl
+ .data            313bce00 Arinc429P39Tbl
+ .data            313ba8e0 Arinc429P3Tbl
+ .data            313bcf08 Arinc429P40Tbl
+ .data            313bd010 Arinc429P41Tbl
+ .data            313bd118 Arinc429P42Tbl
+ .data            313bd220 Arinc429P43Tbl
+ .data            313bd328 Arinc429P44Tbl
+ .data            313bd430 Arinc429P45Tbl
+ .data            313bd538 Arinc429P46Tbl
+ .data            313bd640 Arinc429P47Tbl
+ .data            313bd748 Arinc429P48Tbl
+ .data            313bd850 Arinc429P49Tbl
+ .data            313ba9e8 Arinc429P4Tbl
+ .data            313bd958 Arinc429P50Tbl
+ .data            313bda60 Arinc429P51Tbl
+ .data            313bdb68 Arinc429P52Tbl
+ .data            313bdc70 Arinc429P53Tbl
+ .data            313bdd78 Arinc429P54Tbl
+ .data            313bde80 Arinc429P55Tbl
+ .data            313bdf88 Arinc429P56Tbl
+ .data            313be090 Arinc429P57Tbl
+ .data            313be198 Arinc429P58Tbl
+ .data            313be2a0 Arinc429P59Tbl
+ .data            313baaf0 Arinc429P5Tbl
+ .data            313be3a8 Arinc429P60Tbl
+ .data            313be4b0 Arinc429P61Tbl
+ .data            313be5b8 Arinc429P62Tbl
+ .data            313be6c0 Arinc429P63Tbl
+ .data            313be7c8 Arinc429P64Tbl
+ .data            313be8d0 Arinc429P65Tbl
+ .data            313be9d8 Arinc429P66Tbl
+ .data            313beae0 Arinc429P67Tbl
+ .data            313bebe8 Arinc429P68Tbl
+ .data            313becf0 Arinc429P69Tbl
+ .data            313babf8 Arinc429P6Tbl
+ .data            313bedf8 Arinc429P70Tbl
+ .data            313bef00 Arinc429P71Tbl
+ .data            313bf008 Arinc429P72Tbl
+ .data            313bf110 Arinc429P73Tbl
+ .data            313bf218 Arinc429P74Tbl
+ .data            313bf320 Arinc429P75Tbl
+ .data            313bf428 Arinc429P76Tbl
+ .data            313bf530 Arinc429P77Tbl
+ .data            313bf638 Arinc429P78Tbl
+ .data            313bf740 Arinc429P79Tbl
+ .data            313bad00 Arinc429P7Tbl
+ .data            313bf848 Arinc429P80Tbl
+ .data            313bf950 Arinc429P81Tbl
+ .data            313bfa58 Arinc429P82Tbl
+ .data            313bfb60 Arinc429P83Tbl
+ .data            313bfc68 Arinc429P84Tbl
+ .data            313bfd70 Arinc429P85Tbl
+ .data            313bfe78 Arinc429P86Tbl
+ .data            313bff80 Arinc429P87Tbl
+ .data            313c0088 Arinc429P88Tbl
+ .data            313c0190 Arinc429P89Tbl
+ .data            313bae08 Arinc429P8Tbl
+ .data            313c0298 Arinc429P90Tbl
+ .data            313c03a0 Arinc429P91Tbl
+ .data            313c04a8 Arinc429P92Tbl
+ .data            313c05b0 Arinc429P93Tbl
+ .data            313c06b8 Arinc429P94Tbl
+ .data            313c07c0 Arinc429P95Tbl
+ .data            313c08c8 Arinc429P96Tbl
+ .data            313c09d0 Arinc429P97Tbl
+ .data            313c0ad8 Arinc429P98Tbl
+ .data            313c0be0 Arinc429P99Tbl
+ .data            313baf10 Arinc429P9Tbl
+ .data            313cb214 Arinc429RegisterRxTbl
+ .data            313caf28 Arinc429RegisterTbl
+ .data            313cb374 Arinc429RegisterTxTbl
+ .data            313cadf4 Arinc429Root
+ .data            313cadc8 Arinc429RootTblPtr
+ .data            313b7954 Arinc429RxParameterTbl
+ .data            313cb4d4 Arinc429StatusRxTbl
+ .data            313cb088 Arinc429StatusTbl
+ .data            313cb768 Arinc429StatusTxTbl
+ .bss             300572cc Arinc429SysStatusTemp_Rx..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30057308 Arinc429SysStatusTemp_Tx..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .data            313cb88c Arinc429_ErrMsg
+ .data            313cb85c ArincSysStatusStrs
+ .text            0010ed1a Assert
+ .text            00111eb0 AssertDump
+ .text            0010edbe AssertHandler
+ .text            0010ed56 AssertMessage
+ .text            0010ecf2 Assert_ClearLog
+ .text            0010ec4a Assert_GetLog
+ .text            0010ebc4 Assert_Init
+ .text            0010ef76 Assert_InitEE
+ .text            0010ecaa Assert_MarkLogRead
+ .text            0010eebe Assert_UnhandledException
+ .text            0010efb6 Assert_WriteToEE
+ .bss             30010074 AutoUploadTaskData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0010f1ec BTO_Handler
+ .text            0010f0aa BTO_Init
+ .text            0010f120 BTO_Registers
+ .text            0010f314 BTO_WriteToEE
+ .bss             300353cc BinarySubHdr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3001007c BlinkCount.FAST_DioControl.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr..14
+ .data            313cbdc8 BoxBoardMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .data            313cb8cc BoxMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .data            313cb8a0 BoxRoot
+ .data            313cba84 BoxStatusMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .text            00122076 Box_AircraftUserCfg
+ .text            00122a6a Box_BackGroundTask
+ .text            00121bec Box_BoardUserMsg
+ .text            00121b70 Box_BoxUserMsg
+ .text            0012200c Box_FastUserCfg
+ .text            0012219e Box_GetFastSwVer
+ .text            0012254c Box_GetMfg
+ .text            001221da Box_GetMsPwVer
+ .text            00122164 Box_GetMssimStatus
+ .text            00122592 Box_GetPowerOnCount
+ .text            00122574 Box_GetPowerOnTime
+ .text            00122524 Box_GetRev
+ .text            001224fc Box_GetSerno
+ .text            0012212a Box_GetSystemStatus
+ .text            00122216 Box_GetUlFilesPending
+ .bss             3000f5d6 Box_Info
+ .text            00122248 Box_Init
+ .text            00121fdc Box_InstallIdCmd
+ .text            001220d8 Box_LogGetStatus
+ .text            00121ee8 Box_PowerOnMsg
+ .text            001225ee Box_PowerOn_InitializeUsage
+ .bss             30008108 Box_PowerOn_RunTime
+ .text            001225a0 Box_PowerOn_SetStartupTime
+ .text            001226d6 Box_PowerOn_StartTimeCounting
+ .text            0012271a Box_PowerOn_UpdateElapsedUsage
+ .text            001229e0 Box_ReInitFile
+ .text            00121c80 Box_SysTimeMsg
+ .text            00121f8c Box_VersionCmd
+ .data            313cd2d8 BufferStatusType
+ .text            00111ef8 BusTimeoutException
+ .bss             3013fb1c CBITHealthCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            0012368a CBITMgr_AddPrevCBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122ff2 CBITMgr_CRC_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            001236c8 CBITMgr_CalcDiffCBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            0012370a CBITMgr_GetCBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122a88 CBITMgr_Initialize
+ .text            00123b6c CBITMgr_PWEHSEU_AddPrevCountValues..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122e24 CBITMgr_PWEHSEU_FileInit
+ .text            001239f4 CBITMgr_PWEHSEU_GetAllCurrentCountValues..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00123a76 CBITMgr_PWEHSEU_GetDiffCountValues..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122d20 CBITMgr_PWEHSEU_Initialize
+ .text            001238b8 CBITMgr_PWEHSEU_Rec..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00123726 CBITMgr_PWEHSEU_ResumeRec..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            001233d6 CBITMgr_PWEHSEU_ShutDown..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00123422 CBITMgr_PWEHSEU_Startup..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00123316 CBITMgr_PWEHSEU_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00123cda CBITMgr_PWEHSEU_UpdateSeuEepromData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            0012383e CBITMgr_PWEHSEU_WaitForRec..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            001230da CBITMgr_Ram_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122e86 CBITMgr_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00122e74 CBITMgr_UpdateFlightState
+ .text            0012f5e0 CM_CBit
+ .text            0012f518 CM_CompareSystemToMsClockDrift
+ .text            0012f132 CM_ConvertTimeStamptoTimeStruct
+ .text            0012f7ea CM_CreateClockUpdateLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .text            0012ef84 CM_GetRTCClock
+ .text            0012f3c8 CM_GetSecSinceBaseYr
+ .text            0012ed32 CM_GetSystemClock
+ .text            0012f1f0 CM_GetTickCount
+ .text            0012f0b4 CM_GetTimeAsTimestamp
+ .text            0012ebec CM_Init
+ .text            0012ed20 CM_PreInit
+ .bss             30154db8 CM_PreInitFlag..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .text            0012f1fe CM_RTCTick
+ .bss             30154da4 CM_SYS_CLOCK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .text            0012ed06 CM_SYS_CLOCK_DEFAULT..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .text            0012f03a CM_SetRTCClock
+ .text            0012ed98 CM_SetSystemClock
+ .text            0012f1c2 CM_SynchRTCtoWallClock
+ .bss             30154db4 CM_TickCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .text            0012f742 CM_TimeSourceSyncToRemote..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .bss             30008b9c CQ_EEPromOutput
+ .bss             3000946c CQ_RtcNvRamOutput
+ .bss             30009004 CQ_RtcOutput
+ .text            001447d2 CRC16
+ .text            00144822 CRC16Tbl
+ .text            00144c74 CRC32
+ .text            00144ce4 CRC32Tbl
+ .bss             30010ae4 CRCMismatchStateStr.FSM_Init.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..16
+ .text            00144a22 CRC_CCITT
+ .text            00144a74 CRC_CCITT_TBL
+ .text            0011366e CRC_CMP
+ .crcDefault      0017130c CRC_DEFAULT
+ .text            00111cec CRLF..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00113394 CRLF..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            001450e4 CalculateCheckSum
+ .data            313cbea4 CbitMgrRoot
+ .data            313cbe78 CbitMgrRootTblPtr
+ .data            313cbefc CbitStatusTbl
+ .data            313b5e00 CfgCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .data            313cdb28 CfgCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .data            313b55c0 CfgFlagsCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0012eaea CfgMgr_CancelBatchCfg
+ .text            0012eaf8 CfgMgr_CommitBatchCfg
+ .text            0012e938 CfgMgr_ConfigPtr
+ .text            0012e8b8 CfgMgr_FileInit
+ .text            0012e964 CfgMgr_GetSystemBinaryHdr
+ .text            00123d6c CfgMgr_Init
+ .text            0012eb12 CfgMgr_IsEEWritePending
+ .text            0012e8ec CfgMgr_ResetConfig
+ .text            0012ea22 CfgMgr_RetrieveConfig
+ .text            0012e956 CfgMgr_RuntimeConfigPtr
+ .text            0012eaba CfgMgr_StartBatchCfg
+ .text            0012ea72 CfgMgr_StoreConfig
+ .text            0012eb38 CfgMgr_StoreConfigItem
+ .data            313b5edc CfgStateCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .data            313b5f8c CfgTCCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             3003d3e0 CheckFileCnt.UploadMgr_FileCollectionTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..24
+ .bss             3003d3d5 CheckFileRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003f468 CheckSum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser.
+ .text            001446c8 ChecksumBuffer
+ .text            001161e8 CodeDescriptions..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CResultCodes.
+ .bss             30008aa0 CodeSec
+ .data            313d0dc8 ComparisonEnum
+ .bss             30154fbc ConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3124394c ConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .bss             3133f2bc ConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             31341878 ConfigTriggerTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00138a4c ConstMemMap
+ .data            313d0090 ConversionType
+ .text            00113436 CrcFail..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .bss             31329a84 CurrentDev.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..28
+ .text            00111d8c D0Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d92 D1Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d98 D2Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d9e D3Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111da4 D4Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111daa D5Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111db0 D6Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111db6 D7Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .buildDate       00171310 DATETIME
+ .bss             31329a64 DEV_EE_BKUP_DevSem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31329664 DEV_EE_BKUP_RefCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31308e62 DEV_EE_BKUP_Shadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31328e64 DEV_EE_BKUP_sectorIoResult..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31308e60 DEV_EE_PRI_DevSem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31308a60 DEV_EE_PRI_RefCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e825e DEV_EE_PRI_Shadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             31308260 DEV_EE_PRI_sectorIoResult..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e80fa DEV_NONE_DevSem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e80f8 DEV_NONE_RefCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e80f2 DEV_NONE_Shadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e80f4 DEV_NONE_sectorIoResult..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e825c DEV_RTC_PRI_DevSem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e823c DEV_RTC_PRI_RefCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e80fc DEV_RTC_PRI_Shadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e81fc DEV_RTC_PRI_sectorIoResult..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .data            313cc004 DIOCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr.
+ .data            313cc088 DIOInTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr.
+ .text            0012fbd4 DIOMgr_FSMGetStateDIO
+ .text            0012fb5e DIOMgr_FSMRunDIO
+ .text            0012f8c4 DIOMgr_Init
+ .text            0012f890 DIOMgr_InputPin
+ .text            0012f840 DIOMgr_OutputPin
+ .text            0012fb46 DIOMgr_UpdateDiscreteInputs
+ .data            313cc450 DIOOutTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr.
+ .text            0012fc30 DIOTable.DIOMgr_FSMGetStateDIO.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr..5
+ .text            0012fbc0 DIOTable.DIOMgr_FSMRunDIO.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr..4
+ .text            00110cd6 DIO_AddPortToList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            00110d8e DIO_CheckWrapAround..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            00110bce DIO_DebounceState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            00110776 DIO_GetOutputPin
+ .text            001106a6 DIO_GetValue
+ .text            0010f920 DIO_Init
+ .text            0010fafa DIO_InitPin
+ .text            001107be DIO_InitShadowReg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            00110946 DIO_InitShadowRegFPGA..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            00110924 DIO_InitShadowRegGMS2..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .data            313b6f90 DIO_InputPins
+ .data            313b6a20 DIO_OutputPins
+ .pbss            313d3cbc DIO_OutputShadow
+ .text            00110570 DIO_ReadPin
+ .text            00110162 DIO_SetPin
+ .text            001106d0 DIO_UpdateDiscreteInputs
+ .data            313cd1fc DL_FastStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313ccf68 DL_LargeStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313cd120 DL_SlowStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313cd044 DL_SmallStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3105a32c DMInfoTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3123ad90 DMPBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3123aed4 DMRecordEnabled..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3123aed8 DMTempBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00111396 DPRAM_EP5_ISR
+ .text            0011135a DPRAM_GetTxInfo
+ .text            00110f14 DPRAM_Init
+ .text            0011119e DPRAM_InitStatus
+ .text            00111384 DPRAM_KickMS
+ .text            0011129c DPRAM_ReadBlock
+ .text            0011108e DPRAM_Registers
+ .bss             300494b4 DPRAM_RxBuf..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             300514b4 DPRAM_RxFIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .text            001115b2 DPRAM_RxFromDPRAM..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             300514cc DPRAM_RxOverflow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             3004149c DPRAM_TxBuf..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             3004949c DPRAM_TxFIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .text            00111484 DPRAM_TxToDPRAM..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .text            001111ac DPRAM_WriteBlock
+ .text            00111286 DPRAM_WriteFreeCnt
+ .bss             3003d464 DataBuf.UploadMgr_UploadFileBlock.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..36
+ .data            313cccbc DataManagerStatusCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00131664 DataMgrBuildFailLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0013108c DataMgrBuildPacketHdr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0013070c DataMgrCreateTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00131bac DataMgrDLSaveAndChangeState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00131fc0 DataMgrDLUpdateStatistics..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             31242ed8 DataMgrDLWriteStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            001303e6 DataMgrDownloadGetState
+ .text            0013040e DataMgrDownloadRun
+ .text            001317e6 DataMgrDownloadTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00130506 DataMgrDownloadingACS
+ .text            001310dc DataMgrFinishPacket..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            001301f2 DataMgrGetACSDataSet
+ .text            00130324 DataMgrGetHeader
+ .text            00130fa8 DataMgrGetSnapShot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             3015500c DataMgrInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0013151a DataMgrInitChannels..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            001300e6 DataMgrIntialize
+ .text            00130e18 DataMgrNewBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            001311b0 DataMgrProcBuffers..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            001303ce DataMgrRecGetState
+ .text            001303f8 DataMgrRecRun
+ .text            0013025c DataMgrRecord
+ .text            00130d48 DataMgrRecordData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00130278 DataMgrRecordFinished
+ .text            00131dca DataMgrRequestRecord..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00131e14 DataMgrSaveDLRecord..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00130554 DataMgrStartDownload
+ .text            00130c7e DataMgrStartRecording..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0013042a DataMgrStopDownload
+ .text            00130af4 DataMgrTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            00131438 DataMgrWriteBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313ccb88 DataMngMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             30008ab8 DataRam
+ .text            0010f41e DataReduction
+ .text            0010f850 DataReductionGetCurrentValue
+ .text            0010f3d8 DataReductionInit
+ .text            0012ffa0 Data_Manager_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0013000c Data_TCB_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .text            0012f3ba DaysPerMonth..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .bss             31246770 DebugLevel..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .data            313cb844 DebugOutStrs
+ .bss             3132c78c DefaultIoResultAddress..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .text            00123ec8 DefaultNVCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCfgManager.
+ .text            001520a2 DefaultSignalHandler
+ .text            00139ee0 Delimiters.MonitorSysCmds.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..1
+ .bss             31329a74 Dev.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..24
+ .bss             31329a6c DevSectorSize.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..22
+ .bss             31329a68 DevSize.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..21
+ .bss             31329a7c DeviceSectorArraySize.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..26
+ .bss             30000d98 DioInputStore
+ .data            313cbfd8 DioMgr_RootMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIOMgr.
+ .text            001109a8 DioRegCheck_Init..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3ea0 DioShadowData_FPGA..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3cdc DioShadowData_GMS2..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3e34 DioShadowData_PDDR..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3ce8 DioShadowData_PODR..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3dc8 DioShadowData_PPDSDR..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .pbss            313d3d54 DioShadowOutputPinReg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            001108b8 DioShadowReg
+ .bss             30000de0 Dio_FilteredPins
+ .bss             31329a70 DirtySectorOffset.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..23
+ .bss             30008a94 DoCleanup
+ .bss             312e420c DpramFailLogged..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface.
+ .text            00133e9c DriverInitList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .bss             3000f594 EEPROM1_Detected
+ .bss             3000f595 EEPROM2_Detected
+ .text            00111b82 EEPROM_GetDeviceId
+ .text            00111640 EEPROM_Init
+ .text            00111c44 EEPROM_IsIDValid
+ .text            00111bbe EEPROM_IsWriteInProgress
+ .text            001116e0 EEPROM_ReadBlock
+ .text            00111932 EEPROM_WriteBlock
+ .data            313d3c68 EMU150BPSStrs
+ .data            313d3588 EMU150CfgTbl
+ .bss             3136a878 EMU150CfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .data            313d3c10 EMU150DebugTbl
+ .text            0014d4f8 EMU150Msg_Cfg
+ .text            0014d492 EMU150Msg_Debug
+ .text            0014d5c6 EMU150Msg_ShowConfig
+ .text            0014d440 EMU150Msg_Status
+ .data            313d376c EMU150ProtocolRoot
+ .data            313d3740 EMU150ProtocolRootTblPtr
+ .text            0014e316 EMU150Protocol_DownloadHndl
+ .text            0014e204 EMU150Protocol_GetStatus
+ .text            0014da1e EMU150Protocol_Handler
+ .text            0014d6e4 EMU150Protocol_Initialize
+ .text            0014e212 EMU150Protocol_ReturnFileHdr
+ .text            0014e28a EMU150Protocol_SetBaseUartCfg
+ .data            313d3848 EMU150StatusTbl
+ .bss             3136a810 EMU150StatusTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014ee18 EMU150_AppendBaudRate..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014edae EMU150_AppendRecordId..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014ee44 EMU150_BAUD_RATES
+ .text            0014e7b4 EMU150_CMDS
+ .text            0014e840 EMU150_CMDS_ACK
+ .text            0014e766 EMU150_CMDS_HS
+ .text            0014faf0 EMU150_CalcCksum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014fc0c EMU150_CreateSummaryLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014ed58 EMU150_CreateTxPacket..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014fc82 EMU150_FileInit
+ .text            0014fbac EMU150_GetCksumStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f8c2 EMU150_GetDesiredBaudRateIndex..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014e0a4 EMU150_NAME
+ .text            0014ecf2 EMU150_NextCmdState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014ec48 EMU150_NextState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f94a EMU150_ProcessChksum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014ee4a EMU150_Process_ACK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014eeb8 EMU150_Process_Blk..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f0e0 EMU150_Process_InstallCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f584 EMU150_Process_Record..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f7b8 EMU150_Process_Record_Confirmation..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f31c EMU150_Process_Recording_Hdr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f7f0 EMU150_Process_Set_Baud..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             300098d8 EMU150_RSP
+ .text            0014fa8a EMU150_RestoreAppData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014f900 EMU150_SetUart..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014e8ee EMU150_State_AutoDetect..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .text            0014e37e EMU150_State_ProcessCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3003d45c EndLogPollDecimator.UploadMgr_FileUploadTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..35
+ .bss             30051540 ExOutputBuf
+ .text            00113452 Expected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .data            313d18a8 F7XCfgTbl
+ .bss             31365e8c F7XCfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .data            313d3428 F7XDebugTbl
+ .bss             31365f94 F7XDebugTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             3136a344 F7XDispDebugBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014b2c4 F7XDispDebug_Task
+ .data            313d3194 F7XDumpListRoot
+ .text            0014a414 F7XMsg_Cfg
+ .text            0014a50e F7XMsg_Debug
+ .text            0014a73e F7XMsg_DumpListShowConfig
+ .text            0014a650 F7XMsg_ParamEntryList
+ .text            0014a57a F7XMsg_ParamList
+ .text            0014aaaa F7XMsg_ParamListShowConfig
+ .text            0014a3bc F7XMsg_Status
+ .data            313d2f2c F7XParamCfgTbl
+ .data            313d2fdc F7XParamEntryCfgTbl
+ .bss             31366bb4 F7XParamEntryTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31365fb0 F7XParamListTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .data            313d3218 F7XParamRoot
+ .data            313d30b8 F7XProtocolDumpListTblPtr
+ .data            313d30e4 F7XProtocolParamTblPtr
+ .data            313d3110 F7XProtocolRoot
+ .data            313d308c F7XProtocolRootTblPtr
+ .text            0014c8cc F7XProtocol_Decoder_NotSynced..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014cc0c F7XProtocol_Decoder_Synced..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014d430 F7XProtocol_DisableLiveStream
+ .text            0014cdaa F7XProtocol_DumpListRecognized..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014d3e4 F7XProtocol_FileInit
+ .text            0014b268 F7XProtocol_GetCfg
+ .text            0014b288 F7XProtocol_GetDebug
+ .text            0014b2a4 F7XProtocol_GetParamEntryList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014b296 F7XProtocol_GetParamList
+ .text            0014b248 F7XProtocol_GetStatus
+ .text            0014b130 F7XProtocol_Handler
+ .text            0014d1f6 F7XProtocol_InitUartMgrData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014adb8 F7XProtocol_Initialize
+ .text            0014d390 F7XProtocol_RestoreAppData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014cd74 F7XProtocol_Resync..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014c6aa F7XProtocol_ReturnFileHdr
+ .text            0014c63c F7XProtocol_SensorSetup
+ .text            0014d0f2 F7XProtocol_UpdateFrame..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014d2f2 F7XProtocol_UpdateUartMgrData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .data            313d329c F7XStatusTbl
+ .bss             31365e68 F7XStatusTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014b05c F7X_ParamList_DefaultEntry..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .text            0014b618 F7X_Param_Names..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             3013f758 FASTConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .bss             3000feb4 FASTConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             3001003c FASTStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001039a0 FAST_AtEndOfDownload..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0010394a FAST_AtEndOfFlight..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103998 FAST_AtEndOfRecord..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001039d8 FAST_AtEndOnGround..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103a0e FAST_AtMSSIMLost..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001039f6 FAST_AtMSSIMRunning..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0010391c FAST_AtStartOfFlight..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0010397c FAST_AtStartOfRecord..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001039bc FAST_AtStartOnGround..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103a32 FAST_AtVPNConnected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103a20 FAST_AtVPNNotConnected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103622 FAST_DioControl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00104032 FAST_DoTxTestTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00102f66 FAST_FSMEndOfFlightRun
+ .text            00102f52 FAST_FSMRfGetState
+ .text            00102f34 FAST_FSMRfRun
+ .text            00102eaa FAST_GetSoftwareVersion
+ .text            00102948 FAST_Init
+ .text            00102880 FAST_InstallIdCmd
+ .text            001025fc FAST_ResetNVConfig
+ .text            00103a44 FAST_RfGsmEnable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00102770 FAST_ShowConfig
+ .text            00102ed2 FAST_SignalUploadComplete
+ .text            001028fe FAST_StartTxTest
+ .text            00102f94 FAST_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00102e96 FAST_TimeSourceCfg
+ .text            00102efe FAST_TurnOffFASTControl
+ .text            00103b2c FAST_TxTestTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001034d8 FAST_UploadCheckTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00102540 FAST_UserCfg
+ .text            001026d4 FAST_VersionCmd
+ .text            001034a6 FAST_WatchdogTask1..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001034bc FAST_WatchdogTask2..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            00103aac FAST_WlanPowerEnable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            001127c6 FIFO_Flush
+ .text            0011278c FIFO_FreeBytes
+ .text            00112470 FIFO_Init
+ .text            0011261e FIFO_PopBlock
+ .text            0011249a FIFO_PushBlock
+ .bss             3124393c FPGACBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .text            001324c0 FPGAMgr_AddPrevCBITHealthStatus
+ .text            00132330 FPGAMgr_CBIT_Task
+ .text            00132742 FPGAMgr_CBIT_VerifyShadowReg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .text            00132476 FPGAMgr_CalcDiffCBITHealthStatus
+ .text            0013241a FPGAMgr_GetCBITHealthStatus
+ .text            001321ac FPGAMgr_Initialize
+ .text            001324f8 FPGAMgr_Monitor_HW_CRC..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .text            001320b0 FPGAMsg_Register
+ .text            0013206c FPGAMsg_Status
+ .data            313cd5bc FPGASystemStrs
+ .text            00113248 FPGA_CheckStartupConfig..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGA.
+ .text            001131e4 FPGA_CheckVersion..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGA.
+ .text            00112c4e FPGA_Configure
+ .text            00112800 FPGA_EP6_ISR
+ .text            00113068 FPGA_ForceReload
+ .text            0011309c FPGA_ForceReload_Status
+ .text            001130c8 FPGA_GetRegCheckTbl
+ .text            0011291c FPGA_GetShadowRam
+ .text            001130ba FPGA_GetStatus
+ .text            00115490 FPGA_INTERNAL_DPRAM..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            0011292a FPGA_Initialize
+ .text            001132ba FPGA_InitializeShadowRam..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGA.
+ .text            0011337a FPGA_InitializeShadowRamVer12..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGA.
+ .text            00113048 FPGA_Monitor_Ok
+ .text            001130e0 FPGA_REG_CHECK_TBL
+ .text            00112b60 FPGA_Registers
+ .bss             30008148 FPGA_StatusTemp
+ .data            313b6068 FSMRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            0010462c FSM_CfgOther
+ .text            00104406 FSM_CfgStateCmd
+ .text            00104506 FSM_CfgTCCmd
+ .text            00104128 FSM_CfgTCStrCmd
+ .text            00104292 FSM_CfgTaskStrCmd
+ .text            00105044 FSM_ChangeState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            0010565a FSM_ConvertTCInputStrToBin..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            00105370 FSM_EvalTCExpr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            001054d2 FSM_EvaluateTCExprInput..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            001045f2 FSM_GetActvTimeCmd
+ .text            00104846 FSM_GetCRCofCfg
+ .text            00104e40 FSM_GetIsTimerExpired
+ .text            0010471c FSM_GetRunningTasks
+ .text            00104e54 FSM_GetStateFALSE
+ .text            00104890 FSM_GetStateStr
+ .text            00104be0 FSM_Init
+ .text            001048b0 FSM_ShowConfig
+ .text            00105290 FSM_StartNextStateTasks..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            001051b0 FSM_StopThisStateTasks..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            001058a0 FSM_TCBinToStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            00105544 FSM_TCStrToBin..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            001059b0 FSM_TaskBinToStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            00104e64 FSM_TaskFunc..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            00105730 FSM_TaskStrToBin..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .text            00111d6b FSStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            001133c3 FailHeader..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            0011fefa FailureCondition..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .data            313b57f0 FastCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .data            313b5cd0 FastTxTestEnum
+ .data            313b5c68 FastTxTestStatusEnum
+ .text            00132ba2 FaultCheckSensorStates..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .text            00132c12 FaultCheckSensorTriggers..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .data            313cd5dc FaultCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .text            00132b56 FaultCompareValues
+ .data            313cda14 FaultIndexType
+ .text            00132aec FaultInitialize
+ .bss             31246750 FaultMgrConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .data            313cdbfc FaultMgr_RootMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .data            313cd990 FaultRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .bss             31246758 FaultSystemStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .bss             31246764 FaultSystemStatusCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .bss             3013f888 FaultSystemStatusTemp.Box_GetSystemStatus.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox..4
+ .text            0013293c Fault_ShowConfig
+ .text            00132850 Fault_UserCfg
+ .data            313b7380 FieldInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .data            313b66d4 FileCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             300253b0 FileDataBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             300353b0 FileDataFIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .data            313d06d0 FilterState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d00a8 FilterType
+ .text            0011d40c FlashCheckSameSector
+ .text            0011d19e FlashChipErase
+ .text            0011cd10 FlashCmdSet..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .bss             30056168 FlashDescription..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .text            0011ccc0 FlashFindCmdSet
+ .text            0011d69c FlashGetCFIDeviceGeometry..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .text            0011d4b0 FlashGetCFIIdentification..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .text            0011d52e FlashGetCFISystemInterfaceData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .text            0011d1f8 FlashGetDirectStatus
+ .text            0011d432 FlashGetInfo
+ .text            0011cc14 FlashInitialize
+ .text            0011d44e FlashPopulateCFIData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash.
+ .text            0011d158 FlashRead
+ .text            0011d268 FlashSectorErase
+ .text            0011cd5e FlashWriteBufferMode
+ .text            0011cfdc FlashWriteWordMode
+ .data            313cdc28 FltCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .data            313cdb24 FltEmptyStr.Flt_GetFltBuffEntry.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr..4
+ .text            00133438 Flt_AddToFaultBuf..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .text            00133364 Flt_ClrStatus
+ .text            001333ee Flt_GetDebugVerbosity
+ .text            00132e2e Flt_GetFltBuffEntry..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .text            00133424 Flt_GetSysCondOutputPin
+ .text            00133416 Flt_GetSystemStatus
+ .text            0013310e Flt_Init
+ .text            001333fc Flt_InitDebugVerbosity
+ .text            0013323a Flt_InitFltBuf
+ .text            001330f2 Flt_PreInitFaultMgr
+ .text            001333d4 Flt_SetDebugVerbosity
+ .text            00133288 Flt_SetStatus
+ .text            00132f48 Flt_ShowConfig
+ .data            313cdbcc Flt_SysCondOutPin
+ .text            001334ea Flt_UpdateSystemStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .text            00133036 Flt_UserCfg
+ .data            313cdd5c Flt_UserEnumStatus
+ .data            313cdbac Flt_UserEnumVerbosityTbl
+ .text            00132d20 Flt_UserMessage
+ .text            00132d4a Flt_UserMessageRecentAll
+ .text            00111d57 FormatStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .data            313cef14 FormatStrs
+ .bss             31243948 FpgaFailLogged..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .bss             31243938 FpgaMgrBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .bss             3000a980 FpgaRegData
+ .data            313cd3d8 FpgaRegisterTbl
+ .data            313cd354 FpgaRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .data            313cd328 FpgaRootTblPtr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .data            313cd50c FpgaStatusTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFPGAManager.
+ .text            00133936 GSE_DebugStr
+ .text            00133684 GSE_GetLine
+ .bss             30008178 GSE_GetLineBuf
+ .text            00133536 GSE_Init
+ .bss             30154db9 GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CClockMgr.
+ .bss             3138a9d1 GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3136a78e GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             30055e3a GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             313645e8 GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             301232f4 GSE_OutLine..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0013366e GSE_PutLine
+ .text            001335f4 GSE_PutLineBlocked
+ .text            00133978 GSE_StatusStr
+ .text            001338d2 GSE_ToggleDisplayLiveStream
+ .text            00133804 GSE_getc
+ .text            00133894 GSE_read
+ .text            001339b2 GSE_vDebugOutput..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CGSE.
+ .text            0013384c GSE_write
+ .text            00143ec0 GetRegCheckNumReg
+                  00000000 GetThreadLocalStorage
+ .bss             3003d456 GotResponse..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00111cef HeaderLn1..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d22 HeaderLn2..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d77 HeaderRegs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111d48 HeaderStack..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111e86 HexTable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .data            313cc978 HighLow
+ .bss             30008ac0 IDataRam
+ .text            0013434c Im_Application_Initialize..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .text            00133c68 Im_Driver_Initialize..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .text            00133a70 Im_InitializeControlProcessor
+ .text            00134406 Im_PromptContinueAsDegraded..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .text            00134396 Im_RecordDrvStartup_Logs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .text            0013458c Im_StartupTickHandler
+ .text            0013413a Im_System_Initialize..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager.
+ .bss             3013f9aa InFlight..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .text            00111e96 InitGSEBuf
+ .bss             3000827c InitMgrPbitLogs
+ .bss             3013f8f0 IntFailLogged..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .bss             3004148c IsEERdy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAssert.
+ .bss             30015054 LCTaskData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001027ee LabelStem.FAST_ShowConfig.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr..2
+ .text            00132fe1 LabelStem.Flt_ShowConfig.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr..6
+ .bss             31341870 LiveDataBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d0524 LiveDataCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             31340568 LiveDataDisplay..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d0104 LiveDataMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d01e0 LiveDataRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             31340560 LiveDataTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d05a8 LiveDataType
+ .text            00135960 LogAddPrevCBITHealthStatus
+ .bss             312d410c LogBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00135946 LogCalcDiffCBITHealthStatus
+ .text            001366ac LogCheckEraseInProgress..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136aa2 LogCheckHeader..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00135fc0 LogCheckResult..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a858 LogCmdEraseBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            001361c2 LogCmdEraseTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a790 LogConfig..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3013f868 LogConfigTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox.
+ .text            0013563a LogErase
+ .bss             3124a7b8 LogEraseData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             312e410c LogEraseFailTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a7e0 LogEraseRequest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a7c4 LogError..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            0013528c LogFindNextRecord
+ .text            00136886 LogFindNextWriteOffset..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00135934 LogGetCBITHealthStatus
+ .text            00135926 LogGetConfigPtr
+ .text            0013597c LogGetLastAddress
+ .text            00135908 LogGetLogCount
+ .text            00136b08 LogHdrFilterMatch..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a7d4 LogHealthCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00134770 LogInitialize
+ .text            00135916 LogIsEraseInProgress
+ .text            001358f4 LogIsLogEmpty
+ .text            0013598a LogManageTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a7d8 LogManagerPause..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a834 LogMarkBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            001356b6 LogMarkState
+ .bss             3003d3ec LogMarkStatus.UploadMgr_MaintainFileTable.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..28
+ .text            00136068 LogMarkTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a804 LogMngBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00135c0c LogMngPending..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            001359c4 LogMngStart..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00135d4a LogMngStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a7b0 LogMonEraseBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136452 LogMonEraseTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            001351b2 LogPauseWrites
+ .text            00135112 LogPreInit
+ .bss             3124a87c LogQueue..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .data            313cde5c LogQueueCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136be6 LogQueueGet..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136bb8 LogQueueInit..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            001350a4 LogQueuePut
+ .text            0013540a LogRead
+ .bss             312d4104 LogReadFailTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            0013523c LogRegisterEraseCleanup
+ .data            313cd2f8 LogReqType
+ .data            313cddac LogRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            0013660e LogSaveEraseData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .data            313cdee0 LogStatusCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a830 LogStatusTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .bss             3124a878 LogSystemInit..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136510 LogSystemLogManageTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            00136b68 LogVerifyAllDeleted..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .text            0013553a LogWrite
+ .text            001351dc LogWriteIsPaused
+ .text            00135730 LogWriteSystem
+ .text            00134606 Log_EraseBlock
+ .text            001345e0 Log_GetStatus
+ .data            313b68b8 LookupCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .data            313b6350 MSFXMsgsTbl
+ .data            313b6484 MSFXStateEnumTbl
+ .text            001074fa MSFX_AddYMdm1kCRC..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107524 MSFX_Error..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00105ae0 MSFX_GetFileUserCmd
+ .text            00105aac MSFX_GetListUserCmd
+ .text            00105b40 MSFX_GetStsUserCmd
+ .text            00105b64 MSFX_Init
+ .text            00107782 MSFX_MSCmdFileData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107662 MSFX_MSRspFileXfrd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107908 MSFX_MSRspGenericPassFail..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            0010759c MSFX_MSRspShellCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001075d4 MSFX_MSRspStartFile..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001061c6 MSFX_MarkFileAsTransmitted..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001064d8 MSFX_MarkFileTransmittedState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00105a7c MSFX_MarkFileTxdCmd
+ .text            0010740a MSFX_PauseJMessenger..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00105b10 MSFX_PutFileUserCmd
+ .text            00106f44 MSFX_ReceiveDataPacket..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00105f94 MSFX_RequestFileList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106086 MSFX_RequestGetFile..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            0010624a MSFX_RequestNonTxdFileListState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106138 MSFX_RequestPutFile..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106404 MSFX_RequestStartFileSndrState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106354 MSFX_RequestTxdFileListState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001073a8 MSFX_SendEndPutFileToMS..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107548 MSFX_SendFileDataResponse..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001072be MSFX_SendPutFileDataToMS..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107058 MSFX_SendStartPutFileToMS..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001074d0 MSFX_Signal..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00105e12 MSFX_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00107480 MSFX_Wait..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106c3a MSFX_YMdmRcvrSendACK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106d26 MSFX_YMdmRcvrSendNAK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106b6e MSFX_YMdmRcvrSendStartChar..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106dec MSFX_YMdmRcvrWaitForSndr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            0010687c MSFX_YMdmSndrGetNext..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001067a2 MSFX_YMdmSndrSend..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            001069bc MSFX_YMdmSndrSendEOT..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            0010667a MSFX_YMdmSndrWaitForACKNAK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106a96 MSFX_YMdmSndrWaitForEOT_ACKNAK..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00106578 MSFX_YMdmSndrWaitForStart..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .text            00136f92 MSI_AddCmdHandler
+ .text            00137642 MSI_AddPendingRsp
+ .text            00137482 MSI_CheckDPRAM
+ .text            001373c8 MSI_CheckMsgTimeouts
+ .bss             312e4210 MSI_CmdSeqNum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface.
+ .text            001375b4 MSI_FindAndRemovePendingRsp
+ .text            00137330 MSI_HandleMSCommand
+ .text            00137262 MSI_HandleMSResponse
+ .text            00136c58 MSI_Init
+ .bss             312e41bc MSI_MSCmdHandlerList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface.
+ .text            00137542 MSI_MSCommandFailed
+ .text            00136ff0 MSI_MSPacketTask
+ .bss             312e411c MSI_PendingMSResponseList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface.
+ .text            00136d86 MSI_PutCommand
+ .text            00136ee8 MSI_PutResponse
+ .text            001376fa MSI_ValidatePacket
+ .text            00137a88 MSSC_CfgMsg
+ .text            0013811e MSSC_DoRefreshMSInfo
+ .text            00137ed2 MSSC_FSMGetCFStatus
+ .text            00137ebe MSSC_FSMGetVPNStatus
+ .text            00138192 MSSC_GetConfigSysCond
+ .text            00137f5c MSSC_GetGSMSCID
+ .text            00137f84 MSSC_GetGSMSignalStrength
+ .text            00137f16 MSSC_GetIsAlive
+ .text            00137f30 MSSC_GetIsCompactFlashMounted
+ .text            00137eae MSSC_GetIsVPNConnected
+ .text            00137f40 MSSC_GetLastMSSIMTime
+ .text            001386c0 MSSC_GetMSInfoRspHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            00137fd4 MSSC_GetMSTimeSynced
+ .text            00137fac MSSC_GetMsPwVer
+ .text            00138184 MSSC_GetMsStatus
+ .text            00137ee6 MSSC_GetSTS
+ .text            00137efe MSSC_GetXFR
+ .text            001377c4 MSSC_GsmCfgMsg
+ .data            313ce300 MSSC_GsmModeCfgEnum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            001382c2 MSSC_HBMonitor..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            00137bf0 MSSC_Init
+ .text            001383d6 MSSC_MSGetCPInfoCmdHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            0013843c MSSC_MSICallback_GSMCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            0013848c MSSC_MSICallback_ShellCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            00138556 MSSC_MSRspCallback..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            00137b4a MSSC_MSTimeMsg
+ .data            313ce5d8 MSSC_MssimStatusEnum
+ .text            00137a4a MSSC_RefreshMSInfo
+ .text            00137fe4 MSSC_SendGSMCfgCmd
+ .text            0013823a MSSC_SendHeartbeatCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            00137e9c MSSC_SetIsOnGround
+ .text            00137886 MSSC_ShellCmd
+ .text            00137924 MSSC_ShowConfig
+ .text            0013821c MSSC_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            0014c7c4 M_UNDEFINED_DUMPLIST..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             3000b190 MaxStackSize
+ .text            001394f4 MemCheckAddr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138fca MemChipErase
+ .bss             312e6ca0 MemClearBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .bss             312e7cdc MemClearPBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00139722 MemClearTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138b60 MemCommandErase
+ .bss             312e7ca0 MemCurrentState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .bss             312e6c70 MemDescription..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138e56 MemErase
+ .bss             312e7cbc MemErasePBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            0013915e MemEraseTask
+ .text            001395e2 MemFindCurrentOffset..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138f92 MemGetBlockSize
+ .text            00139142 MemGetSectorSize
+ .text            00138ef6 MemGetStatus
+ .text            00138704 MemInitialize
+ .text            00139150 MemMgrStatus
+ .bss             312e7ca4 MemProgPBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            001396b6 MemProgTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138c3a MemRead
+ .text            00138b16 MemSetupErase
+ .text            00139348 MemStateErase..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00139282 MemStateProgram..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            0013941a MemStateRead..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMemManager.
+ .text            00138bc0 MemStatusErase
+ .text            00138cde MemWrite
+ .bss             312e7cf0 MessageHandlerCallback..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .bss             3133f2b4 MinuteCounter.UTIL_MinuteTimerDisplay.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtility..1
+ .text            0013a1fa MonitorGetMem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013ba50 MonitorGetMemUsage..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013bed0 MonitorGetNvRAM..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013aa10 MonitorGetRtc..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013bbf8 MonitorGetStackUsage..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013b0c8 MonitorGetTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139a1a MonitorGetTaskId
+ .text            0013b766 MonitorGetTaskList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013b7d0 MonitorGetTaskTiming..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013aaa4 MonitorGetTm..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139888 MonitorInitialize
+ .text            0013bd48 MonitorInvalidCommand..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013a5ac MonitorMemoryWrite..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013a16a MonitorPrintCRCs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139a26 MonitorPrintVersion
+ .text            0013a430 MonitorSetMem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139a08 MonitorSetMsgCallback
+ .text            0013bfce MonitorSetNvRAM..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013a69a MonitorSetRtc..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013be60 MonitorSetTaskEnable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013bdce MonitorSetTaskMode..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013a7b4 MonitorSetTaskPulse..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139cf8 MonitorSysCmds..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139ef4 MonitorSysGet..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            0013a056 MonitorSysSet..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .text            00139af4 MonitorTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor.
+ .data            313ce174 MsCfgGsmMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .data            313ce040 MsCfgMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .data            313ce344 MsMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             3013f8b0 MsPwVersion.Box_GetMsPwVer.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox..7
+ .data            313ce318 MsRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .data            313ce5f8 MsStatusGsmMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .data            313ce420 MsStatusMsgs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             3003f460 MsgSource..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser.
+ .bss             3003f464 MsgTag..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser.
+ .bss             3013f88c MssimStatusTemp.Box_GetMssimStatus.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox..5
+ .bss             3013fb28 NVRAMShadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCfgManager.
+ .bss             31329a88 NVTaskState.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..29
+ .text            0013cd7c NV_Close
+ .text            0013dfe2 NV_CopyBackupToPrimaryShadow
+ .text            0013e028 NV_CopyPrimaryToBackupShadow
+ .text            0013c580 NV_DevInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .bss             312e7d04 NV_DevSpaceUsed..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .text            0013d5be NV_EERead
+ .text            0013d600 NV_EEWrite
+ .text            0013d48c NV_Erase
+ .bss             312e7ef4 NV_FileCRC..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .text            0013db26 NV_FileDevToShadow
+ .text            0013c630 NV_FileInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .text            0013ddde NV_FileShadowToDev
+ .text            0013d71c NV_GetFileCRC
+ .text            0013d6f4 NV_GetFileName
+ .text            0013c188 NV_Init
+ .text            0013d85e NV_MgrTask
+ .text            0013c860 NV_Open
+ .text            0013d67a NV_RTCRead
+ .text            0013d6b2 NV_RTCWrite
+ .text            0013cd94 NV_Read
+ .text            0013d4e0 NV_ResetConfig
+ .bss             312e7d14 NV_RuntimeInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr.
+ .text            0013cef2 NV_Write
+ .text            0013d264 NV_WriteNow
+ .text            0013d748 NV_WriteState
+ .bss             3003f450 NextUpdateTimemS.UploadMgr_PrintUploadStats.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..40
+ .bss             30010084 NumFilesPendingRoundTrip.FAST_TxTestTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr..16
+ .data            313cef2c NumWordsStrs
+ .text            001133ac OkMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            00105634 OpTbl.FSM_TCStrToBin.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..25
+ .text            001136bc OutputFailInfo
+ .data            313cf58c OutputStrs
+ .text            001136a2 PBIT_FAIL
+ .text            00111d86 PCStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00113ba6 PI_FlushBranchCache
+ .text            00113bd4 PI_FlushCache
+ .text            00113b78 PI_FlushInstructionCache
+ .text            0013e136 PMMsg_Cfg
+ .text            0013e1fe PMMsg_ShowConfig
+ .text            0013e070 PMMsg_State
+ .data            313b73d4 PRODUCT_COPYRIGHT
+ .data            313b73d8 PRODUCT_NAME
+ .data            313b73d0 PRODUCT_VERSION
+ .text            00144690 PadString
+ .data            313ba580 ParityStrs
+ .pbss            313d3eac Pm
+ .text            0013f294 PmCallAppBusInterrupt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013f2ce PmCallAppShutDownNormal..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013eb16 PmFSMAppBusyGetState
+ .text            0013eb00 PmFSMAppBusyRun
+ .text            0013eb46 PmFileInit
+ .text            0013e2b4 PmInitializePowerManager
+ .text            0013e9f4 PmInsertAppBusInterrupt
+ .text            0013e93c PmInsertAppShutDownNormal
+ .bss             31329ab4 PmInternalLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013f1f6 PmProcessPowerFailure..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013eaa2 PmRegisterAppBusyFlag
+ .text            0013f304 PmSet_Cfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013eb2a PmSet_PowerOnTime
+ .text            0013eba0 PmTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .text            0013f24c PmUpdateAppBusyStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .bss             30008adc Pm_Eeprom
+ .text            0013e8bc PowerFailIsr
+ .data            313ceac4 PowerManagerCfgTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .data            313ceb74 PowerManagerRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .data            313ced2c PowerManagerStateStrs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .data            313ceb48 PowerManagerTblPtr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .bss             31329a94 PowerManager_CfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .bss             3000f7fb PrevCmd
+ .bss             30008ad0 PrevCmdLen
+ .bss             30008ad4 PrevResult
+ .data            313ce8e4 PromFileName
+ .data            313b791c ProtocolStrs
+ .text            001121e4 PutHexString
+ .text            0011220a PutSerialString
+ .bss             3013f9b0 PwehSeuCountsAtStartOfRec..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .bss             3013fa62 PwehSeuCountsPrevStored..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .bss             3013f8f4 PwehSeuEepromData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .data            313b6220 PwrOnInit.FSM_TaskFunc.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..22
+ .bss             30055e24 QARCBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30055de0 QARCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30051dc0 QARFrame..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30053dd0 QARFramePrevGood..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .data            313b739c QARLBTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            0013fc50 QARMgr_DisableLiveStream
+ .text            0013f878 QARMgr_Initialize
+ .text            0013fb9e QARMgr_Task
+ .text            0013f58a QARMsg_Cfg
+ .text            0013f654 QARMsg_CfgBarker
+ .text            0013f706 QARMsg_Reconfigure
+ .text            0013f31c QARMsg_Register
+ .text            0013f726 QARMsg_ShowConfig
+ .text            0013f4f2 QARMsg_State
+ .text            0013f544 QARMsg_State_SubFrameOk
+ .bss             30051d4c QARState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30000f84 QARWordInfo
+ .bss             3000a97c QARWordSensorCount
+ .text            00114b44 QAR_AddPrevCBITHealthStatus
+ .text            00114ae2 QAR_CalcDiffCBITHealthStatus
+ .bss             30008b58 QAR_CfgTemp
+ .text            0011559a QAR_CreateTimeOutSystemLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00115498 QAR_FindCurrentGoodSF..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00114a7e QAR_GetCBITHealthStatus
+ .text            00114bbe QAR_GetCfg
+ .text            0011459a QAR_GetFileHdr
+ .text            00114478 QAR_GetFrameSnapShot
+ .text            00114b94 QAR_GetRegisters
+ .text            00114bb0 QAR_GetState
+ .text            00114318 QAR_GetSubFrame
+ .text            001143e6 QAR_GetSubFrameDisplay
+ .text            00114644 QAR_GetSystemHdr
+ .text            00113d3c QAR_Init_Tasks
+ .text            00113bdc QAR_Initialize
+ .text            00114f96 QAR_InterfaceValid
+ .text            001146c4 QAR_MonitorTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            0011535e QAR_PBIT_DPRAM_Test..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            0011522c QAR_PBIT_LoopBack_Test..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00113fac QAR_ProcessISR
+ .text            0011404a QAR_ReadSubFrameTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00114300 QAR_ReadSubFrameTaskShutdown..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00114cc6 QAR_ReadWord
+ .text            00113f96 QAR_Reconfigure
+ .text            0011507a QAR_ReconfigureFPGAShadowRam..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00113f58 QAR_Reframe
+ .text            00115166 QAR_ResetState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00115530 QAR_RestoreStartupCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            00114be8 QAR_SensorSetup
+ .text            00114e12 QAR_SensorTest
+ .text            00114bcc QAR_SetCfg
+ .bss             30008af4 QAR_StateTemp
+ .text            0011458e QAR_SyncTime
+ .bss             3000b182 QAR_register
+ .text            00115034 QARread
+ .text            00114fbe QARwrite
+ .data            313ced5c QarCfgTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .bss             31329ac8 QarMgrBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .bss             31329acc QarMgr_Data..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .bss             3000b18e QarRegData
+ .data            313cf5a4 QarRegisterControlTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .data            313cf6d8 QarRegisterStatusTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .data            313cf0bc QarRegisterTbl
+ .data            313cef88 QarRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .data            313cef5c QarRootTblPtr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .data            313cf16c QarStatusTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .data            313cf880 QarSysStatusStrs
+ .text            00115658 RAM_TEST_PATTERN
+ .text            0011569a RTA_TP
+ .text            00115fd0 RTC_ConvertRTC_BCDToTs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .text            001159a8 RTC_DEFAULT_TIME..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .text            00115894 RTC_GetStatus
+ .text            001158a2 RTC_GetTime
+ .text            001156f0 RTC_Init
+ .text            00115c1a RTC_ReadNVRam
+ .text            001158b8 RTC_ReadTime
+ .text            00115dc2 RTC_ResetTime..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .text            001159b6 RTC_SetTime
+ .text            00115e4a RTC_Verify3234Config..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .text            00115cee RTC_WriteNVRam
+ .text            001159ce RTC_WriteTime
+ .text            00115662 RTD_TP
+ .text            001156c6 RTP_TP1
+ .text            001156d0 RTP_TP2
+ .text            001133f6 RamAddrFail..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            001133d9 RamDataFail..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            00113416 RamPtrnFail..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .text            0011566c RamTestAddr
+ .text            0011565c RamTestData
+ .text            001156a8 RamTestPattern
+ .bss             30123504 RawDataArinc..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             301234f4 RawDataCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             3012fd04 RawRecords..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            00116148 RcGetResultCodeString
+ .bss             30056054 ReEntered
+ .bss             30051940 ReOutputBuf
+ .bss             3003d3d8 ReadOffset.UploadMgr_FileCollectionTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..22
+ .text            00111e64 RebootingStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .bss             31246650 RecentLogStr.Flt_GetFltBuffEntry.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr..3
+ .bss             31243658 RecordStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .data            313ccf50 RecordStatusType
+ .text            00143aa6 RegAdd
+ .text            00143b28 RegCheck
+ .bss             3132e90c RegCheckStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00144268 RegCheckUint16..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00144330 RegCheckUint32..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00144186 RegCheckUint8..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            0014447e RegCmpEntries..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00143a1a RegSet
+ .text            001439c8 RegSetCheck_Init
+ .text            00143d96 RegSetOrUpdate
+ .text            00144018 RegSetUint16..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            001440cc RegSetUint32..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00143f44 RegSetUint8..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            00143ed0 RegSetUintX..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .text            001443e8 RegUpdateEntryChksum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .bss             3003d454 RemoveFileRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3013fb14 ResetHealthCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager.
+ .bss             3003d458 ResponseStatusBusy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003d457 ResponseStatusSuccess..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003f45c ResponseStatusTimeout..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001133b2 RestartMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .bss             312445ac ResultBuffer.Flt_UserMessageRecentAll.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr..0
+ .data            313cf8b0 ResyncStrs
+ .bss             30008ab0 RomData
+ .data            313ccb5c RootACSMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             30000868 RootCmdTbl
+ .data            313cd964 RootFaultMsg
+ .data            313cdd80 RootLogMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .data            313b57c4 RootMsg
+ .data            313b5180 RootMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .data            313b651c RootMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .data            313d00d8 RootSensorMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d0e00 RootTriggerMsg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313b6324 RootUserTbl
+ .bss             3003d44c Row.UploadMgr_CheckLogMoved.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..29
+ .bss             3003d3e4 Row.UploadMgr_MaintainFileTable.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..25
+ .bss             3003d450 RowRetry.UploadMgr_CheckLogMoved.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..30
+ .bss             3003f46a RspBuffOverflowDetected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser.
+ .text            00115f94 RtcVerify3234Cfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .bss             300514d0 RxMessageCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .data            313cf860 SFStateStrs
+ .data            313cf838 SFStrs
+ .text            00140b52 SPIMgr_CircQueue_Add
+ .text            00140c26 SPIMgr_CircQueue_GetHead
+ .text            00140af0 SPIMgr_CircQueue_Remove
+ .text            00140bcc SPIMgr_CircQueue_Reset
+ .text            00140ac6 SPIMgr_CircQueue_SetName
+ .text            0014086e SPIMgr_GetACBattVoltage
+ .text            00140856 SPIMgr_GetACBusVoltage
+ .text            0014089e SPIMgr_GetBoardTemp
+ .text            00140886 SPIMgr_GetLiBattVoltage
+ .text            001404dc SPIMgr_GetTime
+ .text            0013fc8c SPIMgr_Initialize
+ .text            00140958 SPIMgr_LogError
+ .text            001406f4 SPIMgr_ReadBlock
+ .text            001407f2 SPIMgr_SensorTest
+ .text            0013ff38 SPIMgr_SetModeDirectToDevice
+ .text            00140550 SPIMgr_SetRTC
+ .text            001408b6 SPIMgr_SetupDataPassing
+ .text            0013ff4a SPIMgr_Task
+ .text            001401d8 SPIMgr_UpdateAnalogDevice
+ .text            001402e8 SPIMgr_UpdateEEProm
+ .text            0013ffaa SPIMgr_UpdateRTC
+ .text            00140112 SPIMgr_UpdateRTCNVRam
+ .text            0014060a SPIMgr_WriteEEPROM
+ .text            00140744 SPIMgr_WriteRTCNvRam
+ .text            0013fee0 SPI_DevInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .text            00118a44 SPI_Devices
+ .text            0011871c SPI_Init
+ .text            00118ce4 SPI_ReadBlock
+ .text            00118afc SPI_ReadByte
+ .text            00118bf0 SPI_ReadWord
+ .text            00118790 SPI_Registers
+ .bss             3132c6d4 SPI_RuntimeInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .text            00118aa4 SPI_WriteBlock
+ .text            0011894a SPI_WriteByte
+ .text            00111d71 SRStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .data            313cfd90 SampleType
+ .bss             30008aa8 SecInfo
+ .bss             3133f2b0 SecondCounter.UTIL_MinuteTimerDisplay.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtility..0
+ .bss             300571cc SectorCount.FlashSectorErase.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash..2
+ .data            313cd94c SenseType
+ .text            00146c62 SensorApplyFilter..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313cfdd0 SensorCalConfigCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            001463c4 SensorCheck..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313cf8e0 SensorCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313cfe80 SensorConvConfigCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00145d1e SensorDisableLiveStream
+ .text            0014716a SensorDumpASCIILiveData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146e32 SensorExponential..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d08b4 SensorFailureNames
+ .data            313cff30 SensorFilterConfigCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d08cc SensorFilterNames
+ .text            00145c0c SensorGetPreviousValue
+ .text            00145c36 SensorGetSystemHdr
+ .text            00145be2 SensorGetValue
+ .data            313d05c0 SensorIndexType
+ .text            001469f2 SensorInitFilter..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146760 SensorInterfaceTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00145bb2 SensorIsUsed
+ .text            00145b90 SensorIsValid
+ .text            00146824 SensorLogFailure..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146bfe SensorManageSamples..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146f74 SensorMaxReject..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146814 SensorNoInterface..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146804 SensorNoTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146da0 SensorPersistCounter..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            001464b0 SensorRangeTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            0014657a SensorRateTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146218 SensorRead..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            001460b0 SensorReset..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d0130 SensorRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            0014669a SensorSignalTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00147038 SensorSlope..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146e6e SensorSpikeReject..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313d0290 SensorStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             313404d4 SensorTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313cfd58 SensorType
+ .text            0014549a Sensor_Live_Data_Cfg
+ .text            0014558c Sensor_ShowConfig
+ .text            00145430 Sensor_State
+ .text            00145338 Sensor_UserCfg
+ .bss             3133f354 Sensors..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00145d2c SensorsConfigure..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            0014580c SensorsInitialize
+ .text            00147120 SensorsLiveDataTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            00146068 SensorsReset..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .text            001461a8 SensorsUpdateTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             3124675c SetFaultInitialized..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .text            0011221c SetXMT
+ .text            001445f4 Slower
+ .data            313b7904 SpeedStrs
+ .bss             30008ac8 Stack
+ .text            0013c184 StackFill
+ .text            00111e51 StackInstErr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111e3d StackLabels..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111e5e StackMainStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111dec StackTrace..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111e0a StackTraceDone..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00111e17 StackTraceError..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .text            00112278 StackWalk
+ .text            00113397 StartHeader..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPBIT.
+ .bss             300571d0 StartTime.FlashSectorErase.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Cflash..3
+ .bss             31329a8c StartTime.NV_FileDevToShadow.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..30
+ .bss             31329a90 StartTime.NV_FileShadowToDev.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..31
+ .bss             30056044 StartTime.SPI_ReadByte.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSPI..1
+ .bss             30056048 StartTime.SPI_ReadWord.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSPI..2
+ .bss             30056040 StartTime.SPI_WriteByte.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSPI..0
+ .bss             3133f2b8 StartTime.UTIL_MinuteTimerDisplay.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtility..2
+ .bss             3003d3e8 State.UploadMgr_MaintainFileTable.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..27
+ .bss             31342bf4 StateTriggerTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313b6118 StatusCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .data            313b5950 StatusFlagsCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .data            313b6a00 StatusStrs.UploadMgr_MSRspCallback.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..44
+ .bss             3136a346 Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31329ad4 Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .bss             31364668 Str..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00144624 StripString
+ .data            313b793c SubProtocolStrs
+ .text            001452d2 SuperStrcat
+ .text            001445c4 Supper
+ .bss             30010053 SwVersion..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             3013f890 SwVersionTemp.Box_GetFastSwVer.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox..6
+ .data            313ba598 SwapLabelStrsRx
+ .data            313ba5b0 SwapLabelStrsTx
+ .data            313cf8c8 SyncStatusStrs
+ .text            00140c7c SystemLogIDString
+ .text            0014215a SystemLogInitLimitCheck
+ .text            001421c2 SystemLogLimitCheck
+ .text            0014217c SystemLogResetLimitCheck
+ .text            00140ce4 SystemLogStrings..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSystemLog.
+ .text            00140ccc SystemLogUndefindedID..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSystemLog.
+ .bss             3132e910 SystemRegTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .bss             31336de0 SystemRegTblShadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUtilRegSetCheck.
+ .bss             3124f084 SystemTable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CLogManager.
+ .data            313ce8d0 TASK_STATES
+ .data            313ce8c8 TASK_TYPES
+ .bss             3123ae30 TCBTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             30010b28 TCIndex.FSM_TaskFunc.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..21
+ .bss             3132c89c TMHealthCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CTaskManager.
+ .text            00118ece TTMR_Delay
+ .text            00118ef0 TTMR_GPT0ISR
+ .text            00118f5c TTMR_Get10msTickCount
+ .text            00118ebe TTMR_GetHSTickCount
+ .text            00118d3c TTMR_Init
+ .text            00118dbe TTMR_Registers
+ .text            00118eac TTMR_SetTaskManagerTickFunc
+ .bss             3005604c TaskMgrTickHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CTTMR.
+ .bss             3132c8b4 TcbArray..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CTaskManager.
+ .bss             31243738 TempDebugString..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDataManager.
+ .bss             30056050 TestCounter
+ .bss             30010080 TestStart.FAST_TxTestTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr..15
+ .bss             3003d3dc TickLast.UploadMgr_FileCollectionTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..23
+ .bss             312e421c TimeElapsed.MSI_CheckDPRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface..7
+ .bss             3003f44c TimeElapsedmS.UploadMgr_PrintUploadStats.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..39
+ .bss             312e4220 TimeLast.MSI_CheckDPRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface..8
+ .bss             312e4214 TimeLast.MSI_CheckMsgTimeouts.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface..5
+ .bss             3003f448 TimeLastmS.UploadMgr_PrintUploadStats.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..38
+ .data            313b57a4 TimeSourceStrs
+ .bss             3013f708 TimeStr.Box_SysTimeMsg.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBox..0
+ .bss             312e63ea TimeStr.MSSC_MSTimeMsg.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl..7
+ .text            001446fe Timeout
+ .text            0014472a TimeoutEx
+ .bss             30006f84 Tm
+ .text            00142b26 TmDispatchDtTasks
+ .text            0014302c TmDispatchRmtTasks
+ .text            00142670 TmInitializeTaskDispatcher
+ .text            00142230 TmInitializeTaskManager
+ .text            00142de6 TmScheduleRmtTasks
+ .text            00143258 TmScheduleTask
+ .text            00143336 TmSetMode
+ .text            0014234a TmStartTaskManager
+ .text            0014236a TmTaskCreate
+ .text            00143212 TmTaskEnable
+ .text            0014287c TmTick
+ .text            001433dc Tm_AddPrevTMHealthStatus
+ .text            0014339c Tm_CalcDiffTMHealthStatus
+ .text            00143374 Tm_GetTMHealthStatus
+ .bss             3003f454 TotalBytesSent.UploadMgr_PrintUploadStats.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..41
+ .bss             3003f458 TotalMessagesSent.UploadMgr_PrintUploadStats.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..42
+ .bss             31329a80 TotalWritten.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..27
+ .data            313d0d88 TrigRateType
+ .data            313d0fe4 TrigStateEnum
+ .text            00147f58 TriggerCheckDuration..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147ff6 TriggerCheckEnd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147e6e TriggerCheckStart..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313d08e4 TriggerCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            0014795c TriggerCompareValues
+ .data            313cd660 TriggerConfigCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .bss             313418f4 TriggerData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147c46 TriggerEnableTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .bss             31343c0c TriggerFlags..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147c06 TriggerGetState
+ .text            00147ac6 TriggerGetSystemHdr
+ .data            313d1004 TriggerIndexType
+ .text            0014772a TriggerInitialize
+ .text            0014793e TriggerIsActive
+ .bss             31343c14 TriggerLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            001480a6 TriggerLogEnd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            001482c8 TriggerLogUpdate..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147ce6 TriggerProcess..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            0014812e TriggerReset..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313d0e2c TriggerRoot..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313d09ec TriggerSensorCfgCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .data            313d0f08 TriggerStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            0014818a TriggerUpdateData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147c62 TriggerUpdateTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .bss             31343c10 TriggerValidFlags..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .text            00147c20 TriggerValidGetState
+ .text            001474fe Trigger_ShowConfig
+ .text            00147490 Trigger_State
+ .text            001473b0 Trigger_UserCfg
+ .text            001484b8 TriggersEnd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .bss             3124678c TxBuf.GSE_Init.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CGSE..1
+ .bss             312e4218 TxCntLast.MSI_CheckDPRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface..6
+ .bss             31246774 TxFIFO..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CGSE.
+ .bss             300514d4 TxMessageCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             3003d460 TxSize.UploadMgr_UploadFileBlock.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..37
+ .data            313b5a58 TxTestTable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .text            0011a2a2 UART_BITStatus
+ .text            0014d8d0 UART_BPS_SUPPORTED
+ .text            0011a15a UART_CheckForTXDone
+ .text            00119850 UART_ClosePort
+ .bss             30056058 UART_Config..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUART.
+ .bss             30056158 UART_Failed..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUART.
+ .bss             3005615c UART_IMR..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUART.
+ .text            00118f6a UART_Init
+ .text            0011a114 UART_IntrMonitor
+ .text            001192c8 UART_OpenPort
+ .text            0011a5ac UART_PBIT
+ .text            0011a2ce UART_PSC0_ISR
+ .text            0011a302 UART_PSC1_ISR
+ .text            0011a334 UART_PSC2_ISR
+ .text            0011a366 UART_PSC3_ISR
+ .text            0011a398 UART_PSCX_ISR
+ .text            001199ce UART_Purge
+ .text            00119e24 UART_Receive
+ .text            00119152 UART_Registers
+ .bss             300560e8 UART_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUART.
+ .text            00119bce UART_Transmit
+ .text            00119dc6 UART_Write
+ .bss             3002534c ULTaskData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0014517e UTIL_MinuteTimerDisplay
+ .data            313d148c UartDrvDefaultCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             313641d0 UartMgrBITBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .data            313d13c8 UartMgrBPSStrs
+ .bss             31364190 UartMgrBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .data            313d1114 UartMgrCfgTbl
+ .bss             31344a88 UartMgrCfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .data            313d17c8 UartMgrDebugTbl
+ .bss             31344ad4 UartMgrDebugTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             313641d2 UartMgrDispDebugBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149d6c UartMgrDispDebug_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00148630 UartMgrMsg_Cfg
+ .text            0014872a UartMgrMsg_Debug
+ .text            0014879e UartMgrMsg_ShowConfig
+ .text            001485d8 UartMgrMsg_Status
+ .data            313d12c0 UartMgrPortCfgTbl
+ .data            313d12a0 UartMgrProtocolStrs
+ .data            313d14b0 UartMgrRoot
+ .data            313d1460 UartMgrRootTblPtr
+ .data            313d1410 UartMgrSBStrs
+ .data            313d158c UartMgrStatusTbl
+ .bss             31344a54 UartMgrStatusTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .data            313d1878 UartMgrSysStatusStrs
+ .text            001492ce UartMgr_BITTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149d28 UartMgr_ClearDownloadState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            0014a30c UartMgr_ConvertToEngUnits..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            0014a2a2 UartMgr_CopyRollBuff..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            0014a066 UartMgr_CreateTimeOutSystemLog..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149e70 UartMgr_DetermineChanLoss..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149fee UartMgr_DetermineParamDataLoss..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149ba6 UartMgr_DownloadRecord
+ .text            00149cfc UartMgr_DownloadStop
+ .text            0014a34c UartMgr_Download_NoneHndl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            00149b4e UartMgr_FlushChannels
+ .text            00149076 UartMgr_GetCfg
+ .text            00149e62 UartMgr_GetDebug
+ .text            001499d0 UartMgr_GetFileHdr
+ .text            00149056 UartMgr_GetStatus
+ .text            00149aa2 UartMgr_GetSystemHdr
+ .text            00148924 UartMgr_Initialize
+ .text            00149700 UartMgr_InterfaceValid
+ .text            0014973e UartMgr_ReadBuffer
+ .text            00149830 UartMgr_ReadBufferSnapshot
+ .text            00149430 UartMgr_ReadWord
+ .text            00149994 UartMgr_ResetBufferTimeCnt
+ .text            00149366 UartMgr_SensorSetup
+ .text            00149562 UartMgr_SensorTest
+ .text            00149096 UartMgr_Task..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .text            0014a134 UartMgr_UpdateDataReduction..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .data            313d13f8 UartMgrsDBStrs
+ .data            313d1448 UartMgrsDuplexStrs
+ .data            313d1428 UartMgrsParityStrs
+ .text            001161c4 UndefinedResultCode..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CResultCodes.
+ .text            00111f9a UnexpectedException
+ .data            313b6548 UploadCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             30010078 UploadImmediateAfterDownload.FAST_UploadCheckTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr..13
+ .text            0010a70e UploadMgr_CheckLogCommandCallback..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010a7d4 UploadMgr_CheckLogMoved..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00108096 UploadMgr_DeleteFVTEntry
+ .text            0010826e UploadMgr_FSMGetState
+ .text            00108280 UploadMgr_FSMGetStateFilesPendingRoundTrip
+ .text            00108222 UploadMgr_FSMRun
+ .text            00108248 UploadMgr_FSMRunAuto
+ .text            0010872e UploadMgr_FileCollectionTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010afd4 UploadMgr_FileUploadTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010aaac UploadMgr_FindFlight..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010af86 UploadMgr_FinishFileUpload..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001086be UploadMgr_GetFileVfy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00108082 UploadMgr_GetFilesPendingRoundTrip
+ .text            001080da UploadMgr_GetNumFilesPendingRoundTrip
+ .text            0010844c UploadMgr_GetVfyDeletedRow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00107b1c UploadMgr_Init
+ .text            0010812e UploadMgr_InitFileVfyTbl
+ .text            00108034 UploadMgr_IsUploadInProgress
+ .text            0010bc08 UploadMgr_MSRspCallback..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010b792 UploadMgr_MSValidateCRCCmdHandler..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00109f08 UploadMgr_MaintainFileTable..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010aba6 UploadMgr_MakeFileHeader..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001082a0 UploadMgr_OpenFileVfyTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010bcda UploadMgr_PrintInstallationInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010b60e UploadMgr_PrintUploadStats..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010b736 UploadMgr_SendMSCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00108004 UploadMgr_SetUploadEnable
+ .text            0010af28 UploadMgr_StartFileUploadTask..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001084a2 UploadMgr_StartFileVfy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00107f0c UploadMgr_StartUpload
+ .text            001085e4 UploadMgr_UpdateFileVfy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0010b4cc UploadMgr_UploadFileBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00107932 UploadMgr_UserForceUpload
+ .text            00107954 UploadMgr_UserUploadEnable
+ .text            00107a8a UploadMgr_UserVfyIdxByFN
+ .text            00107a1a UploadMgr_UserVfyRows
+ .text            0010798c UploadMgr_UserVfyTbl
+ .text            0010a972 UploadMgr_VerifyMSCmdsCallback..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            001083d0 UploadMgr_VfyDeleteIncomplete..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            00108044 UploadMgr_WriteVfyTblRowsLog
+ .data            313b697c UploadOrderTbl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .data            313b693c UploadVerifyStateEnum..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3000b193 UserFactoryMode
+ .bss             3000b194 UserMsgBuf
+ .bss             30000850 UserMsgQueue
+ .bss             3000b192 UserPrivilegedMode
+ .bss             30000d94 UserProcessed
+ .bss             30000d90 UserRequest
+ .text            0010c036 User_AddRootCmd
+ .text            0010dd36 User_AppendChecksum
+ .text            0010e3d4 User_AuthenticateModeRequest
+ .text            0010e09c User_CheckForLeafArray
+ .text            0010d94c User_ConversionErrorResponse
+ .text            0010d522 User_CvtGetStr
+ .text            0010d064 User_CvtSetStr
+ .text            0010de30 User_DisplayConfigTree
+ .text            0010c4b8 User_ExecuteCmdMsg
+ .text            0010cb56 User_ExecuteMultipleGetMsg
+ .text            0010c988 User_ExecuteSingleMsg
+ .text            0010cf6a User_ExtractAssign
+ .text            0010cfb0 User_ExtractIndex
+ .text            0010c0f2 User_GSEMessageHandler
+ .text            0010e13e User_GenericAccessor
+ .text            0010e244 User_GetParamValue
+ .text            0010bef8 User_Init
+ .text            0010e306 User_LogUserActivity
+ .text            0010c10e User_MSMessageHandler
+ .text            0010e4f2 User_OutputMsgString
+ .text            0010c424 User_ProcMsgTask
+ .text            0010c17c User_PutMsg
+ .text            0010c2a4 User_PutRsp
+ .text            0010d798 User_SetMinMax
+ .text            0010dd7c User_ShowAllConfig
+ .text            0010c91a User_TraverseCmdTables
+ .text            0010dcb2 User_ValidateChecksum
+ .text            0010cc74 User_ValidateMessage
+ .vector          00100000 VECTOR_TABLE
+ .bss             312e7d00 Value16.MonitorGetNvRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..3
+ .bss             312e7cf4 Value32.MonitorGetNvRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..4
+ .bss             312e7d02 Value8.MonitorGetNvRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..2
+ .bss             312e7cf8 ValueFloat.MonitorGetNvRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..5
+ .text            00111d61 VectorStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CException.
+ .bss             30008a98 VectorTab
+ .text            0011a772 Ver_CheckVerAndDateMatch
+ .data            313b65f8 VfyCmd..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             300252fa VfyLookupFN..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3002533c VfyLookupIdx..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003d3f0 VfyRow.UploadMgr_MaintainFileTable.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr..26
+ .bss             300252a0 VfyRowTmp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003d3d4 VfyRspFailed..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             3003d3d0 VfyRspId..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .text            0014fcf4 WatchdogReboot
+ .text            00110ec4 WrapAround
+ .data            313ce8dc YES_NO
+ .bss             30008084 _ERR
+ .text            00152014 _Exit
+ .bss             30000f50 _SPIERR
+ .vector          00100000 _VECTOR_TABLE
+ .text            001522b0 __CLZ32
+                  0017130c __CRC_END
+                  00100000 __CRC_START
+                  00000000 __Char_Max__
+                  31f00000 __SP_END
+                  32000000 __SP_INIT
+                  00000000 __alt_init
+ .bss             3000992c __atexit_cleanup
+                  00000000 __cpp_exception_cleanup
+                  00000000 __cpp_exception_init
+ .text            00150d60 __docvt
+ .syscall         00152590 __dotsyscall
+ .text            0015223a __get_eh_globals
+ .text            001520c0 __gh_errno_ptr
+                  00000000 __gh_error_init
+ .text            00150252 __gh_float_printf
+ .text            001520ce __gh_get_errno
+ .text            0015083c __gh_hexout
+                  00000000 __gh_iob_init
+ .text            0015225e __gh_lock_init
+                  00000000 __gh_long_long_printf
+ .text            0015089c __gh_octhexout
+ .text            001505c4 __gh_outspaces
+ .text            001520ae __gh_set_errno
+                  00000000 __gh_signal_init
+ .text            001505f0 __gh_strout
+                  00000000 __gh_uns_long_long_printf
+ .text            001508e2 __gh_vsprintf
+ .text            0015058a __gh_xxdecout
+ .text            0015224e __ghsLock
+ .text            00152256 __ghsUnlock
+ .text            0015221a __ghs_GetThreadLocalStorageItem
+ .text            00152270 __ghs_RestoreSignalContext
+ .text            00152266 __ghs_SaveSignalContext
+                  313b4f44 __ghs_allocatedramend
+ .text            0015207c __ghs_at_exit
+                  00000000 __ghs_board_cache_sync
+                  00000000 __ghs_board_devices_init
+                  00000000 __ghs_board_memory_init
+                  80010000 __ghs_cframstart
+                  00000000 __ghs_checksum
+ .text            00151e94 __ghs_decompress
+ .text            00152292 __ghs_flock_create
+ .text            0015229a __ghs_flock_destroy
+ .text            00152278 __ghs_flock_file
+ .text            00152288 __ghs_ftrylock_file
+ .text            00152280 __ghs_funlock_file
+ .text            0011d8a4 __ghs_ind_crt0
+ .text            0015210c __ghs_ind_crt1
+                  00000000 __ghs_init_d2
+                  00000000 __ghs_init_d3
+                  00000000 __ghs_init_d4
+                  00000000 __ghs_init_d5
+                  00000000 __ghs_manprf_init
+ .text            00151632 __ghs_memcmp
+                  313d3f68 __ghs_pramend
+                  313d3cbc __ghs_pramstart
+                  00000000 __ghs_rambootcodeend
+                  00000000 __ghs_rambootcodestart
+                  31f00000 __ghs_ramend
+                  30000000 __ghs_ramstart
+                  00152590 __ghs_rombootcodeend
+                  00100420 __ghs_rombootcodestart
+                  02000000 __ghs_romend
+                  00000000 __ghs_romstart
+ .text            0014fff4 __ghs_strcat
+ .text            0014ffce __ghs_strchr
+ .text            0014ffaa __ghs_strcmp
+ .text            0014ff90 __ghs_strcpy
+ .text            0014ff4e __ghs_strlen
+ .text            0014ff18 __ghs_strncmp
+ .text            0014fee6 __ghs_strncpy
+ .text            0014fe42 __ghs_strstr
+ .text            001520dc __ghs_syscall
+                  00000000 __ghs_undefined_func
+ .fixaddr         00152590 __ghsbegin_fixaddr
+ .fixtype         00152590 __ghsbegin_fixtype
+                  00000000 __ghsbegin_picbase
+                  00000000 __ghsbegin_pidbase
+                  00000000 __ghsbegin_robase
+ .sdabase         313d3f68 __ghsbegin_sdabase
+ .secinfo         00152308 __ghsbegin_secinfo
+ .secinfo         00152320 __ghsbinfo_aclear
+ .secinfo         0015232c __ghsbinfo_acopy
+ .secinfo         00152308 __ghsbinfo_clear
+ .secinfo         0015232c __ghsbinfo_comacopy
+ .secinfo         0015232c __ghsbinfo_comcopy
+ .secinfo         0015232c __ghsbinfo_comtcopy
+ .secinfo         00152320 __ghsbinfo_copy
+ .secinfo         0015232c __ghsbinfo_tcopy
+ .secinfo         00152320 __ghseinfo_clear
+ .secinfo         0015232c __ghseinfo_comcopy
+ .secinfo         0015232c __ghseinfo_copy
+ .fixaddr         00152590 __ghsend_fixaddr
+ .stack           32000000 __ghsend_stack
+ .text            00151de4 __i64tod
+ .secinfo         0015232c __secinfo
+ .bss             30009930 __stdio_cleanup
+ .text            00151d50 __u64tod
+ .text            00152000 _enter
+ .text            00152014 _exit
+ .bss             300098fc _multiArgs
+ .text            0014fd3c _multibufSize
+ .bss             3000f904 _multibuffer
+ .text            0014fd30 _multiend
+ .text            0011d7f8 _start
+ .text            0015160a abs
+ .bss             300514e8 active.DPRAM_TxToDPRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM..11
+ .text            00151c00 atof
+ .text            0015161a atoi
+ .bss             30041498 bDebounceActive..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .bss             3138a9d0 bStartup..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             31329a9c busyArray..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .bss             312e7cfc dataPtr.MonitorGetNvRAM.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMonitor..6
+ .text            00110bac defDIORegData
+ .text            00113b2e disable_cache
+ .text            00150014 efout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccefgout.
+ .bss             30009938 environ
+ .bss             30009934 errno
+ .text            001511f0 exit
+ .text            0015165e fabs
+ .text            0010e4c7 fact.User_AuthenticateModeRequest.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser..6
+ .bss             31246760 faultCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .bss             312465b0 faultHistory..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .bss             312465ac faultIndex..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFaultMgr.
+ .bss             30056164 fpgaLogged..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429.
+ .text            0011ad10 fpgaRxReg
+ .bss             300571d4 fpgaRxRegTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             300571fc fpgaTxRegTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .text            0011af3c fpgaTxReg_v12
+ .bss             30010051 gsmOverride..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             31329a78 i.NV_MgrTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CNVMgr..25
+ .text            00113b44 init_cache
+ .text            0011371e init_processor
+ .bss             30010b2c input_states.FSM_TaskFunc.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..23
+ .bss             3000f7fa isWatchdogRestart
+ .data            313b73c0 isr.UART_PSCX_ISR.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUART..4
+ .text            0010e4d1 key.User_AuthenticateModeRequest.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser..5
+ .data            313cdd7c lastId.Im_StartupTickHandler.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager..1
+ .bss             3000a982 lcQARFrame
+ .text            0015159e localeconv
+ .bss             3132c790 logWriteCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSystemLog.
+ .bss             3000fdf8 m_ACStoredSensorVals..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000feac m_ACTaskTimeoutTmr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3004146c m_ADC_ChanData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CADC.
+ .bss             3005d9b8 m_Arinc429BCDInvDigit..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30107080 m_Arinc429CBITHealthStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30057320 m_Arinc429Cfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             300f4000 m_Arinc429DebugBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30116af4 m_Arinc429DebugStorage..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30008088 m_Arinc429HW
+ .bss             30057220 m_Arinc429MgrBlock..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             300f3f80 m_Arinc429RxBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             3005ddc0 m_Arinc429RxChannel..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             301070f2 m_Arinc429RxStorage..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             300f4080 m_Arinc429SensorInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             301070f0 m_Arinc429WordSensorCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             3005ddb8 m_Arinc429_Debug..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             300f2f80 m_ArincSensorFilterData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr.
+ .bss             30055e39 m_BarkerErr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             3014a468 m_BatchModeShadow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCfgManager.
+ .bss             312e6c68 m_CBITSysCond..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             3000fe5d m_CancelWhileRcvingConfigCmds..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             30008128 m_CbitMgrStatus
+ .bss             300101d1 m_Cfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             3001016a m_CfgCRCTmp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             30010168 m_CfgEnbTmp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             3000fde4 m_CfgStatusStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fcf4 m_CfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             30025344 m_CheckLogFileCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             30025340 m_CheckLogRow..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             312e6460 m_CompactFlashMounted..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             300101cc m_CurState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             300101c8 m_CurStateStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             30000f3c m_DPRAM_Status
+ .bss             3138aa54 m_EMU150_AppData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3138a994 m_EMU150_Cfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3138a9b0 m_EMU150_Download..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3138a9b8 m_EMU150_Download_Ptr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3136a8fc m_EMU150_Rx_Buff..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3138c240 m_EMU150_Rx_Record..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3136a894 m_EMU150_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3138a910 m_EMU150_Tx_Buff..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3136a786 m_F7X_AppData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31366c50 m_F7X_Buff..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31368700 m_F7X_DataFrame..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             3136a328 m_F7X_Debug..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31367cb0 m_F7X_DumplistCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31368b20 m_F7X_ParamList..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31369724 m_F7X_ParamListCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             31366bc0 m_F7X_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CF7XProtocol.
+ .bss             30010052 m_FASTControlEnb..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             3000993c m_FPGA_ShadowRam
+ .bss             3000a15c m_FPGA_ShadowRamCopy
+ .bss             30000f54 m_FPGA_Status
+ .bss             3000a97e m_FPGA_StatusReg
+ .bss             31329ab0 m_FSMAppBusy..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CPowerManager.
+ .bss             3000fed4 m_FastTxTest..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             312439ac m_FaultCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFault.
+ .bss             30010b44 m_FileDataQBuf..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .bss             30014b44 m_FileXfrData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .bss             300353c8 m_FreeFVTRows..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             30000008 m_FreeVerifyRows
+ .bss             312e6462 m_GetMSInfoRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             3000fe60 m_GetStatusRetryCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             312e4224 m_GsmCfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6458 m_HeartbeatLogCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6454 m_HeartbeatTimedOut..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6450 m_HeartbeatTimer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .text            0010501e m_InitState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             300514e4 m_InitStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             312e6c62 m_IsClientConnected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             3014a464 m_IsInBatchMode..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCfgManager.
+ .bss             312e6444 m_IsOnGround..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             300101d0 m_IsTimerExpired..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             312e6c63 m_IsVPNConnected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e644c m_LastHeartbeatTime..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             30000000 m_MSCrcResult
+ .bss             312e420d m_MSIntSvcTimeout..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSInterface.
+ .bss             312e43e8 m_MSShellRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             30025348 m_MaintainFileTableRunning..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUploadMgr.
+ .bss             312e645c m_MaxHeartbeatLogs..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e63ce m_MsCfgTemp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6461 m_MsFileXfer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6440 m_MsStsSta..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e63dc m_MsTime..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e643c m_MsXfrSta..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             312e6448 m_MssimStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             30008138 m_PWEHSEUStatus
+ .bss             30008aec m_PowerManagerCfg
+ .bss             31329ad0 m_QarOutputType..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQARManager.
+ .bss             3005603c m_RTC_Status..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CRTC.
+ .bss             3000fe5c m_ReceivingConfigCmds..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .data            313b5518 m_RecfgErrorStr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             313ac254 m_Record_Hdr..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             3000fe64 m_ReqCfgFilesRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fdf4 m_ReqFilesFailCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fe08 m_ReqStsRsp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             300514e0 m_RxBlockCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             312e643a m_SendHeartbeat..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             31340570 m_SensorCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .bss             30010164 m_StateStartTime..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             30010119 m_StateTmp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             3001013e m_TCTmp..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             3000fcec m_TaskState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             30010b40 m_TaskState..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .data            313b5d10 m_Tasks..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             312e6c64 m_TimeSynced..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             30000004 m_TotalVerifyRows
+ .data            313b6224 m_TransitionCriteria..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr.
+ .bss             31342c8c m_TriggerCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Ctrigger.
+ .bss             300514dc m_TxBlockCnt..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             300514d8 m_TxSem..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDPRAM.
+ .bss             3138c21c m_UartCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEMU150Protocol.
+ .bss             31364060 m_UartMgrCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31344ee8 m_UartMgrStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31347fb8 m_UartMgr_Data..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             313641d4 m_UartMgr_Debug..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31363ff8 m_UartMgr_Download..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31350fb8 m_UartMgr_RawBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             313513b8 m_UartMgr_StoreBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31344fb8 m_UartMgr_WordInfo..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             31364058 m_UartMgr_WordSensorCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUartMgr.
+ .bss             3000feb0 m_UploadBeforeCommitRetryCount..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fe54 m_WaitData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3001504c m_WaitData..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .bss             30014c44 m_YMdm..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSFileXfr.
+ .bss             3000fdef m_bAircraftIDMismatch..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fdf0 m_bAutoCfg..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3132c77c m_bDirectToDev..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .bss             3000fcf0 m_bGotCommit..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fded m_bMsConnected..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3000fdee m_bOnGround..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             3132c77d m_bTaskStarted..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .bss             3000fdec m_bVPNConn..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAircraftConfigMgr.
+ .bss             312e6c6c m_clockDriftChecked..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CMSStsCtl.
+ .bss             300098d4 m_resultGetRTC
+ .bss             3132c77e m_rtcTimeStruct..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CSpiManager.
+ .bss             3000f8fb m_spiErrorRecorded
+ .text            00145318 main
+ .bss             31341874 maxSensorUsed..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Csensor.
+ .data            313ce88c memInfoTable
+ .data            313ce8c4 memInfoTableLen
+ .text            00151632 memcmp
+ .text            00151f84 memcpy
+ .text            00151f30 memset
+ .bss             30008ad8 mifPulse
+ .bss             3003f46b msBuffer..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser.
+ .bss             3000f194 msgBuf
+ .bss             3013f704 nMIFCnt.Arinc429MgrDisplaySWBufferTask.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5Carinc429mgr..25
+ .bss             30010b24 next.FSM_TaskFunc.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..20
+ .bss             30051db8 pQARCtrl..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30051db0 pQARCtrlStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30051dbc pQARStatus..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .bss             30051db4 pQARSubFrame..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CQAR.
+ .text            0011346e pbit
+ .bss             3132c8a4 pendingSystemMode..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CTaskManager.
+ .text            0010e4cc priv.User_AuthenticateModeRequest.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CUser..7
+ .bss             3013f9ac readPattern.CBITMgr_Ram_Task.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager..4
+ .bss             3013f9ab recorded.CBITMgr_CRC_Task.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CCBITManager..3
+ .bss             3004148d reentered.AssertHandler.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAssert..1
+ .bss             3004148e reentered.Assert_UnhandledException.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CAssert..2
+ .bss             3004148f reentered.BTO_WriteToEE.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CBusTO..0
+ .text            001116d0 resultCode.EEPROM_Init.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CEEPROM..0
+ .bss             3000f596 resultStr
+ .bss             3124a78c sameIdCount.Im_StartupTickHandler.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CInitializationManager..2
+ .text            00151c14 scalbln
+ .text            00151518 setlocale
+ .text            00150ce8 snprintf
+ .text            00150d32 sprintf
+ .text            00150d4a sputc..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsprntf.
+ .text            00150c74 sputc_limit..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsnprtf.
+ .bss             3000000c startupId
+ .bss             30010088 str.FSM_CfgTCStrCmd.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..0
+ .bss             300100d8 str.FSM_CfgTaskStrCmd.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..1
+ .bss             3001016c str.FSM_GetRunningTasks.D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTStateMgr..8
+ .text            0014fd40 strcasecmp
+ .text            0014fff4 strcat
+ .text            0014ffce strchr
+ .text            0014ffaa strcmp
+ .text            0014ff90 strcpy
+ .text            0014ff66 strcspn
+ .text            0014ff4e strlen
+ .text            0014ff18 strncmp
+ .text            0014fee6 strncpy
+ .text            0014524c strncpy_safe
+ .text            0014feba strpbrk
+ .text            0014fe90 strspn
+ .text            0014fe42 strstr
+ .text            00151688 strtod
+ .text            0014fe02 strtok
+ .text            0014fda8 strtok_r
+ .text            001513b8 strtol
+ .text            0015127c strtoul
+ .bss             3132c8a8 systemModeTransitions..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CTaskManager.
+ .text            00143410 taskInfo
+ .text            00150806 unsout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccvsprnt.
+ .bss             30000010 userMsgQ
+ .text            00150c9a vsnprintf
+ .text            00150d04 vsprintf
+ .bss             30041494 waFailLogRecorded..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.
+ .text            0015121e wctomb
+ .bss             30010050 wlanOverride..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CFASTMgr.
+ .bss             30041490 wrapFailCounts..D.3A.5CFAST_Testing.5Cdev.5CCP.5Cbuild.5CDIO.

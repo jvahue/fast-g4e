@@ -11,7 +11,7 @@
                  data from the various interfaces.
     
     VERSION
-      $Revision: 37 $  $Date: 10/26/11 6:44p $     
+      $Revision: 38 $  $Date: 7/19/12 11:07a $     
     
 ******************************************************************************/
 
@@ -228,10 +228,12 @@ EXPORT void       DataMgrRecord         ( BOOLEAN bEnable );
 EXPORT BOOLEAN    DataMgrStartDownload  ( void );
 EXPORT void       DataMgrStopDownload   ( void );
 EXPORT BOOLEAN    DataMgrDownloadingACS ( void );
-EXPORT BOOLEAN    DataMgrRecGetState ( INT32 param );
+EXPORT BOOLEAN    DataMgrRecGetState    ( INT32 param );
 EXPORT BOOLEAN    DataMgrDownloadGetState ( INT32 param );
-EXPORT void       DataMgrRecRun ( BOOLEAN Run, INT32 param );
-EXPORT void       DataMgrDownloadRun ( BOOLEAN Run, INT32 param );
+EXPORT void       DataMgrRecRun         ( BOOLEAN Run, INT32 param );
+EXPORT void       DataMgrDownloadRun    ( BOOLEAN Run, INT32 param );
+EXPORT BOOLEAN    DataMgrIsFFDInhibtMode( void );
+BOOLEAN           DataMgrIsPortFFD      ( const ACS_CONFIG *ACS_Config );
 
 #endif 
 
@@ -239,6 +241,11 @@ EXPORT void       DataMgrDownloadRun ( BOOLEAN Run, INT32 param );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 38  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 37  *****************
  * User: John Omalley Date: 10/26/11   Time: 6:44p

@@ -18,7 +18,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 45 $  $Date: 10/18/10 7:03p $
+   $Revision: 46 $  $Date: 7/19/12 10:42a $
 
 
 ******************************************************************************/
@@ -162,7 +162,7 @@ BOOLEAN DIO_OutputShadow[DIO_MAX_OUTPUTS];
 #endif
 
 // Array of "filtered" output pins
-DIO_DEBOUNCED Dio_FilteredPins[DIO_MAX_OUTPUTS];
+DIO_DEBOUNCED Dio_FilteredPins[DIO_MAX_INPUTS];
 
 // Fast-lookup table for getting the 8-bit value at a specific port.
 DIO_PORT_DATA DioInputStore[DIO_ENUM_MAX];
@@ -500,10 +500,6 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
   }
   else if(DIO_FPGA == PinConfig->Peripheral)
   {
-    //If peripheral is FPGA, this is a "special case" pin that is also not
-    //under control of the GPIO peripheral, but is a GPIO in the FPGA.  This
-    //ugly hack is because we ran out of pins on the MCF5485.
-
     //FPGA already has direction hardwired, so just need to set initial value
     //Set data output value
     switch(PinConfig->InitialState)
@@ -635,6 +631,7 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
 {
   BOOLEAN State;
   UINT8 value;
+  UINT16 value16;
   DIO_ACC_METHOD access;
 
   
@@ -658,14 +655,23 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
       // No break. Deliberate Fall through.
     
     case DIO_RAW:   //Read the value directly off the register and mask the bit
-      value = DIO_R( Dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
-      State = ( value & DIO_InputPins[Pin].PinMask) ? ON : OFF;      
+      if(DIO_InputPins[Pin].Peripheral == DIO_FPGA)
+      {
+        value16 = DIO_R( (UINT16 *)Dio_FilteredPins[Pin].portData->portAddr );
+        State = ( value16 & DIO_InputPins[Pin].PinMask) ? ON : OFF;      
+      }
+      else
+      {
+        value = DIO_R( Dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
+        State = ( value & DIO_InputPins[Pin].PinMask) ? ON : OFF;      
+      }
       break;
     
     default:
       FATAL("Invalid AccessMethod: %d", DIO_InputPins[Pin].AccessMethod);
       break;
   }   
+  
 
   return State;
 }
@@ -1178,6 +1184,11 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:42a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 10/18/10   Time: 7:03p

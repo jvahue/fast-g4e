@@ -1,0 +1,13 @@
+#!gbuild
+primaryTarget=coldfire_standalone.tgt
+[Project]
+
+# SCR 167 Move to main.gpj
+#	-bsp generic
+#	-G
+#	-cpu=CF5485
+#	--prototype_errors
+
+main.gpj		[Program]
+  :postexecShell=".\\ELFtoDLD.bat > fastCRC.txt"
+

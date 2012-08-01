@@ -1,0 +1,101 @@
+#!gbuild
+[Program]
+	-bsp generic
+	-G
+	-cpu=CF5485
+	--prototype_errors
+	
+	-DRELEASE
+	-object_dir=.\obj
+	-I..\drivers\hwdef
+	-I..\drivers\hwdef\ASMhwdef
+	-I..\drivers
+	-I..\system
+	-I..\application
+	-I..\test
+	:outputDir=.\
+	-list
+	{optgroup=GhsCompilerOptions} -o output.elf
+	-ansi
+	-keeptempfiles
+	-passsource
+	-gtws
+	-nostartfiles
+	-o fast.elf
+#Debugger RAM RUN at 0x30000000.ld	
+FASTII.ld
+..\application\AircraftConfigMgr.c
+..\application\EngineRun.c
+..\application\FASTMgr.c
+..\application\FASTStateMgr.c
+..\application\MSFileXfr.c
+..\application\UploadMgr.c
+..\application\User.c
+..\application\Event.c
+..\application\Timehistory.c
+..\application\trend.c
+..\drivers\ADC.c
+..\drivers\Assert.c
+..\drivers\BusTO.c
+..\drivers\datareduction.c
+..\drivers\DIO.c
+..\drivers\DPRAM.c
+..\drivers\EEPROM.c
+..\drivers\Exception.s
+..\drivers\Evaluator.c
+..\drivers\FIFO.c
+..\drivers\FPGA.c
+..\drivers\PBIT.s
+..\drivers\ProcessorInit.s
+..\drivers\QAR.c
+..\drivers\RamTest.s
+..\drivers\RTC.c
+..\drivers\ResultCodes.c
+..\drivers\SPI.c
+..\drivers\TTMR.c
+..\drivers\UART.c
+..\drivers\Version.c
+..\drivers\amdfujiscs.c
+..\drivers\arinc429.c
+..\drivers\flash.c
+..\drivers\vectors.s
+..\ghs_crt\crt0.68
+..\ghs_crt\ind_crt0.c
+..\system\actionmanager.c
+..\system\arinc429mgr.c
+..\system\Box.c
+..\system\CBITManager.c
+..\system\CfgManager.c
+..\system\ClockMgr.c
+..\system\Cycle.c
+..\system\DIOMgr.c
+..\system\DataManager.c
+..\system\FPGAManager.c
+..\system\Fault.c
+..\system\FaultMgr.c
+..\system\GSE.c
+..\system\InitializationManager.c
+..\system\LogManager.c
+..\system\MSInterface.c
+..\system\MSStsCtl.c
+..\system\MemManager.c
+..\system\Monitor.c
+..\system\NVMgr.c
+..\system\PowerManager.c
+..\system\QARManager.c
+..\system\SpiManager.c
+..\system\SystemLog.c
+..\system\TaskManager.c
+..\system\UtilRegSetCheck.c
+..\system\Utility.c
+..\system\main.c
+..\system\sensor.c
+..\system\trigger.c
+..\system\UartMgr.c
+..\system\F7XProtocol.c
+..\system\EMU150Protocol.c
+..\system\WatchDog.c
+..\test\etm.c
+
+:postexecShell=..\build\ELFtoDLD.bat
+

@@ -12,7 +12,7 @@ validate the files were received correctly by the
 micro-server and ground server.
 
 VERSION
-$Revision: 15 $  $Date: 10/14/10 3:47p $
+$Revision: 17 $  $Date: 7/26/12 2:08p $
 
 ******************************************************************************/
 
@@ -78,77 +78,41 @@ UINT32 m_FreeVerifyRows;
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
 static USER_MSG_TBL FileCmd[] =
-{
-  {"NAME"          , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_STR   , USER_RO                           , &VfyRowTmp.Name,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT,  NULL},
-  
-  {"STATE"         , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_ENUM  , USER_RO                           , &VfyRowTmp.State,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, UploadVerifyStateEnum},
-
-  {"LOGDELETED"    , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_YESNO , USER_RO                           , &VfyRowTmp.LogDeleted,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-  
-  {"START"         , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.Start,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-
-  {"END"           , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.End,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-  
-  {"TYPE"          , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.Type,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-  
-  {"ACS"           , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.Source,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT,NULL},
-
-  {"PRIORITY"      , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.Priority,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-  
-  {"CRC"           , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_HEX32 , USER_RO                           , &VfyRowTmp.CRC,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT, NULL},
-  
-  {"DELETE"        , NO_NEXT_TABLE                     , UploadMgr_UserVfyTbl,
-   USER_TYPE_ACTION, USER_RO                           , (void*)0,
-   0               , UPLOADMGR_VFY_TBL_MAX_ROWS-1      , NO_LIMIT,NULL},
-
-  { NULL           , NULL                              , NULL, NO_HANDLER_DATA}
+{/*Str               Next Tbl Ptr   Handler Func.         Data Type         Access    Parameter           IndexRange                       DataLimit EnumTbl*/                      
+  {"NAME"          , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_STR   , USER_RO, &VfyRowTmp.Name,     0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"STATE"         , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_ENUM  , USER_RO, &VfyRowTmp.State,    0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, UploadVerifyStateEnum},
+  {"LOGDELETED"    , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_YESNO , USER_RO, &VfyRowTmp.LogDeleted,0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"START"         , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.Start,    0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"END"           , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.End,      0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"TYPE"          , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.Type,     0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"ACS"           , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.Source,   0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"PRIORITY"      , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.Priority, 0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"CRC"           , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_HEX32 , USER_RO, &VfyRowTmp.CRC,      0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  {"DELETE"        , NO_NEXT_TABLE, UploadMgr_UserVfyTbl, USER_TYPE_ACTION, USER_RO, (void*)0,            0, UPLOADMGR_VFY_TBL_MAX_ROWS-1, NO_LIMIT, NULL},
+  { NULL           , NULL                              ,  NULL, NO_HANDLER_DATA}
 };
 #pragma ghs endnowarning 
 
 static USER_MSG_TBL LookupCmd[] =
 {
-  {"FN",    NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_STR,
-    USER_RW,  VfyLookupFN,  -1,-1,  NO_LIMIT, NULL },
-  {"INDEX", NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_INT32,
-    USER_RO,  NULL,         -1,-1,  NO_LIMIT, NULL },
+  {"FN",            NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_STR,  USER_RW,VfyLookupFN,        -1,-1,                           NO_LIMIT, NULL },
+  {"INDEX",         NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_INT32,USER_RO,NULL,               -1,-1,                           NO_LIMIT, NULL },
   { NULL,     NULL,         NULL,   NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL VfyCmd[] =
 {
-  {"TBL_SIZE",  NO_NEXT_TABLE,  UploadMgr_UserVfyRows,  USER_TYPE_UINT32,
-    USER_RO,  &m_TotalVerifyRows, -1,-1,  NO_LIMIT, NULL },
-  {"TBL_FREE",  NO_NEXT_TABLE,  UploadMgr_UserVfyRows,  USER_TYPE_UINT32,
-    USER_RO,  &m_FreeVerifyRows,  -1,-1,  NO_LIMIT, NULL },
-  {"FILE",     FileCmd,         NULL, NO_HANDLER_DATA},
-  {"LOOKUP",   LookupCmd,       NULL, NO_HANDLER_DATA},
-  { NULL,      NULL,            NULL, NO_HANDLER_DATA}
+  {"TBL_SIZE", NO_NEXT_TABLE,  UploadMgr_UserVfyRows,    USER_TYPE_UINT32,USER_RO,&m_TotalVerifyRows,  -1,-1,  NO_LIMIT, NULL },
+  {"TBL_FREE", NO_NEXT_TABLE,  UploadMgr_UserVfyRows,    USER_TYPE_UINT32,USER_RO,&m_FreeVerifyRows,   -1,-1,  NO_LIMIT, NULL },
+  {"FILE",     FileCmd,        NULL, NO_HANDLER_DATA},
+  {"LOOKUP",   LookupCmd,      NULL, NO_HANDLER_DATA},
+  { NULL,      NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL UploadCmd[] =
 {
-  {"FORCEUPLOAD", NO_NEXT_TABLE,  UploadMgr_UserForceUpload,  USER_TYPE_ACTION,
-    USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
-  {"ENABLED",     NO_NEXT_TABLE,  UploadMgr_UserUploadEnable, USER_TYPE_YESNO,
-    USER_RW,  NULL, -1,-1,  NO_LIMIT, NULL },
+  {"FORCEUPLOAD", NO_NEXT_TABLE,  UploadMgr_UserForceUpload,  USER_TYPE_ACTION,USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
+  {"ENABLED",     NO_NEXT_TABLE,  UploadMgr_UserUploadEnable, USER_TYPE_YESNO, USER_RW,  NULL, -1,-1,  NO_LIMIT, NULL },
   {"VFY",      VfyCmd,          NULL, NO_HANDLER_DATA},
   { NULL,      NULL,            NULL, NO_HANDLER_DATA}
 };
@@ -289,11 +253,7 @@ USER_HANDLER_RESULT UploadMgr_UserVfyTbl(USER_DATA_TYPE DataType,
   }
   else
   {
-     if( 0 == UploadMgr_UpdateFileVfy( Index, VFY_STA_DELETED, 0, 0))
-     {
-        //Update succeeded
-        result =  USER_RESULT_OK;
-     }
+    UploadMgr_UpdateFileVfy( Index, VFY_STA_DELETED, 0, 0);
   }
    return result;
 }
@@ -421,6 +381,16 @@ USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: UploadMgrUserTables.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 2:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1076 Code Review Updates
+ * 
+ * *****************  Version 16  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 15  *****************
  * User: Contractor2  Date: 10/14/10   Time: 3:47p

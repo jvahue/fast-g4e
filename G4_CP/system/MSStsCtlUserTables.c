@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 20 $  $Date: 8/02/10 3:16p $    
+    $Revision: 21 $  $Date: 7/19/12 11:07a $    
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -131,6 +131,7 @@ static USER_MSG_TBL MsCfgMsgs[] =
    { "HBSTARTUP_S", NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_UINT16,   USER_RW,  &m_MsCfgTemp.HeartBeatStartup_s,-1, -1,      NO_LIMIT,    NULL },
    { "HBLOSS_S"   , NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_UINT16,   USER_RW,  &m_MsCfgTemp.HeartBeatLoss_s,   -1, -1,      NO_LIMIT,    NULL },
    { "HBMAXLOGS" ,  NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_UINT8,    USER_RW,  &m_MsCfgTemp.HeartBeatLogCnt,   -1, -1,      NO_LIMIT,    NULL },
+   { "PRI4_MAX_MB", NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_UINT16,   USER_RW,  &m_MsCfgTemp.Pri4DirMaxSizeMB,  -1, -1,      NO_LIMIT,    NULL },
    { NULL         , NULL           ,  NULL             , NO_HANDLER_DATA}
 };
 
@@ -417,6 +418,11 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 8/02/10    Time: 3:16p

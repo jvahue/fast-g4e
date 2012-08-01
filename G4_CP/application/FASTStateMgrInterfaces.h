@@ -11,7 +11,7 @@
     Description:  
 
     VERSION
-    $Revision: 4 $  $Date: 9/23/11 8:02p $
+    $Revision: 5 $  $Date: 7/26/12 2:08p $
 
 ******************************************************************************/
 
@@ -62,7 +62,7 @@
 FSM_TC_ITEM(TACT,  TRUE,         TriggerGetState)\
 FSM_TC_ITEM(TVLD,  TRUE,         TriggerValidGetState)\
 FSM_TC_ITEM(TIMR, FALSE,         FSM_GetIsTimerExpired)\
-FSM_TC_ITEM(FILX, FALSE,         UploadMgr_FSMGetStateFilesPendingRoundTrip)\
+FSM_TC_ITEM(FILX, FALSE,         UploadMgr_FSMGetFilesPendingRT)\
 FSM_TC_ITEM(MVPN, FALSE,         MSSC_FSMGetVPNStatus)\
 FSM_TC_ITEM(MSCF, FALSE,         MSSC_FSMGetCFStatus)\
 FSM_TC_ITEM(UPLD, FALSE,         UploadMgr_FSMGetState)\
@@ -114,6 +114,11 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 5  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 2:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1076 Code Review Updates
  * 
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 9/23/11    Time: 8:02p

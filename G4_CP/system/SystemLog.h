@@ -15,7 +15,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 95 $  $Date: 7/11/12 4:36p $
+      $Revision: 97 $  $Date: 12-07-27 3:02p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -56,6 +56,7 @@ SYS_LOG_ID(APP_ID_FSM_CRC_MISMATCH                  ,0xA208 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_STARTED                     ,0xB000 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_ENDED                       ,0xB001 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
+SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
 SYS_LOG_ID(APP_ID_TIMEHISTORY                       ,0xB200 ,0)\
 \
 SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
@@ -170,6 +171,7 @@ SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
 \
 SYS_LOG_ID(SYS_ID_MS_HEARTBEAT_FAIL                 ,0x4F10 ,0) /* Configurable Limit in MSStsCtl.c */\
 SYS_LOG_ID(SYS_ID_MS_RECONNECT                      ,0x4F20 ,0) /* Configurable Limit in MSStsCtl.c */\
+SYS_LOG_ID(SYS_ID_MS_VERSION_MISMATCH               ,0x4F21 ,0)\
 \
 SYS_LOG_ID(SYS_ID_FPGA_CBIT_CRC_FAIL                ,0x5811 ,0)\
 SYS_LOG_ID(SYS_ID_FPGA_CBIT_FORCE_RELOAD_RESULT     ,0x5812 ,0) /* Limit in FPGAManager.c */\
@@ -193,6 +195,10 @@ SYS_LOG_ID(SYS_ID_GSE_PBIT_REG_INIT_FAIL            ,0x5B01 ,0)\
 \
 SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_FILES_INVALID      ,0x6000 ,0)/* Cycles */\
 SYS_LOG_ID(SYS_ID_CYCLES_CHECKID_CHANGED            ,0x6001 ,0)/* Cycles */\
+\
+SYS_LOG_ID(SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL      ,0x6101 ,0)\
+SYS_LOG_ID(SYS_ID_ACTION_PERSIST_CLR                ,0x6120 ,0)\
+SYS_LOG_ID(SYS_ID_ACTION_PERSIST_RESET              ,0x6121 ,0)\
 \
 SYS_LOG_ID(APP_UI_USER_PARAM_CHANGE_LOG             ,0x8800 ,0)\
 SYS_LOG_ID(APP_UI_USER_ACTION_COMMAND_LOG           ,0x8801 ,0)\
@@ -343,6 +349,16 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 97  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:02p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Action Manager Persistent updates
+ * 
+ * *****************  Version 96  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 95  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:36p

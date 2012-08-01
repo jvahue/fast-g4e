@@ -11,7 +11,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 46 $  $Date: 12-05-24 9:38a $
+    $Revision: 47 $  $Date: 7/19/12 11:07a $
 
 ******************************************************************************/
 
@@ -63,8 +63,6 @@ typedef enum
    ACS_6,
    ACS_7,
    ACS_8,
-   ACS_9,
-   ACS_10,
    ACS_DONT_CARE = 0xFFFFFFFF // Note the don't care in this enumeration
                               // must match the don't care in the SystemLog.h
                               // SYS_APP_ID enumeration and the Source
@@ -143,9 +141,13 @@ typedef enum
 
 typedef enum
 {
-   LOG_PRIORITY_HIGH   = 0,
-   LOG_PRIORITY_LOW    = 1,
-   LOG_PRIORITY_DONT_CARE
+   LOG_PRIORITY_1       = 1,
+   LOG_PRIORITY_2       = 2,
+   LOG_PRIORITY_3       = 3,
+   LOG_PRIORITY_4       = 4,
+   LOG_PRIORITY_DONT_CARE,
+   LOG_PRIORITY_LOW     = LOG_PRIORITY_3, /*Enums for legacy System logs*/
+   LOG_PRIORITY_HIGH    = LOG_PRIORITY_3  /*Enums for legacy System logs*/
 } LOG_PRIORITY;
 
 typedef enum
@@ -368,8 +370,10 @@ typedef struct
 #if defined ( LOGMNG_BODY )
 // Note: Updates to LOG_PRIORITY has dependency to LM_UserEnumPriority[]
 EXPORT USER_ENUM_TBL LM_UserEnumPriority[] =
-{ { "HIGH",   LOG_PRIORITY_HIGH      },
-  { "LOW",    LOG_PRIORITY_LOW       },
+{ { "1",   LOG_PRIORITY_1      },
+  { "2",   LOG_PRIORITY_2      },
+  { "3",   LOG_PRIORITY_3      },
+  { "4",   LOG_PRIORITY_4      },  
   { NULL,     0                      }
 };
 #else
@@ -426,6 +430,11 @@ EXPORT UINT32            LogGetLogCount          ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 47  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 46  *****************
  * User: John Omalley Date: 12-05-24   Time: 9:38a

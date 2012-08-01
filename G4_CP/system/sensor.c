@@ -26,7 +26,7 @@
     Notes: 
   
     VERSION
-      $Revision: 67 $  $Date: 7/18/12 6:27p $     
+      $Revision: 68 $  $Date: 12-07-19 10:49a $     
   
 ******************************************************************************/
 
@@ -471,8 +471,6 @@ void SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary)
   FLOAT32  NewValue = SensorGetValue(pSummary->SensorIndex);
   
   // Add value to total
-  pSummary->fTotal += NewValue;
-
   pSummary->fTotal += NewValue;
 
   pSummary->fMinValue =
@@ -1841,6 +1839,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 68  *****************
+ * User: John Omalley Date: 12-07-19   Time: 10:49a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Fixed Sensor summary processing
  * 
  * *****************  Version 67  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

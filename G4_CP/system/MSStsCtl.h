@@ -11,7 +11,7 @@
     Description: MicroServer Status and Control. 
     
     VERSION
-      $Revision: 23 $  $Date: 7/26/11 3:06p $    
+      $Revision: 24 $  $Date: 7/19/12 11:07a $    
     
 ******************************************************************************/
 
@@ -49,7 +49,8 @@
                                     STA_CAUTION,               /*CBITSysCond*/\
                                     120,                /*HeartBeatStartup_s*/\
                                     3,                     /*HeartBeatLoss_s*/\
-                                    5                      /*HeartBeatLogCnt*/
+                                    5,                     /*HeartBeatLogCnt*/\
+                                    100                   /*Pri4DirMaxSizeMB*/
 
 #define MSSC_CFG_STR_MAX_LEN        64
 /******************************************************************************
@@ -99,6 +100,7 @@ typedef struct {
   UINT16     HeartBeatStartup_s;  // Heartbeat startup-timeout value in secs.
   UINT16     HeartBeatLoss_s;     // Heartbeat normal-timeout  value in secs.
   UINT8      HeartBeatLogCnt;     // Max number of timout logs to write
+  UINT16     Pri4DirMaxSizeMB;    // Size limit for the Priority 4 logs dir on the CF  
 } MSSC_CONFIG;
 
 // Fail Log for Heartbeat Timeout
@@ -106,6 +108,12 @@ typedef struct {
   BOOLEAN  operational;         // True if system in Normal mode when timeout
                                 // False if system in Startup mode when timeout
 } MSSC_HB_FAIL_LOG; 
+
+// Fail Log Micro-Server version mismatch
+// 9-chars sufficient to store nn.nn.nnl, 
+typedef struct {
+  CHAR MssimVer[9];
+} MSSC_MS_VERSION_ERR_LOG; 
 
 #pragma pack()
 
@@ -162,6 +170,11 @@ EXPORT void               MSSC_GetMsPwVer(CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.h $
+ * 
+ * *****************  Version 24  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 23  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:06p

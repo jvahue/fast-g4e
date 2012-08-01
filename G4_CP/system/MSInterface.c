@@ -15,7 +15,7 @@
                  TaskManager.h
                  
   VERSION
-      $Revision: 61 $  $Date: 11/03/10 7:03p $    
+      $Revision: 62 $  $Date: 7/19/12 11:07a $    
  
 ******************************************************************************/
 /*****************************************************************************/
@@ -147,11 +147,51 @@ void MSI_Init(void)
 /******************************************************************************
  * Function:    MSI_PutCommand
  *
+ * Description: Calls 'Ex function with NoCheck parameter false.
+ *
+ * Parameters:  [in]  Id      : Command Id
+ *              [in]  data*   : Pointer to the data buffer to transmit
+ *              [in]  size    : Size, in bytes, of the data
+ *              [in]  TO      : Message timeout in milliseconds.  If a
+ *                              response is not returned by the micro-server,
+ *                              within this timeout, a "timeout" status is
+ *                              sent to the response handler.
+ *                              A value of -1 will disable
+ *              [in]  handler*: Pointer to a response handler for the
+ *                              micro-server response.  If this parameter
+ *                              is null, the response packet is discarded
+ *                              when received.  
+ *              [in]  NoCheck  : Allow command to be sent, even if the 
+ *                               MSSIM is not alive
+ *                              
+ * Returns:     SYS_OK: Message successfully sent to the queue
+ *              SYS_SEND_BUF_FULL: Send buffer is full, try later
+ *              else See ResultCodes.h
+ * Notes:      The RspHandler callback is executed in the context of the MS
+ *             Interface task, and therefore needs to be coded to execute
+ *             quickly so the MS Interface task does not overrun its timeslot.
+ *
+ *             Ex function created to allow certian commands through w/o
+ *             heartbeat, and maintain call signature other PutCommand
+ *             callers.
+ *              
+ *****************************************************************************/
+RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+                      MSI_RSP_CALLBACK RspHandler)
+{
+  return MSI_PutCommandEx(Id,data,size,TOmS,RspHandler,FALSE);
+}
+
+
+
+/******************************************************************************
+ * Function:    MSI_PutCommandEx
+ *
  * Description: Queues a command message for transmission to
  *              the micro server.  Once the micro
  *              server processes the command it should issue a response.  The
  *              response is passed to the function pointed to by RspHandler
- *
+ *              
  *              Multiple tasks may be writing to the micro-server so
  *              mutual exclusion is necessary.
  *
@@ -167,7 +207,8 @@ void MSI_Init(void)
  *                              micro-server response.  If this parameter
  *                              is null, the response packet is discarded
  *                              when received.  
- *                              
+ *              [in]  NoCheck  : Allow command to be sent, even if the 
+ *                               MSSIM is not alive
  *                              
  * Returns:     SYS_OK: Message successfully sent to the queue
  *              SYS_SEND_BUF_FULL: Send buffer is full, try later
@@ -175,10 +216,13 @@ void MSI_Init(void)
  * Notes:      The RspHandler callback is executed in the context of the MS
  *             Interface task, and therefore needs to be coded to execute
  *             quickly so the MS Interface task does not overrun its timeslot.
+ *             Ex function created to allow certian commands through w/o
+ *             heartbeat, and maintain call signature other PutCommand
+ *             callers.
  *              
  *****************************************************************************/
-RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
-                      MSI_RSP_CALLBACK RspHandler)
+RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+                      MSI_RSP_CALLBACK RspHandler, BOOLEAN NoCheck)
 {
   CHAR ResultStr[RESULTCODES_MAX_STR_LEN];
   MSCP_CMDRSP_PACKET* Packet;
@@ -193,7 +237,7 @@ RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
   //Reject commands except for the heartbeat until the MS is declared "alive"
   //Reject all commands if the MS is not servicing the DPRAM interrupt, this
   //prevent commands from queuing up while the MS is not listening.
-  if ( ((MSSC_GetIsAlive() == TRUE) || (CMD_ID_HEARTBEAT == Id)) &&
+  if ( ((MSSC_GetIsAlive() == TRUE) || NoCheck) &&
         !m_MSIntSvcTimeout )
   {
     //Create local copy of command sequence number for reentrancy
@@ -894,6 +938,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 61  *****************
  * User: Jeff Vahue   Date: 11/03/10   Time: 7:03p

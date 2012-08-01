@@ -11,7 +11,7 @@
   Description: 
   
   VERSION
-      $Revision: 18 $  $Date: 7/29/10 11:10a $ 
+      $Revision: 19 $  $Date: 7/19/12 11:07a $ 
  
 ******************************************************************************/
 
@@ -109,9 +109,16 @@ EXPORT RESULT MSI_AddCmdHandler(UINT16 Id, MSI_CMD_CALLBACK CmdHandler);
 
 EXPORT void MSI_Init(void); 
 
+EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+                               MSI_RSP_CALLBACK RspHandler, BOOLEAN NoCheck);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 18  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a

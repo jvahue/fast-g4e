@@ -23,7 +23,7 @@
                  FILE IS UNDER THE VERSION CONTROL OF THE CONTROL PROCESSOR
 
       VERSION
-      $Revision: 41 $  $Date: 8/05/10 11:40a $    
+      $Revision: 42 $  $Date: 7/19/12 11:07a $    
 
  ******************************************************************************/
 
@@ -302,11 +302,18 @@ typedef enum
 } MSCP_TX_METHOD;
 
 //---Command ID: Start Log Data---
+/*Data Structure for pre-2.0.0 FAST Control Processor software*/
 typedef struct 
 {
     INT8    FileName[MSCP_MAX_STRING_SIZE];
-}  PACKED MSCP_LOGFILE_INFO;
+}  PACKED MSCP_LOGFILE_INFO_LEGACY;
 
+//---Command ID: Start Log Data---
+typedef struct 
+{
+    INT8    FileName[MSCP_MAX_STRING_SIZE];
+    INT32   Priority;
+}  PACKED MSCP_LOGFILE_INFO;
 
 //---Command ID: Log Data---
 typedef struct 
@@ -615,8 +622,18 @@ typedef struct
 //---Command ID: CMD_ID_GET_CP_INFO---
 typedef struct
 {
-  INT8 SN[MSCP_MAX_STRING_SIZE];
+  INT8  SN[MSCP_MAX_STRING_SIZE];
+//  CHAR  SwVer[MSCP_MAX_STRING_SIZE];
+  INT32 Pri4DirMaxSizeMB;  
 }MSCP_GET_CP_INFO_RSP;
+
+
+//---Command ID: CMD_ID_GET_CP_INFO---
+/*Data Structure for pre-2.0.0 FAST Control Processor software*/
+typedef struct
+{
+  INT8 SN[MSCP_MAX_STRING_SIZE];
+}MSCP_GET_CP_INFO_RSP_LEGACY;
 
 //---Command ID: CMD_ID_GET_MSSIM_INFO---
 typedef struct
@@ -773,9 +790,11 @@ typedef struct{
 }PACKED MSCP_CP_FILE_XFRD_CMD;
 
 typedef enum{
-  MSCP_FILE_XFRD_OK                 = 0,
-  MSCP_FILE_XFRD_CRC_FILE_EXISTS    = 1,
-  MSCP_FILE_XFRD_LOG_ALREADY_MOVED  = 2,
+  MSCP_FILE_XFRD_OK                      = 0,
+  MSCP_FILE_XFRD_CRC_FILE_EXISTS         = 1,
+  MSCP_FILE_XFRD_LOG_ALREADY_MOVED       = 2,
+  MSCP_PRI4_FILE_XFRD_OK                 = 3,
+  MSCP_PRI4_FILE_XFRD_LOG_ALREADY_MOVED  = 4,
   MSCP_FILE_XFRD_FNF                = -1,
   MSCP_FILE_XFRD_ERROR              = -2
 }MSCP_FILE_XFRD_STATUS;
@@ -885,6 +904,11 @@ typedef struct{
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSCPInterface.h $
+ * 
+ * *****************  Version 42  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 41  *****************
  * User: John Omalley Date: 8/05/10    Time: 11:40a

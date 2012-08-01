@@ -10,7 +10,7 @@
     Description: This file contains all the register definitions for the fpga.
     
 VERSION
-     $Revision: 28 $  $Date: 9/24/10 3:02p $
+     $Revision: 29 $  $Date: 7/19/12 10:42a $
     
 ******************************************************************************/
 
@@ -104,6 +104,7 @@ VERSION
 #define FPGA_429_TX2_MSW          (volatile UINT16 *)(FPGA_BASE_ADDR + 0x005C)
 
 #define FPGA_GPIO_0               (volatile UINT16 *)(FPGA_BASE_ADDR + 0x0072)
+#define FPGA_GPIO_1               (volatile UINT16 *)(FPGA_BASE_ADDR + 0x0074)
 
 #define FPGA_429_RX1_FILTER       (volatile UINT16 *)(FPGA_BASE_ADDR + 0x0100)
 #define FPGA_429_RX2_FILTER       (volatile UINT16 *)(FPGA_BASE_ADDR + 0x0300)
@@ -357,6 +358,11 @@ VERSION
 #define FPGA_GPIO_O_485_VAL        0x0
 #define FPGA_GPIO_0_CAN_OFF_VAL    0x0
 
+// GPIO 1 Bit definitions
+#define FPGA_GPIO_1_FFDI           0x4000     // Full Flight Data Inhibit offload.  
+                                              // 0 = Inhibit 
+                                              // 1 = No Inhibit
+
 // ARINC429 RX LABEL WRAP / FILTER REGISTER
 #define LFR_429_NOT_USED           B4        // Bits 15..04
 #define LFR_429_SDI_MASK3          B3
@@ -595,6 +601,11 @@ EXPORT FPGA_REG_CHECK_PTR FPGA_GetRegCheckTbl ( UINT16 *nCnt );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FPGA.h $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:42a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 28  *****************
  * User: Contractor2  Date: 9/24/10    Time: 3:02p

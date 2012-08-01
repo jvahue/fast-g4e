@@ -1,0 +1,24 @@
+
+D:\FAST_Testing\dev\CP\build>echo off 
+Converting fast.elf to fast.dld
+using S8 and S2 records
+.
+Computing and Adding CRC to fast.dld
+Input/Output File Types are SREC/SREC respectively.
+Output 1 Section image file.
+Machine is big endian with 16 bit data access.
+Section 0 size is 800000 bytes and will be output ----------------------------
+IDed address range is 0x100000..0x0, pre-filled with 0xff
+Checksum address: 0x0, size is 0 bits, operands are 32 bits
+CRC address is 0x0, the polynomial is 0x8005 and it is 32 bits.
+CRC Type is Bytewise, CRC initial value is 0xffffffff, CRC operands are 8 bits.
+Lines containing only the fill pattern will not be output.
+
+Section 0 CRC 0x4c1e390a, written to address 0x0017130c
+--- Open fast.dld output file
+Section 0 filled with 463656 (0x00071328) bytes, utilization is 57.96%
+--- Total bytes written to memory 463656 (0x00071328), utilization is 57.96%
+.
+.
+Done!
+Press any key to continue . . . 

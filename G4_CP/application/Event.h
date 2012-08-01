@@ -1,27 +1,25 @@
 #ifndef EVENT_H
 #define EVENT_H
-/**********************************************************************************************
+/*****************************************************************************
                 Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
 
     File:        event.h
 
-
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 14 $  $Date: 7/18/12 6:24p $
+  $Revision: 16 $  $Date: 12-07-27 3:03p $
 
-**********************************************************************************************/
+******************************************************************************/
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
 
-/*********************************************************************************************/
-/* Compiler Specific Includes                                                                */
-/*********************************************************************************************/
-
-/*********************************************************************************************/
-/* Software Specific Includes                                                                */
-/*********************************************************************************************/
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
 #include "actionmanager.h"
 #include "alt_basic.h"
 #include "EngineRun.h"
@@ -32,9 +30,9 @@
 #include "trigger.h"
 #include "timehistory.h"
 
-/*********************************************************************************************/
-/*                                 Package Defines                                           */
-/*********************************************************************************************/
+/******************************************************************************
+                                 Package Defines                              *
+******************************************************************************/
 /*------------------------------------  EVENT  ----------------------------------------------*/
 #define MAX_EVENTS              32      /* Total Events defined in the system           */
 #define MAX_EVENT_NAME          32      /* Maximum Length of the event name             */
@@ -44,13 +42,19 @@
 /*--------------------------------  EVENT TABLE  --------------------------------------------*/
 #define MAX_TABLES               8      /* Total Event Tables defined in the system     */
 #define MAX_REGION_SEGMENTS      6      /* Maximum number of regions per table          */
+/*-------------------------------- EVENT ACTION  --------------------------------------------*/
+#define EVENT_ACTION_ACK            0x80000000
+#define EVENT_ACTION_LATCH          0x08000000
 
+#define EVENT_ACTION_ON_DURATION(a) ( (a >> 12) & ACTION_ALL )
+#define EVENT_ACTION_ON_MET(a)      ( a & ACTION_ALL )
+#define EVENT_ACTION_CHK_ACK(a)     (( a & EVENT_ACTION_ACK)   ? TRUE : FALSE)
+#define EVENT_ACTION_CHK_LATCH(a)   (( a & EVENT_ACTION_LATCH) ? TRUE : FALSE)
 /*---------------------------- EVENT CONFIGURATION DEFAULT ----------------------------------*/
 #define EVENT_DEFAULT              "Unused",              /* &EventName[MAX_EVENT_NAME] */\
                                    "None",                /* Event ID - Code            */\
                                    EV_1HZ,                /* Event Rate                 */\
                                    0,                     /* Event Offset               */\
-                                   ENGRUN_UNUSED,         /* Engine Run ID              */\
                                    EVAL_EXPR_CFG_DEFAULT, /* Start Expression           */\
                                    EVAL_EXPR_CFG_DEFAULT, /* End Expression             */\
                                    0,                     /* Minimum Duration           */\
@@ -60,7 +64,7 @@
                                    0,                     /* Pre Time History Time Sec  */\
                                    TH_NONE,               /* Post Time History          */\
                                    0,                     /* Post Time History Time Sec */\
-                                   LOG_PRIORITY_LOW,      /* Log Priority               */\
+                                   LOG_PRIORITY_3,        /* Log Priority               */\
                                    EVENT_TABLE_UNUSED     /* Event Table                */
 
 #define EVENT_CONFIG_DEFAULT       EVENT_DEFAULT,\
@@ -127,9 +131,9 @@
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT
 
-/*********************************************************************************************/
-/*                                   Package Typedefs                                        */
-/*********************************************************************************************/
+/******************************************************************************
+                                 Package Typedefs                             *
+******************************************************************************/
 typedef enum
 {
    EVENT_0   =   0, EVENT_1   =   1, EVENT_2   =   2, EVENT_3   =   3,
@@ -194,47 +198,46 @@ typedef enum
 /* The following structure contains the event configuration information */
 typedef struct
 {
-   INT8                EventName[MAX_EVENT_NAME];   /* the name of the event             */
-   INT8                EventID  [MAX_EVENT_ID];     /* 4 char cfg id for the event       */
-   EVENT_RATE          Rate;                        /* Rate to run the event             */
+   INT8                sEventName[MAX_EVENT_NAME];  /* the name of the event             */
+   INT8                sEventID  [MAX_EVENT_ID];    /* 4 char cfg id for the event       */
+   EVENT_RATE          rate;                        /* Rate to run the event             */
    UINT16              nOffset_ms;                  /* Offset from 0 to start the event  */
-   ENGRUN_INDEX        EngineId;                    /* Engine ID Related to the event    */
-   EVAL_EXPR           StartExpr;                   /* RPN Expression to start the event */
-   EVAL_EXPR           EndExpr;                     /* RPN Expression to end the event   */
+   EVAL_EXPR           startExpr;                   /* RPN Expression to start the event */
+   EVAL_EXPR           endExpr;                     /* RPN Expression to end the event   */
    UINT32              nMinDuration_ms;             /* Min duration start expression     */
                                                     /* must be met before becoming ACTIVE*/
-   UINT32              Action;                      /* Bit encoded action flags          */
-   BITARRAY128         SensorMap;                   /* Bit encoded flags of sensors to   */
-                                                    /* sample during the event */
-   TIMEHISTORY_TYPE    PreTimeHistory;              /* Type of previous time history to  */
+   UINT32              nAction;                     /* Bit encoded action flags          */
+   BITARRAY128         sensorMap;                   /* Bit encoded flags of sensors to   */
+                                                    /* sample during the event           */
+   TIMEHISTORY_TYPE    preTimeHistory;              /* Type of previous time history to  */
                                                     /* take; NONE, ALL, OR PORTION       */
-   UINT16              PreTime_s;                   /* PORTION Amount of time history    */
-   TIMEHISTORY_TYPE    PostTimeHistory;             /* Type of post time history to      */
+   UINT16              preTime_s;                   /* PORTION Amount of time history    */
+   TIMEHISTORY_TYPE    postTimeHistory;             /* Type of post time history to      */
                                                     /* take; NONE, ALL, OR PORTION       */
-   UINT16              PostTime_s;                  /* PORTION Amount of time history    */
-   LOG_PRIORITY        Priority;                    /* Priority to write the event log   */
-   EVENT_TABLE_INDEX   EventTableIndex;             /* Related Event Table to process    */
+   UINT16              postTime_s;                  /* PORTION Amount of time history    */
+   LOG_PRIORITY        priority;                    /* Priority to write the event log   */
+   EVENT_TABLE_INDEX   eventTableIndex;             /* Related Event Table to process    */
 }EVENT_CFG;
 
 /* The following structure defines the START LOG for the event                           */
 typedef struct
 {
-   UINT16     EventIndex;                           /* Event Index for start log         */
-   TIMESTAMP  StartTime;                            /* Time when the event started       */
+   UINT16     nEventIndex;                          /* Event Index for start log         */
+   TIMESTAMP  tsStartTime;                          /* Time when the event started       */
 } EVENT_START_LOG;
 
 /* End Log definition for the event                                                      */
 typedef struct
 {
-   UINT16          EventIndex;                      /* Event Index                       */
-   EVENT_END_TYPE  EndType;                         /* Reason for the event ending       */
-   TIMESTAMP       CriteriaMetTime;                 /* Time the start criteria was met   */
-   TIMESTAMP       DurationMetTime;                 /* Time when the min duration was met*/
+   UINT16          nEventIndex;                     /* Event Index                       */
+   EVENT_END_TYPE  endType;                         /* Reason for the event ending       */
+   TIMESTAMP       tsCriteriaMetTime;               /* Time the start criteria was met   */
+   TIMESTAMP       tsDurationMetTime;               /* Time when the min duration was met*/
    UINT32          nDuration_ms;                    /* Length of the event from start    */
                                                     /* criteria being met until event end*/
-   TIMESTAMP       EndTime;                         /* Time when the event ended         */
+   TIMESTAMP       tsEndTime;                       /* Time when the event ended         */
    UINT16          nTotalSensors;                   /* Total sensors sampled by event    */
-   SNSR_SUMMARY    Sensor[MAX_EVENT_SENSORS];       /* Sensor Summary                    */
+   SNSR_SUMMARY    sensor[MAX_EVENT_SENSORS];       /* Sensor Summary                    */
 } EVENT_END_LOG;
 #pragma pack()
 
@@ -242,25 +245,22 @@ typedef struct
 typedef struct
 {
    // Run Time Data
-   EVENT_INDEX        EventIndex;                   /* Index of the event                */
-   EVENT_STATE        State;                        /* State of the event: NONE, START   */
+   EVENT_INDEX        eventIndex;                   /* Index of the event                */
+   EVENT_STATE        state;                        /* State of the event: NONE, START   */
                                                     /*                     ACTIVE        */
    UINT32             nStartTime_ms;                /* Time the event started in millisec*/
    UINT32             nDuration_ms;                 /* Duration of event in millisec     */
-   TIMESTAMP          CriteriaMetTime;              /* Time the start criteria was met   */
-   TIMESTAMP          DurationMetTime;              /* Time the duration was met         */
-   TIMESTAMP          EndTime;                      /* Time the event ended              */
+   TIMESTAMP          tsCriteriaMetTime;            /* Time the start criteria was met   */
+   TIMESTAMP          tsDurationMetTime;            /* Time the duration was met         */
+   TIMESTAMP          tsEndTime;                    /* Time the event ended              */
    UINT32             nSampleCount;                 /* Sensor sample count for calc avg  */
    UINT16             nTotalSensors;                /* Total sensors being sampled       */
-   SNSR_SUMMARY       Sensor[MAX_EVENT_SENSORS];    /* Array to store sampling results   */
+   SNSR_SUMMARY       sensor[MAX_EVENT_SENSORS];    /* Array to store sampling results   */
    UINT16             nRateCounts;                  /* Number of counts between process  */
    UINT16             nRateCountdown;               /* Countdown until next processing   */
-   BOOLEAN            bStartCompareFail;            /* TBD                               */
-   BOOLEAN            bEndCompareFail;              /* TBD                               */
-   ACTION_TYPE        ActionType;                   /* Type of action being requested    */
-                                                    /* ON_MET or ON_DURATION             */
-   INT8               ActionReqNum;                 /* Number used to id action request  */
-   EVENT_END_TYPE     EndType;                      /* Reason for the event ending       */
+   INT8               nActionReqNum;                /* Number used to id action request  */
+   EVENT_END_TYPE     endType;                      /* Reason for the event ending       */
+   BOOLEAN            bStarted;                     /* Was the Start Criteria met?       */
 } EVENT_DATA;
 
 //A type for an array of the maximum number of events
@@ -272,18 +272,18 @@ typedef EVENT_CFG EVENT_CONFIGS[MAX_EVENTS];
 /* This structure defines the line segments used to define regions                       */
 typedef struct
 {
-   FLOAT32 StartValue;                               /* y value where line starts        */
-   UINT32  StartTime_s;                              /* x value where line starts        */
-   FLOAT32 StopValue;                                /* y value where line ends          */
-   UINT32  StopTime_s;                               /* x value where line ends          */
+   FLOAT32 fStartValue;                              /* y value where line starts        */
+   UINT32  nStartTime_s;                             /* x value where line starts        */
+   FLOAT32 fStopValue;                               /* y value where line ends          */
+   UINT32  nStopTime_s;                              /* x value where line ends          */
 } SEGMENT_DEF;
 
 /* This structure defines the region using line segments and event action                */
 typedef struct
 {
-   SEGMENT_DEF  Segment[MAX_REGION_SEGMENTS];       /* Definition of the segments for    */
+   SEGMENT_DEF  segment[MAX_REGION_SEGMENTS];       /* Definition of the segments for    */
                                                     /* the region                        */
-   UINT32       Action;                             /* Bit encode action to take when    */
+   UINT32       nAction;                            /* Bit encode action to take when    */
                                                     /* in a region                       */
 } REGION_DEF;
 
@@ -291,49 +291,64 @@ typedef struct
 typedef struct
 {
    SENSOR_INDEX nSensor;                            /* Index of sensor to monitor        */
-   FLOAT32      TableEntryValue;                    /* Value that must be reached to     */
+   FLOAT32      fTableEntryValue;                   /* Value that must be reached to     */
                                                     /* enter the table                   */
-   FLOAT32      HysteresisPos;                      /* Hysteresis value to exceed when   */
+   FLOAT32      fHysteresisPos;                     /* Hysteresis value to exceed when   */
                                                     /* entering the region from a lower  */
                                                     /* region                            */
-   FLOAT32      HysteresisNeg;                      /* Hysteresis value to exceed when   */
+   FLOAT32      fHysteresisNeg;                     /* Hysteresis value to exceed when   */
                                                     /* entering the region from a        */
                                                     /* higher region                     */
-   UINT32       TransientAllowance_ms;              /* Amount of time in milliseconds    */
+   UINT32       nTransientAllowance_ms;             /* Amount of time in milliseconds    */
                                                     /* a region must entered for before  */
                                                     /* confirming the entry              */
-   REGION_DEF   Region[MAX_TABLE_REGIONS];          /* Definition of the regions         */
+   REGION_DEF   region[MAX_TABLE_REGIONS];          /* Definition of the regions         */
 } EVENT_TABLE_CFG;
 
 /* Region statistics to be reported                                                      */
 typedef struct
 {
-   UINT32 EnteredCount;                             /* Count of enteries into a region   */
-   UINT32 ExitCount;                                /* Count of exits from a region      */
-   UINT32 Duration_ms;                              /* Amount of time spent in region    */
+   UINT32 nEnteredCount;                            /* Count of enteries into a region   */
+   UINT32 nExitCount;                               /* Count of exits from a region      */
+   UINT32 nDuration_ms;                             /* Amount of time spent in region    */
 } REGION_LOG_STATS;
 
 /* Runtime statistics to determine where we are in the table                             */
 typedef struct
 {
-   UINT32           EnteredTime;                    /* Time the region was entered       */
-   BOOLEAN          RegionConfirmed;                /* Flag if we confirmed region entry */
-   REGION_LOG_STATS LogStats;                       /* Statistics for the log            */
+   UINT32           nEnteredTime;                   /* Time the region was entered       */
+   BOOLEAN          bRegionConfirmed;               /* Flag if we confirmed region entry */
+   REGION_LOG_STATS logStats;                       /* Statistics for the log            */
 } REGION_STATS;
+
+/* Event Table Region Transition Log */
+typedef struct
+{
+   EVENT_REGION     confirmed;                      /* Confirmed Region                  */
+   EVENT_REGION     previousRegion;                 /* Exited region                     */
+   REGION_LOG_STATS previous;                       /* Exited region log stats           */
+                                                    /* - Entered Count                   */
+                                                    /* - Exited Count                    */
+                                                    /* - Duration in Exited Region       */
+   EVENT_REGION     maximumRegionEntered;           /* Maximum Region Reached            */
+   FLOAT32          fMaxSensorValue;                /* Maximum value the sensor reached  */
+   UINT32           nMaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
+} EVENT_TABLE_TRANSITION_LOG;
+
 
 /* Event Table summary log                                                               */
 typedef struct
 {
-   EVENT_TABLE_INDEX EventTableIndex;               /* Index of the event table          */
-   SENSOR_INDEX      SensorIndex;                   /* Index of the sensor monitored     */
-   TIMESTAMP         ExceedanceStartTime;           /* Time the table was entered        */
-   TIMESTAMP         ExceedanceEndTime;             /* Time the table processing ended   */
-   UINT32            Duration_ms;                   /* Total duration in the table       */
-   EVENT_REGION      MaximumRegionEntered;          /* Maximum region reached            */
-   FLOAT32           MaxSensorValue;                /* Maximum value the sensor reached  */
-   UINT32            MaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
-   EVENT_REGION      MaximumCfgRegion;              /* Maximum configured region         */
-   REGION_LOG_STATS  RegionStats[MAX_TABLE_REGIONS];/* Enter, Exit and Duration of Regs  */
+   EVENT_TABLE_INDEX eventTableIndex;               /* Index of the event table          */
+   SENSOR_INDEX      sensorIndex;                   /* Index of the sensor monitored     */
+   TIMESTAMP         tsExceedanceStartTime;         /* Time the table was entered        */
+   TIMESTAMP         tsExceedanceEndTime;           /* Time the table processing ended   */
+   UINT32            nDuration_ms;                  /* Total duration in the table       */
+   EVENT_REGION      maximumRegionEntered;          /* Maximum region reached            */
+   FLOAT32           fMaxSensorValue;               /* Maximum value the sensor reached  */
+   UINT32            nMaxSensorElaspedTime_ms;      /* Time max sensor was reached       */
+   EVENT_REGION      maximumCfgRegion;              /* Maximum configured region         */
+   REGION_LOG_STATS  regionStats[MAX_TABLE_REGIONS];/* Enter, Exit and Duration of Regs  */
 } EVENT_TABLE_SUMMARY_LOG;
 #pragma pack()
 
@@ -347,56 +362,55 @@ typedef struct
 /* Runtime data object for the event table data                                          */
 typedef struct
 {
-   BOOLEAN      Started;                            /* Has the table been entered        */
-   UINT32       StartTime_ms;                       /* When was the table entered        */
-   LINE_CONST   Segment[MAX_TABLE_REGIONS][MAX_REGION_SEGMENTS];
+   BOOLEAN      bStarted;                           /* Has the table been entered        */
+   UINT32       nStartTime_ms;                      /* When was the table entered        */
+   LINE_CONST   segment[MAX_TABLE_REGIONS][MAX_REGION_SEGMENTS];
                                                     /* constants used to calculate the   */
                                                     /* line thresholds                   */
-   EVENT_REGION CurrentRegion;                      /* Current Region the sensor is in   */
-   EVENT_REGION ConfirmedRegion;                    /* Region the sensor has been        */
+   EVENT_REGION currentRegion;                      /* Current Region the sensor is in   */
+   EVENT_REGION confirmedRegion;                    /* Region the sensor has been        */
                                                     /* confirmed in, exceed transient    */
-   TIMESTAMP    ExceedanceStartTime;                /* Time the table was entered        */
-   TIMESTAMP    ExceedanceEndTime;                  /* Time the table processing ended   */
-   UINT32       TotalDuration_ms;                   /* Total Time spent in the table     */
-   EVENT_REGION MaximumRegionEntered;               /* Max region reached while in table */
-   FLOAT32      CurrentSensorValue;                 /* Current value of the sensor       */
-   FLOAT32      MaxSensorValue;                     /* Max value the sensor reached      */
-   UINT32       MaxSensorElaspedTime_ms;            /* Time the max value was reached    */
-   EVENT_REGION MaximumCfgRegion;                   /* Maximum configured region         */
-   REGION_STATS RegionStats[MAX_TABLE_REGIONS];     /* Stats for each region             */
-   INT8         ActionReqNum;
+   TIMESTAMP    tsExceedanceStartTime;              /* Time the table was entered        */
+   TIMESTAMP    tsExceedanceEndTime;                /* Time the table processing ended   */
+   UINT32       nTotalDuration_ms;                  /* Total Time spent in the table     */
+   EVENT_REGION maximumRegionEntered;               /* Max region reached while in table */
+   FLOAT32      fCurrentSensorValue;                /* Current value of the sensor       */
+   FLOAT32      fMaxSensorValue;                    /* Max value the sensor reached      */
+   UINT32       nMaxSensorElaspedTime_ms;           /* Time the max value was reached    */
+   EVENT_REGION maximumCfgRegion;                   /* Maximum configured region         */
+   REGION_STATS regionStats[MAX_TABLE_REGIONS];     /* Stats for each region             */
+   INT8         nActionReqNum;
 } EVENT_TABLE_DATA;
 
 //A type for an array of the maximum number of event tables
 //Used for storing event table configurations in the configuration manager
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 
-/**********************************************************************************************
-                                      Package Exports
-**********************************************************************************************/
+/******************************************************************************
+                                 Package Exports                              *
+******************************************************************************/
 #undef EXPORT
-
 #if defined( EVENT_BODY )
-#define EXPORT
+   #define EXPORT
 #else
-#define EXPORT extern
+   #define EXPORT extern
 #endif
 
 #if defined ( EVENT_BODY )
-// Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
-USER_ENUM_TBL EVT_Region_UserEnumType [] =
-{ { "NONE",             REGION_NOT_FOUND    },
-  { "REGION_A",         REGION_A            },
-  { "REGION_B",         REGION_B            },
-  { "REGION_C",         REGION_C            },
-  { "REGION_D",         REGION_D            },
-  { "REGION_E",         REGION_E            },
-  { "REGION_F",         REGION_F            },
-  { "MAX_REGIONS",      MAX_TABLE_REGIONS   },
-  { NULL,          0                        }
-};
+   // Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
+   USER_ENUM_TBL evt_Region_UserEnumType [] =
+   { { "NONE",             REGION_NOT_FOUND    },
+     { "REGION_A",         REGION_A            },
+     { "REGION_B",         REGION_B            },
+     { "REGION_C",         REGION_C            },
+     { "REGION_D",         REGION_D            },
+     { "REGION_E",         REGION_E            },
+     { "REGION_F",         REGION_F            },
+     { "MAX_REGIONS",      MAX_TABLE_REGIONS   },
+     { NULL,          0                        }
+   };
 #else
-EXPORT USER_ENUM_TBL EVT_Region_UserEnumType[];
+   EXPORT USER_ENUM_TBL evt_Region_UserEnumType[];
 #endif
 /**********************************************************************************************
                                   Package Exports Variables
@@ -412,11 +426,16 @@ EXPORT void EventTablesInitialize  ( void );
  *  MODIFICATIONS
  *    $History: Event.h $
  * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Action Manager Persistent Updates
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Refactor for common Sensor Summary
- * 
+ *
  * *****************  Version 13  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:26a
  * Updated in $/software/control processor/code/application
@@ -495,7 +514,7 @@ EXPORT void EventTablesInitialize  ( void );
  *
  *
  *********************************************************************************************/
-#endif  /* EVENT_H */
+#endif  // EVENT_H
 
 
 

@@ -12,7 +12,7 @@
                   events.
 
    VERSION
-   $Revision: 104 $  $Date: 3/21/12 6:46p $
+   $Revision: 105 $  $Date: 7/26/12 2:08p $
 
 
 ******************************************************************************/
@@ -651,7 +651,7 @@ void FAST_Task(void* pParam)
   FASTStatus.LogTransferToGSActive =
     ( (!FASTStatus.IsVPNConnected && 
        (CM_GetTickCount() < FASTStatus.LogTransferToGSNoVPNTO) ) ||
-      (FASTStatus.IsVPNConnected && (UploadMgr_GetFilesPendingRoundTrip() != 0) ) );
+      (FASTStatus.IsVPNConnected && (UploadMgr_GetFilesPendingRT() != 0) ) );
 
     FAST_DioControl();
 }
@@ -1360,7 +1360,7 @@ void FAST_TxTestTask(void* pParam)
           //After upload, record the number of files waiting for round trip        
           snprintf(m_FastTxTest.MoveLogsStr,sizeof(m_FastTxTest.MoveLogsStr),
               "MoveLogsToGround 00%%");
-          NumFilesPendingRoundTrip = UploadMgr_GetNumFilesPendingRoundTrip();
+          NumFilesPendingRoundTrip = UploadMgr_GetNumFilesPendingRT();
           //Preventing div/0
           NumFilesPendingRoundTrip = NumFilesPendingRoundTrip == 0 ?
             1 : NumFilesPendingRoundTrip;
@@ -1369,7 +1369,7 @@ void FAST_TxTestTask(void* pParam)
       }
       else
       {
-        NumFilesStillPendingRoundTrip = UploadMgr_GetNumFilesPendingRoundTrip();
+        NumFilesStillPendingRoundTrip = UploadMgr_GetNumFilesPendingRT();
         snprintf(m_FastTxTest.MoveLogsStr,sizeof(m_FastTxTest.MoveLogsStr),
             "MoveLogsToGround %02d%%",
             PERCENT_CONST - (NumFilesStillPendingRoundTrip * PERCENT_CONST)/
@@ -1466,6 +1466,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 105  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 2:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1076 Code Review Updates
  * 
  * *****************  Version 104  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:46p

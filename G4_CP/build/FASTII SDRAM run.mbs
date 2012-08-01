@@ -1,0 +1,51 @@
+// MULTI setup script for M5485EVB board
+
+target rst
+
+// uncomment for INTEGRITY: don't have the debug server intercept syscalls
+// target syscalls off
+
+// Invalidate branch and instruction caches
+eval $CACR = 0x01040100
+
+eval $MBAR = 0x80000000
+eval $VBR = 0x30000000
+eval $RAMBAR = 0xf2000021
+eval $RAMBAR1 = 0xf2001021
+
+// Init CS0 - Program Flash 
+memwrite 4 0x80000500 0x00000000 //CSAR0 - Base address = 0x0000 0000
+memwrite 4 0x80000508 0x003f2920 //CSCR0 - CS control reg
+memwrite 4 0x80000504 0x01FF0001 //CSMR0 - CS mask reg
+
+// Init CS1 - Data Flash
+memwrite 4 0x8000050C 0x10000000 //CSAR1 -  Base address = 0x1000 0000
+memwrite 4 0x80000514 0x0000FD00 //CSCR1 -  CS control reg
+memwrite 4 0x80000510 0x0FFF0001 //CSMR1 -  CS Mask reg
+
+// Init CS2 - Dual-Port RAM
+memwrite 4 0x80000518 0x40100000 //CSAR2
+memwrite 4 0x80000520 0x000001a0 //CSCR2
+memwrite 4 0x8000051C 0x00000001 //CSMR2
+
+// Init CS3 - FPGA
+memwrite 4 0x80000524 0x40000000 //CSAR3 - Base address = 0x4000 0000
+memwrite 4 0x8000052C 0x000011C0 //CSCR3
+memwrite 4 0x80000528 0x00000001 //CSMR3
+
+
+// SDRAM Initialization
+// Setup 32MB of SDRAM at 0x3000 0000
+memwrite 4 0x80000004 0x000002AA //SDRAMDS 
+memwrite 4 0x80000020 0x30000018 //CS0CFG
+memwrite 4 0x80000108 0x73611730 //SDCFG1  
+memwrite 4 0x8000010C 0x46770000 //SDCFG2  
+memwrite 4 0x80000104 0xE0170002 //SDCR
+memwrite 4 0x80000100 0x40010000 //SDMR
+memwrite 4 0x80000100 0x048D0000 //SDMR
+memwrite 4 0x80000104 0xE0170002 //SDCR
+memwrite 4 0x80000104 0xE0170006 //SDCR
+memwrite 4 0x80000104 0xE0170006 //SDCR
+memwrite 4 0x80000100 0x008D0000 //SDMR
+memwrite 4 0x80000104 0x70170F06 //SDCR
+

@@ -7,7 +7,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 1 $  $Date: 12-07-17 11:32a $
+$Revision: 3 $  $Date: 12-07-27 3:03p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -49,50 +49,56 @@ USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr );
+USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
+                                       USER_MSG_PARAM Param,
+                                       UINT32 Index,
+                                       const void *SetPtr,
+                                       void **GetPtr);
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static ACTION_CFG    ConfigActionTemp; // Action temp Storage
-static ACTION_OUTPUT ConfigOutputTemp;
-static ACTION_DATA   StateActionTemp;  // Action State Temp Storage
+static ACTION_CFG    configActionTemp; // Action temp Storage
+static ACTION_OUTPUT configOutputTemp;
+static ACTION_DATA   stateActionTemp;  // Action State Temp Storage
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-static USER_MSG_TBL ActionOutCmd [] =
+static USER_MSG_TBL actionOutCmd [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange                  DataLimit   EnumTbl*/
-   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &ConfigOutputTemp.UsedMask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
-   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &ConfigOutputTemp.LSS_Mask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
+   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nUsedMask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
+   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nLSS_Mask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
-static USER_MSG_TBL ActionCmd [] =
+static USER_MSG_TBL actionCmd [] =
 {
-   /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange              DataLimit   EnumTbl*/
-   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &ConfigActionTemp.ACKTrigger,              -1,-1,                  NO_LIMIT,   TriggerIndexType },
-   { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &ConfigActionTemp.Persist.bEnabled,        -1,-1,                  NO_LIMIT,   NULL },
-   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &ConfigActionTemp.Persist.Output.UsedMask, -1,-1,                  NO_LIMIT,   NULL },
-   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &ConfigActionTemp.Persist.Output.LSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
-   { "OUTPUT",            ActionOutCmd,      NULL,              NO_HANDLER_DATA },
+   /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                   IndexRange              DataLimit   EnumTbl*/
+   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                  NO_LIMIT,   TriggerIndexType },
+   { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &configActionTemp.persist.bEnabled,         -1,-1,                  NO_LIMIT,   NULL },
+   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  NO_LIMIT,   NULL },
+   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
+   { "OUTPUT",            actionOutCmd,      NULL,              NO_HANDLER_DATA },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
-static USER_MSG_TBL ActionStatus [] =
+static USER_MSG_TBL actionStatus [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange              DataLimit   EnumTbl*/
    { NULL          ,      NO_NEXT_TABLE,     NULL,              USER_TYPE_NONE,    USER_RW, NULL,                                      0,(MAX_TABLES-1),       NO_LIMIT,   NULL },
 };
 
-static USER_MSG_TBL ActionRoot [] =
-{ /* Str                  Next Tbl Ptr       Handler Func.      Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
-   { "CFG",               ActionCmd,         NULL,              NO_HANDLER_DATA},
-   { "STATUS",            ActionStatus,      NULL,              NO_HANDLER_DATA},
-   { DISPLAY_CFG,         NO_NEXT_TABLE,     Action_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
-   { NULL,                NULL,              NULL,              NO_HANDLER_DATA}
+static USER_MSG_TBL actionRoot [] =
+{ /* Str                     Next Tbl Ptr       Handler Func.      Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
+   { "CFG",                  actionCmd,         NULL,              NO_HANDLER_DATA},
+   { "STATUS",               actionStatus,      NULL,              NO_HANDLER_DATA},
+   { "CLEAR_LATCH",          NO_NEXT_TABLE,     Action_ClearLatch, USER_TYPE_ACTION,  USER_RO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,            NO_NEXT_TABLE,     Action_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { NULL,                   NULL,              NULL,              NO_HANDLER_DATA}
 };
 
 static
-USER_MSG_TBL    RootActionMsg = {"ACTION", ActionRoot, NULL, NO_HANDLER_DATA};
+USER_MSG_TBL    rootActionMsg = {"ACTION", actionRoot, NULL, NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
 
@@ -136,20 +142,20 @@ USER_HANDLER_RESULT Action_UserCfg ( USER_DATA_TYPE DataType,
    //Load Event Table structure into the temporary location based on index param
    //Param.Ptr points to the struct member to be read/written
    //in the temporary location
-   memcpy(&ConfigActionTemp,
+   memcpy(&configActionTemp,
           &CfgMgr_ConfigPtr()->ActionConfig,
-          sizeof(ConfigActionTemp));
+          sizeof(configActionTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    if(SetPtr != NULL && USER_RESULT_OK == result)
    {
      memcpy(&CfgMgr_ConfigPtr()->ActionConfig,
-            &ConfigActionTemp,
+            &configActionTemp,
             sizeof(ACTION_CFG));
      //Store the modified temporary structure in the EEPROM.
      CfgMgr_StoreConfigItem( CfgMgr_ConfigPtr(),
                              &CfgMgr_ConfigPtr()->ActionConfig,
-                             sizeof(ConfigActionTemp));
+                             sizeof(configActionTemp));
    }
    return result;
 }
@@ -190,20 +196,20 @@ USER_HANDLER_RESULT ActionOut_UserCfg ( USER_DATA_TYPE DataType,
    //Load Event Table structure into the temporary location based on index param
    //Param.Ptr points to the struct member to be read/written
    //in the temporary location
-   memcpy(&ConfigOutputTemp,
-          &CfgMgr_ConfigPtr()->ActionConfig.Output[Index],
-          sizeof(ConfigOutputTemp));
+   memcpy(&configOutputTemp,
+          &CfgMgr_ConfigPtr()->ActionConfig.output[Index],
+          sizeof(configOutputTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    if(SetPtr != NULL && USER_RESULT_OK == result)
    {
-     memcpy(&CfgMgr_ConfigPtr()->ActionConfig.Output[Index],
-            &ConfigOutputTemp,
-            sizeof(ConfigOutputTemp));
+     memcpy(&CfgMgr_ConfigPtr()->ActionConfig.output[Index],
+            &configOutputTemp,
+            sizeof(configOutputTemp));
      //Store the modified temporary structure in the EEPROM.
      CfgMgr_StoreConfigItem( CfgMgr_ConfigPtr(),
-                             &CfgMgr_ConfigPtr()->ActionConfig.Output[Index],
-                             sizeof(ConfigOutputTemp));
+                             &CfgMgr_ConfigPtr()->ActionConfig.output[Index],
+                             sizeof(configOutputTemp));
    }
    return result;
 }
@@ -238,36 +244,65 @@ USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
                                         const void *SetPtr,
                                         void **GetPtr)
 {
-   CHAR  LabelStem[] = "\r\n\r\nACTION.CFG";
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
+   CHAR  sLabelStem[] = "\r\n\r\nACTION.CFG";
+   CHAR  sLabel[USER_MAX_MSG_STR_LEN * 3];
    INT16 i;
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    USER_MSG_TBL*  pCfgTable;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR sBranchName[USER_MAX_MSG_STR_LEN] = " ";
 
-   pCfgTable = &ActionCmd[0];  // Get pointer to config entry
+   pCfgTable = &actionCmd[0];  // Get pointer to config entry
 
    for (i = 0; i < MAX_TABLES && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
-      sprintf(Label, "%s[%d]", LabelStem, i);
+      sprintf(sLabel, "%s[%d]", sLabelStem, i);
 
       result = USER_RESULT_ERROR;
-      if ( User_OutputMsgString( Label, FALSE ) )
+      if ( User_OutputMsgString( sLabel, FALSE ) )
       {
-         result = User_DisplayConfigTree(BranchName, pCfgTable, i, 0, NULL);
+         result = User_DisplayConfigTree(sBranchName, pCfgTable, i, 0, NULL);
       }
    }
    return result;
+}
+
+/******************************************************************************
+ * Function:     ActionClearLatch
+ *
+ * Description:  Reset the persistent latch for the action manager.
+ *
+ * Parameters:   See user.h command handler prototype
+ *
+ * Returns:      OK:  successfully
+ *
+ * Notes:        None
+ *****************************************************************************/
+USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
+                                       USER_MSG_PARAM Param,
+                                       UINT32 Index,
+                                       const void *SetPtr,
+                                       void **GetPtr)
+{
+  USER_HANDLER_RESULT result = USER_RESULT_OK;
+
+  ActionResetNVPersist();
+
+  return result;
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
  * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Action Manager Persistent Updates
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:32a
  * Created in $/software/control processor/code/system

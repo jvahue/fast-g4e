@@ -13,7 +13,7 @@
                  to this module.
 
    VERSION
-    $Revision: 56 $  $Date: 7/11/12 4:36p $
+    $Revision: 58 $  $Date: 12-07-27 3:02p $
 
 ******************************************************************************/
 
@@ -85,7 +85,7 @@
 //        Id          Size      Size Offset      Timeout Reset    Read        Write
 #define NV_DEV_LIST \
 NV_DEV(DEV_NONE,      1,        1,   0,          0,      0,       NULL,       NULL),        \
-NV_DEV(DEV_RTC_PRI,   256,      16,  0,          5,      0,       NV_RTCRead, NV_RTCWrite), \
+NV_DEV(DEV_RTC_PRI,   256,      8,   0,          5,      0,       NV_RTCRead, NV_RTCWrite), \
 NV_DEV(DEV_EE_PRI,    (128 KB), 256, 0,          10,     0xFF,    NV_EERead,  NV_EEWrite),  \
 NV_DEV(DEV_EE_BKUP,   (128 KB), 256, 0x10000000, 10,     0xFF,    NV_EERead,  NV_EEWrite)
 
@@ -144,6 +144,8 @@ NV_LOG_COUNTS      - Saves the errors counts during log manager operations
 NV_UART_EMU150     - Uart EMU150 Protocol application non-volatile data
 NV_PCYCLE_CNTS_EE  - Persisted Cycle Counts EE
 NV_PCYCLE_CNTS_RTC - Persisted Cycle Counts RTC Ram
+NV_ACT_STATUS_RTC  - Persistent Action Status
+NV_ACT_STATUS_EE   - Persistent Action Status
 */
 
 #undef NV_FILE
@@ -156,7 +158,7 @@ NV_FILE(NV_BOX_CFG,        "Status Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_PWR_ON_CNTS_EE, "Power-On Counts EE",   DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_PWR_ON_CNTS_RTC,"Power-On Counts RTC",  DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      16), \
 NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (84 KB)),\
-NV_FILE(NV_UPLOAD_VFY_TBL, "Upload Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  UploadMgr_InitFileVfyTbl,  (32 KB)),\
+NV_FILE(NV_UPLOAD_VFY_TBL, "Upload Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  UploadMgr_InitFileVfyTbl,    18176),\
 NV_FILE(NV_FAULT_LOG,      "Fault Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Flt_InitFltBuf          ,      256),\
 NV_FILE(NV_PWR_MGR,        "Power Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  PmFileInit              ,      256),\
 NV_FILE(NV_ASSERT_LOG,     "Exception Log",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  Assert_InitEE           ,   (2 KB)),\
@@ -165,10 +167,12 @@ NV_FILE(NV_UART_F7X,       "Uart F7X Data",        DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_VER_INFO,       "Version Info",         DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_LOG_ERASE,      "Log Erase Status",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_AC_CFG,         "Recfg Sensor Val",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  AC_FileInit             ,     256), \
-NV_FILE(NV_LOG_COUNTS,     "Log Error Counts",     DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      32), \
+NV_FILE(NV_LOG_COUNTS,     "Log Error Counts",     DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      24), \
 NV_FILE(NV_UART_EMU150,    "Uart EMU150 Data",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, EMU150_FileInit         ,   (6 KB)),\
 NV_FILE(NV_PCYCLE_CNTS_EE, "P-Cycle Counts EE",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
-NV_FILE(NV_PCYCLE_CNTS_RTC,"P-Cycle Counts RTC",   DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,     208)
+NV_FILE(NV_PCYCLE_CNTS_RTC,"P-Cycle Counts RTC",   DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,     198),\
+NV_FILE(NV_ACT_STATUS_RTC, "Action Status RTC",    DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,       8),\
+NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256)
 
 
 /******************************************************************************
@@ -384,6 +388,16 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 58  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:02p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Action Manager Persistent updates
+ * 
+ * *****************  Version 57  *****************
+ * User: Jim Mood     Date: 7/27/12    Time: 10:06a
+ * Updated in $/software/control processor/code/system
+ * SCR 1138
  * 
  * *****************  Version 56  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:36p

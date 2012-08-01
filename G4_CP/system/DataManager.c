@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 75 $  $Date: 10/27/11 8:57a $ 
+      $Revision: 76 $  $Date: 7/19/12 11:07a $ 
     
 ******************************************************************************/
 
@@ -30,6 +30,7 @@
 #include "Utility.h"
 #include "gse.h"
 #include "Assert.h"
+#include "LogManager.h"
 
 /*****************************************************************************/
 /* Local Defines                                                             */
@@ -151,7 +152,10 @@ void DataMgrIntialize(void)
 /******************************************************************************
  * Function:    DataMgrGetACSDataSet
  *
- * Description: Return the contents of the ACS Data Configuration.
+ * Description: Return the contents of the ACS Data Configuration.  If Full
+ *              Flight Data Offload is in effect, force the priority of Full
+ *              Flight Data channels to "4".  Priority 4 logs are stored locally
+ *              on the CF card and not offloaded.
  *
  * Parameters:  ACS (i): the requested ACS             
  *
@@ -176,6 +180,67 @@ ACS_CONFIG DataMgrGetACSDataSet(LOG_ACS_FIELD ACS)
 }
 
 /******************************************************************************
+ * Function:    DataMgrIsFFDInhibtMode
+ *
+ * Description: Return the status of the Full Flight Data Offload Inhibit
+ *              strap.  When the strap is installed, the box cannot offload
+ *              data from sources classified as "Full Flight"
+ *
+ * Parameters:  None.
+ *
+ * Returns:     BOOLEAN - [ TRUE  - FFDI Strap is installed, 
+ *                          FALSE - FFDI Strap is not installed ]
+ *
+ * Notes:       
+ *
+ *****************************************************************************/
+BOOLEAN DataMgrIsFFDInhibtMode( void )
+{ 
+  return DIO_ReadPin(FFD_Inh) ? FALSE : TRUE;
+}
+
+/******************************************************************************
+ * Function:    DataMgrIsPortFFD
+ *
+ * Description: Examines the ACS port configuration and determines if the port
+ *              passed in is considered "Full Flight Data"  The rules for 
+ *              determining full flight data are:
+ *              if ACS_PORT_TYPE is: 
+ *                   ARINC 429 
+ *                   ARINC 717(QAR)
+ *              if ACS_PORT_TYPE is UART and ACS_MODE is RECORD
+ *
+ *              429 and 717 are also currently used only in RECORD mode, so
+ *              this field could be used to determine FFD instead.  The intent 
+ *              of this method is to allow more complex rules if they are 
+ *              necessary in the future.
+ *
+ * Parameters:  [in] ACS_Config: Structure containg the ACS port configuration
+ *                               in question
+ *
+ * Returns:     BOOLEAN - [ TRUE  - The ACS is a "Full Flight" data source, 
+ *                          FALSE  - The ACS is not a"Full Flight" data source]
+ *
+ * Notes:       
+ *
+ *****************************************************************************/
+BOOLEAN DataMgrIsPortFFD( const ACS_CONFIG *ACS_Config )
+{
+  BOOLEAN retval = FALSE;
+
+
+  if( (ACS_Config->PortType == ACS_PORT_ARINC429) ||
+      (ACS_Config->PortType == ACS_PORT_QAR)      ||
+      ((ACS_Config->PortType == ACS_PORT_UART)    &&
+       (ACS_Config->Mode == ACS_RECORD       ))      )
+  {
+    retval = TRUE;
+  }
+  
+  return retval;
+}
+
+/******************************************************************************
  * Function:    DataMgrRecord
  *  
  * Description: The Data Manager Record function is used to enable or disable
@@ -191,6 +256,7 @@ ACS_CONFIG DataMgrGetACSDataSet(LOG_ACS_FIELD ACS)
 void DataMgrRecord (BOOLEAN bEnable )
 {
    DMRecordEnabled = bEnable;
+   
    
    if (bEnable == TRUE)
    {
@@ -1151,7 +1217,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
             // Add the checksum's checksum to the checksum for Log Write
             LogWrite ( LOG_TYPE_DATA, 
                        TempChannel,
-                       LOG_PRIORITY_HIGH, 
+                       pDMInfo->ACS_Config.Priority, 
                        (void*)&pDMInfo->MsgBuf[i].packet,
                        DM_PACKET_SIZE(pDMInfo->MsgBuf[i].packet.size),
                        ( pDMInfo->MsgBuf[i].packet.checksum + 
@@ -1268,6 +1334,16 @@ void DataMgrInitChannels(void)
     pACSConfig = &(CfgMgr_RuntimeConfigPtr()->ACSConfigs[i]);
     taskId     = (TASK_INDEX)(i + (UINT32)Data_Mgr0);
     
+	/*Override ACS priority for Full Flight Data sources if Full Flight Data mode is enabled
+	  Full Flight Data inhibit.  This modifies the prioriy in the configuration memory before
+    it is copied to the DataManager local configuration.  If the configuration is changed
+    at runtime, it will not change DataManager local configuration. */
+    if( DataMgrIsPortFFD(pACSConfig) && DataMgrIsFFDInhibtMode( ) )
+    {
+	pACSConfig->Priority = LOG_PRIORITY_4;
+    }
+
+	
     if ((pACSConfig->Mode == ACS_DOWNLOAD) && (pACSConfig->PortType != ACS_PORT_NONE))
     {
        // Configure the ACS Download Task
@@ -1755,6 +1831,11 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 76  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 75  *****************
  * User: John Omalley Date: 10/27/11   Time: 8:57a

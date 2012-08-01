@@ -10,7 +10,7 @@
                  the CP GSE port.
 
     VERSION
-    $Revision: 12 $  $Date: 10/08/10 10:46a $   
+    $Revision: 13 $  $Date: 7/19/12 10:41a $   
     
 ******************************************************************************/
 
@@ -79,6 +79,8 @@ USER_ENUM_TBL MSFXStateEnumTbl[] =
   { "WaitForMS",         TASK_WAIT                          },  
   { "ReqNonTXDList",     TASK_REQUEST_NON_TXD_FILE_LIST     },
   { "ReqTXDList",        TASK_REQUEST_TXD_FILE_LIST         },  
+  { "ReqNonTXDList",     TASK_REQPRI4_NON_TXD_FILE_LIST     },
+  { "ReqTXDList",        TASK_REQPRI4_TXD_FILE_LIST         },  
   { "ReqFile",           TASK_REQUEST_START_FILE            }, 
   { "MarkTXD",           TASK_MARK_FILE_TXD                 },
   { "YMDMWtStart",       TASK_YMDM_SNDR_WAIT_FOR_START      },
@@ -96,14 +98,16 @@ USER_ENUM_TBL MSFXStateEnumTbl[] =
 };                                                  
                                                     
 USER_MSG_TBL MSFXMsgsTbl[] =
-{/*Str               Next Tbl Ptr   Handler Func.         Data Type         Access                 Parameter                             IndexRange DataLimit           EnumTbl*/                      
-  {"STATUS",         NO_NEXT_TABLE, MSFX_GetStsUserCmd,   USER_TYPE_ENUM,   USER_RO,              NULL,                                  -1, -1,    NO_LIMIT,           MSFXStateEnumTbl},
-  {"GET_TXD_LIST",   NO_NEXT_TABLE, MSFX_GetListUserCmd,  USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_TXD_FILE_LIST,     -1, -1,    NO_LIMIT,           NULL},
-  {"GET_UNTXD_LIST", NO_NEXT_TABLE, MSFX_GetListUserCmd,  USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_NON_TXD_FILE_LIST, -1, -1,    NO_LIMIT,           NULL},
-  {"MARK_FILE_TXD",  NO_NEXT_TABLE, MSFX_MarkFileTxdCmd,  USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL}, 
-  {"GET_FILE",       NO_NEXT_TABLE, MSFX_GetFileUserCmd,  USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},
-  {"PUT_FILE",       NO_NEXT_TABLE, MSFX_PutFileUserCmd,  USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},
-  {NULL,             NULL,          NULL,                 NO_HANDLER_DATA}
+{/*Str                 Next Tbl Ptr   Handler Func.         Data Type         Access                 Parameter                             IndexRange DataLimit           EnumTbl*/                      
+  {"STATUS",             NO_NEXT_TABLE, MSFX_GetStsUserCmd, USER_TYPE_ENUM,   USER_RO,              NULL,                                  -1, -1,    NO_LIMIT,           MSFXStateEnumTbl},
+  {"GET_TXD_LIST",       NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
+  {"GET_TXD_PRI4_LIST",  NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQPRI4_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
+  {"GET_UNTXD_LIST",     NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
+  {"GET_UNTXD_PRI4_LIST",NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQPRI4_NON_TXD_FILE_LIST,  -1, -1,    NO_LIMIT,           NULL},  
+  {"MARK_FILE_TXD",      NO_NEXT_TABLE, MSFX_MarkFileTxdCmd,USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},   
+  {"GET_FILE",           NO_NEXT_TABLE, MSFX_GetFileUserCmd,USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},
+  {"PUT_FILE",           NO_NEXT_TABLE, MSFX_PutFileUserCmd,USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},
+  {NULL,                 NULL,          NULL,                 NO_HANDLER_DATA}
 };
 
 USER_MSG_TBL RootUserTbl   = {"MSFX",MSFXMsgsTbl,NULL,NO_HANDLER_DATA};                                         
@@ -269,6 +273,11 @@ USER_HANDLER_RESULT MSFX_GetStsUserCmd(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfrUserTables.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 10/08/10   Time: 10:46a

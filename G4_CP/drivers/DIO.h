@@ -13,7 +13,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 35 $  $Date: 10/18/10 11:59a $    
+      $Revision: 36 $  $Date: 7/19/12 10:42a $    
 ******************************************************************************/
 
 
@@ -88,7 +88,11 @@ DIO_PIN(HWPFEN_Sta,      DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR
 DIO_PIN(LSS_OvI,         DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FEC1L, 0x08)\
 DIO_PIN(WOW,             DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR_FEC1L, 0x20)\
 DIO_PIN(WLAN_WOW_Enb,    DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR_FECI2C,0x04)\
-DIO_PIN(SW_PFEN_Sta,     DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FECI2C,0x08)
+DIO_PIN(SW_PFEN_Sta,     DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FECI2C,0x08)\
+/*FPGA GPIO input.  Typecast 16-bit GPIO_1 reg to fit in 8-bit ptr type.  Should think about adding\
+ reg width column in the future if more 16-but registers are needed*/\
+DIO_PIN(FFD_Inh,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        (void*)FPGA_GPIO_1, FPGA_GPIO_1_FFDI)
+
 
 #define DIO_OUTPUTS_LIST \
 /*  Name (<24 chars)....Dir     Init   Peripheral Access Method  PODR addr         BitMask*/\
@@ -250,6 +254,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 36  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:42a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 35  *****************
  * User: Jim Mood     Date: 10/18/10   Time: 11:59a

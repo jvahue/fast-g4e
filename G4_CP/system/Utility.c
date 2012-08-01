@@ -10,7 +10,7 @@
                     modules.
 
     VERSION
-      $Revision: 48 $  $Date: 12-07-13 3:50p $
+      $Revision: 49 $  $Date: 7/19/12 11:07a $
 
 ******************************************************************************/
 
@@ -18,7 +18,8 @@
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
 #include <string.h>
-
+#include <errno.h>
+#include <stdlib.h>
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -674,6 +675,77 @@ UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size )
   return CRC;
 }
 
+
+/******************************************************************************
+* Function:     CompareVersions
+*
+* Description:  Compares two software version strings in the format
+*               n.n.n.  Only 3 levels of revisions can be processed, however
+*               processing will stop at the first revision level that is not
+*               equal to the other and the function will return the result of 
+*               that comparison.
+*
+* Parameters:   [in] First version string to compare
+*               [in] Second version string to compare
+*
+* Returns:      0:  The versions are identical
+*               1:  v1 is greater than v2 
+*               2:  v2 is less than v1
+*              -1: error interpeting v1 or v2
+*
+* Notes:        
+*
+*****************************************************************************/
+INT32 CompareVersions(const char* v1,const char* v2)
+{
+  INT32 v1_val;
+  const CHAR  *v1_pos,*v2_pos;
+  CHAR  *end;
+  INT32 v2_val;
+  INT32 i;
+  INT32 retval = 0;
+  
+  v1_pos = v1;
+  v2_pos = v2;
+  
+  //Convert v1 and v2 to their 3-integer representations
+  for(i = 0; (i < 3) && (retval == 0); i++)
+  {
+    v1_val = strtol(v1_pos, &end, 10);
+    //confirm strtol ate some characters
+    if(end == v1_pos)
+    {
+      retval = -1;
+      break;
+    }
+    //Advance to next number (pass '.') if not at the end of the string
+    v1_pos = *end == '\0' ? end : end  + 1;
+
+    
+    v2_val = strtol(v2_pos, &end, 10);
+    //confirm strtol ate some characters
+    if(end == v2_pos)
+    {
+      retval = -1;
+      break;
+    }
+    //Advance to next number (pass '.') if not at the end of the string
+    v2_pos = *end == '\0' ? end : end + 1;
+    
+    if(v1_val > v2_val)
+    {
+      retval = 1;
+    }
+    else if(v1_val < v2_val)
+    {
+      retval = 2;      
+    } 
+  }
+  
+  return retval;
+}
+
+
 /******************************************************************************
 * Function:     UTIL_MinuteTimerDisplay
 *
@@ -1167,6 +1239,11 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.c $
+ * 
+ * *****************  Version 49  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 48  *****************
  * User: John Omalley Date: 12-07-13   Time: 3:50p

@@ -5,12 +5,14 @@
 
    File:        ActionManager.c
 
-   Description:
+   Description: The Action manager provides a service for configuring and
+                driving specific LSS output combinations based on
+                action requests for other parts of the system.
 
-   Note:
+   Note:        None
 
  VERSION
- $Revision: 1 $  $Date: 12-07-17 11:32a $
+ $Revision: 3 $  $Date: 12-07-27 3:03p $
 
 ******************************************************************************/
 
@@ -22,16 +24,8 @@
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "actionmanager.h"
-#include "alt_basic.h"
-#include "assert.h"
 #include "cfgmanager.h"
 #include "gse.h"
-#include "logmanager.h"
-#include "NVMgr.h"
-#include "taskmanager.h"
-#include "systemlog.h"
-#include "utility.h"
-#include "user.h"
 
 /*****************************************************************************/
 /* Local Defines                                                             */
@@ -47,6 +41,9 @@
 static ACTION_CFG          m_ActionCfg;         /* Configuration Storage Object       */
 static ACTION_DATA         m_ActionData;        /* Runtime Data storage object        */
 
+static ACTION_PERSIST      m_RTC_Copy;
+static ACTION_PERSIST      m_EE_Copy;
+
 /* FIFO Definition for requested Actions                                              */
 static ACTION_REQUEST_FIFO m_Request;
 static ACTION_REQUEST      m_RequestStorage [MAX_ACTION_REQUESTS];
@@ -56,11 +53,17 @@ static ACTION_REQUEST      m_RequestStorage [MAX_ACTION_REQUESTS];
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-static void ActionTask          ( void *pParam );
-static void ActionUpdateFlags   ( ACTION_DATA *pData );
-static void ActionCheckACK      ( ACTION_CFG  *pCfg, ACTION_DATA *pData );
-static void ActionUpdateOutputs ( ACTION_CFG  *pCfg, ACTION_DATA *pData );
-static void ActionSetOuptut     ( UINT8 LSS,   DIO_OUT_OP State );
+static void ActionInitPersist    ( void );
+static void ActionTask           ( void *pParam );
+static void ActionUpdateFlags    ( ACTION_CFG  *pCfg,  ACTION_DATA *pData );
+static void ActionResetFlags     ( ACTION_DATA *pData, INT8 nID, UINT16 nAction );
+static void ActionSetFlags       ( const ACTION_CFG  *pCfg,  ACTION_DATA *pData,
+                                   INT8 nID, UINT16 nAction, BOOLEAN bACK, BOOLEAN bLatch );
+static void ActionCheckACK       ( ACTION_DATA *pData );
+static void ActionUpdateOutputs  ( ACTION_CFG  *pCfg,  ACTION_DATA *pData );
+static void ActionSetOutput      ( UINT8 nLSS,         DIO_OUT_OP state );
+static void ActionRectifyOutputs ( ACTION_CFG  *pCfg,  ACTION_DATA *pData,
+                                   BOOLEAN      bPersistOn );
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -80,10 +83,10 @@ static void ActionSetOuptut     ( UINT8 LSS,   DIO_OUT_OP State );
 void ActionsInitialize ( void )
 {
    // Local Data
-   TCB TaskInfo;
+   TCB tTaskInfo;
 
    // Add Event Action to the User Manager
-   User_AddRootCmd(&RootActionMsg);
+   User_AddRootCmd(&rootActionMsg);
 
    // Reset the Event Action cfg and storage objects
    memset(&m_ActionCfg,  0, sizeof(m_ActionCfg));
@@ -96,67 +99,223 @@ void ActionsInitialize ( void )
 
    // Event Action Initialize FIFO
    memset ( (void *) &m_Request, 0, sizeof( m_Request ) );
-   FIFO_Init( &m_Request.RecordFIFO, (INT8*)&m_RequestStorage, sizeof(m_RequestStorage) );
+   FIFO_Init( &m_Request.recordFIFO, (INT8*)m_RequestStorage, sizeof(m_RequestStorage) );
+
+   // Initialize the Persistent status from the NV Memory
+   ActionInitPersist();
 
    // Create Action Task - DT
-   memset(&TaskInfo, 0, sizeof(TaskInfo));
-   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Action",_TRUNCATE);
-   TaskInfo.TaskID          = Action_Task;
-   TaskInfo.Function        = ActionTask;
-   TaskInfo.Priority        = taskInfo[Action_Task].priority;
-   TaskInfo.Type            = taskInfo[Action_Task].taskType;
-   TaskInfo.modes           = taskInfo[Action_Task].modes;
-   TaskInfo.MIFrames        = taskInfo[Action_Task].MIFframes;
-   TaskInfo.Enabled         = TRUE;
-   TaskInfo.Locked          = FALSE;
-   TaskInfo.Rmt.InitialMif  = taskInfo[Action_Task].InitialMif;
-   TaskInfo.Rmt.MifRate     = taskInfo[Action_Task].MIFrate;
-   TaskInfo.pParamBlock     = NULL;
+   memset(&tTaskInfo, 0, sizeof(tTaskInfo));
+   strncpy_safe(tTaskInfo.Name, sizeof(tTaskInfo.Name),"Action",_TRUNCATE);
+   tTaskInfo.TaskID          = Action_Task;
+   tTaskInfo.Function        = ActionTask;
+   tTaskInfo.Priority        = taskInfo[Action_Task].priority;
+   tTaskInfo.Type            = taskInfo[Action_Task].taskType;
+   tTaskInfo.modes           = taskInfo[Action_Task].modes;
+   tTaskInfo.MIFrames        = taskInfo[Action_Task].MIFframes;
+   tTaskInfo.Enabled         = TRUE;
+   tTaskInfo.Locked          = FALSE;
+   tTaskInfo.Rmt.InitialMif  = taskInfo[Action_Task].InitialMif;
+   tTaskInfo.Rmt.MifRate     = taskInfo[Action_Task].MIFrate;
+   tTaskInfo.pParamBlock     = NULL;
 
-   TmTaskCreate (&TaskInfo);
+   TmTaskCreate (&tTaskInfo);
 }
+
+/******************************************************************************
+* Function:     ActionInitPersist
+*
+* Description:  The Action Init Persist opens both the EEPROM copy and
+*               RTC Copy of the persistent action and verifies they are
+*               not corrupt and match. If either copy is bad a log is written
+*               and then the bad copy is overwritten by the good copy. If
+*               both copies are bad then a log is written and the persistent
+*               action is reset.
+*
+* Parameters:   None
+*
+* Returns:      None
+*
+* Notes:        None
+*
+*****************************************************************************/
+void ActionInitPersist ( void )
+{
+   // Local Data
+   ACTION_PERSIST_NV_FAIL_LOG log;
+
+   // Clear the intermediate copies
+   memset( (void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy) );
+   memset( (void *)&m_EE_Copy,  0, sizeof(m_EE_Copy)  );
+   // Clear the log
+   memset( (void *)&log, 0, sizeof(log) );
+   // Clear the final destination
+   memset( (void *)&m_ActionData.persist, 0, sizeof(m_ActionData.persist));
+
+   // Retrieves the stored counters from non-voltaile
+   //  Note: NV_Open() performs checksum and creates sys log if checksum fails !
+   //        This means we will have duplicate indication of the failure?
+   log.resultEE  = NV_Open(NV_ACT_STATUS_EE);
+   log.resultRTC = NV_Open(NV_ACT_STATUS_RTC);
+
+   NV_Read(NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy));
+   NV_Read(NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ));
+
+   log.copyfromEE  = m_EE_Copy;
+   log.copyfromRTC = m_RTC_Copy;
+
+   if ((log.resultEE != SYS_OK) && (log.resultRTC != SYS_OK))
+   {
+      log.failureType = ACT_BOTH_COPIES_BAD;
+
+      // Both locations are corrupt - Set system status to CAUTION
+      Flt_SetStatus( STA_CAUTION,
+                     SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
+                     &log,
+                     sizeof(log));
+
+      // Clear the persistent action data
+      NV_WriteNow( NV_ACT_STATUS_RTC, 0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
+      NV_WriteNow( NV_ACT_STATUS_EE,  0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
+   }
+   else if (log.resultRTC != SYS_OK)
+   {
+      log.failureType = ACT_RTC_COPY_BAD;
+      // Write a log that the RTC was bad and restored with the EEPROM
+      LogWriteSystem( SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
+                      LOG_PRIORITY_3,
+                      &log,
+                      sizeof(log),
+                      NULL );
+      // Restore the RTC version
+      NV_WriteNow( NV_ACT_STATUS_RTC, 0, &m_EE_Copy, sizeof(m_EE_Copy) );
+   }
+   else if (log.resultEE != SYS_OK)
+   {
+      log.failureType = ACT_EE_COPY_BAD;
+      // Write a log that the RTC was bad and restored with the EEPROM
+      LogWriteSystem( SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
+                      LOG_PRIORITY_3,
+                      &log,
+                      sizeof(log),
+                      NULL );
+
+      // Restore the EE version
+      NV_WriteNow( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+   }
+   else
+   {
+      // If both are GOOD then since RTC is saved first, it will most likely be the
+      // most update to date.
+
+      // Read from RTC version
+      m_ActionData.persist = m_RTC_Copy;
+
+      // Do we have a persistent action stored?
+      if (0 != m_ActionData.persist.action.nUsedMask)
+      {
+         m_ActionData.bNVStored         = TRUE;
+         m_ActionData.bUpdatePersistOut = TRUE;
+      }
+
+      // If not in sync make the EEPROM the same as the RTC
+      if ( (m_RTC_Copy.bState != m_EE_Copy.bState) ||
+           (m_RTC_Copy.bLatch != m_EE_Copy.bLatch) ||
+           (m_RTC_Copy.action.nUsedMask != m_EE_Copy.action.nUsedMask) ||
+           (m_RTC_Copy.action.nLSS_Mask != m_EE_Copy.action.nLSS_Mask) )
+      {
+         m_EE_Copy = m_RTC_Copy;
+
+         NV_WriteNow( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+      }
+   }
+}
+
 
 /******************************************************************************
  * Function:     ActionRequest
  *
- * Description:
+ * Description:  The Action Request function allows other functions to
+ *               activate and deactivate any of the configurable actions.
  *
- * Parameters:   [in] UINT32  Action - Flags
- *               [in] BOOLEAN State
+ * Parameters:   [in] INT8   nReqNum    - Request number of the action to update
+ *                                        (-1 for init request - ACTION_NO_REQ)
+ *               [in] UINT16 nAction    - Bit encoded action flags (b0 = act0, b1 = act1, etc.)
+ *               [in] ACTION_TYPE state - State to place action into (ACTION_ON, ACTION_OFF)
+ *               [in] BOOLEAN bACK      - TRUE if action is acknowledgable
+ *               [in] BOOLEAN bLatch    - TRUE if action is latched.
  *
- * Returns:      None
+ * Returns:      INT8 - ID for the requested action
  *
- * Notes:
+ * Notes:        This function returns an ID when called with nReqNum = -1
+ *               The ID can then be used to deactivate the action.
  *
  *****************************************************************************/
-INT8 ActionRequest ( INT8 ReqNum, UINT32 Action, ACTION_TYPE State )
+INT8 ActionRequest( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
+                    BOOLEAN bACK, BOOLEAN bLatch )
 {
    // Local Data
-   ACTION_REQUEST Request;
+   ACTION_REQUEST request;
+   ACTION_REQUEST oldestRecord;
 
    // Make sure this is a valid action request before queueing
-   if (0 != Action)
+   if (0 != nAction)
    {
-      if ( ACTION_NO_REQ == ReqNum )
+      if ( ACTION_NO_REQ == nReqNum )
       {
-         ReqNum = m_ActionData.RequestCounter++;
+         nReqNum = m_ActionData.nRequestCounter++;
       }
       // Build the request
-      Request.Index  = ReqNum;
-      Request.Action = Action;
-      Request.State  = State;
-
-//      GSE_DebugStr(NORMAL,TRUE,"Action Req: EI: %d A: 0x%08x S: %d", EventIndex, Action, State );
+      request.nID     = nReqNum;
+      request.nAction = nAction;
+      request.state   = state;
+      request.bACK    = bACK;
+      request.bLatch  = bLatch;
 
       // Push the request into the Queue
-      // TBD: What to do on a return value of FALSE --- No room in FIFO?
-      FIFO_PushBlock(&m_Request.RecordFIFO, &Request, sizeof(Request));
-      m_Request.RecordCnt++;
+      while (FALSE == FIFO_PushBlock(&m_Request.recordFIFO, &request, sizeof(ACTION_REQUEST)))
+      {
+         // Couldn't fit anymore into the queue so set the overflow flag and pop the oldest
+         m_Request.bOverFlow = TRUE;
+         FIFO_PopBlock (&m_Request.recordFIFO, &oldestRecord, sizeof(ACTION_REQUEST));
+         m_Request.nRecordCnt--;
+      }
+      m_Request.nRecordCnt++;
    }
 
-   return ReqNum;
+   return nReqNum;
 }
 
+/******************************************************************************
+* Function:     ActionResetNVPersist
+*
+* Description:  Resets any persistent data in the NV Memory
+*
+* Parameters:   None
+*
+* Returns:      None
+*
+* Notes:        None
+*
+*****************************************************************************/
+void ActionResetNVPersist ( void )
+{
+   // Log the Reset of the non volatile persist data
+   LogWriteETM ( SYS_ID_ACTION_PERSIST_RESET,
+                 LOG_PRIORITY_3,
+                 &m_ActionData.persist,
+                 sizeof(m_ActionData.persist),
+                 NULL );
+
+   memset(&m_ActionData.persist, 0, sizeof(m_ActionData.persist));
+   memset(&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
+   memset(&m_EE_Copy,  0, sizeof(m_EE_Copy ));
+
+   m_ActionData.bNVStored = FALSE;
+
+   NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+   NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
+}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -179,85 +338,102 @@ static
 void ActionTask ( void *pParam )
 {
    // Local Data
-   BOOLEAN       bACK;
-   ER_STATE      EngineState;
-   ACTION_CFG   *pCfg;
-   ACTION_DATA  *pData;
-   UINT8         EngRunFlags;
+   BOOLEAN                 bACK;
+   ER_STATE                engineState;
+   ACTION_CFG             *pCfg;
+   ACTION_DATA            *pData;
+   UINT8                   nEngRunFlags;
+   ACTION_CLR_PERSIST_LOG  actionLog;
 
    // Initialize Local Data
    pData = &m_ActionData;
    pCfg  = &m_ActionCfg;
 
    // Check if we have received an ACK
-   bACK        = TriggerGetState( pCfg->ACKTrigger );
-   // TBD - Should the event have a configurable engine run index, similar to trends
-   EngineState = EngRunGetState(ENGRUN_ID_ANY, &EngRunFlags);
+   bACK        = TriggerGetState( (INT32)pCfg->aCKTrigger );
+   // Check the engine state for ANY possible running engine
+   engineState = EngRunGetState(ENGRUN_ID_ANY, &nEngRunFlags);
 
    // Update the Action flags
-   ActionUpdateFlags(pData);
-
-   if (TRUE == pCfg->Persist.bEnabled)
+   ActionUpdateFlags(pCfg, pData);
+   // Did the engine just transition to STOPPED State?
+   if ((ER_STATE_STOPPED != pData->prevEngState) && (ER_STATE_STOPPED == engineState))
    {
-      // Need to determine if the engine run ended
-      if ((ER_STATE_STOPPED != pData->PrevEngState) && (ER_STATE_STOPPED == EngineState))
+      // Check if the persistent latch is set
+      if ( TRUE == pData->persist.bLatch)
       {
-         // Check if the persistent latch is set
-         if ( TRUE == pData->Persist.bLatch)
-         {
-            // Turn on the persistent action
-            pData->Persist.bState = ON;
-         }
-
-      }
-      else if ( ER_STATE_STOPPED != EngineState ) // We are in the starting or running state
-      {
-         // Check if the previous exceed is on because we aren't in stopped anymore
-         if ( TRUE == pData->Persist.bLatch )
-         {
-            pData->Persist.bState = OFF;
-            // TODO: Write a Log
-         }
-
-         // We have received an ACK now check if there is an Action to Acknowledge
-         if ( TRUE == bACK )
-         {
-            ActionCheckACK ( pCfg, pData );
-         }
-      }
-      else // We are in the stopped state
-      {
-         if ( (( TRUE == bACK ) && ( TRUE == pData->Persist.bLatch )) ||
-               ((ER_STATE_STOPPED == pData->PrevEngState) && (ER_STATE_STOPPED != EngineState)) )
-         {
-            // Clear the previous exceed outputs
-            pData->Persist.bState = OFF;
-            // TODO: Write A Log
-         }
+         // Turn on the persistent action
+         pData->persist.bState    = ON;
+         pData->bUpdatePersistOut = TRUE;
+         // TODO: if EE Copy not equal RTC Copy
+         m_EE_Copy = m_RTC_Copy;
+         // Engine Run ended now update the EEPROM Copy
+         NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
       }
    }
+   // Is the engine in starting or run state?
+   else if ( ER_STATE_STOPPED != engineState )
+   {
+      // Check if the persistent output is on because we aren't in stopped anymore
+      if ( ON == pData->persist.bState )
+      {
+         // Save the Action Log Data
+         actionLog.persistState = pData->persist;
+         actionLog.clearReason  = ACT_TRANS_TO_ENG_RUN;
+         // Clear the previous exceed output
+         pData->persist.bState  = OFF;
+         pData->bUpdatePersistOut = TRUE;
+         // Write the action log
+         LogWriteETM (SYS_ID_ACTION_PERSIST_CLR,
+                      LOG_PRIORITY_3,
+                      &actionLog,
+                      sizeof(actionLog),
+                      NULL);
+      }
+   }
+   // Guess we must be in the stopped state
    else
    {
-      // Have we received an ACK now check if there is an Action to Acknowledge
-      if ( TRUE == bACK )
+      // Now monitor the persist state for an ACK
+      if (( TRUE == bACK ) && ( TRUE == pData->persist.bLatch ) &&
+          ( ON == pData->persist.bState ))
       {
-         ActionCheckACK ( pCfg, pData );
+         // Save the action log data
+         actionLog.persistState = pData->persist;
+         actionLog.clearReason  = ACT_ACKNOWLEDGED;
+         // Clear the previous exceed outputs
+         pData->persist.bState = OFF;
+         pData->bUpdatePersistOut = TRUE;
+         // Write the action log
+         LogWriteETM (SYS_ID_ACTION_PERSIST_CLR,
+                      LOG_PRIORITY_3,
+                      &actionLog,
+                      sizeof(actionLog),
+                      NULL);
       }
    }
-   // Save the Engine Run State
-   pData->PrevEngState = EngineState;
 
+   // Have we received an ACK now check if there is an Action to Acknowledge
+   if ( TRUE == bACK )
+   {
+      ActionCheckACK ( pData );
+   }
+   // Save the Engine Run State
+   pData->prevEngState = engineState;
    // Check the Event Action data and set the outputs accordingly
    ActionUpdateOutputs ( pCfg, pData );
-
 }
 
 /******************************************************************************
  * Function:     ActionUpdateFlags
  *
- * Description:
+ * Description:  Pops any requests from the FIFO and then sets or resets the
+ *               Active, Latch and/or ACK flags. These flags are used
+ *               by the output process to activate and deactivate the
+ *               configured outputs.
  *
- * Parameters:
+ * Parameters:  [in] ACTION_CFG  *pCfg
+*               [in] ACTION_DATA *pData
  *
  * Returns:      None
  *
@@ -265,130 +441,199 @@ void ActionTask ( void *pParam )
  *
  *****************************************************************************/
 static
-void ActionUpdateFlags ( ACTION_DATA *pData )
+void ActionUpdateFlags ( ACTION_CFG *pCfg, ACTION_DATA *pData )
 {
    // Local Data
-   ACTION_REQUEST NewRequest;
-   ACTION_FLAGS   *pFlags;
-   UINT8          i;
+   ACTION_REQUEST newRequest;
 
    // Pop any new Action Requests from the FIFO
-   while (0 < m_Request.RecordCnt)
+   while (0 < m_Request.nRecordCnt)
    {
-      FIFO_PopBlock(&m_Request.RecordFIFO, &NewRequest, sizeof(NewRequest));
-      m_Request.RecordCnt--;
+      FIFO_PopBlock(&m_Request.recordFIFO, &newRequest, sizeof(newRequest));
+      m_Request.nRecordCnt--;
 
-//      GSE_DebugStr(NORMAL,TRUE,"Update Flags: EI: %d A: 0x%08x S: %d", NewRequest.Index, NewRequest.Action, NewRequest.State );
-
-      // Loop through the possible action bits
-      for ( i = 0; i < MAX_ACTION_DEFINES; i++ )
+      if ( ACTION_ON == newRequest.state )
       {
-         // Check if an action flag is set
-         if ( 0 != BIT( (NewRequest.Action & ACTION_MASK), i ) )
+         ActionSetFlags ( pCfg, pData, newRequest.nID,  newRequest.nAction,
+                                 newRequest.bACK, newRequest.bLatch );
+      }
+      else if ( ACTION_OFF == newRequest.state )
+      {
+         ActionResetFlags ( pData, newRequest.nID, newRequest.nAction );
+      }
+   }
+
+}
+
+/******************************************************************************
+ * Function:     ActionResetFlags
+ *
+ * Description:  The Action Reset Flags is used to reset the appropriate
+ *               flags when an Action is deactivated.
+ *
+ * Parameters:   [in] ACTION_DATA *pData
+ *               [in] INT8         nID
+ *               [in] UINT16       nAction
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static
+void ActionResetFlags ( ACTION_DATA *pData, INT8 nID, UINT16 nAction )
+{
+   // Local Data
+   UINT16        i;
+   ACTION_FLAGS *pFlags;
+
+   // Loop through all the possible actions
+   for ( i = 0; i < MAX_ACTION_DEFINES; i++ )
+   {
+      pFlags = &pData->action[i];
+
+      if ( 0 != BIT( nAction, i ) )
+      {
+         // Check if the action latched before resetting the event flag
+         if ( FALSE == GetBit(nID, pFlags->flagLatch, sizeof(pFlags->flagLatch)))
          {
-            pFlags = &pData->Action[i];
-
-            // Initiate the Action
-            if (((ON_MET == NewRequest.State) && (0 != (ACTION_WHEN_MET & NewRequest.Action))) ||
-                  ((ON_DURATION == NewRequest.State) &&
-                   (0 != (ACTION_ON_DURATION & NewRequest.Action))))
-            {
-               // Set the bit for the Action
-               SetBit(NewRequest.Index, pFlags->Active, sizeof(pFlags->Active));
-
-               if (0 != (NewRequest.Action & ACTION_LATCH))
-               {
-                  // Set the bit for the Latch
-                  SetBit(NewRequest.Index, pFlags->Latch, sizeof(pFlags->Latch));
-               }
-
-               if ( 0 != (NewRequest.Action & ACTION_ACK))
-               {
-                  // Set the bit for the ACK
-                  SetBit(NewRequest.Index, pFlags->ACK, sizeof(pFlags->ACK));
-               }
-            }
-            else if ( ACTION_OFF == NewRequest.State )
-            {
-               // Check if the action latched before resetting the event flag
-               if ( FALSE == GetBit(NewRequest.Index, pFlags->Latch, sizeof(pFlags->Latch)))
-               {
-                  // Reset the Active flag for the Event
-                  ResetBit(NewRequest.Index, pFlags->Active, sizeof(pFlags->Active));
-                  // Reset the Acknowledge for the Event
-                  ResetBit(NewRequest.Index, pFlags->ACK, sizeof(pFlags->ACK));
-               }
-            }
+            // Reset the Active flag for the Event
+            ResetBit(nID, pFlags->flagActive, sizeof(pFlags->flagActive));
+            // Reset the Acknowledge for the Event
+            ResetBit(nID, pFlags->flagACK, sizeof(pFlags->flagACK));
          }
       }
    }
 }
 
+/******************************************************************************
+ * Function:     ActionSetFlags
+ *
+ * Description:  The Action Set Flags is used to set the appropriate
+ *               flags when an Action is Activated.
+ *
+ * Parameters:   [in] ACTION_CFG  *pCfg
+*                [in] ACTION_DATA *pData
+ *               [in] INT8 nID
+ *               [in] UINT16 nAction
+ *               [in] BOOLEAN bACK
+ *               [in] BOOLEAN bLatch
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static
+void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
+                      INT8 nID, UINT16 nAction, BOOLEAN bACK, BOOLEAN bLatch )
+{
+   // Local Data
+   UINT16          i;
+   ACTION_FLAGS   *pFlags;
+
+   for ( i = 0; i < MAX_ACTION_DEFINES; i++ )
+   {
+      pFlags = &pData->action[i];
+
+      if ( 0 != BIT( nAction, i ) )
+      {
+         // Set the bit for the Action
+         SetBit(nID, pFlags->flagActive, sizeof(pFlags->flagActive));
+
+         if ( TRUE == bLatch )
+         {
+            // Set the bit for the Latch
+            SetBit(nID, pFlags->flagLatch, sizeof(pFlags->flagLatch));
+
+            pData->persist.bLatch    = TRUE;
+
+            // If the persist action is enabled then the action is based on the
+            // persistent output configuration, otherwise we should save the action
+            // that is latched so it can be restored after a powercycle
+            if (FALSE == pCfg->persist.bEnabled)
+            {
+               // Check if this a higher priority action
+               if ( i < pData->persist.actionNum )
+               {
+                  pData->persist.actionNum = i;
+                  pData->persist.action    = pCfg->output[i];
+                  m_RTC_Copy.actionNum     = pData->persist.actionNum;
+                  m_RTC_Copy.bState        = ON;
+                  m_RTC_Copy.bLatch        = pData->persist.bLatch;
+                  m_RTC_Copy.action        = pCfg->output[i];
+                  NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+               }
+            }
+            else // There is a configured persistent action so just do that!
+            {
+               // Check if the persistent action is already stored to RTC RAM
+               if (FALSE == pData->bNVStored)
+               {
+                  pData->bNVStored = TRUE;
+                  // Action not stored to RTC RAM yet
+                  m_RTC_Copy.actionNum  = i;
+                  m_RTC_Copy.bState     = ON;
+                  m_RTC_Copy.bLatch     = pData->persist.bLatch;
+                  m_RTC_Copy.action     = pCfg->persist.output;
+                  pData->persist.action = pCfg->persist.output;
+                  // Save the pesistent status to Non-Volatile Memory
+                  NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+               }
+            }
+         }
+
+         if ( TRUE == bACK )
+         {
+            // Set the bit for the ACK
+            SetBit(nID, pFlags->flagACK, sizeof(pFlags->flagACK));
+         }
+      }
+   }
+}
 
 /******************************************************************************
  * Function:     ActionCheckACK
  *
- * Description:
+ * Description:  The Action Check ACK function checks all the actions and
+ *               acknowledges the actions that were activated with an ACK
+ *               requests set to TRUE.
  *
- * Parameters:
- *
+ * Parameters:   [in]     ACTION_CFG *pCfg
+ *               [in/out] ACTION_DATA *pData
  *
  * Returns:      None
  *
- * Notes:
+ * Notes:        None
  *
  *****************************************************************************/
 static
-void ActionCheckACK ( ACTION_CFG  *pCfg, ACTION_DATA *pData )
+void ActionCheckACK ( ACTION_DATA *pData )
 {
    // Local Data
    ACTION_FLAGS *pFlags;
-   UINT8         ActionIndex;
-   BITARRAY128   MaskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+   UINT8         nActionIndex;
+   BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
 
    // Loop through all the Action
-   for ( ActionIndex = 0; ActionIndex < MAX_ACTION_DEFINES; ActionIndex++ )
+   for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
    {
-      pFlags = &pData->Action[ActionIndex];
+      pFlags = &pData->action[nActionIndex];
 
       // Check if any ACK flag is set
-      if ( TRUE == TestBits( MaskAll, sizeof(MaskAll),
-                             pFlags->ACK, sizeof(pFlags->ACK), FALSE ) )
+      if ( TRUE == TestBits( maskAll, sizeof(maskAll),
+                             pFlags->flagACK, sizeof(pFlags->flagACK), FALSE ) )
       {
          // Need to check if any of the Active flags match the ACK
-         if ( TRUE == TestBits( pFlags->ACK, sizeof(pFlags->ACK),
-                                pFlags->Active, sizeof(pFlags->Active), FALSE))
+         if ( TRUE == TestBits( pFlags->flagACK, sizeof(pFlags->flagACK),
+                                pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
          {
             // We know we have an Active Flag to ACK, so reset the Active bits
-            ResetBits ( pFlags->ACK, sizeof(pFlags->ACK),
-                        pFlags->Active, sizeof(pFlags->Active) );
+            ResetBits ( pFlags->flagACK, sizeof(pFlags->flagACK),
+                        pFlags->flagActive, sizeof(pFlags->flagActive) );
 
-            // Now we need to figure out if we Acknowledged a latched event
-            // If it is latched and the Persistent Logic is enabled
-            // save a flag to let the software know we should perform the persistent
-            // action
-            if (TRUE == TestBits (pFlags->ACK, sizeof(pFlags->ACK),
-                                  pFlags->Latch, sizeof(pFlags->Latch), FALSE))
-            {
-               pData->Persist.bLatch = TRUE;
-               // TODO: This should be stored to non-volatile memory ASAP!!
-
-               // If the persist action is enabled then the action is based on the
-               // persistent output configuration, otherwise we should save the action
-               // that is latched so it can be restored after a powercycle
-               if (FALSE == pCfg->Persist.bEnabled)
-               {
-                  pData->Persist.Action = pCfg->Output[ActionIndex];
-                  // TODO: This also needs to go into non-volatile memory ASAP
-               }
-
-               // Since we have cleared with an ACK and then set the persistent latch
-               // we can now clear the latch for this event.
-               ResetBits ( pFlags->ACK, sizeof(pFlags->ACK),
-                           pFlags->Latch, sizeof(pFlags->Latch) );
-            }
-            // Clear the ACK for all events
-            memset(&pFlags->ACK, 0, sizeof(pFlags->ACK));
+            // Clear the ACK for all IDs
+            memset(pFlags->flagACK, 0, sizeof(pFlags->flagACK));
          }
       }
    }
@@ -397,170 +642,144 @@ void ActionCheckACK ( ACTION_CFG  *pCfg, ACTION_DATA *pData )
 /******************************************************************************
  * Function:     ActionUpdateOutputs
  *
- * Description:
+ * Description:  The Action Update Output function uses the Action flags and
+ *               persistent state to determine how to set the configured outputs.
  *
- * Parameters:
- *
+ * Parameters:   [in]     ACTION_CFG  *pCfg
+ *               [in/out] ACTION_DATA *pData
  *
  * Returns:      None
  *
- * Notes:
+ * Notes:        None
  *
  *****************************************************************************/
 static
 void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
 {
    // Local Data
-   UINT8          LSS;
-   DIO_OUT_OP     Output;
-   ACTION_FLAGS  *pFlags;
-   ACTION_OUTPUT *pOutCfg;
-   UINT8          i;
-   UINT16         ActionIndex;
-   BITARRAY128    MaskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+   DIO_OUT_OP output;
+   UINT8      i;
 
    // Check if persistent is ON or OFF because the Persist ON is highest
    // priority
-   if ( ON == pData->Persist.bState )
+   if ( ( ON == pData->persist.bState ) && ( TRUE == pData->bUpdatePersistOut) )
    {
       for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
       {
-         LSS = 0;
-         if ( TRUE == BIT( pData->Persist.Action.UsedMask, i ) )
+         if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
          {
-            pData->PriorityMask = SET_BIT(pData->PriorityMask,i);
-            LSS    = SET_BIT(LSS,i);
-            Output = (ON == BIT ( pData->Persist.Action.LSS_Mask, i )) ?
+            pData->nPriorityMask = SET_BIT(pData->nPriorityMask,i);
+            output = (ON == BIT ( pData->persist.action.nLSS_Mask, i )) ?
                      DIO_SetHigh : DIO_SetLow;
+            ActionSetOutput ( i, output );
          }
-         ActionSetOuptut ( LSS, Output );
-      }
 
-      // Now loop through the Actions and set any outputs that don't overlap
-      // the persistent outputs
-      for ( ActionIndex = 0; ActionIndex < MAX_ACTION_DEFINES; ActionIndex++ )
-      {
-         pFlags  = &pData->Action[ActionIndex];
-         pOutCfg = &pCfg->Output[ActionIndex];
-
-         // First check if any event is active for this Action
-         if ( TRUE == TestBits( MaskAll, sizeof(MaskAll),
-                                pFlags->Active, sizeof(pFlags->Active), FALSE))
-         {
-            // Find the USED LSS Bits
-            for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
-            {
-               LSS = 0;
-               // Check if this Action uses the LSS
-               if ( TRUE == BIT( pOutCfg->UsedMask, i ) )
-               {
-                  // Now make sure the persist action isn't using this LSS
-                  if ( FALSE == BIT( pData->Persist.Action.UsedMask, i )  )
-                  {
-                     // Now Make sure a higher priority Action hasn't already used this LSS
-                     if ( FALSE == BIT( pData->PriorityMask, i ) )
-                     {
-                        LSS = 0;
-                        // Set the LSS
-                        LSS    = SET_BIT ( LSS, i );
-                        Output = ( ON == BIT( pOutCfg->LSS_Mask,i ) ) ?
-                                 DIO_SetHigh : DIO_SetLow;
-                        pData->PriorityMask = SET_BIT( pData->PriorityMask, i );
-                        pFlags->bState = ON;
-                     }
-                  }
-               }
-               ActionSetOuptut ( LSS, Output );
-            }
-         }
-         else // If the Action was on and is now off we need to turn off
-         {
-            if ( ON == pFlags->bState )
-            {
-               LSS    = SET_BIT ( LSS, i );
-               Output = (ON == BIT( pOutCfg->LSS_Mask, i)) ? DIO_SetLow : DIO_SetHigh;
-               pFlags->bState = OFF;
-               ActionSetOuptut ( LSS, Output );
-            }
-         }
       }
+      pData->bUpdatePersistOut = FALSE;
    }
    else // Persist is OFF
    {
-      // Shut off persistent outputs - Reset Priority Mask
-      // Update the Action Outputs in Priority Order
-      // Loop through the Actions and see if any bit is set Active
-      // Also check the mask because the priority is only for actions that
-      // share a mask
-      for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+      if ( ( OFF == pData->persist.bState ) && ( TRUE == pData->bUpdatePersistOut) )
       {
-         LSS = 0;
-         if ( TRUE == BIT( pData->Persist.Action.UsedMask, i ) )
+         // Shut off persistent outputs - Reset Priority Mask
+         // Update the Action Outputs in Priority Order
+         // Loop through the Actions and see if any bit is set Active
+         // Also check the mask because the priority is only for actions that
+         // share a mask
+         for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
          {
-            pData->PriorityMask = RESET_BIT ( pData->PriorityMask, i );
-            LSS    = RESET_BIT ( LSS, i );
-            Output = ( ON == BIT( pData->Persist.Action.LSS_Mask,i) ) ?
-                     DIO_SetLow : DIO_SetHigh ;
-            ActionSetOuptut ( LSS, Output );
-         }
-
-      }
-
-      // Now loop through the Actions and set any outputs
-      for ( ActionIndex = 0; ActionIndex < MAX_ACTION_DEFINES; ActionIndex++ )
-      {
-         pFlags  = &pData->Action[ActionIndex];
-         pOutCfg = &pCfg->Output[ActionIndex];
-
-         // First check if any event is active for this Action
-         if ( TRUE == TestBits( MaskAll, sizeof(MaskAll),
-                                pFlags->Active, sizeof(pFlags->Active), FALSE))
-         {
-            // Find the USED LSS Bits
-            for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+            if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
             {
-               LSS = 0;
-               // Check if this Action uses the LSS
-               if ( TRUE == BIT( pOutCfg->UsedMask, i ) )
+               pData->nPriorityMask = RESET_BIT ( pData->nPriorityMask, i );
+               output = ( ON == BIT( pData->persist.action.nLSS_Mask,i) ) ?
+                        DIO_SetLow : DIO_SetHigh ;
+               ActionSetOutput ( i, output );
+            }
+         }
+         pData->bUpdatePersistOut = FALSE;
+      }
+   }
+
+   ActionRectifyOutputs ( pCfg, pData, pData->persist.bState );
+}
+
+/******************************************************************************
+ * Function:     ActionRectifyOutputs
+ *
+ * Description:  The Action Rectify Outputs converts the action flags
+ *               into the proper LSS output and then sets that output to
+ *               the proper state.
+ *
+ * Parameters:   [in] ACTION_CFG  *pCfg
+ *               [in] ACTION_DATA *pData
+ *               [in] BOOLEAN      bPersistOn
+ *
+ * Returns:      None.
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
+static
+void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersistOn )
+{
+   // Local Data
+   UINT8          i;
+   UINT32         nActionIndex;
+   ACTION_FLAGS  *pFlags;
+   ACTION_OUTPUT *pOutCfg;
+   DIO_OUT_OP     output;
+   BITARRAY128    maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+
+   // Loop through all the actions
+   for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
+   {
+      // Set the pointers
+      pFlags  = &pData->action[nActionIndex];
+      pOutCfg = &pCfg->output[nActionIndex];
+
+      // First check if any event is active for this Action
+      if ( TRUE == TestBits( maskAll, sizeof(maskAll),
+                             pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
+      {
+         // Find the USED LSS Bits
+         for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+         {
+            // Check if this Action uses the LSS
+            if ( TRUE == BIT( pOutCfg->nUsedMask, i ) )
+            {
+               if ( (FALSE == bPersistOn) ||
+                     ((TRUE  == bPersistOn) &&
+                      (FALSE == BIT(pData->persist.action.nUsedMask, i))) )
                {
                   // Now Make sure a higher priority Action hasn't already used this LSS
-                  if ( FALSE == BIT( pData->PriorityMask, i ) )
+                  if ( (FALSE == BIT( pData->nPriorityMask, i )) && (OFF == pFlags->bState) )
                   {
-                     if (OFF == pFlags->bState)
-                     {
-                        // Set the LSS
-                        LSS    = SET_BIT ( LSS, i );
-                        Output = (ON == BIT( pOutCfg->LSS_Mask,i)) ?
-                                 DIO_SetHigh : DIO_SetLow;
-                        pData->PriorityMask = SET_BIT( pData->PriorityMask, i );
-                        ActionSetOuptut ( LSS, Output );
-                        GSE_DebugStr(NORMAL,TRUE,"Output ON: LSS %d  State %d", LSS, Output  );
-                     }
+                     // Set the LSS
+                     output = ( ON == BIT( pOutCfg->nLSS_Mask,i ) ) ? DIO_SetHigh : DIO_SetLow;
+                     pData->nPriorityMask = SET_BIT( pData->nPriorityMask, i );
+                     ActionSetOutput ( i, output );
+                     GSE_DebugStr(NORMAL,TRUE,"Output ON: LSS %d  State %d", i, output );
                   }
                   pFlags->bState = ON;
-
                }
             }
          }
-         else // If the Action was on and is now off we need to turn off
+      }
+      else // If the Action was on and is now off we need to turn off
+      {
+         if ( ON == pFlags->bState )
          {
-            if ( ON == pFlags->bState )
+            for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
             {
-               for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+               if ( TRUE == BIT( pOutCfg->nUsedMask, i ) )
                {
-                  LSS = 0;
-                  if ( TRUE == BIT( pOutCfg->UsedMask, i ) )
-                  {
-                     LSS    = SET_BIT ( LSS, i );
-                     Output = (ON == BIT( pOutCfg->LSS_Mask, i)) ?
-                              DIO_SetLow : DIO_SetHigh;
-                     ActionSetOuptut ( LSS, Output );
-                     GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", LSS, Output  );
-                     pData->PriorityMask = RESET_BIT( pData->PriorityMask, i );
-                  }
+                  output = (ON == BIT( pOutCfg->nLSS_Mask, i)) ? DIO_SetLow : DIO_SetHigh;
+                  ActionSetOutput ( i, output );
+                  GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, output  );
+                  pData->nPriorityMask = RESET_BIT( pData->nPriorityMask, i );
                }
-               pFlags->bState = OFF;
             }
+            pFlags->bState = OFF;
          }
       }
    }
@@ -569,10 +788,12 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
 /******************************************************************************
  * Function:     ActionSetOutput
  *
- * Description:
+ * Description:  The Action Set Output converts the passed in LSS Mask
+ *               into the proper LSS output and then sets that output to
+ *               requested state.
  *
- *
- * Parameters:
+ * Parameters:   [in] UINT8 nLSS
+ *               [in] DIO_OUT_OP state
  *
  * Returns:      None.
  *
@@ -580,21 +801,21 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
  *
  *****************************************************************************/
 static
-void ActionSetOuptut ( UINT8 LSS, DIO_OUT_OP State )
+void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 {
-   switch (LSS)
+   switch (nLSS)
    {
-      case LSS0MASK:
-         DIO_SetPin(LSS0, State);
+      case LSS0_INDEX:
+         DIO_SetPin(LSS0, state);
          break;
-      case LSS1MASK:
-         DIO_SetPin(LSS1, State);
+      case LSS1_INDEX:
+         DIO_SetPin(LSS1, state);
          break;
-      case LSS2MASK:
-         DIO_SetPin(LSS2, State);
+      case LSS2_INDEX:
+         DIO_SetPin(LSS2, state);
          break;
-      case LSS3MASK:
-         DIO_SetPin(LSS3, State);
+      case LSS3_INDEX:
+         DIO_SetPin(LSS3, state);
          break;
       default:
          break;
@@ -605,6 +826,11 @@ void ActionSetOuptut ( UINT8 LSS, DIO_OUT_OP State )
  *  MODIFICATIONS
  *    $History: ActionManager.c $
  * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12-07-27   Time: 3:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Action Manager Persistent Updates
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:32a
  * Created in $/software/control processor/code/system

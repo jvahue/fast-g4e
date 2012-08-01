@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 9 $  $Date: 7/18/12 12:11p $
+  $Revision: 10 $  $Date: 7/30/12 7:29p $
 
 ******************************************************************************/
 
@@ -685,6 +685,7 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
+    opStatus      = FALSE;
   }
   else
   {
@@ -1283,6 +1284,11 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Contractor V&v Date: 7/30/12    Time: 7:29p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Fix evaluator
  * 
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 12:11p

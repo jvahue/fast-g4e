@@ -16,7 +16,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 95 $  $Date: 12-05-24 9:38a $
+      $Revision: 96 $  $Date: 7/19/12 11:08a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -476,7 +476,7 @@ void LogPreInit(void)
    for (i=0; i<SYSTEM_TABLE_MAX_SIZE; i++)
    {
       SystemTable[i].Source   = SYS_ID_NULL_LOG;
-      SystemTable[i].Priority = LOG_PRIORITY_LOW;
+      SystemTable[i].Priority = LOG_PRIORITY_DONT_CARE;
       SystemTable[i].WrStatus = LOG_REQ_NULL;
       SystemTable[i].Result   = SYS_OK;
       memset(&SystemTable[i].Payload, 0, sizeof(SystemTable[i].Payload));
@@ -1004,7 +1004,7 @@ UINT32 LogWriteSystem (SYS_APP_ID LogID, LOG_PRIORITY Priority,
  *****************************************************************************/
 UINT32 LogWriteETM (SYS_APP_ID LogID, LOG_PRIORITY Priority,
                     void *pData, UINT16 nSize, TIMESTAMP *pTs)
-           {
+{
 
    // Return the SystemTable index in case the caller needs to track the status.   
    return ( LogManageWrite ( LogID, Priority, pData, nSize, pTs, LOG_TYPE_ETM ) );
@@ -2728,6 +2728,11 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 96  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:08a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 95  *****************
  * User: John Omalley Date: 12-05-24   Time: 9:38a

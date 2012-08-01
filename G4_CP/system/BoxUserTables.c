@@ -8,7 +8,7 @@
     Description:
 
     VERSION
-    $Revision: 27 $  $Date: 10/11/11 4:58p $
+    $Revision: 28 $  $Date: 7/26/12 2:10p $
 
 
 ******************************************************************************/
@@ -887,7 +887,7 @@ USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
 
   if(SetPtr == NULL)
   {
-    **(UINT32**)GetPtr = UploadMgr_GetFilesPendingRoundTrip();
+    **(UINT32**)GetPtr = UploadMgr_GetFilesPendingRT();
     result = USER_RESULT_OK;
   }
   return result;
@@ -897,6 +897,11 @@ USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: BoxUserTables.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 2:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 Code review changes
  * 
  * *****************  Version 27  *****************
  * User: John Omalley Date: 10/11/11   Time: 4:58p

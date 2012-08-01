@@ -11,7 +11,7 @@
     Description: Package system logs and application (flight data)logs
     
     VERSION
-    $Revision: 40 $  $Date: 7/20/11 10:54a $    
+    $Revision: 42 $  $Date: 7/26/12 4:57p $    
     
 ******************************************************************************/
 
@@ -200,12 +200,12 @@ EXPORT void     UploadMgr_SetUploadEnable(BOOLEAN Enable);
 EXPORT void     UploadMgr_WriteVfyTblRowsLog(void);
 EXPORT BOOLEAN  UploadMgr_DeleteFVTEntry(const INT8* FN);
 EXPORT BOOLEAN  UploadMgr_InitFileVfyTbl(void);
-EXPORT INT32    UploadMgr_GetNumFilesPendingRoundTrip(void);
+EXPORT INT32    UploadMgr_GetNumFilesPendingRT(void);
 EXPORT void     UploadMgr_VfyDeleteIncomplete(void);
-EXPORT UINT32   UploadMgr_GetFilesPendingRoundTrip(void);
+EXPORT UINT32   UploadMgr_GetFilesPendingRT(void);
 EXPORT void     UploadMgr_FSMRun( BOOLEAN Run, INT32 Param );
 EXPORT BOOLEAN  UploadMgr_FSMGetState( INT32 param );
-EXPORT BOOLEAN  UploadMgr_FSMGetStateFilesPendingRoundTrip( INT32 param );
+EXPORT BOOLEAN  UploadMgr_FSMGetFilesPendingRT( INT32 param );
 EXPORT void     UploadMgr_FSMRunAuto( BOOLEAN Run, INT32 Param );
 
 #ifdef GENERATE_SYS_LOGS
@@ -218,6 +218,16 @@ EXPORT void     UploadMgr_GenerateDebugLogs(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.h $
+ * 
+ * *****************  Version 42  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 4:57p
+ * Updated in $/software/control processor/code/application
+ * SCR 1076: Code review updates
+ * 
+ * *****************  Version 41  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 2:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1076 Code Review Updates
  * 
  * *****************  Version 40  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:54a

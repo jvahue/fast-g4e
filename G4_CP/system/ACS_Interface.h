@@ -10,7 +10,7 @@
     Description: All data elements required for an ACS are defined here.
     
     VERSION
-      $Revision: 2 $  $Date: 10/26/11 6:44p $     
+      $Revision: 3 $  $Date: 7/19/12 11:07a $     
     
 ******************************************************************************/
 
@@ -28,6 +28,7 @@
 ******************************************************************************/
 #define ACS_CONFIG_DEFAULT    "None",         /* Model              */\
                               "FAST-None",    /* ACS ID             */\
+                              LOG_PRIORITY_3, /* ACS Priority       */\
                               ACS_PORT_NONE,  /* ACS Port Type      */\
                               0,              /* Port Index         */\
                               1000,           /* Packet Size in Ms  */\
@@ -47,6 +48,7 @@
 
 #define MAX_ACS_CONFIG          8
 #define MAX_ACS_NAME            32
+
 
 typedef enum
 {
@@ -84,17 +86,20 @@ typedef enum
    DL_WRITE_FAIL
 } DL_WRITE_STATUS;
 
+#pragma pack(1)
 // Definition of an ACS configuration.
 typedef struct
 {
   CHAR          Model[MAX_ACS_NAME]; 
   CHAR          ID[MAX_ACS_NAME];
+  LOG_PRIORITY  Priority;
   ACS_PORT_TYPE PortType;
   UINT8         PortIndex;
   UINT16        PacketSize_ms;
   FLT_STATUS    SystemCondition; 
   ACS_MODE      Mode;
 } ACS_CONFIG;
+#pragma pack()
 
 //A type for an array of the maximum number of ACSs
 //Used for storing ACS configurations in the configuration manager
@@ -125,6 +130,11 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 10/26/11   Time: 6:44p

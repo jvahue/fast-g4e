@@ -24,7 +24,7 @@
                  "transmitted" with one command.                 
 
     VERSION
-    $Revision: 25 $  $Date: 11/15/10 10:34a $   
+    $Revision: 26 $  $Date: 7/19/12 10:41a $   
     
 ******************************************************************************/
 
@@ -106,6 +106,8 @@ typedef enum{
   TASK_WAIT,
   TASK_REQUEST_NON_TXD_FILE_LIST,
   TASK_REQUEST_TXD_FILE_LIST,
+  TASK_REQPRI4_NON_TXD_FILE_LIST,
+  TASK_REQPRI4_TXD_FILE_LIST,
   TASK_REQUEST_START_FILE,
   TASK_MARK_FILE_TXD,
   TASK_YMDM_SNDR_WAIT_FOR_START,
@@ -185,6 +187,8 @@ static void    MSFX_Signal(BOOLEAN Success);
 
 static void    MSFX_RequestNonTxdFileListState(void);
 static void    MSFX_RequestTxdFileListState(void);
+static void    MSFX_ReqPri4TxdFileListState(void);
+static void    MSFX_ReqPri4NonTxdFileListState(void);
 static void    MSFX_RequestStartFileSndrState(void);
 static void    MSFX_MarkFileTransmittedState(void);
 static void    MSFX_YMdmSndrWaitForStart(void);
@@ -198,6 +202,7 @@ static void    MSFX_YMdmRcvrSendStartChar(void);
 static void    MSFX_YMdmRcvrSendACK(void);
 static void    MSFX_YMdmRcvrSendNAK(void);
 static void    MSFX_YMdmRcvrWaitForSndr(void);
+
 #include "MSFileXfrUserTables.c"  // Include cmd tables & functions .c
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -272,6 +277,8 @@ void MSFX_Init(void)
  *              RequestNonTXDFileList: to create and download a file containing
  *                                     a list of log files that have not been
  *                                     transmitted
+ *              ReqPri4TXDFileList:
+ *              ReqPri4NonTXDFileList:
  *
  *              ..and then enabling the task.  
  *
@@ -313,7 +320,15 @@ static void MSFX_Task(void* pParam)
     case TASK_REQUEST_TXD_FILE_LIST:
       MSFX_RequestTxdFileListState();
       break;
-    
+      
+    case TASK_REQPRI4_NON_TXD_FILE_LIST:
+      MSFX_ReqPri4NonTxdFileListState();
+      break;
+      
+    case TASK_REQPRI4_TXD_FILE_LIST:
+      MSFX_ReqPri4TxdFileListState();
+      break;
+      
     case TASK_REQUEST_START_FILE:
       MSFX_RequestStartFileSndrState();
       break;
@@ -382,21 +397,28 @@ static void MSFX_Task(void* pParam)
  *                             Request the list of transmitted log files
  *                             TASK_REQUEST_NON_TXD_FILE_LIST:
  *                             Request the list of non-transmitted log files
- *
+ *			       TASK_REQPRI4_NON_TXD_FILE_LIST:
+ *		               Request the list of non-transmitted log files
+ *                             in the priority 4 dir
+ *                             TASK_REQPRI4_TXD_FILE_LIST:
+ *                             Request the list of transmitted log files
+ *                             in the priority 4 dir
  *
  * Returns:     TRUE: Task started successfully
  *              FALSE: Task did not start.
  *
- * Notes:       ASSERT check that the parameter is one of the two aforementioned
- *              states.
+ * Notes:       ASSERT check that the parameter is one of the two 
+ *              aforementioned states.
  *
  *****************************************************************************/
 static BOOLEAN MSFX_RequestFileList(MSFX_TASK_STATE ListType)
 {
   BOOLEAN retval = FALSE;
  
-  ASSERT(ListType == TASK_REQUEST_TXD_FILE_LIST ||
-         ListType == TASK_REQUEST_NON_TXD_FILE_LIST);
+  ASSERT( (ListType == TASK_REQUEST_TXD_FILE_LIST)    ||
+          (ListType == TASK_REQUEST_NON_TXD_FILE_LIST)||
+          (ListType == TASK_REQPRI4_NON_TXD_FILE_LIST)||
+          (ListType == TASK_REQPRI4_TXD_FILE_LIST)      );
   
   if((m_TaskState == TASK_STOPPED ) || (m_TaskState == TASK_ERROR))
   {
@@ -535,6 +557,7 @@ static BOOLEAN MSFX_MarkFileAsTransmitted(const INT8* FN)
   return retval;
 }
 
+
 /******************************************************************************
  * Function:    MSFX_RequestNonTxdFileListState
  *
@@ -610,6 +633,93 @@ static void MSFX_RequestTxdFileListState(void)
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
             "MS returned fail for get file list");
   
+  if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
+        sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
+  {
+    MSFX_Error("Could not send MS command, file list");
+    m_TaskState = TASK_ERROR;
+  }
+}
+
+
+
+/******************************************************************************
+ * Function:    MSFX_ReqPri4TxdFileListState
+ *
+ * Description: Request the list of transmitted priority 4 files from the
+ *		micro-server
+ *              Previous state: STOPPED
+ *              Next state:     WAIT_FOR_REQUEST_FILE_LIST_RSP
+ *                              ERROR
+ *              
+ * Parameters:  none
+ *
+ * Returns:     none
+ *
+ * Notes:       
+ *
+ *****************************************************************************/
+static void MSFX_ReqPri4TxdFileListState(void)
+{
+  MSCP_CP_SHELL_CMD cmd;
+ 
+ 
+  //Set file name and path
+  sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
+
+  //construct a command to create a formatted listing of the CP_SAVED
+  //folder and pipe it to /tmp
+  sprintf(cmd.Str,"ls -lre [CP_PRI4] | grep [.]qc > %s",m_FileXfrData.FN);
+
+  cmd.Len = strlen(cmd.Str) + 1;
+
+
+  MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
+            "MS returned fail for get file list");
+  
+  if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
+        sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
+  {
+    MSFX_Error("Could not send MS command, file list");
+    m_TaskState = TASK_ERROR;
+  }
+}
+
+
+
+/******************************************************************************
+ * Function:    MSFX_ReqPri4NonTxdFileListState
+ *
+ * Description: Request the list of non-transmitted priority 4 files from the
+ *		micro-server
+ *              Previous state: STOPPED
+ *              Next state:     WAIT
+ *                              ERROR
+ *              
+ * Parameters:  none
+ *
+ * Returns:     none 
+ *
+ * Notes:       
+ *
+ *****************************************************************************/
+static void MSFX_ReqPri4NonTxdFileListState(void)
+{
+  MSCP_CP_SHELL_CMD cmd;
+ 
+ 
+  //Set file name and path
+  sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
+
+  //construct a command to create a formatted listing of the CP_FILES
+  //folder and pipe it to /tmp
+  sprintf(cmd.Str,"ls -lre [CP_PRI4] | grep -v [.]qc > %s",
+      m_FileXfrData.FN);
+  
+  cmd.Len = strlen(cmd.Str) + 1;
+
+  MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
+      "MS returned fail for get file list");
   if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
   {
@@ -1795,7 +1905,9 @@ static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
   INT8 *ptr;
   if(Status == MSI_RSP_SUCCESS)
   {
-    if(rsp->Status >= 0)
+    if((rsp->Status == MSCP_FILE_XFRD_OK) ||
+       (rsp->Status == MSCP_FILE_XFRD_CRC_FILE_EXISTS) ||
+       (rsp->Status == MSCP_FILE_XFRD_LOG_ALREADY_MOVED) )
     {
       //Strip Micro-Server added file extensions
       ptr = strstr(m_FileXfrData.FN,".bz2.bfe");
@@ -1813,6 +1925,12 @@ static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
         MSFX_Error("MS Mark Log cmd, remove FVT entry failed");
         MSFX_Signal(FALSE);
       }
+    }
+    //Priority 4 logs, there is no FVT entry to delete.
+    else if((rsp->Status == MSCP_PRI4_FILE_XFRD_OK) ||
+            (rsp->Status == MSCP_PRI4_FILE_XFRD_LOG_ALREADY_MOVED) )
+    {
+      MSFX_Signal(TRUE);
     }
     else if(rsp->Status == MSCP_FILE_XFRD_FNF)//File Not Found
     {
@@ -1954,6 +2072,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 25  *****************
  * User: Jim Mood     Date: 11/15/10   Time: 10:34a

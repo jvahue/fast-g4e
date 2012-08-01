@@ -13,7 +13,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 153 $  $Date: 2/24/12 10:32a $
+   $Revision: 156 $  $Date: 7/26/12 4:57p $
     
 ******************************************************************************/
 
@@ -108,8 +108,6 @@ typedef enum
   FILE_UL_WAIT_DATA_UL_RSP,
   FILE_UL_WAIT_END_UL_RSP,
   FILE_UL_FINISHED,
-  FILE_UL_SEND_GET_FILE_STATUS,
-  FILE_UL_WAIT_FILE_STATUS_RSP,
   FILE_UL_ERROR
 }UPLOADMGR_FILE_UL_STATE;
 
@@ -209,7 +207,7 @@ static UPLOADMGR_FILE_UL_TASK_DATA ULTaskData;
 
 //Micro-server response status.  This data is volatile because it
 //is modified by two different tasks with different priorities.
-static volatile BOOLEAN GotResponse;
+static volatile BOOLEAN m_GotResponse;
 static volatile BOOLEAN ResponseStatusSuccess;
 static volatile BOOLEAN ResponseStatusTimeout;
 static volatile BOOLEAN ResponseStatusBusy;
@@ -225,17 +223,43 @@ static volatile MSCP_CHECK_FILE_RSP  CheckFileRsp;  //Data for a check file resp
 //log files for upload in this order.  Number of files to upload is the
 //maximum possible ACS sources, plus one for system logs
 static UPLOADMGR_UPLOAD_ORDER_TBL UploadOrderTbl[] =
-               {{LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_1 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_2 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_3 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_4 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_5 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_6 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_7 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_8 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_9 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_DONT_CARE ,ACS_10},
-                {LOG_TYPE_SYSTEM,LOG_PRIORITY_DONT_CARE ,ACS_DONT_CARE}};
+               {{LOG_TYPE_ETM, LOG_PRIORITY_1,ACS_DONT_CARE},              
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_1 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_2 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_3 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_4 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_5 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_6 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_7 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_8 },		
+                {LOG_TYPE_ETM, LOG_PRIORITY_2,ACS_DONT_CARE},
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_1 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_2 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_3 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_4 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_5 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_6 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_7 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_8 },				
+                {LOG_TYPE_ETM, LOG_PRIORITY_3,ACS_DONT_CARE},
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_1 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_2 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_3 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_4 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_5 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_6 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_7 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_8 },				
+                {LOG_TYPE_ETM, LOG_PRIORITY_4,ACS_DONT_CARE},
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_1 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_2 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_3 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_4 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_5 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_6 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_7 },
+                {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_8 },				
+                {LOG_TYPE_SYSTEM,LOG_PRIORITY_3 ,ACS_DONT_CARE}};
 
 static const UINT32
   UploadFilesPerFlight = sizeof(UploadOrderTbl)/sizeof(UploadOrderTbl[0]);
@@ -271,31 +295,30 @@ static INT32   UploadMgr_GetVfyDeletedRow(void);
 static INT32   UploadMgr_StartFileVfy(INT8* FN, UINT32 Start,
                              LOG_TYPE Type, LOG_SOURCE Source,
                              LOG_PRIORITY Priority);
-static INT32   UploadMgr_UpdateFileVfy(INT32 Row,UPLOADMGR_VFY_STATE NewState,
+static void    UploadMgr_UpdateFileVfy(INT32 Row,UPLOADMGR_VFY_STATE NewState,
                               UINT32 CRC, UINT32 End);
 static INT32   UploadMgr_GetFileVfy(const INT8* FN, UPLOADMGR_FILE_VFY* VfyRow);
 static LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd);
 
 static void    UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status);
-static BOOLEAN UploadMgr_MSValidateCRCCmdHandler(void* Data,UINT16 Size,
+static BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
                              UINT32 Sequence);
 static BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 Timeout, void* Data, UINT32 Size);
 static void    UploadMgr_VerifyMSCmdsCallback(UINT16 Id, void* PacketData, 
                              UINT16 Size, MSI_RSP_STATUS Status);
 
-static BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op, 
-                             FIFO* FileQueue);
+static BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op);
 static void    UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
                              LOG_PRIORITY Priority, LOG_SOURCE ACS, 
                              TIMESTAMP* Timestamp);
-static void    UploadMgr_StartFileUploadTask(const INT8* FN);     
+static void UploadMgr_StartFileUploadTask(const INT8* FN, const LOG_PRIORITY Priority);
 
 static void    UploadMgr_FinishFileUpload(INT32 Row, UINT32 CRC, UINT32 LogOffset);
 
 static void    UploadMgr_PrintUploadStats(UINT32 BytesSent);
 static INT32   UploadMgr_MaintainFileTable(BOOLEAN Start);
-static void    UploadMgr_PrintInstallationInfo(UPLOADMGR_FILE_HEADER* FileHeader);
+static void    UploadMgr_PrintInstallationInfo(void);
 
 
 // Include cmd tables & function definitions here so that referenced functions 
@@ -329,7 +352,7 @@ void UploadMgr_Init(void)
   UPLOADMGR_FILE_VFY VfyRow;
   
   User_AddRootCmd(&RootMsg);
-  MSI_AddCmdHandler(CMD_ID_VALIDATE_CRC,UploadMgr_MSValidateCRCCmdHandler);
+  MSI_AddCmdHandler(CMD_ID_VALIDATE_CRC,UploadMgr_MSCRCCmdHandler);
   
   //For the user cmd to get total rows,
   m_TotalVerifyRows = UPLOADMGR_VFY_TBL_MAX_ROWS;
@@ -569,7 +592,7 @@ void UploadMgr_WriteVfyTblRowsLog(void)
  * Notes:
  *
  *****************************************************************************/
-UINT32 UploadMgr_GetFilesPendingRoundTrip(void)
+UINT32 UploadMgr_GetFilesPendingRT(void)
 {
   return UPLOADMGR_VFY_TBL_MAX_ROWS - m_FreeFVTRows;
 }
@@ -599,10 +622,7 @@ BOOLEAN UploadMgr_DeleteFVTEntry(const INT8* FN)
 
   if(row > -1)
   {
-    if(0 == UploadMgr_UpdateFileVfy(row,VFY_STA_DELETED,0,0))
-    {
-      retval = TRUE;
-    }
+    UploadMgr_UpdateFileVfy(row,VFY_STA_DELETED,0,0);
   }
   return retval;
 }
@@ -610,7 +630,7 @@ BOOLEAN UploadMgr_DeleteFVTEntry(const INT8* FN)
 
 
 /******************************************************************************
- * Function:    UploadMgr_GetNumFilesPendingRoundTrip
+ * Function:    UploadMgr_GetNumFilesPendingRT
  *  
  * Description: Return the number of files pending round trip verification in
  *              the file verification table.
@@ -623,7 +643,7 @@ BOOLEAN UploadMgr_DeleteFVTEntry(const INT8* FN)
  * Notes:
  *
  *****************************************************************************/
-INT32 UploadMgr_GetNumFilesPendingRoundTrip(void)
+INT32 UploadMgr_GetNumFilesPendingRT(void)
 {
   INT32 i;
   INT32 msvfy = 0;
@@ -654,7 +674,7 @@ INT32 UploadMgr_GetNumFilesPendingRoundTrip(void)
  *              
  * Parameters:  none
  *
- * Returns:     TRUE
+ * Returns:     BOOLEAN: True (return type to satisfy NVMgr Init call sig.)
  *
  * Notes:
  *
@@ -665,7 +685,6 @@ BOOLEAN UploadMgr_InitFileVfyTbl(void)
   UINT32 MagicNumber = VFY_MAGIC_NUM;
   UINT32 startup_Id = 500000;
   UPLOADMGR_FILE_VFY VfyRow;
-  BOOLEAN status = TRUE;
 
   //Clear the row structure.  Init non-zero members.
   memset(&VfyRow,0,sizeof(VfyRow));
@@ -692,7 +711,8 @@ BOOLEAN UploadMgr_InitFileVfyTbl(void)
 
 
   GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table re-initialized");
-  return status;
+
+  return TRUE;
 }
 
 /*****************************************************************************
@@ -823,7 +843,7 @@ BOOLEAN UploadMgr_FSMGetState( INT32 param )
 
 
 /******************************************************************************
- * Function:    UploadMgr_FSMGetStateFilesPendingRT() |IMPLEMENTS GetState()
+ * Function:    UploadMgr_FSMGetFilesPendingRT()      |IMPLEMENTS GetState()
  *                                                    |FSM
  *  
  * Description: Return if there are files pending round-trip verification.
@@ -842,7 +862,7 @@ BOOLEAN UploadMgr_FSMGetState( INT32 param )
  * Notes:
  *
  *****************************************************************************/
-BOOLEAN UploadMgr_FSMGetStateFilesPendingRoundTrip( INT32 param )
+BOOLEAN UploadMgr_FSMGetFilesPendingRT( INT32 param )
 {
   return ((UPLOADMGR_VFY_TBL_MAX_ROWS - m_FreeFVTRows) != 0);
 }
@@ -857,7 +877,7 @@ BOOLEAN UploadMgr_FSMGetStateFilesPendingRoundTrip( INT32 param )
  *              If the file is invalid, it will re-initialize the verification
  *              table.
  *              
- * Parameters:  
+ * Parameters:  none
  *
  * Returns:     none
  *
@@ -888,7 +908,7 @@ void UploadMgr_OpenFileVfyTbl(void)
       GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table, bad magic number %08x",
                MagicNumber);
       
-      UploadMgr_InitFileVfyTbl();
+      UploadMgr_InitFileVfyTbl() ? 0 : 0, GSE_DebugStr(NORMAL,TRUE,"Upload: re-init failed");
     }
   }
   else
@@ -896,7 +916,7 @@ void UploadMgr_OpenFileVfyTbl(void)
     //NV_Open failed, file not initialized
     GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table, NV_Open() failed",
              MagicNumber);
-    UploadMgr_InitFileVfyTbl();
+    UploadMgr_InitFileVfyTbl() ? 0 : 0, GSE_DebugStr(NORMAL,TRUE,"Upload: re-init failed");
   }
 }
 
@@ -1072,48 +1092,44 @@ INT32 UploadMgr_StartFileVfy(INT8* FN, UINT32 Start,
  *
  *****************************************************************************/
 static
-INT32 UploadMgr_UpdateFileVfy(INT32 Row,UPLOADMGR_VFY_STATE NewState,
+void UploadMgr_UpdateFileVfy(INT32 Row,UPLOADMGR_VFY_STATE NewState,
                               UINT32 CRC, UINT32 End)
 {
   UPLOADMGR_FILE_VFY  VfyRow;
   INT8 PrevState;
-  INT32 RetVal = -1;
- 
-  if((Row < UPLOADMGR_VFY_TBL_MAX_ROWS) && (Row >= 0))
-  {
-    NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));
-    PrevState    = VfyRow.State;
+  
+  ASSERT((Row < UPLOADMGR_VFY_TBL_MAX_ROWS) && (Row >= 0));
+
+  NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));
+  PrevState    = VfyRow.State;
     
-    //If new state is higher priority, write the new state
-    if(NewState > VfyRow.State)
-    {
-      VfyRow.State = NewState;
-      NV_Write(NV_UPLOAD_VFY_TBL,
-          VFY_ROW_TO_OFFSET(Row),
-          &VfyRow,
-          sizeof(VfyRow));
-    }
-    //If the new state is COMPLETED, write the file CRC and end offset.
-    if(VFY_STA_COMPLETED == NewState)
-    {
-      VfyRow.CRC = CRC;
-      VfyRow.End = End;
-      NV_Write(NV_UPLOAD_VFY_TBL,
-          VFY_ROW_TO_OFFSET(Row),
-          &VfyRow,
-          sizeof(VfyRow));
-    }
-    /*Update free rows.
-      If a row is !deleted->deleted, increment free rows
-      Rows only go from deleted->!deleted in UploadMgr_StartFileVfy*/
-       
-    if((PrevState != VFY_STA_DELETED) && (NewState == VFY_STA_DELETED))
-    {
-      m_FreeFVTRows += 1;
-    }
-    RetVal = 0;
+  //If new state is higher priority, write the new state
+  if(NewState > VfyRow.State)
+  {
+    VfyRow.State = NewState;
+    NV_Write(NV_UPLOAD_VFY_TBL,
+        VFY_ROW_TO_OFFSET(Row),
+        &VfyRow,
+        sizeof(VfyRow));
   }
-  return RetVal;
+  //If the new state is COMPLETED, write the file CRC and end offset.
+  if(VFY_STA_COMPLETED == NewState)
+  {
+    VfyRow.CRC = CRC;
+    VfyRow.End = End;
+    NV_Write(NV_UPLOAD_VFY_TBL,
+        VFY_ROW_TO_OFFSET(Row),
+        &VfyRow,
+        sizeof(VfyRow));
+  }
+  /*Update free rows.
+    If a row is !deleted->deleted, increment free rows
+    Rows only go from deleted->!deleted in UploadMgr_StartFileVfy*/
+     
+  if((PrevState != VFY_STA_DELETED) && (NewState == VFY_STA_DELETED))
+  {
+    m_FreeFVTRows += 1;
+  }
 }
 
 
@@ -1166,7 +1182,7 @@ INT32 UploadMgr_GetFileVfy(const INT8* FN, UPLOADMGR_FILE_VFY* VfyRow)
  *
  * Returns:     none
  *
- * Notes:
+ * Notes:       Function exceeds cyclomatic and nesting complexity 
  *
  *****************************************************************************/
 static
@@ -1262,7 +1278,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         Task->State = LOG_COLLECTION_WAIT_END_OF_FLIGHT_LOGGED;
         // Display installation info to the version
-        UploadMgr_PrintInstallationInfo(&Task->FileHeader);
+        UploadMgr_PrintInstallationInfo();
         
       }
       else if(-1 == i)
@@ -1474,7 +1490,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
         if(Task->VfyRow >= 0)
         {
           //Start the upload task and create the file header
-          UploadMgr_StartFileUploadTask(Task->FN);
+          UploadMgr_StartFileUploadTask(Task->FN, UploadOrderTbl[Task->UploadOrderIdx].Priority);
 
           UploadMgr_MakeFileHeader(&Task->FileHeader,
               UploadOrderTbl[Task->UploadOrderIdx].Type,
@@ -1483,6 +1499,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
               &Timestamp);
                     
           //Put file data into the queue and start the CRC computation.
+          //Q is empty at this point, so no concern about overflow.
           FIFO_PushBlock(&FileDataFIFO,&Task->FileHeader,
               sizeof(Task->FileHeader));
           
@@ -1562,6 +1579,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
               else
               {
                 GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_FIND_LOG-ReadLog=SUCCESS");
+
+                //Ignore return, .
                 FIFO_PushBlock(&FileDataFIFO,&Task->LogBuf,Task->LogSize);
                 CRC32(&Task->LogBuf,Task->LogSize,&Task->VfyCRC,
                       CRC_FUNC_NEXT);
@@ -1661,9 +1680,6 @@ void UploadMgr_FileCollectionTask(void *pParam)
       if(FILE_UL_FINISHED == ULTaskData.State)
       {
         //File transfer has successfully completed. 
-        Task->FileFailCnt = 0;
-        Task->FileUploadedCnt++;
-        GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Upload Complete");
         TickLast = CM_GetTickCount();
         Task->State = LOG_COLLECTION_WT_FOR_MS_TO_VFY;
       }
@@ -1689,21 +1705,21 @@ void UploadMgr_FileCollectionTask(void *pParam)
         Task->State = 
           MSI_PutCommand(CMD_ID_CHECK_FILE,&CheckCmdData,sizeof(CheckCmdData),10000,
           UploadMgr_VerifyMSCmdsCallback)  == SYS_OK ? 
-          LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_NEXTFILE;
+          LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_FILE_UL_ERROR;
         TickLast = CM_GetTickCount();
         CheckFileCnt = UPLOADMGR_CHECK_FILE_CNT;
       }
       else if(MS_CRC_RESULT_FAIL == m_MSCrcResult)
       {
         //If CRC failed, it will be deleted and re-uploaded on the next cycles
-        Task->State = LOG_COLLECTION_NEXTFILE;
+        Task->State = LOG_COLLECTION_FILE_UL_ERROR;
 
       }
       else
       {
         if( (CM_GetTickCount() - TickLast) > UPLOADMGR_MS_VFY_TIMEOUT )
         {
-          Task->State = LOG_COLLECTION_NEXTFILE;
+          Task->State = LOG_COLLECTION_FILE_UL_ERROR;
           GSE_DebugStr(NORMAL, FALSE,
             "UploadMgr LC: Timeout waiting for CRC from Micro-Server, moving onto next file");
         }          
@@ -1720,9 +1736,12 @@ void UploadMgr_FileCollectionTask(void *pParam)
         //GS verified or failed in the time we are checking the file.
         if(CheckFileRsp.FileSta >= MSCP_FILE_STA_MSVALID)
         {
-          //Verified, update entry.
+          //Verified, update entry to verified on CF for priority 1,2,3,4
           UploadMgr_UpdateFileVfy(Task->VfyRow,VFY_STA_MSVFY,0,0);
           GSE_StatusStr(NORMAL,"Done!");
+	  Task->FileFailCnt = 0;
+          Task->FileUploadedCnt++;
+          GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Upload Complete");
           Task->State = LOG_COLLECTION_NEXTFILE;
         }
         else
@@ -1737,17 +1756,17 @@ void UploadMgr_FileCollectionTask(void *pParam)
               GSE_StatusStr(NORMAL,".");
               strncpy_safe(CheckCmdData.FN,sizeof(CheckCmdData.FN),Task->FN,_TRUNCATE);
               //If MSI fails to to put the command, treat it as a MS response failure 
-              //and attempt the next file
+              //and attempt the file again
               Task->State = 
               MSI_PutCommand(CMD_ID_CHECK_FILE,&CheckCmdData,sizeof(CheckCmdData),10000,
                   UploadMgr_VerifyMSCmdsCallback)  == SYS_OK ? 
-                  LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_NEXTFILE;
+                  LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_FILE_UL_ERROR;
 
               TickLast = CM_GetTickCount();
             }
             else
             {  
-              Task->State = LOG_COLLECTION_NEXTFILE;
+              Task->State = LOG_COLLECTION_FILE_UL_ERROR;
               GSE_DebugStr(NORMAL, FALSE,
                   "UploadMgr LC: Timeout waiting for Micro-Server to move file");
             }
@@ -1756,7 +1775,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       }
       else if(VfyRspFailed)
       {
-        Task->State = LOG_COLLECTION_NEXTFILE;
+        Task->State = LOG_COLLECTION_FILE_UL_ERROR;
       }
     break;
 
@@ -1802,7 +1821,6 @@ void UploadMgr_FileCollectionTask(void *pParam)
         Task->State = LOG_COLLECTION_STARTFILE;                
       }
       break;
-
     case LOG_COLLECTION_POST_MAINTENANCE:
       //MaintainFileTable() return 0 while in progress.  When it returns 1,
       //continue to the next task.  -1 indicates an error occurred, so quit
@@ -1825,6 +1843,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
           GSE_DebugStr(NORMAL, TRUE,
                 "UploadMgr: LC %d of %d files not uploaded, skip FLASH erase",
                 Task->FileNotUploadedCnt,
+                
                 Task->FileUploadedCnt+Task->FileNotUploadedCnt);
                
           Task->State = LOG_COLLECTION_FINISHED;
@@ -1912,7 +1931,9 @@ void UploadMgr_FileCollectionTask(void *pParam)
  *                 the Start parameter set to TRUE again.
  *
  * Notes:       The very first call with Start set to TRUE will always return
- *              with a value of 0.  
+ *              with a value of 0.
+ * 
+ *              Function exceeds cyclomatic and nesting complexity 
  *
  *****************************************************************************/
 static
@@ -1997,11 +2018,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
       //Once deleted from MS, delete from the Verification Table
       if(CMD_ID_REMOVE_LOG_FILE == VfyRspId )
       {
-        /*if*/(0 != UploadMgr_UpdateFileVfy(Row,VFY_STA_DELETED,0,0)) ?
-        //{
-          GSE_DebugStr(NORMAL, TRUE, "UploadMgr FVT: Delete row %d failed",Row),0
-        //}
-        :0;
+        UploadMgr_UpdateFileVfy(Row,VFY_STA_DELETED,0,0);
 
         GSE_DebugStr(NORMAL,FALSE,"   Done!");
         State = TBL_MAINT_SRCH_STARTED_MSFAIL;
@@ -2064,7 +2081,16 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
           m_FreeFVTRows += 1
         //}
           :0;
-        NV_Write(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));         
+
+	//For priority 4 log files, no data is transmitted to the ground, so no
+	//round trip CRC is expected.  Delete the entry once the logs have been
+	//marked for deletion.
+	if(VfyRow.Priority == LOG_PRIORITY_4)
+	{
+	  VfyRow.State = VFY_STA_DELETED;
+        }
+
+	NV_Write(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));         
         State = TBL_MAINT_SRCH_LOG_DELETED;
         GSE_StatusStr(NORMAL,"Done!");
       }
@@ -2158,7 +2184,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
 
 
 /******************************************************************************
- * Function:    UploadMgr_CheckLogCommandCallback | MS Response Handler
+ * Function:    UploadMgr_CheckLogCmdCallback | MS Response Handler
  *  
  * Description: Handles responses to the Remove Log File and Check File
  *              commands that are sent from the file verification table
@@ -2178,7 +2204,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
  *
  *****************************************************************************/
 static
-void UploadMgr_CheckLogCommandCallback(UINT16 Id, void* PacketData, UINT16 Size,
+void UploadMgr_CheckLogCmdCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status)
 {
   MSCP_CHECK_FILE_RSP *rsp  = PacketData;
@@ -2306,7 +2332,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
                                        &cmd,
                                        sizeof(cmd),
                                        5000,
-                                       UploadMgr_CheckLogCommandCallback) == SYS_OK ? Row : -2;
+                                       UploadMgr_CheckLogCmdCallback) == SYS_OK ? Row : -2;
         FileFound = TRUE;
         m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0;
       }
@@ -2653,11 +2679,7 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
  *
  * Parameters:  [in] FN: < 64 char string for the data's file name. 
  *                         note: longer strings will be truncated
- *              [in] LogStart:  Log manager start offset for this file
- *              [in] LogEnd:    Log manager end offset for this file
- *              [in] LogType:   Log manager log type for this file
- *              [in] LogSource: Log manager log source for this file
- *              [in] LogPriority: Log manager priority for this file
+ *              [in] Priority: Log manager priority for this file
  *
  *
  * Returns:     TRUE:  Upload process started
@@ -2668,7 +2690,7 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
  *
  *****************************************************************************/
 static
-void UploadMgr_StartFileUploadTask(const INT8* FN)
+void UploadMgr_StartFileUploadTask(const INT8* FN, const LOG_PRIORITY Priority)
 {
   //File data queue
   FIFO_Flush(&FileDataFIFO);                
@@ -2677,16 +2699,16 @@ void UploadMgr_StartFileUploadTask(const INT8* FN)
   ULTaskData.State            = FILE_UL_INIT;
   ULTaskData.FailCnt          = 0;
   ULTaskData.FinishFileUpload = FALSE;
-
-  //Deleted verification row found, upload can start.
+  
+  //Initialize Upload Task data for this file.
   strncpy_safe(ULTaskData.LogFileInfo.FileName,
           sizeof(ULTaskData.LogFileInfo.FileName),
           FN,
           _TRUNCATE);
-
+  ULTaskData.LogFileInfo.Priority = Priority;
+  
   //Start upload task.
   TmTaskEnable(UL_Log_File_Upload, TRUE);
-
 }
 
 
@@ -2738,59 +2760,59 @@ void  UploadMgr_FinishFileUpload(INT32 Row, UINT32 CRC, UINT32 LogOffset)
  *
  * Returns:     none
  *
- * Notes:
+ * Notes:       Function exceeds cyclomatic and nesting complexity 
  *
  *****************************************************************************/
 static
 void UploadMgr_FileUploadTask(void *pParam)
 {
-  UPLOADMGR_FILE_UL_TASK_DATA* Task =  pParam;
-  static UINT32                EndLogPollDecimator;
+  UPLOADMGR_FILE_UL_TASK_DATA* task =  pParam;
+  static UINT32                endLogPollDecimator = 0;
    
-  switch (Task->State)                             
+  switch (task->State)                             
   {
     case FILE_UL_INIT:
       if( UploadMgr_SendMSCmd(CMD_ID_START_LOG_DATA,30000,  
-                          &Task->LogFileInfo,
-                          sizeof(Task->LogFileInfo)))
+                          &task->LogFileInfo,
+                          sizeof(task->LogFileInfo)))
       {
-        Task->State = FILE_UL_WAIT_START_UL_RSP;
+        task->State = FILE_UL_WAIT_START_UL_RSP;
         UploadMgr_PrintUploadStats(0);
       }
       else
       {
         GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put Start Log failed");
-        Task->FailCnt++;
-        if(Task->FailCnt  >= UPLOADMGR_START_LOG_FAIL_MAX)
+        task->FailCnt++;
+        if(task->FailCnt  >= UPLOADMGR_START_LOG_FAIL_MAX)
         {
-          Task->State = FILE_UL_ERROR;
+          task->State = FILE_UL_ERROR;
         }
       }
       break;
     
     case FILE_UL_WAIT_START_UL_RSP:
-      if(GotResponse)
+      if(m_GotResponse)
       {
         if(ResponseStatusSuccess)
         {          
-          if(UploadMgr_UploadFileBlock(UPLOAD_BLOCK_FIRST,&FileDataFIFO))
+          if(UploadMgr_UploadFileBlock(UPLOAD_BLOCK_FIRST))
           {
-            Task->FailCnt = 0;
-            Task->State = FILE_UL_WAIT_DATA_UL_RSP;
+            task->FailCnt = 0;
+            task->State = FILE_UL_WAIT_DATA_UL_RSP;
           }
           else
           {
             GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put Log Data failed");
-            Task->FailCnt++;
-            if(Task->FailCnt  >= UPLOADMGR_START_LOG_FAIL_MAX)
+            task->FailCnt++;
+            if(task->FailCnt  >= UPLOADMGR_START_LOG_FAIL_MAX)
             {
-              Task->State = FILE_UL_ERROR;
+              task->State = FILE_UL_ERROR;
             }
           }
         }
         else  //status == FAIL, retry same command until fail count exceeded
         {
-          Task->State = Task->FailCnt++ < UPLOADMGR_START_LOG_FAIL_MAX ? 
+          task->State = task->FailCnt++ < UPLOADMGR_START_LOG_FAIL_MAX ? 
                         FILE_UL_INIT : FILE_UL_ERROR;
         }
       }
@@ -2798,117 +2820,117 @@ void UploadMgr_FileUploadTask(void *pParam)
 
     case FILE_UL_WAIT_DATA_UL_RSP:
       //Wait for response from ms interface.
-      if(GotResponse)
+      if(m_GotResponse)
       {
         if(ResponseStatusSuccess)
         {
           //Log collection task signals all the file data has been
           //transfered to the queue and the queue count is zero.
-          if(Task->FinishFileUpload && FileDataFIFO.Cnt == 0)
+          if(task->FinishFileUpload && FileDataFIFO.Cnt == 0)
           {
             if(UploadMgr_SendMSCmd(CMD_ID_END_LOG_DATA,5000,
-                                   &Task->LogFileInfo,
-                                   sizeof(Task->LogFileInfo)))
+                                   &task->LogFileInfo,
+                                   sizeof(task->LogFileInfo)))
             {
-              Task->State = FILE_UL_WAIT_END_UL_RSP;
+              task->State = FILE_UL_WAIT_END_UL_RSP;
             }
             else
             {
               GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put End Log failed");
-              Task->FailCnt++;
-              if(Task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
+              task->FailCnt++;
+              if(task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
               {
-                Task->State = FILE_UL_ERROR;
+                task->State = FILE_UL_ERROR;
               }
             }
           }
           else
           {
             if(UploadMgr_UploadFileBlock(
-              Task->FailCnt == 0 ? UPLOAD_BLOCK_NEXT:UPLOAD_BLOCK_LAST,&FileDataFIFO))
+              task->FailCnt == 0 ? UPLOAD_BLOCK_NEXT:UPLOAD_BLOCK_LAST))
             {
-              Task->FailCnt = 0;
-              Task->State = FILE_UL_WAIT_DATA_UL_RSP;
+              task->FailCnt = 0;
+              task->State = FILE_UL_WAIT_DATA_UL_RSP;
             }
             else
             {
               GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put Next Log Data failed");
-              Task->FailCnt++;
-              if(Task->FailCnt  >= UPLOADMGR_LOG_DATA_FAIL_MAX)
+              task->FailCnt++;
+              if(task->FailCnt  >= UPLOADMGR_LOG_DATA_FAIL_MAX)
               {
-                Task->State = FILE_UL_ERROR;
+                task->State = FILE_UL_ERROR;
               }
             }
           }
         }
         else  //status == FAIL, retry same block until fail count exceeded
         {
-          if(Task->FailCnt++ < UPLOADMGR_LOG_DATA_FAIL_MAX)
+          if(task->FailCnt++ < UPLOADMGR_LOG_DATA_FAIL_MAX)
           {
-            if(UploadMgr_UploadFileBlock(UPLOAD_BLOCK_LAST,&FileDataFIFO))
+            if(UploadMgr_UploadFileBlock(UPLOAD_BLOCK_LAST))
             {
               //Block queued - wait for MS response before clearing FailCnt
             }
             else //putting the command failed
             {
               GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put Last Log Data failed");
-              Task->FailCnt++;
-              if(Task->FailCnt  >= UPLOADMGR_LOG_DATA_FAIL_MAX)
+              task->FailCnt++;
+              if(task->FailCnt  >= UPLOADMGR_LOG_DATA_FAIL_MAX)
               {
-                Task->State = FILE_UL_ERROR;
+                task->State = FILE_UL_ERROR;
               }
             }
           }
           else //micro server response failed
           {            
-            Task->State = FILE_UL_ERROR;
+            task->State = FILE_UL_ERROR;
           }
         }
       }
       break;
     
     case FILE_UL_WAIT_END_UL_RSP:
-      if(GotResponse)
+      if(m_GotResponse)
       {
         if(ResponseStatusSuccess)
         {
-          Task->State = FILE_UL_FINISHED;
+          task->State = FILE_UL_FINISHED;
         }
         else if(ResponseStatusBusy)
         {
           //This resends the END LOG DATA cmd every 5s to poll the
           //microserver for the status of the file processing
-          EndLogPollDecimator = (EndLogPollDecimator + 1) % 500;
-          if(0 == EndLogPollDecimator)
+          endLogPollDecimator = (endLogPollDecimator + 1) % 500;
+          if(0 == endLogPollDecimator)
           {
             GSE_DebugStr(NORMAL,TRUE,
                   "UploadMgr: Waiting for MS to process file...");
             if( !UploadMgr_SendMSCmd(CMD_ID_END_LOG_DATA,5000,
-                                    &Task->LogFileInfo,
-                                     sizeof(Task->LogFileInfo)))              
+                                    &task->LogFileInfo,
+                                     sizeof(task->LogFileInfo)))              
             {
               GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put End Log failed");
-              Task->FailCnt++;
-              if(Task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
+              task->FailCnt++;
+              if(task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
               {
-                Task->State = FILE_UL_ERROR;
+                task->State = FILE_UL_ERROR;
               }
             }
           }
         }
         else //failed or timeout, retry command
         {
-          if( Task->FailCnt++ < UPLOADMGR_END_LOG_FAIL_MAX)
+          if( task->FailCnt++ < UPLOADMGR_END_LOG_FAIL_MAX)
           {
             if( !UploadMgr_SendMSCmd(CMD_ID_END_LOG_DATA,5000,
-                                     &Task->LogFileInfo,
-                                     sizeof(Task->LogFileInfo)))              
+                                     &task->LogFileInfo,
+                                     sizeof(task->LogFileInfo)))              
             {
               GSE_DebugStr(NORMAL,FALSE,"UploadMgr UL: Put End Log failed");
-              Task->FailCnt++;
-              if(Task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
+              task->FailCnt++;
+              if(task->FailCnt  >= UPLOADMGR_END_LOG_FAIL_MAX)
               {
-                Task->State = FILE_UL_ERROR;
+                task->State = FILE_UL_ERROR;
               }
             }
           }
@@ -2931,7 +2953,7 @@ void UploadMgr_FileUploadTask(void *pParam)
       break;
 
     default:
-      FATAL("Unsupported UPLOADMGR_FILE_UL_STATE = %d",Task->State);
+      FATAL("Unsupported UPLOADMGR_FILE_UL_STATE = %d",task->State);
       break; 
   }
 }
@@ -2971,14 +2993,14 @@ void UploadMgr_FileUploadTask(void *pParam)
  *
  *****************************************************************************/
 static
-BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op, FIFO* FileQueue)
+BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op)
 {
   BOOLEAN result = TRUE;
   static union  {
     MSCP_FILE_PACKET_INFO FileInfo;
     INT8 FileDataBuf[MSCP_CMDRSP_MAX_DATA_SIZE];
   } DataBuf;
-  static UINT32 TxSize;
+  static UINT32 txSize;
   
   //For the first data block sent, initialize the static file header information
   switch(Op)
@@ -3001,21 +3023,21 @@ BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op, FIFO* FileQueue)
         //    DataBuf size - FileInfo header
         // 2. The number of bytes remaining to be transmitted in the log data
         //    array
-        TxSize = MIN((sizeof(DataBuf) - sizeof(DataBuf.FileInfo)),
+        txSize = MIN((sizeof(DataBuf) - sizeof(DataBuf.FileInfo)),
                       FileDataFIFO.CmpltCnt);
         FIFO_PopBlock(&FileDataFIFO,
                       &DataBuf.FileDataBuf[sizeof(DataBuf.FileInfo)],
-                      TxSize);
+                      txSize);
         result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&DataBuf,
-                                     TxSize+sizeof(DataBuf.FileInfo));
-        UploadMgr_PrintUploadStats(TxSize);
+                                     txSize+sizeof(DataBuf.FileInfo));
+        UploadMgr_PrintUploadStats(txSize);
       }     
       break;
 
     case UPLOAD_BLOCK_LAST:
       //Re-upload the same block.
       result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&DataBuf,
-                                        TxSize+sizeof(DataBuf.FileInfo));
+                                        txSize+sizeof(DataBuf.FileInfo));
       break;
 
     default:
@@ -3047,40 +3069,40 @@ BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op, FIFO* FileQueue)
 static
 void UploadMgr_PrintUploadStats(UINT32 BytesSent)
 {
-  static UINT32 TimeLastmS;
-  static UINT32 TimeElapsedmS;
-  static UINT32 NextUpdateTimemS;
-  static UINT32 TotalBytesSent;
-  static UINT32 TotalMessagesSent;
+  static UINT32 timeLastmS;
+  static UINT32 timeElapsedmS;
+  static UINT32 nextUpdateTimemS;
+  static UINT32 totalBytesSent;
+  static UINT32 totalMessagesSent;
 
   //Initialize local vars if this is running for the first time
   if(0 == BytesSent)
   {
-    TimeElapsedmS = 0;
-    TimeLastmS = CM_GetTickCount();
-    NextUpdateTimemS = ONE_SEC_IN_MS;  //Update terminal 1s from now
-    TotalBytesSent = 0;
-    TotalMessagesSent = 0;
+    timeElapsedmS = 0;
+    timeLastmS = CM_GetTickCount();
+    nextUpdateTimemS = ONE_SEC_IN_MS;  //Update terminal 1s from now
+    totalBytesSent = 0;
+    totalMessagesSent = 0;
     GSE_StatusStr(NORMAL, "\r\n");
   }
   else
   {
     //Accumulate total time and data
-    TotalBytesSent += BytesSent;
-    TotalMessagesSent += 1;
-    TimeElapsedmS += (CM_GetTickCount() - TimeLastmS);
-    TimeLastmS = CM_GetTickCount();
+    totalBytesSent += BytesSent;
+    totalMessagesSent += 1;
+    timeElapsedmS += (CM_GetTickCount() - timeLastmS);
+    timeLastmS = CM_GetTickCount();
 
     //Print out status string every 1s
-    if(TimeElapsedmS > NextUpdateTimemS)
+    if(timeElapsedmS > nextUpdateTimemS)
     {
       GSE_StatusStr( NORMAL, 
                      "\rUL Task: Sent %d messages, %dkB @ %dmsg/S %dkB/S",
-                     TotalMessagesSent,
-                     TotalBytesSent/ONE_KB,
-                     TotalMessagesSent/(TimeElapsedmS/ONE_SEC_IN_MS),
-                     (TotalBytesSent/ONE_KB)/(TimeElapsedmS/ONE_SEC_IN_MS));
-      NextUpdateTimemS += ONE_SEC_IN_MS;
+                     totalMessagesSent,
+                     totalBytesSent/ONE_KB,
+                     totalMessagesSent/(timeElapsedmS/ONE_SEC_IN_MS),
+                     (totalBytesSent/ONE_KB)/(timeElapsedmS/ONE_SEC_IN_MS));
+      nextUpdateTimemS += ONE_SEC_IN_MS;
     }
   }
 }
@@ -3109,26 +3131,26 @@ void UploadMgr_PrintUploadStats(UINT32 BytesSent)
  *
  *****************************************************************************/
 static
-BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 Timeout, void* Data, UINT32 Size)
+BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 TO, void* Data, UINT32 Size)
 {
   BOOLEAN result = FALSE;
-  BOOLEAN GotResponseSave = GotResponse;
+  BOOLEAN gotResponseSave = m_GotResponse;
 
   //Reset the "GotResponse" Flag.  This must be done before sending the command
   //to prevent a race condition where Upload Task is held off after sending
   //a command and a response is received to the callback
   //before exiting this routine.
-  GotResponse = FALSE; 
+  m_GotResponse = FALSE; 
 
   //Send the command
-  if(SYS_OK == MSI_PutCommand(Id,Data,Size,Timeout,UploadMgr_MSRspCallback))
+  if(SYS_OK == MSI_PutCommand(Id,Data,Size,TO,UploadMgr_MSRspCallback))
   {
     result = TRUE;
   }
   else
   {
     //Put Command failed, restore Got Response flag to original state.
-    GotResponse = GotResponseSave; 
+    m_GotResponse = gotResponseSave; 
   }
   return result;
 }
@@ -3136,7 +3158,7 @@ BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 Timeout, void* Data, UINT32 Size)
 
 
 /******************************************************************************
- * Function:    UploadMgr_MSValidateCRCCmdHandler
+ * Function:    UploadMgr_MSCRCCmdHandler
  *
  * Description: This is a callback that is registered with the micro server
  *              interface module. It handles the command id CMD_ID_VALIDATE_CRC
@@ -3165,128 +3187,130 @@ BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 Timeout, void* Data, UINT32 Size)
  *
  *****************************************************************************/
 static
-BOOLEAN UploadMgr_MSValidateCRCCmdHandler(void* Data,UINT16 Size,
+BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
                                           UINT32 Sequence)
 {
-  MSCP_VALIDATE_CRC_CMD*      VfyCmdData = Data;
-  UPLOADMGR_FILE_VFY          VfyRow;
-  MSCP_VALIDATE_CRC_RSP       CrcRsp;
-  UPLOAD_CRC_FAIL             CrcFailLog;
-  UPLOAD_GS_TRANSMIT_SUCCESS  GsCrcPassLog;
-  INT32   Row;
-  BOOLEAN RetVal;
+  MSCP_VALIDATE_CRC_CMD*      vfyCmdData = Data;
+  UPLOADMGR_FILE_VFY          vfyRow;
+  MSCP_VALIDATE_CRC_RSP       crcRsp;
+  UPLOAD_CRC_FAIL             crcFailLog;
+  UPLOAD_GS_TRANSMIT_SUCCESS  gsCrcPassLog;
+  INT32   row;
+  BOOLEAN retval;
    
-
-  //Look up the file 
-  GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Got VfyCRCCmd for %s",VfyCmdData->FN);
-  Row = UploadMgr_GetFileVfy(VfyCmdData->FN,&VfyRow); 
-  if(Row >= 0)
+  if(Size == sizeof(*vfyCmdData))
   {
-    if((VfyCmdData->CRC == VfyRow.CRC) && (VFY_STA_DELETED != VfyRow.State))
+    //Look up the file 
+    GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Got VfyCRCCmd for %s",vfyCmdData->FN);
+    row = UploadMgr_GetFileVfy(vfyCmdData->FN,&vfyRow); 
+    if(row >= 0)
     {
-      switch(VfyCmdData->CRCSrc)
+      if((vfyCmdData->CRC == vfyRow.CRC) && (VFY_STA_DELETED != vfyRow.State))
       {
-        //Signal to Log Collection task the last file uploaded passed vfy.  File state
-        //is update only after Log Collection task verifies the file was moved to CP_FILES
-      case MSCP_CRC_SRC_MS:   //CRC from the MicroServer
-        m_MSCrcResult = MS_CRC_RESULT_VFY;
-        break;
-
-      case MSCP_CRC_SRC_GS:   //CRC from the ground server
-        UploadMgr_UpdateFileVfy(Row,VFY_STA_GROUNDVFY,0,0);
-
-        // log system message
-        strncpy_safe(GsCrcPassLog.Filename, sizeof(GsCrcPassLog.Filename),
-            VfyCmdData->FN, _TRUNCATE);
-        LogWriteSystem(APP_UPM_GS_TRANSMIT_SUCCESS, LOG_PRIORITY_LOW,
-            &GsCrcPassLog, sizeof(GsCrcPassLog), NULL);
-        GSE_DebugStr(NORMAL,TRUE,
-            "UploadMgr: Got Ground CRC for %s",VfyCmdData->FN);
-        GSE_DebugStr(NORMAL,TRUE,
-            "UploadMgr: CRC OK!, verifying log file was moved...");
-
-        //The Maintain File Table task will eventually delete the entry, but
-        //if it not running start the Check_Log task so the entry will be
-        //verified and deleted immediatly
-        if(!m_MaintainFileTableRunning)
+        switch(vfyCmdData->CRCSrc)
         {
-          m_CheckLogFileCnt++;
-          TmTaskEnable(UL_Log_Check,TRUE);
+          //Signal to Log Collection task the last file uploaded passed vfy.  File state
+          //is update only after Log Collection task verifies the file was moved to CP_FILES
+        case MSCP_CRC_SRC_MS:   //CRC from the MicroServer
+          m_MSCrcResult = MS_CRC_RESULT_VFY;
+          break;
+
+        case MSCP_CRC_SRC_GS:   //CRC from the ground server
+          UploadMgr_UpdateFileVfy(row,VFY_STA_GROUNDVFY,0,0);
+
+          // log system message
+          strncpy_safe(gsCrcPassLog.Filename, sizeof(gsCrcPassLog.Filename),
+              vfyCmdData->FN, _TRUNCATE);
+          LogWriteSystem(APP_UPM_GS_TRANSMIT_SUCCESS, LOG_PRIORITY_LOW,
+              &gsCrcPassLog, sizeof(gsCrcPassLog), NULL);
+          GSE_DebugStr(NORMAL,TRUE,
+              "UploadMgr: Got Ground CRC for %s",vfyCmdData->FN);
+          GSE_DebugStr(NORMAL,TRUE,
+              "UploadMgr: CRC OK!, verifying log file was moved...");
+
+          //The Maintain File Table task will eventually delete the entry, but
+          //if it not running start the Check_Log task so the entry will be
+          //verified and deleted immediatly
+          if(!m_MaintainFileTableRunning)
+          {
+            m_CheckLogFileCnt++;
+            TmTaskEnable(UL_Log_Check,TRUE);
+          }
+          break;
+
+        default:
+          FATAL("Unrecognized MSCP_CRC_SRC = %d",vfyCmdData->CRCSrc);
+          break;
         }
-        break;
-
-      default:
-        FATAL("Unrecognized MSCP_CRC_SRC = %d",VfyCmdData->CRCSrc);
-        break;
+        crcRsp.CRCRes = MSCP_CRC_RES_PASS;
       }
-      CrcRsp.CRCRes = MSCP_CRC_RES_PASS;
-    }
-    else if(VFY_STA_DELETED != VfyRow.State)
-    {
-      switch(VfyCmdData->CRCSrc)
+      else if(VFY_STA_DELETED != vfyRow.State)
       {
+        switch(vfyCmdData->CRCSrc)
+        {
 
-      case MSCP_CRC_SRC_MS:   //CRC from the MicroServer
-        //Signal to Log Collection task the last file uploaded failed vfy
-        UploadMgr_UpdateFileVfy(Row, VFY_STA_MSFAIL, 0,0);
-        m_MSCrcResult = MS_CRC_RESULT_FAIL;
+        case MSCP_CRC_SRC_MS:   //CRC from the MicroServer
+          //Signal to Log Collection task the last file uploaded failed vfy
+          UploadMgr_UpdateFileVfy(row, VFY_STA_MSFAIL, 0,0);
+          m_MSCrcResult = MS_CRC_RESULT_FAIL;
 
-        // log system message
-        CrcFailLog.FvtCrc = VfyRow.CRC;
-        CrcFailLog.SrcCrc = VfyCmdData->CRC;
-        strncpy_safe(CrcFailLog.Filename, sizeof(CrcFailLog.Filename),
-            VfyCmdData->FN, _TRUNCATE);
-        LogWriteSystem(APP_UPM_MS_CRC_FAIL, LOG_PRIORITY_LOW,
-            &CrcFailLog, sizeof(CrcFailLog), NULL);
-        GSE_DebugStr(NORMAL,TRUE,
-            "UploadMgr: Got MS CRC for %s",VfyCmdData->FN);
-        GSE_DebugStr(NORMAL, FALSE,
-            "UploadMgr: CRC FAILED, from MS CP:%08x MS:%08x",
-            VfyRow.CRC, VfyCmdData->CRC);
-        break;
+          // log system message
+          crcFailLog.FvtCrc = vfyRow.CRC;
+          crcFailLog.SrcCrc = vfyCmdData->CRC;
+          strncpy_safe(crcFailLog.Filename, sizeof(crcFailLog.Filename),
+              vfyCmdData->FN, _TRUNCATE);
+          LogWriteSystem(APP_UPM_MS_CRC_FAIL, LOG_PRIORITY_LOW,
+              &crcFailLog, sizeof(crcFailLog), NULL);
+          GSE_DebugStr(NORMAL,TRUE,
+              "UploadMgr: Got MS CRC for %s",vfyCmdData->FN);
+          GSE_DebugStr(NORMAL, FALSE,
+              "UploadMgr: CRC FAILED, from MS CP:%08x MS:%08x",
+              vfyRow.CRC, vfyCmdData->CRC);
+          break;
 
-      case MSCP_CRC_SRC_GS:   //CRC from the ground server
-        // log system message
-        CrcFailLog.FvtCrc = VfyRow.CRC;
-        CrcFailLog.SrcCrc = VfyCmdData->CRC;
-        strncpy_safe(CrcFailLog.Filename, sizeof(CrcFailLog.Filename),
-            VfyCmdData->FN, _TRUNCATE);
-        LogWriteSystem(APP_UPM_GS_CRC_FAIL, LOG_PRIORITY_LOW,
-            &CrcFailLog, sizeof(CrcFailLog), NULL);
+        case MSCP_CRC_SRC_GS:   //CRC from the ground server
+          // log system message
+          crcFailLog.FvtCrc = vfyRow.CRC;
+          crcFailLog.SrcCrc = vfyCmdData->CRC;
+          strncpy_safe(crcFailLog.Filename, sizeof(crcFailLog.Filename),
+              vfyCmdData->FN, _TRUNCATE);
+          LogWriteSystem(APP_UPM_GS_CRC_FAIL, LOG_PRIORITY_LOW,
+              &crcFailLog, sizeof(crcFailLog), NULL);
 
-        GSE_DebugStr(NORMAL, FALSE,
-            "UploadMgr: CRC FAILED, from ground CP:%08x Ground:%08x",
-            VfyRow.CRC, VfyCmdData->CRC);          
-        UploadMgr_UpdateFileVfy(Row, VFY_STA_DELETED , 0,0);
-        break;
+          GSE_DebugStr(NORMAL, FALSE,
+              "UploadMgr: CRC FAILED, from ground CP:%08x Ground:%08x",
+              vfyRow.CRC, vfyCmdData->CRC);          
+          UploadMgr_UpdateFileVfy(row, VFY_STA_DELETED , 0,0);
+          break;
 
-      default:
-        FATAL("Unrecognized MSCP_CRC_SRC = %d", VfyCmdData->CRCSrc);
-        break;          
+        default:
+          FATAL("Unrecognized MSCP_CRC_SRC = %d", vfyCmdData->CRCSrc);
+          break;          
+        }
+        crcRsp.CRCRes = MSCP_CRC_RES_FAIL;
       }
-      CrcRsp.CRCRes = MSCP_CRC_RES_FAIL;
+      else
+      {
+        //File not found, it was deleted.....
+        GSE_DebugStr(NORMAL,FALSE,
+            "UploadMgr: CRC FAILED, File not found (DELETED) %s",vfyRow.Name);
+        crcRsp.CRCRes = MSCP_CRC_RES_FNF;
+      }
     }
     else
     {
-      //File not found, it was deleted.....
-      GSE_DebugStr(NORMAL,FALSE,
-          "UploadMgr: CRC FAILED, File not found (DELETED) %s",VfyRow.Name);
-      CrcRsp.CRCRes = MSCP_CRC_RES_FNF;
+      //FN not found, or NV_ read error
+      crcRsp.CRCRes = MSCP_CRC_RES_FNF;
+      GSE_DebugStr(NORMAL,FALSE,"UploadMgr: CRC FAILED, File not found %s",vfyCmdData->FN);
     }
   }
-  else
-  {
-    //FN not found, or NV_ read error
-    CrcRsp.CRCRes = MSCP_CRC_RES_FNF;
-    GSE_DebugStr(NORMAL,FALSE,"UploadMgr: CRC FAILED, File not found %s",VfyCmdData->FN);
-  }
 
-  MSI_PutResponse(CMD_ID_VALIDATE_CRC,&CrcRsp,MSCP_RSP_STATUS_SUCCESS,
-      sizeof(CrcRsp),Sequence);
-  RetVal = TRUE;    
+  MSI_PutResponse(CMD_ID_VALIDATE_CRC,&crcRsp,(Size == sizeof(*vfyCmdData) ? 
+                  MSCP_RSP_STATUS_SUCCESS : MSCP_RSP_STATUS_FAIL),sizeof(crcRsp),Sequence);
+  retval = TRUE;    
 
 
-  return RetVal;
+  return retval;
 }
 
 
@@ -3314,7 +3338,7 @@ static
 void UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status)
 {
-  static const INT8* StatusStrs[MSI_RSP_TIMEOUT+1] =
+  static const INT8* statusStrs[MSI_RSP_TIMEOUT+1] =
     {"Success", "Busy", "Failed", "Timeout"};
 
   ResponseStatusSuccess = MSI_RSP_SUCCESS == Status;
@@ -3325,10 +3349,10 @@ void UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
   if(MSI_RSP_SUCCESS != Status)
   {
     GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: MS Response Id %d, Status %s",Id,
-               Status <= MSI_RSP_TIMEOUT ? StatusStrs[Status]:"Unknown");
+               Status <= MSI_RSP_TIMEOUT ? statusStrs[Status]:"Unknown");
   }
   
-  GotResponse = TRUE;
+  m_GotResponse = TRUE;
 }
 
 /******************************************************************************
@@ -3337,7 +3361,7 @@ void UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 * Description: Prints out FAST SerialNumber, installation info and date & time 
 *              for the upload.
 *
-* Parameters:  [in] - None    
+* Parameters:  none
 *
 * Returns:     none
 *
@@ -3347,11 +3371,11 @@ void UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 *
 *****************************************************************************/
 static
-void UploadMgr_PrintInstallationInfo(UPLOADMGR_FILE_HEADER* FileHeader)
+void UploadMgr_PrintInstallationInfo()
 {
   TIMESTAMP ts; 
   TIMESTRUCT time_struct;  
-  INT8   BoxStr[BOX_INFO_STR_LEN];
+  INT8   boxStr[BOX_INFO_STR_LEN];
 
   GSE_DebugStr( NORMAL, FALSE, "\r\n");
 
@@ -3364,8 +3388,8 @@ void UploadMgr_PrintInstallationInfo(UPLOADMGR_FILE_HEADER* FileHeader)
   //***********************
   // Box Serial Number
   //***********************
-  Box_GetSerno(BoxStr);
-  GSE_DebugStr( NORMAL, TRUE, "UploadMgr: FAST Serial #: %s", BoxStr);
+  Box_GetSerno(boxStr);
+  GSE_DebugStr( NORMAL, TRUE, "UploadMgr: FAST Serial #: %s", boxStr);
 
   //****************************
   // FAST Configuration Version #
@@ -3408,6 +3432,17 @@ void UploadMgr_PrintInstallationInfo(UPLOADMGR_FILE_HEADER* FileHeader)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 156  *****************
+ * User: Jim Mood     Date: 7/26/12    Time: 4:57p
+ * Updated in $/software/control processor/code/application
+ * SCR 1076: Code review updates
+ * 
+ * *****************  Version 154  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 10:42a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: Data Offload changes for 2.0.0
+ * SCR 1129: Upload retry on CF CRC failure
  * 
  * *****************  Version 153  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:32a

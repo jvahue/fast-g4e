@@ -9,7 +9,7 @@
     Description:  MicroServer Status and Control
     
     VERSION
-      $Revision: 54 $  $Date: 7/26/11 3:06p $    
+      $Revision: 55 $  $Date: 7/19/12 11:07a $    
     
 ******************************************************************************/
 
@@ -36,7 +36,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define MSSC_MIN_MSSIM_VER "2.1.0"
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -70,7 +70,8 @@ static FLT_STATUS         m_CBITSysCond;          // Logged CBIT Sys Condition
 
 static MSCP_GET_MS_INFO_RSP m_GetMSInfoRsp;
 static BOOLEAN            m_MsFileXfer;           // File transfer to Ground in-progress;
-
+static BOOLEAN            m_MssimVersionError;    // The MSSIM version is incompatible
+                                                  // with this version of CP
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -118,7 +119,8 @@ void MSSC_Init(void)
   m_MsStsSta     = MSSC_STS_NOT_VLD;
   m_IsOnGround   = FALSE;
   m_MssimStatus  = MSSC_STARTUP;
-
+  m_MssimVersionError = FALSE;
+  
   m_LastHeartbeatTime = CM_GetTickCount();
   m_HeartbeatTimer =
     (UINT32)CfgMgr_ConfigPtr()->MsscConfig.HeartBeatStartup_s * MILLISECONDS_PER_SECOND;
@@ -603,7 +605,7 @@ void MSSC_Task(void* pParam)
   // Check MS Heartbeat
   MSSC_HBMonitor();
 
-  if( TRUE == m_SendHeartbeat )
+  if( TRUE == m_SendHeartbeat && !m_MssimVersionError  )
   {
     MSSC_SendHeartbeatCmd();
   }
@@ -659,11 +661,11 @@ void MSSC_SendHeartbeatCmd(void)
   //Send the heartbeat message.  If it is sent successfully, switch "send" off
   //until a response is received. Else, switch send on to try again the next
   //time the task runs.
-  if(SYS_OK == MSI_PutCommand(CMD_ID_HEARTBEAT,
+  if(SYS_OK == MSI_PutCommandEx(CMD_ID_HEARTBEAT,
                              &Cmd,
                              sizeof(Cmd),
                              1000,
-                             MSSC_MSRspCallback))
+                             MSSC_MSRspCallback,TRUE))
   {
     m_SendHeartbeat = FALSE;
   }
@@ -787,7 +789,7 @@ BOOLEAN MSSC_MSGetCPInfoCmdHandler(void* Data, UINT16 Size,
   memset(&MsRsp,0,sizeof(MsRsp));
   
   Box_GetSerno(MsRsp.SN);
-  
+  MsRsp.Pri4DirMaxSizeMB = CfgMgr_ConfigPtr()->MsscConfig.Pri4DirMaxSizeMB;
   MSI_PutResponse(CMD_ID_GET_CP_INFO,
                   &MsRsp.SN,
                   MSCP_RSP_STATUS_SUCCESS,
@@ -858,7 +860,7 @@ void MSSC_MSICallback_ShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
        2. append the final string segment after the last /n
           at the loop exit*/
     m_MSShellRsp.Str[0] = '\0';
-    str_start = rsptemp->Str;
+    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this, extra char sometimes appears on ms.cmd rsp
     while(NULL != (str_end = strchr(str_start,'\n')))
     {
       *str_end = '\0';   //NULL terminate segment
@@ -890,20 +892,37 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
                                MSI_RSP_STATUS Status)
 {
   MSCP_MS_HEARTBEAT_RSP* RspData;
-
+  INT32 CompareResult;
+  MSSC_MS_VERSION_ERR_LOG log;
+  
   //If a good heartbeat was received, save the data in the response to local
   //variables.  Make sure the MSSIM status is alive and clear the error count
   if(Status == MSI_RSP_SUCCESS)
   {
     if(m_MssimStatus != MSSC_RUNNING)
     {
-      //GSE_DebugStr(NORMAL, TRUE, "MSSC: MSSIM is running...");
-      m_MssimStatus = MSSC_RUNNING;
-      m_HeartbeatTimer =
-        (UINT32)CfgMgr_ConfigPtr()->MsscConfig.HeartBeatLoss_s * MILLISECONDS_PER_SECOND;
-
-      //Get initial MS Info on connect
-      MSSC_DoRefreshMSInfo();
+      //Check if version number has been received yet...
+      if(0 != strlen(m_GetMSInfoRsp.MssimVer))
+      {
+        CompareResult = CompareVersions(m_GetMSInfoRsp.MssimVer, MSSC_MIN_MSSIM_VER);
+        //If the MSSIM version is the same ( =0) or greater than ( =1)
+        if((CompareResult == 0) || (CompareResult == 1))
+        {      
+          m_MssimStatus = MSSC_RUNNING;
+          m_HeartbeatTimer =
+            (UINT32)CfgMgr_ConfigPtr()->MsscConfig.HeartBeatLoss_s * MILLISECONDS_PER_SECOND;
+        }
+        //MSSIM version less than 2.1.0 or decode
+        else
+        {
+          strncpy_safe(log.MssimVer, sizeof(log.MssimVer), m_GetMSInfoRsp.MssimVer,_TRUNCATE);
+          Flt_SetStatus(m_CBITSysCond,SYS_ID_MS_VERSION_MISMATCH, &log, sizeof(MSSC_MS_VERSION_ERR_LOG)); 
+          m_MssimVersionError = TRUE;
+        }
+      }
+      //Get initial MS Info on connect. Return value deliberatly ignored, if command fails,
+      //then the next HB will automatically re-execute this call.
+      MSI_PutCommandEx(CMD_ID_GET_MSSIM_INFO, NULL, 0, 5000, MSSC_GetMSInfoRspHandler,TRUE);   
     }
 
     m_LastHeartbeatTime = CM_GetTickCount();
@@ -1009,6 +1028,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: Jim Mood     Date: 7/19/12    Time: 11:07a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: Data Offload changes for 2.0.0
  * 
  * *****************  Version 54  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:06p
