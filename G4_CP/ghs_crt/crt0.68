@@ -1,0 +1,162 @@
+/*
+*
+*                Language Independent Library
+*
+*       Copyright 1983-2002 Green Hills Software,Inc.
+*
+*  This program is the property of Green Hills Software, Inc,
+*  its contents are proprietary information and no part of it
+*  is to be disclosed to anyone except employees of Green Hills
+*  Software, Inc., or as agreed in writing signed by the President
+*  of Green Hills Software, Inc.
+*
+*/
+/* crt0.68: initial C runtime startup file for Motorola 68000 family systems. */
+
+//#if defined(EMBEDDED)
+
+#include "indsyscl.h"
+
+#if defined(__GHS_UNDERSCORE)
+#define __ghs_ind_crt0		___ghs_ind_crt0
+#define __ghs_set_errno		___ghs_set_errno
+#define __ghsend_stack		___ghsend_stack
+#define _start			__start
+#define exit			_exit
+#define	__ghsbegin_picbase	___ghsbegin_picbase
+#define	__ghsbegin_robase	___ghsbegin_robase
+#define	__ghsbegin_pidbase	___ghsbegin_pidbase
+#define __ghsbegin_sdabase	___ghsbegin_sdabase
+
+#define __ghs_rambootcodestart  ___ghs_rambootcodestart
+#define	__ghs_rambootcodeend    ___ghs_rambootcodeend
+#define __ghs_rombootcodestart  ___ghs_rombootcodestart
+#define __ghs_rombootcodeend    ___ghs_rombootcodeend
+
+#define __ghs_init_d2		___ghs_init_d2
+#define __ghs_init_d3		___ghs_init_d3
+#define __ghs_init_d4		___ghs_init_d4
+#define __ghs_init_d5		___ghs_init_d5
+
+#endif
+
+	FILE	"crt0.68"
+	SECT	.text,x
+
+	OPT	NOLC		; do not assume _symbol is local
+
+	XREF	__dotsyscall
+	XREF	__ghsend_stack
+	WEAK	__ghsbegin_picbase	; THIS SHOULD BE A WEAK REFERENCE
+	WEAK	__ghsbegin_robase	; THIS SHOULD BE A WEAK REFERENCE
+	WEAK	__ghsbegin_pidbase	; THIS SHOULD BE A WEAK REFERENCE
+	WEAK	__ghsbegin_sdabase
+        WEAK	__ghs_rambootcodestart
+        WEAK	__ghs_rambootcodeend
+        WEAK	__ghs_rombootcodestart
+        WEAK	__ghs_rombootcodeend
+	WEAK	__ghs_init_d2
+	WEAK	__ghs_init_d3
+	WEAK	__ghs_init_d4
+	WEAK	__ghs_init_d5
+        WEAK	__ghs_board_memory_init
+	
+	
+	XREF	__ghs_ind_crt0
+
+	XDEF	_start
+_start:
+
+; Clear the frame pointer so stack traces terminate nicely
+	SUBA.L	A6,A6			; smaller than move.w 0,a6
+
+; Try to initialize memory if it's available
+	MOVE.L	#__ghs_board_memory_init,D0
+	TST.L	D0
+	BEQ	after_mem_init
+board_memory_init:
+	MOVE.L	#__ghs_board_memory_init-board_memory_init,A1
+	LEA	after_mem_init(PC),A0
+	JMP	board_memory_init(PC,A1.L)
+after_mem_init:
+
+; First order of business is to detect whether or not the debugger ran us.
+; We do that by making a special system call that does not use the stack.
+; The code to do this is a carbon copy of the sequence in __ghs_syscall.
+; If it returns with the carry clear then somebody caught the system call.
+; Otherwise we must set the stack pointer and the PID base ourselves.
+	MOVEQ	#SYSCALL_HELLO,D1
+	LEA	didsyscall(PC),A0
+	MOVEQ	#0,D0			; return -1, errno=0 if no host
+	MOVE	#1,CCR			; set carry
+lab1:	MOVE.L	#__dotsyscall-lab1,A1	; 68000 PIC-safe jump to __dotsyscall
+	JMP	lab1(PC,A1.L)		; branch with link in A0
+didsyscall:
+	LEA	hang(PC),A0		; DOES NOT AFFECT CARRY FLAG
+	BCC.S	regs_okay		; host present, use SP and PID base
+	LEA	__ghsend_stack,SP	; .stack is always absolutely located.
+#if defined(__motcoff)
+	LEA 	__ghsbegin_pidbase,A5   ; COFF uses pidbase
+#else
+	LEA	__ghsbegin_sdabase,A5	; .sdabase section in link map, used for PID and SDA
+#endif
+	CLR.L	-(SP)			; push 0 value for envp
+	CLR.L	-(SP)			; push 0 value for argv
+	CLR.L	-(SP)			; push 0 value for argc
+	SUBQ.L	#4,SP			; make space for return address
+	LEA	croak(PC),A0
+regs_okay:
+	LEA	baseptrs(PC),A1
+	MOVE.L	A1,(SP)			; overwrite return address
+
+; Setup SDA/PID base pointer for signed offsets - not supported on COFF
+#if !defined(__motcoff)	
+	ADDA.L	#$8000,A5
+#endif
+	
+; Initialize potential global registers 
+	MOVE.L	#__ghs_init_d2,D2
+	MOVE.L	#__ghs_init_d3,D3
+	MOVE.L	#__ghs_init_d4,D4
+	MOVE.L	#__ghs_init_d5,D5
+	
+; Arrange to handle the case where exit(main(...)) returns to us. (!!)
+; If we are under the debugger, hang (loop forever) so we can be halted.
+; If we are not under the debugger, croak (force a double bus fault).
+; The default _exit() function usually prevents this case from happening.
+	MOVE.L	A0,-(SP)		; give ind_crt0 our chosen return addr
+
+; Now do 68000 PIC-safe transfer to C startup routine (ind_crt0.c)
+lab2:	MOVE.L	#__ghs_ind_crt0-lab2,A0
+	JMP	lab2(PC,A0.L)
+
+hang:	BRA.S	hang
+
+; If __ghs_ind_crt0 returns, then something went wrong. Try to double bus fault.
+croak:	MOVE.W	#-1,SP
+	RTS
+
+#if !defined(__gnu_asm)
+        type    _start,@function
+        size    _start,.-_start
+#endif
+
+baseptrs:	; this is still in .text so we can find it in all memory models
+	DC.L	1			; baseptr version number
+	DC.L	__ghsbegin_picbase	; link-time address of .text label
+	DC.L	__ghsbegin_robase	; link-time address of .rodata label
+	DC.L	__ghsbegin_pidbase	; link-time address of .data label
+	DC.L	__ghs_rambootcodestart	; link-time address of start of RAM bool code
+	DC.L	__ghs_rambootcodeend	; link-time address of end of RAM boot code
+	DC.L	__ghs_rombootcodestart	; link-time address of start of ROM boot code
+	DC.L	__ghs_rombootcodeend	; link-time address of end of ROM boot code
+#if defined(__motcoff)	
+	XREF	exit
+	DC.L	exit
+#endif
+	END
+	NOP				; data in code section makes 
+	NOP				; disassembly difficult so use NOP
+	NOP				; to keep disassembler in sync.
+	NEED	exit
+//#endif

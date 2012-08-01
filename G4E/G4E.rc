@@ -1,0 +1,263 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\G4E.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\G4E.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About G4E"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "G4E Version 1.1",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2009",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+END
+
+IDD_G4E_DIALOG DIALOGEX 0, 0, 320, 371
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "G4E"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_GSE_TX,7,125,306,239,ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL
+    PUSHBUTTON      "Load Cfg",IDC_LD_CFG,263,12,50,14
+    EDITTEXT        IDC_GSE_RX,7,107,223,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Send",IDC_SEND,234,107,24,14
+    PUSHBUTTON      "Clear",IDC_CLEAR,260,107,24,14
+    GROUPBOX        "Interrupt Request",IDC_STATIC,7,38,253,26
+    GROUPBOX        "Status",IDC_STATUS,7,3,253,35
+    CONTROL         "STE Connected ",IDC_STE_CONN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,20,67,10
+    COMBOBOX        IDC_IRQST,11,46,106,249,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Static",IDC_IRQ,127,46,124,12,SS_SUNKEN
+    GROUPBOX        "DIN",IDC_STATIC,7,63,150,41
+    COMBOBOX        IDC_DIN,12,87,106,257,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "DOUT",IDC_STATIC,161,65,152,41
+    CONTROL         "On",IDC_DIN_STS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,122,89,23,10
+    PUSHBUTTON      "Flip",IDC_DIN_SET,121,70,21,14
+    COMBOBOX        IDC_DOUT,170,87,106,279,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "On",IDC_DOUT_STS,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,279,89,24,10
+    PUSHBUTTON      "Esc",IDC_ESC,286,107,24,14
+    PUSHBUTTON      "Bus/Batt",IDC_BUSBAT,263,29,50,14
+    CONTROL         "PWR",IDC_PWR,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,95,15,31,10
+    CONTROL         "LNK",IDC_LNK,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,175,14,28,10
+    CONTROL         "DAT",IDC_DAT,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,137,15,29,10
+    CONTROL         "CFG",IDC_CFG,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,95,24,29,10
+    CONTROL         "XFR",IDC_XFR,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,137,24,29,10
+    CONTROL         "STS",IDC_STS,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,175,24,28,10
+    CONTROL         "CFM",IDC_CFM,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,210,15,30,10
+    CONTROL         "FLT",IDC_FLT,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,210,24,27,10
+    CONTROL         "LSS0",IDC_LSS0,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,171,75,31,10
+    CONTROL         "LSS1",IDC_LSS1,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,207,75,31,10
+    CONTROL         "LSS2",IDC_LSS2,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,243,75,31,10
+    CONTROL         "LSS3",IDC_LSS3,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,279,75,29,10
+END
+
+IDD_FPGA_CTRL DIALOGEX 0, 0, 219, 132
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,162,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,162,24,50,14
+END
+
+IDD_BUSBAT DIALOGEX 0, 0, 97, 63
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Bus/Batt Voltage"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,23,43,50,14
+    EDITTEXT        IDC_BUSV,50,7,40,14,ES_AUTOHSCROLL
+    CTEXT           "Bus V",IDC_SBUS,7,7,40,14,SS_CENTERIMAGE | SS_SUNKEN
+    EDITTEXT        IDC_BATV,50,25,40,14,ES_AUTOHSCROLL
+    CTEXT           "Batt V",IDC_SBUS2,7,25,40,14,SS_CENTERIMAGE | SS_SUNKEN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "Knowlogic Software"
+            VALUE "FileDescription", "G4 Emulation"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "G4E.exe"
+            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "OriginalFilename", "G4E.exe"
+            VALUE "ProductName", "G4 Emulation"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_G4E_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 364
+    END
+
+    IDD_FPGA_CTRL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 212
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 125
+    END
+
+    IDD_BUSBAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 90
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About G4E..."
+    IDP_SOCKETS_INIT_FAILED "Windows Socket Initialization Failed."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\G4E.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

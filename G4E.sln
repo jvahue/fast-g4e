@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "G4E", "G4E\G4E.vcproj", "{1B044536-4020-4394-83CF-0F652BA3FD1F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_ENV_TEST|Win32 = Debug_ENV_TEST|Win32
+		DEBUG_TP|Win32 = DEBUG_TP|Win32
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		TARGET_TP|Win32 = TARGET_TP|Win32
+		Target|Win32 = Target|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Debug_ENV_TEST|Win32.ActiveCfg = Debug_ENV_TEST|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Debug_ENV_TEST|Win32.Build.0 = Debug_ENV_TEST|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.DEBUG_TP|Win32.ActiveCfg = DEBUG_TP|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.DEBUG_TP|Win32.Build.0 = DEBUG_TP|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Debug|Win32.Build.0 = Debug|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Release|Win32.ActiveCfg = Release|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Release|Win32.Build.0 = Release|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.TARGET_TP|Win32.ActiveCfg = TARGET_TP|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.TARGET_TP|Win32.Build.0 = TARGET_TP|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Target|Win32.ActiveCfg = Target|Win32
+		{1B044536-4020-4394-83CF-0F652BA3FD1F}.Target|Win32.Build.0 = Target|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
