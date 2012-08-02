@@ -7,6 +7,10 @@ syntax: regexp
 \.lst$
 \.s$
 ^G4E/Debug/.
+\.orig$
+^GhsInclude.
+^Pc-Lint/.
+^STI/.
 syntax: glob
 G4E.exe
 G4E.ilk

@@ -98,8 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetPath) C:\development\Knowlogic\scripts\bin"
-				ExcludedFromBuild="false"
+				CommandLine="copy $(TargetPath) $(SolutionDir)\..\..\scripts\bin"
 			/>
 		</Configuration>
 		<Configuration
