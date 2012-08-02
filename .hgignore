@@ -6,12 +6,13 @@ syntax: regexp
 \.dbo$
 \.lst$
 \.s$
-^G4E/Debug/.
 \.orig$
+\.user$
+\.suo$
+^G4E/Debug.
 ^GhsInclude.
-^Pc-Lint/.
-^STI/.
-.user$
+^Pc-Lint.
+^STI.
 syntax: glob
 G4E.exe
 G4E.ilk
