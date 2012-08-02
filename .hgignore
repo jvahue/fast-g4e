@@ -11,6 +11,7 @@ syntax: regexp
 ^GhsInclude.
 ^Pc-Lint/.
 ^STI/.
+.user$
 syntax: glob
 G4E.exe
 G4E.ilk
