@@ -33,7 +33,7 @@ FASTII.ld
 ..\application\User.c
 ..\application\Event.c
 ..\application\Timehistory.c
-..\application\trend.c
+#..\application\Trend.c
 ..\drivers\ADC.c
 ..\drivers\Assert.c
 ..\drivers\BusTO.c

@@ -104,7 +104,7 @@ static USER_MSG_TBL TrendRoot [] =
 };
 
 static
-USER_MSG_TBL    RootEventMsg = {"TREND",TrendRoot,NULL,NO_HANDLER_DATA};
+USER_MSG_TBL  RootTrendMsg = {"TREND",TrendRoot,NULL,NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
 

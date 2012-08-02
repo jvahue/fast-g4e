@@ -1,5 +1,5 @@
 
-D:\FAST_Testing\dev\CP\build>echo off 
+C:\development\Knowlogic\dev\G4E\G4_CP\build>echo off 
 Converting fast.elf to fast.dld
 using S8 and S2 records
 .
@@ -14,10 +14,10 @@ CRC address is 0x0, the polynomial is 0x8005 and it is 32 bits.
 CRC Type is Bytewise, CRC initial value is 0xffffffff, CRC operands are 8 bits.
 Lines containing only the fill pattern will not be output.
 
-Section 0 CRC 0x4c1e390a, written to address 0x0017130c
+Section 0 CRC 0x5c41fab6, written to address 0x0018a640
 --- Open fast.dld output file
-Section 0 filled with 463656 (0x00071328) bytes, utilization is 57.96%
---- Total bytes written to memory 463656 (0x00071328), utilization is 57.96%
+Section 0 filled with 566876 (0x0008a65c) bytes, utilization is 70.86%
+--- Total bytes written to memory 566876 (0x0008a65c), utilization is 70.86%
 .
 .
 Done!

@@ -32,7 +32,6 @@
 ******************************************************************************/
 #undef PEAK_CUM_PROCESSING
 #undef RHL_PROCESSING
-#undef CYCLES_UNDER_CONSTRUCTION
 
 #define CYCLE_DEFAULT  "Unused",           /* Name       */\
                        CYC_TYPE_NONE_CNT,  /* Type       */\
@@ -169,12 +168,15 @@ typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
 +----------------------------------------------------------------------------------------*/
 typedef struct
 {
-   BOOLEAN CycleActive;  /* The cycle is active */  
+  BOOLEAN CycleActive;    /* The cycle is active */
+  UINT32  CycleLastTime; /* Timestamp in ms that the cycle became active */
 }CYCLE_DATA, *CYCLE_DATA_PTR;
 
 #pragma pack(1)
+
+
 typedef struct
-{
+{  
   union
   {
     UINT32  n;    /* used for duration count in seconds */
@@ -186,8 +188,7 @@ typedef struct
 // Collection of cycle entries with csum for persisting to NV Memory.
 typedef struct
 {
-  CYCLE_ENTRY data[MAX_CYCLES];
-  //UINT16       cksum;             //todo DaveB is this redundant given the NvMgr csum?
+  CYCLE_ENTRY data[MAX_CYCLES]; 
 } CYCLE_COUNTS;
 #pragma pack()
 

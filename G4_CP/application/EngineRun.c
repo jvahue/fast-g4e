@@ -54,8 +54,11 @@ static void EngRunUpdateAll(void);
 
 static void EngRunUpdate (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
-static void EngRunStartLog      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
-static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
+static void EngRunStartLog       ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
+static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
+                                   ENGRUN_DATA* pErData,
+                                  BOOLEAN bUpdateDuration);
+
 static void EngRunWriteStartLog ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
 
 static void EngRunUpdateRunData     ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
@@ -92,13 +95,13 @@ static ENGRUN_RUNLOG   EngineRunLog[MAX_ENGINES];
  *
  * Parameters:   [in] idx - ENGRUN_ID of the EngineRun being requested or
  *                          ENGRUN_ID_ANY to return the bit array of all enginerun
- *                          in the RUNNING state.
+ *                          in the STARTING or RUNNING state.
  *               [out]      Pointer to the EngRunFlags bit array of engines in RUNNING state.
  *                          This field is not updated if idx is not set to ENGRUN_ID_ANY.
  *
  * Returns:      ER_STATE   if idx  is not ENGRUN_ID_ANY, state of the requested engine run is 
- *                          returned. Otherwise returns ER_STATE_RUNNING if at least one
- *                          enginerun is in the RUNNING state.
+ *                          returned. Otherwise returns one of the following based on a 
+*                           prioritized check: RUNNING, STARTING, STOPPED
  *
  * Notes:        None
  *
@@ -106,30 +109,41 @@ static ENGRUN_RUNLOG   EngineRunLog[MAX_ENGINES];
 ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
 {
   INT16 i;
+  UINT8 runMask  = 0x00;  // bit map of started/running EngineRuns.
   ER_STATE state = ER_STATE_STOPPED;
+  BOOLEAN  bRunning  = FALSE;
+  BOOLEAN  bStarting = FALSE;
 
   // If the user wants a list of ALL running engine-runs, return
   // it in the provided location. 
   if ( ENGRUN_ID_ANY == idx )
-  {
-    // Check that an return address is provided
+  {    
+    runMask = 0x00;
+
+    for (i = 0; i < MAX_ENGINES; ++i)
+    {
+      if (ER_STATE_RUNNING == EngineRunData[i].State)
+      {
+        // Set the bit in the flag
+        runMask |= 1 << i;
+        bRunning = TRUE;
+      }
+      else if (ER_STATE_STARTING == EngineRunData[i].State)
+      {
+        // Set the bit in the flag
+        runMask |= 1 << i;
+        bStarting = TRUE;
+      }      
+    }
+
+    // Assign overall engine run state based in the following priority:
+    // RUNNING->STARTING->STOPPED
+    state = bRunning ? ER_STATE_RUNNING : bStarting ? ER_STATE_STARTING : ER_STATE_STOPPED;
+
+    // If the caller has passed a field to return the list, fill it.
     if(NULL != EngRunFlags)
     {
-      *EngRunFlags = 0;
-      for (i = 0; i < MAX_ENGINES; ++i)
-      {
-        if (ER_STATE_RUNNING == EngineRunData[i].State)
-        {
-          // Set the bit in the flag
-          *EngRunFlags |= 1 << i;
-        }
-      }
-      // Set the return value to running if any bits were set on, otherwise assume STOPPED
-      state = (*EngRunFlags != 0)  ? ER_STATE_RUNNING : ER_STATE_STOPPED;
-    }
-    else
-    {
-      GSE_DebugStr(NORMAL, TRUE, "Request for EngRun list needs return address");
+      *EngRunFlags = runMask;
     }
   }
   else // Get the current state of the requested engine run.
@@ -137,7 +151,6 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
     ASSERT ( idx >= ENGRUN_ID_0 && idx < MAX_ENGINES);
     state = EngineRunData[idx].State;
   }
- 
   return state;
 }
 
@@ -251,6 +264,26 @@ UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId)
   return &EngineRunData[engId].CycleCounts[0];
 }
 
+/******************************************************************************
+ * Function:     EngRunGetPtrToLog
+ *
+ * Description:  Returns pointer to the engine run log area for this engine-run .
+ *               This function is called to retrieve cycle counts owned by the 
+ *               indicated engine run object.
+ *
+ * Parameters:   
+ *
+ * Returns:      Pointer to the array of floats containing the cycle counts 
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+ENGRUN_RUNLOG* EngRunGetPtrToLog(ENGRUN_INDEX engId)
+{
+  ASSERT(engId < MAX_ENGINES); 
+  return &EngineRunLog[engId];
+}
+
 
 /******************************************************************************
  * Function:     EngRunGetStartingTime
@@ -318,6 +351,7 @@ static void EngRunForceEnd( void )
 
   // Close out any active cycle
   // and flag the task to stop.
+  // Eng
   for (i = ENGRUN_ID_0; i < MAX_ENGINES; ++i)
   {
     pErCfg  = &EngineRunCfg[i];
@@ -330,6 +364,7 @@ static void EngRunForceEnd( void )
       
       case ER_STATE_STARTING:
         EngRunWriteStartLog( ER_LOG_SHUTDOWN, pErCfg, pErData);
+        CycleFinishEngineRun(i);
         break;
 
       case ER_STATE_RUNNING:
@@ -340,9 +375,7 @@ static void EngRunForceEnd( void )
       default:
         FATAL("Unrecognized engine run state %d", pErData->State );
         break;
-    }
-    
-    
+    }    
     
     EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
 
@@ -373,8 +406,8 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx )
   if ( TriggerIsConfigured(pErCfg->StartTrigID)   &&
        TriggerIsConfigured(pErCfg->StopTrigID )   &&
        TriggerIsConfigured(pErCfg->RunTrigID  )   &&
-       SensorIsUsed       (pErCfg->BattSensorID ) &&
-       SensorIsUsed       (pErCfg->TempSensorID )
+       SensorIsUsed       (pErCfg->MonMinSensorID ) &&
+       SensorIsUsed       (pErCfg->MonMaxSensorID )
      )
   {
     // Initialize the common fields in the EngineRun data structure
@@ -388,8 +421,8 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx )
     pErData->startingTime        = 0;
     pErData->StartingDuration_ms = 0;
     pErData->Duration_ms         = 0;
-    pErData->MinBattery          = FLT_MAX;
-    pErData->MaxStartTemp        = 0.f;   
+    pErData->MonMinValue   = FLT_MAX;
+    pErData->MonMaxValue   = 0.f;   
     pErData->nSampleCount        = 0;
     pErData->nRateCounts         = (UINT16)(MIFs_PER_SECOND / pErCfg->Rate);
     pErData->nRateCountdown      = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
@@ -456,7 +489,6 @@ static void EngRunUpdateAll(void)
  *****************************************************************************/
 static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 {
-  FLOAT32 fValue;
  #ifdef DEBUG_ENGRUN 
   ER_STATE curState;
 #endif
@@ -491,15 +523,10 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
           break;
         }
 
-        // update minimum battery voltage      
-        if ( SensorIsValid(pErCfg->BattSensorID))
-        {
-          fValue = SensorGetValue(pErCfg->BattSensorID);
-          if ( pErData->MinBattery > fValue)
-          {
-            pErData->MinBattery = fValue;
-          }
-        }
+        // Monitor configured min/max sensors, set flag 
+        // FALSE to prevent update start duration.
+        EngRunUpdateStartData(pErCfg, pErData, FALSE);
+
 
         // Check that all transition-trigger are valid,
         // then see if engine start/running is occurring
@@ -510,8 +537,9 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
           if ( EngRunIsStarting(pErCfg) ||
                EngRunIsRunning(pErCfg) )
           {            
-            // init the start-log entry
-            // and clear the cycle counts for this engrun
+            
+            // init the start-log entry and set start-time 
+            // clear the cycle counts for this engrun
             EngRunStartLog(pErCfg, pErData);
             CycleResetEngineRun(pErData->ErIndex);
 
@@ -522,10 +550,10 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
     case ER_STATE_STARTING:      
       // Always update the ER Starter parameters.
-      EngRunUpdateStartData(pErCfg, pErData);
-
+      EngRunUpdateStartData(pErCfg, pErData, TRUE);
       
-      // Error Detected transition STARTING -> STOP
+      // STARTING -> STOP
+      // Error Detected
       // If we have a problem determining the EngineRun state,
       // write the engine run start-log and transition to STOPPED state
       if ( EngRunIsError(pErCfg))
@@ -548,9 +576,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // STARTING -> RUNNING
       if ( EngRunIsRunning( pErCfg ) )
       {
-        // Set the max ER starting Temperature Sensor to the current value todo DaveB- confirm this
-        pErData->MaxStartTemp = SensorGetValue((SENSOR_INDEX)pErCfg->TempSensorID);
-        
         // Write ETM START log
         EngRunWriteStartLog( ER_LOG_RUNNING, pErCfg, pErData);
         pErData->State = ER_STATE_RUNNING;
@@ -584,7 +609,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         break;
       }
 
-      // Update the EngineRun log
+      // Update the EngineRun log data
       // Allow additional update so that is ER is closed, this last second
       // is counted.
       EngRunUpdateRunData( pErCfg, pErData);
@@ -647,15 +672,16 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
 
   // Init the current values of the starting sensors.
   // Note: Validity was already checked as a pre-condition of calling this function.)
-  pErData->MaxStartTemp = SensorGetValue(pErCfg->TempSensorID);
-  pErData->MaxStartTemp = pErData->MaxStartTemp;
-  pErData->MinBattery   = pErData->MinBattery;
+  pErData->MonMaxValue = SensorGetValue(pErCfg->MonMaxSensorID);
+ 
+  pErData->MonMinValue = pErData->MonMinValue;
 
   // Initialize the summary values for monitored sensors
 
   for (i = 0; i < pErData->nTotalSensors; ++i)
   {
     pSnsr = &(pErData->SnsrSummary[i]);
+
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
     // todo DaveB is this really necessary ?... it will be updated anyway during EngRunUpdateLog
     if(pSnsr->bValid)
@@ -696,10 +722,10 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
   CM_GetTimeAsTimestamp(&pLog->EndTime);
   pLog->StartingDuration_ms = pErData->StartingDuration_ms;
  
-  pLog->MaxStartSensorId    = pErCfg->TempSensorID;
-  pLog->MaxStartTemp        = pErData->MaxStartTemp;
-  pLog->MinStartSensorId    = pErCfg->BattSensorID;
-  pLog->MinBattery          = pErData->MinBattery;
+  pLog->MaxStartSensorId    = pErCfg->MonMaxSensorID;
+  pLog->MonMaxValue         = pErData->MonMaxValue;
+  pLog->MinStartSensorId    = pErCfg->MonMinSensorID;
+  pLog->MonMinValue         = pErData->MonMinValue;
   
   LogWriteETM( APP_ID_ENGINERUN_STARTED, 
                LOG_PRIORITY_LOW,
@@ -764,7 +790,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
       pLogSummary->fMaxValue   = pErSummary->fMaxValue;
 
       // if sensor is valid, calculate the final average,
-      // otherwise use the average calculated at the point it when invalid.
+      // otherwise use the average calculated at the point it went invalid.
       pLogSummary->fAvgValue = (pErSummary->bValid) ? pErSummary->fTotal * oneOverN
                                                     : pErSummary->fAvgValue;
     }
@@ -778,7 +804,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
       pLogSummary->fAvgValue   = 0.f;
     }    
   }
-#pragma ghs endnowarning
+#pragma ghs endnowarning  
 
   for (i = 0; i < MAX_CYCLES; ++i)
   {
@@ -949,62 +975,72 @@ static BOOLEAN EngRunIsStopped(ENGRUN_CFG* pErCfg)
  * Description:  Update the EngineRun start data.
  *               The enginerun is in ER_STATE_STARTING.
  *
- * Parameters:   None
+ * Parameters:   [in] - config
+ *               [in] - data
+ *               [in] - start duration update flag.
  *
  * Returns:      None
  *
- * Notes:        None
+ * Notes:        bUpdateDuration is set to false when called during STOP state to
+ *               maintain min/max values only. During START state, it is called with
+ *               true to maintain the start duration elapsed time.
  *
  *****************************************************************************/
-static void EngRunUpdateStartData(ENGRUN_CFG* pErCfg,ENGRUN_DATA* pErData)
+static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
+                                  ENGRUN_DATA* pErData,
+                                  BOOLEAN bUpdateDuration)
 {
-  FLOAT32 batteryVoltage;
-  FLOAT32 temperature;
-  BOOLEAN validBatt;
-  BOOLEAN validTemp;
+  FLOAT32 valueMin;
+  FLOAT32 valueMax;
+  BOOLEAN validMin;
+  BOOLEAN validMax;
   
-  // Update the min battery
-  if ( SensorIsValid(pErCfg->BattSensorID) )
+  // Update the min
+  if ( SensorIsValid(pErCfg->MonMinSensorID) )
   {
    
-    batteryVoltage = SensorGetValue(pErCfg->BattSensorID);
-    validBatt = TRUE;
+    valueMin  = SensorGetValue(pErCfg->MonMinSensorID);
+    validMin = TRUE;
 
-    if ( pErData->MinBattery > batteryVoltage )
+    if ( pErData->MonMinValue > valueMin )
     {
-      pErData->MinBattery = batteryVoltage;        
+      pErData->MonMinValue = valueMin;
     }
   }
   else
   {
-    validBatt = FALSE;
+    validMin = FALSE;
   }
 
-  // update max temperature
-  if ( SensorIsValid(pErCfg->TempSensorID) )
+  // update max
+  if ( SensorIsValid(pErCfg->MonMaxSensorID) )
   {
-    temperature = SensorGetValue(pErCfg->TempSensorID);
-    validTemp = TRUE;
-    if ( pErData->MaxStartTemp < temperature)
+    valueMax = SensorGetValue(pErCfg->MonMaxSensorID);
+    validMax = TRUE;
+    if ( pErData->MonMaxValue < valueMax)
     {
-      pErData->MaxStartTemp   = temperature;        
+      pErData->MonMaxValue   = valueMax;        
     }
   }
   else
   {
-    validTemp = FALSE;
+    validMax = FALSE;
   }
 
   // todo DaveB - verify requirements on how to log start values when
   // invalid.   
-  pErData->MinBattery = validBatt ? pErData->MinBattery :
-                                SensorGetPreviousValue(pErCfg->BattSensorID);
+  pErData->MonMinValue = validMin ? pErData->MonMinValue :
+                                SensorGetPreviousValue(pErCfg->MonMinSensorID);
 
-  pErData->MaxStartTemp = validTemp ? pErData->MaxStartTemp :
-                                SensorGetPreviousValue(pErCfg->TempSensorID);
+  pErData->MonMaxValue = validMax ? pErData->MonMaxValue :
+                                SensorGetPreviousValue(pErCfg->MonMaxSensorID);
 
   // Update the starting duration.
-  pErData->StartingDuration_ms += CM_GetTickCount() - pErData->startingTime;
+  if (bUpdateDuration)
+  {
+    pErData->StartingDuration_ms += CM_GetTickCount() - pErData->startingTime;
+  }
+ 
 
 }
 /*************************************************************************

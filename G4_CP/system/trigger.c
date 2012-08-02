@@ -679,6 +679,12 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
   // Criteria is in return value.
   // Validity of sensors is in IsValid pointer.
   StartCriteriaMet = (BOOLEAN)EvalExeExpression(&pTrigCfg->StartExpr, IsValid);
+  
+  // If any sensor in the expression was unused/invalid, the start state must be false
+  if(FALSE == *IsValid)
+  {
+    StartCriteriaMet = FALSE;
+  }
     
   return StartCriteriaMet;
 }
@@ -748,36 +754,37 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
 {
    // Local Data
   BOOLEAN        validity;
-  TRIG_END_TYPE  EndType = TRIG_NO_END; // Assume still running
+  TRIG_END_TYPE  EndType = TRIG_NO_END; // Assume/default to still running
+  INT32          result;
    
   // Process the end expression.
   // Exit criteria is in return value, sensor validity in 'validity'.
   // Together they define how the trigger ended.  
   
-  if (pTrigCfg->EndExpr.Size > 0)
+  // If end criteria is empty(i.e. un-configured),
+  // then just check to see if start criteria is no longer active.
+  // Note: The result is an INT32 where < 0 is error, 0 is false and 1 is true
+ 
+  if(pTrigCfg->EndExpr.Size > 0)
   {
-    if( EvalExeExpression(&pTrigCfg->EndExpr, &validity ) > 0 && validity  )
-    {
-      EndType = TRIG_END_CRITERIA;
-    }
-    else if (!validity)
-    {
-      EndType = TRIG_SENSOR_INVALID;
-    }
+    result = EvalExeExpression(&pTrigCfg->EndExpr, &validity );
   }
   else
   {
-    // If end criteria is empty(i.e. unconfigured), then just check
-    // to see if start criteria is no longer active.
-    if( EvalExeExpression(&pTrigCfg->StartExpr, &validity ) == 0 && validity  )
-    {
-      EndType = TRIG_END_CRITERIA;
-    }
-    else if (!validity)
-    {
-      EndType = TRIG_SENSOR_INVALID;
-    }
-  }  
+    result = EvalExeExpression(&pTrigCfg->StartExpr, &validity );
+    // If the returned value is 0 or 1, do a boolean inversion.  
+    result = (result >= 0) ?  (INT32) ! (BOOLEAN)(result) : result;
+  }
+  
+  if(result > 0 && validity)
+  {
+    EndType = TRIG_END_CRITERIA;
+  }
+  else if(result > 0 && !validity)
+  {
+    EndType = TRIG_SENSOR_INVALID;
+  }
+ 
   return EndType;
 }
 
@@ -868,7 +875,6 @@ static
 void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 {
    // Local Data
-   FLOAT32          NewValue;
    TRIG_SENSOR      *pTrigSensor;
    SNSR_SUMMARY     *pSummary;
    UINT8            i;
@@ -901,15 +907,7 @@ void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
          // Verify the sensor is used
          if (SensorIsUsed(pTrigSensor->SensorIndex))
          {
-            // Get the sensors latest value
-            NewValue = SensorGetValue( pTrigSensor->SensorIndex);
-
-            // Add the new value and calculate the min and max
-            pSummary->fTotal += NewValue;
-            pSummary->fMinValue =
-              (NewValue < pSummary->fMinValue) ? NewValue : pSummary->fMinValue;
-            pSummary->fMaxValue =
-              (NewValue > pSummary->fMaxValue) ? NewValue : pSummary->fMaxValue;
+          SensorUpdateSummaryItem(pSummary);
          }
          pSummary->bValid = SensorIsValid(pTrigSensor->SensorIndex);
       }

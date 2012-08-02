@@ -1,2 +1,14 @@
 syntax: regexp
 .vssver.scc
+\.d$
+\.obj$
+\.o$
+\.dbo$
+\.lst$
+\.s$
+^G4E/Debug/.
+syntax: glob
+G4E.exe
+G4E.ilk
+G4E.pdb
+G4E.ncb

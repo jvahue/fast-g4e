@@ -44,6 +44,7 @@
 #define MAX_FP_STRING 32
 #define MAX_FALSE_STRING 5
 
+
 #define RPN_PUSH(obj) (rpn_stack[rpn_stack_pos++] = (obj))
 #define RPN_POP       (rpn_stack[--rpn_stack_pos])
 #define RPN_STACK_CNT (rpn_stack_pos)
@@ -697,7 +698,7 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
       switch (cmd->OpCode)
       {
         case OP_NE:
-          rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndLeft.Data) >= FLT_EPSILON);
+          rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) >= FLT_EPSILON);
           break;
 
         case OP_EQ:

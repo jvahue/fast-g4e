@@ -85,8 +85,9 @@ static USER_ENUM_TBL CycleTypeEnum[] =
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 static USER_MSG_TBL CycleStatusCmd [] =
 {
-  /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                  IndexRange         DataLimit   EnumTbl*/
-  {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.CycleActive, 0,(MAX_CYCLES-1),    NO_LIMIT,   NULL}, 
+  /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                   IndexRange         DataLimit   EnumTbl*/
+  {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.CycleActive,   0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
+  {"CYCLE_LAST_TIME", NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleLastTime, 0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
@@ -104,9 +105,9 @@ static USER_MSG_TBL CycleCfgCmd[] =
 // Persisted Counts
 static USER_MSG_TBL CyclePCountsCmd[] =
 {
-  /*Str        Next Tbl Ptr   Handler Func  Data Type         Access    Parameter                 IndexRange          DataLimit              EnumTbl*/
-  {"COUNT",    NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT32, USER_RW,  &m_persistTemp.count.n,   0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL },
-  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RW,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL },  
+  /*Str        Next Tbl Ptr   Handler Func  Data Type         Access    Parameter                 IndexRange          DataLimit         EnumTbl*/
+  {"COUNT",    NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT32, USER_RW,  &m_persistTemp.count.n,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },
+  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RW,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },  
   { NULL,        NULL,          NULL,       NO_HANDLER_DATA}
 };
 
