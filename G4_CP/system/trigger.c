@@ -604,6 +604,9 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 
       // Duration has been met now the trigger is considered active
       case TRIG_ACTIVE:
+
+         // Check if the running trigger is still valid.
+         IsStartValid = TriggerValidGetState(pTrigData->TriggerIndex);
          
          pTrigData->EndType = TriggerCheckEnd(pTrigCfg, pTrigData); 
 
@@ -780,7 +783,7 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
   {
     EndType = TRIG_END_CRITERIA;
   }
-  else if(result > 0 && !validity)
+  else if(!validity)
   {
     EndType = TRIG_SENSOR_INVALID;
   }

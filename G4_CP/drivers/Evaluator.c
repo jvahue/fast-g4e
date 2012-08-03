@@ -940,7 +940,7 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
       }
       else
       {
-        rslt.Data = 0.0f;
+        rslt.Data = (FLOAT32) ( ((BOOLEAN)oprndLeft.Data) || ((BOOLEAN)oprndRight.Data) );
         rslt.DataType = DATATYPE_BOOL;
         rslt.Validity = (oprndLeft.Validity || oprndRight.Validity);
       }
