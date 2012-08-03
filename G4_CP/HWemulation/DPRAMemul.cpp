@@ -98,6 +98,9 @@ bool DPRamEmulation::ProcessDPR()
             case CMD_ID_SHELL_CMD:
                 status = MsShellCmd();
                 break;
+            case CMD_ID_GET_MSSIM_INFO:
+                status = GetInfo();
+                break;
             default:
                 status = true;
                 break;
@@ -170,6 +173,18 @@ bool DPRamEmulation::HbResponse()
     rsp.TimeSynched = FALSE;
     rsp.Sta         = MSCP_STS_OFF;
     rsp.Xfr         = MSCP_XFR_NONE;
+
+    return Send( &rsp, sizeof(rsp));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+bool DPRamEmulation::GetInfo()
+{
+    MSCP_GET_MS_INFO_RSP rsp;
+
+    sprintf( rsp.MssimVer, "%s", "2.1.0");
+    sprintf( rsp.SetrixVer, "%s", "setrix");
+    sprintf( rsp.PWEHVer, "%s", "pweh");
 
     return Send( &rsp, sizeof(rsp));
 }
