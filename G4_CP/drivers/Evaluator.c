@@ -49,6 +49,8 @@
 #define RPN_POP       (rpn_stack[--rpn_stack_pos])
 #define RPN_STACK_CNT (rpn_stack_pos)
 
+
+//#define DEBUG_EVALUATOR
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -66,7 +68,7 @@ const CHAR* EvalRetValEnumString[10] =
   "RPN_ERR_VALUE_INVALID"            ,
   "RPN_ERR_INDEX_OTRNG"              ,
   "RPN_ERR_TOO_MANY_OPRNDS"          ,
-  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND",
+  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,
   "RPN_ERR_CONST_VALUE_OTRG"         ,
   "RPN_ERR_TOO_FEW_STACK_VARS"       ,
   "RPN_ERR_INV_OPRND_TYPE"           ,
@@ -319,10 +321,15 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
 {
 
   INT32   i;
-  INT32   j;
   const EVAL_OPCODE_TBL_ENTRY* pOpCodeTbl = NULL;
   const EVAL_CMD* cmd;
   EVAL_RPN_ENTRY  result;
+#ifdef DEBUG_EVALUATOR
+  /*vcast_dont_instrument_start*/
+  CHAR expString[256];
+  EvalExprBinToStr(expString,expr);
+  /*vcast_dont_instrument_end*/
+#endif
 
   // Init the results
   result.DataType = DATATYPE_BOOL;
@@ -338,15 +345,9 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
     // Get ptr to next cmd in list.
     cmd = &expr->CmdList[i];
 
-    // Get a ptr to the Opcode table entry for this cmd.
-    for(j = 0; j < EVAL_OPCODE_MAX; j++)
-    {
-      if (cmd->OpCode == OpCodeTable[j].OpCode)
-      {
-        pOpCodeTbl = &OpCodeTable[j];
-        break;
-      }
-    }
+    // The OpCode value is the index into the OpCodeTable for this operation
+    // see: EVAL_OPCODE_LIST in EvaluatorInterface.h
+    pOpCodeTbl = &OpCodeTable[cmd->OpCode];    
 
     // process the command.
     if ( !pOpCodeTbl->ExeCmd(cmd))
@@ -480,12 +481,9 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
   if (retval < 0)
   {
     expr->Size = 0;
-  }
-
-  // If the return value is < 0, create an assert rather than run with a
-  // corrupted trigger, event, etc.
-  ASSERT_MESSAGE(retval > -1 ,"Expression Parsing failed. retval = %s", 
+    GSE_DebugStr(NORMAL,FALSE,"Expression Parsing failed. retval = %s", 
                  EvalGetMsgFromErrCode(retval));
+  }  
   return retval;
 }
 
@@ -519,20 +517,14 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
 
   for(i = 0; i < expr->Size; i++)
   {
-    cnt  = 0;
-    // Cmd... Lookup the symbolic name.
-    for (j = 0; j < EVAL_OPCODE_MAX; ++j)
-    {
-      // Call the function to handle formatting this command
-      if ( OpCodeTable[j].OpCode == expr->CmdList[i].OpCode )
-      {
-        cnt = OpCodeTable[j].FmtCmd( j, (const EVAL_CMD*) &expr->CmdList[i], pStr);
-        pStr += cnt;
-        *pStr = ' ';
-        pStr++;
-        break;
-      } // If opcode matches expression entry
-    } // for-loop OpcodeTable lookup
+    cnt  = 0;   
+    j = expr->CmdList[i].OpCode;
+    cnt = OpCodeTable[j].FmtCmd( j, (const EVAL_CMD*) &expr->CmdList[i], pStr);
+    pStr += cnt;
+    *pStr = ' ';
+    pStr++;
+
+    //Should never happen unless the op code table is corrupted!
     ASSERT_MESSAGE(cnt != 0, "EvalExprBinToStr OpCode not valid: %d",expr->CmdList[i].OpCode );
   } // for-loop expression entries
   --pStr;
@@ -939,32 +931,18 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
     oprndLeft  = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_BOOL, &oprndLeft, &oprndRight) )
     {
-      // perform the compare, set the data type
-      rslt.Data     = (FLOAT32) (BOOLEAN)(oprndLeft.Data || (BOOLEAN)oprndRight.Data);
-      rslt.DataType = DATATYPE_BOOL;
-
-      // A SINGLE invalid operand is acceptable in an OR operation.
-      // Use the state/value of the valid operand and consider the result as VALID
-
-      if ( EvalGetValidCnt(&oprndLeft, &oprndRight) < 2)
+      if ( (oprndLeft.Validity  && (BOOLEAN)oprndLeft.Data) ||
+           (oprndRight.Validity && (BOOLEAN)oprndRight.Data) )
       {
-        if (oprndLeft.Validity && !oprndRight.Validity)
-        {
-          // Operand A is valid but not Operand B
-          rslt.Data     = oprndLeft.Data;
-          rslt.Validity = oprndLeft.Validity;
-        }
-        else if(!oprndLeft.Validity && oprndRight.Validity)
-        {
-          // Operand B is valid but not Operand A
-          rslt.Data     = oprndRight.Data;
-          rslt.Validity = oprndRight.Validity;
-        }
-        else
-        {
-          // Both operands invalid, carry it into the result.
-          rslt.Validity = FALSE;
-        }
+        rslt.Data = 1.0f;
+        rslt.DataType = DATATYPE_BOOL;
+        rslt.Validity = TRUE;
+      }
+      else
+      {
+        rslt.Data = 0.0f;
+        rslt.DataType = DATATYPE_BOOL;
+        rslt.Validity = (oprndLeft.Validity || oprndRight.Validity);
       }
     }
     else
@@ -979,6 +957,7 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
   RPN_PUSH(rslt);
   return opStatus;
 }
+
 
 /******************************************************************************
  * Function: EvalAddConst
