@@ -35,7 +35,7 @@ protected:
     bool CheckFile();
     bool GsmSetup();
     bool MsShellCmd();
-
+    bool GetInfo();
     MSCP_GSM_CONFIG_CMD gsmSetup;
 };
 

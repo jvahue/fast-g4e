@@ -13,8 +13,10 @@ syntax: regexp
 ^GhsInclude.
 ^Pc-Lint.
 ^STI.
+^G4E/Persist/.
 syntax: glob
 G4E.exe
 G4E.ilk
 G4E.pdb
 G4E.ncb
+G4E/gse.log
