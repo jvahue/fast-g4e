@@ -184,7 +184,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetPath) C:\development\Knowlogic\scripts\bin"
+				CommandLine="copy $(TargetPath) $(SolutionDir)\..\..\scripts\bin"
 			/>
 		</Configuration>
 		<Configuration
@@ -355,7 +355,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetPath) C:\development\Knowlogic\scripts\bin"
+				CommandLine="copy $(TargetPath) $(SolutionDir)\..\..\scripts\bin"
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
@@ -858,6 +858,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="DEBUG_TP|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\application\UploadMgr.c"
@@ -1310,6 +1318,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="DEBUG_TP|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\ARINC429Mgr.c"
@@ -1604,6 +1620,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DEBUG_TP|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2187,34 +2211,6 @@
 			<Filter
 				Name="test"
 				>
-				<File
-					RelativePath="..\G4_CP\test\c_cover_ioPWES.c"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\G4_CP\test\Etm.c"
-					>
-				</File>
-				<File
-					RelativePath="..\G4_CP\test\Etm.h"
-					>
-				</File>
 				<File
 					RelativePath="..\G4_CP\test\TestPoints.c"
 					>

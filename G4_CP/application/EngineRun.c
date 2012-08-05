@@ -855,7 +855,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   }
 
   // Update the total run duration
-  pErData->Duration_ms += CM_GetTickCount() - pErData->startingTime;
+  pErData->Duration_ms = CM_GetTickCount() - pErData->startingTime;
   
   // update the sample count so average can be calculated at end of engine run.
   pErData->nSampleCount++;
@@ -1038,7 +1038,7 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
   // Update the starting duration.
   if (bUpdateDuration)
   {
-    pErData->StartingDuration_ms += CM_GetTickCount() - pErData->startingTime;
+    pErData->StartingDuration_ms = CM_GetTickCount() - pErData->startingTime;
   }
  
 
