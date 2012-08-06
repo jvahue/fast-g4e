@@ -405,7 +405,7 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
     }
     else
     {  
-      GSE_DebugStr( NORMAL,FALSE,"EvalExprStrToBin Failed: %s",
+      GSE_DebugStr( NORMAL,FALSE,"EvalExprStrToBin Failed: %s"NEW_LINE,
                     EvalGetMsgFromErrCode(StrToBinResult));     
       result = USER_RESULT_ERROR;
     }
