@@ -419,11 +419,18 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
       continue;
     }
 
-    len = 0;
+    // More tokens to process but Cmd list full!
+    // break out of while-loop
+    if(expr->Size >= EVAL_EXPR_BIN_LEN)
+    {
+      retval = RPN_ERR_TOO_MANY_TOKENS_IN_EXPR;
+      break;
+    }
 
+    len = 0;
     // If the token matches a token in table, call the associated
     // function to add a command to the expression's cmd-list.
-    for ( i = 0; i < EVAL_OPCODE_MAX && expr->Size < EVAL_EXPR_BIN_LEN; ++i )
+    for ( i = 0; i < EVAL_OPCODE_MAX; ++i )
     {
       if( 0 != OpCodeTable[i].TokenLen  &&
           0 == strncmp(OpCodeTable[i].Token, str, OpCodeTable[i].TokenLen))
@@ -431,14 +438,7 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
         len = OpCodeTable[i].AddCmd(i, str, expr);
         break; // Processed a token, break out of lookup loop
       }
-    }
-
-    // Cmd list full, break out of while-loop
-    if(expr->Size > EVAL_EXPR_BIN_LEN)
-    {
-      retval = RPN_ERR_TOO_MANY_TOKENS_IN_EXPR;
-      break;
-    }
+    }    
 
     // For-loop ended, check for failure.
     if(len < 0)
