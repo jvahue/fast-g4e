@@ -86,8 +86,8 @@ static EVENT_TABLE_DATA  stateEventTableTemp;   // Event Table State Temp Storag
 USER_ENUM_TBL eventTableType[]   =
 {  { "0"  , EVENT_TABLE_0   }, { "1"  ,  EVENT_TABLE_1   }, {  "2"  , EVENT_TABLE_2   },
    { "3"  , EVENT_TABLE_3   }, { "4"  ,  EVENT_TABLE_4   }, {  "5"  , EVENT_TABLE_5   },
-   { "6"  , EVENT_TABLE_6   }, { "7"  ,  EVENT_TABLE_7   }, {  "8"  , EVENT_TABLE_8   },
-   { "9"  , EVENT_TABLE_9   }, { "UNUSED", EVENT_TABLE_UNUSED }, { NULL, 0}
+   { "6"  , EVENT_TABLE_6   }, { "7"  ,  EVENT_TABLE_7   },
+   { "UNUSED", EVENT_TABLE_UNUSED }, { NULL, 0}
 };
 
 
@@ -119,8 +119,8 @@ static USER_MSG_TBL eventCmd [] =
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nOffset_ms,        0,(MAX_EVENTS-1),    0,1000,              NULL                },
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,            0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
+  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "PRETIMEHISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.preTimeHistory,    0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
   { "PRETIME_S",      NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "POSTTIMEHISTORY",NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.postTimeHistory,   0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
@@ -839,11 +839,16 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Action Manager Persistent Updates
+ *
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-07-19   Time: 5:09p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Cleaned up Code Review Tool findings
  *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:26a

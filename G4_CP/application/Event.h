@@ -261,6 +261,7 @@ typedef struct
    INT8               nActionReqNum;                /* Number used to id action request  */
    EVENT_END_TYPE     endType;                      /* Reason for the event ending       */
    BOOLEAN            bStarted;                     /* Was the Start Criteria met?       */
+   BOOLEAN            bTableWasEntered;             /* Flag to for table entry status    */
 } EVENT_DATA;
 
 //A type for an array of the maximum number of events
@@ -425,11 +426,16 @@ EXPORT void EventTablesInitialize  ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- * 
+ *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Action Manager Persistent Updates
+ *
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-07-19   Time: 5:09p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Cleaned up Code Review Tool findings
  *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p

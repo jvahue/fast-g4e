@@ -112,6 +112,8 @@ static void           EventTableLogSummary     ( const EVENT_TABLE_CFG  *pConfig
                                                  const EVENT_TABLE_DATA *pData,
                                                  EVENT_TABLE_INDEX eventTableIndex,
                                                  LOG_PRIORITY      priority );
+static void           EventForceTableEnd       ( EVENT_TABLE_INDEX eventTableIndex,
+                                                 LOG_PRIORITY priority );
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -169,6 +171,7 @@ void EventsInitialize ( void )
       pEventData->nActionReqNum     = ACTION_NO_REQ;
       pEventData->endType           = EVENT_NO_END;
       pEventData->bStarted          = FALSE;
+      pEventData->bTableWasEntered  = FALSE;
 
       // If the event has a Start and End Expression then it must be configured
       if ( (0 != pEventCfg->startExpr.Size) && (0 != pEventCfg->endExpr.Size) )
@@ -467,11 +470,11 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    BOOLEAN  bStartCriteriaMet;
    BOOLEAN  bIsStartValid;
    UINT32   nCurrentTick;
-   BOOLEAN  bTableRunning;
+   BOOLEAN  bTableEntered;
 
    // Initialize Local Data
    nCurrentTick   = CM_GetTickCount();
-   bTableRunning = FALSE;
+   bTableEntered  = FALSE;
 
    switch (pData->state)
    {
@@ -486,33 +489,38 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
             // Check if already started
             if ( FALSE == pData->bStarted )
             {
-               pData->bStarted = TRUE;
                // if we just detected the event is starting then set the flag
-               // and reset the event data so we can start collecting it again
+               pData->bStarted = TRUE;
+
+               // SRS-4196 - Simple Event Action is mutually exclusive with Table processing
+               // Make sure we don't have event table processing attached.
+               if ( EVENT_TABLE_UNUSED == pConfig->eventTableIndex )
+               {
+                  pData->nActionReqNum = ActionRequest(pData->nActionReqNum,
+                                                       EVENT_ACTION_ON_MET(pConfig->nAction),
+                                                       ACTION_ON,
+                                                       EVENT_ACTION_CHK_ACK(pConfig->nAction),
+                                                    EVENT_ACTION_CHK_LATCH (pConfig->nAction));
+               }
+               // reset the event data so we can start collecting it again
                // If we do this at the end we cannot view the status after the
                // event has ended using GSE commands.
-               pData->nActionReqNum = ActionRequest(pData->nActionReqNum,
-                                                    EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                    ACTION_ON,
-                                                    EVENT_ACTION_CHK_ACK(pConfig->nAction),
-                                                    EVENT_ACTION_CHK_LATCH (pConfig->nAction));
                EventResetData( pConfig, pData );
             }
-
+            // Since we just started begin collecting data
             EventUpdateData ( pData );
 
             // If this is a table event then perform table processing
             if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
             {
-               bTableRunning = EventTableUpdate ( pConfig->eventTableIndex, nCurrentTick,
-                                                  pConfig->priority );
+               pData->bTableWasEntered = EventTableUpdate ( pConfig->eventTableIndex,
+                                                            nCurrentTick,
+                                                            pConfig->priority );
 
-               // The event will only become active when the table is entered
-               // by exceeding the minimum sensor value configured for the table
-               if ( TRUE == bTableRunning )
-               {
-                  pData->state = EVENT_ACTIVE;
-               }
+               // Doesn't matter if the table is entered or not, the event is now
+               // considered active because the start criteria for the simple event is
+               // met and there is no duration for events that have an event table
+               pData->state = EVENT_ACTIVE;
             }
             // This is a simple event check if we have exceeded the cfg duration
             else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
@@ -569,23 +577,30 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
          // Perform table processing if configured for a table
          if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
          {
-            bTableRunning = EventTableUpdate ( pConfig->eventTableIndex, nCurrentTick,
+            bTableEntered = EventTableUpdate ( pConfig->eventTableIndex, nCurrentTick,
                                                pConfig->priority );
+            if (TRUE == bTableEntered)
+            {
+               pData->bTableWasEntered = TRUE;
+            }
          }
 
          // Check if the end criteria has been met
          pData->endType = EventCheckEnd(pConfig);
 
-         // Check if any end criteria has happened and the table is done
-         if ((EVENT_NO_END != pData->endType) && (FALSE == bTableRunning))
+         // Check if any end criteria has happened and/or the table is done
+         if ( ((EVENT_NO_END != pData->endType) && (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
+              ((EVENT_NO_END != pData->endType) && (FALSE == bTableEntered) ) ||
+              ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) && (FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered)) )
          {
             // Record the time the event ended
             CM_GetTimeAsTimestamp(&pData->tsEndTime);
             // Log the End
             EventLogEnd(pConfig, pData);
             // Change event state back to start
-            pData->state    = EVENT_START;
-            pData->bStarted = FALSE;
+            pData->state            = EVENT_START;
+            pData->bStarted         = FALSE;
+            pData->bTableWasEntered = FALSE;
             // End the time history
             TimeHistoryEnd(pConfig->postTimeHistory, pConfig->postTime_s);
             // reset the event Action
@@ -720,7 +735,8 @@ void EventLogStart (EVENT_CFG *pConfig, const EVENT_DATA *pData)
  *               [in] UINT32            nCurrentTick
  *               [in] LOG_PRIORITY      priority
  *
- * Returns:      None
+ * Returns:      TRUE  - if the table was entered
+ *               FALSE - if the table was not entered
  *
  * Notes:        None
  *
@@ -742,8 +758,9 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
    // Get Sensor Value
    pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
 
-   // Don't do anything until the table is entered
-   if ( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue )
+   // Don't do anything until the sensor is valid and the table is entered
+   if (( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue ) &&
+       ( TRUE == SensorIsValid( pTableCfg->nSensor ) ) )
    {
        // Check if this Table was already running
       if ( FALSE == pTableData->bStarted )
@@ -801,7 +818,7 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceEndTime );
          // Exit any confirmed region that wasn't previously exited
          EventTableExitRegion ( pTableCfg,  pTableData, foundRegion, nCurrentTick );
-         // Log the Event Table
+         // Log the Event Table -
          EventTableLogSummary ( pTableCfg, pTableData, eventTableIndex, priority );
       }
       // Now reset the Started Flag and wait until we cross a region threshold
@@ -1331,6 +1348,8 @@ void EventForceEnd ( void )
       // Check if the event is active
       if ( EVENT_ACTIVE == pEventData->state )
       {
+         // Command the event table to end
+         EventForceTableEnd (pEventCfg->eventTableIndex, pEventCfg->priority );
          // Record the End Time for the event
          CM_GetTimeAsTimestamp ( &pEventData->tsEndTime );
          // Record the type of end for the event
@@ -1347,14 +1366,57 @@ void EventForceEnd ( void )
    }
 }
 
+/******************************************************************************
+ * Function:     EventForceTableEnd
+ *
+ * Description:  Force the event table to end.
+ *
+ * Parameters:   None.
+ *
+ * Returns:      None.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static
+void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priority )
+{
+   // Local Data
+   EVENT_TABLE_CFG  *pTableCfg;
+   EVENT_TABLE_DATA *pTableData;
+
+   // Initialize Local Data
+   pTableCfg    = &m_EventTableCfg [eventTableIndex];
+   pTableData   = &m_EventTableData[eventTableIndex];
+
+   // Check if we already started the Event Table Processing
+   if ( ( TRUE == pTableData->bStarted ) && ( 0 != pTableData->nTotalDuration_ms ) )
+   {
+      // The exceedance has ended
+      CM_GetTimeAsTimestamp( &pTableData->tsExceedanceEndTime );
+      // Exit any confirmed region
+      EventTableExitRegion ( pTableCfg,  pTableData, pTableData->confirmedRegion,
+                             CM_GetTickCount());
+      // Log the Event Table
+      EventTableLogSummary ( pTableCfg, pTableData, eventTableIndex, priority );
+   }
+   // Now reset the Started Flag
+   pTableData->bStarted = FALSE;
+}
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- * 
+ *
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Action Manager Persistent Updates
+ *
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-07-19   Time: 5:09p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Cleaned up Code Review Tool findings
  *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p
