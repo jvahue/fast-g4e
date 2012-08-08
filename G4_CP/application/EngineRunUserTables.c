@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description: 
 
 VERSION
-$Revision: 7 $  $Date: 7/18/12 6:24p $ 
+$Revision: 8 $  $Date: 8/08/12 3:41p $ 
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -788,6 +788,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:41p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 make min/max generic
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p

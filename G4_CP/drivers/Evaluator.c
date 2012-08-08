@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 10 $  $Date: 7/30/12 7:29p $
+  $Revision: 11 $  $Date: 8/08/12 3:12p $
 
 ******************************************************************************/
 
@@ -483,7 +483,7 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
     expr->Size = 0;
     GSE_DebugStr(NORMAL,FALSE,"Expression Parsing failed. retval = %s", 
                  EvalGetMsgFromErrCode(retval));
-  }  
+  }
   return retval;
 }
 
@@ -1264,6 +1264,13 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:12p
+ * Updated in $/software/control processor/code/drivers
+ * Fixed: Issue #3 eval accepts a 17 token expression
+ * Fixed: Issue #4 eval does not end a trigger when a sensor goes invalid
+ * Fixed: Issue #7 EVAL OR function and optimized opcode table lookup
  * 
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/30/12    Time: 7:29p
