@@ -21,3 +21,9 @@ G4E.ilk
 G4E.pdb
 G4E.ncb
 G4E/gse.log
+G4_CP/build/fast.dep
+G4_CP/build/fast.dla
+G4_CP/build/fast.dnm
+G4_CP/build/fast.elf
+G4_CP/build/fast0.dld
+G4_CP/build/fastCRC.txt
