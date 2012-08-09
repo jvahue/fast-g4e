@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 21 $  $Date: 12-07-13 9:03a $    
+$Revision: 22 $  $Date: 8/08/12 3:49p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -416,6 +416,11 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 add line break to output EvalExprStrToBin failed
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a

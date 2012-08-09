@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description: 
 
 VERSION
-$Revision: 7 $  $Date: 7/18/12 6:26p $ 
+$Revision: 8 $  $Date: 8/08/12 3:29p $ 
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -337,6 +337,11 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Fixed bug in persist count writing
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:26p

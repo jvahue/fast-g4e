@@ -12,7 +12,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 10 $  $Date: 7/18/12 6:24p $     
+      $Revision: 11 $  $Date: 8/08/12 3:33p $     
     
 ******************************************************************************/
 
@@ -186,6 +186,12 @@ EXPORT ENGRUN_RUNLOG*  EngRunGetPtrToLog(ENGRUN_INDEX engId);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Fixed bug in persist count writing Refactor temp and
+ * voltage to max and min
  * 
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p

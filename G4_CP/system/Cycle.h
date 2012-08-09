@@ -11,7 +11,7 @@
                  data from the various interfaces.
     
     VERSION
-      $Revision: 8 $  $Date: 7/11/12 4:35p $
+      $Revision: 9 $  $Date: 8/08/12 3:29p $
     
 ******************************************************************************/
 
@@ -254,6 +254,11 @@ EXPORT void CycleResetEngineRun( ENGRUN_INDEX erID);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Cleanup
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:35p
