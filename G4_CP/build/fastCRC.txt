@@ -14,10 +14,10 @@ CRC address is 0x0, the polynomial is 0x8005 and it is 32 bits.
 CRC Type is Bytewise, CRC initial value is 0xffffffff, CRC operands are 8 bits.
 Lines containing only the fill pattern will not be output.
 
-Section 0 CRC 0x5c41fab6, written to address 0x0018a640
+Section 0 CRC 0x151de58f, written to address 0x0018a600
 --- Open fast.dld output file
-Section 0 filled with 566876 (0x0008a65c) bytes, utilization is 70.86%
---- Total bytes written to memory 566876 (0x0008a65c), utilization is 70.86%
+Section 0 filled with 566812 (0x0008a61c) bytes, utilization is 70.85%
+--- Total bytes written to memory 566812 (0x0008a61c), utilization is 70.85%
 .
 .
 Done!
