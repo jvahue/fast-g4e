@@ -104,17 +104,17 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 static FASTMGR_CONFIG FASTConfigTemp;
 
 static USER_MSG_TBL CfgFlagsCmd [] =
-{  /*Str               Next Tbl Ptr   Handler Func.       Data Type          Access      Parameter                         IndexRange   DataLimit          EnumTbl*/
-  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_HEX128,  USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       HEX128_LIMIT,      NULL },
-  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_HEX128,  USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       HEX128_LIMIT,      NULL },
-  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,  USER_RW,    &FASTConfigTemp.AutoULPer_s,      -1,-1,       NO_LIMIT,          NULL },
-  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,    USER_RW,    &FASTConfigTemp.TimeSource,       -1,-1,       NO_LIMIT,          TimeSourceStrs },
-  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,  USER_RW,    NULL,                             -1,-1,       NO_LIMIT,          NULL },
-  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,     USER_RW,    NULL,                             -1,-1,       INSTALL_STR_LIMIT, NULL },
-  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,  USER_RW,    &FASTConfigTemp.TxTestMsRdyTO,    -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,  USER_RW,    &FASTConfigTemp.TxTestSIMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,  USER_RW,    &FASTConfigTemp.TxTestGSMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,  USER_RW,    &FASTConfigTemp.TxTestVPNRdyTO,   -1,-1,       NO_LIMIT,          NULL },
+{  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                         IndexRange   DataLimit          EnumTbl*/
+  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       NO_LIMIT,          NULL },
+  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       NO_LIMIT,          NULL },
+  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.AutoULPer_s,      -1,-1,       NO_LIMIT,          NULL },
+  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &FASTConfigTemp.TimeSource,       -1,-1,       NO_LIMIT,          TimeSourceStrs },
+  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                             -1,-1,       NO_LIMIT,          NULL },
+  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,      USER_RW,    NULL,                             -1,-1,       INSTALL_STR_LIMIT, NULL },
+  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestMsRdyTO,    -1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestSIMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestGSMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestVPNRdyTO,   -1,-1,       NO_LIMIT,          NULL },
   { NULL,              NULL,          NULL,               NO_HANDLER_DATA } 
 };
 

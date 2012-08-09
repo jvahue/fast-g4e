@@ -612,16 +612,16 @@ static USER_MSG_TBL EngRunStatusCmd [] =
 
 static USER_MSG_TBL EngRunCfgCmd[] =
 {
-  /*Str              Next Tbl Ptr   Handler Func     Data Type       Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
-  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,    USER_RW,  &m_CfgTemp.EngineName,     0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
-  {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.StartTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.RunTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.StopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.Rate,           0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
-  {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
-  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.MonMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.MonMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_HEX128, USER_RW,  &m_CfgTemp.SensorMap,      0,(MAX_ENGINES-1), HEX128_LIMIT,         NULL            },
+  /*Str              Next Tbl Ptr   Handler Func     Data Type        Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
+  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,     USER_RW,  &m_CfgTemp.EngineName,     0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
+  {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.StartTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.RunTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.StopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.Rate,           0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
+  {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
+  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.SensorMap,      0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
