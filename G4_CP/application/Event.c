@@ -93,7 +93,7 @@ static void           EventLogUpdate         ( EVENT_DATA *pData  );
 static void           EventLogEnd            ( EVENT_CFG  *pConfig, EVENT_DATA *pData   );
 static void           EventForceEnd          ( void );
 /*-------------------------- EVENT TABLES ----------------------------------*/
-static void           EventTableResetData      ( EVENT_TABLE_INDEX eventTableIndex );
+static void           EventTableResetData      ( EVENT_TABLE_DATA *pTableData );
 static BOOLEAN        EventTableUpdate         ( EVENT_TABLE_INDEX eventTableIndex,
                                                  UINT32            nCurrentTick,
                                                  LOG_PRIORITY      priority );
@@ -110,7 +110,6 @@ static void           EventTableExitRegion     ( const EVENT_TABLE_CFG  *pTableC
                                                  UINT32            nCurrentTick );
 static void           EventTableLogSummary     ( const EVENT_TABLE_CFG  *pConfig,
                                                  const EVENT_TABLE_DATA *pData,
-                                                 EVENT_TABLE_INDEX eventTableIndex,
                                                  LOG_PRIORITY      priority );
 static void           EventForceTableEnd       ( EVENT_TABLE_INDEX eventTableIndex,
                                                  LOG_PRIORITY priority );
@@ -245,6 +244,7 @@ void EventTablesInitialize ( void )
       pTableCfg  = &m_EventTableCfg  [nTableIndex];
       pTableData = &m_EventTableData [nTableIndex];
 
+      pTableData->nTableIndex      = (EVENT_TABLE_INDEX)nTableIndex;
       pTableData->maximumCfgRegion = REGION_NOT_FOUND;
       pTableData->nActionReqNum    = ACTION_NO_REQ;
 
@@ -360,14 +360,11 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
  *
  *****************************************************************************/
 static
-void EventTableResetData ( EVENT_TABLE_INDEX eventTableIndex )
+void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
 {
    //Local Data
-   EVENT_TABLE_DATA *pTableData;
    UINT16           nRegionIndex;
    REGION_STATS     *pStats;
-
-   pTableData = &m_EventTableData[eventTableIndex];
 
    // Reset all the region statistics and max value reached
    pTableData->bStarted                 = FALSE;
@@ -765,7 +762,7 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
        // Check if this Table was already running
       if ( FALSE == pTableData->bStarted )
       {
-         EventTableResetData ( eventTableIndex );
+         EventTableResetData ( pTableData );
          pTableData->bStarted      = TRUE;
          pTableData->nStartTime_ms = nCurrentTick;
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceStartTime );
@@ -819,7 +816,7 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
          // Exit any confirmed region that wasn't previously exited
          EventTableExitRegion ( pTableCfg,  pTableData, foundRegion, nCurrentTick );
          // Log the Event Table -
-         EventTableLogSummary ( pTableCfg, pTableData, eventTableIndex, priority );
+         EventTableLogSummary ( pTableCfg, pTableData, priority );
       }
       // Now reset the Started Flag and wait until we cross a region threshold
       pTableData->bStarted = FALSE;
@@ -1038,6 +1035,7 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
          GSE_DebugStr(NORMAL,TRUE,"Exit:      R: %d", pTableData->confirmedRegion );
 
          // Build transition log
+         transLog.eventTableIndex          = pTableData->nTableIndex;
          transLog.confirmed                = foundRegion;
          transLog.previousRegion           = pTableData->confirmedRegion;
          transLog.previous = pTableData->regionStats[pTableData->confirmedRegion].logStats;
@@ -1087,14 +1085,14 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
  *****************************************************************************/
 static
 void EventTableLogSummary (const EVENT_TABLE_CFG *pConfig, const EVENT_TABLE_DATA *pData,
-                           EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priority )
+                           LOG_PRIORITY priority )
 {
    // Local Data
    EVENT_TABLE_SUMMARY_LOG tSumm;
    UINT16                  nRegIndex;
 
    // Gather up the data to write to the log
-   tSumm.eventTableIndex          = eventTableIndex;
+   tSumm.eventTableIndex          = pData->nTableIndex;
    tSumm.sensorIndex              = pConfig->nSensor;
    tSumm.tsExceedanceStartTime    = pData->tsExceedanceStartTime;
    tSumm.tsExceedanceEndTime      = pData->tsExceedanceEndTime;
@@ -1402,7 +1400,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
       EventTableExitRegion ( pTableCfg,  pTableData, pTableData->confirmedRegion,
                              CM_GetTickCount());
       // Log the Event Table
-      EventTableLogSummary ( pTableCfg, pTableData, eventTableIndex, priority );
+      EventTableLogSummary ( pTableCfg, pTableData, priority );
    }
    // Now reset the Started Flag
    pTableData->bStarted = FALSE;
@@ -1416,7 +1414,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- * 
+ *
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
