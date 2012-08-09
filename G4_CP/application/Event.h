@@ -10,7 +10,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 16 $  $Date: 12-07-27 3:03p $
+  $Revision: 17 $  $Date: 12-08-09 8:38a $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -427,6 +427,11 @@ EXPORT void EventTablesInitialize  ( void );
  *  MODIFICATIONS
  *    $History: Event.h $
  *
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 12-08-09   Time: 8:38a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Fixed code to properly implement requirements
+ * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application

@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 3 $  $Date: 12-07-27 3:03p $
+ $Revision: 4 $  $Date: 12-08-09 8:36a $
 
 ******************************************************************************/
 
@@ -315,6 +315,10 @@ void ActionResetNVPersist ( void )
 
    NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
    NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
+
+   m_ActionData.bUpdatePersistOut = TRUE;
+   m_ActionData.persist.bLatch    = FALSE;
+   m_ActionData.persist.bState    = OFF;
 }
 
 /*****************************************************************************/
@@ -826,10 +830,21 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
  *  MODIFICATIONS
  *    $History: ActionManager.c $
  * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 12-08-09   Time: 8:36a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Disabled the Persistent ouput when cleared from a GSE
+ * Command
+ * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Action Manager Persistent Updates
+ *
+ * *****************  Version 2  *****************
+ * User: John Omalley Date: 12-07-19   Time: 5:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Cleaned up Code Review Tool findings
  *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:32a

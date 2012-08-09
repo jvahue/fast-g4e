@@ -13,7 +13,7 @@
  Description:
 
  VERSION
- $Revision: 44 $  $Date: 12-07-17 11:28a $
+ $Revision: 45 $  $Date: 12-08-09 8:34a $
 
 ******************************************************************************/
 
@@ -56,7 +56,7 @@
                                  Package Defines
 ******************************************************************************/
 #define TEXT_BUF_SIZE 64
-#define SYS_HDR_VERSION 2
+#define SYS_HDR_VERSION 3
 
 
 
@@ -198,6 +198,11 @@ EXPORT UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-08-09   Time: 8:34a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Updated the System Binary Header to Version 3
  * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:28a

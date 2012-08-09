@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 15 $  $Date: 12-07-27 3:03p $
+ $Revision: 16 $  $Date: 12-08-09 8:38a $
 
 ******************************************************************************/
 
@@ -1286,16 +1286,16 @@ void EventLogUpdate( EVENT_DATA *pData )
   pLog->tsCriteriaMetTime  = pData->tsCriteriaMetTime;
   pLog->tsDurationMetTime  = pData->tsDurationMetTime;
   pLog->tsEndTime          = pData->tsEndTime;
+  pLog->nTotalSensors      = pData->nTotalSensors;
 
   // Loop through all the sensors
-  for ( numSensor = 0; numSensor < MAX_EVENT_SENSORS; numSensor++)
+  for ( numSensor = 0; numSensor < pData->nTotalSensors; numSensor++ )
   {
     // Set a pointer the summary
     pSummary = &(pData->sensor[numSensor]);
 
-    // Check for a valid sensor index and the sensor is used
-    if ( ( pSummary->SensorIndex < (SENSOR_INDEX)MAX_SENSORS ) &&
-          SensorIsUsed((SENSOR_INDEX)pSummary->SensorIndex ) )
+    // Check the sensor is used
+    if ( SensorIsUsed((SENSOR_INDEX)pSummary->SensorIndex ) )
     {
        pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
        // Update the summary data for the trigger
@@ -1303,8 +1303,12 @@ void EventLogUpdate( EVENT_DATA *pData )
        pLog->sensor[numSensor].fTotal      = pSummary->fTotal;
        pLog->sensor[numSensor].fMinValue   = pSummary->fMinValue;
        pLog->sensor[numSensor].fMaxValue   = pSummary->fMaxValue;
-       pLog->sensor[numSensor].fAvgValue   = pSummary->fTotal * oneOverN;
        pLog->sensor[numSensor].bValid      = pSummary->bValid;
+       // if sensor is valid, calculate the final average,
+       // otherwise use the average calculated at the point it went invalid.
+       pLog->sensor[numSensor].fAvgValue   = (TRUE == pSummary->bValid ) ?
+                                              pSummary->fTotal * oneOverN :
+                                              pSummary->fAvgValue;
     }
     else // Sensor Not Used
     {
@@ -1408,6 +1412,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 12-08-09   Time: 8:38a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Fixed code to properly implement requirements
+ * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
