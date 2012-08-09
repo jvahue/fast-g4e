@@ -82,12 +82,11 @@
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define USER_CMD_Q_SIZE 8
+#define BASE_10         10
 // mask off the bits to index into the queue 2^x = USER_CMD_Q_SIZE, x = 3
 #define Q_INDEX_MASK    MASK(0,3)
 
 #define USER_ACTION_TOKEN "<USR_ACTION>"
-
-#define HEX128_SIZE  16  // bytes to process for USER_TYPE_HEX128
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -1212,7 +1211,6 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_UINT16:
     case USER_TYPE_HEX32:
     case USER_TYPE_UINT32:
-    case USER_TYPE_HEX128:
     //case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     //case USER_TYPE_INT32:
@@ -1292,65 +1290,60 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       }
       break;
 
-   case USER_TYPE_HEX128:
-     {
-       CHAR*   ptr;
-       INT16   copyLen;      
-       CHAR    hexStrBuffer[11];             // Size: "0x" + 8 Hex digits + '\0'
-       CHAR    reverseBuffer[11];
-       UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
-       INT16   offset = 0;                   // word-offset index into output buffer
-       INT16   inputLen  = strlen( SetStr ); // length of the input string.     
-       BOOLEAN bConversionError = FALSE;
-      
-       if ( inputLen >= Min->Sint && inputLen <= Max->Sint)
-       {
-         // Erase entire dest in case supplied input defines less than max.
-         for(i = 0; i < (HEX128_SIZE / 4); ++i)
-         {
-           destPtr[i] = 0;
-         }
-         
-         // Set a pointer to the end of the input 'SetStr',
-         // Skip leading '0x' prefix.
-         inputLen -= 2;
-         ptr = &SetStr[2] + inputLen;
-         
-         // Process the hex string in R->L order, using up to 8 characters at a time to fill
-         // a single 32 bit word of the HEX128 array. (The right-most char in
-         // the string represents bits 0-3 in array entry [0])
-         do
-         {           
-           copyLen = MIN( (ptr - &SetStr[2]),8);
-           ptr -= copyLen;
-           
-           // Prepend '0x' into buffer for strtoul, then copy up to 8 chars of hex digits
-           // and convert to UINT32.
-           strncpy_safe(hexStrBuffer,sizeof(hexStrBuffer),"0X",2);
-           strncpy_safe(&hexStrBuffer[2], sizeof(hexStrBuffer) - 2, ptr, copyLen);
-           uint_temp = strtoul(hexStrBuffer, &end, Base);
+  case USER_TYPE_128_LIST:
+    {
+      CHAR*   ptr;
+      CHAR*   end;
+      UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer     
+      INT32   index;
+      INT16   inputLen  = strlen( SetStr ); // length of the input string.  
 
-           // Reverse calculated value to verify conversion.
-           // need to deal with len of input string in hex case as "0X00FF1234" != "0XFF1234"
-           snprintf( reverseBuffer, 11, "0X%0*X", strlen(hexStrBuffer)-2, uint_temp);
-           if (strcmp( hexStrBuffer, reverseBuffer) == 0)
-           {
-             destPtr[offset++] = uint_temp;
-           }
-           else
-           {
-             bConversionError = TRUE;
-           }
-         }
-         while( ptr > &SetStr[2] && offset >= 0 && !bConversionError );
-       }
-       else  // String too long/too short
-       {
-        bConversionError = TRUE;
-       }
-       result = bConversionError ? FALSE : TRUE;
-     } // end-scope for HEX128 decls
-     break;     
+      BOOLEAN bConversionError = FALSE;
+
+      // Init the destination.
+      memset(destPtr, 0, sizeof(BITARRAY128 ) );
+    
+      if ( inputLen >= Min->Sint && inputLen <= Max->Sint)
+      {
+        ptr = SetStr;
+       
+        // Loop until null-terminator is found.
+        while((*ptr != '\0' && !bConversionError) )
+        {
+          //Ignore spaces
+          if(*ptr == ' ' || *ptr == ',' )
+          {
+            ptr++;
+            continue;
+          }
+
+          if ( !isdigit(*ptr) )
+          {
+            bConversionError = TRUE;
+            break;
+          }
+          else
+          {
+            // Attempt to convert to a base 10 integer and verify
+            // range.
+            index = strtol(ptr, &end, BASE_10 );
+            if (index >= 0 && index <= 127)
+            {
+              SetBit(index, destPtr, sizeof(BITARRAY128));
+              ptr = end;
+            }
+            else
+            {
+              bConversionError = TRUE;
+              break;
+            }
+          }
+        }       
+         result = bConversionError ? FALSE : TRUE;
+      }
+
+    } // end-scope for USER_TYPE_128_LIST decls
+    break;     
 
 
     //case USER_TYPE_INT8:
@@ -1576,28 +1569,35 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       sprintf(GetStr,"0x%08X",*(UINT32*)GetPtr);
       break;
 
-    case USER_TYPE_HEX128:
+    case USER_TYPE_128_LIST:
       {
-        CHAR*   destPtr;
-        UINT32  tempWord;
-        CHAR    bufHex128[HEX128_SIZE * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
-        UINT32* word32Ptr = (UINT32*)GetPtr; 
-      
-        destPtr = bufHex128;
-        strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
-        destPtr += 2;
+        CHAR  numStr[5];
+        CHAR    tempOuput[USER_SINGLE_MSG_MAX_SIZE ];
+        CHAR*   destPtr = tempOuput;
 
-        // Display order: 127...0
-        // Read the array from back to front and convert each word
-        // to hex string.
-
-        for( i = 0; i < (HEX128_SIZE/4); ++i )
+        *destPtr = '\0';
+        
+        // Check each bit in the BITARRAY128.
+        // For each 'on' bit, convert the index to a string
+        // and concatenate to the output buffer.
+        for( i = 0; i < 128; ++i )
         {          
-          tempWord = word32Ptr[((HEX128_SIZE/4) - 1)-i];          
-          sprintf( destPtr, "%08X", tempWord );
-          destPtr += 8;
+          if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
+          {
+            snprintf(numStr, sizeof(numStr), "%d,", i);
+            SuperStrcat(tempOuput, numStr, sizeof(tempOuput));
+            destPtr += strlen(numStr);
+          }         
         }
-        strncpy_safe(GetStr, Len, bufHex128, _TRUNCATE);
+
+        // If something was added to tempBuffer, replace the 
+        // final ',' with '\0'
+        if (destPtr > tempOuput)
+        {
+          *(--destPtr) = '\0';
+        }
+        
+        strncpy_safe(GetStr, Len, tempOuput, _TRUNCATE);
       } // USER_TYPE_HEX128 scope for decls
       break;
 
@@ -1739,15 +1739,19 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
       //String length limit to half of the command string.
       //This allows ample room for the command, and should be sufficient
       //for any string value that needs to be set.
-    case USER_TYPE_STR:
+    case USER_TYPE_STR:    
       Min->Uint = NoLimit ? 0          : Min->Uint;
       Max->Uint = NoLimit ? USER_SINGLE_MSG_MAX_SIZE/2 :
                                     MIN(USER_SINGLE_MSG_MAX_SIZE/2, Max->Uint);
       break;
-     
-    case USER_TYPE_HEX128:
-      Min->Sint = NoLimit ? 3                   : Min->Sint;
-      Max->Sint = NoLimit ? (HEX128_SIZE * 8)+2 : Max->Sint;
+
+      case USER_TYPE_128_LIST:
+        Min->Uint = NoLimit ? 0 : Min->Uint;
+
+        Max->Uint = NoLimit ? 127 :
+                    MIN(127, Max->Uint);
+        break;
+
 
     default:
       /* Other types are not limit checked, they will default to here
@@ -1852,8 +1856,8 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
       SuperStrcat(RspStr, "]", destLength);
       break;
 
-    case USER_TYPE_HEX128:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"length must be %u to %u characters.%s",
+    case USER_TYPE_128_LIST:
+      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"data values must be %u to %u, comma separated.%s",
         Min.Uint, Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
@@ -2259,8 +2263,8 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
         break;
 
-      case USER_TYPE_HEX128:
-        memcpy(Param.Ptr, SetPtr, HEX128_SIZE);
+      case USER_TYPE_128_LIST:
+        memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
    
       case USER_TYPE_BOOLEAN:

@@ -60,7 +60,6 @@
 #define NO_NEXT_TABLE NULL
 #define NO_LIMIT 0,0
 #define NO_HANDLER_DATA USER_TYPE_NONE,USER_RW,NULL,-1,-1,0,0,NULL
-#define HEX128_LIMIT  3,34            // '0x0' -> '0x<32 Nibbles>'
 
 // Define for performing dumping cfg info to log
 #define DISPLAY_CFG "SHOWCFG"  
@@ -109,12 +108,11 @@ typedef enum{
   //USER_TYPE_HEX8,
   USER_TYPE_HEX16,
   USER_TYPE_HEX32,
-  USER_TYPE_HEX128,    // defines an array of 4 x UINT32 as used by 
-
   //USER_TYPE_ENUM8,
   //USER_TYPE_ENUM16,
   USER_TYPE_ENUM,
   USER_TYPE_STR,
+  USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list  
   USER_TYPE_FLOAT,
   USER_TYPE_BOOLEAN,
   USER_TYPE_YESNO,

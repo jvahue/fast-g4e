@@ -120,14 +120,14 @@ static USER_MSG_TBL eventCmd [] =
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,            0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "PRETIMEHISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.preTimeHistory,    0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
   { "PRETIME_S",      NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "POSTTIMEHISTORY",NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.postTimeHistory,   0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
   { "POSTTIME_S",     NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
-  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_HEX128,  USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    HEX128_LIMIT,        NULL                },
+  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 
