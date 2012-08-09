@@ -23,7 +23,7 @@
 
 
   VERSION
-  $Revision: 14 $  $Date: 7/18/12 6:26p $
+  $Revision: 15 $  $Date: 8/08/12 3:29p $
    
 ******************************************************************************/
 
@@ -1078,6 +1078,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Fixed bug in persist count writing
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:26p

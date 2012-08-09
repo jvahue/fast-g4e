@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 11 $  $Date: 7/18/12 6:24p $
+      $Revision: 13 $  $Date: 8/08/12 5:04p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -582,8 +582,10 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         break;
       }
 
-      // -> STOP
-      if ( EngRunIsStopped(pErCfg))
+      // STARTING -> STOP
+      // STARTING -> (Aborted) -> STOP
+      if ( TriggerGetState( pErCfg->StopTrigID) ||
+          !TriggerGetState( pErCfg->StartTrigID) )
       {      
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
@@ -596,7 +598,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // If we have a problem determining the EngineRun state for this engine run,
       // end the engine run log, and transition to error mode
 
-      // ERROR! -> STOP
+      // RUNNING -> (error) -> STOP
       if ( EngRunIsError(pErCfg))
       {
         // Add additional 1 second to close of ER due to ERROR.  Normally
@@ -615,8 +617,9 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       EngRunUpdateRunData( pErCfg, pErData);
 
       // If the engine run has stopped, finish the engine run and change states
-      // -> STOP
-      if ( EngRunIsStopped(pErCfg))
+      // RUNNING -> STOP
+      if ( TriggerGetState( pErCfg->StopTrigID) ||
+          !TriggerGetState( pErCfg->RunTrigID) )
       {
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);        
@@ -1046,6 +1049,18 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 5:04p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 create transition from START and RUN to STOP when either is no
+ * longer active.
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Fixed bug in persist count writing Refactor temp and
+ * voltage to max and min
  * 
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p

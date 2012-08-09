@@ -33,7 +33,7 @@
        wnd without ever meeting the duration and no log will be recorded.
        
   VERSION
-  $Revision: 64 $  $Date: 7/18/12 6:27p $
+  $Revision: 65 $  $Date: 8/08/12 3:30p $
    
 ******************************************************************************/
 
@@ -604,9 +604,6 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 
       // Duration has been met now the trigger is considered active
       case TRIG_ACTIVE:
-
-         // Check if the running trigger is still valid.
-         IsStartValid = TriggerValidGetState(pTrigData->TriggerIndex);
          
          pTrigData->EndType = TriggerCheckEnd(pTrigCfg, pTrigData); 
 
@@ -684,6 +681,8 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
   StartCriteriaMet = (BOOLEAN)EvalExeExpression(&pTrigCfg->StartExpr, IsValid);
   
   // If any sensor in the expression was unused/invalid, the start state must be false
+  // todo DaveB move this inside the eval so apps using expressions directly will be
+  // false when invalid.
   if(FALSE == *IsValid)
   {
     StartCriteriaMet = FALSE;
@@ -1370,6 +1369,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 65  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:30p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Trigger uses SensorUpdateSummaryItem
  * 
  * *****************  Version 64  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

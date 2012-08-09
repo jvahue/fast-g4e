@@ -15,7 +15,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 97 $  $Date: 12-07-27 3:02p $
+      $Revision: 98 $  $Date: 8/08/12 3:30p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -349,6 +349,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 98  *****************
+ * User: Contractor V&v Date: 8/08/12    Time: 3:30p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Change Cycle log # offset to +0x20
  * 
  * *****************  Version 97  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:02p
