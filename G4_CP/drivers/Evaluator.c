@@ -347,7 +347,7 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
 
     // The OpCode value is the index into the OpCodeTable for this operation
     // see: EVAL_OPCODE_LIST in EvaluatorInterface.h
-    pOpCodeTbl = &OpCodeTable[cmd->OpCode];    
+    pOpCodeTbl = &OpCodeTable[cmd->OpCode]; 
 
     // process the command.
     if ( !pOpCodeTbl->ExeCmd(cmd))
@@ -358,10 +358,10 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
     }
   } // for-loop cmd list
 
-   // Pop the 'final' entry.
-   result = RPN_POP;
-   *validity = result.Validity;
-   return (INT32)result.Data;
+  // Pop the 'final' entry.
+  result = RPN_POP;
+  *validity = result.Validity;
+  return (INT32)result.Data;
 }
 
 /******************************************************************************
@@ -940,7 +940,7 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
       }
       else
       {
-        rslt.Data = (FLOAT32) ( ((BOOLEAN)oprndLeft.Data) || ((BOOLEAN)oprndRight.Data) );
+        rslt.Data = 0.0f;
         rslt.DataType = DATATYPE_BOOL;
         rslt.Validity = (oprndLeft.Validity || oprndRight.Validity);
       }
