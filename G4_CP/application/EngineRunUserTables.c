@@ -621,7 +621,7 @@ static USER_MSG_TBL EngRunCfgCmd[] =
   {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
   {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
   {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.SensorMap,      0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
+  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.SensorMap,      0,(MAX_ENGINES-1), 0,MAX_SENSORS-1,      NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
