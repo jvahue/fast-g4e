@@ -82,7 +82,6 @@
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define USER_CMD_Q_SIZE 8
-#define BASE_10         10
 // mask off the bits to index into the queue 2^x = USER_CMD_Q_SIZE, x = 3
 #define Q_INDEX_MASK    MASK(0,3)
 
@@ -157,6 +156,14 @@ BOOLEAN   User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                                  INT32 Index, INT8* RspStr, UINT32 Len);
 void      User_LogUserActivity(CHAR* cmdString, CHAR* valuePrev, CHAR* valueNew);
 BOOLEAN   User_AuthenticateModeRequest(const INT8* msg, UINT8 mode);
+
+static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                             USER_ENUM_TBL* MsgEnumTbl,
+                                             USER_RANGE *Min,USER_RANGE *Max);
+
+static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                        USER_ENUM_TBL* MsgEnumTbl,
+                                        USER_RANGE *Min,USER_RANGE *Max);
 
 
 /*****************************************************************************/
@@ -1190,7 +1197,8 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     USER_ENUM_TBL* MsgEnumTbl,USER_RANGE *Min,USER_RANGE *Max)
 {
   CHAR* end;
-  UINT32 i, uint_temp;
+  UINT32 i;
+  UINT32 uint_temp;
   
   INT32  int_temp;
   FLOAT32 float_temp;
@@ -1291,58 +1299,29 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       break;
 
   case USER_TYPE_128_LIST:
-    {
-      CHAR*   ptr;
-      CHAR*   end;
-      UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer     
-      INT32   index;
-      INT16   inputLen  = strlen( SetStr ); // length of the input string.  
 
-      BOOLEAN bConversionError = FALSE;
+      memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
 
-      // Init the destination.
-      memset(destPtr, 0, sizeof(BITARRAY128 ) );
-    
-      if ( inputLen >= Min->Sint && inputLen <= Max->Sint)
+      // Check if value has a hex prefix
+      if (0 != strstr(SetStr, "0X"))
       {
-        ptr = SetStr;
-       
-        // Loop until null-terminator is found.
-        while((*ptr != '\0' && !bConversionError) )
-        {
-          //Ignore spaces
-          if(*ptr == ' ' || *ptr == ',' )
-          {
-            ptr++;
-            continue;
-          }
-
-          if ( !isdigit(*ptr) )
-          {
-            bConversionError = TRUE;
-            break;
-          }
-          else
-          {
-            // Attempt to convert to a base 10 integer and verify
-            // range.
-            index = strtol(ptr, &end, BASE_10 );
-            if (index >= 0 && index <= 127)
-            {
-              SetBit(index, destPtr, sizeof(BITARRAY128));
-              ptr = end;
-            }
-            else
-            {
-              bConversionError = TRUE;
-              break;
-            }
-          }
-        }       
-         result = bConversionError ? FALSE : TRUE;
+        result = User_SetBitArrayFromHexString(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
       }
-
-    } // end-scope for USER_TYPE_128_LIST decls
+      // ...otherwise it could be a list of 1..128 CSV decimal-values
+      else if ( isdigit(*SetStr) )
+      {
+        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+      }
+      // ... if nothing in the set string, the user just wants to clear all  bits.
+      else if (0 == strlen(SetStr))
+      {
+        result = TRUE;
+      }
+      else
+      // Invalid assignment, display a error msg.
+      {
+        result = FALSE;
+      }
     break;     
 
 
@@ -1745,7 +1724,7 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
                                     MIN(USER_SINGLE_MSG_MAX_SIZE/2, Max->Uint);
       break;
 
-      case USER_TYPE_128_LIST:
+    case USER_TYPE_128_LIST:
         Min->Uint = NoLimit ? 0 : Min->Uint;
 
         Max->Uint = NoLimit ? 127 :
@@ -1857,7 +1836,8 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
       break;
 
     case USER_TYPE_128_LIST:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"data values must be %u to %u, comma separated.%s",
+      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
+        "valid set is comma separated decimals from %u to %u, or hex strings of 0x followed by 1 to 32 hex digits.%s",
         Min.Uint, Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
@@ -2540,7 +2520,143 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
   return statusFlag;
 }
 
+/******************************************************************************
+* Function:     User_SetBitArrayFromHexString
+*
+* Description:  Sets a BitArray128 storage using a hex string as input
+*
+* Parameters:   
+*
+* Returns:      True if successful otherwise false.
+*
+* Notes:
+******************************************************************************/
+#define MIN_HEX_STRING  3
+#define MAX_HEX_STRING 34
+static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                             USER_ENUM_TBL* MsgEnumTbl,
+                                             USER_RANGE *Min,USER_RANGE *Max)
+{
+  BOOLEAN bResult = TRUE;
+  UINT32  i;
+  UINT32  uint_temp;
+  CHAR*   ptr;
+  CHAR*   end;
+  INT16   copyLen;
+  INT16   base = 16;
+  CHAR    hexStrBuffer[11];             // Size: "0x" + 8 Hex digits + '\0'
+  CHAR    reverseBuffer[11];
+  UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
+  INT16   offset = 0;                   // word-offset index into output buffer
+  INT16   inputLen  = strlen( SetStr ); // length of the input string.     
+  
+  // Input can be empty otherwise 
+  // s/b "0x0" -> "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
+  if ( inputLen >= MIN_HEX_STRING && inputLen <= MAX_HEX_STRING)
+  {
+    // Set a pointer to the end of the input 'SetStr',
+    // Skip leading '0x' prefix.
+    inputLen -= 2;
+    ptr = &SetStr[2] + inputLen;
+
+    // Process the hex string in R->L order, using up to 8 characters at a time to fill
+    // a single 32 bit word of the HEX128 array.
+    // (i.e. Big-Endian, the right-most char in string represents bits 0-3 in array entry [0])
+    do
+    {           
+      copyLen = MIN( (ptr - &SetStr[2]),8);
+      ptr -= copyLen;
+
+      // Prepend '0x' into buffer for strtoul, then copy up to 8 chars of hex digits
+      // and convert to UINT32.
+      strncpy_safe(hexStrBuffer,sizeof(hexStrBuffer),"0X",2);
+      strncpy_safe(&hexStrBuffer[2], sizeof(hexStrBuffer) - 2, ptr, copyLen);
+
+      uint_temp = strtoul(hexStrBuffer, &end, base);
+
+      // Reverse calculated value to verify conversion.
+      // need to deal with len of input string in hex case as "0X00FF1234" != "0XFF1234"
+      snprintf( reverseBuffer, 11, "0X%0*X", strlen(hexStrBuffer)-2, uint_temp);
+      if (strcmp( hexStrBuffer, reverseBuffer) == 0)
+      {
+        destPtr[offset++] = uint_temp;
+      }
+      else
+      {
+        bResult = FALSE;
+      }
+    }
+    while( ptr > &SetStr[2] && offset >= 0 && bResult );
+  }  
+  return bResult;
+}
+
+/******************************************************************************
+* Function:     User_SetBitArrayFromList
+*
+* Description:  Sets a BitArray128 storage using a string of CSV decimal values as input
+*
+* Parameters:   
+*
+* Returns:      True if successful otherwise false.
+*
+* Notes:
+******************************************************************************/
+static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                        USER_ENUM_TBL* MsgEnumTbl,
+                                        USER_RANGE *Min,USER_RANGE *Max)
+{
+  BOOLEAN bResult = TRUE;
+  CHAR*   ptr;
+  CHAR*   end;
+  UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer     
+  INT32   index;
+  INT16   inputLen = strlen( SetStr ); // length of the input string.  
+  
+  const INT16   base = 10;
+
+  // If the CSV list is not empty, process it.
+  if ( inputLen >= 1 )
+  {
+    ptr = SetStr;
+
+    // Loop until null-terminator is found.
+    while((*ptr != '\0' && bResult) )
+    {
+      //Ignore spaces
+      if(*ptr == ' ' || *ptr == ',' )
+      {
+        ptr++;
+        continue;
+      }
+
+      if ( !isdigit(*ptr) )
+      {
+        bResult = FALSE;
+        break;
+      }
+      else
+      {
+        // Attempt to convert to a base 10 integer and
+        // verify within range for this entry.
+        index = strtol(ptr, &end, base );
+        if (index >= Min->Sint && index <= Max->Sint)
+        {
+          SetBit(index, destPtr, sizeof(BITARRAY128));
+          ptr = end;
+        }
+        else
+        {
+          bResult = FALSE;
+          break;
+        }
+      }
+    } // while more tokens   
+  }
+
+  return bResult;
+}
 
 /*************************************************************************
  *  MODIFICATIONS

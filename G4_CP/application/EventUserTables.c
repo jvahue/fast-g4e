@@ -127,7 +127,7 @@ static USER_MSG_TBL eventCmd [] =
   { "POSTTIME_S",     NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
-  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_SENSORS-1,     NULL                },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 

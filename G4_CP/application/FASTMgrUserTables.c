@@ -105,8 +105,8 @@ static FASTMGR_CONFIG FASTConfigTemp;
 
 static USER_MSG_TBL CfgFlagsCmd [] =
 {  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                         IndexRange   DataLimit          EnumTbl*/
-  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       NO_LIMIT,          NULL },
-  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       NO_LIMIT,          NULL },
+  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       0,MAX_TRIGGERS-1,  NULL },
+  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       0,MAX_TRIGGERS-1,  NULL },
   { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.AutoULPer_s,      -1,-1,       NO_LIMIT,          NULL },
   { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &FASTConfigTemp.TimeSource,       -1,-1,       NO_LIMIT,          TimeSourceStrs },
   { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                             -1,-1,       NO_LIMIT,          NULL },
