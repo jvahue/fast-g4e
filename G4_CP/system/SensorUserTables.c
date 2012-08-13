@@ -1,5 +1,5 @@
 /******************************************************************************
-Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
 Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 21 $  $Date: 7/18/12 6:27p $
+$Revision: 22 $  $Date: 12-08-13 4:21p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -16,7 +16,7 @@ $Revision: 21 $  $Date: 7/18/12 6:27p $
 #endif
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 
@@ -64,10 +64,10 @@ static SENSOR             SensorTemp;      // Temporary Sensor Data block
 static SENSOR_LD_CONFIG   LiveDataTemp;    // Temporary Live Data Cfg Block
 
 // Sensor User Configuration Support
-             
+
 
 USER_ENUM_TBL SensorIndexType[]   =
-{{ "0"  , SENSOR_0   }, { "1"  ,  SENSOR_1   }, {  "2"  , SENSOR_2   },
+{ { "0"  , SENSOR_0   }, { "1"  ,  SENSOR_1   }, {  "2"  , SENSOR_2   },
   { "3"  , SENSOR_3   }, { "4"  ,  SENSOR_4   }, {  "5"  , SENSOR_5   },
   { "6"  , SENSOR_6   }, { "7"  ,  SENSOR_7   }, {  "8"  , SENSOR_8   },
   { "9"  , SENSOR_9   }, { "10" ,  SENSOR_10  }, {  "11" , SENSOR_11  },
@@ -81,26 +81,26 @@ USER_ENUM_TBL SensorIndexType[]   =
   { "33" , SENSOR_33  }, { "34" ,  SENSOR_34  }, {  "35" , SENSOR_35  },
   { "36" , SENSOR_36  }, { "37" ,  SENSOR_37  }, {  "38" , SENSOR_38  },
   { "39" , SENSOR_39  }, { "40" ,  SENSOR_40  }, {  "41" , SENSOR_41  },
-  { "42 ", SENSOR_42  }, { "43" ,  SENSOR_43  }, {  "44" , SENSOR_44  },
-  { "45 ", SENSOR_45  }, { "46" ,  SENSOR_46  }, {  "47" , SENSOR_47  },
-  { "48 ", SENSOR_48  }, { "49" ,  SENSOR_49  }, {  "50" , SENSOR_50  },
-  { "51 ", SENSOR_51  }, { "52" ,  SENSOR_52  }, {  "53" , SENSOR_53  },
-  { "54 ", SENSOR_54  }, { "55" ,  SENSOR_55  }, {  "56" , SENSOR_56  },
-  { "57 ", SENSOR_57  }, { "58" ,  SENSOR_58  }, {  "59" , SENSOR_59  },
-  { "60 ", SENSOR_60  }, { "61" ,  SENSOR_61  }, {  "62" , SENSOR_62  },
-  { "63 ", SENSOR_63  }, { "64" ,  SENSOR_64  }, {  "65" , SENSOR_65  },
-  { "66 ", SENSOR_66  }, { "67" ,  SENSOR_67  }, {  "68" , SENSOR_68  },
-  { "69 ", SENSOR_69  }, { "70" ,  SENSOR_70  }, {  "71" , SENSOR_71  },
-  { "72 ", SENSOR_72  }, { "73" ,  SENSOR_73  }, {  "74" , SENSOR_74  },
-  { "75 ", SENSOR_75  }, { "76" ,  SENSOR_76  }, {  "77" , SENSOR_77  },
-  { "78 ", SENSOR_78  }, { "79" ,  SENSOR_79  }, {  "80" , SENSOR_80  },
-  { "81 ", SENSOR_81  }, { "82" ,  SENSOR_82  }, {  "83" , SENSOR_83  },
-  { "84 ", SENSOR_84  }, { "85" ,  SENSOR_85  }, {  "86" , SENSOR_86  },
-  { "87 ", SENSOR_87  }, { "88" ,  SENSOR_88  }, {  "89" , SENSOR_89  },
-  { "90 ", SENSOR_90  }, { "91" ,  SENSOR_91  }, {  "92" , SENSOR_92  },
-  { "93 ", SENSOR_93  }, { "94" ,  SENSOR_94  }, {  "95" , SENSOR_95  },
-  { "96 ", SENSOR_96  }, { "97" ,  SENSOR_97  }, {  "98" , SENSOR_98  },
-  { "99 ", SENSOR_99  }, {"100" ,  SENSOR_100 }, { "101" , SENSOR_101 },
+  { "42",  SENSOR_42  }, { "43" ,  SENSOR_43  }, {  "44" , SENSOR_44  },
+  { "45",  SENSOR_45  }, { "46" ,  SENSOR_46  }, {  "47" , SENSOR_47  },
+  { "48",  SENSOR_48  }, { "49" ,  SENSOR_49  }, {  "50" , SENSOR_50  },
+  { "51",  SENSOR_51  }, { "52" ,  SENSOR_52  }, {  "53" , SENSOR_53  },
+  { "54",  SENSOR_54  }, { "55" ,  SENSOR_55  }, {  "56" , SENSOR_56  },
+  { "57",  SENSOR_57  }, { "58" ,  SENSOR_58  }, {  "59" , SENSOR_59  },
+  { "60",  SENSOR_60  }, { "61" ,  SENSOR_61  }, {  "62" , SENSOR_62  },
+  { "63",  SENSOR_63  }, { "64" ,  SENSOR_64  }, {  "65" , SENSOR_65  },
+  { "66",  SENSOR_66  }, { "67" ,  SENSOR_67  }, {  "68" , SENSOR_68  },
+  { "69",  SENSOR_69  }, { "70" ,  SENSOR_70  }, {  "71" , SENSOR_71  },
+  { "72",  SENSOR_72  }, { "73" ,  SENSOR_73  }, {  "74" , SENSOR_74  },
+  { "75",  SENSOR_75  }, { "76" ,  SENSOR_76  }, {  "77" , SENSOR_77  },
+  { "78",  SENSOR_78  }, { "79" ,  SENSOR_79  }, {  "80" , SENSOR_80  },
+  { "81",  SENSOR_81  }, { "82" ,  SENSOR_82  }, {  "83" , SENSOR_83  },
+  { "84",  SENSOR_84  }, { "85" ,  SENSOR_85  }, {  "86" , SENSOR_86  },
+  { "87",  SENSOR_87  }, { "88" ,  SENSOR_88  }, {  "89" , SENSOR_89  },
+  { "90",  SENSOR_90  }, { "91" ,  SENSOR_91  }, {  "92" , SENSOR_92  },
+  { "93",  SENSOR_93  }, { "94" ,  SENSOR_94  }, {  "95" , SENSOR_95  },
+  { "96",  SENSOR_96  }, { "97" ,  SENSOR_97  }, {  "98" , SENSOR_98  },
+  { "99",  SENSOR_99  }, {"100" ,  SENSOR_100 }, { "101" , SENSOR_101 },
   { "102", SENSOR_102 }, {"103" ,  SENSOR_103 }, { "104" , SENSOR_104 },
   { "105", SENSOR_105 }, {"106" ,  SENSOR_106 }, { "107" , SENSOR_107 },
   { "108", SENSOR_108 }, {"109" ,  SENSOR_109 }, { "110" , SENSOR_110 },
@@ -124,17 +124,17 @@ USER_ENUM_TBL SensorType[]      =  { { "UNUSED"  , UNUSED          },
 USER_ENUM_TBL LiveDataType[]    =  { { "NONE"  , LD_NONE           },
                                      { "ASCII" , LD_ASCII          },
                                      { NULL,       0               }
-                                   };                               
+                                   };
 USER_ENUM_TBL ConversionType[]  =  { { "NONE",  NONE               },
                                      { "LINEAR", LINEAR            },
                                      { NULL,       0               }
                                    };
 USER_ENUM_TBL SampleType[]      =  { { "1HZ"    , SSR_1HZ          },
-                                     { "2HZ"    , SSR_2HZ          }, 
-                                     { "4HZ"    , SSR_4HZ          }, 
-                                     { "5HZ"    , SSR_5HZ          }, 
-                                     { "10HZ"   , SSR_10HZ         }, 
-                                     { "20HZ"   , SSR_20HZ         }, 
+                                     { "2HZ"    , SSR_2HZ          },
+                                     { "4HZ"    , SSR_4HZ          },
+                                     { "5HZ"    , SSR_5HZ          },
+                                     { "10HZ"   , SSR_10HZ         },
+                                     { "20HZ"   , SSR_20HZ         },
                                      { "50HZ"   , SSR_50HZ         },
                                      { NULL     , 0                }
                                    };
@@ -144,7 +144,7 @@ USER_ENUM_TBL FilterType[]      =  { { "NONE"       , FILTERNONE     },
                                      { "MAXREJECT"  , MAXREJECT      },
                                      { "SLOPE"      , SLOPEFILTER    },
                                      { NULL         , 0              }
-                                   };   
+                                   };
 
 // Sensor User Configuration Support
 
@@ -171,7 +171,7 @@ static USER_MSG_TBL SensorConvConfigCmd [] =
      &ConfigTemp.Conversion.fParams[0],0,MAX_SENSORS-1,NO_LIMIT,NULL },
    { "PARAM2", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
      &ConfigTemp.Conversion.fParams[1],0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }  
+   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL SensorFilterConfigCmd [] =
@@ -200,7 +200,7 @@ static USER_MSG_TBL SensorCmd [] =
    { "NAME"        , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_STR, USER_RW,
      &ConfigTemp.SensorName,0,MAX_SENSORS-1,0,MAX_SENSORNAME,NULL },
    { "OUTPUT"      , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_STR, USER_RW,
-     &ConfigTemp.OutputUnits,0,MAX_SENSORS-1,0,MAX_SENSORUNITS,NULL },    
+     &ConfigTemp.OutputUnits,0,MAX_SENSORS-1,0,MAX_SENSORUNITS,NULL },
    { "INPUT"       , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT8,USER_RW,
      &ConfigTemp.nInputChannel,0,MAX_SENSORS-1,NO_LIMIT,NULL },
    { "MAXSAMPLES"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT8,USER_RW,
@@ -240,13 +240,13 @@ static USER_MSG_TBL SensorCmd [] =
    { "SIGNALDURATION_MS", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT16,USER_RW,
      &ConfigTemp.SignalDuration_ms,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
    { "INSPECT"   , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_BOOLEAN,USER_RW,
-     &ConfigTemp.bInspectInclude,0,MAX_SENSORS-1,NO_LIMIT,NULL  },   
+     &ConfigTemp.bInspectInclude,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
    { "GPA"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_HEX32,USER_RW,
      &ConfigTemp.GeneralPurposeA,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
    { "GPB"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_HEX32,USER_RW,
      &ConfigTemp.GeneralPurposeB,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
    { NULL          , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_NONE,USER_RW,
-     NULL,0,MAX_SENSORS-1,NO_LIMIT,NULL  } 
+     NULL,0,MAX_SENSORS-1,NO_LIMIT,NULL  }
 };
 
 static USER_MSG_TBL FilterState [] =
@@ -272,7 +272,7 @@ static USER_MSG_TBL FilterState [] =
    { "PERSISTSTATEZ1", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, USER_RO,
      &SensorTemp.FilterData.persistStateZ1,      0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
    { NULL            , NO_NEXT_TABLE, NULL, USER_TYPE_NONE,  USER_RW,
-     NULL,0,MAX_SENSORS-1,NULL  } 
+     NULL,0,MAX_SENSORS-1,NULL  }
 };
 
 static USER_MSG_TBL SensorStatus [] =
@@ -285,23 +285,23 @@ static USER_MSG_TBL SensorStatus [] =
      USER_RO       , &SensorTemp.fValue         , 0, MAX_SENSORS - 1,NO_LIMIT,NULL },
    { "PRIORVALUE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,
      USER_RO       , &SensorTemp.fPriorValue    , 0, MAX_SENSORS - 1,NO_LIMIT,NULL },
-   { "SAMPLECOUNTDOWN", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16, 
+   { "SAMPLECOUNTDOWN", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,
      USER_RO       , &SensorTemp.nSampleCountdown, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "NEXTSAMPLE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8, 
+   { "NEXTSAMPLE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,
      USER_RO       , &SensorTemp.nNextSample     , 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "CURRENTSAMPLES", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8, 
+   { "CURRENTSAMPLES", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,
      USER_RO       , &SensorTemp.nCurrentSamples , 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "BITFAIL"     , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, 
+   { "BITFAIL"     , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
      USER_RO       , &SensorTemp.bBITFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RANGEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, 
+   { "RANGEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
      USER_RO       , &SensorTemp.bRangeFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RATEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, 
+   { "RATEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
      USER_RO       , &SensorTemp.bRateFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RATEVALUE", NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, 
+   { "RATEVALUE", NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,
      USER_RO       , &SensorTemp.fRateValue, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "SIGNALFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, 
+   { "SIGNALFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
      USER_RO       , &SensorTemp.bSignalFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "FILTERDATA", FilterState, NULL, NO_HANDLER_DATA }, 
+   { "FILTERDATA", FilterState, NULL, NO_HANDLER_DATA },
    { "INTERFACEINDEX" , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,
      USER_RO       , &SensorTemp.nInterfaceIndex, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
    { NULL          , NO_NEXT_TABLE, Sensor_State, USER_TYPE_NONE, USER_RW,
@@ -340,9 +340,9 @@ static USER_MSG_TBL LiveDataMsg   = {"LIVEDATA",  LiveDataRoot, NULL, NO_HANDLER
 * Function:     Sensor_UserCfg
 *
 * Description:  Handles User Manager requests to change sensor configuraion
-*               items.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               items.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -355,9 +355,9 @@ static USER_MSG_TBL LiveDataMsg   = {"LIVEDATA",  LiveDataRoot, NULL, NO_HANDLER
 *                               this to the location of the data requested.
 
 *
-* Returns:      
+* Returns:
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Sensor_UserCfg(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
@@ -388,9 +388,9 @@ USER_HANDLER_RESULT Sensor_UserCfg(USER_DATA_TYPE DataType,
 * Function:     Sensor_State
 *
 * Description:  Handles User Manager requests to retrieve the current sensor
-*               status.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               status.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -403,9 +403,9 @@ USER_HANDLER_RESULT Sensor_UserCfg(USER_DATA_TYPE DataType,
 *                               this to the location of the data requested.
 
 *
-* Returns:      
+* Returns:
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 
 USER_HANDLER_RESULT Sensor_State(USER_DATA_TYPE DataType,
@@ -429,9 +429,9 @@ USER_HANDLER_RESULT Sensor_State(USER_DATA_TYPE DataType,
 * Function:     Sensor_Live_Data_Cfg
 *
 * Description:  Handles User Manager requests to change sensor configuraion
-*               items.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               items.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -444,9 +444,9 @@ USER_HANDLER_RESULT Sensor_State(USER_DATA_TYPE DataType,
 *                               this to the location of the data requested.
 
 *
-* Returns:      
+* Returns:
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
@@ -489,9 +489,9 @@ USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
 * Function:     Sensor_ShowConfig
 *
 * Description:  Handles User Manager requests to retrieve the configuration
-*               settings.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -505,9 +505,9 @@ USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
 
 *
 * Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.       
+*              USER_RESULT_ERROR: Error processing command.
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
@@ -515,17 +515,17 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
                                       const void *SetPtr,
                                       void **GetPtr)
 {
-   USER_HANDLER_RESULT result;   
-   CHAR Label[USER_MAX_MSG_STR_LEN * 3];   
-   
+   USER_HANDLER_RESULT result;
+   CHAR Label[USER_MAX_MSG_STR_LEN * 3];
+
    //Top-level name is a single indented space
    CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
-   
+
    USER_MSG_TBL*  pCfgTable;
    INT16 sensorIdx;
 
-   result = USER_RESULT_OK;   
-   
+   result = USER_RESULT_OK;
+
    // Loop for each sensor.
    for (sensorIdx = 0; sensorIdx < MAX_SENSORS && result == USER_RESULT_OK; ++sensorIdx)
    {
@@ -534,120 +534,125 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
       result = USER_RESULT_ERROR;
       if (User_OutputMsgString( Label, FALSE ) )
       {
-         pCfgTable = SensorCmd;  // Re-set the pointer to beginning of CFG table       
+         pCfgTable = SensorCmd;  // Re-set the pointer to beginning of CFG table
 
          // User_DisplayConfigTree will invoke itself recursively to display all fields.
          result = User_DisplayConfigTree(BranchName, pCfgTable, sensorIdx, 0, NULL);
-      }     
-   } 
+      }
+   }
    return result;
 }
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
- * 
+ *
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 12-08-13   Time: 4:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Remove space from sensor index enum
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Add nowarn pragma
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
  * Updated in $/software/control processor/code/system
  * SCR 1124 - Packed the configuration structures for ARINC429 Mgr,
  * Sensors and Triggers. Suppressed the alignment warnings for those three
  * objects also.
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 4/11/12    Time: 5:05p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2   128sensors
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor2  Date: 10/04/10   Time: 1:27p
  * Updated in $/software/control processor/code/system
  * SCR #916 Code Review Updates
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:01a
  * Updated in $/software/control processor/code/system
  * SCR #685 - Add USER_GSE flag
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 6/09/10    Time: 3:04p
  * Updated in $/software/control processor/code/system
  * SCR# 486 - mod the fix to use the 'active' version of the livedata to
  * control the task execution.  Also modify tables to use the live data
  * structure directly.
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:55p
  * Updated in $/software/control processor/code/system
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:29p
  * Updated in $/software/control processor/code/system
  * SCR #486 Livedata enhancement
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:28p
  * Updated in $/software/control processor/code/system
  * SCR #618 F7X and UartMgr Requirements Implementation
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #248 Parameter Log Change. Add no log for showcfg
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 4:04p
  * Updated in $/software/control processor/code/system
  * SCR 106 Remove USE_GENERIC_ACCESSOR macro
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 2/17/10    Time: 1:24p
  * Updated in $/software/control processor/code/system
  * SCR# 452 - code coverage mods
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 11:20a
  * Updated in $/software/control processor/code/system
  * SCR# 404 - remove unused sensor status cmds
- * 
+ *
  * *****************  Version 7  *****************
  * User: Jeff Vahue   Date: 1/23/10    Time: 3:14p
  * Updated in $/software/control processor/code/system
  * Typo in GSE command SPKIKEPERCENT -> SPIKEPERCENT
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 1/19/10    Time: 3:52p
  * Updated in $/software/control processor/code/system
  * SCR# 399
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 1/13/10    Time: 4:58p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:27p
  * Updated in $/software/control processor/code/system
  * SCR 18, SCR 333
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:46p
  * Updated in $/software/control processor/code/system
  * SCR 42
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 11/30/09   Time: 5:41p
  * Updated in $/software/control processor/code/system
  * SCR 106  XXXUserTable.c consistency
- 
+
 *
 *****************************************************************************/

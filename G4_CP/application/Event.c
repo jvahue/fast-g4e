@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 16 $  $Date: 12-08-09 8:38a $
+ $Revision: 17 $  $Date: 12-08-13 4:22p $
 
 ******************************************************************************/
 
@@ -759,13 +759,20 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
    if (( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue ) &&
        ( TRUE == SensorIsValid( pTableCfg->nSensor ) ) )
    {
-       // Check if this Table was already running
+      // Check if this Table was already running
       if ( FALSE == pTableData->bStarted )
       {
          EventTableResetData ( pTableData );
          pTableData->bStarted      = TRUE;
          pTableData->nStartTime_ms = nCurrentTick;
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceStartTime );
+      }
+
+      // Check the maximum voltage
+      if ( pTableData->fCurrentSensorValue > pTableData->fMaxSensorValue )
+      {
+         pTableData->fMaxSensorValue          = pTableData->fCurrentSensorValue;
+         pTableData->nMaxSensorElaspedTime_ms = pTableData->nTotalDuration_ms;
       }
 
       // Calculate the duration since the exceedance began
@@ -940,13 +947,6 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
          pTableCfg->nTransientAllowance_ms) ||
          ( foundRegion < pTableData->confirmedRegion ) )
    {
-      // We exceeded the transient allowance check for new max value
-      if ( pTableData->fCurrentSensorValue > pTableData->fMaxSensorValue )
-      {
-         pTableData->fMaxSensorValue          = pTableData->fCurrentSensorValue;
-         pTableData->nMaxSensorElaspedTime_ms = pTableData->nTotalDuration_ms;
-      }
-
       // Has this region been confirmed yet?
       if ( FALSE == pTableData->regionStats[foundRegion].bRegionConfirmed )
       {
@@ -1409,6 +1409,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 12-08-13   Time: 4:22p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Log Cleanup
  *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:38a

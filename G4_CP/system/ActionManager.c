@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 4 $  $Date: 12-08-09 8:36a $
+ $Revision: 5 $  $Date: 12-08-13 4:21p $
 
 ******************************************************************************/
 
@@ -60,6 +60,7 @@ static void ActionResetFlags     ( ACTION_DATA *pData, INT8 nID, UINT16 nAction 
 static void ActionSetFlags       ( const ACTION_CFG  *pCfg,  ACTION_DATA *pData,
                                    INT8 nID, UINT16 nAction, BOOLEAN bACK, BOOLEAN bLatch );
 static void ActionCheckACK       ( ACTION_DATA *pData );
+static void ActionClearLatch     ( ACTION_DATA *pData );
 static void ActionUpdateOutputs  ( ACTION_CFG  *pCfg,  ACTION_DATA *pData );
 static void ActionSetOutput      ( UINT8 nLSS,         DIO_OUT_OP state );
 static void ActionRectifyOutputs ( ACTION_CFG  *pCfg,  ACTION_DATA *pData,
@@ -84,6 +85,7 @@ void ActionsInitialize ( void )
 {
    // Local Data
    TCB tTaskInfo;
+   UINT16   i;
 
    // Add Event Action to the User Manager
    User_AddRootCmd(&rootActionMsg);
@@ -91,6 +93,11 @@ void ActionsInitialize ( void )
    // Reset the Event Action cfg and storage objects
    memset(&m_ActionCfg,  0, sizeof(m_ActionCfg));
    memset(&m_ActionData, 0, sizeof(m_ActionData));
+
+   for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+   {
+      m_ActionData.LSS_Priority[i] = ACTION_NONE;
+   }
 
    // Load the current configuration to the configuration array.
    memcpy(&m_ActionCfg,
@@ -151,6 +158,8 @@ void ActionInitPersist ( void )
    memset( (void *)&log, 0, sizeof(log) );
    // Clear the final destination
    memset( (void *)&m_ActionData.persist, 0, sizeof(m_ActionData.persist));
+
+   m_ActionData.persist.actionNum = ACTION_NONE;
 
    // Retrieves the stored counters from non-voltaile
    //  Note: NV_Open() performs checksum and creates sys log if checksum fails !
@@ -307,7 +316,6 @@ void ActionResetNVPersist ( void )
                  sizeof(m_ActionData.persist),
                  NULL );
 
-   memset(&m_ActionData.persist, 0, sizeof(m_ActionData.persist));
    memset(&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
    memset(&m_EE_Copy,  0, sizeof(m_EE_Copy ));
 
@@ -319,6 +327,9 @@ void ActionResetNVPersist ( void )
    m_ActionData.bUpdatePersistOut = TRUE;
    m_ActionData.persist.bLatch    = FALSE;
    m_ActionData.persist.bState    = OFF;
+   m_ActionData.persist.actionNum = ACTION_NONE;
+
+   ActionClearLatch ( &m_ActionData );
 }
 
 /*****************************************************************************/
@@ -369,7 +380,7 @@ void ActionTask ( void *pParam )
          // Turn on the persistent action
          pData->persist.bState    = ON;
          pData->bUpdatePersistOut = TRUE;
-         // TODO: if EE Copy not equal RTC Copy
+         // Copy RTC to EE
          m_EE_Copy = m_RTC_Copy;
          // Engine Run ended now update the EEPROM Copy
          NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
@@ -384,9 +395,10 @@ void ActionTask ( void *pParam )
          // Save the Action Log Data
          actionLog.persistState = pData->persist;
          actionLog.clearReason  = ACT_TRANS_TO_ENG_RUN;
-         // Clear the previous exceed output
+         // Clear the persistent output
          pData->persist.bState  = OFF;
          pData->bUpdatePersistOut = TRUE;
+         ActionClearLatch(pData);
          // Write the action log
          LogWriteETM (SYS_ID_ACTION_PERSIST_CLR,
                       LOG_PRIORITY_3,
@@ -644,6 +656,47 @@ void ActionCheckACK ( ACTION_DATA *pData )
 }
 
 /******************************************************************************
+ * Function:     ActionClearLatch
+ *
+ * Description:  The Action clear latch function clears all the actions that
+ *               are latched. It resets the flags for latch, ack and active.
+ *
+ * Parameters:   [in/out] ACTION_DATA *pData
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static
+void ActionClearLatch ( ACTION_DATA *pData )
+{
+   // Local Data
+   ACTION_FLAGS *pFlags;
+   UINT8         nActionIndex;
+   BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+
+   // Loop through all the Action
+   for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
+   {
+      pFlags = &pData->action[nActionIndex];
+
+      // Check if any ACK flag is set
+      if ( TRUE == TestBits( maskAll, sizeof(maskAll),
+                             pFlags->flagLatch, sizeof(pFlags->flagLatch), FALSE ) )
+      {
+         // We know which flags are latched so just clear those
+         ResetBits ( pFlags->flagLatch, sizeof(pFlags->flagLatch),
+                     pFlags->flagActive, sizeof(pFlags->flagActive) );
+         ResetBits ( pFlags->flagLatch, sizeof(pFlags->flagLatch),
+                     pFlags->flagACK, sizeof(pFlags->flagACK) );
+         // Clear the Latch for all IDs
+         memset(pFlags->flagLatch, 0, sizeof(pFlags->flagLatch));
+      }
+   }
+}
+
+/******************************************************************************
  * Function:     ActionUpdateOutputs
  *
  * Description:  The Action Update Output function uses the Action flags and
@@ -672,7 +725,7 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
       {
          if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
          {
-            pData->nPriorityMask = SET_BIT(pData->nPriorityMask,i);
+            pData->LSS_Priority[i] = ACTION0;
             output = (ON == BIT ( pData->persist.action.nLSS_Mask, i )) ?
                      DIO_SetHigh : DIO_SetLow;
             ActionSetOutput ( i, output );
@@ -694,7 +747,7 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
          {
             if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
             {
-               pData->nPriorityMask = RESET_BIT ( pData->nPriorityMask, i );
+               pData->LSS_Priority[i] = ACTION_NONE;
                output = ( ON == BIT( pData->persist.action.nLSS_Mask,i) ) ?
                         DIO_SetLow : DIO_SetHigh ;
                ActionSetOutput ( i, output );
@@ -756,18 +809,21 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                       (FALSE == BIT(pData->persist.action.nUsedMask, i))) )
                {
                   // Now Make sure a higher priority Action hasn't already used this LSS
-                  if ( (FALSE == BIT( pData->nPriorityMask, i )) && (OFF == pFlags->bState) )
+                  if ( ((nActionIndex + 1) < pData->LSS_Priority[i]) )
                   {
                      // Set the LSS
                      output = ( ON == BIT( pOutCfg->nLSS_Mask,i ) ) ? DIO_SetHigh : DIO_SetLow;
-                     pData->nPriorityMask = SET_BIT( pData->nPriorityMask, i );
+                     pData->LSS_Priority[i] = (nActionIndex + 1);
                      ActionSetOutput ( i, output );
-                     GSE_DebugStr(NORMAL,TRUE,"Output ON: LSS %d  State %d", i, output );
+                     if (OFF == pFlags->bState)
+                     {
+                        GSE_DebugStr(NORMAL,TRUE,"Output ON: LSS %d  State %d", i, output );
+                     }
                   }
-                  pFlags->bState = ON;
                }
             }
          }
+         pFlags->bState = ON;
       }
       else // If the Action was on and is now off we need to turn off
       {
@@ -775,12 +831,15 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
          {
             for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
             {
-               if ( TRUE == BIT( pOutCfg->nUsedMask, i ) )
+               if ( (TRUE == BIT( pOutCfg->nUsedMask, i ) ) &&
+                   ((nActionIndex + 1) <= pData->LSS_Priority[i]) )
                {
-                  output = (ON == BIT( pOutCfg->nLSS_Mask, i)) ? DIO_SetLow : DIO_SetHigh;
-                  ActionSetOutput ( i, output );
-                  GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, output  );
-                  pData->nPriorityMask = RESET_BIT( pData->nPriorityMask, i );
+                  pData->LSS_Priority[i] = ACTION_NONE;
+                  if ( TRUE == BIT( pOutCfg->nLSS_Mask, i ) )
+                  {
+                     ActionSetOutput ( i, DIO_SetLow );
+                     GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, DIO_SetLow  );
+                  }
                }
             }
             pFlags->bState = OFF;
@@ -829,13 +888,18 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
- * 
+ *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-08-13   Time: 4:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Clean up Action Priorities and Latch
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:36a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Disabled the Persistent ouput when cleared from a GSE
  * Command
- * 
+ *
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/system
