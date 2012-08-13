@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 3 $  $Date: 12-07-27 3:03p $
+  $Revision: 4 $  $Date: 12-08-13 4:21p $
 
 **********************************************************************************************/
 
@@ -31,6 +31,7 @@
 #define MAX_ACTION_DEFINES           8
 #define MAX_ACTION_REQUESTS         32
 /* Action Flags                                                          */
+#define ACTION0                     0x0000
 #define ACTION1                     0x0001
 #define ACTION2                     0x0002
 #define ACTION3                     0x0004
@@ -42,6 +43,7 @@
 
 #define ACTION_ALL                  ( ACTION1 | ACTION2 | ACTION3 | ACTION4 |\
                                       ACTION5 | ACTION6 | ACTION7 | ACTION8 )
+#define ACTION_NONE                 0xFFFF
 
 // OUTPUTS
 #define LSS0_INDEX                  0
@@ -120,7 +122,7 @@ typedef struct
 {
    BOOLEAN       bState;                              /* Persistent output current state     */
    BOOLEAN       bLatch;                              /* Is persistent action latched?       */
-   UINT8         actionNum;
+   UINT16        actionNum;
    ACTION_OUTPUT action;                              /* Persistent output state             */
 } ACTION_PERSIST;
 
@@ -157,7 +159,7 @@ typedef struct
    BOOLEAN         bUpdatePersistOut;
    BOOLEAN         bNVStored;
    ACTION_PERSIST  persist;                           /* State of the persistent data        */
-   UINT8           nPriorityMask;                     /* Current Priority mask               */
+   UINT16          LSS_Priority[MAX_OUTPUT_LSS];      /* Priority Storage for each LSS       */
    INT8            nRequestCounter;                   /* Request Counter for generating IDs  */
 } ACTION_DATA;
 
@@ -206,7 +208,12 @@ EXPORT void ActionResetNVPersist ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
- * 
+ *
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 12-08-13   Time: 4:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Clean up Action Priorities and Latch
+ *
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/system
