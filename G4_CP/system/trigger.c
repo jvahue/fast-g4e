@@ -1298,7 +1298,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "FALSE ");
         }
 
-        // Format expression ( sensr Compare value)
+        // Format expression ( sensor Compare value)
         else if (NOT_EQUAL_PREV != pCriteria->Compare)
         {
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "S_%03d %f %s ",
@@ -1308,7 +1308,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
         }
         else
         {
-          // Format a (sensr not-equal-prev) expression
+          // Format a (sensor not-equal-prev) expression
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "S_%03d %s ",                                 
                                   pTrigCfg->TrigSensor[i].SensorIndex,
                                   trigSensorComparison[pCriteria->Compare] );
@@ -1347,17 +1347,17 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
       memcpy(&m_TriggerCfg[trigIdx], &ConfigTriggerTemp, sizeof(ConfigTriggerTemp));
 
       GSE_DebugStr( NORMAL,FALSE,
-                    "Trigger: Trigger[%d] - %s Criteria expression successfully created.",
+                    "Trigger: Trigger[%d] - %s Criteria expression successfully created.\r\n%s",
                     trigIdx,
-                    critString[exprCnt]);
+                    critString[exprCnt], exprString);
     }
     else 
     {  
       GSE_DebugStr( NORMAL,FALSE,
-                    "Trigger: Trigger[%d] - %s Criteria expression failed: %s",
+                    "Trigger: Trigger[%d] - %s Criteria expression failed: %s\r\n%s",
                      trigIdx,
                      critString[exprCnt],
-                     EvalGetMsgFromErrCode(StrToBinResult));
+                     EvalGetMsgFromErrCode(StrToBinResult), exprString);
     }
 
 

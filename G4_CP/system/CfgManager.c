@@ -592,8 +592,7 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
       // calculate and update checksum on shadow NVRAM
       NVRAMShadow.CS = CRC16(&NVRAMShadow.Cfg,sizeof(NVRAMShadow.Cfg));
 
-      nOffset = (UINT16)((UINT32)(&NVRAMShadow.CS) -
-                                (UINT32)(&NVRAMShadow));
+      nOffset = ((UINT32)(&NVRAMShadow.CS) - (UINT32)(&NVRAMShadow));
 
       pChkSumSrc = &(NVRAMShadow.CS);
       nChkSumSize = sizeof(NVRAMShadow.CS);
@@ -603,7 +602,7 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
       memcpy( pDest, pChkSumSrc, nChkSumSize );
 /*vcast_dont_instrument_end*/
 #else
-      NV_Write(NV_CFG_MGR,nOffset, pChkSumSrc, nChkSumSize);
+      NV_Write(NV_CFG_MGR, nOffset, pChkSumSrc, nChkSumSize);
 #endif
 
     }
