@@ -12,7 +12,7 @@
 
 
     VERSION
-    $Revision: 64 $  $Date: 12-07-17 11:28a $
+    $Revision: 65 $  $Date: 8/13/12 1:58p $
 
 ******************************************************************************/
 
@@ -638,6 +638,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 65  *****************
+ * User: Jeff Vahue   Date: 8/13/12    Time: 1:58p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1145 - remove UINT16 cast
  * 
  * *****************  Version 64  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:28a
