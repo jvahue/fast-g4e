@@ -563,12 +563,12 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
    // Local Data
    BOOLEAN StartCriteriaMet;
    BOOLEAN IsStartValid;
-   
+
    switch (pTrigData->State)
    {
       // Trigger start is looking for beginning of trigger
       case TRIG_START:
-         
+
          // Check if all trigger sensors have reached thresh-hold
          StartCriteriaMet = TriggerCheckStart(pTrigCfg, pTrigData, &IsStartValid);
 
@@ -674,6 +674,11 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
   //Catch IsValid passed as null, preset to true
   IsValid = IsValid == NULL ? &ValidTmp : IsValid;
   *IsValid = TRUE;
+
+  // Set validity of 'this' trigger.
+  // This supports self-referencing triggers to recover if a referenced sensor
+  // is marked as failed from a prior run and may have healed. 
+  SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
 
   // Call the configured Trigger-start check rule.
   // Criteria is in return value.
@@ -846,7 +851,7 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
    pTrigData->nDuration_ms  = 0;
    pTrigData->nSampleCount  = 0;
    pTrigData->EndType       = TRIG_NO_END;
-   
+
    // Reinit the sensor summary data for the trigger
    for (i = 0; i < MAX_TRIG_SENSORS; i++)
    {
