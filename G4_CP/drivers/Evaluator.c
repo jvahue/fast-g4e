@@ -686,42 +686,50 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
     oprndLeft  = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndLeft, &oprndRight) )
     {
-      // perform the comparison operation, store the result
-      switch (cmd->OpCode)
-      {
-        case OP_NE:
-          rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) >= FLT_EPSILON);
-          break;
-
-        case OP_EQ:
-          rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON);
-          break;
-
-        case OP_GE:
-          rslt.Data = (FLOAT32) ((oprndLeft.Data > oprndRight.Data) ||
-                      (fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON));
-          break;
-
-        case OP_LE:
-          rslt.Data = (FLOAT32) ((oprndLeft.Data < oprndRight.Data) ||
-                      (fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON));
-          break;
-
-        case OP_GT:
-          rslt.Data = (FLOAT32) (oprndLeft.Data > oprndRight.Data);
-          break;
-
-        case OP_LT:
-          rslt.Data = (FLOAT32) (oprndLeft.Data < oprndRight.Data);
-          break;
-
-        // Should never get here; all Comparison Operators are handled.
-        default:
-          FATAL("Unrecognized Expression OpCode: %d", cmd->OpCode);
-      }
-
       rslt.DataType = DATATYPE_BOOL;
-      rslt.Validity = ( EvalGetValidCnt(&oprndLeft, &oprndRight ) == 2 );
+      if ( EvalGetValidCnt(&oprndLeft, &oprndRight ) == 2 )
+      {
+        // perform the comparison operation, store the result
+        switch (cmd->OpCode)
+        {
+          case OP_NE:
+            rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) >= FLT_EPSILON);
+            break;
+
+          case OP_EQ:
+            rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON);
+            break;
+
+          case OP_GE:
+            rslt.Data = (FLOAT32) ((oprndLeft.Data > oprndRight.Data) ||
+                        (fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON));
+            break;
+
+          case OP_LE:
+            rslt.Data = (FLOAT32) ((oprndLeft.Data < oprndRight.Data) ||
+                        (fabs(oprndLeft.Data - oprndRight.Data) <= FLT_EPSILON));
+            break;
+
+          case OP_GT:
+            rslt.Data = (FLOAT32) (oprndLeft.Data > oprndRight.Data);
+            break;
+
+          case OP_LT:
+            rslt.Data = (FLOAT32) (oprndLeft.Data < oprndRight.Data);
+            break;
+
+          // Should never get here; all Comparison Operators are handled.
+          default:
+            FATAL("Unrecognized Expression OpCode: %d", cmd->OpCode);
+        }
+
+        rslt.Validity = TRUE;
+      }
+      else
+      {
+        rslt.Data = 0.0f;
+        rslt.Validity = FALSE;
+      }
     }
     else
     {

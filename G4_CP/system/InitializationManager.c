@@ -11,7 +11,7 @@
                System and Application.
 
  VERSION
-     $Revision: 107 $  $Date: 7/18/12 6:27p $
+     $Revision: 108 $  $Date: 12-08-14 2:20p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -315,8 +315,7 @@ static void Im_Driver_Initialize(void)
     // Record Result to be used to in Im_RecordDrvStartup_Logs() to 
     pLog->InitResult = DriverInits[i].InitResult; 
     pLog++;                                                             
-    STARTUP_ID(i+1);
-    //TODO: Handle/Log drivers with a !DRV_OK result
+    STARTUP_ID((i+1));
   }
 
   // Allow the timer interrupt to occur so we can keep the system alive during init
@@ -444,8 +443,6 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   STARTUP_ID(sysStartupId++);
   CfgMgr_Init(degradedMode);
 
-  // TODO: This address should be read from some configuration register
-  //       and then passed to the Memory initialization function
   STARTUP_ID(sysStartupId++);
   Box_PowerOn_InitializeUsage (); 
 
@@ -762,6 +759,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 108  *****************
+ * User: John Omalley Date: 12-08-14   Time: 2:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 107  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
