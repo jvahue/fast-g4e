@@ -678,6 +678,11 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
   IsValid = IsValid == NULL ? &ValidTmp : IsValid;
   *IsValid = TRUE;
 
+  // Set validity of 'this' trigger.
+  // This supports self-referencing triggers to recover if a referenced sensor
+  // is marked as failed from a prior run and may have healed. 
+  SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
+
   // Call the configured Trigger-start check rule.
   // Criteria is in return value.
   // Validity of sensors is in IsValid pointer.

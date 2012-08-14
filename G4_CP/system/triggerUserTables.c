@@ -50,6 +50,12 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
                                              const void *SetPtr,
                                              void **GetPtr);
 
+USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
+                                              USER_MSG_PARAM Param,
+                                              UINT32 Index,
+                                              const void *SetPtr,
+                                              void **GetPtr);
+
 
 
 /*****************************************************************************/
@@ -149,6 +155,7 @@ static USER_MSG_TBL TriggerStatus [] =
 {
   /* Str            Next Tbl Ptr       Handler Func.    Data Type        Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
   { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &StateTriggerTemp.State,          0, MAX_TRIGGERS - 1, NO_LIMIT,   TrigStateEnum },
+  { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "SAMPLECOUNT" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT16, USER_RO    , &StateTriggerTemp.nSampleCount,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
@@ -412,6 +419,44 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
   }
 
   return result;
+}
+/******************************************************************************
+ * Function:     Trigger_CfgExprStrCmd | USER COMMAND HANDLER
+ *  
+ * Description:  Returns the validity for the trigger passed in "Index'               
+ *           
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+
+{
+   // Use the supplied Accessor to return the validity of the indicated trigger.
+
+  *(BOOLEAN*)GetPtr = TriggerValidGetState(Index);
+   return USER_RESULT_OK;
 }
 /*************************************************************************
 *  MODIFICATIONS
