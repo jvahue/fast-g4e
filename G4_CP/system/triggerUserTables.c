@@ -20,6 +20,7 @@ $Revision: 22 $  $Date: 8/08/12 3:49p $
 static TRIGGER_CONFIG ConfigTriggerTemp; // Trigger Configuration
                                          // temp storage
 static TRIGGER_DATA   StateTriggerTemp;
+static BOOLEAN        triggerValidTemp;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -155,11 +156,11 @@ static USER_MSG_TBL TriggerStatus [] =
 {
   /* Str            Next Tbl Ptr       Handler Func.    Data Type        Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
   { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &StateTriggerTemp.State,          0, MAX_TRIGGERS - 1, NO_LIMIT,   TrigStateEnum },
-  { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
+  { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , &triggerValidTemp,                0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "SAMPLECOUNT" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT16, USER_RO    , &StateTriggerTemp.nSampleCount,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
-  { NULL          , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_NONE,   USER_RW    , NULL,                             0, MAX_TRIGGERS  -1, NO_LIMIT,   NULL },
+  { NULL          , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_NONE,   USER_RW    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
 };
 
 static USER_MSG_TBL TriggerRoot [] =
@@ -454,10 +455,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 
 {
    // Use the supplied Accessor to return the validity of the indicated trigger.
-
-  *(BOOLEAN*)GetPtr = TriggerValidGetState(Index);
+   triggerValidTemp = TriggerValidGetState(Index);
+   *GetPtr = Param.Ptr;  
    return USER_RESULT_OK;
 }
+
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $

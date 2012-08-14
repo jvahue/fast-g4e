@@ -407,7 +407,7 @@ BOOLEAN TriggerGetState( INT32 TrigIdx )
  * Returns:      active/inactive state of the passed trigger.
  *
  *****************************************************************************/
-BOOLEAN TriggerValidGetState( INT32 TrigIdx )
+BOOLEAN TriggerValidGetState( INT32 TrigIdx ) 
 {
   return ( GetBit(TrigIdx, TriggerValidFlags, sizeof(TriggerValidFlags)) );
 }

@@ -686,9 +686,6 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
     oprndLeft  = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndLeft, &oprndRight) )
     {
-      rslt.DataType = DATATYPE_BOOL;
-      if ( EvalGetValidCnt(&oprndLeft, &oprndRight ) == 2 )
-      {
         // perform the comparison operation, store the result
         switch (cmd->OpCode)
         {
@@ -723,13 +720,8 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
             FATAL("Unrecognized Expression OpCode: %d", cmd->OpCode);
         }
 
-        rslt.Validity = TRUE;
-      }
-      else
-      {
-        rslt.Data = 0.0f;
-        rslt.Validity = FALSE;
-      }
+      rslt.DataType = DATATYPE_BOOL;
+      rslt.Validity = ( EvalGetValidCnt(&oprndLeft, &oprndRight ) == 2 );
     }
     else
     {
