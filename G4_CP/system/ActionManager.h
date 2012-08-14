@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 4 $  $Date: 12-08-13 4:21p $
+  $Revision: 5 $  $Date: 12-08-14 2:59p $
 
 **********************************************************************************************/
 
@@ -159,7 +159,7 @@ typedef struct
    BOOLEAN         bUpdatePersistOut;
    BOOLEAN         bNVStored;
    ACTION_PERSIST  persist;                           /* State of the persistent data        */
-   UINT16          LSS_Priority[MAX_OUTPUT_LSS];      /* Priority Storage for each LSS       */
+   UINT16          nLSS_Priority[MAX_OUTPUT_LSS];     /* Priority Storage for each LSS       */
    INT8            nRequestCounter;                   /* Request Counter for generating IDs  */
 } ACTION_DATA;
 
@@ -209,6 +209,11 @@ EXPORT void ActionResetNVPersist ( void );
  *  MODIFICATIONS
  *    $History: ActionManager.h $
  *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-08-14   Time: 2:59p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system

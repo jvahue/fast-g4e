@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 17 $  $Date: 12-08-13 4:22p $
+ $Revision: 18 $  $Date: 12-08-14 2:54p $
 
 ******************************************************************************/
 
@@ -144,11 +144,11 @@ void EventsInitialize ( void )
    User_AddRootCmd(&rootEventMsg);
 
    // Reset the Sensor configuration storage array
-   memset(m_EventCfg, 0, sizeof(m_EventCfg));
+   memset((void *)m_EventCfg, 0, sizeof(m_EventCfg));
 
    // Load the current configuration to the configuration array.
-   memcpy(m_EventCfg,
-          (CfgMgr_RuntimeConfigPtr()->EventConfigs),
+   memcpy((void *)m_EventCfg,
+          (const void *)(CfgMgr_RuntimeConfigPtr()->EventConfigs),
           sizeof(m_EventCfg));
 
    // Loop through the Configured triggers
@@ -230,11 +230,11 @@ void EventTablesInitialize ( void )
    User_AddRootCmd(&rootEventTableMsg);
 
    // Reset the Sensor configuration storage array
-   memset(m_EventTableCfg, 0, sizeof(m_EventTableCfg));
+   memset((void *)m_EventTableCfg, 0, sizeof(m_EventTableCfg));
 
    // Load the current configuration to the configuration array.
-   memcpy(m_EventTableCfg,
-          (CfgMgr_RuntimeConfigPtr()->EventTableConfigs),
+   memcpy((void *)m_EventTableCfg,
+          (const void *)(CfgMgr_RuntimeConfigPtr()->EventTableConfigs),
           sizeof(m_EventTableCfg));
 
    // Loop through all the Tables
@@ -352,7 +352,7 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
  *
  * Description:  Reset a single event table objects Data
  *
- * Parameters:   [in] eventTableIndex - Index of the event to reset
+ * Parameters:   [in] EVENT_TABLE_DATA *pTableData
  *
  * Returns:      None
  *
@@ -586,9 +586,11 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
          pData->endType = EventCheckEnd(pConfig);
 
          // Check if any end criteria has happened and/or the table is done
-         if ( ((EVENT_NO_END != pData->endType) && (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
+         if ( ((EVENT_NO_END != pData->endType) &&
+               (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
               ((EVENT_NO_END != pData->endType) && (FALSE == bTableEntered) ) ||
-              ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) && (FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered)) )
+              ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) &&
+               (FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered)) )
          {
             // Record the time the event ended
             CM_GetTimeAsTimestamp(&pData->tsEndTime);
@@ -1182,8 +1184,8 @@ void EventUpdateData ( EVENT_DATA *pData )
       pData->nStartTime_ms   = nCurrentTick;
       pData->nSampleCount    = 0;
       CM_GetTimeAsTimestamp(&pData->tsCriteriaMetTime);
-      memset(&pData->tsDurationMetTime,0, sizeof(TIMESTAMP));
-      memset(&pData->tsEndTime        ,0, sizeof(TIMESTAMP));
+      memset((void *)&pData->tsDurationMetTime,0, sizeof(TIMESTAMP));
+      memset((void *)&pData->tsEndTime        ,0, sizeof(TIMESTAMP));
    }
    // update the sample count for the average calculation
    pData->nSampleCount++;
@@ -1373,11 +1375,12 @@ void EventForceEnd ( void )
  *
  * Description:  Force the event table to end.
  *
- * Parameters:   None.
+ * Parameters:   [in] EVENT_TABLE_INDEX eventTableIndex
+ *               [in] LOG_PRIORITY      prioirity
  *
  * Returns:      None.
  *
- * Notes:
+ * Notes:        None
  *
  *****************************************************************************/
 static
@@ -1410,6 +1413,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-08-14   Time: 2:54p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ * 
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application

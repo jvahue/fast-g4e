@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 5 $  $Date: 12-08-13 4:21p $
+ $Revision: 6 $  $Date: 12-08-14 2:59p $
 
 ******************************************************************************/
 
@@ -55,7 +55,7 @@ static ACTION_REQUEST      m_RequestStorage [MAX_ACTION_REQUESTS];
 /*****************************************************************************/
 static void ActionInitPersist    ( void );
 static void ActionTask           ( void *pParam );
-static void ActionUpdateFlags    ( ACTION_CFG  *pCfg,  ACTION_DATA *pData );
+static void ActionUpdateFlags    ( const ACTION_CFG  *pCfg,  ACTION_DATA *pData );
 static void ActionResetFlags     ( ACTION_DATA *pData, INT8 nID, UINT16 nAction );
 static void ActionSetFlags       ( const ACTION_CFG  *pCfg,  ACTION_DATA *pData,
                                    INT8 nID, UINT16 nAction, BOOLEAN bACK, BOOLEAN bLatch );
@@ -91,17 +91,17 @@ void ActionsInitialize ( void )
    User_AddRootCmd(&rootActionMsg);
 
    // Reset the Event Action cfg and storage objects
-   memset(&m_ActionCfg,  0, sizeof(m_ActionCfg));
-   memset(&m_ActionData, 0, sizeof(m_ActionData));
+   memset((void *)&m_ActionCfg,  0, sizeof(m_ActionCfg));
+   memset((void *)&m_ActionData, 0, sizeof(m_ActionData));
 
    for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
    {
-      m_ActionData.LSS_Priority[i] = ACTION_NONE;
+      m_ActionData.nLSS_Priority[i] = ACTION_NONE;
    }
 
    // Load the current configuration to the configuration array.
-   memcpy(&m_ActionCfg,
-          &(CfgMgr_RuntimeConfigPtr()->ActionConfig),
+   memcpy((void *)&m_ActionCfg,
+          (void *)&(CfgMgr_RuntimeConfigPtr()->ActionConfig),
           sizeof(m_ActionCfg));
 
    // Event Action Initialize FIFO
@@ -112,9 +112,9 @@ void ActionsInitialize ( void )
    ActionInitPersist();
 
    // Create Action Task - DT
-   memset(&tTaskInfo, 0, sizeof(tTaskInfo));
+   memset((void *)&tTaskInfo, 0, sizeof(tTaskInfo));
    strncpy_safe(tTaskInfo.Name, sizeof(tTaskInfo.Name),"Action",_TRUNCATE);
-   tTaskInfo.TaskID          = Action_Task;
+   tTaskInfo.TaskID          = (TASK_INDEX)Action_Task;
    tTaskInfo.Function        = ActionTask;
    tTaskInfo.Priority        = taskInfo[Action_Task].priority;
    tTaskInfo.Type            = taskInfo[Action_Task].taskType;
@@ -146,6 +146,7 @@ void ActionsInitialize ( void )
 * Notes:        None
 *
 *****************************************************************************/
+static
 void ActionInitPersist ( void )
 {
    // Local Data
@@ -316,8 +317,8 @@ void ActionResetNVPersist ( void )
                  sizeof(m_ActionData.persist),
                  NULL );
 
-   memset(&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
-   memset(&m_EE_Copy,  0, sizeof(m_EE_Copy ));
+   memset((void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
+   memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
 
    m_ActionData.bNVStored = FALSE;
 
@@ -457,7 +458,7 @@ void ActionTask ( void *pParam )
  *
  *****************************************************************************/
 static
-void ActionUpdateFlags ( ACTION_CFG *pCfg, ACTION_DATA *pData )
+void ActionUpdateFlags ( const ACTION_CFG *pCfg, ACTION_DATA *pData )
 {
    // Local Data
    ACTION_REQUEST newRequest;
@@ -478,7 +479,6 @@ void ActionUpdateFlags ( ACTION_CFG *pCfg, ACTION_DATA *pData )
          ActionResetFlags ( pData, newRequest.nID, newRequest.nAction );
       }
    }
-
 }
 
 /******************************************************************************
@@ -545,14 +545,14 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
                       INT8 nID, UINT16 nAction, BOOLEAN bACK, BOOLEAN bLatch )
 {
    // Local Data
-   UINT16          i;
+   UINT16          nActionIndex;
    ACTION_FLAGS   *pFlags;
 
-   for ( i = 0; i < MAX_ACTION_DEFINES; i++ )
+   for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
    {
-      pFlags = &pData->action[i];
+      pFlags = &pData->action[nActionIndex];
 
-      if ( 0 != BIT( nAction, i ) )
+      if ( 0 != BIT( nAction, nActionIndex ) )
       {
          // Set the bit for the Action
          SetBit(nID, pFlags->flagActive, sizeof(pFlags->flagActive));
@@ -570,14 +570,14 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
             if (FALSE == pCfg->persist.bEnabled)
             {
                // Check if this a higher priority action
-               if ( i < pData->persist.actionNum )
+               if ( nActionIndex < pData->persist.actionNum )
                {
-                  pData->persist.actionNum = i;
-                  pData->persist.action    = pCfg->output[i];
+                  pData->persist.actionNum = nActionIndex;
+                  pData->persist.action    = pCfg->output[nActionIndex];
                   m_RTC_Copy.actionNum     = pData->persist.actionNum;
                   m_RTC_Copy.bState        = ON;
                   m_RTC_Copy.bLatch        = pData->persist.bLatch;
-                  m_RTC_Copy.action        = pCfg->output[i];
+                  m_RTC_Copy.action        = pCfg->output[nActionIndex];
                   NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
                }
             }
@@ -588,7 +588,7 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
                {
                   pData->bNVStored = TRUE;
                   // Action not stored to RTC RAM yet
-                  m_RTC_Copy.actionNum  = i;
+                  m_RTC_Copy.actionNum  = nActionIndex;
                   m_RTC_Copy.bState     = ON;
                   m_RTC_Copy.bLatch     = pData->persist.bLatch;
                   m_RTC_Copy.action     = pCfg->persist.output;
@@ -649,7 +649,7 @@ void ActionCheckACK ( ACTION_DATA *pData )
                         pFlags->flagActive, sizeof(pFlags->flagActive) );
 
             // Clear the ACK for all IDs
-            memset(pFlags->flagACK, 0, sizeof(pFlags->flagACK));
+            memset((void *)pFlags->flagACK, 0, sizeof(pFlags->flagACK));
          }
       }
    }
@@ -691,7 +691,7 @@ void ActionClearLatch ( ACTION_DATA *pData )
          ResetBits ( pFlags->flagLatch, sizeof(pFlags->flagLatch),
                      pFlags->flagACK, sizeof(pFlags->flagACK) );
          // Clear the Latch for all IDs
-         memset(pFlags->flagLatch, 0, sizeof(pFlags->flagLatch));
+         memset((void *)pFlags->flagLatch, 0, sizeof(pFlags->flagLatch));
       }
    }
 }
@@ -725,7 +725,7 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
       {
          if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
          {
-            pData->LSS_Priority[i] = ACTION0;
+            pData->nLSS_Priority[i] = ACTION0;
             output = (ON == BIT ( pData->persist.action.nLSS_Mask, i )) ?
                      DIO_SetHigh : DIO_SetLow;
             ActionSetOutput ( i, output );
@@ -747,7 +747,7 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
          {
             if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
             {
-               pData->LSS_Priority[i] = ACTION_NONE;
+               pData->nLSS_Priority[i] = ACTION_NONE;
                output = ( ON == BIT( pData->persist.action.nLSS_Mask,i) ) ?
                         DIO_SetLow : DIO_SetHigh ;
                ActionSetOutput ( i, output );
@@ -781,7 +781,7 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
 {
    // Local Data
    UINT8          i;
-   UINT32         nActionIndex;
+   UINT16         nActionIndex;
    ACTION_FLAGS  *pFlags;
    ACTION_OUTPUT *pOutCfg;
    DIO_OUT_OP     output;
@@ -809,11 +809,11 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                       (FALSE == BIT(pData->persist.action.nUsedMask, i))) )
                {
                   // Now Make sure a higher priority Action hasn't already used this LSS
-                  if ( ((nActionIndex + 1) < pData->LSS_Priority[i]) )
+                  if ( ((nActionIndex + 1) < pData->nLSS_Priority[i]) )
                   {
                      // Set the LSS
                      output = ( ON == BIT( pOutCfg->nLSS_Mask,i ) ) ? DIO_SetHigh : DIO_SetLow;
-                     pData->LSS_Priority[i] = (nActionIndex + 1);
+                     pData->nLSS_Priority[i] = (nActionIndex + 1);
                      ActionSetOutput ( i, output );
                      if (OFF == pFlags->bState)
                      {
@@ -832,9 +832,9 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
             for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
             {
                if ( (TRUE == BIT( pOutCfg->nUsedMask, i ) ) &&
-                   ((nActionIndex + 1) <= pData->LSS_Priority[i]) )
+                   ((nActionIndex + 1) <= pData->nLSS_Priority[i]) )
                {
-                  pData->LSS_Priority[i] = ACTION_NONE;
+                  pData->nLSS_Priority[i] = ACTION_NONE;
                   if ( TRUE == BIT( pOutCfg->nLSS_Mask, i ) )
                   {
                      ActionSetOutput ( i, DIO_SetLow );
@@ -889,6 +889,11 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
  *  MODIFICATIONS
  *    $History: ActionManager.c $
  *
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 12-08-14   Time: 2:59p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system
