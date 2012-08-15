@@ -531,7 +531,7 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime, 
                               const CHAR* str, va_list args)
 {
-    CHAR buf[128];
+    CHAR buf[1024];
     TIMESTRUCT DateTime;
 
     if ( newLine)
