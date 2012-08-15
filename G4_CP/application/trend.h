@@ -12,7 +12,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 1 $  $Date: 12-06-07 11:32a $
+  $Revision: 2 $  $Date: 8/15/12 7:20p $
 
 **********************************************************************************************/
 
@@ -219,6 +219,11 @@ EXPORT void TrendTask( void* pParam );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 2  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Checking in prelim trends
  *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-06-07   Time: 11:32a

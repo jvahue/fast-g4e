@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 66 $  $Date: 12-08-14 2:28p $
+  $Revision: 67 $  $Date: 8/15/12 7:22p $
 
 ******************************************************************************/
 
@@ -1309,7 +1309,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
         // Format expression ( sensor Compare value)
         else if (NOT_EQUAL_PREV != pCriteria->Compare)
         {
-          bytesMoved = snprintf( pStr,MAX_COND_STRING, "S_%03d %f %s ",
+          bytesMoved = snprintf( pStr,MAX_COND_STRING, "SVLU%03d %f %s ",
                                   pTrigCfg->TrigSensor[i].SensorIndex,
                                   tempFloat,
                                   trigSensorComparison[pCriteria->Compare] );
@@ -1317,7 +1317,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
         else
         {
           // Format a (sensor not-equal-prev) expression
-          bytesMoved = snprintf( pStr,MAX_COND_STRING, "S_%03d %s ",
+          bytesMoved = snprintf( pStr,MAX_COND_STRING, "SVLU%03d %s ",
                                   pTrigCfg->TrigSensor[i].SensorIndex,
                                   trigSensorComparison[pCriteria->Compare] );
         }
@@ -1377,6 +1377,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 67  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Fixed issue #2, #6 trigger validity
  *
  * *****************  Version 66  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:28p

@@ -208,7 +208,7 @@ EXPORT void ActionResetNVPersist ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
- *
+ * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:59p
  * Updated in $/software/control processor/code/system

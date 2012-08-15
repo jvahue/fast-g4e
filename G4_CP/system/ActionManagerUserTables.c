@@ -77,25 +77,25 @@ static ACTION_FLAGS  stateActionFlagsTemp;
 static USER_MSG_TBL actionOutCmd [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange                  DataLimit   EnumTbl*/
-   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nUsedMask,                0,(MAX_ACTION_DEFINES-1),  NO_LIMIT,   NULL },
-   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nLSS_Mask,                0,(MAX_ACTION_DEFINES-1),  NO_LIMIT,   NULL },
+   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nUsedMask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
+   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nLSS_Mask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL actionCmd [] =
 {
-   /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                   IndexRange                 DataLimit   EnumTbl*/
-   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                     NO_LIMIT,   TriggerIndexType },
-   { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &configActionTemp.persist.bEnabled,         -1,-1,                     NO_LIMIT,   NULL },
-   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                     NO_LIMIT,   NULL },
-   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                     NO_LIMIT,   NULL },
+   /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                   IndexRange              DataLimit   EnumTbl*/
+   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                  NO_LIMIT,   TriggerIndexType },
+   { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &configActionTemp.persist.bEnabled,         -1,-1,                  NO_LIMIT,   NULL },
+   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  NO_LIMIT,   NULL },
+   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
    { "OUTPUT",            actionOutCmd,      NULL,              NO_HANDLER_DATA },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL actionStatus [] =
 {
-   /* Str                 Next Tbl Ptr       Handler Func.      Data Type           Access   Parameter                                  IndexRange                DataLimit    EnumTbl*/
+   /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange              DataLimit   EnumTbl*/
    { "ACTIVE_FLAGS",      NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagActive,          0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
    { "LATCH_FLAGS",       NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagLatch,           0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
    { "ACK_FLAGS",         NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagACK,             0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
@@ -414,7 +414,7 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
- *
+ * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-14   Time: 3:00p
  * Updated in $/software/control processor/code/system

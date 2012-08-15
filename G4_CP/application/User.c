@@ -44,7 +44,7 @@
 
 
    VERSION
-   $Revision: 93 $  $Date: 3/14/12 4:51p $
+   $Revision: 94 $  $Date: 8/15/12 7:20p $
 
 ******************************************************************************/
 
@@ -2661,6 +2661,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 94  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 BITARRAY128 input as integer list
  * 
  * *****************  Version 93  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:51p

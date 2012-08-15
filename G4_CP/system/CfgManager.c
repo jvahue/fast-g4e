@@ -602,7 +602,7 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
       memcpy( pDest, pChkSumSrc, nChkSumSize );
 /*vcast_dont_instrument_end*/
 #else
-      NV_Write(NV_CFG_MGR, nOffset, pChkSumSrc, nChkSumSize);
+      NV_Write(NV_CFG_MGR,nOffset, pChkSumSrc, nChkSumSize);
 #endif
 
     }

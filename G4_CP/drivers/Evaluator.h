@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 7 $  $Date: 6/25/12 7:12p $
+  $Revision: 8 $  $Date: 8/15/12 7:22p $
 
 ******************************************************************************/
 
@@ -33,7 +33,7 @@
 #define EVAL_OPS_PER_OPERAND       2
 #define EVAL_MAX_OPERANDS_PER_EXPR 8    // Number of operands in an expression
 
-#define EVAL_OPRND_LEN             5    // Fixed Len S_nnn, SVnnn, FALSE
+#define EVAL_OPRND_LEN             7    // Fixed Len SVLUnnn, SVLDnnn, FALSE
 #define EVAL_OPERAND_DIGIT_LEN     3
 #define EVAL_PREFIX_LEN  (EVAL_OPRND_LEN - EVAL_OPERAND_DIGIT_LEN)
 
@@ -238,6 +238,11 @@ INT16 EvalFmtOperStr      (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:22p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Issue # 20 Eval operand names like FSM
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:12p

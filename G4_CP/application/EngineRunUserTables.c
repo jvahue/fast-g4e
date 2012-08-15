@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description: 
 
 VERSION
-$Revision: 8 $  $Date: 8/08/12 3:41p $ 
+$Revision: 9 $  $Date: 8/15/12 7:17p $ 
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -788,6 +788,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 BITARRAY128 input as integer list
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:41p

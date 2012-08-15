@@ -12,7 +12,7 @@
    Note:
 
  VERSION
- $Revision: 2 $  $Date: 7/18/12 6:25p $
+ $Revision: 3 $  $Date: 8/15/12 7:20p $
 
 ******************************************************************************/
 
@@ -614,6 +614,11 @@ static BOOLEAN TrendCheckCriteria( TREND_CFG* pTrCfg, TREND_DATA* pTrData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Checking in prelim trends
  * 
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:25p

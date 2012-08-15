@@ -326,15 +326,15 @@ typedef struct
 typedef struct
 {
    EVENT_TABLE_INDEX eventTableIndex;               /* Index of the event table          */
-   EVENT_REGION      confirmed;                     /* Confirmed Region                  */
-   EVENT_REGION      previousRegion;                /* Exited region                     */
-   REGION_LOG_STATS  previous;                      /* Exited region log stats           */
+   EVENT_REGION     confirmed;                      /* Confirmed Region                  */
+   EVENT_REGION     previousRegion;                 /* Exited region                     */
+   REGION_LOG_STATS previous;                       /* Exited region log stats           */
                                                     /* - Entered Count                   */
                                                     /* - Exited Count                    */
                                                     /* - Duration in Exited Region       */
-   EVENT_REGION      maximumRegionEntered;          /* Maximum Region Reached            */
-   FLOAT32           fMaxSensorValue;               /* Maximum value the sensor reached  */
-   UINT32            nMaxSensorElaspedTime_ms;      /* Time max sensor was reached       */
+   EVENT_REGION     maximumRegionEntered;           /* Maximum Region Reached            */
+   FLOAT32          fMaxSensorValue;                /* Maximum value the sensor reached  */
+   UINT32           nMaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
 } EVENT_TABLE_TRANSITION_LOG;
 
 
@@ -428,7 +428,7 @@ EXPORT void EventTablesInitialize  ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- *
+ * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
@@ -438,7 +438,7 @@ EXPORT void EventTablesInitialize  ( void );
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- *
+ * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application

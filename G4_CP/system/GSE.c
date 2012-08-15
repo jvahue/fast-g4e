@@ -13,7 +13,7 @@
               provided.
               
  VERSION
-     $Revision: 21 $  $Date: 10/07/10 7:00p $
+     $Revision: 22 $  $Date: 8/15/12 3:38p $
 
 ******************************************************************************/
 
@@ -556,6 +556,11 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jeff Vahue   Date: 8/15/12    Time: 3:38p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1152 - increase GSE debug buffer size
  * 
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 7:00p

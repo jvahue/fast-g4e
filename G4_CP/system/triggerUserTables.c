@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 22 $  $Date: 8/08/12 3:49p $    
+$Revision: 23 $  $Date: 8/15/12 7:23p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -164,11 +164,11 @@ static USER_MSG_TBL TriggerStatus [] =
 };
 
 static USER_MSG_TBL TriggerRoot [] =
-{ /* Str            Next Tbl Ptr       Handler Func.        Data Type           Access            Parameter      IndexRange   DataLimit      EnumTbl*/
+{ /* Str            Next Tbl Ptr       Handler Func.        Data Type           Access            Parameter      IndexRange   DataLimit          EnumTbl*/
    { "CFG",         TriggerCmd   ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      TriggerStatus,     NULL,                NO_HANDLER_DATA},
-   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          &TriggerFlags, -1, -1,      NO_LIMIT,      NULL },
-   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,      NULL},
+   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          &TriggerFlags, -1, -1,      0,MAX_TRIGGERS-1,  NULL },
+   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,          NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
@@ -463,6 +463,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 BITARRAY128 input as integer list
  * 
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:49p

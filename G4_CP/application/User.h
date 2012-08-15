@@ -11,7 +11,7 @@
     Description:
     
     VERSION
-    $Revision: 38 $  $Date: 6/05/12 6:42p $
+    $Revision: 39 $  $Date: 8/15/12 7:20p $
     
 ******************************************************************************/
 
@@ -267,6 +267,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 BITARRAY128 input as integer list
  * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 6/05/12    Time: 6:42p

@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 11 $  $Date: 8/08/12 3:12p $
+  $Revision: 12 $  $Date: 8/15/12 7:21p $
 
 ******************************************************************************/
 
@@ -581,6 +581,7 @@ BOOLEAN EvalLoadConstFalse(const EVAL_CMD* cmd)
 
   rslt.Data = cmd->Data;
   rslt.DataType = DATATYPE_BOOL;
+  // Const FALSE is always VALID
   rslt.Validity = TRUE;
 
   RPN_PUSH(rslt);
@@ -1039,7 +1040,7 @@ INT32 EvalAddFalseStr(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     // Object is a constant Boolean 'FALSE'
     cmd.OpCode = (UINT8)OP_CONST_FALSE;
     cmd.Data   = 0.f;
-    
+        
     // Add cmd to expression list
     expr->CmdList[expr->Size++] = cmd;
     expr->OperandCnt++;
@@ -1096,7 +1097,10 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
         FATAL("Unrecognized Opcode: %d",OpCodeTable[tblIdx].OpCode );
     }
     
-    objIdx = EvalParseObjectIndex( &str[2], maxObjects);
+    //                                                          |
+    //                                                          V
+    // Look to end of this fixed-token for the objIdx (e.g. SVLU127)
+    objIdx = EvalParseObjectIndex( &str[OpCodeTable[tblIdx].TokenLen], maxObjects);
     if(objIdx >= 0)
     {
       cmd.OpCode = (UINT8)OpCodeTable[tblIdx].OpCode;
@@ -1264,6 +1268,11 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:21p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Fixed Issue #7
  * 
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:12p

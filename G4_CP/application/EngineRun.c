@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 13 $  $Date: 8/08/12 5:04p $
+      $Revision: 14 $  $Date: 8/15/12 7:17p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -65,10 +65,6 @@ static void EngRunUpdateRunData     ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
 static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
 
 static BOOLEAN EngRunIsError     (ENGRUN_CFG* pErCfg);
-static BOOLEAN EngRunIsRunning   (ENGRUN_CFG* pErCfg);
-static BOOLEAN EngRunIsStarting  (ENGRUN_CFG* pErCfg);
-static BOOLEAN EngRunIsStopped   (ENGRUN_CFG* pErCfg);
-
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -534,8 +530,8 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         // we still go thru START to set up initialization and logs
         if ( !EngRunIsError(pErCfg) )
         {          
-          if ( EngRunIsStarting(pErCfg) ||
-               EngRunIsRunning(pErCfg) )
+          if ( TriggerGetState( pErCfg->StartTrigID) ||
+               TriggerGetState( pErCfg->RunTrigID  ) )
           {            
             
             // init the start-log entry and set start-time 
@@ -574,7 +570,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       EngRunUpdateRunData(pErCfg, pErData);
 
       // STARTING -> RUNNING
-      if ( EngRunIsRunning( pErCfg ) )
+      if ( TriggerGetState( pErCfg->RunTrigID) )
       {
         // Write ETM START log
         EngRunWriteStartLog( ER_LOG_RUNNING, pErCfg, pErData);
@@ -918,61 +914,6 @@ static BOOLEAN EngRunIsError( ENGRUN_CFG* pErCfg)
 }
 
 /******************************************************************************
- * Function:     EngRunIsRunning
- *
- * Description:  
- *               
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static BOOLEAN EngRunIsRunning( ENGRUN_CFG* pErCfg)
-{  
-  return TriggerGetState( pErCfg->RunTrigID);
-}
-
-/******************************************************************************
- * Function:     EngRunIsStarting
- *
- * Description:  
- *               
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static BOOLEAN EngRunIsStarting( ENGRUN_CFG* pErCfg )
-{
-   return TriggerGetState( pErCfg->StartTrigID);
-}
-
-
-/******************************************************************************
- * Function:     EngRunIsStopped
- *
- * Description:  
- *               
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static BOOLEAN EngRunIsStopped(ENGRUN_CFG* pErCfg)
-{  
-  return TriggerGetState( pErCfg->StopTrigID);
-}
-
-/******************************************************************************
  * Function:     EngRunUpdateStartData
  *
  * Description:  Update the EngineRun start data.
@@ -1049,6 +990,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Refactored test functions for efficiency
  * 
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 5:04p

@@ -10,7 +10,7 @@
     Description:
 
     VERSION
-    $Revision: 7 $  $Date: 6/25/12 7:12p $
+    $Revision: 8 $  $Date: 8/15/12 7:22p $
 
 ******************************************************************************/
 
@@ -33,12 +33,13 @@
 #define EVAL_OPCODE_LIST \
 /*       OpCode       Token   Len  AddCmd             FmtString             ExeCmd             */\
 /* Load/Fetch commands                                                                         */\
-OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr, EvalLoadConstValue  ),\
+/* Operands: KEEP LIST IN SAME ORDER AS EVAL_DAI_LIST BELOW. LOOKUPS USE OPCMD AS INDEXES      */\
+OPCMD(OP_GETSNRVAL,   "SVLU",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETSNRVALID, "SVLD",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETTRIGVAL,  "TACT",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETTRIGVALID,"TVLD",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
 OPCMD(OP_CONST_FALSE, "FALSE", 5, EvalAddFalseStr,    EvalFmtLoadFalseStr, EvalLoadConstFalse  ),\
-OPCMD(OP_GETSNRVAL,   "S_",    2, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETSNRVALID, "SV",    2, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETTRIGVAL,  "T_",    2, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETTRIGVALID,"TV",    2, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr, EvalLoadConstValue  ),\
 /* Operators: KEEP LIST IN DESCENDING SIZE ORDER ( "!=" MUST BE FOUND BEFORE "!"               */\
 OPCMD(OP_NE,          "!=",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
 OPCMD(OP_EQ,          "==",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
@@ -97,6 +98,11 @@ DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EvaluatorInterface.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:22p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Issue # 20 Eval operand names like FSM
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:12p

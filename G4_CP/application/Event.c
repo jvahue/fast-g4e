@@ -1412,7 +1412,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- *
+ * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:54p
  * Updated in $/software/control processor/code/application

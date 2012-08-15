@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 24 $  $Date: 3/14/12 4:51p $
+   $Revision: 25 $  $Date: 8/15/12 7:18p $
     
 ******************************************************************************/
 
@@ -488,6 +488,11 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Contractor V&v Date: 8/15/12    Time: 7:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 BITARRAY128 input as integer list
  * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:51p
