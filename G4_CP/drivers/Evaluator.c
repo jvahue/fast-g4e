@@ -61,19 +61,21 @@
 
 
 // Keep this list in sync with enum RPN_ERR
-const CHAR* EvalRetValEnumString[10] =
-{
-  "RPN_ERR_UNKNOWN"                  ,
-  "RPN_ERR_INDEX_NOT_NUMERIC"        ,
-  "RPN_ERR_VALUE_INVALID"            ,
-  "RPN_ERR_INDEX_OTRNG"              ,
-  "RPN_ERR_TOO_MANY_OPRNDS"          ,
-  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,
-  "RPN_ERR_CONST_VALUE_OTRG"         ,
-  "RPN_ERR_TOO_FEW_STACK_VARS"       ,
-  "RPN_ERR_INV_OPRND_TYPE"           ,
-  "RPN_ERR_TOO_MANY_TOKENS_IN_EXPR"
+const CHAR* EvalRetValEnumString[11] =                                                                       
+{                                                                                                            
+  "RPN_ERR_UNKNOWN"                  ,  // place unused.                                                   
+  "RPN_ERR_INDEX_NOT_NUMERIC"        ,  // Unrecognized operand input name                                 
+  "RPN_ERR_VALUE_INVALID"            ,  // Unrecognized operand input name                                 
+  "RPN_ERR_INDEX_OTRNG"              ,  // Index out of range                                              
+  "RPN_ERR_TOO_MANY_OPRNDS"          ,  // Too many operands in the expression.                            
+  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,  // Operation is invalid on this operand                            
+  "RPN_ERR_CONST_VALUE_OTRG"         ,  // Const value out of range for FLOAT32                            
+  "RPN_ERR_TOO_FEW_STACK_VARS"       ,  // Operation requires more vars on stack than present              
+  "RPN_ERR_INV_OPRND_TYPE"           ,  // One or more operands are invalid for operation                  
+  "RPN_ERR_TOO_MANY_TOKENS_IN_EXPR"  ,  // Too many tokens to fit on stack                                 
+  "RPN_ERR_TOO_MANY_STACK_VARS"      ,  // Too many stack vars were present at end of eval
 };
+
 
 //  OpCodeTable[] allocation and initialization
 #undef OPCMD
@@ -358,6 +360,20 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
     }
   } // for-loop cmd list
 
+  // At this point there should be only a single item on the stack with the
+  // results of the expression processing.
+  // If not, clear the stack and push an error msg on
+  if (RPN_STACK_CNT > 1)
+  {
+    while ( 0 != RPN_STACK_CNT)
+    {
+      RPN_POP;
+    }
+    result.Data     = RPN_ERR_TOO_MANY_STACK_VARS;
+    result.DataType = DATATYPE_RPN_PROC_ERR;
+    result.Validity = FALSE;   
+  }
+  
   // Pop the 'final' entry.
   result = RPN_POP;
   *validity = result.Validity;
@@ -435,7 +451,7 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
       if( 0 != OpCodeTable[i].TokenLen  &&
           0 == strncmp(OpCodeTable[i].Token, str, OpCodeTable[i].TokenLen))
       {
-        len = OpCodeTable[i].AddCmd(i, str, expr);
+        len = OpCodeTable[i].AddCmd(i, str, expr);        
         break; // Processed a token, break out of lookup loop
       }
     }    
@@ -455,10 +471,12 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
     {
       len = EvalAddConst(OP_CONST_VAL, str, expr );
     }
-    // Still no luck parsing... its an unrecognized operand.
+    // Still no luck parsing... its an unrecognized token.
+    // stop parsing.
     if(0 == len)
     {
       retval = RPN_ERR_VALUE_INVALID;
+      break;
     }
     else // Token has been encoded into list... increment to next.
     {
@@ -611,42 +629,42 @@ BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
   // Get a pointer to the DataAccess table for the set of
   // function-pointers supporting this opCode.
 
-  dataAcc = EvalGetDataAccess(cmd->OpCode);
-  if (NULL != dataAcc)
+   dataAcc = EvalGetDataAccess(cmd->OpCode);
+ 
+   // Should never get here! (Table 'coding' error)
+   // Every entry tied to this func MUST also have a corr. estry in EVAL_DAI_LIST   
+   ASSERT_MESSAGE(NULL != dataAcc,
+                  "Data Access Interface lookup not configured for OpCode: %d",
+                  cmd->OpCode );
+
+  // Only 1 'Get' function should be defined in table for each opCode
+  // Should never be true. (Table 'coding' error)
+  ASSERT_MESSAGE(!((dataAcc->GetSrcByBool == NULL) && (dataAcc->GetSrcByValue == NULL)) &&
+                 !((dataAcc->GetSrcByBool != NULL) && (dataAcc->GetSrcByValue != NULL)),
+                 "Multiple 'Get' entries configured for DataAccessTable[%d] Cmd: [%d][%f]",
+                  cmd->OpCode, cmd->OpCode, cmd->Data);
+
+  // Init the data-type and data here.
+  // If the source is not configured we need at least
+  // this much info for the stack push.
+  rslt.DataType = (NULL != dataAcc->GetSrcByValue) ? DATATYPE_VALUE : DATATYPE_BOOL;
+  rslt.Data = 0.f;
+
+  // If the input source is configured, get the data (value or bool) and validity
+  if (dataAcc->IsSrcConfigured( (INT32)cmd->Data) )
   {
-    // Only 1 Get function should be defined in table for each opCode
-    // Should never be true. (Table 'coding' error)
-    ASSERT_MESSAGE(!((dataAcc->GetSrcByBool == NULL) && (dataAcc->GetSrcByValue == NULL)) &&
-                   !((dataAcc->GetSrcByBool != NULL) && (dataAcc->GetSrcByValue != NULL)),
-                   "Multiple 'Get' entries configured for DataAccessTable[%d] Cmd: [%d][%f]",
-                    cmd->OpCode, cmd->OpCode, cmd->Data);
+    rslt.Data = (NULL != dataAcc->GetSrcByValue) ?
+                  dataAcc->GetSrcByValue( (INT32) cmd->Data) :
+                  dataAcc->GetSrcByBool ( (INT32) cmd->Data);
 
-    // Init the data-type and data here.
-    // If the source is not configured we need at least
-    // this much info for the stack push.
-    rslt.DataType = (NULL != dataAcc->GetSrcByValue) ? DATATYPE_VALUE : DATATYPE_BOOL;
-    rslt.Data = 0.f;
-
-    // If the input source is configured, get the data (value or bool) and validity
-    if (dataAcc->IsSrcConfigured( (INT32)cmd->Data) )
-    {
-      rslt.Data = (NULL != dataAcc->GetSrcByValue) ?
-                    dataAcc->GetSrcByValue( (INT32) cmd->Data) :
-                    dataAcc->GetSrcByBool ( (INT32) cmd->Data);
-
-      rslt.Validity = dataAcc->GetSrcValidity( (SENSOR_INDEX)cmd->Data);
-    }
-    else // The indicated data source is not configured.
-    {
-      rslt.Validity = FALSE;
-    }
+    rslt.Validity = dataAcc->GetSrcValidity( (SENSOR_INDEX)cmd->Data);
   }
-  else
+  else // The indicated data source is not configured.
   {
-    // Should never get here! (Table 'coding' error)
-    FATAL("Data Access lookup not configured for OpCode: %d",cmd->OpCode );
+    rslt.Validity = FALSE;
   }
 
+  
   RPN_PUSH(rslt);
   return TRUE;
 }

@@ -101,21 +101,23 @@ typedef enum
 }DATATYPE;
 
 // Note: Keep this enum in sync with EvalRetValEnumString[]
-typedef enum
-{
-  RPN_ERR_UNKNOWN                   =  0,  // place unused.
-  RPN_ERR_INDEX_NOT_NUMERIC         = -1,  // Unrecognized operand input name
-  RPN_ERR_VALUE_INVALID             = -2,  // Unrecognized operand input name
-  RPN_ERR_INDEX_OTRNG               = -3,  // Index out of range
-  RPN_ERR_TOO_MANY_OPRNDS           = -4,  // Too many operands in the expression.
-  RPN_ERR_OP_REQUIRES_SENSOR_OPRND  = -5,  // Operation is invalid on this operand
-  RPN_ERR_CONST_VALUE_OTRG          = -6,  // Const value out of range for FLOAT32
-  RPN_ERR_TOO_FEW_STACK_VARS        = -7,
-  RPN_ERR_INV_OPRND_TYPE            = -8,      
-  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR   = -9,  // Too many tokens to fit on stack
-  //-----                           
-  RPN_ERR_MAX                       = -10
-}RPN_ERR;
+typedef enum                                                                                      
+{                                                                                                 
+  RPN_ERR_UNKNOWN                  =  0,  // place unused.                                        
+  RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index                      
+  RPN_ERR_VALUE_INVALID            = -2,  // Unrecognized operand input name                      
+  RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range                                   
+  RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.                 
+  RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand                 
+  RPN_ERR_CONST_VALUE_OTRG         = -6,  // Const value out of range for FLOAT32                 
+  RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present   
+  RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation       
+  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack                      
+  RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval      
+  //-----                                                                                         
+  RPN_ERR_MAX                      = -11                                                          
+}RPN_ERR;                                                                                         
+
 
 #pragma pack(1)
 typedef struct

@@ -1300,6 +1300,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
       {
         tempFloat = pCriteria->fValue;
 
+        // Ensure the COMPARISON type is in range.
+        // This can only ASSERT when cfg is corrupted.
+        ASSERT_MESSAGE(pCriteria->Compare >= LT && pCriteria->Compare <= NO_COMPARE,
+                           "Legacy Comparison not defined: %d", pCriteria->Compare);
+
         // Format NO_COMPARE condition as a 'FALSE' const
         if (NO_COMPARE == pCriteria->Compare)
         {
