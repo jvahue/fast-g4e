@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 5 $  $Date: 12-08-14 2:59p $
+  $Revision: 6 $  $Date: 12-08-16 4:16p $
 
 **********************************************************************************************/
 
@@ -161,6 +161,7 @@ typedef struct
    ACTION_PERSIST  persist;                           /* State of the persistent data        */
    UINT16          nLSS_Priority[MAX_OUTPUT_LSS];     /* Priority Storage for each LSS       */
    INT8            nRequestCounter;                   /* Request Counter for generating IDs  */
+   BOOLEAN         bInitialized;                      /* Ready to Accept Requests            */
 } ACTION_DATA;
 
 /* Structure that defines the action requests                      */
@@ -208,6 +209,11 @@ EXPORT void ActionResetNVPersist ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ *
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 12-08-16   Time: 4:16p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Fault Action Processing
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:59p

@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 18 $  $Date: 12-08-14 2:54p $
+ $Revision: 19 $  $Date: 12-08-16 4:16p $
 
 ******************************************************************************/
 
@@ -555,12 +555,15 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
          // or table threshold was crossed
          else
          {
-            // Reset the Start Type
-            pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
-                                                  EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                  ACTION_OFF,
-                                                  0,
-                                                  0 );
+            if (TRUE == pData->bStarted)
+            {
+               // Reset the Start Type
+               pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
+                                                      EVENT_ACTION_ON_MET(pConfig->nAction),
+                                                      ACTION_OFF,
+                                                      0,
+                                                      0 );
+            }
             pData->bStarted  = FALSE;
          }
          break;
@@ -1412,6 +1415,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 12-08-16   Time: 4:16p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Block Action Request for OFF State if the Event never
+ * started.
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:54p

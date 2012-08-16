@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 6 $  $Date: 12-08-14 2:59p $
+ $Revision: 7 $  $Date: 12-08-16 4:16p $
 
 ******************************************************************************/
 
@@ -109,6 +109,9 @@ void ActionsInitialize ( void )
    FIFO_Init( &m_Request.recordFIFO, (INT8*)m_RequestStorage, sizeof(m_RequestStorage) );
 
    // Initialize the Persistent status from the NV Memory
+   // NOTE: This must come after initializing the FIFO in case the Init Persist Check fails.
+   //       When that happens it will Call Flt_SetStatus which will try and submit an
+   //       Action Request to the FIFO which will cause an ASSERT
    ActionInitPersist();
 
    // Create Action Task - DT
@@ -127,6 +130,8 @@ void ActionsInitialize ( void )
    tTaskInfo.pParamBlock     = NULL;
 
    TmTaskCreate (&tTaskInfo);
+
+   m_ActionData.bInitialized = TRUE;
 }
 
 /******************************************************************************
@@ -269,7 +274,7 @@ INT8 ActionRequest( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
    ACTION_REQUEST oldestRecord;
 
    // Make sure this is a valid action request before queueing
-   if (0 != nAction)
+   if ((0 != nAction) && (TRUE == m_ActionData.bInitialized))
    {
       if ( ACTION_NO_REQ == nReqNum )
       {
@@ -888,12 +893,17 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ *
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 12-08-16   Time: 4:16p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Fault Action Processing
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:59p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system
