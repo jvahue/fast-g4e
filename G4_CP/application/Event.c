@@ -108,6 +108,10 @@ static void           EventTableExitRegion     ( const EVENT_TABLE_CFG  *pTableC
                                                  EVENT_TABLE_DATA *pTableData,
                                                  EVENT_REGION      foundRegion,
                                                  UINT32            nCurrentTick );
+static void           EventTableLogTransition  ( const EVENT_TABLE_CFG *pTableCfg,
+                                                 EVENT_TABLE_DATA *pTableData,
+                                                 EVENT_REGION EnteredRegion,
+                                                 EVENT_REGION ExitedRegion );
 static void           EventTableLogSummary     ( const EVENT_TABLE_CFG  *pConfig,
                                                  const EVENT_TABLE_DATA *pData,
                                                  LOG_PRIORITY      priority );
@@ -249,7 +253,7 @@ void EventTablesInitialize ( void )
       pTableData->nActionReqNum    = ACTION_NO_REQ;
 
       // Loop through all the Regions
-      for ( nRegionIndex = 0; nRegionIndex < (UINT16)MAX_TABLE_REGIONS; nRegionIndex++ )
+      for ( nRegionIndex = REGION_A; nRegionIndex < (UINT16)MAX_TABLE_REGIONS; nRegionIndex++ )
       {
          // Set a pointer the Region Cfg
          pReg = &pTableCfg->region[nRegionIndex];
@@ -595,6 +599,12 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
               ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) &&
                (FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered)) )
          {
+            if ((FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered) &&
+                 (EVENT_NO_END == pData->endType))
+            {
+               pData->endType = EVENT_TABLE_FORCED_END;
+            }
+
             // Record the time the event ended
             CM_GetTimeAsTimestamp(&pData->tsEndTime);
             // Log the End
@@ -773,6 +783,9 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceStartTime );
       }
 
+      // Calculate the duration since the exceedance began
+      pTableData->nTotalDuration_ms = nCurrentTick - pTableData->nStartTime_ms;
+
       // Check the maximum voltage
       if ( pTableData->fCurrentSensorValue > pTableData->fMaxSensorValue )
       {
@@ -780,8 +793,6 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
          pTableData->nMaxSensorElaspedTime_ms = pTableData->nTotalDuration_ms;
       }
 
-      // Calculate the duration since the exceedance began
-      pTableData->nTotalDuration_ms = nCurrentTick - pTableData->nStartTime_ms;
       // Find out what region we are in
       foundRegion = EventTableFindRegion ( pTableCfg,
                                            pTableData,
@@ -825,6 +836,8 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
       {
          // The exceedance has ended
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceEndTime );
+         // Calculate the final duration since the exceedance began
+         pTableData->nTotalDuration_ms = nCurrentTick - pTableData->nStartTime_ms;
          // Exit any confirmed region that wasn't previously exited
          EventTableExitRegion ( pTableCfg,  pTableData, foundRegion, nCurrentTick );
          // Log the Event Table -
@@ -896,9 +909,15 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
 
             // If we haven't already entered or exceeded this region then add a positive
             // Hysteresis Else we need a negetive Hysteresis to exit the region
-            fThreshold = (pTableData->currentRegion < (EVENT_REGION)nRegIndex) ?
-                         fThreshold + pTableCfg->fHysteresisPos :
-                         fThreshold - pTableCfg->fHysteresisNeg;
+            if ( (pTableData->currentRegion < (EVENT_REGION)nRegIndex) ||
+                 (pTableData->currentRegion == REGION_NOT_FOUND) )
+            {
+               fThreshold += pTableCfg->fHysteresisPos;
+            }
+            else
+            {
+               fThreshold -= pTableCfg->fHysteresisNeg;
+            }
 
             // Check if the sensor is greater than the threshold
             if ( fSensorValue > fThreshold )
@@ -950,7 +969,9 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
    // Are we coming back from a higher region?
    if (((nCurrentTick - pTableData->regionStats[foundRegion].nEnteredTime) >=
          pTableCfg->nTransientAllowance_ms) ||
-         ( foundRegion < pTableData->confirmedRegion ) )
+        (( foundRegion < pTableData->confirmedRegion ) &&
+         (pTableData->confirmedRegion != REGION_NOT_FOUND)) ||
+         ( foundRegion == REGION_NOT_FOUND ) )
    {
       // Has this region been confirmed yet?
       if ( FALSE == pTableData->regionStats[foundRegion].bRegionConfirmed )
@@ -960,7 +981,8 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
          pTableData->regionStats[foundRegion].bRegionConfirmed = TRUE;
 
          // Check for the maximum region entered
-         if ( foundRegion > pTableData->maximumRegionEntered )
+         if (( foundRegion > pTableData->maximumRegionEntered ) ||
+             ( REGION_NOT_FOUND == pTableData->maximumRegionEntered))
          {
             pTableData->maximumRegionEntered = foundRegion;
          }
@@ -1016,7 +1038,6 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
 {
    // Local Data
    UINT16                     i;
-   EVENT_TABLE_TRANSITION_LOG transLog;
 
    // Make sure we are in a confirmed region
    if ( REGION_NOT_FOUND != pTableData->confirmedRegion )
@@ -1039,20 +1060,9 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
 
          GSE_DebugStr(NORMAL,TRUE,"Exit:      R: %d", pTableData->confirmedRegion );
 
-         // Build transition log
-         transLog.eventTableIndex          = pTableData->nTableIndex;
-         transLog.confirmed                = foundRegion;
-         transLog.previousRegion           = pTableData->confirmedRegion;
-         transLog.previous = pTableData->regionStats[pTableData->confirmedRegion].logStats;
-         transLog.maximumRegionEntered     = pTableData->maximumRegionEntered;
-         transLog.fMaxSensorValue          = pTableData->fMaxSensorValue;
-         transLog.nMaxSensorElaspedTime_ms = pTableData->nMaxSensorElaspedTime_ms;
-         // Write the transition Log
-         LogWriteETM    ( APP_ID_EVENT_TABLE_TRANSITION,
-                          LOG_PRIORITY_3,
-                          &transLog,
-                          sizeof(transLog),
-                          NULL);
+         EventTableLogTransition ( pTableCfg, pTableData,
+                                   foundRegion, pTableData->confirmedRegion );
+
       }
 
       // Clear any other event actions
@@ -1070,6 +1080,65 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
          }
       }
    }
+   else if ( ( REGION_NOT_FOUND != foundRegion ) &&
+             ( REGION_NOT_FOUND == pTableData->confirmedRegion ) )
+   {
+      EventTableLogTransition (pTableCfg, pTableData,
+                               foundRegion, pTableData->confirmedRegion);
+   }
+
+}
+
+/******************************************************************************
+ * Function:     EventTableLogTransition
+ *
+ * Description:  Generates the log when regions are transitioned.
+ *
+ * Parameters:   [in] EVENT_TABLE_CFG   *pConfig
+ *               [in] EVENT_TABLE_DATA  *pData
+ *               [in] EVENT_TABLE_INDEX eventTableIndex
+ *               [in] LOG_PRIORITY      priority
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static
+void EventTableLogTransition ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA *pTableData,
+                               EVENT_REGION EnteredRegion, EVENT_REGION ExitedRegion)
+{
+   // Local Data
+   EVENT_TABLE_TRANSITION_LOG transLog;
+
+   // Build transition log
+   transLog.eventTableIndex  = pTableData->nTableIndex;
+   transLog.regionEntered    = EnteredRegion;
+   transLog.regionExited     = pTableData->confirmedRegion;
+
+   if (REGION_NOT_FOUND != ExitedRegion)
+   {
+      transLog.exitedStats  = pTableData->regionStats[ExitedRegion].logStats;
+   }
+   else
+   {
+      transLog.exitedStats.nDuration_ms  = 0;
+      transLog.exitedStats.nEnteredCount = 0;
+      transLog.exitedStats.nExitCount    = 0;
+   }
+
+   transLog.maximumRegionEntered     = pTableData->maximumRegionEntered;
+   transLog.nSensorIndex             = pTableCfg->nSensor;
+   transLog.fMaxSensorValue          = pTableData->fMaxSensorValue;
+   transLog.nMaxSensorElaspedTime_ms = pTableData->nMaxSensorElaspedTime_ms;
+   transLog.fCurrentSensorValue      = pTableData->fCurrentSensorValue;
+   transLog.nDuration_ms             = pTableData->nTotalDuration_ms;
+   // Write the transition Log
+   LogWriteETM    ( APP_ID_EVENT_TABLE_TRANSITION,
+                    LOG_PRIORITY_3,
+                    &transLog,
+                    sizeof(transLog),
+                    NULL);
 }
 
 
@@ -1421,12 +1490,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Block Action Request for OFF State if the Event never
  * started.
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:54p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
