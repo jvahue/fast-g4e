@@ -65,7 +65,7 @@ const CHAR* EvalRetValEnumString[11] =
 {                                                                                                            
   "RPN_ERR_UNKNOWN"                  ,  // place unused.                                                   
   "RPN_ERR_INDEX_NOT_NUMERIC"        ,  // Unrecognized operand input name                                 
-  "RPN_ERR_VALUE_INVALID"            ,  // Unrecognized operand input name                                 
+  "RPN_ERR_INVALID_TOKEN"            ,  // Unrecognized operand input name                                 
   "RPN_ERR_INDEX_OTRNG"              ,  // Index out of range                                              
   "RPN_ERR_TOO_MANY_OPRNDS"          ,  // Too many operands in the expression.                            
   "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,  // Operation is invalid on this operand                            
@@ -470,12 +470,20 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
     if ( 0 == len )
     {
       len = EvalAddConst(OP_CONST_VAL, str, expr );
+      // Negative result indicates that it WAS a constant float
+      // but it was a bad value.
+      if ( len < 0 )
+      {
+        retval = len;
+        break;
+      }
     }
+
     // Still no luck parsing... its an unrecognized token.
     // stop parsing.
     if(0 == len)
     {
-      retval = RPN_ERR_VALUE_INVALID;
+      retval = RPN_ERR_INVALID_TOKEN;
       break;
     }
     else // Token has been encoded into list... increment to next.

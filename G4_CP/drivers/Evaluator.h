@@ -105,7 +105,7 @@ typedef enum
 {                                                                                                 
   RPN_ERR_UNKNOWN                  =  0,  // place unused.                                        
   RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index                      
-  RPN_ERR_VALUE_INVALID            = -2,  // Unrecognized operand input name                      
+  RPN_ERR_INVALID_TOKEN            = -2,  // Unrecognized operand input name                      
   RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range                                   
   RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.                 
   RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand                 
