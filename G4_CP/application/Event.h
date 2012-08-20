@@ -10,7 +10,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 18 $  $Date: 12-08-13 4:22p $
+  $Revision: 19 $  $Date: 12-08-20 9:00a $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -156,14 +156,14 @@ typedef enum
 
 typedef enum
 {
-   REGION_NOT_FOUND  = -1,
    REGION_A          = 0,
    REGION_B          = 1,
    REGION_C          = 2,
    REGION_D          = 3,
    REGION_E          = 4,
    REGION_F          = 5,
-   MAX_TABLE_REGIONS = 6
+   MAX_TABLE_REGIONS = 6,
+   REGION_NOT_FOUND  = 255,
 
 } EVENT_REGION;
 
@@ -191,7 +191,8 @@ typedef enum
    EVENT_NO_END,
    EVENT_TRIGGER_INVALID,
    EVENT_END_CRITERIA,
-   EVENT_COMMANDED_END
+   EVENT_COMMANDED_END,
+   EVENT_TABLE_FORCED_END
 } EVENT_END_TYPE;
 
 #pragma pack(1)
@@ -326,15 +327,18 @@ typedef struct
 typedef struct
 {
    EVENT_TABLE_INDEX eventTableIndex;               /* Index of the event table          */
-   EVENT_REGION     confirmed;                      /* Confirmed Region                  */
-   EVENT_REGION     previousRegion;                 /* Exited region                     */
-   REGION_LOG_STATS previous;                       /* Exited region log stats           */
+   EVENT_REGION      regionEntered;                 /* New Region Entered                */
+   EVENT_REGION      regionExited;                  /* Exited region                     */
+   REGION_LOG_STATS  exitedStats;                   /* Exited region log stats           */
                                                     /* - Entered Count                   */
                                                     /* - Exited Count                    */
                                                     /* - Duration in Exited Region       */
-   EVENT_REGION     maximumRegionEntered;           /* Maximum Region Reached            */
-   FLOAT32          fMaxSensorValue;                /* Maximum value the sensor reached  */
-   UINT32           nMaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
+   EVENT_REGION      maximumRegionEntered;          /* Maximum Region Reached            */
+   SENSOR_INDEX      nSensorIndex;                  /* Sensor Index being monitored      */
+   FLOAT32           fMaxSensorValue;               /* Maximum value the sensor reached  */
+   UINT32            nMaxSensorElaspedTime_ms;      /* Time max sensor was reached       */
+   FLOAT32           fCurrentSensorValue;           /* Current Sensor Value at transition*/
+   UINT32            nDuration_ms;                  /* Duration spent in table           */
 } EVENT_TABLE_TRANSITION_LOG;
 
 
@@ -428,17 +432,22 @@ EXPORT void EventTablesInitialize  ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 12-08-20   Time: 9:00a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Bit Bucket Issues Cleanup
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Log Cleanup
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- * 
+ *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
