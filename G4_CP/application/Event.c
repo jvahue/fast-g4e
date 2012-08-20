@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 19 $  $Date: 12-08-16 4:16p $
+ $Revision: 20 $  $Date: 12-08-20 9:00a $
 
 ******************************************************************************/
 
@@ -1485,6 +1485,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-08-20   Time: 9:00a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Bit Bucket Issues Cleanup
+ * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/application
