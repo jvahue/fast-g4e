@@ -43,6 +43,7 @@
 /*****************************************************************************/
 #define MAX_FP_STRING 32
 #define MAX_FALSE_STRING 5
+#define MAX_PRIOR_VALUES 50
 
 
 #define RPN_PUSH(obj) (rpn_stack[rpn_stack_pos++] = (obj))
@@ -94,6 +95,13 @@ const EVAL_DATAACCESS DataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
 EVAL_RPN_ENTRY rpn_stack[EVAL_EXPR_BIN_LEN];
 INT32          rpn_stack_pos = 0;
 
+
+// Array for storing prior sensors values for all managed expressions.
+
+PRIOR_SENSOR_ENTRY priorValues[MAX_PRIOR_VALUES];
+UINT8 priorValueCnt = 0;
+
+
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -104,6 +112,13 @@ static INT8    EvalGetValidCnt     ( const EVAL_RPN_ENTRY* operandA,
                                      const EVAL_RPN_ENTRY* operandB);
 static BOOLEAN EvalVerifyDataType  ( DATATYPE expectedType, const EVAL_RPN_ENTRY* opA,
                                      const EVAL_RPN_ENTRY* opB);
+
+static void EvalGetPriorSensorValue(UINT32 cmdAddress,
+                                    FLOAT32* fPriorValue,
+                                    BOOLEAN* bPriorValid);
+static void EvalSetPriorSensorValue(UINT32 cmdAddress,
+                                    FLOAT32 fValue,
+                                    BOOLEAN bValid);
 
 /*********************************************************************************************/
 /* Local Functions                                                                           */
@@ -785,6 +800,7 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
   EVAL_RPN_ENTRY oprndPrevious;
   EVAL_RPN_ENTRY rslt;
 
+
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
@@ -797,14 +813,18 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
     oprndCurrent = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndCurrent, NULL) )
     {
-      // Fetch the previous sensor and make an R-side operand for the compare
-      oprndPrevious.Data     = SensorGetPreviousValue((SENSOR_INDEX) cmd->Data);
+      // Fetch the previous sensor for 'this' cmd and make an R-side operand for the compare
+      EvalGetPriorSensorValue( (UINT32)cmd, &oprndPrevious.Data, &oprndPrevious.Validity);
+    //  oprndPrevious.Data     = SensorGetPreviousValue((SENSOR_INDEX) cmd->Data);     
+    //  oprndPrevious.Validity = SensorGetPreviousValid((SENSOR_INDEX) cmd->Data);
       oprndPrevious.DataType = DATATYPE_VALUE;
-      oprndPrevious.Validity = SensorGetPreviousValid((SENSOR_INDEX) cmd->Data);
 
       rslt.Data    = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
       rslt.DataType = DATATYPE_BOOL;
       rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
+
+      // Now store the current sensor value & validity  as the prior for next time.
+      EvalSetPriorSensorValue( (UINT32)cmd, oprndCurrent.Data ,oprndCurrent.Validity );
     }
     else
     {
@@ -1269,8 +1289,6 @@ INT16 EvalFmtLoadFalseStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
   return snprintf(str, MAX_FALSE_STRING, "FALSE");
 }
 
-
-
 /******************************************************************************
  * Function: EvalFmtOperStr
  *
@@ -1289,6 +1307,100 @@ INT16 EvalFmtLoadFalseStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return  snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", &OpCodeTable[tblIdx].Token);
+}
+/******************************************************************************
+ * Function: EvalGetPriorSensorValue
+ *
+ * Description: Get the previous sensor value for the !P command at the passed 
+ *              address.
+ *
+ * Parameters:    [in] The address-value-key of the !P command
+ *
+ *                [out] None
+ *
+ * Returns:   The last value or zero if this is the first call( address not in table.
+ *
+ *
+ * Notes:  If this is the first time the function is called the entry will be 
+ *         zero. The call will make a call to EvalSetPriorSensorValue to add/update
+ *
+ *****************************************************************************/
+static void EvalGetPriorSensorValue(UINT32 cmdAddress,
+                                    FLOAT32* fPriorValue,
+                                    BOOLEAN* bPriorValid)
+{
+  UINT8 i;
+  *fPriorValue = 0.f;
+  *bPriorValid = TRUE;
+
+  for(i = 0; i < priorValueCnt; ++i)
+  {
+    if (priorValues[i].CmdAddress == cmdAddress)
+    {
+      *fPriorValue = priorValues[i].PriorValue;
+      *bPriorValid = priorValues[i].PriorValid;
+      break;
+    }
+  }
+  return;
+}
+
+
+/******************************************************************************
+ * Function: EvalSetPriorSensorValue
+ *
+ * Description: Stores the passed value as the prior sensor value for the !P
+ *              cmd at the passed address.
+ *
+ * Parameters:    [in]
+ *
+ *                [out]
+ *
+ * Returns:
+ *
+ * Notes:
+ *
+ *
+ *****************************************************************************/
+static void EvalSetPriorSensorValue(UINT32 cmdAddress,
+                                    FLOAT32 fValue,
+                                    BOOLEAN bValid)
+{
+  BOOLEAN update  = FALSE;
+  UINT8 i;
+
+  // Check if the !P for this cmd is already stored and update.
+  for(i = 0; i < priorValueCnt; ++i)
+  {
+    if (priorValues[i].CmdAddress == cmdAddress)
+    {
+      priorValues[i].PriorValue = fValue;
+      priorValues[i].PriorValid = bValid;
+      update = TRUE;
+      break;
+    }
+  }
+
+  // Entry not found? It's the first time seen for this !P.
+  // Add it.
+  if ( !update && priorValueCnt < MAX_PRIOR_VALUES )
+  {
+    // Tell the SWE the table is too small
+    if((priorValueCnt + 1) == MAX_PRIOR_VALUES)
+    {
+      GSE_DebugStr(NORMAL,
+        FALSE,
+        "Evaluator: Prior-Sensor Storage Table is FULL (Max: %d)",
+        MAX_PRIOR_VALUES);
+    }
+    else
+    {
+      priorValues[priorValueCnt].CmdAddress  = cmdAddress;
+      priorValues[priorValueCnt].PriorValue  = fValue;
+      priorValues[priorValueCnt].PriorValid  = bValid;
+      ++priorValueCnt;
+    }
+  }
 }
 
 /*************************************************************************

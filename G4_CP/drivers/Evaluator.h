@@ -146,6 +146,15 @@ typedef struct
   BOOLEAN  Validity;
 }EVAL_RPN_ENTRY;
 
+// Entry to handle prior sensor values in expressions
+typedef struct  
+{
+  UINT32  CmdAddress; // Lookup key - address of the !P Cmd object.
+  FLOAT32 PriorValue; // The previous stored value of this sensor.
+  BOOLEAN PriorValid; // The validity of the previous stored value.
+}PRIOR_SENSOR_ENTRY;
+
+
 // Typedef to function pointers.
 typedef INT32   ADD_CMD (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 typedef INT16   FMT_CMD (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
