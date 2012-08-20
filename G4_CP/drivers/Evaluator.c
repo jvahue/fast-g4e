@@ -46,9 +46,10 @@
 #define MAX_PRIOR_VALUES 50
 
 
-#define RPN_PUSH(obj) (rpn_stack[rpn_stack_pos++] = (obj))
-#define RPN_POP       (rpn_stack[--rpn_stack_pos])
-#define RPN_STACK_CNT (rpn_stack_pos)
+#define RPN_PUSH(obj)  (rpn_stack[rpn_stack_pos++] = (obj))
+#define RPN_POP        (rpn_stack[--rpn_stack_pos])
+#define RPN_STACK_CNT  (rpn_stack_pos)
+#define RPN_STACK_PURGE rpn_stack_pos = 0;
 
 
 //#define DEBUG_EVALUATOR
@@ -376,17 +377,16 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
   } // for-loop cmd list
 
   // At this point there should be only a single item on the stack with the
-  // results of the expression processing.
-  // If not, clear the stack and push an error msg on
+  // results of the expression processing or in the event of an error, the error status.
+  // If more than one, clear the stack and push an error msg on
   if (RPN_STACK_CNT > 1)
   {
-    while ( 0 != RPN_STACK_CNT)
-    {
-      RPN_POP;
-    }
+    RPN_STACK_PURGE;
     result.Data     = RPN_ERR_TOO_MANY_STACK_VARS;
     result.DataType = DATATYPE_RPN_PROC_ERR;
-    result.Validity = FALSE;   
+    result.Validity = FALSE;
+    RPN_PUSH(result);
+
   }
   
   // Pop the 'final' entry.
@@ -709,7 +709,6 @@ BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
  *****************************************************************************/
 BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
 {
-  BOOLEAN opStatus = TRUE;
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
@@ -720,7 +719,7 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
-    opStatus      = FALSE;
+    RPN_STACK_PURGE;    
   }
   else
   {
@@ -771,11 +770,13 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
       rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
-      opStatus      = FALSE;
+      // Ensure our error msg will be the only thing on stack.
+      RPN_STACK_PURGE;      
     }
   }
+
   RPN_PUSH(rslt);
-  return opStatus;
+  return rslt.DataType != DATATYPE_RPN_PROC_ERR;
 }
 
 /******************************************************************************
@@ -795,7 +796,6 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
  *****************************************************************************/
 BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
 {
-  BOOLEAN opStatus = TRUE;
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
   EVAL_RPN_ENTRY rslt;
@@ -807,6 +807,8 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
+    // Ensure error msg is only thing on the stack
+    RPN_STACK_PURGE;   
   }
   else
   {
@@ -832,11 +834,12 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
       rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
-      opStatus      = FALSE;
+      RPN_STACK_PURGE;      
     }
   }
+
   RPN_PUSH(rslt);
-  return opStatus;
+  return rslt.DataType != DATATYPE_RPN_PROC_ERR;;
 }
 
 
@@ -857,7 +860,6 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
  *****************************************************************************/
 BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
 {
-  BOOLEAN opStatus = TRUE;
   EVAL_RPN_ENTRY oprnd;
   EVAL_RPN_ENTRY rslt;
 
@@ -867,6 +869,8 @@ BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
+    // Ensure error msg is only thing on the stack
+    RPN_STACK_PURGE;        
   }
   else
   {
@@ -883,11 +887,13 @@ BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
       rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
-      opStatus      = FALSE;
+      // Ensure error msg is only thing on the stack
+      RPN_STACK_PURGE;      
     }
   }
+
   RPN_PUSH(rslt);
-  return opStatus;
+ return rslt.DataType != DATATYPE_RPN_PROC_ERR;
 }
 
 /******************************************************************************
@@ -907,7 +913,6 @@ BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
  *****************************************************************************/
 BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
 {
-  BOOLEAN opStatus = TRUE;
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
@@ -918,6 +923,8 @@ BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
+    // Ensure error msg is only thing on the stack
+    RPN_STACK_PURGE;
   }
   else
   {
@@ -936,11 +943,12 @@ BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
       rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
-      opStatus      = FALSE;
+      // Ensure error msg is only thing on the stack
+      RPN_STACK_PURGE;
     }
   }
   RPN_PUSH(rslt);
-  return opStatus;
+  return rslt.DataType != DATATYPE_RPN_PROC_ERR;
 }
 
 /******************************************************************************
@@ -960,7 +968,6 @@ BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
  *****************************************************************************/
 BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
 {
-  BOOLEAN opStatus = TRUE;
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
@@ -971,6 +978,7 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
+    RPN_STACK_PURGE;   
   }
   else
   {
@@ -998,11 +1006,13 @@ BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
       rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
-      opStatus      = FALSE;
+      // Ensure error msg is only thing on the stack
+      RPN_STACK_PURGE;
     }
   }
+
   RPN_PUSH(rslt);
-  return opStatus;
+  return rslt.DataType != DATATYPE_RPN_PROC_ERR;
 }
 
 
