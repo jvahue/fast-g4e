@@ -1550,33 +1550,76 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 
     case USER_TYPE_128_LIST:
       {
-        CHAR  numStr[5];
-        CHAR    tempOuput[USER_SINGLE_MSG_MAX_SIZE ];
-        CHAR*   destPtr = tempOuput;
+        CHAR    numStr[5];
+        CHAR    tempOutput[GSE_GET_LINE_BUFFER_SIZE];
+        CHAR*   destPtr = tempOutput;
+        UINT32  tempWord;
+        CHAR    bufHex128[16 * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
+        UINT32* word32Ptr = (UINT32*)GetPtr;
+        UINT32  arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
 
-        *destPtr = '\0';
-        
-        // Check each bit in the BITARRAY128.
-        // For each 'on' bit, convert the index to a string
-        // and concatenate to the output buffer.
-        for( i = 0; i < 128; ++i )
-        {          
-          if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
-          {
-            snprintf(numStr, sizeof(numStr), "%d,", i);
-            SuperStrcat(tempOuput, numStr, sizeof(tempOuput));
-            destPtr += strlen(numStr);
-          }         
-        }
+        // Display a string containing both the hex and enumeration string:
+        // e.g. 0x0000000000000000000000000000001F : [0,1,2,3]
 
-        // If something was added to tempBuffer, replace the 
-        // final ',' with '\0'
-        if (destPtr > tempOuput)
+        // CHECK FOR EMPTY
+        tempWord = 0;
+        for (i = 0; tempWord == 0 && i < arraySizeWords; ++i )
         {
-          *(--destPtr) = '\0';
+          tempWord = word32Ptr[i];
+        }
+
+        if ( 0 == tempWord )
+        {
+          // Display "NONE SELECTED" String
+          snprintf(tempOutput,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED");
+          strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
+        }
+        else
+        {
+          // DISPLAY THE HEX STRING
+          destPtr = bufHex128;
+          strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
+          destPtr += 2;
+
+          // Display order: 127...0
+          // Read the array from back to front and convert each word
+          // to hex string.
+
+          for( i = 0; i < arraySizeWords; ++i )
+          {          
+            tempWord = word32Ptr[(arraySizeWords - 1)-i];          
+            sprintf( destPtr, "%08X", tempWord );
+            destPtr += 8;
+          }
+          strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
+
+          // APPEND THE ENUMERATED LIST
+
+          // Check each bit in the BITARRAY128.
+          // For each 'on' bit, convert the index to a string
+          // and concatenate to the output buffer.
+          
+          SuperStrcat(tempOutput, " [", sizeof(tempOutput));
+          
+          destPtr = tempOutput + strlen(tempOutput);
+          for( i = 0; i < 128; ++i )
+          {          
+            if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
+            {
+              snprintf(numStr, sizeof(numStr), "%d,", i);
+              SuperStrcat(tempOutput, numStr, sizeof(tempOutput));
+              destPtr += strlen(numStr);
+            }         
+          }
+
+          // replace the final ',' with ']' and 'null'
+          *(--destPtr) = ']';
+          *(++destPtr) = '\0';
+             
+          strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
         }
         
-        strncpy_safe(GetStr, Len, tempOuput, _TRUNCATE);
+        
       } // USER_TYPE_HEX128 scope for decls
       break;
 
@@ -2537,8 +2580,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
                                              USER_ENUM_TBL* MsgEnumTbl,
                                              USER_RANGE *Min,USER_RANGE *Max)
 {
-  BOOLEAN bResult = TRUE;
-  UINT32  i;
+  BOOLEAN bResult = TRUE;  
   UINT32  uint_temp;
   CHAR*   ptr;
   CHAR*   end;
