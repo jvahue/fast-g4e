@@ -30,6 +30,7 @@ DPRamEmulation::DPRamEmulation()
     : m_file(0)
     , msAlive(false)
     , msWrite(false)
+    , m_sendCrc(false)
 {
     Reset();
 }
@@ -116,6 +117,10 @@ bool DPRamEmulation::ProcessDPR()
     else
     {
         // do we have anything to send to the CP ?
+        if (m_sendCrc)
+        {
+            status = SendCrc();
+        }
     }
             
 
@@ -215,6 +220,8 @@ bool DPRamEmulation::StartLog()
 
     msWrite = true;
 
+    CRC32(NULL, 0, &m_computedCrc, CRC_FUNC_START);
+
     return Send( &handle, sizeof(handle));
 }
 
@@ -238,6 +245,10 @@ bool DPRamEmulation::LogData()
     }
     else
     {
+        // compute the CRC
+        CRC32(data->FileDataBuf, m_msgIn.nDataSize - sizeof(MSCP_FILE_PACKET_INFO), 
+              &m_computedCrc, CRC_FUNC_NEXT);
+
         TRACE("Log File Sequence: Got %d expected %d\n", data->FileInfo.seq, m_seq);
         m_file.Write( data->FileDataBuf, m_msgIn.nDataSize - sizeof(MSCP_FILE_PACKET_INFO));
         ++m_seq;
@@ -259,7 +270,43 @@ bool DPRamEmulation::EndLog()
     }
     TRACE("*** Close Log(%d)\n", m_seq);
     msWrite = false;
+
+    CRC32(NULL, 0, &m_computedCrc, CRC_FUNC_END);
+    m_sendCrc = true;
+
     return Send( &result, sizeof(result));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+bool DPRamEmulation::SendCrc()
+{
+    MSCP_VALIDATE_CRC_CMD crcRsp;
+    CString n = m_file.m_filename;
+
+    int fast = m_file.m_filename.Find( "FAST");
+    n = m_file.m_filename.Mid(fast);
+
+    strcpy( (char*)crcRsp.FN, (LPCTSTR)n);
+    crcRsp.CRC = m_computedCrc;
+    crcRsp.CRCSrc = MSCP_CRC_SRC_MS;
+
+    UINT16 result = 0;
+    if (m_file.m_hFile != CFile::hFileNull)
+    {
+        m_file.Close();
+    }
+    TRACE("*** Close Log(%d)\n", m_seq);
+    msWrite = false;
+
+    // local prep of the msg out
+    m_msgOut.id = CMD_ID_VALIDATE_CRC;
+    m_msgOut.sequence += 1;
+    m_msgOut.type = (UINT16)MSCP_PACKET_COMMAND;;
+    m_msgOut.status = 0;
+
+    m_sendCrc = false;
+
+    return Send( &crcRsp, sizeof(crcRsp));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,13 +15,15 @@ public:
     void Reset();
     bool ProcessDPR();
     bool msAlive;
-    bool msWrite;
+    bool msWrite; // simulate driving the DAT led while writing a file
 
 protected:
+    int m_seq;
     MSCP_CMDRSP_PACKET m_msgIn;
     MSCP_CMDRSP_PACKET m_msgOut;
     PersistFile m_file;
-    int m_seq;
+    bool m_sendCrc;
+    UINT32 m_computedCrc;
 
     void PrepResp();
     bool Send( void* data, UINT16 size);
@@ -36,6 +38,7 @@ protected:
     bool GsmSetup();
     bool MsShellCmd();
     bool GetInfo();
+    bool SendCrc();
     MSCP_GSM_CONFIG_CMD gsmSetup;
 };
 
