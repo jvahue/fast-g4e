@@ -893,7 +893,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
- *
+ * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/system
@@ -903,7 +903,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
  * User: John Omalley Date: 12-08-14   Time: 2:59p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- *
+ * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system

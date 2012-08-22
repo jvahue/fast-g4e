@@ -1484,7 +1484,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- *
+ * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
@@ -1495,12 +1495,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Block Action Request for OFF State if the Event never
  * started.
- *
+ * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:54p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- *
+ * 
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application

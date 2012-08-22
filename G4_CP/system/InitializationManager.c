@@ -44,7 +44,7 @@
   #include "TestPoints.h"
 #endif
 
-#ifdef ENV_TEST
+#ifdef ENV_TEST  
   #include "Etm.h"
 #endif
 
@@ -83,12 +83,12 @@ typedef struct {
 #define INIT_MGR_MAX_DRV  14
 
 typedef struct {
-  RESULT InitResult;
-  SYS_APP_ID SysId;
-  LOG_PRIORITY Priority; // Init to "0" which is HIGH_PRIORITY
-  UINT16 nSize;
-  UINT8 data[INIT_MGR_PBIT_LOG_MAX_SIZE];       // Maximum PBIT log must be < 128 bytes
-  TIMESTAMP ts;
+  RESULT InitResult; 
+  SYS_APP_ID SysId; 
+  LOG_PRIORITY Priority; // Init to "0" which is HIGH_PRIORITY 
+  UINT16 nSize; 
+  UINT8 data[INIT_MGR_PBIT_LOG_MAX_SIZE];       // Maximum PBIT log must be < 128 bytes 
+  TIMESTAMP ts; 
 } INIT_MGR_PBIT_LOGS, *INT_MGR_PBIT_LOG_PTR;
 
 #pragma pack(1)
@@ -106,7 +106,7 @@ typedef struct {
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-INIT_MGR_PBIT_LOGS InitMgrPbitLogs[INIT_MGR_MAX_DRV];
+INIT_MGR_PBIT_LOGS InitMgrPbitLogs[INIT_MGR_MAX_DRV]; 
 
 static const DRV_INIT_FUNC DriverInitList[INIT_MGR_MAX_DRV] =
                                     {{DIO_Init,              DRV_OK,"Discrete I/0  "},  //1
@@ -182,7 +182,7 @@ void Im_InitializeControlProcessor(void)
 #endif
 
    CM_PreInit();
-   RegSetCheck_Init();
+   RegSetCheck_Init(); 
 
     //Init drivers
    Im_Driver_Initialize();
@@ -198,7 +198,7 @@ void Im_InitializeControlProcessor(void)
    sprintf( AssertLogBuf,
        "\r\n\r\nWd1: 0x%08x Wd2: 0x%08x WdFlag: 0x%08x WdCnt: 0x%08x UnkCnt: 0x%08x PBitCnt: 0x%08x\r\n",
        SRAM_INIT_SAVE, SRAM_INV_SAVE, watchdogFlag,
-       ASSERT_COUNT, UNKNOWN_RESTART_COUNT, INIT_RESTART_COUNT);
+       ASSERT_COUNT, UNKNOWN_RESTART_COUNT, INIT_RESTART_COUNT);     
    GSE_PutLine( AssertLogBuf);
    /*vcast_dont_instrument_end*/
 #endif
@@ -219,7 +219,7 @@ void Im_InitializeControlProcessor(void)
    GSE_PutLine("\r\n");
    GSE_PutLine(PRODUCT_COPYRIGHT);
    MonitorPrintVersion();
-
+   
    //Check assert log and copy to flash
    size = Assert_GetLog(AssertLogBuf);
    if(size != 0)
@@ -245,26 +245,26 @@ void Im_InitializeControlProcessor(void)
      LogWriteSystem( SYS_CBIT_RESET_LOG, LOG_PRIORITY_LOW, &resetLog,
                         sizeof(resetLog), NULL);
    }
-
+   
    CM_Init();                //Clock manager goes last, RTC time is loaded into
                              //the system (interrupt driven) clock here
-
+                             
    UartMgr_FlushChannels();  // Flush Uart Port just before normal operation
 
    Arinc429DrvFlushHWFIFO();  // Flush the ARINC429 Ports before normal operation
-
-
+                             
+                             
    // Start the Task Manager
    TmInitializeTaskDispatcher();
    TmStartTaskManager();
 
    __EI();
-
-   Box_PowerOn_StartTimeCounting();
+   
+   Box_PowerOn_StartTimeCounting(); 
 
    // SCR# 640 inti real cfg verbosity after startup is complete
    Flt_InitDebugVerbosity();   // now that config data is available - init debug level
-
+   
 }   // End of Im_InitializeControlProcessor()
 
 /*****************************************************************************/
@@ -289,54 +289,54 @@ static void Im_Driver_Initialize(void)
   UINT32 i;
   CHAR ResultStr[RESULTCODES_MAX_STR_LEN];
   INT8 StrBuf[INIT_MGR_DRV_INIT_BUF_SIZE];
-  INT8 TimeStr[INIT_MGR_DRV_INIT_BUF_SIZE];
+  INT8 TimeStr[INIT_MGR_DRV_INIT_BUF_SIZE]; 
   DRV_INIT_FUNC DriverInits[sizeof(DriverInitList)/sizeof(DRV_INIT_FUNC)];
 
-  INT_MGR_PBIT_LOG_PTR pLog;
-  TIMESTAMP ts;
-  TIMESTRUCT time_struct;
+  INT_MGR_PBIT_LOG_PTR pLog; 
+  TIMESTAMP ts; 
+  TIMESTRUCT time_struct; 
 
   //Create a local, writable copy of the driver init list
   memcpy(&DriverInits, &DriverInitList, sizeof(DriverInits));
 
-  //Clear InitMgrPbitLog Struct
-  memset ( InitMgrPbitLogs, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV );
+  //Clear InitMgrPbitLog Struct 
+  memset ( InitMgrPbitLogs, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV ); 
 
-  pLog = &InitMgrPbitLogs[0];
-  memset ( pLog, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV );
-
+  pLog = &InitMgrPbitLogs[0]; 
+  memset ( pLog, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV ); 
+  
   //Init all drivers in the driver init list defined at the top of this file
   //  InitMgrPbitLogs[].SysId != 0x00 or SYS_ID_NULL_LOG if PBIT fails and require PBIT log!!
   __EI();
-  for(i = 0; i < INIT_MGR_MAX_DRV; i++)
+  for(i = 0; i < INIT_MGR_MAX_DRV; i++) 
   {
     DriverInits[i].InitResult = DriverInits[i].InitFunction(&pLog->SysId,
                                             (void *) &pLog->data,  &pLog->nSize);
-    // Record Result to be used to in Im_RecordDrvStartup_Logs() to
-    pLog->InitResult = DriverInits[i].InitResult;
-    pLog++;
+    // Record Result to be used to in Im_RecordDrvStartup_Logs() to 
+    pLog->InitResult = DriverInits[i].InitResult; 
+    pLog++;                                                             
     STARTUP_ID((i+1));
   }
 
   // Allow the timer interrupt to occur so we can keep the system alive during init
   __RIR(TTMR_GPT0_INT_LEVEL);
-
-  //Init ts to current time.  Note, SPI and RTC Drivers have been initialized at this point !
-  CM_GetTimeAsTimestamp( &ts );
-  pLog = &InitMgrPbitLogs[0];
+  
+  //Init ts to current time.  Note, SPI and RTC Drivers have been initialized at this point ! 
+  CM_GetTimeAsTimestamp( &ts ); 
+  pLog = &InitMgrPbitLogs[0]; 
   for (i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
-    pLog->ts = ts;
-    pLog++;
+    pLog->ts = ts; 
+    pLog++; 
   }
-
-  // Set the Power On Time Write After Drv Init has completed.
-  //   Note: Expect Drv Initialization and Process.s routines to be < 2 seconds
-  //         thus the actual Power On Time shall be approx 2 seconds late.
-  PmSet_PowerOnTime( &ts );
-
-  // Use for Box Power On Time calculations !
-  Box_PowerOn_SetStartupTime( ts );
+  
+  // Set the Power On Time Write After Drv Init has completed.  
+  //   Note: Expect Drv Initialization and Process.s routines to be < 2 seconds 
+  //         thus the actual Power On Time shall be approx 2 seconds late.  
+  PmSet_PowerOnTime( &ts ); 
+  
+  // Use for Box Power On Time calculations ! 
+  Box_PowerOn_SetStartupTime( ts ); 
 
   //Output the init result to the GSE port
   GSE_PutLine("\r\n\r\nStart up: Driver initialization\r\n");
@@ -347,9 +347,9 @@ static void Im_Driver_Initialize(void)
                               RcGetResultCodeString(DriverInits[i].InitResult,ResultStr));
     GSE_PutLine(StrBuf);
   }
-
+  
   //Output current Box System Time SRS-2979
-  CM_ConvertTimeStamptoTimeStruct( &ts, &time_struct );
+  CM_ConvertTimeStamptoTimeStruct( &ts, &time_struct ); 
   snprintf(TimeStr,INIT_MGR_DRV_INIT_BUF_SIZE,"%02d/%02d/%04d %02d:%02d:%02d.%03d",
       time_struct.Month,
       time_struct.Day,
@@ -359,7 +359,7 @@ static void Im_Driver_Initialize(void)
       time_struct.Second,
       time_struct.MilliSecond);
   sprintf(StrBuf,"  %s = %s", "Current Time  ", TimeStr);
-  GSE_PutLine(StrBuf);
+  GSE_PutLine(StrBuf); 
 
 }
 
@@ -386,7 +386,7 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   wall clock is not available until the system is running.
   */
   STARTUP_ID(sysStartupId++);
-  Flt_PreInitFaultMgr();
+  Flt_PreInitFaultMgr(); 
 
   //   DebugStr
   STARTUP_ID(sysStartupId++);
@@ -414,7 +414,7 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   STARTUP_ID(sysStartupId++);
   Assert_Init();
 
-  STARTUP_ID(sysStartupId++);
+  STARTUP_ID(sysStartupId++);  
   MonitorInitialize();
 
   STARTUP_ID(sysStartupId++);
@@ -428,10 +428,10 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
                             //because some system modules register a user
                             //message table with User.
 #ifdef STE_TP
-   STARTUP_ID(sysStartupId++);
+   STARTUP_ID(sysStartupId++); 
   TestPointInit();
 #endif
-  STARTUP_ID(sysStartupId++);
+  STARTUP_ID(sysStartupId++);  
   Flt_Init();
 
   STARTUP_ID(sysStartupId++);
@@ -447,20 +447,20 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   ActionsInitialize();
 
   STARTUP_ID(sysStartupId++);
-  Box_PowerOn_InitializeUsage ();
+  Box_PowerOn_InitializeUsage (); 
 
   STARTUP_ID(sysStartupId++);
   PmInitializePowerManager();   // Power On Log Recorded Here !
 
   STARTUP_ID(sysStartupId++);
   Im_RecordDrvStartup_Logs();   // Driver Initialization PBIT Logs Recorded Here !
-  STARTUP_ID(sysStartupId++);
+  STARTUP_ID(sysStartupId++);           
   QARMgr_Initialize();
 
   STARTUP_ID(sysStartupId++);
   FPGAMgr_Initialize();
 
-  STARTUP_ID(sysStartupId++);
+  STARTUP_ID(sysStartupId++); 
   Arinc429MgrInitTasks();    // User Cfg Loaded and FPGA Reconfigured
 
   STARTUP_ID(sysStartupId++);
@@ -495,8 +495,8 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   STARTUP_ID(sysStartupId++);
   CBITMgr_Initialize();
 
-  STARTUP_ID(sysStartupId++);
-  CBITMgr_PWEHSEU_Initialize();
+  STARTUP_ID(sysStartupId++);  
+  CBITMgr_PWEHSEU_Initialize(); 
 
   STARTUP_ID(sysStartupId++);
   MSFX_Init();
@@ -540,13 +540,13 @@ static void Im_Application_Initialize(void)
 
   STARTUP_ID(appStartupId++);
   EngRunInitialize();
-
+  
   STARTUP_ID(appStartupId++);
   EventsInitialize();
 
  /* STARTUP_ID(appStartupId++);
   TrendInitialize(); */
-
+  
   STARTUP_ID(appStartupId);
 }
 
@@ -558,38 +558,38 @@ static void Im_Application_Initialize(void)
  * Returns:      None
  * Notes:
  *   - Im_RecordDrvStartup_Logs should be called immediately after LogInitialization
- *     has completed. Although there are some system initialization that occurs
+ *     has completed. Although there are some system initialization that occurs 
  *     before Log Init is completed, all system logs generated by those process
- *     shall call the regular SystemWriteLog() and will pend log writing
+ *     shall call the regular SystemWriteLog() and will pend log writing 
  *     until box initialization completes.
- *
+ * 
  *****************************************************************************/
 static void Im_RecordDrvStartup_Logs(void)
 {
-  UINT32 i;
-  INT_MGR_PBIT_LOG_PTR pLog;
+  UINT32 i; 
+  INT_MGR_PBIT_LOG_PTR pLog; 
 
   // clear this in preparation of PBIT results
   DIO_SetPin( LED_FLT, DIO_SetLow);
 
-  pLog = &InitMgrPbitLogs[0];
-  for(i = 0; i < INIT_MGR_MAX_DRV; i++)
+  pLog = &InitMgrPbitLogs[0]; 
+  for(i = 0; i < INIT_MGR_MAX_DRV; i++) 
   {
-    if (pLog->InitResult != DRV_OK)
+    if (pLog->InitResult != DRV_OK) 
     {
-      LogWriteSystem( pLog->SysId, pLog->Priority, (void *) pLog->data, pLog->nSize,
-                      &pLog->ts );
-
+      LogWriteSystem( pLog->SysId, pLog->Priority, (void *) pLog->data, pLog->nSize, 
+                      &pLog->ts ); 
+      
       // PBIT error turn on LED FLT
       DIO_SetPin( LED_FLT, DIO_SetHigh);
     }
-    pLog++;   // Move to Next Array Element
+    pLog++;   // Move to Next Array Element 
   }
 }
 
 
 /******************************************************************************
-* Function:    Im_PromptContinueAsDegraded
+* Function:    Im_PromptContinueAsDegraded  
 * Description: Prompt user to press any key to enter degraded mode.
 *              This function loops performing a countdown display which is
 *              updated every 1 second. Input is tested to check if the user
@@ -617,27 +617,27 @@ BOOLEAN Im_PromptContinueAsDegraded(void)
   BOOLEAN    fltLedState;
   DIO_OUT_OP ledState = DIO_SetLow;
   // Save the current FLT DIO state
-  DIO_GetOutputPin(LED_FLT, &fltLedState);
+  DIO_GetOutputPin(LED_FLT, &fltLedState);  
   DIO_SetPin( LED_FLT, ledState);
-  */
-
+  */  
+  
   // skip down a couple of line to separate the countdown prompt
   GSE_PutLine("\r\n\r\nProblems detected\r\nPress 'D' to start in degraded mode\r\n");
-
+  
   snprintf(promptBuffer, sizeof(promptBuffer), PromptString, timeRemainingSecs);
   GSE_PutLine(promptBuffer);
-
+  
   // Set up a countdown timer to await some input from the user
   lastTime = TTMR_GetHSTickCount();
 
   //flashTime = lastTime;
 
   // Wait for countdown expiration or user input.
-  do
+  do 
   {
     currentTime = TTMR_GetHSTickCount();
     /*
-    // Flash/toggle the FLT LED every 500msec until we leave this function.
+    // Flash/toggle the FLT LED every 500msec until we leave this function.     
     if ( (currentTime - flashTime) >= (TICKS_PER_Sec / 2) )
     {
       ledState =  (DIO_OUT_OP)((UINT16)ledState ^ 0x0001);
@@ -660,7 +660,7 @@ BOOLEAN Im_PromptContinueAsDegraded(void)
     UART_CheckForTXDone();
 
     // Check to see if the user has pressed a key
-    if ( GSE_getc() == 'D' )
+    if ( GSE_getc() == 'D' ) 
     {
       proceedAsDegraded = TRUE;
       GSE_PutLine("\r\n\r\nSystem will startup in degraded mode using default configuration");
@@ -676,18 +676,18 @@ BOOLEAN Im_PromptContinueAsDegraded(void)
   // Restore the current FLT DIO state
   DIO_SetPin(LED_FLT, (DIO_OUT_OP)fltLedState);
   */
-
+ 
   // Return results to caller.
   return proceedAsDegraded;
 }
 
 
 /******************************************************************************
- * Function:    Im_StartupTickHandler
+ * Function:    Im_StartupTickHandler  
  * Description: Interrupt handler used during system startup. Used to check for stalled tasks
  *              during startup.
  * Parameters:  none
- * Returns:     none
+ * Returns:     none             
  * Notes:
  *
  *****************************************************************************/
@@ -732,7 +732,7 @@ void Im_StartupTickHandler(void)
 }
 
 /******************************************************************************
- * Function:    Test_Initialize
+ * Function:    Test_Initialize  
  * Description: Initialize EMI/Environmental test code specific modules
  * Parameters:  void
  * Returns:     void
@@ -759,7 +759,7 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
- *
+ * 
  * *****************  Version 109  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system
@@ -769,424 +769,424 @@ void Im_StartupTickHandler(void)
  * User: John Omalley Date: 12-08-14   Time: 2:20p
  * Updated in $/software/control processor/code/system
  * SCR 1076 - Code Review Updates
- *
+ * 
  * *****************  Version 107  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Added Trend task
- *
+ * 
  * *****************  Version 106  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:29a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added new Action Object
- *
+ * 
  * *****************  Version 105  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:18p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Check in for Dave
- *
+ * 
  * *****************  Version 104  *****************
  * User: John Omalley Date: 4/27/12    Time: 5:04p
  * Updated in $/software/control processor/code/system
- *
+ * 
  * *****************  Version 103  *****************
  * User: Contractor V&v Date: 4/23/12    Time: 8:01p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Engine Run
- *
+ * 
  * *****************  Version 102  *****************
  * User: Jim Mood     Date: 9/26/11    Time: 6:15p
  * Updated in $/software/control processor/code/system
  * SCR 575 Modfix.  Needed to change the place where FSM was initialized
- *
+ * 
  * *****************  Version 101  *****************
  * User: Contractor V&v Date: 7/26/11    Time: 7:29p
  * Updated in $/software/control processor/code/system
  * SCR 1035 fix EEPROM causing startup errors
- *
+ * 
  * *****************  Version 100  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:57a
  * Updated in $/software/control processor/code/system
  * SCR 575: GSM Enable when engine status is lost.  (Part of changes for
  * the Fast State Machine)
- *
+ * 
  * *****************  Version 99  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:53p
  * Updated in $/software/control processor/code/system
  * SCR #515 Enhancement - sys.get.mem.l halts processor when invalid
  * memory is referenced
- *
+ * 
  * *****************  Version 98  *****************
  * User: Jim Mood     Date: 10/26/10   Time: 5:12p
  * Updated in $/software/control processor/code/system
  * SCR 958 ResultCodes reentrancy
- *
+ * 
  * *****************  Version 97  *****************
  * User: John Omalley Date: 10/18/10   Time: 11:20a
  * Updated in $/software/control processor/code/system
  * SCR 947 - Remove duplicate CM_PreInit
- *
+ * 
  * *****************  Version 96  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 2:57p
  * Updated in $/software/control processor/code/system
  * SCR #840 Code Review Updates
- *
+ * 
  * *****************  Version 95  *****************
  * User: Peter Lee    Date: 8/11/10    Time: 5:32p
  * Updated in $/software/control processor/code/system
- * SCR #777 Consolidate duplicate Program CRC.
- *
+ * SCR #777 Consolidate duplicate Program CRC. 
+ * 
  * *****************  Version 94  *****************
  * User: Jeff Vahue   Date: 8/03/10    Time: 12:37p
  * Updated in $/software/control processor/code/system
  * Remove (ifdef out) Degraded Mode debug message
- *
+ * 
  * *****************  Version 93  *****************
  * User: Contractor2  Date: 7/30/10    Time: 7:18p
  * Updated in $/software/control processor/code/system
  * SCR #638 Startup requests for Degraded Mode
- *
+ * 
  * *****************  Version 92  *****************
  * User: John Omalley Date: 7/29/10    Time: 7:51p
  * Updated in $/software/control processor/code/system
  * SCR 754 - Added a FIFO flush after initialization
- *
+ * 
  * *****************  Version 91  *****************
  * User: Peter Lee    Date: 7/29/10    Time: 6:51p
  * Updated in $/software/control processor/code/system
  * SCR #754 Flush Uart Interface before normal op
- *
+ * 
  * *****************  Version 90  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- *
+ * 
  * *****************  Version 89  *****************
  * User: Contractor V&v Date: 7/27/10    Time: 2:26p
  * Updated in $/software/control processor/code/system
  * SCR #573 WD overrun at startup SCR #282 Shutdown processing
- *
+ * 
  * *****************  Version 88  *****************
  * User: Contractor2  Date: 7/13/10    Time: 3:24p
  * Updated in $/software/control processor/code/system
  * SCR #687 Watchdog Reset Log
  * Fix log file data.
- *
+ * 
  * *****************  Version 87  *****************
  * User: Contractor2  Date: 7/13/10    Time: 2:35p
  * Updated in $/software/control processor/code/system
  * SCR #638 Startup requests for Degraded Mode
  * Fixed display output
- *
+ * 
  * *****************  Version 86  *****************
  * User: Contractor2  Date: 7/09/10    Time: 1:44p
  * Updated in $/software/control processor/code/system
  * SCR #687 Implementation: Watchdog Reset Log
- *
+ * 
  * *****************  Version 85  *****************
  * User: Jeff Vahue   Date: 7/06/10    Time: 1:47p
  * Updated in $/software/control processor/code/system
  * SCR# 675 - enter degreaded mode only when a 'D' is entered
- *
+ * 
  * *****************  Version 84  *****************
  * User: Jeff Vahue   Date: 6/29/10    Time: 5:27p
  * Updated in $/software/control processor/code/system
  * SCR# 640 - Allow Normal verbosity debug messages during startup
- *
+ * 
  * *****************  Version 83  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a
  * Updated in $/software/control processor/code/system
  * SCR #662 - Changes based on code review
- *
+ * 
  * *****************  Version 82  *****************
  * User: Contractor2  Date: 6/18/10    Time: 1:48p
  * Updated in $/software/control processor/code/system
  * SCR #638 Misc - Startup requests for Degraded Mode
  * Fix debug error display
- *
+ * 
  * *****************  Version 81  *****************
  * User: Contractor2  Date: 6/14/10    Time: 1:11p
  * Updated in $/software/control processor/code/system
  * SCR #483 Function Names must begin with the CSC it belongs with.
- *
+ * 
  * *****************  Version 80  *****************
  * User: Jeff Vahue   Date: 6/09/10    Time: 2:58p
  * Updated in $/software/control processor/code/system
  * SCR #638 - modification  made to investigate erroneous degraded mode,
  * seem to have fixed the issue?  Test will detect any occurance in the
  * future.
- *
+ * 
  * *****************  Version 79  *****************
  * User: John Omalley Date: 6/08/10    Time: 12:14p
  * Updated in $/software/control processor/code/system
  * SCR 627 - Updated for LJ60
- *
+ * 
  * *****************  Version 78  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:28p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence & Box Config
- *
+ * 
  * *****************  Version 77  *****************
  * User: Contractor2  Date: 6/07/10    Time: 11:51a
  * Updated in $/software/control processor/code/system
  * SCR #628 Count SEU resets during data capture
- *
+ * 
  * *****************  Version 76  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:35p
  * Updated in $/software/control processor/code/system
- * SCR #618 F7X and UartMgr Requirements Implementation
- *
+ * SCR #618 F7X and UartMgr Requirements Implementation 
+ * 
  * *****************  Version 75  *****************
  * User: Contractor2  Date: 5/25/10    Time: 3:03p
  * Updated in $/software/control processor/code/system
  * SCR #563 Implementation: Req SRS-1811,1813,1814,1815,3162 - CBIT RAM
  * Tests
  * Fix for ram test protected sections. Minor coding standard fixes
- *
+ * 
  * *****************  Version 74  *****************
  * User: Contractor V&v Date: 5/19/10    Time: 6:11p
  * Updated in $/software/control processor/code/system
  * SCR #404 Misc - Preliminary Code Review Issues
- *
+ * 
  * *****************  Version 73  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:08p
  * Updated in $/software/control processor/code/system
  * SCR #579 Change LogWriteSys to return void
- *
+ * 
  * *****************  Version 72  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:50p
  * Updated in $/software/control processor/code/system
  * SCR #573 - startup WD changes
- *
+ * 
  * *****************  Version 71  *****************
  * User: Contractor2  Date: 4/27/10    Time: 1:42p
  * Updated in $/software/control processor/code/system
  * SCR 187: Degraded mode. Modified to correctly test watchdog reset
  * flags.
- *
+ * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:41p
  * Updated in $/software/control processor/code/system
  * SCR #187 Run in degraded mode
- *
+ * 
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:10p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- *
+ * 
  * *****************  Version 68  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 12:12p
  * Updated in $/software/control processor/code/system
  * SCR #534 - remove unused variable
- *
+ * 
  * *****************  Version 67  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 12:09p
  * Updated in $/software/control processor/code/system
  * SCR #534 - Cleanup Program CRC messages
- *
+ * 
  * *****************  Version 66  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 11:45a
  * Updated in $/software/control processor/code/system
  * SCR #534 - set the default program CRC to allow for development and
  * reformat so messages related tot he CRC.
- *
+ * 
  * *****************  Version 65  *****************
  * User: Contractor2  Date: 4/06/10    Time: 4:08p
  * Updated in $/software/control processor/code/system
  * SCR 528: Display Software CRC in power-up message
- *
+ * 
  * *****************  Version 64  *****************
  * User: Jeff Vahue   Date: 3/29/10    Time: 2:31p
  * Updated in $/software/control processor/code/system
  * SCR# 514 - display assert message retrieved from EEPROM at startup
- *
+ * 
  * *****************  Version 63  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- *
+ * 
  * *****************  Version 62  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:42p
  * Updated in $/software/control processor/code/system
  * SCR #464 Move Version Info into own file and support it.
- *
+ * 
  * *****************  Version 61  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 4:01p
  * Updated in $/software/control processor/code/system
  * SCR 67 Interrupted SPI Access (Multiple / Nested SPI Access)
- *
+ * 
  * *****************  Version 60  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- *
+ * 
  * *****************  Version 59  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 12:58p
  * Updated in $/software/control processor/code/system
  * SCR# 455 - remove LINT issues
- *
+ * 
  * *****************  Version 58  *****************
  * User: Jeff Vahue   Date: 2/17/10    Time: 1:26p
  * Updated in $/software/control processor/code/system
  * SCR# 453 - LED processing at startup
  * SCR# 369 - remove test code
- *
+ * 
  * *****************  Version 57  *****************
  * User: Jeff Vahue   Date: 1/21/10    Time: 12:59p
  * Updated in $/software/control processor/code/system
  * SCR# 369
- *
+ * 
  * *****************  Version 56  *****************
  * User: Jim Mood     Date: 1/20/10    Time: 3:44p
  * Updated in $/software/control processor/code/system
  * Added msfx_init() to system initialization
- *
+ * 
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 5:22p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- *
+ * 
  * *****************  Version 54  *****************
  * User: Peter Lee    Date: 12/18/09   Time: 4:36p
  * Updated in $/software/control processor/code/system
- * SCR #368 Use of Flt_SetStatus() before Flt_Init().
- *
+ * SCR #368 Use of Flt_SetStatus() before Flt_Init(). 
+ * 
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 3:52p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- *
+ * 
  * *****************  Version 52  *****************
  * User: Peter Lee    Date: 11/20/09   Time: 2:35p
  * Updated in $/software/control processor/code/system
  * SCR #345 Implement FPGA Watchdog Requirements
- *
+ * 
  * *****************  Version 51  *****************
  * User: Peter Lee    Date: 11/19/09   Time: 10:55a
  * Updated in $/software/control processor/code/system
  * SCR #315 Fix bug with maintaining SEU counts across power cycle
- *
+ * 
  * *****************  Version 50  *****************
  * User: Peter Lee    Date: 10/23/09   Time: 9:36a
  * Updated in $/software/control processor/code/system
- * SCR #315 CBIT / SEU Reg Processing
- *
+ * SCR #315 CBIT / SEU Reg Processing 
+ * 
  * *****************  Version 49  *****************
  * User: John Omalley Date: 10/14/09   Time: 5:09p
  * Updated in $/software/control processor/code/system
  * SCR 292 - Reversed the Order of the Sensor and Trigger initialization.
- *
+ * 
  * *****************  Version 48  *****************
  * User: Peter Lee    Date: 10/07/09   Time: 11:34a
  * Updated in $/software/control processor/code/system
  * SCR #292 Issues found with v2.0.11 Test10052009
- *
+ * 
  * *****************  Version 47  *****************
  * User: John Omalley Date: 9/30/09    Time: 9:38a
  * Updated in $/software/control processor/code/system
  * Add Fault Initialization for sensor processing.
- *
+ * 
  * *****************  Version 46  *****************
  * User: Peter Lee    Date: 9/29/09    Time: 1:25p
  * Updated in $/software/control processor/code/system
  * SCR #280 Fix Compiler Warnings
- *
+ * 
  * *****************  Version 45  *****************
  * User: Peter Lee    Date: 9/28/09    Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR 275 Box Power On Usage Requirements
- *
+ * 
  * *****************  Version 44  *****************
  * User: Peter Lee    Date: 9/18/09    Time: 1:38p
  * Updated in $/software/control processor/code/system
- * SRS-2979
- *
+ * SRS-2979 
+ * 
  * *****************  Version 43  *****************
  * User: Peter Lee    Date: 9/17/09    Time: 11:48a
  * Updated in $/software/control processor/code/system
- * SCR #94, #96 Support PBIT and PBIT structure recordings.
- * SCR #65 Sequencing of recording intialization logs.
- *
+ * SCR #94, #96 Support PBIT and PBIT structure recordings. 
+ * SCR #65 Sequencing of recording intialization logs.  
+ * 
  * *****************  Version 42  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:22p
  * Updated in $/software/control processor/code/system
  * SCR #94, #95 return PBIT Log Structure to Init Mgr
- *
+ * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 8/06/09    Time: 3:52p
  * Updated in $/software/control processor/code/system
  * SCR 179  - Added Flash initialization to the Init Manager. This change
- * was needed to support the logic check of memory problems.
+ * was needed to support the logic check of memory problems. 
  *
  * *****************  Version 38  *****************
  * User: Peter Lee    Date: 6/30/09    Time: 2:44p
  * Updated in $/software/control processor/code/system
  * SCR #204 Misc Code Review Updates
- *
+ * 
  * *****************  Version 37  *****************
  * User: Peter Lee    Date: 4/29/09    Time: 10:27a
  * Updated in $/software/control processor/code/system
  * SCR #168 Updates per preliminary code review (jv). Remove extra \n from
  * Driver_Initialize()
- *
+ * 
  * *****************  Version 36  *****************
  * User: Jim Mood     Date: 4/22/09    Time: 4:03p
  * Updated in $/control processor/code/system
  * Function prototype
- *
+ * 
  * *****************  Version 35  *****************
  * User: Jim Mood     Date: 4/09/09    Time: 1:56p
  * Updated in $/control processor/code/system
  * Changed initilization order so the Clock Manager init is dead-last.
  * This ensures the interrupt driven "system clock" is started right after
  * its power on value is loaded from the battery backed RTC.
- *
+ * 
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 4/02/09    Time: 9:02a
  * Updated in $/control processor/code/system
  * Moved User init after MSI init b/c User needs to register a command
  * handler with MSI
  * Added init calls to Box and AircraftConfig
- *
+ * 
  * *****************  Version 33  *****************
  * User: Jim Mood     Date: 2/17/09    Time: 5:09p
  * Updated in $/control processor/code/system
- *
+ * 
  * *****************  Version 32  *****************
  * User: Jim Mood     Date: 2/06/09    Time: 8:58a
  * Updated in $/control processor/code/system
- *
+ * 
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 2/05/09    Time: 11:33a
  * Updated in $/control processor/code/system
- *
+ * 
  * *****************  Version 30  *****************
  * User: Peter Lee    Date: 1/19/09    Time: 5:27p
  * Updated in $/control processor/code/system
  * Removed Arinc429_Test() from Drv Init.  Func now part of
  * Arinc429_Init()
- *
+ * 
  * *****************  Version 29  *****************
  * User: Peter Lee    Date: 1/06/09    Time: 2:59p
  * Updated in $/control processor/code/system
- * SCR 129 Misc FPGA Updates. Add call to FPGAMgr_Initialize().
- *
+ * SCR 129 Misc FPGA Updates. Add call to FPGAMgr_Initialize(). 
+ * 
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 11/12/08   Time: 1:40p
  * Updated in $/control processor/code/system
- *
+ * 
  * *****************  Version 27  *****************
  * User: Jim Mood     Date: 10/23/08   Time: 3:06p
  * Updated in $/control processor/code/system
  * Broke up system initilization into two stages.  A pre-init that
  * performs minimal initilization, allowing PBIT log writes, and a normal
  * startup to finish initializing the system
- *
+ * 
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 3:05p
  * Updated in $/control processor/code/system
  * 1) SCR #87 Function Prototype
  * 2) PM Code
- *
+ * 
  *
  ***************************************************************************/

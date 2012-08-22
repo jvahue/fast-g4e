@@ -333,10 +333,10 @@ typedef struct
                                                     /* - Entered Count                   */
                                                     /* - Exited Count                    */
                                                     /* - Duration in Exited Region       */
-   EVENT_REGION      maximumRegionEntered;          /* Maximum Region Reached            */
-   SENSOR_INDEX      nSensorIndex;                  /* Sensor Index being monitored      */
-   FLOAT32           fMaxSensorValue;               /* Maximum value the sensor reached  */
-   UINT32            nMaxSensorElaspedTime_ms;      /* Time max sensor was reached       */
+   EVENT_REGION     maximumRegionEntered;           /* Maximum Region Reached            */
+   SENSOR_INDEX     nSensorIndex;                   /* Sensor Index being monitored      */
+   FLOAT32          fMaxSensorValue;                /* Maximum value the sensor reached  */
+   UINT32           nMaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
    FLOAT32           fCurrentSensorValue;           /* Current Sensor Value at transition*/
    UINT32            nDuration_ms;                  /* Duration spent in table           */
 } EVENT_TABLE_TRANSITION_LOG;
@@ -432,7 +432,7 @@ EXPORT void EventTablesInitialize  ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- *
+ * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
@@ -442,12 +442,12 @@ EXPORT void EventTablesInitialize  ( void );
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Log Cleanup
- *
+ * 
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- *
+ * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
