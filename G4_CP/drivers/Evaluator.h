@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 8 $  $Date: 8/15/12 7:22p $
+  $Revision: 9 $  $Date: 8/22/12 5:29p $
 
 ******************************************************************************/
 
@@ -249,6 +249,11 @@ INT16 EvalFmtOperStr      (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Contractor V&v Date: 8/22/12    Time: 5:29p
+ * Updated in $/software/control processor/code/drivers
+ * FAST 2 Issue #14 Coverage: Use assert vs. if/then/else
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:22p

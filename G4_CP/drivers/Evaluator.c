@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 12 $  $Date: 8/15/12 7:21p $
+  $Revision: 13 $  $Date: 8/22/12 5:28p $
 
 ******************************************************************************/
 
@@ -808,7 +808,7 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     // Ensure error msg is only thing on the stack
-    RPN_STACK_PURGE;   
+    RPN_STACK_PURGE;
   }
   else
   {
@@ -816,9 +816,7 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
     if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndCurrent, NULL) )
     {
       // Fetch the previous sensor for 'this' cmd and make an R-side operand for the compare
-      EvalGetPriorSensorValue( (UINT32)cmd, &oprndPrevious.Data, &oprndPrevious.Validity);
-    //  oprndPrevious.Data     = SensorGetPreviousValue((SENSOR_INDEX) cmd->Data);     
-    //  oprndPrevious.Validity = SensorGetPreviousValid((SENSOR_INDEX) cmd->Data);
+      EvalGetPriorSensorValue( (UINT32)cmd, &oprndPrevious.Data, &oprndPrevious.Validity);    
       oprndPrevious.DataType = DATATYPE_VALUE;
 
       rslt.Data    = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
@@ -1231,7 +1229,7 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     cmd.OpCode = OP_NOT_EQ_PREV;
     cmd.Data   = expr->CmdList[expr->Size - 1].Data;
     expr->CmdList[expr->Size++] = cmd;
-    retval = OpCodeTable[tblIdx].TokenLen;
+    retval = OpCodeTable[tblIdx].TokenLen;    
   }
   else
   {
@@ -1416,6 +1414,11 @@ static void EvalSetPriorSensorValue(UINT32 cmdAddress,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 8/22/12    Time: 5:28p
+ * Updated in $/software/control processor/code/drivers
+ * FAST 2 Issue #12
  * 
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:21p

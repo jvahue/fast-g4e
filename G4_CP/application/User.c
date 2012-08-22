@@ -44,7 +44,7 @@
 
 
    VERSION
-   $Revision: 94 $  $Date: 8/15/12 7:20p $
+   $Revision: 95 $  $Date: 8/22/12 5:27p $
 
 ******************************************************************************/
 
@@ -2703,6 +2703,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 95  *****************
+ * User: Contractor V&v Date: 8/22/12    Time: 5:27p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 Issue #15 legacy conversion
  * 
  * *****************  Version 94  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p

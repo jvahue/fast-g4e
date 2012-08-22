@@ -26,7 +26,7 @@
     Notes: 
   
     VERSION
-      $Revision: 68 $  $Date: 12-07-19 10:49a $     
+      $Revision: 69 $  $Date: 8/22/12 5:27p $     
   
 ******************************************************************************/
 
@@ -414,11 +414,7 @@ void SensorDisableLiveStream( void )
   }
 
   // Loop thru the mask-of-sensors to be added to the Summary array
-  // For each "ON" bit, initialize the next available SnsrSummary entry.
-
-  // NOTE: Get a TOTAL COUNT of configured sensors so we can
-  // ASSERT to notify the user if they have accidentally
-  // configured more in the snsrMask than can be stored in the provided SNSR_SUMMARY
+  // For each "ON" bit, initialize the next available SnsrSummary entry.  
 
   summaryIdx = -1;
   for(snsrIdx = SENSOR_0; snsrIdx < MAX_SENSORS; ++snsrIdx)
@@ -427,13 +423,11 @@ void SensorDisableLiveStream( void )
     {
       ++summaryIdx;
       // Only store the first <summarySize> number of sensors.
+      // Get the TOTAL COUNT of configured sensors in the mask.
+      //  notify the caller if they have accidentally
+      // configured more in the snsrMask than can be stored in the provided SNSR_SUMMARY
       if (summaryIdx < summarySize)
       {
-        // This should never happen except during configuration file development
-        ASSERT_MESSAGE( SensorIsUsed(snsrIdx),
-          "SensorSetupSummaryArray: Sensor[%d] declared in sensor mask but is not configured",
-          snsrIdx);       
-
         summary[summaryIdx].SensorIndex  = snsrIdx;
         summary[summaryIdx].bInitialized = FALSE;
         summary[summaryIdx].bValid       = FALSE;        
@@ -444,13 +438,9 @@ void SensorDisableLiveStream( void )
       }
     }
   }
-
-  // This should never happen unless the user configured too many sensors!
-  ASSERT_MESSAGE((summaryIdx < summarySize),
-    "SensorSetupSummaryArray: Too many sensors Configured. Allowed:[%d], Configured:[%d]",
-    summarySize, summaryIdx + 1);
-
-  // Return the count of summary items.
+  // Return the count of "ON" bits 
+  // in the snsrMask[]. Caller should check this to
+  // ensure that the count did not exceed <summarySize>
   return (UINT16)(summaryIdx + 1);
 }
 
@@ -1839,6 +1829,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: Contractor V&v Date: 8/22/12    Time: 5:27p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Issue #19 SensorSummaryArray ASSERTS
  * 
  * *****************  Version 68  *****************
  * User: John Omalley Date: 12-07-19   Time: 10:49a
