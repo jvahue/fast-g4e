@@ -7,7 +7,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 4 $  $Date: 12-08-14 3:00p $
+$Revision: 5 $  $Date: 12-08-24 9:30a $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -90,6 +90,7 @@ static USER_MSG_TBL actionCmd [] =
    { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  NO_LIMIT,   NULL },
    { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
    { "OUTPUT",            actionOutCmd,      NULL,              NO_HANDLER_DATA },
+   { "ACTIVE_STATE",      NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.activeState,              -1,-1,                  NO_LIMIT,   NULL },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
@@ -414,12 +415,17 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-08-24   Time: 9:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - ETM Fault Action Logic
  * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-14   Time: 3:00p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates and Action Status User Commands
- * 
+ *
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/system

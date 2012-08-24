@@ -12,7 +12,7 @@
                   events.
 
    VERSION
-   $Revision: 105 $  $Date: 7/26/12 2:08p $
+   $Revision: 106 $  $Date: 12-08-24 9:30a $
 
 
 ******************************************************************************/
@@ -59,7 +59,7 @@
 typedef enum {
   FAST_TXTEST_STATE_STOPPED,
   FAST_TXTEST_STATE_SYSCON,
-  FAST_TXTEST_STATE_WOWDISC,  
+  FAST_TXTEST_STATE_WOWDISC,
   FAST_TXTEST_STATE_ONGND,
   FAST_TXTEST_STATE_REC,
   FAST_TXTEST_STATE_MSRDY,
@@ -68,7 +68,7 @@ typedef enum {
   FAST_TXTEST_STATE_VPN,
   FAST_TXTEST_STATE_UL,
   FAST_TXTEST_STATE_PASS,
-  FAST_TXTEST_STATE_FAIL  
+  FAST_TXTEST_STATE_FAIL
 }FAST_TXTEST_TASK_STATE;
 
 typedef enum{
@@ -95,14 +95,14 @@ typedef struct {
   CHAR InProgressStr[TXTEST_DATA_STR_LEN];
   CHAR GSMPassStr[TXTEST_DATA_STR_LEN];
   CHAR FailReason[TXTEST_DATA_STR_LEN];
-  CHAR MoveLogsStr[TXTEST_DATA_STR_LEN];  
+  CHAR MoveLogsStr[TXTEST_DATA_STR_LEN];
 }FAST_TXTEST_DATA;
 
 typedef struct {
   BOOLEAN InFlight;
   BOOLEAN Recording;
   BOOLEAN OnGround;
-  BOOLEAN CommandedRfEnb;         //Desired state of the RF before factoring in override, 
+  BOOLEAN CommandedRfEnb;         //Desired state of the RF before factoring in override,
                                   //WOW, and system condition
   BOOLEAN MssimRunning;
   BOOLEAN IsVPNConnected;
@@ -154,8 +154,8 @@ static void FAST_DioControl(void);
 static void FAST_RfGsmEnable(void);
 static void FAST_WlanPowerEnable(void);
 static void FAST_TxTestTask(void* pParam);
-static void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s, 
-      FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest, 
+static void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
+      FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest,
       CHAR* FailStr );
 
 /*****************************************************************************/
@@ -190,23 +190,23 @@ void FAST_Init(void)
   FASTStatus.LogTransferToGSNoVPNTO = 0;
   FASTStatus.DownloadStarted        = FALSE;
   FASTStatus.AutoDownload           = FALSE;
-  
+
   memset(&m_FastTxTest,0,sizeof(m_FastTxTest));
-  
+
   CBITMgr_UpdateFlightState(FALSE);
 
   wlanOverride     = FALSE;
   gsmOverride      = FALSE;
-  m_FASTControlEnb = TRUE;  
-  
+  m_FASTControlEnb = TRUE;
+
   strncpy_safe(SwVersion,  sizeof(SwVersion), PRODUCT_VERSION, _TRUNCATE);
 
   //FAST Manager Task
-  
+
   // Register the application busy flag with the Power Manager.
   PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &FASTStatus.Recording);
   PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &FASTStatus.LogTransferToGSActive);
-  
+
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST Manager",_TRUNCATE);
   TaskInfo.TaskID         = FAST_Manager;
@@ -224,7 +224,7 @@ void FAST_Init(void)
 
   //Watchdog Tasks
   memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST WDOG1",_TRUNCATE);  
+  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST WDOG1",_TRUNCATE);
   TaskInfo.TaskID         = FAST_WDOG1;
   TaskInfo.Function       = FAST_WatchdogTask1;
   TaskInfo.Priority       = taskInfo[FAST_WDOG1].priority;
@@ -258,7 +258,7 @@ void FAST_Init(void)
   // Performs timing based on frames, should be highish priority
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST U/L Chk",_TRUNCATE);  
+  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST U/L Chk",_TRUNCATE);
   TaskInfo.TaskID         = FAST_UL_Chk;
   TaskInfo.Function       = FAST_UploadCheckTask;
   TaskInfo.Priority       = taskInfo[FAST_UL_Chk].priority;
@@ -271,12 +271,12 @@ void FAST_Init(void)
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = &AutoUploadTaskData;
   TmTaskCreate (&TaskInfo);
-  
+
   //FAST TxTest Task
   // Performs timing based on frames, should be highish priority
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST TxTest",_TRUNCATE);  
+  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST TxTest",_TRUNCATE);
   TaskInfo.TaskID         = FAST_TxTestID;
   TaskInfo.Function       = FAST_TxTestTask;
   TaskInfo.Priority       = taskInfo[FAST_TxTestID].priority;
@@ -288,7 +288,7 @@ void FAST_Init(void)
   TaskInfo.Enabled        = FALSE;
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);  
+  TmTaskCreate (&TaskInfo);
 
 }
 
@@ -332,7 +332,7 @@ void FAST_GetSoftwareVersion(INT8* SwVerStr)
  *
  * Description: When the upload completes if we do not have a VPN connection
  *              then we must wait for up to 10 minutes waiting for one.  This
- *              wait will keep the system "busy" or powered up if battery 
+ *              wait will keep the system "busy" or powered up if battery
  *              latching is enabled.
  *
  * Parameters:  None
@@ -344,8 +344,8 @@ void FAST_GetSoftwareVersion(INT8* SwVerStr)
  *****************************************************************************/
 void FAST_SignalUploadComplete( void)
 {
-  
-  //Do not start LogTransfer timer if the 
+
+  //Do not start LogTransfer timer if the
   if(m_FASTControlEnb )
   {
     FASTStatus.LogTransferToGSActive = TRUE;
@@ -360,7 +360,7 @@ void FAST_SignalUploadComplete( void)
  *
  * Description: Selectivly disables certian parts of FAST manager relating
  *              to the "OnGround" and "Recording" configurable controls
- * 
+ *
  *              Turning off FAST control will remove control of:
  *              1. AtStart/AtEnd On Ground condition
  *              2. AtStart/AtEnd Record condition
@@ -385,13 +385,13 @@ void FAST_TurnOffFASTControl( void)
   memset( CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers, 0, sizeof(BITARRAY128 ));
  // CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers = 0;
   memset( CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers, 0, sizeof(BITARRAY128 ));
-  TmTaskEnable(FAST_UL_Chk, FALSE); 
+  TmTaskEnable(FAST_UL_Chk, FALSE);
 }
 
 
 
 /******************************************************************************
- * Function:    FAST_FSMRfRun    | IMPLEMENTS Run() INTERFACE to 
+ * Function:    FAST_FSMRfRun    | IMPLEMENTS Run() INTERFACE to
  *                               | FAST STATE MGR
  *
  * Description: Signals the FAST Manager to turn on or turn off RF.  The
@@ -416,14 +416,14 @@ void FAST_FSMRfRun(BOOLEAN Run, INT32 param)
   }
   else
   {
-    FAST_AtEndOnGround();    
+    FAST_AtEndOnGround();
   }
 }
 
 
 
 /******************************************************************************
- * Function:    FAST_FSMRfGetState   | IMPLEMENTS GetState() INTERFACE to 
+ * Function:    FAST_FSMRfGetState   | IMPLEMENTS GetState() INTERFACE to
  *                                   | FAST STATE MGR
  *
  * Description: Returns the actual state of the GSM RF power.  This is not
@@ -454,15 +454,15 @@ BOOLEAN FAST_FSMRfGetState(INT32 param)
 
 
 /******************************************************************************
- * Function:    FAST_FSMEndOfFlightRun    | IMPLEMENTS Run() INTERFACE to 
+ * Function:    FAST_FSMEndOfFlightRun    | IMPLEMENTS Run() INTERFACE to
  *                                        | FAST STATE MGR
  *
  * Description: The End of Flight log is used by the Upload Manager to
- *              delimit flights.  
+ *              delimit flights.
  *
  * Parameters:  [in] Run: TRUE:  Write the End Of Flight log
  *                        FALSE: No action
- *              [in] param: not used, just to match FSM call sig. 
+ *              [in] param: not used, just to match FSM call sig.
  *
  * Returns:     none
  *
@@ -504,7 +504,7 @@ static
 void FAST_Task(void* pParam)
 {
   BOOLEAN prevFlightState;
-  
+
   /*ON GROUND
     Transition into the on ground state*/
   if( TriggerIsActive(&CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers) &&
@@ -549,13 +549,13 @@ void FAST_Task(void* pParam)
        FASTStatus.Recording = FALSE;
     }
   }
-  
+
  /*IN-FLIGHT
     Transition into the start engine run or flight state*/
-  
+
   // Save current flight state to test-for-change later.
   prevFlightState = FASTStatus.InFlight;
-  
+
   if(FASTStatus.Recording  && !FASTStatus.InFlight)
   {
     GSE_DebugStr(VERBOSE,TRUE,"FAST: Start of Flight/Engine Run");
@@ -566,14 +566,14 @@ void FAST_Task(void* pParam)
   else if(FASTStatus.OnGround && !FASTStatus.Recording && FASTStatus.InFlight )
     {
       // Write EOF Log and tell LogMgr to register the returned index so we can perform
-      // completion-monitoring.      
+      // completion-monitoring.
       LogRegisterIndex( LOG_REGISTER_END_FLIGHT,
                            LogWriteSystem(APP_ID_END_OF_FLIGHT, LOG_PRIORITY_LOW, 0, 0, NULL)
                          );
 
       GSE_DebugStr(NORMAL,TRUE,"FAST: End of Flight/Engine Run");
       FASTStatus.InFlight = FALSE;
-    
+
       FASTStatus.DownloadStarted = DataMgrStartDownload();
       if (FASTStatus.DownloadStarted == TRUE)
       {
@@ -585,7 +585,7 @@ void FAST_Task(void* pParam)
       FAST_AtEndOfFlight();
     }
   }
-  
+
   /*DOWNLOAD ACS(s)
     Transition into the download state */
   if (!TriggerIsActive( &CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
@@ -596,18 +596,18 @@ void FAST_Task(void* pParam)
          LogWriteSystem(APP_ID_END_OF_DOWNLOAD, LOG_PRIORITY_LOW, 0, 0, NULL);
          GSE_DebugStr(NORMAL,TRUE,"FAST: End ACS Download");
          FASTStatus.DownloadStarted = FALSE;
-         // Since a flight was detected and a normal download was performed 
-         // reset the flag so the auto-upload will initiate this at least once         
+         // Since a flight was detected and a normal download was performed
+         // reset the flag so the auto-upload will initiate this at least once
          FASTStatus.AutoDownload    = FALSE;
          FAST_AtEndOfDownload();
      }
   }
-     
+
 
   // On change of flight state, notify CBIT Mgr.
   if (prevFlightState != FASTStatus.InFlight)
   {
-    CBITMgr_UpdateFlightState(FASTStatus.InFlight); 
+    CBITMgr_UpdateFlightState(FASTStatus.InFlight);
   }
 
   /*MSSIM running
@@ -649,7 +649,7 @@ void FAST_Task(void* pParam)
        connection has been established.
   */
   FASTStatus.LogTransferToGSActive =
-    ( (!FASTStatus.IsVPNConnected && 
+    ( (!FASTStatus.IsVPNConnected &&
        (CM_GetTickCount() < FASTStatus.LogTransferToGSNoVPNTO) ) ||
       (FASTStatus.IsVPNConnected && (UploadMgr_GetFilesPendingRT() != 0) ) );
 
@@ -742,15 +742,15 @@ void FAST_UploadCheckTask(void* pParam)
     {
       // Start an auto-download only if the system is not already downloading,
       // not recording, not already uploading and has not tried to auto-download before
-      if (!FASTStatus.AutoDownload && !DataMgrDownloadingACS() && 
+      if (!FASTStatus.AutoDownload && !DataMgrDownloadingACS() &&
           !FASTStatus.Recording    && !UploadMgr_IsUploadInProgress())
       {
          FASTStatus.AutoDownload = DataMgrStartDownload();
          UploadImmediateAfterDownload = FASTStatus.AutoDownload;
       }
-       
+
       Task->TimeElapsedS = 0;
-      
+
       if(!FASTStatus.Recording && !UploadMgr_IsUploadInProgress() &&
          !DataMgrDownloadingACS() && MSSC_GetIsAlive())
       {
@@ -819,6 +819,7 @@ void FAST_DioControl(void)
 
   DIO_OUTPUT   SysCondOutPin;
   DIO_OUT_OP   Blink = DIO_SetHigh;
+  UINT16       action;
 
   // compute RF GSM and WLAN Power control
   FAST_RfGsmEnable();
@@ -845,7 +846,7 @@ void FAST_DioControl(void)
     case MSSC_XFR_NONE:
       DIO_SetPin(LED_XFR,DIO_SetLow);
       break;
-      
+
     //LED on states
     case MSSC_XFR_DATA_LOG:
       DIO_SetPin(LED_XFR,DIO_SetHigh);
@@ -907,32 +908,41 @@ void FAST_DioControl(void)
        break;
   }
 
-  // SYS CONDITION - output to LSSx if configured
-  SysCondOutPin = Flt_GetSysCondOutputPin();
+  action = Flt_GetSysCondAction();
 
-  // If an output Pin has been enabled/configured, set the output Pin state
-  // based on system condition.
-  if(SysCondOutPin != SYS_COND_OUTPUT_DISABLED)
+  if (0 == action)
   {
-    FLT_STATUS sysCond = Flt_GetSystemStatus();
-    switch( sysCond)
+    // SYS CONDITION - output to LSSx if configured
+    SysCondOutPin = Flt_GetSysCondOutputPin();
+
+    // If an output Pin has been enabled/configured, set the output Pin state
+    // based on system condition.
+    if(SysCondOutPin != SYS_COND_OUTPUT_DISABLED)
     {
-      case STA_NORMAL:
-        DIO_SetPin( SysCondOutPin, DIO_SetLow);
-        break;
+      FLT_STATUS sysCond = Flt_GetSystemStatus();
+      switch( sysCond)
+      {
+        case STA_NORMAL:
+          DIO_SetPin( SysCondOutPin, DIO_SetLow);
+          break;
 
-      case STA_CAUTION:
-        DIO_SetPin( SysCondOutPin, Blink);
-        break;
+        case STA_CAUTION:
+          DIO_SetPin( SysCondOutPin, Blink);
+          break;
 
-      case STA_FAULT:
-        DIO_SetPin( SysCondOutPin, DIO_SetHigh);
-        break;
+        case STA_FAULT:
+          DIO_SetPin( SysCondOutPin, DIO_SetHigh);
+          break;
 
-      default:
-        FATAL( "Unsupported SYSTEM CONDITION STATE = %d", sysCond );
-        break;
+        default:
+          FATAL( "Unsupported SYSTEM CONDITION STATE = %d", sysCond );
+          break;
+      }
     }
+  }
+  else
+  {
+     Flt_UpdateAction();
   }
 }
 
@@ -979,7 +989,7 @@ void FAST_AtStartOfFlight(void)
 void FAST_AtEndOfFlight(void)
 {
   UploadMgr_SetUploadEnable(TRUE);
-  AutoUploadTaskData.TimeElapsedS = 0;  //Reset seconds count for auto-ul 
+  AutoUploadTaskData.TimeElapsedS = 0;  //Reset seconds count for auto-ul
   TmTaskEnable(FAST_UL_Chk, TRUE);      //re-enable auto upload task
   UploadMgr_StartUpload(UPLOAD_START_POST_FLIGHT);
 }
@@ -1076,7 +1086,7 @@ void FAST_AtEndOnGround(void)
 {
   //Tell wireless mgr FAST is not on the ground
   MSSC_SetIsOnGround(FALSE);
-  FASTStatus.CommandedRfEnb = FALSE;  
+  FASTStatus.CommandedRfEnb = FALSE;
   // Cancel any downloads in progress
   DataMgrStopDownload();
 }
@@ -1100,7 +1110,7 @@ void FAST_AtMSSIMRunning(void)
   AC_SetIsMSConnected(TRUE);
 
   //Send the GSM configuration data one MSSIM is running.
-  MSSC_SendGSMCfgCmd(); 
+  MSSC_SendGSMCfgCmd();
 
 }
 
@@ -1126,7 +1136,7 @@ void FAST_AtMSSIMLost(void)
 /******************************************************************************
  * Function:    FAST_AtVPNNotConnected
  *
- * Description: Actions to take when it is detected that the VPN is not 
+ * Description: Actions to take when it is detected that the VPN is not
  *              connected to the ground server.
  *
  * Parameters:  none
@@ -1191,7 +1201,7 @@ void FAST_RfGsmEnable(void)
 /******************************************************************************
 * Function:    FAST_WlanPowerEnable
 *
-* Description: Compute the logic specified in SRS-2252. 
+* Description: Compute the logic specified in SRS-2252.
 *
 * Parameters:  none
 *
@@ -1234,7 +1244,7 @@ void FAST_WlanPowerEnable(void)
 *                  timeout
 *               9) Files uploaded to the micro-server are round-trip
 *                  verified to the ground server.
-*             
+*
 *
 * Parameters:  pParam (i) - dummy to match function signature
 *
@@ -1250,82 +1260,82 @@ void FAST_TxTestTask(void* pParam)
   static INT32 NumFilesPendingRoundTrip;
   INT32 NumFilesStillPendingRoundTrip;
   CHAR  gsm_str[MSCP_MAX_STRING_SIZE];
-  
+
   switch(m_FastTxTest.State)
   {
     case FAST_TXTEST_STATE_STOPPED:
       break;
-  
+
     case FAST_TXTEST_STATE_SYSCON:
       TestStart = CM_GetTickCount()/TICKS_PER_SEC;
-      FAST_DoTxTestTask((Flt_GetSystemStatus() != STA_FAULT),//Test Condition 
+      FAST_DoTxTestTask((Flt_GetSystemStatus() != STA_FAULT),//Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
                         &m_FastTxTest.SysCon,               //Test Result loc.
                         FAST_TXTEST_STATE_WOWDISC,          //Next test after pass
                         FAST_TXTEST_SYSCON_FAIL_STR );      //Fail desc if test fails
       break;
-  
-    case FAST_TXTEST_STATE_WOWDISC:  
-      FAST_DoTxTestTask((DIO_ReadPin( WOW) == TRUE),        //Test Condition 
+
+    case FAST_TXTEST_STATE_WOWDISC:
+      FAST_DoTxTestTask((DIO_ReadPin( WOW) == TRUE),        //Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.WowDisc,              //Test Result loc.          
+                        &m_FastTxTest.WowDisc,              //Test Result loc.
                         FAST_TXTEST_STATE_ONGND,            //Next test after pass
                         FAST_TXTEST_WOWDIS_FAIL_STR );      //Fail desc if test fails
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_ONGND:
-      FAST_DoTxTestTask((FASTStatus.CommandedRfEnb == TRUE),//Test Condition 
+      FAST_DoTxTestTask((FASTStatus.CommandedRfEnb == TRUE),//Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.OnGround,             //Test Result loc.          
+                        &m_FastTxTest.OnGround,             //Test Result loc.
                         FAST_TXTEST_STATE_REC,              //Next test after pass
                         FAST_TXTEST_ONGRND_FAIL_STR );      //Fail desc if test fails
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_REC:
-      FAST_DoTxTestTask((DataMgrRecordFinished() == TRUE),  //Test Condition 
+      FAST_DoTxTestTask((DataMgrRecordFinished() == TRUE),  //Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.Record,               //Test Result loc.          
+                        &m_FastTxTest.Record,               //Test Result loc.
                         FAST_TXTEST_STATE_MSRDY,            //Next test after pass
                         FAST_TXTEST_RECORD_FAIL_STR );      //Fail desc if test fails
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_MSRDY:
-      FAST_DoTxTestTask((MSSC_GetIsAlive() == TRUE),        //Test Condition 
+      FAST_DoTxTestTask((MSSC_GetIsAlive() == TRUE),        //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.TxTestMsRdyTO, //Test Timeout
                         TestStart,                          //Test Start time
-                        &m_FastTxTest.MsReady,              //Test Result loc.          
+                        &m_FastTxTest.MsReady,              //Test Result loc.
                         FAST_TXTEST_STATE_SIMRDY,           //Next test after pass
                         FAST_TXTEST_MSREDY_FAIL_STR );      //Fail desc if test fails
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_SIMRDY:
       MSSC_DoRefreshMSInfo();
       MSSC_GetGSMSCID(gsm_str);
       //Verify SIM ID is a big number (usually 18 or 19 numbers, starting with "89")
-      FAST_DoTxTestTask((UINT32_MAX == strtoul(gsm_str,NULL,10)) ,//Test Condition 
+      FAST_DoTxTestTask((UINT32_MAX == strtoul(gsm_str,NULL,10)) ,//Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.TxTestSIMRdyTO, //Test Timeout
                         TestStart,                        //Test Start time
-                        &m_FastTxTest.SIMReady,           //Test Result loc.        
+                        &m_FastTxTest.SIMReady,           //Test Result loc.
                         FAST_TXTEST_STATE_GSM,            //Next test after pass
                         FAST_TXTEST_SIMCRD_FAIL_STR );    //Fail desc if test fails
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_GSM:
       MSSC_DoRefreshMSInfo();
       MSSC_GetGSMSignalStrength(gsm_str);
       //Verify the gsm string has a decoded signal strength, formatted as
       //(-xxdB) by MSSIM.  If no signal is available, the (-xxdB) format won't
       //be in the string
-      FAST_DoTxTestTask((NULL != strstr(gsm_str,"dB)")),  //Test Condition 
+      FAST_DoTxTestTask((NULL != strstr(gsm_str,"dB)")),  //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.TxTestGSMRdyTO, //Test Timeout
                         TestStart,                        //Test Start time
-                        &m_FastTxTest.GSMSignal,          //Test Result loc.        
+                        &m_FastTxTest.GSMSignal,          //Test Result loc.
                         FAST_TXTEST_STATE_VPN,            //Next test after pass
-                        FAST_TXTEST_GSMSIG_FAIL_STR );    //Fail desc if test fails  
+                        FAST_TXTEST_GSMSIG_FAIL_STR );    //Fail desc if test fails
       //After test passes, change test status to show special GSM pass message
       if(m_FastTxTest.State == FAST_TXTEST_STATE_VPN)
       {
@@ -1333,38 +1343,38 @@ void FAST_TxTestTask(void* pParam)
             ,"PASS %s",strchr(gsm_str,'('));
         m_FastTxTest.GSMSignal = FAST_TXTEST_GSMPASS;
       }
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_VPN:
-      FAST_DoTxTestTask((MSSC_GetIsVPNConnected()),       //Test Condition 
+      FAST_DoTxTestTask((MSSC_GetIsVPNConnected()),       //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.TxTestVPNRdyTO, //Test Timeout
                         TestStart,                        //Test Start time
-                        &m_FastTxTest.VPNStatus,          //Test Result loc.        
+                        &m_FastTxTest.VPNStatus,          //Test Result loc.
                         FAST_TXTEST_STATE_UL,             //Next test after pass
-                        FAST_TXTEST_VPNSTA_FAIL_STR );    //Fail desc if test fails  
+                        FAST_TXTEST_VPNSTA_FAIL_STR );    //Fail desc if test fails
 
       //After test passes, start file upload.
       if(m_FastTxTest.State == FAST_TXTEST_STATE_UL)
       {
         NumFilesPendingRoundTrip = -1;
-        m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOMS;      
+        m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOMS;
         UploadMgr_StartUpload(UPLOAD_START_TXTEST);
       }
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_UL:
       if(NumFilesPendingRoundTrip == -1)
       {
         if(!UploadMgr_IsUploadInProgress())
         {
-          //After upload, record the number of files waiting for round trip        
+          //After upload, record the number of files waiting for round trip
           snprintf(m_FastTxTest.MoveLogsStr,sizeof(m_FastTxTest.MoveLogsStr),
               "MoveLogsToGround 00%%");
           NumFilesPendingRoundTrip = UploadMgr_GetNumFilesPendingRT();
           //Preventing div/0
           NumFilesPendingRoundTrip = NumFilesPendingRoundTrip == 0 ?
             1 : NumFilesPendingRoundTrip;
-          m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOGROUND;             
+          m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOGROUND;
         }
       }
       else
@@ -1374,23 +1384,23 @@ void FAST_TxTestTask(void* pParam)
             "MoveLogsToGround %02d%%",
             PERCENT_CONST - (NumFilesStillPendingRoundTrip * PERCENT_CONST)/
             NumFilesPendingRoundTrip);
-  
+
         if(NumFilesStillPendingRoundTrip == 0)
         {
           m_FastTxTest.ULStatus = FAST_TXTEST_PASS;
           m_FastTxTest.State = FAST_TXTEST_STATE_PASS;
         }
       }
-      break;  
-  
+      break;
+
     case FAST_TXTEST_STATE_PASS:
       TmTaskEnable(FAST_TxTestID,TRUE);
       break;
-  
+
     case FAST_TXTEST_STATE_FAIL:
-      TmTaskEnable(FAST_TxTestID,TRUE);  
+      TmTaskEnable(FAST_TxTestID,TRUE);
       break;
-  
+
     default:
       FATAL("Unknown TxTaskState %d",m_FastTxTest.State);
       break;
@@ -1405,7 +1415,7 @@ void FAST_TxTestTask(void* pParam)
 * Description: Performs the basic logic for each transmission test.  If the
 *              test pass condition is not met, the test continues "InProgress"
 *              until the test passes or times out/fails
-*             
+*
 *
 * Parameters:  BOOLEAN  Condition
 *              UINT32   Timeout
@@ -1420,8 +1430,8 @@ void FAST_TxTestTask(void* pParam)
 *
 *****************************************************************************/
 static
-void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s, 
-      FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest, 
+void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
+      FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest,
       CHAR* FailStr )
 {
   UINT32 elapsed_s;
@@ -1459,232 +1469,237 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
     *TestStatus = FAST_TXTEST_PASS;
     m_FastTxTest.State = NextTest;
   }
-  
+
 }
 
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ *
+ * *****************  Version 106  *****************
+ * User: John Omalley Date: 12-08-24   Time: 9:30a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added ETM Fault Action Logic
  * 
  * *****************  Version 105  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:08p
  * Updated in $/software/control processor/code/application
  * SCR# 1076 Code Review Updates
- * 
+ *
  * *****************  Version 104  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:46p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Renamed TRIGGER_FLAGS
- * 
+ *
  * *****************  Version 103  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:50p
  * Updated in $/software/control processor/code/application
  * SCR #1107 Trigger processing
- * 
+ *
  * *****************  Version 102  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:25a
  * Updated in $/software/control processor/code/application
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 100  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:49p
  * Updated in $/software/control processor/code/application
  * SCR #1105 End of Flight Log Race Condition
- * 
+ *
  * *****************  Version 99  *****************
  * User: John Omalley Date: 10/11/11   Time: 4:59p
  * Updated in $/software/control processor/code/application
  * SCR 1078  and SCR 1076 Code Review Updates
- * 
+ *
  * *****************  Version 98  *****************
  * User: Jim Mood     Date: 10/04/11   Time: 3:15p
  * Updated in $/software/control processor/code/application
  * SCR 1083 Move Auto Upload enable from end of record to end of flight
  * per requirement SRS2521
- * 
+ *
  * *****************  Version 97  *****************
  * User: Jim Mood     Date: 9/27/11    Time: 6:19p
  * Updated in $/software/control processor/code/application
  * SCR 1072 Modfix.  Fixes upload attempts every 1 second by the auto
  * upload task after downloading ACS
- * 
+ *
  * *****************  Version 95  *****************
  * User: John Omalley Date: 9/12/11    Time: 2:20p
  * Updated in $/software/control processor/code/application
  * SCR 1073 - Cancelled download on In-Flight and when on-ground no longer
  * detected.
- * 
+ *
  * *****************  Version 94  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:06p
  * Updated in $/software/control processor/code/application
  * SCR 575 updates
- * 
+ *
  * *****************  Version 93  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:54a
  * Updated in $/software/control processor/code/application
  * SCR 575: GSM Enable when engine status is lost.  (Part of changes for
  * the Fast State Machine)
- * 
+ *
  * *****************  Version 92  *****************
  * User: John Omalley Date: 4/21/11    Time: 4:55p
  * Updated in $/software/control processor/code/application
  * SCR 1029
- * 
+ *
  * *****************  Version 91  *****************
  * User: John Omalley Date: 4/20/11    Time: 8:17a
  * Updated in $/software/control processor/code/application
  * SCR 1029
- * 
+ *
  * *****************  Version 90  *****************
  * User: John Omalley Date: 4/14/11    Time: 11:38a
  * Updated in $/software/control processor/code/application
  * SCR 1029 - Added Upload Enable if no ACS Downloaded needed
- * 
+ *
  * *****************  Version 89  *****************
  * User: John Omalley Date: 4/11/11    Time: 10:08a
  * Updated in $/software/control processor/code/application
  * SCR 1029 - ACS Download logic added
- * 
+ *
  * *****************  Version 88  *****************
  * User: Jeff Vahue   Date: 10/16/10   Time: 1:33p
  * Updated in $/software/control processor/code/application
  * SCR# 939 - Logic error for upload busy
- * 
+ *
  * *****************  Version 87  *****************
  * User: Contractor2  Date: 10/12/10   Time: 3:09p
  * Updated in $/software/control processor/code/application
  * SCR #916 Code Review
- * 
+ *
  * *****************  Version 86  *****************
  * User: Jim Mood     Date: 10/06/10   Time: 7:29p
  * Updated in $/software/control processor/code/application
  * SCR 880: Battery latch while files not round tripped
- * 
+ *
  * *****************  Version 85  *****************
  * User: Contractor2  Date: 10/05/10   Time: 1:54p
  * Updated in $/software/control processor/code/application
  * SCR #916 Code Review Updates
- * 
+ *
  * *****************  Version 84  *****************
  * User: Contractor2  Date: 9/24/10    Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR #882 WD - Old Code for pulsing the WD should be removed
- * 
+ *
  * *****************  Version 83  *****************
  * User: Jeff Vahue   Date: 9/21/10    Time: 5:39p
  * Updated in $/software/control processor/code/application
  * SCR# 880 - Busy Logic
- * 
+ *
  * *****************  Version 82  *****************
  * User: Jeff Vahue   Date: 9/09/10    Time: 11:53a
  * Updated in $/software/control processor/code/application
  * SCR# 833 - Perform only three attempts to get the Cfg files from the
  * MS.  Fix various typos.
- * 
+ *
  * *****************  Version 81  *****************
  * User: Jim Mood     Date: 8/27/10    Time: 4:30p
  * Updated in $/software/control processor/code/application
  * SCR 828 Aircraft config in-air detection
- * 
+ *
  * *****************  Version 80  *****************
  * User: Contractor V&v Date: 7/30/10    Time: 9:21p
  * Updated in $/software/control processor/code/application
  * SCR #282 Misc - Shutdown Processing
- * 
+ *
  * *****************  Version 79  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 6:57p
  * Updated in $/software/control processor/code/application
  * SCR 327 Fast transmission test implementation
- * 
+ *
  * *****************  Version 78  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 11:23a
  * Updated in $/software/control processor/code/application
  * SCR 327 Fast transmission test
- * 
+ *
  * *****************  Version 77  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 8:56a
  * Updated in $/software/control processor/code/application
  * SCR 327 Fast transmssion test functionality
- * 
+ *
  * *****************  Version 76  *****************
  * User: Contractor V&v Date: 7/27/10    Time: 2:25p
  * Updated in $/software/control processor/code/application
  * SCR #282 Misc - Shutdown Processing
- * 
+ *
  * *****************  Version 75  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:29p
  * Updated in $/software/control processor/code/application
  * SCR# 716 - fix INT32 access and unindent code in FastMgr.c
- * 
+ *
  * *****************  Version 74  *****************
  * User: Jim Mood     Date: 6/29/10    Time: 6:16p
  * Updated in $/software/control processor/code/application
  * SCR 623 Reconfiguration function updates
- * 
+ *
  * *****************  Version 73  *****************
  * User: Contractor2  Date: 6/14/10    Time: 4:12p
  * Updated in $/software/control processor/code/application
  * SCR #645 Periodically flush instruction/branch caches
- * 
+ *
  * *****************  Version 72  *****************
  * User: Jim Mood     Date: 6/11/10    Time: 4:14p
  * Updated in $/software/control processor/code/application
  * SCR 623 Batch Configuration implementation updates
- * 
+ *
  * *****************  Version 71  *****************
  * User: John Omalley Date: 6/08/10    Time: 12:03p
  * Updated in $/software/control processor/code/application
  * SCR 627 - Updated for LJ60
- * 
+ *
  * *****************  Version 70  *****************
  * User: Contractor2  Date: 5/28/10    Time: 1:40p
  * Updated in $/software/control processor/code/application
  * SCR #595 CP SW Version accessable through USER.c command
  * Added SW Version number to fast.status command.
  * Also some minor coding standard fixes.
- * 
+ *
  * *****************  Version 69  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:53p
  * Updated in $/software/control processor/code/application
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 68  *****************
  * User: Jim Mood     Date: 5/07/10    Time: 6:24p
  * Updated in $/software/control processor/code/application
  * Added VPN Conneced status
- * 
+ *
  * *****************  Version 67  *****************
  * User: Jeff Vahue   Date: 5/03/10    Time: 3:09p
  * Updated in $/software/control processor/code/application
  * SCR #580 - code review changes
- * 
+ *
  * *****************  Version 66  *****************
  * User: Contractor V&v Date: 4/30/10    Time: 11:28a
  * Updated in $/software/control processor/code/application
  * SCR #574 System Level objects should not be including Applicati
- * 
+ *
  * *****************  Version 65  *****************
  * User: Contractor V&v Date: 4/28/10    Time: 4:49p
  * Updated in $/software/control processor/code/application
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 64  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:37p
  * Updated in $/software/control processor/code/application
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 63  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:07p
  * Updated in $/software/control processor/code/application
  * SCR #317 Implement safe strncpy SCR #70 Store/Restore interrupt
- * 
+ *
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 3/30/10    Time: 4:59p
  * Updated in $/software/control processor/code/application
  * SCR# 463 - correct WD headers and other functio headers, other minor
  * changes see Investigator note.
- * 
+ *
  * *****************  Version 61  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:14p
  * Updated in $/software/control processor/code/application

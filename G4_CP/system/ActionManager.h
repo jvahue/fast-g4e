@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 6 $  $Date: 12-08-16 4:16p $
+  $Revision: 7 $  $Date: 12-08-24 9:30a $
 
 **********************************************************************************************/
 
@@ -69,7 +69,8 @@
                                       ACTION_OUTPUT_DEFAULT, /* Action Output #7           */\
                                       ACTION_OUTPUT_DEFAULT, /* Action Output #8           */\
                                       FALSE,                 /* Persist Enabled            */\
-                                      ACTION_OUTPUT_DEFAULT  /* Persistent Action          */
+                                      ACTION_OUTPUT_DEFAULT, /* Persistent Action          */\
+                                      0x0F                   /* All LSS Active High        */
 
 /*********************************************************************************************/
 /*                                   Package Typedefs                                        */
@@ -115,6 +116,7 @@ typedef struct
    TRIGGER_INDEX      aCKTrigger;                     /* Trigger to Acknowledge Actions      */
    ACTION_OUTPUT      output[MAX_ACTION_DEFINES];     /* Masks for the action outputs        */
    ACTION_PERSIST_CFG persist;                        /* persistent action configuration     */
+   UINT8              activeState;
 } ACTION_CFG;
 
 /* Dynamic structure to hold the persistent state                  */
@@ -209,17 +211,22 @@ EXPORT void ActionResetNVPersist ( void );
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ *
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 12-08-24   Time: 9:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - ETM Fault Action Logic
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Fault Action Processing
- * 
+ *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:59p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system

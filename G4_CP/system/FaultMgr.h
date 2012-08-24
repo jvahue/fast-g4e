@@ -10,7 +10,7 @@
     Description:
 
   VERSION
-    $Revision: 27 $  $Date: 12-08-16 4:15p $
+    $Revision: 28 $  $Date: 12-08-24 9:30a $
 
 ******************************************************************************/
 
@@ -30,7 +30,7 @@
 ******************************************************************************/
 #define SYS_COND_OUTPUT_DISABLED DIO_MAX_OUTPUTS
 
-#define FAULTMGR_CONFIG_DEFAULT DBGOFF,                   /* Debug Verbosity */ \
+#define FAULTMGR_CONFIG_DEFAULT DBGOFF,                   /* Debug Verbosity       */\
                                 SYS_COND_OUTPUT_DISABLED, /* Default DIO Out Pin   */\
                                 0                        /* FAULT/CAUTION Action  */
                                // TRUE,                     /* Acknowledgable        */
@@ -68,11 +68,11 @@ typedef struct
   SYS_APP_ID LogID;            // Id of the CSC which issued the Sys Status
   FLT_STATUS StatusReq;        // The status cmd issued in last SetStatus/ClrStatus
   FLT_STATUS SysStatus;        // The currently active System Status;
-  FLT_STATUS PrevStatus;       // The prior System Status. Could be same as 
+  FLT_STATUS PrevStatus;       // The prior System Status. Could be same as
                                // StatusReq if StatusReq did not result in status change
-  UINT32     StatusNormalCnt;  // The current count of Normal  statuses(should be zero)       
+  UINT32     StatusNormalCnt;  // The current count of Normal  statuses(should be zero)
   UINT32     StatusCautionCnt; // The current count of Caution statuses
-  UINT32     StatusFaultCnt;   // The current count of Fault   statuses  
+  UINT32     StatusFaultCnt;   // The current count of Fault   statuses
 }INFO_SYS_STATUS_UPDATE_LOG;
 #pragma pack()
 
@@ -120,54 +120,61 @@ EXPORT void Flt_PreInitFaultMgr(void);
 
 EXPORT DIO_OUTPUT Flt_GetSysCondOutputPin(void);
 EXPORT BOOLEAN Flt_InitFltBuf(void);
+EXPORT void Flt_UpdateAction ( void );
+EXPORT UINT16 Flt_GetSysCondAction(void);
 
 #endif // FAULTMGR_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
+ *
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-08-24   Time: 9:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - ETM Fault Action Logic
  * 
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Fault Action Processing
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR #307 Add System Status to Fault / Event / etc logs
- * 
+ *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 9/09/10    Time: 2:12p
  * Updated in $/software/control processor/code/system
  * SCR 855 - Removed unused functions
- * 
+ *
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 8/30/10    Time: 6:55p
  * Updated in $/software/control processor/code/system
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:54p
  * Updated in $/software/control processor/code/system
  * SCR #614 fast.reset=really should initialize files
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:28p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence & Box Config
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 4/26/10    Time: 1:27p
  * Updated in $/software/control processor/code/system
  * SCR #566 - disable interrupts in Put/Get operations on Log Q.  Set
  * default fault.cfg.verbosity to OFF
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:17p
  * Updated in $/software/control processor/code/system

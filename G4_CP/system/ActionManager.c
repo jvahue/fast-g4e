@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 7 $  $Date: 12-08-16 4:16p $
+ $Revision: 8 $  $Date: 12-08-24 9:30a $
 
 ******************************************************************************/
 
@@ -94,15 +94,25 @@ void ActionsInitialize ( void )
    memset((void *)&m_ActionCfg,  0, sizeof(m_ActionCfg));
    memset((void *)&m_ActionData, 0, sizeof(m_ActionData));
 
-   for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
-   {
-      m_ActionData.nLSS_Priority[i] = ACTION_NONE;
-   }
-
    // Load the current configuration to the configuration array.
    memcpy((void *)&m_ActionCfg,
           (void *)&(CfgMgr_RuntimeConfigPtr()->ActionConfig),
           sizeof(m_ActionCfg));
+
+   for ( i = 0; i < MAX_OUTPUT_LSS; i++ )
+   {
+      m_ActionData.nLSS_Priority[i] = ACTION_NONE;
+
+      // Initialize the LSS Outputs - If Active low then init LSS to a 1
+      if ( (m_ActionCfg.activeState & (1 << i)) == 0 )
+      {
+         ActionSetOutput ( i, DIO_SetHigh );
+      }
+      else // Init to 0 - Shouldn't have to do this but do it anyway for completeness
+      {
+         ActionSetOutput ( i, DIO_SetLow );
+      }
+   }
 
    // Event Action Initialize FIFO
    memset ( (void *) &m_Request, 0, sizeof( m_Request ) );
@@ -817,7 +827,15 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                   if ( ((nActionIndex + 1) < pData->nLSS_Priority[i]) )
                   {
                      // Set the LSS
-                     output = ( ON == BIT( pOutCfg->nLSS_Mask,i ) ) ? DIO_SetHigh : DIO_SetLow;
+                     if ( (ON == BIT( pOutCfg->nLSS_Mask,i )) &&
+                          (ON == BIT( pCfg->activeState,  i)) )
+                     {
+                        output = DIO_SetHigh;
+                     }
+                     else
+                     {
+                        output = DIO_SetLow;
+                     }
                      pData->nLSS_Priority[i] = (nActionIndex + 1);
                      ActionSetOutput ( i, output );
                      if (OFF == pFlags->bState)
@@ -840,10 +858,17 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                    ((nActionIndex + 1) <= pData->nLSS_Priority[i]) )
                {
                   pData->nLSS_Priority[i] = ACTION_NONE;
-                  if ( TRUE == BIT( pOutCfg->nLSS_Mask, i ) )
+                  if ( ( ON == BIT( pOutCfg->nLSS_Mask, i )) &&
+                       ( ON == BIT( pCfg->activeState,   i )) )
                   {
                      ActionSetOutput ( i, DIO_SetLow );
                      GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, DIO_SetLow  );
+                  }
+                  else if ( (ON  == BIT( pOutCfg->nLSS_Mask, i )) &&
+                            (OFF == BIT( pCfg->activeState,  i )))
+                  {
+                     ActionSetOutput ( i, DIO_SetHigh );
+                     GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, DIO_SetHigh );
                   }
                }
             }
@@ -893,17 +918,22 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ *
+ * *****************  Version 8  *****************
+ * User: John Omalley Date: 12-08-24   Time: 9:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - ETM Fault Action Logic
  * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Fault Action Processing
- * 
+ *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:59p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p
  * Updated in $/software/control processor/code/system
