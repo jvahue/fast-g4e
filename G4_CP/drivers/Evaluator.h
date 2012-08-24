@@ -113,9 +113,10 @@ typedef enum
   RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present   
   RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation       
   RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack                      
-  RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval      
+  RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval
+  RPN_ERR_PRIOR_SENSR_TABLE_FULL   = -11, // The table storing Prior-sensor values is full.
   //-----                                                                                         
-  RPN_ERR_MAX                      = -11                                                          
+  RPN_ERR_MAX                      = -12                                                          
 }RPN_ERR;                                                                                         
 
 
