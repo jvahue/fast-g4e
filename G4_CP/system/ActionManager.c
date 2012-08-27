@@ -348,6 +348,55 @@ void ActionResetNVPersist ( void )
    ActionClearLatch ( &m_ActionData );
 }
 
+/******************************************************************************
+ * Function:     ActionAcknowledgable
+ *
+ * Description:  The Action Acknowledgable function allows other determine if
+ *               there are any acknowledgable actions active.
+ *
+ * Parameters:   None
+ *
+ * Returns:      BOOLEAN [ TRUE  = Acknowledgable Actions Active,
+ *                         FALSE = No acknowledgable actions ]
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
+BOOLEAN ActionAcknowledgable ( void )
+{
+   // Local Data
+   ACTION_DATA *pData;
+   ACTION_FLAGS *pFlags;
+   UINT8         nActionIndex;
+   BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+   BOOLEAN       ACK;
+
+   ACK = FALSE;
+   pData = &m_ActionData;
+
+   // Loop through all the Action
+   for (  nActionIndex = 0;
+        ((nActionIndex < MAX_ACTION_DEFINES) && (ACK == FALSE));
+          nActionIndex++ )
+   {
+      pFlags = &pData->action[nActionIndex];
+
+      // Check if any ACK flag is set
+      if ( TRUE == TestBits( maskAll, sizeof(maskAll),
+                             pFlags->flagACK, sizeof(pFlags->flagACK), FALSE ) )
+      {
+         // Need to check if any of the Active flags match the ACK
+         if ( TRUE == TestBits( pFlags->flagACK, sizeof(pFlags->flagACK),
+                                pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
+         {
+            ACK = TRUE;
+         }
+      }
+   }
+
+   return ACK;
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
