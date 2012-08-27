@@ -208,7 +208,7 @@ EXPORT void    ActionsInitialize    ( void );
 EXPORT INT8    ActionRequest        ( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
                                       BOOLEAN bACK, BOOLEAN bLatch );
 EXPORT void    ActionResetNVPersist ( void );
-EXPORT BOOLEAN ActionAcknowledgable ( void );
+EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 
 /**********************************************************************************************
  *  MODIFICATIONS

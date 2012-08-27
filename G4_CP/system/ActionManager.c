@@ -362,7 +362,7 @@ void ActionResetNVPersist ( void )
  * Notes:        None.
  *
  *****************************************************************************/
-BOOLEAN ActionAcknowledgable ( void )
+BOOLEAN ActionAcknowledgable (  INT32 TrigIdx )
 {
    // Local Data
    ACTION_DATA *pData;

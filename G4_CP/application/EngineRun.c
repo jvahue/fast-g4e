@@ -568,7 +568,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {      
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
-        EngRunReset(pErCfg, pErData, pErData->ErIndex);
+        EngRunReset(pErCfg, pErData);
         pErData->State = ER_STATE_STOPPED;
         break;
       }
@@ -587,7 +587,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
-        EngRunReset(pErCfg, pErData, pErData->ErIndex);
+        EngRunReset(pErCfg, pErData);
         pErData->State = ER_STATE_STOPPED;
         break;
       }
@@ -604,7 +604,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
-        EngRunReset(pErCfg, pErData, pErData->ErIndex);
+        EngRunReset(pErCfg, pErData);
         pErData->State = ER_STATE_STOPPED;
       }
       break;

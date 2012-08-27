@@ -33,7 +33,7 @@
 #define EVAL_OPS_PER_OPERAND       2
 #define EVAL_MAX_OPERANDS_PER_EXPR 8    // Number of operands in an expression
 
-#define EVAL_OPRND_LEN             7    // Fixed Len SVLUnnn, SVLDnnn, FALSE
+#define EVAL_OPRND_LEN             7    // Fixed Len SVLUnnn, SVLDnnn
 #define EVAL_OPERAND_DIGIT_LEN     3
 #define EVAL_PREFIX_LEN  (EVAL_OPRND_LEN - EVAL_OPERAND_DIGIT_LEN)
 
@@ -221,6 +221,7 @@ EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 BOOLEAN EvalLoadConstValue      (const EVAL_CMD* cmd);
 BOOLEAN EvalLoadConstFalse      (const EVAL_CMD* cmd);
 BOOLEAN EvalLoadInputSrc        (const EVAL_CMD* cmd);
+BOOLEAN EvalLoadFuncCall        (const EVAL_CMD* cmd);
 
 // Comparison Operators
 BOOLEAN EvalCompareOperands     (const EVAL_CMD* cmd);
@@ -233,17 +234,17 @@ BOOLEAN EvalPerformOr           (const EVAL_CMD* cmd);
 
 // String-to-Cmd Converter functions.
 INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-INT32 EvalAddFalseStr (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+INT32 EvalAddFuncCall (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 INT32 EvalAddInputSrc (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 
 INT32 EvalAddStdOper  (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 
 // Cmd-to-String representation converters.
-INT16 EvalFmtLoadCmdStr   (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT16 EvalFmtLoadConstStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT16 EvalFmtLoadFalseStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT16 EvalFmtOperStr      (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+INT16 EvalFmtLoadConstStr         (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+INT16 EvalFmtLoadCmdStr           (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+INT16 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 
 #endif // EVALUATOR_H
 

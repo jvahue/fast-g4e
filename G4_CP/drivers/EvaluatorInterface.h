@@ -34,23 +34,24 @@
 /*       OpCode       Token   Len  AddCmd             FmtString             ExeCmd             */\
 /* Load/Fetch commands                                                                         */\
 /* Operands: KEEP LIST IN SAME ORDER AS EVAL_DAI_LIST BELOW. LOOKUPS USE OPCMD AS INDEXES      */\
-OPCMD(OP_GETSNRVAL,   "SVLU",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETSNRVALID, "SVLD",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETTRIGVAL,  "TACT",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_GETTRIGVALID,"TVLD",  4, EvalAddInputSrc,    EvalFmtLoadCmdStr,   EvalLoadInputSrc    ),\
-OPCMD(OP_CONST_FALSE, "FALSE", 5, EvalAddFalseStr,    EvalFmtLoadFalseStr, EvalLoadConstFalse  ),\
-OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr, EvalLoadConstValue  ),\
+OPCMD(OP_GETSNRVAL,   "SVLU",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETSNRVALID, "SVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETTRIGVAL,  "TACT",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_GETTRIGVALID,"TVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+OPCMD(OP_CALL_ACTACK, "AACK",  4, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadFuncCall    ),\
+OPCMD(OP_CONST_FALSE, "FALSE", 5, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadConstFalse  ),\
+OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr,           EvalLoadConstValue  ),\
 /* Operators: KEEP LIST IN DESCENDING SIZE ORDER ( "!=" MUST BE FOUND BEFORE "!"               */\
-OPCMD(OP_NE,          "!=",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_EQ,          "==",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_NOT_EQ_PREV, "!P",    2, EvalAddNotEqPrev,   EvalFmtOperStr,      EvalIsNotEqualPrev  ),\
-OPCMD(OP_GE,          ">=",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_LE,          "<=",    2, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_GT,          ">",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_LT,          "<",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalCompareOperands ),\
-OPCMD(OP_NOT,         "!",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalPerformNot      ),\
-OPCMD(OP_AND,         "&",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalPerformAnd      ),\
-OPCMD(OP_OR,          "|",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalPerformOr       )
+OPCMD(OP_NE,          "!=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_EQ,          "==",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_NOT_EQ_PREV, "!P",    2, EvalAddNotEqPrev,   EvalFmtOperStr,                EvalIsNotEqualPrev  ),\
+OPCMD(OP_GE,          ">=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_LE,          "<=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_GT,          ">",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_LT,          "<",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+OPCMD(OP_NOT,         "!",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformNot      ),\
+OPCMD(OP_AND,         "&",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformAnd      ),\
+OPCMD(OP_OR,          "|",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformOr       )
 
 
 // Data Access Interface table
@@ -65,8 +66,8 @@ OPCMD(OP_OR,          "|",     1, EvalAddStdOper,     EvalFmtOperStr,      EvalP
 DAI(OP_GETSNRVAL,    SensorIsUsed,        SensorGetValue, NULL,                 SensorIsValid       ),\
 DAI(OP_GETSNRVALID,  SensorIsUsed,        NULL,           SensorIsValid,        SensorIsValid       ),\
 DAI(OP_GETTRIGVAL,   TriggerIsConfigured, NULL,           TriggerGetState,      TriggerValidGetState),\
-DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, TriggerValidGetState)
-
+DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, TriggerValidGetState),\
+DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, NULL                )
 
 /******************************************************************************
                                  Package Typedefs                             *
