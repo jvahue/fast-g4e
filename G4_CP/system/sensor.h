@@ -349,6 +349,8 @@ typedef struct
   BOOLEAN      bValid;
   FLOAT32      fMinValue;
   FLOAT32      fMaxValue;
+  TIMESTAMP    timeMinValue;
+  TIMESTAMP    timeMaxValue;
   FLOAT32      fAvgValue;
   FLOAT32      fTotal;
 } SNSR_SUMMARY;

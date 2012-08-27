@@ -656,8 +656,8 @@ BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
 
    dataAcc = EvalGetDataAccess(cmd->OpCode);
  
-   // Should never get here! (Table 'coding' error)
-   // Every entry tied to this func MUST also have a corr. estry in EVAL_DAI_LIST   
+   // Should never be true! (Table 'coding' error)
+   // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST   
    ASSERT_MESSAGE(NULL != dataAcc,
                   "Data Access Interface lookup not configured for OpCode: %d",
                   cmd->OpCode );
@@ -689,6 +689,11 @@ BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
     rslt.Validity = FALSE;
   }
 
+  // If the input source is an invalid boolean operand (e.g trigger), treat the value as false
+  if (DATATYPE_BOOL == rslt.DataType && FALSE == rslt.Validity)
+  {
+    rslt.Data = FALSE;
+  }
   
   RPN_PUSH(rslt);
   return TRUE;
@@ -764,7 +769,18 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
         }
 
       rslt.DataType = DATATYPE_BOOL;
+
+      // SRS-4544  The result of a comparison operation shall be INVALID if
+      // the validity of either of the input value operands is invalid.
       rslt.Validity = ( EvalGetValidCnt(&oprndLeft, &oprndRight ) == 2 );
+
+      // SRS-4595 The result of a comparison operation shall be FALSE
+      // if the validity of  either of the input values operands is invalid
+      if(!rslt.Validity)
+      {
+        rslt.Data = FALSE;
+      }
+
     }
     else
     {
@@ -891,9 +907,9 @@ BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
     oprnd = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_BOOL, &oprnd, NULL) )
     {
-      rslt.Data    = (FLOAT32) !(BOOLEAN)oprnd.Data;
+      rslt.Validity = oprnd.Validity;      
       rslt.DataType = DATATYPE_BOOL;
-      rslt.Validity = oprnd.Validity;
+      rslt.Data     = rslt.Validity ? (FLOAT32) !(BOOLEAN)oprnd.Data : 0.f;
     }
     else
     {

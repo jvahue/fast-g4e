@@ -417,8 +417,8 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx )
     pErData->startingTime        = 0;
     pErData->StartingDuration_ms = 0;
     pErData->Duration_ms         = 0;
-    pErData->MonMinValue   = FLT_MAX;
-    pErData->MonMaxValue   = 0.f;   
+    pErData->MonMinValue         = FLT_MAX;
+    pErData->MonMaxValue         = 0.f;   
     pErData->nSampleCount        = 0;
     pErData->nRateCounts         = (UINT16)(MIFs_PER_SECOND / pErCfg->Rate);
     pErData->nRateCountdown      = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
@@ -585,6 +585,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {      
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+        EngRunReset(pErCfg, pErData, pErData->ErIndex);
         pErData->State = ER_STATE_STOPPED;
         break;
       }
@@ -603,6 +604,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
+        EngRunReset(pErCfg, pErData, pErData->ErIndex);
         pErData->State = ER_STATE_STOPPED;
         break;
       }
@@ -618,7 +620,8 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
           !TriggerGetState( pErCfg->RunTrigID) )
       {
         // Finish the engine run log
-        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);        
+        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+        EngRunReset(pErCfg, pErData, pErData->ErIndex);
         pErData->State = ER_STATE_STOPPED;
       }
       break;

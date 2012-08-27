@@ -406,6 +406,7 @@ void SensorDisableLiveStream( void )
 {
   SENSOR_INDEX snsrIdx;
   INT16        summaryIdx;
+  TIMESTAMP    timeStampNow;
   
   // "Clear" the summary table by setting all indexes to "unused"
   for (summaryIdx = 0; summaryIdx < summarySize; ++summaryIdx)
@@ -413,9 +414,11 @@ void SensorDisableLiveStream( void )
     summary[summaryIdx].SensorIndex = SENSOR_UNUSED;    
   }
 
-  // Loop thru the mask-of-sensors to be added to the Summary array
-  // For each "ON" bit, initialize the next available SnsrSummary entry.  
+  CM_GetTimeAsTimestamp(&timeStampNow);
 
+  // Loop thru the mask-of-sensors to be added to the Summary array
+  // For each "ON" bit, initialize the next available SnsrSummary entry.
+  
   summaryIdx = -1;
   for(snsrIdx = SENSOR_0; snsrIdx < MAX_SENSORS; ++snsrIdx)
   {
@@ -432,7 +435,9 @@ void SensorDisableLiveStream( void )
         summary[summaryIdx].bInitialized = FALSE;
         summary[summaryIdx].bValid       = FALSE;        
         summary[summaryIdx].fMinValue    = FLT_MAX;
+        summary[summaryIdx].timeMinValue = timeStampNow;
         summary[summaryIdx].fMaxValue    = 0.f;
+        summary[summaryIdx].timeMaxValue = timeStampNow;
         summary[summaryIdx].fTotal       = 0.f;
         summary[summaryIdx].fAvgValue    = 0.f;
       }
@@ -463,11 +468,17 @@ void SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary)
   // Add value to total
   pSummary->fTotal += NewValue;
 
-  pSummary->fMinValue =
-    (NewValue < pSummary->fMinValue) ? NewValue : pSummary->fMinValue;
+  if(NewValue < pSummary->fMinValue)
+  {
+    pSummary->fMinValue = NewValue;
+    CM_GetTimeAsTimestamp(&pSummary->timeMinValue);
+  }
 
-  pSummary->fMaxValue =
-    (NewValue > pSummary->fMaxValue) ? NewValue : pSummary->fMaxValue;
+  if( NewValue > pSummary->fMaxValue )
+  {
+    pSummary->fMaxValue = NewValue;
+    CM_GetTimeAsTimestamp(&pSummary->timeMaxValue);
+  }
 
   // Set the sensor validity
   pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
