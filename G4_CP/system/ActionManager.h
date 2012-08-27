@@ -156,14 +156,15 @@ typedef struct
 /* Dynamic state of the actions                                    */
 typedef struct
 {
-   ACTION_FLAGS    action[MAX_ACTION_DEFINES];        /* State of all action flags           */
-   ER_STATE        prevEngState;                      /* Previous engine state               */
-   BOOLEAN         bUpdatePersistOut;
-   BOOLEAN         bNVStored;
-   ACTION_PERSIST  persist;                           /* State of the persistent data        */
-   UINT16          nLSS_Priority[MAX_OUTPUT_LSS];     /* Priority Storage for each LSS       */
-   INT8            nRequestCounter;                   /* Request Counter for generating IDs  */
-   BOOLEAN         bInitialized;                      /* Ready to Accept Requests            */
+   ACTION_FLAGS   action[MAX_ACTION_DEFINES];        /* State of all action flags           */
+   ER_STATE       prevEngState;                      /* Previous engine state               */
+   BOOLEAN        bUpdatePersistOut;
+   BOOLEAN        bNVStored;
+   ACTION_PERSIST persist;                           /* State of the persistent data        */
+   UINT16         nLSS_Priority[MAX_OUTPUT_LSS];     /* Priority Storage for each LSS       */
+   // TBD: Need to think about this counter... this will only allow 128 Unique Action requests
+   INT8           nRequestCounter;                   /* Request Counter for generating IDs  */
+   BOOLEAN        bInitialized;                      /* Ready to Accept Requests            */
 } ACTION_DATA;
 
 /* Structure that defines the action requests                      */
@@ -216,7 +217,7 @@ EXPORT void ActionResetNVPersist ( void );
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - ETM Fault Action Logic
- * 
+ *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/system

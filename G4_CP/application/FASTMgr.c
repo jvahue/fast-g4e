@@ -819,7 +819,8 @@ void FAST_DioControl(void)
 
   DIO_OUTPUT   SysCondOutPin;
   DIO_OUT_OP   Blink = DIO_SetHigh;
-  UINT16       action;
+  FLT_STATUS   sysCond;
+  FLT_ANUNC_MODE AnuncMode;
 
   // compute RF GSM and WLAN Power control
   FAST_RfGsmEnable();
@@ -908,9 +909,11 @@ void FAST_DioControl(void)
        break;
   }
 
-  action = Flt_GetSysCondAction();
 
-  if (0 == action)
+  sysCond   = Flt_GetSystemStatus();
+  AnuncMode = Flt_GetSysAnunciationMode();
+
+  if (FLT_ANUNC_DIRECT == AnuncMode )
   {
     // SYS CONDITION - output to LSSx if configured
     SysCondOutPin = Flt_GetSysCondOutputPin();
@@ -919,7 +922,7 @@ void FAST_DioControl(void)
     // based on system condition.
     if(SysCondOutPin != SYS_COND_OUTPUT_DISABLED)
     {
-      FLT_STATUS sysCond = Flt_GetSystemStatus();
+
       switch( sysCond)
       {
         case STA_NORMAL:
@@ -940,9 +943,9 @@ void FAST_DioControl(void)
       }
     }
   }
-  else
+  else if (FLT_ANUNC_ACTION == AnuncMode)
   {
-     Flt_UpdateAction();
+     Flt_UpdateAction(sysCond);
   }
 }
 
@@ -1481,7 +1484,7 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added ETM Fault Action Logic
- * 
+ *
  * *****************  Version 105  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:08p
  * Updated in $/software/control processor/code/application

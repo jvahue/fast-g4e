@@ -31,9 +31,11 @@
 #define SYS_COND_OUTPUT_DISABLED DIO_MAX_OUTPUTS
 
 #define FAULTMGR_CONFIG_DEFAULT DBGOFF,                   /* Debug Verbosity       */\
+                                FLT_ANUNC_NONE,           /* NO ANNUNCIATION       */\
                                 SYS_COND_OUTPUT_DISABLED, /* Default DIO Out Pin   */\
-                                0                        /* FAULT/CAUTION Action  */
-                               // TRUE,                     /* Acknowledgable        */
+                                0,                        /* NORMAL Action         */\
+                                0,                        /* CAUTION Action        */\
+                                0                         /* FAULT Action          */
 
 /******************************************************************************
                                  Package Typedefs
@@ -53,12 +55,18 @@ typedef enum
   VERBOSE
 } FLT_DBG_LEVEL;
 
+typedef enum {
+  FLT_ANUNC_NONE,
+  FLT_ANUNC_DIRECT,
+  FLT_ANUNC_ACTION
+} FLT_ANUNC_MODE;
+
 typedef struct
 {
   FLT_DBG_LEVEL DebugLevel;
+  FLT_ANUNC_MODE Mode;
   DIO_OUTPUT    SysCondDioOutPin;
-  UINT16        action;                    /* Action to perform for FAULT/CAUTION */
-  //BOOLEAN       faultACK;                  /* Is the Fault Acknowledgable         */
+  UINT16        action[STA_MAX];                    /* Action to perform for FAULT/CAUTION */
 } FAULTMGR_CONFIG;
 
 #pragma pack(1)
@@ -75,6 +83,14 @@ typedef struct
   UINT32     StatusFaultCnt;   // The current count of Fault   statuses
 }INFO_SYS_STATUS_UPDATE_LOG;
 #pragma pack()
+
+typedef struct
+{
+   UINT16     nAction;
+   INT8       nID;
+   BOOLEAN    state;
+   FLT_STATUS sysCond;
+} FAULTMGR_ACTION;
 
 /******************************************************************************
                                  Package Exports
@@ -120,8 +136,8 @@ EXPORT void Flt_PreInitFaultMgr(void);
 
 EXPORT DIO_OUTPUT Flt_GetSysCondOutputPin(void);
 EXPORT BOOLEAN Flt_InitFltBuf(void);
-EXPORT void Flt_UpdateAction ( void );
-EXPORT UINT16 Flt_GetSysCondAction(void);
+EXPORT void Flt_UpdateAction (FLT_STATUS sysCond);
+FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 
 #endif // FAULTMGR_H
 
@@ -133,7 +149,7 @@ EXPORT UINT16 Flt_GetSysCondAction(void);
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - ETM Fault Action Logic
- * 
+ *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system

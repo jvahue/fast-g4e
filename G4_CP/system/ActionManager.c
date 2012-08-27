@@ -923,7 +923,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - ETM Fault Action Logic
- * 
+ *
  * *****************  Version 7  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/system

@@ -36,6 +36,14 @@ USER_ENUM_TBL Flt_SysCondOutPin[] =
   {NULL,0}
 };
 
+USER_ENUM_TBL Flt_AnuncMode[] =
+{
+   {"NONE",   FLT_ANUNC_NONE},
+   {"DIRECT", FLT_ANUNC_DIRECT},
+   {"ACTION", FLT_ANUNC_ACTION},
+   {NULL,0}
+};
+
 static FAULTMGR_CONFIG FaultMgrConfigTemp;
 static FLT_DBG_LEVEL   DebugLevelTemp;
 
@@ -81,9 +89,11 @@ USER_HANDLER_RESULT Flt_UserDebugLvl(USER_DATA_TYPE DataType,
 static USER_MSG_TBL CfgCmd [] =
 {  /*Str                Next Tbl Ptr     Handler Func.    Data Type             Access     Parameter                             IndexRange     DataLimit    EnumTbl*/
   { "VERBOSITY"       , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.DebugLevel,       -1,-1,         NO_LIMIT,    Flt_UserEnumVerbosityTbl },
+  { "ANUNCIATION",      NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.Mode,             -1,-1,         NO_LIMIT,    Flt_AnuncMode },
   { "SYS_COND_OUTPUT" , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.SysCondDioOutPin, -1,-1,         NO_LIMIT,    Flt_SysCondOutPin},
-  { "SYS_ACTION",         NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action,              -1,-1,         NO_LIMIT,    NULL },
-  //{ "ACK",                NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_BOOLEAN,    USER_RW,   &FaultMgrConfigTemp.faultACK,            -1,-1,         NO_LIMIT,    NULL },
+  { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
+  { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
+  { "FAULT_ACTION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[2],        -1,-1,         NO_LIMIT,    NULL },
   { NULL              , NULL,            NULL,            NO_HANDLER_DATA }
 };
 
@@ -370,67 +380,67 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
- * 
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Fault Action Processing
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor2  Date: 9/12/11    Time: 1:42p
  * Updated in $/software/control processor/code/system
  * SCR #815 Error: Checksum on response to fault.recentall error
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor2  Date: 4/29/11    Time: 11:11a
  * Updated in $/software/control processor/code/system
  * SCR #815 Error: Checksum on response to fault.recentall error
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jim Mood     Date: 9/10/10    Time: 2:33p
  * Updated in $/software/control processor/code/system
- * SCR 726.  Setting fault.cfg.verbosity changed real-time verbosity.  
- * 
+ * SCR 726.  Setting fault.cfg.verbosity changed real-time verbosity.
+ *
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 8/30/10    Time: 6:55p
  * Updated in $/software/control processor/code/system
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 8/04/10    Time: 6:01p
  * Updated in $/software/control processor/code/system
- * SCR #765 Remove "fault.clear". 
- * 
+ * SCR #765 Remove "fault.clear".
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 7/29/10    Time: 4:05p
  * Updated in $/software/control processor/code/system
  * SCR# 685 - cleanup
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:01a
  * Updated in $/software/control processor/code/system
  * SCR #685 - Add USER_GSE flag
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 7/07/10    Time: 6:19p
  * Updated in $/software/control processor/code/system
  * SCR #682 Delete function Flt_UserDebugLvl
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a
  * Updated in $/software/control processor/code/system
  * SCR #662 - Changes based on code review
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:54p
  * Updated in $/software/control processor/code/system
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:28p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence & Box Config
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:18p
  * Updated in $/software/control processor/code/system

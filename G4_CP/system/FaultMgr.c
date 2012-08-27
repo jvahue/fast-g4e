@@ -70,8 +70,9 @@ static FLT_STATUS  FaultSystemStatus;
 static BOOLEAN     SetFaultInitialized;
 
 static UINT32      FaultSystemStatusCnt[STA_MAX];
-static INT8        FaultActionID;
-static ACTION_TYPE FaultActionState;
+
+static FAULTMGR_ACTION m_Previous;
+static FAULTMGR_ACTION m_Current;
 
 static FLT_DBG_LEVEL  DebugLevel;   // local runtime copy of config data
 
@@ -104,8 +105,13 @@ void Flt_PreInitFaultMgr(void)
   SetFaultInitialized = FALSE;
   Flt_SetDebugVerbosity( NORMAL); // SCR# 640
   // Fault Action Flags
-  FaultActionID    = ACTION_NO_REQ;
-  FaultActionState = ACTION_OFF;
+  m_Previous.nID     = ACTION_NO_REQ;
+  m_Previous.state   = OFF;
+  m_Previous.sysCond = FaultSystemStatus;
+
+  m_Current.nID     = ACTION_NO_REQ;
+  m_Current.state   = OFF;
+  m_Current.sysCond = FaultSystemStatus;
 }
 
 /******************************************************************************
@@ -177,7 +183,6 @@ void Flt_Init(void)
   memset ( (void *)&FaultSystemStatusCnt, 0x00, sizeof(FaultSystemStatusCnt));
 
   SetFaultInitialized = TRUE;
-  FaultActionState    = ACTION_OFF;
 }
 
 /******************************************************************************
@@ -413,9 +418,9 @@ DIO_OUTPUT Flt_GetSysCondOutputPin(void)
 }
 
 /******************************************************************************
-* Function:    Flt_GetSysCondAction
+* Function:    Flt_GetSysAnunciationMode
 *
-* Description: Returns the current value of DIO Output Pin used to display Sys Condition
+* Description: Returns the configured mode to annunciate the system condition.
 *
 * Parameters:  none
 *
@@ -424,9 +429,9 @@ DIO_OUTPUT Flt_GetSysCondOutputPin(void)
 * Notes:       none
 *
 *****************************************************************************/
-UINT16 Flt_GetSysCondAction(void)
+FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void )
 {
-  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action;
+  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.Mode;
 }
 
 /******************************************************************************
@@ -442,32 +447,51 @@ UINT16 Flt_GetSysCondAction(void)
  * Notes:       none
  *
  *****************************************************************************/
-void Flt_UpdateAction ( void )
+void Flt_UpdateAction ( FLT_STATUS sysCond )
 {
-  // Perform the configured fault Action
-  if ( (STA_NORMAL != FaultSystemStatus) &&
-       ((OFF == FaultActionState) || (ACTION_NO_REQ == FaultActionID)))
-  {
-     // The System Condition just transitioned to CAUTION or FAULT
-     FaultActionState = ACTION_ON;
+   m_Current.sysCond = sysCond;
+   m_Current.nAction = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action[sysCond];
 
-     FaultActionID = ActionRequest( FaultActionID,
-                                    CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action,
-                                    FaultActionState,
-                                    FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
-                                    FALSE );
-  }
-  else if ((STA_NORMAL == FaultSystemStatus) && (ON == FaultActionState))
+   // Perform the configured fault Action
+  if ( m_Current.sysCond != m_Previous.sysCond )
   {
-     // The System Condition just transitioned back to NORMAL
-     FaultActionState = ACTION_OFF;
+     if ( ON == m_Previous.state )
+     {
+        m_Previous.nID = ActionRequest( m_Previous.nID, m_Previous.nAction,
+                                        ACTION_OFF, FALSE, FALSE );
+     }
 
-     FaultActionID = ActionRequest( FaultActionID,
-                                    CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action,
-                                    FaultActionState,
-                                    FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
-                                    FALSE );
+     m_Current.state = ON;
+     m_Current.nID   = ActionRequest( m_Current.nID, m_Current.nAction,
+                                         ACTION_ON, FALSE, FALSE );
+     m_Previous = m_Current;
+
   }
+
+
+  // if ( (STA_NORMAL != sysCond) &&
+  //     ((OFF == FaultActionState) || (ACTION_NO_REQ == FaultActionID)))
+  //{
+  //   // The System Condition just transitioned to CAUTION or FAULT
+  //   FaultActionState = ACTION_ON;
+
+  //   FaultActionID = ActionRequest( FaultActionID,
+  //                                  CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action[sysCond],
+  //                                  FaultActionState,
+  //                                  FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
+  //                                  FALSE );
+  //}
+  //else if ((STA_NORMAL == SysCond) && (ON == FaultActionState))
+  //{
+  //   // The System Condition just transitioned back to NORMAL
+  //   FaultActionState = ACTION_OFF;
+
+  //   FaultActionID = ActionRequest( FaultActionID,
+  //                                  CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action[sysCond],
+  //                                  FaultActionState,
+  //                                  FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
+  //                                  FALSE );
+  //}
 }
 
 /*****************************************************************************/
@@ -604,7 +628,7 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - ETM Fault Action Logic
- * 
+ *
  * *****************  Version 50  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system
