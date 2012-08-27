@@ -47,8 +47,7 @@
 /*****************************************************************************/
 static void EngRunEnableTask ( BOOLEAN bEnable );
 static void EngRunForceEnd   ( void );
-static void EngRunResetAll(void);
-static void EngRunReset   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx);
+static void EngRunReset   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
 static void EngRunUpdateAll(void);
 
@@ -165,19 +164,45 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
 void EngRunInitialize(void)
 {
   TCB TaskInfo;
+  UINT16 i;
+  ENGRUN_CFG*  pErCfg;
+  ENGRUN_DATA* pErData;
 
   // Add user commands for EngineRun to the user command tables.
+
   User_AddRootCmd(&RootEngRunMsg);
 
   // Clear and Load the current cfg info.
   memset(&EngineRunCfg, 0, sizeof(EngineRunCfg));
 
-  memcpy(EngineRunCfg,
-         &(CfgMgr_RuntimeConfigPtr()->EngineRunConfigs),
-         sizeof(EngineRunCfg));
+  memcpy( EngineRunCfg,
+          &(CfgMgr_RuntimeConfigPtr()->EngineRunConfigs),
+          sizeof(EngineRunCfg) );
 
   // Initialize Engine Runs storage objects.
-  EngRunResetAll();
+  for ( i = 0; i < MAX_ENGINES; i++)
+  {
+    pErCfg  = &EngineRunCfg[i];
+    pErData = &EngineRunData[i];
+    // Cfg must specify valid sensor for start, run, stop, temp and battery
+    if ( TriggerIsConfigured(pErCfg->StartTrigID)     &&
+         TriggerIsConfigured(pErCfg->StopTrigID )     &&
+         TriggerIsConfigured(pErCfg->RunTrigID  )     &&
+         SensorIsUsed       (pErCfg->MonMinSensorID ) &&
+         SensorIsUsed       (pErCfg->MonMaxSensorID ) )
+    {
+      // Initialize the common fields in the EngineRun data structure
+      pErData->ErIndex = (ENGRUN_INDEX)i;
+      EngRunReset(pErCfg,pErData);
+    }
+    else // Invalid config... 
+    {
+      // Set ER state to hold in STOP state if
+      // sensor Cfg is invalid
+      pErData->State   = ER_STATE_STOPPED;
+      pErData->ErIndex = ENGRUN_UNUSED;
+    }    
+  }
  
   // Create EngineRun Task - DT
   memset(&TaskInfo, 0, sizeof(TaskInfo));
@@ -300,29 +325,6 @@ EXPORT UINT32 EngRunGetStartingTime(ENGRUN_INDEX engId)
   return EngineRunData[engId].startingTime;
 }
 
-
-/******************************************************************************
- * Function:     EngRunResetAll
- *
- * Description:  Initialize the log processing of all engine runs
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-void EngRunResetAll(void)
-{
-  UINT16 i;
-  for ( i = 0; i < MAX_ENGINES; i++)
-  {
-    EngRunReset( &EngineRunCfg[i], &EngineRunData[i], i );
-  }
-}
-
-
 /*********************************************************************************************/
 /* Local Functions                                                                           */
 /*********************************************************************************************/
@@ -394,26 +396,14 @@ static void EngRunForceEnd( void )
  * Notes:        None
  *
  *****************************************************************************/
-static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx )
+static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 {
-  INT32 i;  
+  INT32 i;
 
-  // Cfg must specify valid sensor for start, run, stop, temp and battery
-  if ( TriggerIsConfigured(pErCfg->StartTrigID)   &&
-       TriggerIsConfigured(pErCfg->StopTrigID )   &&
-       TriggerIsConfigured(pErCfg->RunTrigID  )   &&
-       SensorIsUsed       (pErCfg->MonMinSensorID ) &&
-       SensorIsUsed       (pErCfg->MonMaxSensorID )
-     )
   {
-    // Initialize the common fields in the EngineRun data structure
-    //
-    pErData->ErIndex = (ENGRUN_INDEX)erIdx;
     pErData->State   = ER_STATE_STOPPED;
-
     memset(&pErData->StartTime, 0, sizeof(TIMESTAMP));
-//    memset(&pErData->EndTime, 0, sizeof(TIMESTAMP));
-    
+   //memset(&pErData->EndTime, 0, sizeof(TIMESTAMP));    
     pErData->startingTime        = 0;
     pErData->StartingDuration_ms = 0;
     pErData->Duration_ms         = 0;
@@ -429,20 +419,13 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, UINT16 erIdx )
                                                      MAX_ENGRUN_SENSORS,
                                                      pErCfg->SensorMap,
                                                      sizeof(pErCfg->SensorMap) );
-    // CYCLES setup
-    
+    // CYCLES Init    
     for(i = 0; i < MAX_CYCLES; ++i)
     {
       pErData->CycleCounts[i] = 0;
     }    
   }
-  else // Invalid config... 
-  {
-    // Set ER state to hold in STOP state if
-    // sensor Cfg is invalid
-    pErData->State   = ER_STATE_STOPPED;
-    pErData->ErIndex = ENGRUN_UNUSED;
-  }
+  
 }
 
 /******************************************************************************
