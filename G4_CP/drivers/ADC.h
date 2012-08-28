@@ -1,8 +1,7 @@
 #ifndef DRV_ADC_H
 #define DRV_ADC_H
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        ADC.h
@@ -109,6 +108,7 @@ EXPORT RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage);
 EXPORT RESULT ADC_ReadLiBattVoltage (FLOAT32* Voltage);
 EXPORT RESULT ADC_ReadBoardTemp     (FLOAT32* Temp);
 
+
 #endif //DRV_ADC_H
 
 /*************************************************************************
@@ -185,6 +185,5 @@ EXPORT RESULT ADC_ReadBoardTemp     (FLOAT32* Temp);
  *
  ***************************************************************************/
  
-
 
 

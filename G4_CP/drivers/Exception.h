@@ -2,8 +2,7 @@
 #define EXCEPTION_H
 
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Exception.h
@@ -61,6 +60,7 @@ extern CHAR ReOutputBuf[ASSERT_MAX_LOG_SIZE]; // Buffer containing register
 extern void AssertDump(void); //Dump call stack to the ExOutputBuf.
 
 
+#endif // EXCEPTION_H  
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Exception.h $
@@ -95,6 +95,5 @@ extern void AssertDump(void); //Dump call stack to the ExOutputBuf.
  * Created in $/software/control processor/code/drivers
  *****************************************************************************/
 
-#endif // EXCEPTION_H                             
 
 

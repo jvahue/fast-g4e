@@ -1,6 +1,6 @@
+#define DATAMNG_USERTABLE_BODY
 /******************************************************************************
 Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
 File:        DataManagerUserTables.c
@@ -28,6 +28,10 @@ $Revision: 21 $  $Date: 7/26/12 2:10p $
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "UploadMgr.h"
+
+/*****************************************************************************/
+/* Local Defines                                                             */  
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -551,6 +555,10 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
    return result;
 
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*****************************************************************************
 *  MODIFICATIONS

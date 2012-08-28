@@ -1,7 +1,6 @@
 #define UART_MGR_BODY
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        UartMgr.c

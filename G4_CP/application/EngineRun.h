@@ -3,7 +3,6 @@
 
 /******************************************************************************
             Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EngineRun.h

@@ -1,8 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        Version.h
@@ -61,7 +60,10 @@ extern const CHAR DATETIME[];
 ******************************************************************************/
 EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 
-/*****************************************************************************
+
+
+#endif // VERSION_H
+/*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
  * 
@@ -334,8 +336,4 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
  * SCR# 472 - Fix file/function header
  * 
  *
- *****************************************************************************/
-
-#endif        // End VERSION_H
-
-
+ ***************************************************************************/

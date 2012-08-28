@@ -2,8 +2,7 @@
 #define PROCESSOR_INIT_H
 
 /******************************************************************************
-            Copyright (C) 2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        ProcessorInit.h
@@ -25,7 +24,6 @@
 
 /******************************************************************************
                                  Package Defines
-
 ******************************************************************************/
 
 /******************************************************************************
@@ -58,6 +56,7 @@ EXPORT void PI_FlushInstructionCache(void);
 EXPORT void PI_FlushBranchCache(void);
 
 
+#endif // PROCESSOR_INIT_H                             
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: ProcessorInit.h $
@@ -73,7 +72,4 @@ EXPORT void PI_FlushBranchCache(void);
  * SCR #645 Periodically flush instruction/branch caches
  * 
  *****************************************************************************/
-
-#endif // PROCESSOR_INIT_H                             
-
 

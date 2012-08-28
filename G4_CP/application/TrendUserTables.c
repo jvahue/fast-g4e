@@ -1,6 +1,6 @@
+#define TREND_USERTABLES_BODY
 /******************************************************************************
          Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
-                     Altair Engine Diagnostic Solutions
             All Rights Reserved. Proprietary and Confidential.
 
   File:        TrendUserTables.c
@@ -13,6 +13,7 @@ $Revision: 2 $  $Date: 8/08/12 5:40p $
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
 #endif
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -134,7 +135,7 @@ USER_MSG_TBL  RootTrendMsg = {"TREND",TrendRoot,NULL,NO_HANDLER_DATA};
 * Returns:      USER_HANDLER_RESULT
 *
 * Notes:
-*****************************************************************************/
+******************************************************************************/
 USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -188,7 +189,7 @@ USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
 * Returns:      USER_HANDLER_RESULT
 *
 * Notes:
-*****************************************************************************/
+******************************************************************************/
 
 USER_HANDLER_RESULT Trend_State(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
@@ -230,7 +231,7 @@ USER_HANDLER_RESULT Trend_State(USER_DATA_TYPE DataType,
 *              USER_RESULT_ERROR: Error processing command.
 *
 * Notes:
-*****************************************************************************/
+******************************************************************************/
 USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
@@ -278,6 +279,6 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
  *
  *
  *
- **************************************************************************/
+ ***************************************************************************/
 
 

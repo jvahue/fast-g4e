@@ -2,8 +2,7 @@
 #define ASSERT_H
 
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Assert.h
@@ -97,6 +96,7 @@ EXPORT void   Assert_UnhandledException(void);
 EXPORT BOOLEAN   Assert_InitEE(void);
 EXPORT void   Assert_WriteToEE(void *data, size_t size);
 
+#endif // ASSERT_H     
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Assert.h $
@@ -175,4 +175,3 @@ EXPORT void   Assert_WriteToEE(void *data, size_t size);
  *
  *****************************************************************************/
 
-#endif // ASSERT_H                             

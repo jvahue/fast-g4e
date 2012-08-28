@@ -1,6 +1,6 @@
+#define UPLOADMGR_USERTABLE_BODY
 /******************************************************************************
 Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
 File:         UploadMgrUserTables.c       
@@ -15,7 +15,6 @@ VERSION
 $Revision: 17 $  $Date: 7/26/12 2:08p $
 
 ******************************************************************************/
-
 #ifndef UPLOADMGR_BODY
 #error UploadMgrUserTable.c should only be included by UploadMgr.c
 #endif
@@ -51,6 +50,24 @@ USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
                                              UINT32 Index,
                                              const void *SetPtr,
                                              void **GetPtr);
+
+
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Defines                                                             */  
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -145,7 +162,7 @@ static USER_MSG_TBL RootMsg = {"UPLOAD", UploadCmd,  NULL, NO_HANDLER_DATA};
 *
 * Notes:
 *
-*****************************************************************************/
+******************************************************************************/
 USER_HANDLER_RESULT UploadMgr_UserForceUpload(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
                                               UINT32 Index,
@@ -377,6 +394,10 @@ USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 
    return result;
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*****************************************************************************
 *  MODIFICATIONS

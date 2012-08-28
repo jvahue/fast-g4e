@@ -1,6 +1,6 @@
+#define CBITMANAGER_USERTABLE_BODY
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:         CBITManagerUserTable.c
@@ -11,7 +11,6 @@
       $Revision: 11 $  $Date: 9/28/10 3:55p $
     
 ******************************************************************************/
-
 #ifndef CBIT_MANAGER_BODY
 #error CBITManagerUserTable.c should only be included by CBITManager.c
 #endif
@@ -30,6 +29,9 @@
 #include "stddefs.h"
 #include "user.h"
 
+/*****************************************************************************/
+/* Local Defines                                                             */  
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -92,9 +94,12 @@ USER_MSG_TBL CbitMgrRootTblPtr = {"CBIT",CbitMgrRoot,NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
-/* Local Functions                                                           */
+/* Public Functions                                                          */ 
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:    CbitMgrMsg_CreateLogs (cbit.createlogs)

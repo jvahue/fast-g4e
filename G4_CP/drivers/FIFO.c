@@ -1,8 +1,6 @@
 #define FIFO_BODY
-
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
 
@@ -331,6 +329,9 @@ void FIFO_Flush(FIFO* FIFO)
   __RIR(intsave);
 }
 
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*************************************************************************
  *  MODIFICATIONS
@@ -386,4 +387,4 @@ void FIFO_Flush(FIFO* FIFO)
  * SCR #87 Function Prototype
  * 
  *
- *************************************************************************/
+ ***************************************************************************/

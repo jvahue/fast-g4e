@@ -1,7 +1,7 @@
 #define EMU150_PROTOCOL_BODY
+
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EMU150Protocol.c
@@ -2063,7 +2063,9 @@ BOOLEAN EMU150_FileInit(void)
   return TRUE;
 }
 
-
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /*****************************************************************************
  *  MODIFICATIONS

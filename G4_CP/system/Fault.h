@@ -1,8 +1,7 @@
 #ifndef FAULT_H
 #define FAULT_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        fault.h
@@ -25,9 +24,9 @@
 #include "alt_basic.h"
 #include "trigger.h"
 
-/*****************************************************************************/
-/* Package Defines                                                             */
-/*****************************************************************************/
+/******************************************************************************
+                                   Package Defines                             
+******************************************************************************/
 #define MAX_FAULTS             32
 #define MAX_FAULTNAME          32
 #define MAX_FAULT_TRIGGERS      4
@@ -146,6 +145,8 @@ EXPORT USER_ENUM_TBL FaultIndexType[];
 EXPORT void    FaultInitialize    ( void );
 EXPORT BOOLEAN FaultCompareValues ( FAULT_INDEX Fault );
 
+
+#endif  // FAULT_H 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.h $
@@ -188,5 +189,3 @@ EXPORT BOOLEAN FaultCompareValues ( FAULT_INDEX Fault );
  * Created in $/software/control processor/code/system
  * 
  ****************************************************************************/
-#endif  /* FAULT_H */
-

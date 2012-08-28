@@ -2,8 +2,7 @@
 #define SYS_MSINTERFACE_H
 
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
   File:          MSInterface.h
@@ -111,6 +110,8 @@ EXPORT void MSI_Init(void);
 
 EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
                                MSI_RSP_CALLBACK RspHandler, BOOLEAN NoCheck);
+
+#endif // SYS_MSINTERFACE_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.h $
@@ -157,6 +158,5 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
  *
  *************************************************************************/
  
-#endif // SYS_MSINTERFACE_H
 
 

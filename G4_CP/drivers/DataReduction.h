@@ -1,8 +1,7 @@
 #ifndef DATAREDUCTION_H
 #define DATAREDUCTION_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        DataReduction.h

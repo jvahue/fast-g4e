@@ -1,8 +1,7 @@
 #ifndef ARINC429_H
 #define ARINC429_H
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Arinc429.h      
@@ -367,9 +366,8 @@ EXPORT BOOLEAN Arinc429DrvCheckBITStatus  ( UINT32 *pParityErrCnt, UINT32 *pFram
 EXPORT ARINC429_DRV_RX_STATUS_PTR Arinc429DrvRxGetCounts (UINT8 Channel);
 EXPORT ARINC429_DRV_TX_STATUS_PTR Arinc429DrvTxGetCounts (UINT8 Channel);
 
+              
 #endif // ARINC429_H               
-
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.h $

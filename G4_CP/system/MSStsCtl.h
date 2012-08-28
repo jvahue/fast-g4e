@@ -1,9 +1,7 @@
 #ifndef MSSC_H
 #define MSSC_H
-
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:         MSStsCtl.h       
@@ -167,6 +165,7 @@ EXPORT BOOLEAN            MSSC_FSMGetCFStatus(INT32 param);
 EXPORT void               MSSC_GetMsPwVer(CHAR* str);
 
 
+#endif // MSSC_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.h $
@@ -264,5 +263,4 @@ EXPORT void               MSSC_GetMsPwVer(CHAR* str);
  * SCR# 472 - Fix file/function header
  * 
  *
- *************************************************************************/
-#endif // MSSC_H
+ ***************************************************************************/

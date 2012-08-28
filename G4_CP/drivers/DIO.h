@@ -1,9 +1,7 @@
 #ifndef DRV_DIO_H
 #define DRV_DIO_H
-
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
   File:        DIO.h
@@ -222,7 +220,7 @@ typedef struct {
 #pragma pack()
 
 /******************************************************************************
-                                 Package Exports                              *
+                                 Package Exports                              
 ******************************************************************************/
 #undef EXPORT
 
@@ -250,6 +248,7 @@ EXPORT  void    DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState );
 EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 
 #endif // DRV_DIO_H
+
 
 /*************************************************************************
  *  MODIFICATIONS
@@ -414,3 +413,4 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
  *
  *
  ***************************************************************************/
+

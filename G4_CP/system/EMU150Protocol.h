@@ -1,8 +1,8 @@
 #ifndef EMU150_PROTOCOL_H
 #define EMU150_PROTOCOL_H
+
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EMU150Protocol.h
@@ -268,9 +268,10 @@ EXPORT void EMU150Protocol_DownloadHndl ( UINT8 port,
                                           UINT32  **pSize,
                                           UINT8   **pData ); 
 
+
+
+
 #endif // EMU150_PROTOCOL_H 
-
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.h $
@@ -325,3 +326,4 @@ EXPORT void EMU150Protocol_DownloadHndl ( UINT8 port,
  * 
  *
  *****************************************************************************/
+

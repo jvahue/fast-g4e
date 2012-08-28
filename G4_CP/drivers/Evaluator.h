@@ -24,9 +24,9 @@
 /*****************************************************************************/
 #include "alt_basic.h"
 #include "EvaluatorInterface.h"
-/*****************************************************************************/
-/*                             Package Defines                               */
-/*****************************************************************************/
+/******************************************************************************
+                      Package Defines                               
+******************************************************************************/
 //  Each expression must also accommodate X operators per input.
 //  Defined as 2, each operand can have 1 unary ! and two operands have one binary & or |
 //  so '2' actual defines one extra operator per input.
@@ -66,9 +66,9 @@
                                EVAL_CMD_DEFAULT\
                               }
 
-/*****************************************************************************/
-/*                             Package Typedefs                              */
-/*****************************************************************************/
+/******************************************************************************
+                             Package Typedefs                              
+******************************************************************************/
 
 
 // Declare enum from just the list of supported op codes.
@@ -117,7 +117,6 @@ typedef enum
   //-----                                                                                         
   RPN_ERR_MAX                      = -11                                                          
 }RPN_ERR;                                                                                         
-
 
 #pragma pack(1)
 typedef struct
@@ -245,7 +244,6 @@ INT16 EvalFmtLoadFalseStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 INT16 EvalFmtOperStr      (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 
 #endif // EVALUATOR_H
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
@@ -274,3 +272,5 @@ INT16 EvalFmtOperStr      (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
  * User: Contractor V&v Date: 4/27/12    Time: 4:03p
  * Updated in $/software/control processor/code/drivers
  ***************************************************************************/
+
+

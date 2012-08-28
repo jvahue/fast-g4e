@@ -1,8 +1,7 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
   File:          Compiler.h
@@ -14,7 +13,7 @@
   VERSION
       $Revision: 2 $  $Date: 3/02/10 12:07p $ 
  
- *****************************************************************************/
+******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */

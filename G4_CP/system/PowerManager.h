@@ -2,8 +2,7 @@
 #define POWERMANAGER_H
 
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:         PowerManager.h       
@@ -291,7 +290,7 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 
 
 
-
+#endif // POWERMANAGER_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.h $
@@ -460,6 +459,4 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
  * 
  *
  ***************************************************************************/
-
-#endif // POWERMANAGER_H
 

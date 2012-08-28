@@ -1,7 +1,6 @@
 #define BOXMGR_BODY
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:      Box.c       

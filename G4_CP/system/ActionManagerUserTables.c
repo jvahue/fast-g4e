@@ -1,3 +1,4 @@
+#define ACTION_USERTABLE_BODY
 /******************************************************************************
          Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
@@ -12,6 +13,8 @@ $Revision: 4 $  $Date: 12-08-14 3:00p $
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
 #endif
+
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -431,6 +434,6 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
  * SCR 1107
  *
  *
- **************************************************************************/
+ ***************************************************************************/
 
 

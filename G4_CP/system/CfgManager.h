@@ -1,8 +1,7 @@
 #ifndef CMUTIL_H
 #define CMUTIL_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
 
@@ -13,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 45 $  $Date: 12-08-09 8:34a $
+ $Revision: 45 $  $Date: 8/09/12 8:34a $
 
 ******************************************************************************/
 

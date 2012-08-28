@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 59 $  $Date: 12-08-14 2:08p $
+    $Revision: 59 $  $Date: 8/14/12 2:08p $
 
 ******************************************************************************/
 
@@ -383,6 +383,7 @@ EXPORT INT32 NV_RTCWrite(void* SourceAddr,
 EXPORT NV_FILENAME* NV_GetFileName(NV_FILE_ID fileNum);
 EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 
+#endif // SYS_NVMGR_H
 
 /*************************************************************************
  *  MODIFICATIONS
@@ -699,4 +700,3 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
  *
  ***************************************************************************/
 
-#endif // SYS_NVMGR_H

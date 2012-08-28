@@ -2,8 +2,7 @@
 #define SYSTEMLOG_H
 
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        SystemLog.h
@@ -15,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 99 $  $Date: 12-08-14 2:22p $
+      $Revision: 99 $  $Date: 8/14/12 2:22p $
 ******************************************************************************/
 
 /*****************************************************************************/

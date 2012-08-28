@@ -1,6 +1,5 @@
 /******************************************************************************
 Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
 File:          EngineRunUserTables.c
@@ -783,7 +782,9 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
   } 
   return result;
 }
-
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*************************************************************************
 *  MODIFICATIONS
@@ -832,4 +833,4 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
  * Created in $/software/control processor/code/application
  * Add interface and usertables for enginerun object
 *
-***************************************************************************/
+****************************************************************************/

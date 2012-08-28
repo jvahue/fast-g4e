@@ -1,14 +1,14 @@
 #define FAULTMGR_BODY
+
 /******************************************************************************
             Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:        FaultMgr.c
 
     Description:
    VERSION
-      $Revision: 50 $  $Date: 12-08-16 4:15p $
+      $Revision: 50 $  $Date: 8/16/12 4:15p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -52,12 +52,7 @@ typedef struct {
   UINT32     count;
 } FAULT_HISTORY;
 
-/*****************************************************************************/
-/* Local Function Prototypes                                                 */
-/*****************************************************************************/
-static void Flt_AddToFaultBuf(SYS_APP_ID LogID, TIMESTAMP ts);
-static void Flt_UpdateSystemStatus( void );
-static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS SetStatus, FLT_STATUS prevStatus);
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -77,6 +72,13 @@ static FLT_DBG_LEVEL  DebugLevel;   // local runtime copy of config data
 
 // Include cmd tables and functions here after local dependencies are declared.
 #include "FaultMgrUserTables.c"
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
+static void Flt_AddToFaultBuf(SYS_APP_ID LogID, TIMESTAMP ts);
+static void Flt_UpdateSystemStatus( void );
+static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS SetStatus, FLT_STATUS prevStatus);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -810,4 +812,4 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
  * User: Jim Mood     Date: 9/16/08    Time: 10:26a
  * Created in $/control processor/code/system
  *
- *************************************************************************/
+ ***************************************************************************/

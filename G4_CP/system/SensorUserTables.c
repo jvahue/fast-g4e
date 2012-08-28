@@ -1,6 +1,6 @@
+#define SENSOR_USERTABLES_BODY
 /******************************************************************************
 Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
-Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
 File:        SensorUserTables.c
@@ -8,12 +8,13 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 22 $  $Date: 12-08-13 4:21p $
+$Revision: 22 $  $Date: 8/13/12 4:21p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
 #error SensorUserTables.c should only be included by sensor.c
 #endif
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -24,6 +25,10 @@ $Revision: 22 $  $Date: 12-08-13 4:21p $
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "CfgManager.h"
+
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -336,6 +341,15 @@ static USER_MSG_TBL RootSensorMsg = {"SENSOR",    SensorRoot,   NULL, NO_HANDLER
 static USER_MSG_TBL LiveDataMsg   = {"LIVEDATA",  LiveDataRoot, NULL, NO_HANDLER_DATA};
 #pragma ghs endnowarning
 
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Public Functions                                                          */ 
+/*****************************************************************************/
+
 /******************************************************************************
 * Function:     Sensor_UserCfg
 *
@@ -542,6 +556,11 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
    }
    return result;
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
+
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $

@@ -1,8 +1,7 @@
 #define DRV_DIO_BODY
 
 /******************************************************************************
-            Copyright (C) 2007 - 2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007 - 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:        DIO.c
@@ -1412,4 +1411,4 @@ static void DIO_CheckWrapAround( void)
  * PWES style and added the VSS version/date/history macros
  *
  *
- *************************************************************************/
+ ****************************************************************************/

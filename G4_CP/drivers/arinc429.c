@@ -1,7 +1,6 @@
 #define ARINC429_BODY
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         Arinc429.c
@@ -71,9 +70,10 @@ static BOOLEAN fpgaLogged;  // TRUE if fpga registers have been logged on PBIT f
 static char GSE_OutLine[512];
 #endif
 
-/****************************************************************************/
-/* Local Constants                                                          */
-/****************************************************************************/
+
+/*****************************************************************************/
+/* Local Constants                                                           */
+/*****************************************************************************/
 #ifdef SUPPORT_FPGA_BELOW_V12
 const FPGA_TX_REG fpgaTxReg_v9[FPGA_MAX_TX_CHAN] = 
 {
@@ -341,7 +341,7 @@ RESULT Arinc429DrvInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   return (result);
 }
 
-/*****************************************************************************
+/******************************************************************************
  * Function: Arinc429DrvProcessISR_Rx
  *
  * Description: Process Arinc429 Specific Rx Interrupt  
@@ -357,7 +357,7 @@ RESULT Arinc429DrvInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *          processing to FPGA.  Not, any new FPGA int could be "lost",
  *          esp the longer the ISR processing takes.
  *
- ****************************************************************************/
+ *****************************************************************************/
 void Arinc429DrvProcessISR_Rx( UINT16 IntStatus )
 {
    // Local Data
@@ -399,7 +399,7 @@ void Arinc429DrvProcessISR_Rx( UINT16 IntStatus )
 
 }
 
-/*****************************************************************************
+/******************************************************************************
  * Function: Arinc429DrvProcessISR_Tx
  *
  * Description: Process Arinc429 Specific Tx Interrupt 
@@ -411,7 +411,7 @@ void Arinc429DrvProcessISR_Rx( UINT16 IntStatus )
  * Notes:
  *  - Tx INT TBD
  *
- ****************************************************************************/
+ ******************************************************************************/
 void Arinc429DrvProcessISR_Tx( UINT16 IntStatus )
 {
    // Local Data

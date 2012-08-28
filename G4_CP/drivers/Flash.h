@@ -1,8 +1,7 @@
 #ifndef FLASH_H
 #define FLASH_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Flash.h
@@ -428,6 +427,7 @@ EXPORT FLASH_SECTOR_STATUS FlashGetSectorStatus ( FLASHADDR nOffset );
 EXPORT BOOLEAN             FlashCheckSameSector ( FLASHADDR nFirstOffset,
                                                   FLASHADDR nLastOffset );
                                                   
+#endif // FLASH_H                                                     
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Flash.h $
@@ -489,4 +489,3 @@ EXPORT BOOLEAN             FlashCheckSameSector ( FLASHADDR nFirstOffset,
  *
  *****************************************************************************/
 
-#endif // FLASH_H                             
