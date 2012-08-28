@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 52 $  $Date: 12-08-28 8:34a $
+      $Revision: 53 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -600,6 +600,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 53  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:34a

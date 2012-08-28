@@ -8,7 +8,7 @@
     Description: 
 
 *  VERSION
- *    $Revision: 18 $  $Date: 10/07/10 11:38a $    
+ *    $Revision: 19 $  $Date: 8/28/12 1:43p $    
 ******************************************************************************/
 #ifndef LOGMNG_BODY
 #error LogUserTables.c should only be included by LogManager.c
@@ -194,6 +194,11 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogUserTables.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 10/07/10   Time: 11:38a

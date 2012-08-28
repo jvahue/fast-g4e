@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 3 $  $Date: 8/15/12 7:20p $
+ $Revision: 4 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -613,6 +613,11 @@ static BOOLEAN TrendCheckCriteria( TREND_CFG* pTrCfg, TREND_DATA* pTrData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p

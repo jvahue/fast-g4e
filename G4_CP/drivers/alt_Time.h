@@ -10,7 +10,7 @@
     Description: Definitions for using time units.
     
     VERSION
-    $Revision: 4 $  $Date: 5/27/10 10:56a $
+    $Revision: 5 $  $Date: 8/28/12 1:06p $
     
 ******************************************************************************/
 
@@ -95,6 +95,11 @@ typedef struct
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: alt_Time.h $
+ * 
+ * *****************  Version 5  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 4  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:56a

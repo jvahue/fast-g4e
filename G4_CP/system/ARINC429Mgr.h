@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429 
     
 VERSION
-     $Revision: 11 $  $Date: 7/13/12 9:03a $
+     $Revision: 12 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -688,6 +688,11 @@ EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a

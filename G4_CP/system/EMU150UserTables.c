@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for EMU150 Protocol CSC 
 
     VERSION
-    $Revision: 9 $  $Date: 9/20/11 6:27p $
+    $Revision: 10 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 #ifndef EMU150_PROTOCOL_BODY
@@ -353,6 +353,11 @@ USER_HANDLER_RESULT EMU150Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150UserTables.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 9/20/11    Time: 6:27p

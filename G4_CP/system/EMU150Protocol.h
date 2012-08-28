@@ -11,7 +11,7 @@
                  Handler 
     
     VERSION
-      $Revision: 9 $  $Date: 9/16/11 1:15p $     
+      $Revision: 10 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -275,6 +275,11 @@ EXPORT void EMU150Protocol_DownloadHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 9/16/11    Time: 1:15p

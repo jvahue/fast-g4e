@@ -10,7 +10,7 @@
     Description: This file contains the support definitions for the AMD,
                  FUJITISU Flash Standard Command Set.
    VERSION
-      $Revision: 7 $  $Date: 10/01/10 5:23p $    
+      $Revision: 8 $  $Date: 8/28/12 1:06p $    
     
 ******************************************************************************/
 
@@ -125,6 +125,11 @@ EXPORT FLASH_STATUS AmdFujiSCS_GetStatus    (FLASHDATA *BaseAddr, FLASHADDR offs
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AmdFujiSCS.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 10/01/10   Time: 5:23p

@@ -10,7 +10,7 @@
                  user cmds)
     
     VERSION
-      $Revision: 32 $  $Date: 9/01/10 3:12p $     
+      $Revision: 33 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -192,6 +192,11 @@ void QARMgr_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QARManager.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 32  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 3:12p

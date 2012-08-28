@@ -9,7 +9,7 @@
   Description:   Dual-port RAM driver
  
   VERSION
-  $Revision: 20 $  $Date: 9/27/10 2:55p $
+  $Revision: 21 $  $Date: 8/28/12 1:06p $
 
  ******************************************************************************/
 
@@ -137,6 +137,11 @@ EXPORT __interrupt void DPRAM_EP5_ISR(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DPRAM.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 20  *****************
  * User: Contractor2  Date: 9/27/10    Time: 2:55p

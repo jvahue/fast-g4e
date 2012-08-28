@@ -9,7 +9,7 @@
     Description: This file contains all the register definitions for the fpga.
     
 VERSION
-     $Revision: 29 $  $Date: 7/19/12 10:42a $
+     $Revision: 30 $  $Date: 8/28/12 1:06p $
     
 ******************************************************************************/
 
@@ -600,6 +600,11 @@ EXPORT FPGA_REG_CHECK_PTR FPGA_GetRegCheckTbl ( UINT16 *nCnt );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FPGA.h $
+ * 
+ * *****************  Version 30  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 29  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 10:42a

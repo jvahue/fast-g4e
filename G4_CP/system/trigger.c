@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 68 $  $Date: 8/22/12 5:31p $
+  $Revision: 69 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -1382,6 +1382,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 68  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:31p

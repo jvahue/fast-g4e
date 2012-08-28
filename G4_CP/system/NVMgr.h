@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 59 $  $Date: 8/14/12 2:08p $
+    $Revision: 60 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -388,6 +388,11 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 60  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:08p

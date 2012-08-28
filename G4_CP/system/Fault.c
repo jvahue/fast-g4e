@@ -14,7 +14,7 @@
     Notes: 
   
     VERSION
-      $Revision: 15 $  $Date: 8/31/10 11:13a $     
+      $Revision: 16 $  $Date: 8/28/12 1:43p $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -238,6 +238,11 @@ static BOOLEAN FaultCheckSensorTriggers( FAULT_CONFIG *pFaultCfg)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 11:13a

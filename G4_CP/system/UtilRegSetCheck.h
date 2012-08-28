@@ -12,7 +12,7 @@
           and then verify the register value. 
     
     VERSION
-      $Revision: 6 $  $Date: 9/28/10 9:53a $
+      $Revision: 7 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -102,6 +102,11 @@ EXPORT UINT16 GetRegCheckNumReg( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UtilRegSetCheck.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 9/28/10    Time: 9:53a

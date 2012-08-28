@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 40 $  $Date: 7/13/12 9:03a $
+     $Revision: 41 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -3552,6 +3552,11 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ * 
+ * *****************  Version 41  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 40  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a

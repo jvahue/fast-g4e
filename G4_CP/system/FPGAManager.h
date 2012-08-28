@@ -11,7 +11,7 @@
                   interface 
     
     VERSION
-      $Revision: 13 $  $Date: 8/31/10 12:06p $
+      $Revision: 14 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -110,6 +110,11 @@ EXPORT FPGA_CBIT_HEALTH_COUNTS FPGAMgr_AddPrevCBITHealthStatus (
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FPGAManager.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 12:06p

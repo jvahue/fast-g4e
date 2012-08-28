@@ -9,7 +9,7 @@
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 82 $  $Date: 10/11/11 4:38p $    
+      $Revision: 83 $  $Date: 8/28/12 1:43p $    
 ******************************************************************************/
 
 
@@ -1848,6 +1848,11 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
+ * 
+ * *****************  Version 83  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 82  *****************
  * User: John Omalley Date: 10/11/11   Time: 4:38p

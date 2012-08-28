@@ -9,7 +9,7 @@
   Description: Driver for the LT1594 ADC connected by the SPI bus
  
   VERSION
-      $Revision: 17 $  $Date: 5/26/11 1:17p $ 
+      $Revision: 18 $  $Date: 8/28/12 1:06p $ 
      
  
 ******************************************************************************/
@@ -114,6 +114,11 @@ EXPORT RESULT ADC_ReadBoardTemp     (FLOAT32* Temp);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 17  *****************
  * User: Contractor2  Date: 5/26/11    Time: 1:17p

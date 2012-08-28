@@ -11,7 +11,7 @@
                  the CP GSE port.
 
     VERSION
-    $Revision: 7 $  $Date: 10/08/10 10:46a $   
+    $Revision: 8 $  $Date: 8/28/12 12:43p $   
     
 ******************************************************************************/
 
@@ -67,6 +67,11 @@ EXPORT void MSFX_Init(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 10/08/10   Time: 10:46a

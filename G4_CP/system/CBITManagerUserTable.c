@@ -8,7 +8,7 @@
     Description:  CBIT (Continous Built In Test) Mananger GSE commands
     
     VERSION
-      $Revision: 11 $  $Date: 9/28/10 3:55p $
+      $Revision: 12 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 #ifndef CBIT_MANAGER_BODY
@@ -141,6 +141,11 @@ USER_HANDLER_RESULT CbitMgrMsg_CreateLogs(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManagerUserTable.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 9/28/10    Time: 3:55p

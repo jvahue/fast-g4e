@@ -10,7 +10,7 @@
     Description: Handles, displays, and logs Assert and Unhandled Exceptions to EE
 
     VERSION
-    $Revision: 14 $  $Date: 6/27/11 1:29p $   
+    $Revision: 15 $  $Date: 8/28/12 1:06p $   
     
 ******************************************************************************/
 
@@ -100,6 +100,11 @@ EXPORT void   Assert_WriteToEE(void *data, size_t size);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Assert.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:29p

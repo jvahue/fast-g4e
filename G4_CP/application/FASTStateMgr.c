@@ -12,7 +12,7 @@
 
      
    VERSION
-   $Revision: 16 $  $Date: 2/24/12 10:32a $
+   $Revision: 17 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -927,6 +927,11 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:32a

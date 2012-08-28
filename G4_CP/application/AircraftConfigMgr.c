@@ -9,7 +9,7 @@
   Description:   Aircraft Auto Re-Configuration Routines 
   
   VERSION
-      $Revision: 51 $  $Date: 10/26/11 4:04p $ 
+      $Revision: 52 $  $Date: 8/28/12 12:43p $ 
  
 ******************************************************************************/
 
@@ -1720,6 +1720,11 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 51  *****************
  * User: Jim Mood     Date: 10/26/11   Time: 4:04p

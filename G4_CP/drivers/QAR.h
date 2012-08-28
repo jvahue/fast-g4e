@@ -11,7 +11,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 48 $  $Date: 9/30/11 11:27a $    
+      $Revision: 49 $  $Date: 8/28/12 1:06p $    
     
 ******************************************************************************/
 
@@ -494,6 +494,11 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 49  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 48  *****************
  * User: John Omalley Date: 9/30/11    Time: 11:27a

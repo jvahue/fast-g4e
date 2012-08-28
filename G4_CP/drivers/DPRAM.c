@@ -17,7 +17,7 @@
                location in the interrupt vector table
                
   VERSION
-  $Revision: 39 $  $Date: 11/15/10 5:21p $
+  $Revision: 40 $  $Date: 8/28/12 1:06p $
                
  
 ******************************************************************************/
@@ -780,6 +780,11 @@ static void DPRAM_RxFromDPRAM(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DPRAM.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 39  *****************
  * User: Jim Mood     Date: 11/15/10   Time: 5:21p

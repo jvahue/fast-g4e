@@ -10,7 +10,7 @@
                  data from the various interfaces.
     
     VERSION
-      $Revision: 38 $  $Date: 7/19/12 11:07a $     
+      $Revision: 39 $  $Date: 8/28/12 1:43p $     
     
 ******************************************************************************/
 
@@ -239,6 +239,11 @@ BOOLEAN           DataMgrIsPortFFD      ( const ACS_CONFIG *ACS_Config );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 39  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 38  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

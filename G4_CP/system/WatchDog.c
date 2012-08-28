@@ -8,7 +8,7 @@
     Description: Prepares for system shutdown and waits for Watchdog Restart
 
    VERSION
-      $Revision: 9 $  $Date: 10/16/10 5:27p $    
+      $Revision: 10 $  $Date: 8/28/12 1:43p $    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -137,6 +137,11 @@ void WatchdogReboot(BOOLEAN isNormalShutdown)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: WatchDog.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 10/16/10   Time: 5:27p

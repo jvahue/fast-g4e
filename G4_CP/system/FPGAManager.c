@@ -9,7 +9,7 @@
                  interface 
     
     VERSION
-      $Revision: 35 $  $Date: 11/01/10 7:50p $     
+      $Revision: 36 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -572,6 +572,11 @@ void FPGAMgr_CBIT_VerifyShadowReg( void  )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FPGAManager.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 35  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 7:50p

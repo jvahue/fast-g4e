@@ -9,7 +9,7 @@
     Description: All data elements required for an ACS are defined here.
     
     VERSION
-      $Revision: 3 $  $Date: 7/19/12 11:07a $     
+      $Revision: 4 $  $Date: 8/28/12 1:43p $     
     
 ******************************************************************************/
 
@@ -132,6 +132,11 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 3  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

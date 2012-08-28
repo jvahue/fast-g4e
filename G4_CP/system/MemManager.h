@@ -9,7 +9,7 @@
     Description: Non-Volatile memory management implementation
     
   VERSION
-    $Revision: 16 $  $Date: 6/27/11 10:50a $                 
+    $Revision: 17 $  $Date: 8/28/12 1:43p $                 
                  
 ******************************************************************************/
 
@@ -214,6 +214,11 @@ EXPORT RESULT  MemStatusErase  ( MEM_BLOCK_TYPE nBlock, UINT32 nOffset,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 6/27/11    Time: 10:50a

@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 99 $  $Date: 8/14/12 2:22p $
+      $Revision: 100 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -348,6 +348,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 100  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 99  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:22p

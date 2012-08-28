@@ -11,7 +11,7 @@
   Description: GSE Communications port processing defines.
  
   VERSION
-      $Revision: 15 $  $Date: 7/29/10 11:10a $    
+      $Revision: 16 $  $Date: 8/28/12 1:43p $    
  
 ******************************************************************************/
 
@@ -71,6 +71,11 @@ EXPORT void       MonitorSetMsgCallback(MSG_HANDLER_CALLBACK MsgHandler);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a

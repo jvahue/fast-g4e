@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 10 $  $Date: 4/11/11 10:15a $     
+      $Revision: 11 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -449,6 +449,11 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 4/11/11    Time: 10:15a

@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 1 $  $Date: 4/24/12 10:59a $    
+$Revision: 2 $  $Date: 8/28/12 12:43p $    
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -252,6 +252,11 @@ USER_HANDLER_RESULT TimeHistory_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
+ * 
+ * *****************  Version 2  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 1  *****************
  * User: John Omalley Date: 4/24/12    Time: 10:59a

@@ -10,7 +10,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 60 $  $Date: 7/18/12 6:27p $  
+     $Revision: 61 $  $Date: 8/28/12 1:43p $  
 ******************************************************************************/
 
 
@@ -383,6 +383,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 61  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 60  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

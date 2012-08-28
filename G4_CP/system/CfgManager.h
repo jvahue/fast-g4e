@@ -12,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 45 $  $Date: 8/09/12 8:34a $
+ $Revision: 46 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -197,6 +197,11 @@ EXPORT UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:34a

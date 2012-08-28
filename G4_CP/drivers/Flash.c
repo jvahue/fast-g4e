@@ -13,7 +13,7 @@
                  to the flash device detected during initialization.
 
     VERSION
-    $Revision: 29 $  $Date: 10/27/11 9:48p $
+    $Revision: 30 $  $Date: 8/28/12 1:06p $
     
 ******************************************************************************/
 
@@ -1187,6 +1187,11 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Flash.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 10/27/11   Time: 9:48p

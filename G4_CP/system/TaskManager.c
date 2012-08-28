@@ -9,7 +9,7 @@
    Description: Executive Task Manager functions
   
  VERSION
-      $Revision: 61 $  $Date: 2/24/12 10:39a $
+      $Revision: 62 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************
   
@@ -1030,6 +1030,11 @@ TASK_INDEX TmGetTaskId(char* name)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 61  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a

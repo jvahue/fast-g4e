@@ -9,7 +9,7 @@
                  QAR interface.
     
    VERSION
-      $Revision: 93 $  $Date: 10/05/11 7:55p $
+      $Revision: 94 $  $Date: 8/28/12 1:06p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2304,6 +2304,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 94  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 93  *****************
  * User: John Omalley Date: 10/05/11   Time: 7:55p

@@ -12,7 +12,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 156 $  $Date: 7/26/12 4:57p $
+   $Revision: 157 $  $Date: 8/28/12 12:43p $
     
 ******************************************************************************/
 
@@ -3431,6 +3431,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 157  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 156  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 4:57p

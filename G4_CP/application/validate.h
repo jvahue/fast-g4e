@@ -8,7 +8,7 @@ File:       Validate.h
 
 Description:
 VERSION
-$Revision: 2 $  $Date: 4/30/10 6:06p $
+$Revision: 3 $  $Date: 8/28/12 12:43p $
 ******************************************************************************/
 /*< Generated code - Password Authentication block  start>*/
   const UINT8 key[] =
@@ -68,6 +68,11 @@ Package Defines
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: validate.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 4/30/10    Time: 6:06p

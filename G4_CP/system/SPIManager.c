@@ -9,7 +9,7 @@
                  to all SPI devices to the application 
     
     VERSION
-      $Revision: 25 $  $Date: 7/18/12 6:27p $     
+      $Revision: 26 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -1306,6 +1306,11 @@ INT16 CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

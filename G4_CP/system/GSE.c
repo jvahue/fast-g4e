@@ -12,7 +12,7 @@
               provided.
               
  VERSION
-     $Revision: 22 $  $Date: 8/15/12 3:38p $
+     $Revision: 23 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -555,6 +555,11 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 8/15/12    Time: 3:38p

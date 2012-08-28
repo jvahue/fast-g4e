@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429 
     
 VERSION
-     $Revision: 50 $  $Date: 9/23/11 4:17p $
+     $Revision: 51 $  $Date: 8/28/12 1:06p $
     
 ******************************************************************************/
 
@@ -371,6 +371,11 @@ EXPORT ARINC429_DRV_TX_STATUS_PTR Arinc429DrvTxGetCounts (UINT8 Channel);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.h $
+ * 
+ * *****************  Version 51  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 50  *****************
  * User: Contractor2  Date: 9/23/11    Time: 4:17p

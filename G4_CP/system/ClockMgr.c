@@ -17,7 +17,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 44 $  $Date: 9/22/10 2:28p $
+     $Revision: 45 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -1213,6 +1213,11 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 44  *****************
  * User: Contractor2  Date: 9/22/10    Time: 2:28p

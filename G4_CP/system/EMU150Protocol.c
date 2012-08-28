@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 17 $  $Date: 10/06/11 11:39a $     
+      $Revision: 18 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -2070,6 +2070,11 @@ BOOLEAN EMU150_FileInit(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 10/06/11   Time: 11:39a

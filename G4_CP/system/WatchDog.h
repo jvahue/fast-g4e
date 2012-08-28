@@ -9,7 +9,7 @@
     Description:  Routines to toggle the external watchdog monitor
     
    VERSION
-    $Revision: 9 $  $Date: 7/13/10 2:33p $
+    $Revision: 10 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -74,6 +74,11 @@ EXPORT void WatchdogReboot(BOOLEAN isNormalShutdown);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: WatchDog.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Contractor2  Date: 7/13/10    Time: 2:33p

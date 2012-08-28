@@ -11,7 +11,7 @@
                   
 
    VERSION
-   $Revision: 15 $  $Date: 7/26/11 3:06p $
+   $Revision: 16 $  $Date: 8/28/12 1:43p $
 
     
 ******************************************************************************/
@@ -197,6 +197,11 @@ BOOLEAN DIOMgr_FSMGetStateDIO(INT32 param)
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: DIOMgr.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:06p

@@ -9,7 +9,7 @@
     Description: This file provides the standard data types for all Altair Software systems.
  
  VERSION
-      $Revision: 17 $  $Date: 3/21/12 6:47p $ 
+      $Revision: 18 $  $Date: 8/28/12 1:06p $ 
  
 ******************************************************************************/
 
@@ -169,6 +169,11 @@ typedef  UINT32 BITARRAY128[4];
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: alt_stdtypes.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:47p

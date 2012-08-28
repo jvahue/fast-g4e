@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing. 
 
   VERSION
-  $Revision: 33 $  $Date: 7/18/12 6:27p $       
+  $Revision: 34 $  $Date: 8/28/12 1:43p $       
 
 ******************************************************************************/
 
@@ -326,6 +326,11 @@ EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSen
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
+ * 
+ * *****************  Version 34  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

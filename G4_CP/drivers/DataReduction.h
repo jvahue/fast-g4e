@@ -10,7 +10,7 @@
                  in the data flash.
     
 VERSION
-     $Revision: 3 $  $Date: 9/27/10 2:55p $
+     $Revision: 4 $  $Date: 8/28/12 1:06p $
     
 ******************************************************************************/
 
@@ -78,6 +78,11 @@ EXPORT void DataReductionGetCurrentValue ( REDUCTIONDATASTRUCT *pData );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataReduction.h $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 3  *****************
  * User: Contractor2  Date: 9/27/10    Time: 2:55p

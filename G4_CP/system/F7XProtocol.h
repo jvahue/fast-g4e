@@ -11,7 +11,7 @@
                  Handler 
     
     VERSION
-      $Revision: 11 $  $Date: 5/23/11 1:56p $     
+      $Revision: 12 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -427,6 +427,11 @@ EXPORT void F7XProtocol_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 11  *****************
  * User: Contractor2  Date: 5/23/11    Time: 1:56p

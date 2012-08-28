@@ -9,7 +9,7 @@
     Description: 
 
     VERSION
-    $Revision: 2 $  $Date: 4/27/12 5:04p $   
+    $Revision: 3 $  $Date: 8/28/12 12:43p $   
     
 ******************************************************************************/
 
@@ -129,6 +129,11 @@ EXPORT void        TimeHistoryEnd       ( TIMEHISTORY_TYPE Type, UINT16 Time_s )
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 4/27/12    Time: 5:04p

@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
     
     VERSION
-      $Revision: 54 $  $Date: 4/11/11 5:24p $     
+      $Revision: 55 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -1350,6 +1350,11 @@ void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 54  *****************
  * User: Contractor2  Date: 4/11/11    Time: 5:24p

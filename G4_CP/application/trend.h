@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 2 $  $Date: 8/15/12 7:20p $
+  $Revision: 3 $  $Date: 8/28/12 12:43p $
 
 *******************************************************************************/
 
@@ -194,6 +194,11 @@ EXPORT void TrendTask( void* pParam );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p

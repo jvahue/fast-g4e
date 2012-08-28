@@ -23,7 +23,7 @@
                  "transmitted" with one command.                 
 
     VERSION
-    $Revision: 26 $  $Date: 7/19/12 10:41a $   
+    $Revision: 27 $  $Date: 8/28/12 12:43p $   
     
 ******************************************************************************/
 
@@ -2071,6 +2071,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 26  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 10:41a

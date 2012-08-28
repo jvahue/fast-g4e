@@ -10,7 +10,7 @@
     Description: Processor Initialization and Cache Manager
 
     VERSION
-    $Revision: 2 $  $Date: 9/27/10 2:55p $   
+    $Revision: 3 $  $Date: 8/28/12 1:06p $   
     
 ******************************************************************************/
 
@@ -60,6 +60,11 @@ EXPORT void PI_FlushBranchCache(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: ProcessorInit.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 2  *****************
  * User: Contractor2  Date: 9/27/10    Time: 2:55p

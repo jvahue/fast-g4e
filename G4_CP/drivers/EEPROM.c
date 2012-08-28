@@ -12,7 +12,7 @@
                EEPROM connected via the SPI bus.
                
    VERSION
-    $Revision: 24 $  $Date: 3/28/12 4:53p $
+    $Revision: 25 $  $Date: 8/28/12 1:06p $
 
  
 ******************************************************************************/
@@ -412,6 +412,11 @@ BOOLEAN EEPROM_IsIDValid(SPI_DEVS Device)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EEPROM.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 3/28/12    Time: 4:53p

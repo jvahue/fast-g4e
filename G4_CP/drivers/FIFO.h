@@ -10,7 +10,7 @@
                 .c module for a detailed description.
   
     VERSION
-    $Revision: 9 $  $Date: 10/26/10 12:29p $       
+    $Revision: 10 $  $Date: 8/28/12 1:06p $       
   
 ******************************************************************************/
 
@@ -70,6 +70,11 @@ EXPORT void    FIFO_Flush     (FIFO* FIFO);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FIFO.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Jim Mood     Date: 10/26/10   Time: 12:29p

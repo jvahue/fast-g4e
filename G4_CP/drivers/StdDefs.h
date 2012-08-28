@@ -11,7 +11,7 @@ All Rights Reserved. Proprietary and Confidential.
               firmware.
  
  VERSION
- $Revision: 5 $  $Date: 6/25/10 9:46a $
+ $Revision: 6 $  $Date: 8/28/12 1:06p $
 ******************************************************************************/
 
 
@@ -189,6 +189,11 @@ extern BOOLEAN g_DebugMsgEnable;
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: StdDefs.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 5  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a

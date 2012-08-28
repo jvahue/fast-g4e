@@ -12,7 +12,7 @@ Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
                description.
 
    VERSION
-   $Revision: 26 $  $Date: 9/24/10 3:02p $
+   $Revision: 27 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -112,6 +112,11 @@ EXPORT UINT32           TTMR_Get10msTickCount      (void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TTMR.h $
+ * 
+ * *****************  Version 27  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 9/24/10    Time: 3:02p

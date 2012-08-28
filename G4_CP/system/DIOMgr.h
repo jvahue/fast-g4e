@@ -12,7 +12,7 @@
                   
 
    VERSION
-    $Revision: 6 $  $Date: 7/26/11 3:06p $
+    $Revision: 7 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -59,6 +59,11 @@ EXPORT BOOLEAN DIOMgr_FSMGetStateDIO(INT32 param);
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: DIOMgr.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:06p

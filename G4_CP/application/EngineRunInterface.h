@@ -10,7 +10,7 @@
     Description: Interface control EngineRun <-> Cycle
 
     VERSION
-    $Revision: 7 $  $Date: 7/18/12 6:24p $
+    $Revision: 8 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -70,6 +70,11 @@ EXPORT UINT32  EngRunGetStartingTime  (ENGRUN_INDEX engId);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRunInterface.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p

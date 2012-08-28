@@ -30,7 +30,7 @@
               ResultCodes.c (Driver/system call result codes)
               
   VERSION
-  $Revision: 58 $  $Date: 2/09/12 11:20a $
+  $Revision: 59 $  $Date: 8/28/12 1:06p $
               
 ******************************************************************************/
 
@@ -1356,6 +1356,11 @@ RESULT UART_PBIT(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 58  *****************
  * User: Jim Mood     Date: 2/09/12    Time: 11:20a

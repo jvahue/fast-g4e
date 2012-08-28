@@ -19,7 +19,7 @@
  *                different types of error reporting from different drivers
  *
  *  VERSION
- *    $Revision: 57 $  $Date: 6/27/11 1:31p $ 
+ *    $Revision: 58 $  $Date: 8/28/12 1:06p $ 
  *                
  *
 ******************************************************************************/
@@ -222,6 +222,11 @@ EXPORT const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.h $
+ * 
+ * *****************  Version 58  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 57  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:31p

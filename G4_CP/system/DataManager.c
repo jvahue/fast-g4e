@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 76 $  $Date: 7/19/12 11:07a $ 
+      $Revision: 77 $  $Date: 8/28/12 1:43p $ 
     
 ******************************************************************************/
 
@@ -1830,6 +1830,11 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 77  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 76  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

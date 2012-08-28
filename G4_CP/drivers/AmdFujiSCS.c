@@ -9,7 +9,7 @@
                  use the AMD and FUJITSU parts that use the Standard Command 
                  Set.
     VERSION
-      $Revision: 9 $  $Date: 10/18/10 7:42p $   
+      $Revision: 10 $  $Date: 8/28/12 1:06p $   
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -339,6 +339,11 @@ void AmdFujiSCS_ChipErase (FLASHDATA *BaseAddr)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AmdFujiSCS.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 10/18/10   Time: 7:42p

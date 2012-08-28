@@ -8,7 +8,7 @@
     Description: FPGA User command definitions
     
  VERSION
-     $Revision: 18 $  $Date: 9/10/10 10:01a $
+     $Revision: 19 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 #ifndef FPGA_MANAGER_BODY
@@ -274,6 +274,11 @@ USER_HANDLER_RESULT FPGAMsg_CreateLogs(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FPGAUserTables.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 9/10/10    Time: 10:01a

@@ -9,7 +9,7 @@
     Description:
     
     VERSION
-    $Revision: 10 $  $Date: 9/09/10 2:15p $
+    $Revision: 11 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -111,6 +111,11 @@ EXPORT void Box_PowerOn_UpdateElapsedUsage( BOOLEAN bPadForTruncation,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Box.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 9/09/10    Time: 2:15p

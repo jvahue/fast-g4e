@@ -22,7 +22,7 @@
  Requires:    none
  
  VERSION
-    $Revision: 24 $  $Date: 11/03/10 7:03p $     
+    $Revision: 25 $  $Date: 8/28/12 1:06p $     
 
  
 ******************************************************************************/
@@ -471,6 +471,11 @@ RESULT SPI_ReadBlock(SPI_DEVS Device, BYTE* Data, UINT16 Cnt, BOOLEAN CS)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 11/03/10   Time: 7:03p

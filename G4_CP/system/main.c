@@ -8,7 +8,7 @@
     Description: Entry point for C runtime code.
                  
     VERSION
-       $Revision: 17 $  $Date: 10/04/10 3:41p $    
+       $Revision: 18 $  $Date: 8/28/12 1:43p $    
     
 ******************************************************************************/
 
@@ -86,6 +86,11 @@ unsigned int _cdecl RunMain( void* pParam)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: main.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 17  *****************
  * User: Contractor2  Date: 10/04/10   Time: 3:41p

@@ -19,7 +19,7 @@
               struct are defined.
               
  VERSION
- $Revision: 14 $  $Date: 11/01/10 7:50p $              
+ $Revision: 15 $  $Date: 8/28/12 1:06p $              
 
 ******************************************************************************/
 
@@ -336,6 +336,11 @@ void FIFO_Flush(FIFO* FIFO)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FIFO.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 14  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 7:50p

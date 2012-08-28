@@ -12,7 +12,7 @@ validate the files were received correctly by the
 micro-server and ground server.
 
 VERSION
-$Revision: 17 $  $Date: 7/26/12 2:08p $
+$Revision: 18 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 #ifndef UPLOADMGR_BODY
@@ -402,6 +402,11 @@ USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: UploadMgrUserTables.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:08p

@@ -9,7 +9,7 @@
     Description: MicroServer Status and Control. 
     
     VERSION
-      $Revision: 24 $  $Date: 7/19/12 11:07a $    
+      $Revision: 25 $  $Date: 8/28/12 1:43p $    
     
 ******************************************************************************/
 
@@ -169,6 +169,11 @@ EXPORT void               MSSC_GetMsPwVer(CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.h $
+ * 
+ * *****************  Version 25  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 24  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

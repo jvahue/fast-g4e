@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 95 $  $Date: 8/22/12 5:27p $
+   $Revision: 96 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -2702,6 +2702,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 96  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 95  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:27p

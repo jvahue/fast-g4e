@@ -8,7 +8,7 @@
     Description:  Contains all functions and data related to the Arinc429.
     
 VERSION
-     $Revision: 104 $  $Date: 2/24/12 10:32a $
+     $Revision: 105 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -2585,6 +2585,11 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.c $
+ * 
+ * *****************  Version 105  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 104  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:32a

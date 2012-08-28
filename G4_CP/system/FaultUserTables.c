@@ -11,7 +11,7 @@ Description: The fault processing object is currenlty used to determine the
 
 
 VERSION
-$Revision: 9 $  $Date: 8/31/10 11:45a $ 
+$Revision: 10 $  $Date: 8/28/12 1:43p $ 
 
 ******************************************************************************/
 #ifndef FAULT_BODY
@@ -234,6 +234,11 @@ USER_HANDLER_RESULT Fault_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: FaultUserTables.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 11:45a

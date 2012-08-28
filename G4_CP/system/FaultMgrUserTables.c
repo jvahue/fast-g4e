@@ -11,7 +11,7 @@
          Description:
 
          VERSION
-         $Revision: 27 $  $Date: 12-08-28 8:34a $
+         $Revision: 28 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -398,6 +398,11 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:34a

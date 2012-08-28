@@ -10,7 +10,7 @@
     Description:  
 
     VERSION
-    $Revision: 5 $  $Date: 7/26/12 2:08p $
+    $Revision: 6 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -115,6 +115,11 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 5  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:08p

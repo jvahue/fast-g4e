@@ -8,7 +8,7 @@
     Description: 
 
    VERSION
-      $Revision: 8 $  $Date: 6/01/11 1:45p $    
+      $Revision: 9 $  $Date: 8/28/12 1:43p $    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -197,6 +197,11 @@ BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 8  *****************
  * User: Contractor2  Date: 6/01/11    Time: 1:45p

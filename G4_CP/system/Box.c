@@ -8,7 +8,7 @@
     Description:  
     
     VERSION
-    $Revision: 43 $  $Date: 10/27/10 4:02p $
+    $Revision: 44 $  $Date: 8/28/12 1:43p $
    
 ******************************************************************************/
 
@@ -558,6 +558,11 @@ void Box_BackGroundTask ( void *pParam )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Box.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 43  *****************
  * User: Jim Mood     Date: 10/27/10   Time: 4:02p

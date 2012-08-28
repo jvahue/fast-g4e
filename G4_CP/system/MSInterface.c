@@ -13,7 +13,7 @@
                  TaskManager.h
                  
   VERSION
-      $Revision: 62 $  $Date: 7/19/12 11:07a $    
+      $Revision: 63 $  $Date: 8/28/12 1:43p $    
  
 ******************************************************************************/
 /*****************************************************************************/
@@ -936,6 +936,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 63  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 62  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

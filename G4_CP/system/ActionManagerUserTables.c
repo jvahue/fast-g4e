@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 5 $  $Date: 12-08-24 9:30a $
+$Revision: 6 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -418,6 +418,11 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-08-24   Time: 9:30a

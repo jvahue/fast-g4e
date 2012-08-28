@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 47 $  $Date: 7/19/12 11:07a $
+    $Revision: 48 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -429,6 +429,11 @@ EXPORT UINT32            LogGetLogCount          ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 48  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 47  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

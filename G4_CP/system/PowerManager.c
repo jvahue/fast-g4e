@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 60 $  $Date: 8/31/11 4:05p $
+   $Revision: 61 $  $Date: 8/28/12 1:43p $
 
     
 ******************************************************************************/
@@ -1253,6 +1253,11 @@ void PmSet_Cfg (POWERMANAGER_CFG *Cfg)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 61  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 60  *****************
  * User: Contractor2  Date: 8/31/11    Time: 4:05p

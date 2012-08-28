@@ -11,7 +11,7 @@
                system. 
  
   VERSION
-      $Revision: 19 $  $Date: 4/28/10 5:56p $ 
+      $Revision: 20 $  $Date: 8/28/12 1:43p $ 
  
 ******************************************************************************/
 
@@ -133,6 +133,11 @@ EXPORT void      CM_CompareSystemToMsClockDrift(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 4/28/10    Time: 5:56p

@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
     
     VERSION
-      $Revision: 55 $  $Date: 7/19/12 11:07a $    
+      $Revision: 56 $  $Date: 8/28/12 1:43p $    
     
 ******************************************************************************/
 
@@ -1027,6 +1027,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 55  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

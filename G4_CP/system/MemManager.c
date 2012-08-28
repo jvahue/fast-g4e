@@ -17,7 +17,7 @@
     Notes:       
                  
   VERSION
-    $Revision: 41 $  $Date: 6/27/11 10:50a $                 
+    $Revision: 42 $  $Date: 8/28/12 1:43p $                 
                  
 ******************************************************************************/
 
@@ -1584,6 +1584,11 @@ void MemClearTask (void* pPBlock)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.c $
+ * 
+ * *****************  Version 42  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 41  *****************
  * User: John Omalley Date: 6/27/11    Time: 10:50a

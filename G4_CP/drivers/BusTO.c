@@ -16,7 +16,7 @@ Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
 
               
   VERSION
-  $Revision: 3 $  $Date: 10/17/11 7:45p $
+  $Revision: 4 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -270,6 +270,11 @@ void BTO_WriteToEE(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: BusTO.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 10/17/11   Time: 7:45p

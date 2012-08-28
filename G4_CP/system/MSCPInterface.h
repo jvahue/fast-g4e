@@ -21,7 +21,7 @@
                  FILE IS UNDER THE VERSION CONTROL OF THE CONTROL PROCESSOR
 
       VERSION
-      $Revision: 42 $  $Date: 7/19/12 11:07a $    
+      $Revision: 43 $  $Date: 8/28/12 1:43p $    
 
  ******************************************************************************/
 
@@ -903,6 +903,11 @@ typedef struct{
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSCPInterface.h $
+ * 
+ * *****************  Version 43  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 42  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

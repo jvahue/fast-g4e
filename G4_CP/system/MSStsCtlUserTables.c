@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 21 $  $Date: 7/19/12 11:07a $    
+    $Revision: 22 $  $Date: 8/28/12 1:43p $    
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -437,6 +437,11 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 21  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a

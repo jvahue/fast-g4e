@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for UartMgr 
 
     VERSION
-    $Revision: 10 $  $Date: 4/11/11 10:15a $
+    $Revision: 11 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -524,6 +524,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 4/11/11    Time: 10:15a

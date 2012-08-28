@@ -13,7 +13,7 @@
                   events.
 
     VERSION
-    $Revision: 27 $  $Date: 3/21/12 6:46p $
+    $Revision: 28 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -90,6 +90,11 @@ EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:46p

@@ -8,7 +8,7 @@
     Description:
 
     VERSION
-    $Revision: 28 $  $Date: 7/26/12 2:10p $
+    $Revision: 29 $  $Date: 8/28/12 1:43p $
 
 
 ******************************************************************************/
@@ -903,6 +903,11 @@ USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: BoxUserTables.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:10p

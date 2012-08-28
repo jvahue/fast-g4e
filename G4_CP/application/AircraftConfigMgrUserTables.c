@@ -9,7 +9,7 @@ File:          AircraftConfigMgrUserTables.c
 Description: 
 
 VERSION
-$Revision: 15 $  $Date: 9/03/10 1:49p $ 
+$Revision: 16 $  $Date: 8/28/12 12:43p $ 
 
 ******************************************************************************/
 
@@ -465,6 +465,11 @@ USER_HANDLER_RESULT AircraftShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: AircraftConfigMgrUserTables.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 9/03/10    Time: 1:49p

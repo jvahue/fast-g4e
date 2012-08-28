@@ -11,7 +11,7 @@
     Notes: 
   
     VERSION
-      $Revision: 7 $  $Date: 8/31/10 11:29a $     
+      $Revision: 8 $  $Date: 8/28/12 1:43p $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -150,6 +150,11 @@ EXPORT BOOLEAN FaultCompareValues ( FAULT_INDEX Fault );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 11:29a

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 19 $  $Date: 12-08-20 9:00a $
+  $Revision: 20 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -435,6 +435,11 @@ EXPORT void EventTablesInitialize  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a

@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 107 $  $Date: 12-08-28 8:32a $
+   $Revision: 108 $  $Date: 8/28/12 12:43p $
 
 
 ******************************************************************************/
@@ -1478,6 +1478,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 108  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  *
  * *****************  Version 107  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:32a

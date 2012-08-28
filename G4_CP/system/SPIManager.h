@@ -10,7 +10,7 @@
     Description:  Function prototypes and define for SPI Manager
     
     VERSION
-      $Revision: 10 $  $Date: 7/18/12 6:27p $
+      $Revision: 11 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -187,6 +187,11 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

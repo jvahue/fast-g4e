@@ -11,7 +11,7 @@
                   the aircraft Bus or Battery power supplies. 
     
     VERSION
-    $Revision: 31 $  $Date: 7/20/11 10:57a $
+    $Revision: 32 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -294,6 +294,11 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.h $
+ * 
+ * *****************  Version 32  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:57a

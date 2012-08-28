@@ -10,7 +10,7 @@
     Description: Continuous Built In Test Definitions.
     
     VERSION
-      $Revision: 21 $  $Date: 10/12/10 2:42p $
+      $Revision: 22 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -204,6 +204,11 @@ EXPORT BOOLEAN CBITMgr_PWEHSEU_FileInit ( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.h $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 10/12/10   Time: 2:42p

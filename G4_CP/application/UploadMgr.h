@@ -10,7 +10,7 @@
     Description: Package system logs and application (flight data)logs
     
     VERSION
-    $Revision: 42 $  $Date: 7/26/12 4:57p $    
+    $Revision: 43 $  $Date: 8/28/12 12:43p $    
     
 ******************************************************************************/
 
@@ -217,6 +217,11 @@ EXPORT void     UploadMgr_GenerateDebugLogs(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.h $
+ * 
+ * *****************  Version 43  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 42  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 4:57p

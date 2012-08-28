@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 65 $  $Date: 8/13/12 1:58p $
+    $Revision: 66 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -641,6 +641,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 66  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 65  *****************
  * User: Jeff Vahue   Date: 8/13/12    Time: 1:58p

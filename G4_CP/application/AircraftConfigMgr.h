@@ -10,7 +10,7 @@ Copyright (C) 1999-2012 Pratt & Whitney Engine Services, Inc.
  Description: This file defines structures for the AirCraft reconfigure module. 
 
    VERSION
-   $Revision: 17 $  $Date: 7/20/11 10:54a $
+   $Revision: 18 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -194,6 +194,11 @@ extern "C" {
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:54a

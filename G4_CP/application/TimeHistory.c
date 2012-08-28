@@ -8,7 +8,7 @@
     Description: 
  
     VERSION
-    $Revision: 3 $  $Date: 5/02/12 4:53p $   
+    $Revision: 4 $  $Date: 8/28/12 12:43p $   
    
 ******************************************************************************/
 
@@ -199,6 +199,11 @@ UINT16 TimeHistoryBuildRecord ( TIMEHISTORYRECORD *Record )
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 5/02/12    Time: 4:53p

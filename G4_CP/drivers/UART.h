@@ -10,7 +10,7 @@
                This file contains an API and serial interrupt handlers
  
    VERSION
-   $Revision: 15 $  $Date: 9/03/10 8:22p $
+   $Revision: 16 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -177,6 +177,11 @@ EXPORT void UART_PSCX_ISR( INT8 port);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 9/03/10    Time: 8:22p

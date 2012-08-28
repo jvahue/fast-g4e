@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 6 $  $Date: 10/11/11 5:31p $
+   $Revision: 7 $  $Date: 8/28/12 12:43p $
     
 ******************************************************************************/
 #ifndef FASTSTATEMGR_BODY
@@ -819,6 +819,11 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTStateMgrUserTables.c $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 10/11/11   Time: 5:31p

@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
  
    VERSION
-      $Revision: 33 $  $Date: 12-08-28 8:35a $  
+      $Revision: 34 $  $Date: 8/28/12 1:43p $  
  
 ******************************************************************************/
 
@@ -547,6 +547,11 @@ EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 34  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:35a

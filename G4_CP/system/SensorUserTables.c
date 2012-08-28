@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 22 $  $Date: 8/13/12 4:21p $
+$Revision: 23 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -564,6 +564,11 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:21p

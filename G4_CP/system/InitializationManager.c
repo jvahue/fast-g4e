@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 109 $  $Date: 8/16/12 4:15p $
+     $Revision: 110 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -758,6 +758,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 110  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 109  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p

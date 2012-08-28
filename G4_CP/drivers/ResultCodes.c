@@ -13,7 +13,7 @@ All Rights Reserved. Proprietary and Confidential.
 
               
   VERSION
-    $Revision: 14 $  $Date: 10/26/10 5:12p $ 
+    $Revision: 15 $  $Date: 8/28/12 1:06p $ 
 
 ******************************************************************************/
 
@@ -106,6 +106,11 @@ const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr)
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 10/26/10   Time: 5:12p

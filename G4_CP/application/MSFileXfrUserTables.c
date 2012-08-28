@@ -9,7 +9,7 @@
                  the CP GSE port.
 
     VERSION
-    $Revision: 14 $  $Date: 8/27/12 6:03p $   
+    $Revision: 15 $  $Date: 8/28/12 12:43p $   
     
 ******************************************************************************/
 
@@ -272,6 +272,11 @@ USER_HANDLER_RESULT MSFX_GetStsUserCmd(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfrUserTables.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 8/27/12    Time: 6:03p

@@ -9,7 +9,7 @@
     Description: Flash Memory Driver functions.
     
     VERSION
-    $Revision: 15 $  $Date: 10/01/10 5:24p $       
+    $Revision: 16 $  $Date: 8/28/12 1:06p $       
     
 ******************************************************************************/
 
@@ -431,6 +431,11 @@ EXPORT BOOLEAN             FlashCheckSameSector ( FLASHADDR nFirstOffset,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Flash.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 10/01/10   Time: 5:24p

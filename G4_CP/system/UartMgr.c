@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 39 $  $Date: 10/10/11 5:35p $     
+      $Revision: 40 $  $Date: 8/28/12 1:43p $     
 
 ******************************************************************************/
 
@@ -1951,6 +1951,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 10/10/11   Time: 5:35p

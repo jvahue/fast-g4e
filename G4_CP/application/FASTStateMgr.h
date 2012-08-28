@@ -10,7 +10,7 @@
     Description:  
 
     VERSION
-    $Revision: 6 $  $Date: 9/23/11 8:02p $
+    $Revision: 7 $  $Date: 8/28/12 12:43p $
 
 ******************************************************************************/
 
@@ -198,6 +198,11 @@ EXPORT BOOLEAN FSM_GetStateFALSE(INT32 param);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 9/23/11    Time: 8:02p

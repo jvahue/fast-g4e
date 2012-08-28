@@ -8,7 +8,7 @@
     Description:  Contains all functions and data related to the FPGA.
 
  VERSION
-     $Revision: 59 $  $Date: 10/27/11 12:48p $
+     $Revision: 60 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -1109,6 +1109,11 @@ void FPGA_InitializeShadowRamVer12( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FPGA.c $
+ * 
+ * *****************  Version 60  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 59  *****************
  * User: Jeff Vahue   Date: 10/27/11   Time: 12:48p

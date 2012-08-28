@@ -11,7 +11,7 @@
                 description.
 
   VERSION
-    $Revision: 13 $  $Date: 3/31/10 11:48a $
+    $Revision: 14 $  $Date: 8/28/12 1:06p $
   
 ******************************************************************************/
 
@@ -111,6 +111,11 @@ EXPORT RESULT EEPROM_IsWriteInProgress(SPI_DEVS Device,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EEPROM.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 13  *****************
  * User: Contractor3  Date: 3/31/10    Time: 11:48a

@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for F7X Protocol CSC 
 
     VERSION
-    $Revision: 15 $  $Date: 10/18/10 5:44p $
+    $Revision: 16 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 #ifndef F7X_PROTOCOL_BODY
@@ -799,6 +799,11 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XUserTables.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 10/18/10   Time: 5:44p

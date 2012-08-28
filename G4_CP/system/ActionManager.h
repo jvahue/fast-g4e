@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 8 $  $Date: 12-08-28 8:33a $
+  $Revision: 9 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -214,6 +214,11 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:33a

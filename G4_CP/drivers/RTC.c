@@ -17,7 +17,7 @@
                configuration is loaded into the registers.
  
    VERSION
-    $Revision: 30 $  $Date: 10/18/10 2:25p $
+    $Revision: 31 $  $Date: 8/28/12 1:06p $
  
 ******************************************************************************/
 
@@ -884,6 +884,11 @@ BOOLEAN RTC_ConvertRTC_BCDToTs ( UINT8 ReadArr[], TIMESTRUCT *Ts )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: RTC.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 30  *****************
  * User: Contractor2  Date: 10/18/10   Time: 2:25p

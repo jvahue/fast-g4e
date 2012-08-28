@@ -9,7 +9,7 @@
   Description: SPI driver for the MCF5485 QSPI peripheral
                
    VERSION
-    $Revision: 12 $  $Date: 2/09/12 11:20a $
+    $Revision: 13 $  $Date: 8/28/12 1:06p $
                
  
 ******************************************************************************/
@@ -266,6 +266,11 @@ EXPORT RESULT SPI_ReadBlock (SPI_DEVS Device, BYTE* Data,   UINT16 Cnt, BOOLEAN 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 2/09/12    Time: 11:20a

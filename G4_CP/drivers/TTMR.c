@@ -19,7 +19,7 @@ Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
               Slice Timer 0 - Generates the high speed/high resolution tick counter
               
   VERSION
-  $Revision: 34 $  $Date: 10/15/10 4:21p $
+  $Revision: 35 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -357,6 +357,11 @@ void TTMR_GetLastIntLvl(UINT32* IntLvl)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TTMR.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 10/15/10   Time: 4:21p

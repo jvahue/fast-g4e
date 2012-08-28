@@ -20,7 +20,7 @@
                SPI.h - Accessing the SPI bus to read the converter
  
   VERSION
-      $Revision: 27 $  $Date: 10/11/11 2:10p $ 
+      $Revision: 28 $  $Date: 8/28/12 1:06p $ 
      
  
 ******************************************************************************/
@@ -529,6 +529,11 @@ FLOAT32 ADC_GetValue (UINT16 nIndex)
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 10/11/11   Time: 2:10p

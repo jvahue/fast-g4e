@@ -8,7 +8,7 @@
     Description: User commands definition for QAR Manager
 
     VERSION
-    $Revision: 37 $  $Date: 11/18/10 4:44p $
+    $Revision: 38 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 #ifndef QAR_MANAGER_BODY
@@ -669,6 +669,11 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: QARUserTables.c $
+ * 
+ * *****************  Version 38  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 37  *****************
  * User: Peter Lee    Date: 11/18/10   Time: 4:44p

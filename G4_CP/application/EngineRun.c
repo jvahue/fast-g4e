@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 15 $  $Date: 12-08-28 8:32a $
+      $Revision: 16 $  $Date: 8/28/12 12:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -976,6 +976,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:32a

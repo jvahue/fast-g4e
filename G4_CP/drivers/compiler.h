@@ -11,7 +11,7 @@
   Note:          
  
   VERSION
-      $Revision: 2 $  $Date: 3/02/10 12:07p $ 
+      $Revision: 3 $  $Date: 8/28/12 1:06p $ 
  
 ******************************************************************************/
 
@@ -54,6 +54,11 @@
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: compiler.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 2  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:07p

@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 96 $  $Date: 7/19/12 11:08a $
+      $Revision: 97 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2727,6 +2727,11 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 97  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:08a

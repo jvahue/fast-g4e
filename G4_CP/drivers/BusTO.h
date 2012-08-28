@@ -12,7 +12,7 @@ All Rights Reserved. Proprietary and Confidential..
                description.
 
    VERSION
-   $Revision: 1 $  $Date: 6/27/11 1:42p $
+   $Revision: 2 $  $Date: 8/28/12 1:06p $
 
 ******************************************************************************/
 
@@ -75,6 +75,11 @@ EXPORT void   BTO_WriteToEE(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: BusTO.h $
+ * 
+ * *****************  Version 2  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 1  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:42p

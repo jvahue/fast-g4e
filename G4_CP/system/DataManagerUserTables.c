@@ -10,7 +10,7 @@ Description: The data manager contains the functions used to record
 
 
 VERSION
-$Revision: 21 $  $Date: 7/26/12 2:10p $ 
+$Revision: 22 $  $Date: 8/28/12 1:43p $ 
 
 ******************************************************************************/
 
@@ -563,6 +563,11 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: DataManagerUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 21  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:10p

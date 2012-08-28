@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 47 $  $Date: 12-08-16 4:17p $
+   $Revision: 48 $  $Date: 8/28/12 1:06p $
 
 
 ******************************************************************************/
@@ -1188,6 +1188,11 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 48  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 47  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:17p

@@ -10,7 +10,7 @@
           verify the register value. 
           
     VERSION
-      $Revision: 17 $  $Date: 11/09/10 4:41p $
+      $Revision: 18 $  $Date: 8/28/12 1:43p $
     
 ******************************************************************************/
 
@@ -1047,6 +1047,11 @@ static BOOLEAN RegCheckUint32 ( REG_SETTING_PTR pRegData, BOOLEAN bUpdate )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UtilRegSetCheck.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 11/09/10   Time: 4:41p

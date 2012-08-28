@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 9 $  $Date: 12-08-28 8:33a $
+ $Revision: 10 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -967,6 +967,11 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:33a

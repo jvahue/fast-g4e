@@ -13,7 +13,7 @@ All Rights Reserved. Proprietary and Confidential.
               for a detailed description.
 
   VERSION
-   $Revision: 11 $  $Date: 7/29/10 12:12p $
+   $Revision: 12 $  $Date: 8/28/12 1:06p $
 ******************************************************************************/
 
 
@@ -106,6 +106,11 @@ RESULT RTC_GetStatus ( void );
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: RTC.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 11  *****************
  * User: Contractor3  Date: 7/29/10    Time: 12:12p

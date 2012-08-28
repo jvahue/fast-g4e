@@ -10,7 +10,7 @@
     Description:
     
     VERSION
-    $Revision: 39 $  $Date: 8/15/12 7:20p $
+    $Revision: 40 $  $Date: 8/28/12 12:43p $
     
 ******************************************************************************/
 
@@ -266,6 +266,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 40  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
  * 
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p

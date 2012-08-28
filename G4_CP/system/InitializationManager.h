@@ -9,7 +9,7 @@
   Description: Initialization Manager definitions
  
  VERSION
-     $Revision: 5 $  $Date: 7/27/10 2:26p $
+     $Revision: 6 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************/
 
@@ -55,6 +55,11 @@ EXPORT void Im_StartupTickHandler        (void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 7/27/10    Time: 2:26p

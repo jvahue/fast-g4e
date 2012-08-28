@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 36 $  $Date: 7/19/12 10:42a $    
+      $Revision: 37 $  $Date: 8/28/12 1:06p $    
 ******************************************************************************/
 
 
@@ -253,6 +253,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 37  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 36  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 10:42a

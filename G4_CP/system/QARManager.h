@@ -10,7 +10,7 @@
     Description:  Header file for system level QAR manager functions
     
     VERSION
-      $Revision: 16 $  $Date: 9/01/10 3:19p $      
+      $Revision: 17 $  $Date: 8/28/12 1:43p $      
     
 ******************************************************************************/
 
@@ -66,6 +66,11 @@ EXPORT void QARMgr_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QARManager.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 3:19p

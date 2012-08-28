@@ -10,7 +10,7 @@
   Description: 
   
   VERSION
-      $Revision: 19 $  $Date: 7/19/12 11:07a $ 
+      $Revision: 20 $  $Date: 8/28/12 1:43p $ 
  
 ******************************************************************************/
 
@@ -115,6 +115,11 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
  * 
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
