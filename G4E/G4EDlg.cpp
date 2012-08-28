@@ -314,8 +314,8 @@ BOOL CG4EDlg::OnInitDialog()
 //--------------------------------------------------------------------------------------------------
 void CG4EDlg::PowerUpG4E()
 {
+    m_fpga->Reset(); // this must come first as there is DIO in the FPGA
     m_dio->Reset();
-    m_fpga->Reset();
     m_dpr->Reset();
 
     G4sysCtrl.g4eInitComplete = FALSE;
@@ -419,6 +419,7 @@ bool CG4EDlg::ProcessIocInterface()
 
         // turn on internal DINs 
         m_dinValues |= 1 << WLAN_WOW_Enb;
+        m_dinValues |= 1 << FFD_Inh;
 
         // share our PS value with the G4 code
         G4sysCtrl.busV = m_busV;

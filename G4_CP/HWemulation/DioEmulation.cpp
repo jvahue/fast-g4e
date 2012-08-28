@@ -55,6 +55,7 @@ void DioEmulation::Reset()
 
     SetDio( WOW,             0);
     SetDio( WLAN_WOW_Enb,    0);
+    SetDio( FFD_Inh,         1);
 
     Wraparounds();
 }
@@ -75,6 +76,7 @@ void DioEmulation::ProcessDio(UINT32& dins, UINT32& douts)
     SetDio( LSS_OvI,     BIT( dins, LSS_OvI));
     SetDio( WOW,         BIT( dins, WOW));
     SetDio( SW_PFEN_Sta, BIT( dins, SW_PFEN_Sta));
+    SetDio( FFD_Inh,     BIT( dins, FFD_Inh));
 
     // give back the wraparounds to the UI
     dins |= m_wrapDin;
@@ -165,7 +167,9 @@ void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
     }
     else if(DIO_InputPins[Pin].Peripheral == DIO_FPGA)
     {
-        DIO_W( DIO_InputPins[Pin].DataReg, DIO_InputPins[Pin].PinMask, state);
+        DIO_W16( (volatile UINT16*)DIO_InputPins[Pin].DataReg, 
+                 (UINT16)DIO_InputPins[Pin].PinMask, 
+                 state);
     }
 }
 
@@ -188,6 +192,13 @@ UINT8 DioEmulation::GetDio( DIO_OUTPUT Pin)
 UINT8 DioEmulation::Read(vuint8* addr)
 {
     UINT8 value = *addr;
+    return value;
+}
+
+//--------------------------------------------------------------------------------------------------
+UINT16 DioEmulation::Read16(vuint16* addr)
+{
+    UINT16 value = *addr;
     return value;
 }
 
@@ -230,7 +241,28 @@ void DioEmulation::Write(vuint8* addr, UINT8 mask, UINT8 op, bool wrap)
 }
 
 //--------------------------------------------------------------------------------------------------
+void DioEmulation::Write16(vuint16* addr, UINT16 mask, UINT8 op, bool wrap)
+{
+    // this down and see if we can clear this bit
+    BitState16( addr, mask, op);
+    wrap = false; // already done by Set
+}
+
+//--------------------------------------------------------------------------------------------------
 void DioEmulation::BitState(vuint8* addr, UINT8 mask, UINT8 op )
+{
+    if ( op == 0)
+    {
+        *addr = *addr & ~mask;
+    }
+    else
+    {
+        *addr = *addr | mask;
+    }
+}
+
+//--------------------------------------------------------------------------------------------------
+void DioEmulation::BitState16(vuint16* addr, UINT16 mask, UINT8 op )
 {
     if ( op == 0)
     {
@@ -312,5 +344,14 @@ void DioEmulation::Set(vuint8* addr, UINT8 value, bool wrap)
     {
         Wraparounds();
     }
+}
+
+//--------------------------------------------------------------------------------------------------
+// Set write directly to the register in question with the following conditions
+// ODR only writes to output bits based on DDR
+// DSDR only sets output bits based on DDR
+// CLR only clears output bits based on DDR
+void DioEmulation::Set16(vuint16* addr, UINT16 value, bool wrap)
+{
 }
 

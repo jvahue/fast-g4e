@@ -464,17 +464,36 @@ void* GetDioObject()
 {
     return &dio;
 }
+
 UINT8 hw_DioRead( vuint8* addr)
 {
     return dio.Read( addr);
 }
+
 void hw_DioWrite(vuint8* addr, UINT8 mask, UINT8 op)
 {
     dio.Write(addr, mask, op);
 }
+
 void hw_DioSet(vuint8* addr, UINT8 value)
 {
     dio.Set( addr, value);
+}
+
+UINT16 hw_DioRead16( volatile UINT16* addr)
+{
+    return dio.Read16( addr);
+}
+
+void hw_DioWrite16(volatile UINT16* addr, UINT16 mask, UINT8 op)
+{
+    dio.Write16(addr, mask, op);
+}
+
+void hw_DioSet16(volatile UINT16* addr, UINT16 value)
+{
+    dio.Set16( addr, value);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

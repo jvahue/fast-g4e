@@ -25,6 +25,11 @@ public:
     void BitState(vuint8* addr, UINT8 mask, UINT8 op );
     void SetPinStates( vuint8* addr);
 
+    UINT16 Read16( vuint16* addr);
+    void Write16( vuint16* addr, UINT16 mask, UINT8 op, bool wrap=true);
+    void Set16( vuint16* addr, UINT16 value, bool wrap=true);
+    void BitState16(vuint16* addr, UINT16 mask, UINT8 op );
+
 protected:
     UINT32 m_wrapDin;
 

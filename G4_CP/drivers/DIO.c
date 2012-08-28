@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 48 $  $Date: 8/28/12 1:06p $
+   $Revision: 49 $  $Date: 8/28/12 7:08p $
 
 
 ******************************************************************************/
@@ -608,7 +608,7 @@ void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
   }
   else if(DIO_OutputPins[Pin].Peripheral == DIO_FPGA)
   {
-      DIO_W( (UINT16 *) DIO_OutputPins[Pin].DataReg, DIO_OutputPins[Pin].PinMask, Op);
+      DIO_W16( (UINT16 *) DIO_OutputPins[Pin].DataReg, DIO_OutputPins[Pin].PinMask, Op);
   }
   __RIR(intrLevel);
 
@@ -661,7 +661,7 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
     case DIO_RAW:   //Read the value directly off the register and mask the bit
       if(DIO_InputPins[Pin].Peripheral == DIO_FPGA)
       {
-        value16 = DIO_R( (UINT16 *)Dio_FilteredPins[Pin].portData->portAddr );
+        value16 = DIO_R16( (UINT16 *)Dio_FilteredPins[Pin].portData->portAddr );
         State = ( value16 & DIO_InputPins[Pin].PinMask) ? ON : OFF;      
       }
       else
@@ -1188,6 +1188,11 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 49  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p
+ * Updated in $/software/control processor/code/drivers
+ * SCR# 1142 - Windows Emulation Update and Typos
  * 
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

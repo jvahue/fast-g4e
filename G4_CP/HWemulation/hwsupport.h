@@ -46,6 +46,10 @@ EXPORT UINT8 hw_DioRead( volatile UINT8* addr);
 EXPORT void hw_DioWrite(volatile UINT8* addr, UINT8 mask, UINT8 op);
 EXPORT void hw_DioSet(volatile UINT8* addr, UINT8 value);
 
+EXPORT UINT16 hw_DioRead16( volatile UINT16* addr);
+EXPORT void hw_DioWrite16(volatile UINT16* addr, UINT16 mask, UINT8 op);
+EXPORT void hw_DioSet16(volatile UINT16* addr, UINT16 value);
+
 // QAR
 void   hw_QARwrite( volatile UINT16 * addr, int field, UINT16 data);
 UINT16 hw_QARread( volatile UINT16 * addr, int field);
