@@ -3,12 +3,12 @@
             Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
-    File:        FastMgrUserTables.c
+    File:        FASTStateMgrUserTables.c
     
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 7 $  $Date: 8/28/12 12:43p $
+   $Revision: 8 $  $Date: 8/28/12 2:36p $
     
 ******************************************************************************/
 #ifndef FASTSTATEMGR_BODY
@@ -819,6 +819,11 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTStateMgrUserTables.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142 - more format corrections
  * 
  * *****************  Version 7  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

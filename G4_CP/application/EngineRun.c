@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 16 $  $Date: 8/28/12 12:43p $
+      $Revision: 17 $  $Date: 8/28/12 2:36p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -324,10 +324,9 @@ EXPORT UINT32 EngRunGetStartingTime(ENGRUN_INDEX engId)
   ASSERT(engId < MAX_ENGINES);
   return EngineRunData[engId].startingTime;
 }
-
-/*********************************************************************************************/
-/* Local Functions                                                                           */
-/*********************************************************************************************/
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:     EngRunForceEnd
@@ -977,6 +976,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 17  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142 - more format corrections
+ * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
@@ -1048,4 +1052,4 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
  * User: Contractor V&v Date: 5/10/12    Time: 6:41p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  Engine Run
- ************************************************************************/
+ ***************************************************************************/
