@@ -1,7 +1,6 @@
 #define UTILITY_BODY
 /******************************************************************************
             Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:           Utility.c
@@ -1456,4 +1455,4 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
  * Updated in $/control processor/code/system
  *
  *
- *************************************************************************/
+ ***************************************************************************/

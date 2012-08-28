@@ -2,8 +2,7 @@
 #define UTIL_REG_SET_CHECK_H
 
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:         UtilRegSetCheck.h
@@ -97,9 +96,10 @@ EXPORT UINT16 GetRegCheckNumReg( void );
                               
 
 
-#endif // UTIL_REG_SET_CHECK_H       
+     
 
-/*****************************************************************************
+#endif // UTIL_REG_SET_CHECK_H       
+/*************************************************************************
  *  MODIFICATIONS
  *    $History: UtilRegSetCheck.h $
  * 
@@ -130,5 +130,5 @@ EXPORT UINT16 GetRegCheckNumReg( void );
  * Initial Check In.  SCR #315
  * 
  *
- *****************************************************************************/
+ ***************************************************************************/
                                             

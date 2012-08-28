@@ -1,8 +1,7 @@
 #define BUSTO_BODY
 
 /******************************************************************************
-           Copyright (C)2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.                 
                All Rights Reserved.  Proprietary and Confidential.
 
 
@@ -264,7 +263,9 @@ void BTO_WriteToEE(void)
   WatchdogReboot(FALSE);
 }
 
-
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /*************************************************************************
  *  MODIFICATIONS

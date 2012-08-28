@@ -1,6 +1,6 @@
+#define FASTMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        FastMgrUserTables.c
@@ -11,10 +11,17 @@
    $Revision: 25 $  $Date: 8/15/12 7:18p $
     
 ******************************************************************************/
-
 #ifndef FASTMGR_BODY
 #error FastMgrUserTables.c should only be included by FastMgr.c
 #endif
+
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Defines                                                             */
@@ -159,9 +166,10 @@ static USER_MSG_TBL FastCmd [] =
 
 USER_MSG_TBL RootMsg = {"FAST", FastCmd, NULL, NO_HANDLER_DATA};
 
-//*****************************************************************************/
-/* Local Functions                                                           */
 /*****************************************************************************/
+/* Local Function Prototypes                                                */
+/*****************************************************************************/
+
 /******************************************************************************
  * Function:    FAST_UserCfg
  *  
@@ -617,4 +625,4 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
  * Created in $/software/control processor/code/application
  * SCR 42 and SCR 106
 *
-*************************************************************************/
+****************************************************************************/

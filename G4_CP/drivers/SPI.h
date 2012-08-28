@@ -1,8 +1,7 @@
 #ifndef DRV_SPI_H
 #define DRV_SPI_H
 /******************************************************************************
-         Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        SPI.h
@@ -263,8 +262,7 @@ EXPORT RESULT SPI_ReadWord  (SPI_DEVS Device, UINT16* Word, BOOLEAN CS);
 EXPORT RESULT SPI_ReadBlock (SPI_DEVS Device, BYTE* Data,   UINT16 Cnt, BOOLEAN CS);
 
 
-
-#endif        // End DRV_SPI_H
+#endif   //  DRV_SPI_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.h $
@@ -319,3 +317,5 @@ EXPORT RESULT SPI_ReadBlock (SPI_DEVS Device, BYTE* Data,   UINT16 Cnt, BOOLEAN 
  * 
  *
  ***************************************************************************/
+
+

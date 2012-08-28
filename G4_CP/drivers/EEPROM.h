@@ -1,9 +1,7 @@
 #ifndef DRV_EEPROM_H
 #define DRV_EEPROM_H
-
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
    File:        EEPROM.h
@@ -109,6 +107,7 @@ EXPORT RESULT EEPROM_IsWriteInProgress(SPI_DEVS Device,
                                        BOOLEAN *IsWriteInProgress);
 
 
+#endif // DRV_EEPROM_H 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EEPROM.h $
@@ -156,6 +155,3 @@ EXPORT RESULT EEPROM_IsWriteInProgress(SPI_DEVS Device,
  * to PWES style blocks.
  *
  ***************************************************************************/
-
-#endif // DRV_EEPROM_H 
-

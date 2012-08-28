@@ -1,6 +1,6 @@
 #define TRIGGER_BODY
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        trigger.c

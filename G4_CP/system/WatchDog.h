@@ -1,9 +1,7 @@
 #ifndef WATCHDOG_H
 #define WATCHDOG_H
-
 /******************************************************************************
             Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:         WatchDog.h      
@@ -126,4 +124,4 @@ EXPORT void WatchdogReboot(BOOLEAN isNormalShutdown);
  * Created in $/software/control processor/code/system
  * FPGA Watchdog Implementation
  * 
- *************************************************************************/
+ ***************************************************************************/

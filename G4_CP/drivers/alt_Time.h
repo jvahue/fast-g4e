@@ -2,8 +2,7 @@
 #define ALT_TIME_H
 
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        alt_Time.h        
@@ -91,9 +90,8 @@ typedef struct
                              Package Exports Functions
 ******************************************************************************/
 
+
 #endif // ALT_TIME_H                             
-
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: alt_Time.h $
@@ -121,6 +119,4 @@ typedef struct
  * SCR #168 Update original time.h to alt_time.h
  *
  ***************************************************************************/
-
-
 

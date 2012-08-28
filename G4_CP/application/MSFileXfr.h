@@ -3,7 +3,6 @@
 
 /******************************************************************************
             Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:        MSFileXfr.h
@@ -64,6 +63,7 @@ typedef struct{
 EXPORT void MSFX_Init(void);
 
 
+#endif // MSFX_H    
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.h $
@@ -104,4 +104,3 @@ EXPORT void MSFX_Init(void);
  *
  *****************************************************************************/
 
-#endif // MSFX_H                            

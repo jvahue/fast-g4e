@@ -1,8 +1,7 @@
 #ifndef DATA_MNG_H
 #define DATA_MNG_H
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        DataManager.h
@@ -235,9 +234,8 @@ EXPORT void       DataMgrDownloadRun    ( BOOLEAN Run, INT32 param );
 EXPORT BOOLEAN    DataMgrIsFFDInhibtMode( void );
 BOOLEAN           DataMgrIsPortFFD      ( const ACS_CONFIG *ACS_Config );
 
-#endif 
 
-
+#endif // DATA_MNG_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $

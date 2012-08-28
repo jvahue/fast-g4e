@@ -1,7 +1,6 @@
 #define DIOMGR_BODY
 /******************************************************************************
             Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File: DIOMgr.c               

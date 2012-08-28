@@ -2,7 +2,6 @@
 #define TRIGGER_H
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
 
@@ -27,9 +26,9 @@
 #include "sensor.h"
 #include "Evaluator.h"
 
-/*****************************************************************************/
-/*                             Package Defines                               */
-/*****************************************************************************/
+/******************************************************************************
+                             Package Defines                               
+******************************************************************************/
 #define MAX_TRIG_EXPR_OPRNDS  8
 #define MAX_TRIGGERS         64
 #define MAX_TRIG_SENSORS      4
@@ -124,9 +123,9 @@
                                   TRIGGER_DEFAULT /*64*/
 
 
-/*****************************************************************************/
-/*                             Package Typedefs                              */
-/*****************************************************************************/
+/******************************************************************************
+                             Package Typedefs                              
+******************************************************************************/
 typedef enum 
 {
    TRIGGER_0   =   0, TRIGGER_1   =   1, TRIGGER_2   =   2, TRIGGER_3   =   3,
@@ -323,6 +322,7 @@ EXPORT BOOLEAN TriggerIsConfigured(INT32 trigIdx);
 EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSensrState);
 
 
+#endif // TRIGGER_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
@@ -473,9 +473,3 @@ EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSen
  * EQUAL and NOT_EQUAL. 
  * 
  ***************************************************************************/
- 
-
-
-#endif  /* TRIGGER_H */
-
-

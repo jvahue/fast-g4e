@@ -1,6 +1,6 @@
+#define QAR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        QARUserTables.c
@@ -14,6 +14,7 @@
 #ifndef QAR_MANAGER_BODY
 #error QARUserTables.c should only be included by QARManager.c
 #endif
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/    
@@ -22,6 +23,10 @@
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "CfgManager.h"
+
+/*****************************************************************************/
+/* Local Defines                                                             */  
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -762,5 +767,5 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
  * Updated in $/software/control processor/code/system
  * SCR 42 and SCR 106
 *
-*************************************************************************/
+****************************************************************************/
 

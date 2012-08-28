@@ -3,7 +3,6 @@
 
 /******************************************************************************
             Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTMgr.h
@@ -87,6 +86,7 @@ EXPORT BOOLEAN              FAST_FSMRfGetState       (INT32 param);
 EXPORT void                 FAST_FSMRfRun            (BOOLEAN Run,INT32 param);
 EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
 
+#endif // FASTMGR_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
@@ -171,4 +171,3 @@ EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
  *
  ***************************************************************************/
 
-#endif // FASTMGR_H

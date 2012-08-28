@@ -1,7 +1,6 @@
 #define INITIALIZATION_MANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:        InitializationManager.c
@@ -11,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 109 $  $Date: 12-08-16 4:15p $
+     $Revision: 109 $  $Date: 8/16/12 4:15p $
 
 ******************************************************************************/
 /*****************************************************************************/

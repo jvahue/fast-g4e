@@ -1,7 +1,6 @@
 #define WATCHDOG_BODY
 /******************************************************************************
-            Copyright (C) 2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        WatchDog.c 
@@ -23,6 +22,10 @@
 #include "Assert.h"
 
 /*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
 // Init flag values for normal shutdown/reboot
@@ -38,10 +41,6 @@
 extern BOOLEAN enableSdDump;
 extern void ReportCoverage(void);
 #endif
-
-/*****************************************************************************/
-/* Local Defines                                                             */
-/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Variables                                                           */

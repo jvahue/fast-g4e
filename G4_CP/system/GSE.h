@@ -2,8 +2,7 @@
 #define GSE_H
 
 /******************************************************************************
-          Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+          Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        GSE.h
@@ -94,9 +93,7 @@ EXPORT void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...);
 EXPORT void GSE_ToggleDisplayLiveStream(void);
 
 
-#endif        // End GSE_H
-
-
+#endif // GSE_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.h $
@@ -198,6 +195,5 @@ EXPORT void GSE_ToggleDisplayLiveStream(void);
  * SCR #87 Function Prototype
  * 
  *
- *************************************************************************/
- 
+ ***************************************************************************/
 

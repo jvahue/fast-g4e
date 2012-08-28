@@ -1,8 +1,7 @@
 #ifndef MEM_MNGR_H
 #define MEM_MNGR_H
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        MemManager.h
@@ -25,9 +24,9 @@
 #include "taskmanager.h"
 #include "resultcodes.h"
 
-/*****************************************************************************/
-/*                               Package Defines                             */
-/*****************************************************************************/
+/******************************************************************************
+                            Package Defines                             
+******************************************************************************/
 #define MEM_ALIGN32_MASK        0x03          // Mask to check 32 bit alignment
 #define MEM_END_HDR1            0x96690000    // 1st Unique Header Pattern
 #define MEM_END_HDR2            0xB5E24A1D    // 2nd Unique Header Pattern
@@ -38,9 +37,9 @@
 // Macro to align sizes to long word
 #define MEM_ALIGN_SIZE(size)    ((size + MEM_ALIGN32_MASK) & ~MEM_ALIGN32_MASK)
 
-/*****************************************************************************/
-/*                               Package Typedefs                            */
-/*****************************************************************************/
+/******************************************************************************
+                             Package Typedefs                            
+******************************************************************************/
 // Memory Block type describes the blocks within the Flash Memory 
 typedef enum
 {
@@ -211,6 +210,7 @@ EXPORT RESULT  MemStatusErase  ( MEM_BLOCK_TYPE nBlock, UINT32 nOffset,
                                  UINT32 nSize, BOOLEAN *bDone);
 
 
+#endif // MEM_MNGR_H 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.h $
@@ -269,4 +269,3 @@ EXPORT RESULT  MemStatusErase  ( MEM_BLOCK_TYPE nBlock, UINT32 nOffset,
  *
  ***************************************************************************/
 
-#endif // MEM_MNGR_H                             

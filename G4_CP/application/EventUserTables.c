@@ -1,3 +1,4 @@
+#define EVENT_USERTABLES_BODY
 /******************************************************************************
          Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
@@ -12,6 +13,7 @@ $Revision: 14 $  $Date: 8/15/12 7:18p $
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
 #endif
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -923,5 +925,5 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
  *
  *
  *
- **************************************************************************/
+ ***************************************************************************/
 

@@ -1,8 +1,7 @@
 #ifndef DRV_UART_H
 #define DRV_UART_H
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        UART.h
@@ -174,8 +173,7 @@ EXPORT __interrupt void UART_PSC2_ISR(void);
 EXPORT __interrupt void UART_PSC3_ISR(void);
 EXPORT void UART_PSCX_ISR( INT8 port);
 
-#endif        // End DRV_UART_H
-
+#endif // DRV_UART_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.h $
@@ -240,6 +238,3 @@ EXPORT void UART_PSCX_ISR( INT8 port);
  * 
  *
  ***************************************************************************/
- 
-
-

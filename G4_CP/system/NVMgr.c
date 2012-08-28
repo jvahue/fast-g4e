@@ -1,7 +1,6 @@
 #define SYS_NVMGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
                
  File:       NVMgr.c
@@ -61,6 +60,10 @@
 #include "TestPoints.h"
 
 /*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
 //Shadow array allocates a struct of two UINT8 vars for each sector to
@@ -79,15 +82,6 @@ typedef enum
   NV_FILE_DEV_MAX
 }NV_FILE_DEVS;
 
-
-/*****************************************************************************/
-/* Local Function Prototypes                                                 */
-/*****************************************************************************/
-void  NV_MgrTask(void *pParam);
-INT32 NV_FileDevToShadow(NV_FILE_ID File, NV_FILE_TYPE FileType);
-INT32 NV_FileShadowToDev(NV_FILE_ID File, NV_FILE_TYPE FileType);
-void  NV_CopyBackupToPrimaryShadow(NV_RUNTIME_INFO* File);
-void  NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File);
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -182,6 +176,15 @@ static NV_RUNTIME_INFO NV_RuntimeInfo[NV_MAX_FILE];
 static INT32 NV_DevSpaceUsed[NV_MAX_DEV];
 
 //#define DEBUG_NVMGR_TASK
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
+void  NV_MgrTask(void *pParam);
+INT32 NV_FileDevToShadow(NV_FILE_ID File, NV_FILE_TYPE FileType);
+INT32 NV_FileShadowToDev(NV_FILE_ID File, NV_FILE_TYPE FileType);
+void  NV_CopyBackupToPrimaryShadow(NV_RUNTIME_INFO* File);
+void  NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File);
 
 /*****************************************************************************/
 /* Public Functions                                                          */

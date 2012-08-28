@@ -41,6 +41,19 @@
 /* Local Typedefs                                                            */
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static ENGRUN_CFG    EngineRunCfg[MAX_ENGINES];
+static ENGRUN_DATA   EngineRunData[MAX_ENGINES];
+
+static ENGRUN_STARTLOG EngineStartLog[MAX_ENGINES];
+static ENGRUN_RUNLOG   EngineRunLog[MAX_ENGINES];
+
+
+// Include cmd tables and functions here after local dependencies are declared.
+#include "EngineRunUserTables.c"
+
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -67,21 +80,8 @@ static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_D
 static BOOLEAN EngRunIsError     (ENGRUN_CFG* pErCfg);
 
 /*****************************************************************************/
-/* Local Variables                                                           */
+/* Public Functions                                                          */                
 /*****************************************************************************/
-static ENGRUN_CFG    EngineRunCfg[MAX_ENGINES];
-static ENGRUN_DATA   EngineRunData[MAX_ENGINES];
-
-static ENGRUN_STARTLOG EngineStartLog[MAX_ENGINES];
-static ENGRUN_RUNLOG   EngineRunLog[MAX_ENGINES];
-
-
-// Include cmd tables and functions here after local dependencies are declared.
-#include "EngineRunUserTables.c"
-
-/*********************************************************************************************/
-/* Public Functions                                                                          */
-/*********************************************************************************************/
 
 /******************************************************************************
  * Function:     EngRunGetState

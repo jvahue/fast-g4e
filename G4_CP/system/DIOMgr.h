@@ -2,8 +2,7 @@
 #define DIOMGR_H
 
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:    DioMgr.h     
@@ -56,6 +55,7 @@ EXPORT void DIOMgr_FSMRunDIO(BOOLEAN Run, INT32 param);
 EXPORT BOOLEAN DIOMgr_FSMGetStateDIO(INT32 param);
 
 
+#endif // DIOMGR_H
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: DIOMgr.h $
@@ -85,4 +85,3 @@ EXPORT BOOLEAN DIOMgr_FSMGetStateDIO(INT32 param);
 *
 ***************************************************************************/
 
-#endif // DIOMGR_H

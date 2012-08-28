@@ -1,9 +1,7 @@
-#ifndef alt_stdtypes_h
-#define alt_stdtypes_h
-
+#ifndef alt_stdtypes_H
+#define alt_stdtypes_H
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:         alt_stdtypes.h
@@ -67,6 +65,17 @@
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
+
+/******************************************************************************
+Package Exports                               
+******************************************************************************/
+#undef EXPORT                                                                  
+
+#if defined ( ALT_STDTYPES_BODY )                                                  
+#define EXPORT                                                                 
+#else                                                                          
+#define EXPORT extern                                                          
+#endif                                                                         
 
 /******************************************************************************
                                    Numeric typedefs
@@ -156,8 +165,8 @@ typedef  UINT32 BITARRAY128[4];
                              Package Exports Functions
 ******************************************************************************/
 
-
-/*************************************************************************
+#endif // alt_stdtypes_H
+/******************************************************************************
  *  MODIFICATIONS
  *    $History: alt_stdtypes.h $
  * 
@@ -212,5 +221,5 @@ typedef  UINT32 BITARRAY128[4];
  * 
  * 
  *
- ***************************************************************************/
-#endif //alt_stdtypes_h
+ *****************************************************************************/
+

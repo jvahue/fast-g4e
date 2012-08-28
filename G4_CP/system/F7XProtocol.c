@@ -1,7 +1,7 @@
 #define F7X_PROTOCOL_BODY
+
 /******************************************************************************
             Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:        FX7Protocol.c
@@ -1982,6 +1982,10 @@ void F7XProtocol_DisableLiveStream(void)
 {
   m_F7X_Debug.bDebug = FALSE;
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*****************************************************************************
  *  MODIFICATIONS

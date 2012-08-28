@@ -1,6 +1,6 @@
+#define LOG_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        LogUserTables.c 
@@ -82,6 +82,11 @@ static USER_MSG_TBL LogRoot [] =
 
 
 static USER_MSG_TBL RootLogMsg = {"LOG",LogRoot,NULL,NO_HANDLER_DATA};
+
+
+/*****************************************************************************/
+/* Public Functions                                                          */  
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -271,4 +276,4 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
  * SCR 179
  *    Removed chip erase.
  *
- *************************************************************************/
+ ***************************************************************************/

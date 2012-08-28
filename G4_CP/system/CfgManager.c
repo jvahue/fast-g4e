@@ -1,7 +1,6 @@
 #define CMUTIL_BODY
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
 
@@ -634,6 +633,10 @@ void CfgMgr_GenerateDebugLogs(void)
 }
 /*vcast_dont_instrument_end*/
 #endif //GENERATE_SYS_LOGS
+
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 /*************************************************************************
  *  MODIFICATIONS

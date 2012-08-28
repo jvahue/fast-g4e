@@ -1,40 +1,39 @@
 #define DRV_ADC_BODY
 
-/*----------------------------------------------------------------------------
-            Copyright (C) 2007 - 2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+/******************************************************************************
+            Copyright (C) 2007 - 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
- *
- * File:        Adc.c
- *
- * Description: Driver for the LT1595 ADC, connected by the SPI bus
- *              This 12-bit single channel 4-input ADC is assumed to have 
- *              the following signals tied to its 4-input MUX
- *
- *              Mux Select  Channel                       Scale
- *              0           A/C Bus Voltage               
- *              1           Internal Li battery voltage   1V/V
- *              2           A/C Battery Voltage           
- *              3           FAST mainboard temperature    10mV/ *C .750V @ 25*C
- *
- * Requires:    DIO.h - Controlling the Li battery switch
- *              SPI.h - Accessing the SPI bus to read the converter
- *
- * VERSION
- *     $Revision: 27 $  $Date: 10/11/11 2:10p $ 
- *    
- *
- *--------------------------------------------------------------------------*/
+ 
+  File:        Adc.c
+ 
+  Description: Driver for the LT1595 ADC, connected by the SPI bus
+               This 12-bit single channel 4-input ADC is assumed to have 
+               the following signals tied to its 4-input MUX
+ 
+               Mux Select  Channel                       Scale
+               0           A/C Bus Voltage               
+               1           Internal Li battery voltage   1V/V
+               2           A/C Battery Voltage           
+               3           FAST mainboard temperature    10mV/ *C .750V @ 25*C
+
+  Requires:    DIO.h - Controlling the Li battery switch
+               SPI.h - Accessing the SPI bus to read the converter
+ 
+  VERSION
+      $Revision: 27 $  $Date: 10/11/11 2:10p $ 
+     
+ 
+******************************************************************************/
 
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Compiler Specific Includes                                               */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 #include "mcf548x.h"
 
-/*--------------------------------------------------------------------------*/
-/* Altair Specific Includes                                                 */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
 #include "SPI.h"
 #include "ADC.h"
 #include "DIO.h"
@@ -44,9 +43,9 @@
 
 #include "TestPoints.h"
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Local Defines                                                            */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 #define LI_BATT_ON    DIO_SetPin(LiBattToADC,DIO_SetHigh);
 #define LI_BATT_OFF   DIO_SetPin(LiBattToADC,DIO_SetLow);
 
@@ -57,17 +56,17 @@
 #define BATT_CAL_FACTOR1    -0.0029f
 #define BATT_CAL_FACTOR2     1.1001f
 #define MIN_OFF_VOLTAGE      0.5f
-/*---------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Local Typedefs                                                            */
-/*---------------------------------------------------------------------------*/
+/*****************************************************************************/
 typedef struct {
   FLOAT32 adcValue; 
   RESULT  adcResult; 
 } ADC_DATA; 
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Local Variables                                                          */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 
 const REG_SETTING ADC_Registers[] = 
@@ -82,16 +81,16 @@ const REG_SETTING ADC_Registers[] =
 static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX]; 
 
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Local Function Prototypes                                                */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 
 
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 /* Public Functions                                                         */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_Init
  *
  * Description: Setup the initial state for the ADC driver module.
@@ -107,7 +106,7 @@ static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX];
  * Returns:     Driver operation result: DRV_OK  : Conversion success
  *                                       !DRV_OK : See ResultCodes.h
  * Notes:       
- ****************************************************************************/
+ *****************************************************************************/
 RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   BOOLEAN bInitOk; 
@@ -148,7 +147,7 @@ RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   return pdest->result;
 }
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_GetACBusVoltage
  *
  * Description: Wrapper function for returning the Aircraft Bus voltage.
@@ -160,7 +159,7 @@ RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *
  * Notes:       Wrapper function for values managed by SpiManager 
  *
- ****************************************************************************/
+ *****************************************************************************/
 RESULT ADC_GetACBusVoltage(FLOAT32 *ACBusVoltage)
 {  
   FLOAT32         currVal; 
@@ -179,7 +178,7 @@ RESULT ADC_GetACBusVoltage(FLOAT32 *ACBusVoltage)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_GetACBattVoltage
  *
  * Description: Wrapper function for returning the current Aircraft Battery
@@ -191,7 +190,7 @@ RESULT ADC_GetACBusVoltage(FLOAT32 *ACBusVoltage)
  *
  * Notes:       Wrapper function for values managed via SpiManager
  *
- ****************************************************************************/
+ *****************************************************************************/
 RESULT ADC_GetACBattVoltage (FLOAT32* ACBattVoltage)
 {  
   FLOAT32         currVal; 
@@ -210,7 +209,7 @@ RESULT ADC_GetACBattVoltage (FLOAT32* ACBattVoltage)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_GetLiBattVoltage
  *
  * Description: Wrapper function for returning the lithium battery voltage 
@@ -222,7 +221,7 @@ RESULT ADC_GetACBattVoltage (FLOAT32* ACBattVoltage)
  *                                       !DRV_OK : See ResultCodes.h
  * Notes:       Wrapper function for values managed via SpiManager
  *
- ****************************************************************************/
+ *****************************************************************************/
 RESULT ADC_GetLiBattVoltage(FLOAT32* Voltage)
 {
   FLOAT32         currVal; 
@@ -242,7 +241,7 @@ RESULT ADC_GetLiBattVoltage(FLOAT32* Voltage)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_GetBoardTemp
  *
  * Description: Wrapper function for returning the temperature in *C from the
@@ -255,7 +254,7 @@ RESULT ADC_GetLiBattVoltage(FLOAT32* Voltage)
  *
  * Notes:       Wrapper function for values managed via SpiManager
  *
- ****************************************************************************/
+ *****************************************************************************/
 RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 {
   FLOAT32         currVal; 
@@ -274,7 +273,7 @@ RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
 * Function:    ADC_ReadACBusVoltage
 *
 * Description: Read and calculate the current Aircraft Bus voltage.
@@ -286,7 +285,7 @@ RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 *
 * Notes:       DO NOT CALL DIRECTLY, Call ADC_GetACBusVoltage 
 *
-****************************************************************************/
+*****************************************************************************/
 RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
 {
   UINT16 ADReading;
@@ -302,7 +301,7 @@ RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
 * Function:    ADC_ReadACBattVoltage
 *
 * Description: Read and calculate the current Aircraft Battery voltage.
@@ -314,7 +313,7 @@ RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
 *
 * Notes:       DO NOT CALL DIRECTLY, Call ADC_GetACBattVoltage
 *
-****************************************************************************/
+******************************************************************************/
 RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
 {
   UINT16 ADReading;
@@ -332,7 +331,7 @@ RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
 * Function:    ADC_ReadLiBattVoltage
 *
 * Description: Read the lithium battery voltage channel and convert A/D
@@ -344,7 +343,7 @@ RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
 *                                       !DRV_OK : See ResultCodes.h
 * Notes:       DO NOT CALL DIRECTLY, Call ADC_GetLiBattVoltage
 *
-****************************************************************************/
+******************************************************************************/
 RESULT ADC_ReadLiBattVoltage(FLOAT32* Voltage)
 {
   UINT16 ADReading;
@@ -357,7 +356,7 @@ RESULT ADC_ReadLiBattVoltage(FLOAT32* Voltage)
   return result;
 }
 
-/*****************************************************************************
+/******************************************************************************
 * Function:    ADC_ReadBoardTemp
 *
 * Description: Read and calculate the temperature in *C from the on-board
@@ -370,7 +369,7 @@ RESULT ADC_ReadLiBattVoltage(FLOAT32* Voltage)
 *
 * Notes:       DO NOT CALL DIRECTLY, Call SPIMgr_GetBoardTemp
 *
-****************************************************************************/
+******************************************************************************/
 RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
 {
   UINT16 ADReading;
@@ -384,7 +383,7 @@ RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_ReadRaw
  *
  * Description: Reads the 12-bit A/D converter result from the specified
@@ -410,7 +409,7 @@ RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
  *                of approximately 12us between turning on the switch to 
  *                when the mux switches to channel 1.  This assumes a 320kHz 
  *                SPI clock.
- ****************************************************************************/
+ ******************************************************************************/
 RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
 {
  UINT8  MuxSelect;
@@ -484,7 +483,7 @@ BOOLEAN ADC_SensorTest (UINT16 nIndex)
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * Function:    ADC_GetValue
  *
  * Description: This function is used by the sensor object to read the 
@@ -495,7 +494,7 @@ BOOLEAN ADC_SensorTest (UINT16 nIndex)
  * Returns:     fValue - float Value of the discrete
  *
  * Notes:       
- ****************************************************************************/
+ *****************************************************************************/
 FLOAT32 ADC_GetValue (UINT16 nIndex)
 {
    // Local Data
@@ -523,8 +522,11 @@ FLOAT32 ADC_GetValue (UINT16 nIndex)
    return (fValue);   
 }
 
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
-/*************************************************************************
+/******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
  * 
@@ -652,6 +654,6 @@ FLOAT32 ADC_GetValue (UINT16 nIndex)
  * Updates required for PM
  * 
  *
- ***************************************************************************/
+ *****************************************************************************/
  
 

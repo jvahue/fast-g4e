@@ -1,51 +1,50 @@
 #define DRV_RESULTCODES_BODY
 
-/*----------------------------------------------------------------------------
- *              Copyright (C) 2003 - 2010 Pratt & Whitney Engine Services, Inc
- *                          Altair Avionics Corporation
- *              All Rights Reserved.  Proprietary and Confidential.
- *
- *
- * File:        ResultCodes.c    
- *
- * Description: Provides stringification of the driver result codes.  Calling
- *              GetResultCodeString with the result of a driver function
- *              call returns a pointer to the string of that enumeration label.
- *
- *              
- *  VERSION
- *    $Revision: 14 $  $Date: 10/26/10 5:12p $ 
- *
- *--------------------------------------------------------------------------*/
+/******************************************************************************
+Copyright (C) 2003-2012 Pratt & Whitney Engine Services, Inc.                
+All Rights Reserved. Proprietary and Confidential.    
 
 
-/*--------------------------------------------------------------------------*/
-/* Compiler Specific Includes                                               */
-/*--------------------------------------------------------------------------*/
+ File:        ResultCodes.c    
+
+ Description: Provides stringification of the driver result codes.  Calling
+              GetResultCodeString with the result of a driver function
+              call returns a pointer to the string of that enumeration label.
+
+              
+  VERSION
+    $Revision: 14 $  $Date: 10/26/10 5:12p $ 
+
+******************************************************************************/
+
+
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
 #include "stdio.h"
 
-/*--------------------------------------------------------------------------*/
-/* Software Specific Includes                                               */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
 #include "alt_stdtypes.h"
 #include "ResultCodes.h"
 
-/*--------------------------------------------------------------------------*/
-/* Local Defines                                                            */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
 
 
-/*--------------------------------------------------------------------------*/
-/* Local Typedefs                                                           */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
 typedef struct{
   CHAR   Str[RESULTCODES_MAX_STR_LEN];
   RESULT Result;
 } RESULT_CODE_DESC;
 
-/*--------------------------------------------------------------------------*/
-/* Local Variables                                                          */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
 #undef  RESULT_CODE
 //Set the result code macro to stringify the enumerated list
 #define RESULT_CODE(label,value) {#label,label}, 
@@ -57,13 +56,13 @@ CHAR resultStr[RESULTCODES_MAX_STR_LEN];
 //define a constant for the number of elements in the ResultCodesStrings array
 #define NUM_OF_RESULT_CODES (sizeof(CodeDescriptions)/sizeof(RESULT_CODE_DESC))
 
-/*--------------------------------------------------------------------------*/
-/* Local Function Prototypes                                                */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
 
-/*--------------------------------------------------------------------------*/
-/* Public Functions                                                         */
-/*--------------------------------------------------------------------------*/
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************
  * Function:    RcGetResultCodeString
@@ -80,7 +79,7 @@ CHAR resultStr[RESULTCODES_MAX_STR_LEN];
  * Notes:       outstr should point to a string RESULTCODES_MAX_STR_LEN
  *              bytes long
  *              
- ****************************************************************************/
+ *****************************************************************************/
 const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr)
 {
   UINT32 i;
@@ -100,7 +99,11 @@ const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr)
   return outstr;
 }
 
-/*************************************************************************
+/*****************************************************************************/
+/* Local Functions                                                           */  
+/*****************************************************************************/
+
+/******************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.c $
  * 
@@ -137,4 +140,4 @@ const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr)
  * SCR# 472 - Fix file/function header
  * 
  *
- ***************************************************************************/
+ ******************************************************************************/

@@ -1,8 +1,7 @@
 #define AIRCRAFTCONFIGMGR_BODY
 
 /******************************************************************************
-          Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
   File:          AircraftConfigMgr.c
@@ -21,19 +20,6 @@
 
 #include "TestPoints.h"
 
-/*****************************************************************************/
-/* Software defines                                                          */
-/*****************************************************************************/
-#define AC_CFG_STS_LOG_SIZE 8
-//Shortened up version of strncpy_safe for use with direct object references.
-#define sstrncpy(dest, source) strncpy_safe(dest, sizeof(dest), source,_TRUNCATE);
-#define EE_FILE_MAGIC_NUMBER 0x600DF00D
-//Number of times to retry getting the configuration status from the 
-//Micro-Server.  10 seconds is long enough, that in the event the CP is unable
-//to send the status command, and the Micro-Server is still sending .cfg commands,
-//that it should be able to finish sending .cfg commands before recfg finally gives
-//up
-#define AC_CFG_GET_STATUS_RETRY_CNT 10
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -82,6 +68,23 @@ CHAR *ACUpdateMethod[] =
     "NULL"
   };
   
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
+#define AC_CFG_STS_LOG_SIZE 8
+//Shortened up version of strncpy_safe for use with direct object references.
+#define sstrncpy(dest, source) strncpy_safe(dest, sizeof(dest), source,_TRUNCATE);
+#define EE_FILE_MAGIC_NUMBER 0x600DF00D
+//Number of times to retry getting the configuration status from the 
+//Micro-Server.  10 seconds is long enough, that in the event the CP is unable
+//to send the status command, and the Micro-Server is still sending .cfg commands,
+//that it should be able to finish sending .cfg commands before recfg finally gives
+//up
+#define AC_CFG_GET_STATUS_RETRY_CNT 10
+
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
 typedef enum {
   TASK_STOPPED,
   TASK_WAIT,
@@ -110,47 +113,6 @@ typedef struct
   FLOAT32 Fleet;
   FLOAT32 Number;
 }AC_SENSOR_VALUES;
-
-/*****************************************************************************/
-/* Local Function Prototypes                                                 */
-/*****************************************************************************/
-static void    AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData, 
-                               UINT16 Size, MSI_RSP_STATUS Status);
-static void    AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData, 
-                               UINT16 Size, MSI_RSP_STATUS Status);
-static void    AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData, 
-                               UINT16 Size, MSI_RSP_STATUS Status);
-
-
-static void    AC_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
-                               MSI_RSP_STATUS Status);
-static void    AC_MSRspCancelCfg(UINT16 Id, void* PacketData, UINT16 Size,
-                               MSI_RSP_STATUS Status);
-static BOOLEAN AC_IsAircraftIDSensorsValid(void);
-static void    AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number);
-
-static void AC_WaitMSSIMRdy(void);
-static void AC_StartManual(void);
-static void AC_StartAuto(void);
-//static void AC_WaitLogUpload(void);
-static void AC_WaitVPNConnection(void);
-static void AC_ProcessRetrieveCfg(void);
-static void AC_ValidateAcID(void);
-static void AC_SendGetCfgLoadSts(void);
-static void AC_ProcessGetCfgLoadSts(void);
-static void AC_WaitLogUploadBeforeCommit(void);
-static void AC_WaitForCommitCommand(void);
-static void AC_CommitCfg(void);
-static void AC_Rebooting(void);                                                      
-
-static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *Str);
-static void AC_Error(INT8* Str);
-static void AC_Signal(BOOLEAN Success);
-static void AC_SetCfgStatus(INT8* Str);
-static void AC_Task ( void *pParam );
-
-static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed );
-
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -191,6 +153,47 @@ static struct {
 
 #include "AircraftConfigMgrUserTables.c"  // Include cmd tables & functions .c
 
+
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/			  
+static void    AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData, 
+                               UINT16 Size, MSI_RSP_STATUS Status);
+static void    AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData, 
+                               UINT16 Size, MSI_RSP_STATUS Status);
+static void    AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData, 
+                               UINT16 Size, MSI_RSP_STATUS Status);
+
+
+static void    AC_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
+                               MSI_RSP_STATUS Status);
+static void    AC_MSRspCancelCfg(UINT16 Id, void* PacketData, UINT16 Size,
+                               MSI_RSP_STATUS Status);
+static BOOLEAN AC_IsAircraftIDSensorsValid(void);
+static void    AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number);
+			  
+static void AC_WaitMSSIMRdy(void);
+static void AC_StartManual(void);
+static void AC_StartAuto(void);
+//static void AC_WaitLogUpload(void);
+static void AC_WaitVPNConnection(void);
+static void AC_ProcessRetrieveCfg(void);
+static void AC_ValidateAcID(void);
+static void AC_SendGetCfgLoadSts(void);
+static void AC_ProcessGetCfgLoadSts(void);
+static void AC_WaitLogUploadBeforeCommit(void);
+static void AC_WaitForCommitCommand(void);
+static void AC_CommitCfg(void);
+static void AC_Rebooting(void);                                                      
+
+static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *Str);
+static void AC_Error(INT8* Str);
+static void AC_Signal(BOOLEAN Success);
+static void AC_SetCfgStatus(INT8* Str);
+static void AC_Task ( void *pParam );
+
+static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed );			  
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -1709,6 +1712,9 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
   memcpy ( ACCfg_Packed->Style, ACCfg->Style, AIRCRAFT_CONFIG_STR_LEN);
   
 }
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 
 /*************************************************************************

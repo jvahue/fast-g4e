@@ -1,7 +1,6 @@
-
+#define MSFX_USERTABLES_BODY
 /******************************************************************************
             Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:        MSFileXfrUserTables.c
