@@ -10,7 +10,7 @@
                  the CP GSE port.
 
     VERSION
-    $Revision: 13 $  $Date: 7/19/12 10:41a $   
+    $Revision: 14 $  $Date: 8/27/12 6:03p $   
     
 ******************************************************************************/
 
@@ -102,7 +102,7 @@ USER_MSG_TBL MSFXMsgsTbl[] =
   {"STATUS",             NO_NEXT_TABLE, MSFX_GetStsUserCmd, USER_TYPE_ENUM,   USER_RO,              NULL,                                  -1, -1,    NO_LIMIT,           MSFXStateEnumTbl},
   {"GET_TXD_LIST",       NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
   {"GET_TXD_PRI4_LIST",  NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQPRI4_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
-  {"GET_UNTXD_LIST",     NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_TXD_FILE_LIST,      -1, -1,    NO_LIMIT,           NULL},
+  {"GET_UNTXD_LIST",     NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQUEST_NON_TXD_FILE_LIST,  -1, -1,    NO_LIMIT,           NULL},
   {"GET_UNTXD_PRI4_LIST",NO_NEXT_TABLE, MSFX_GetListUserCmd,USER_TYPE_ACTION, (USER_RO|USER_GSE),  (void*)TASK_REQPRI4_NON_TXD_FILE_LIST,  -1, -1,    NO_LIMIT,           NULL},  
   {"MARK_FILE_TXD",      NO_NEXT_TABLE, MSFX_MarkFileTxdCmd,USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},   
   {"GET_FILE",           NO_NEXT_TABLE, MSFX_GetFileUserCmd,USER_TYPE_STR,    (USER_WO|USER_GSE),   NULL,                                  -1, -1,    1, MSFX_MAX_FN_STR, NULL},
@@ -273,6 +273,11 @@ USER_HANDLER_RESULT MSFX_GetStsUserCmd(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfrUserTables.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Jim Mood     Date: 8/27/12    Time: 6:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 Caravan Requirement updates
  * 
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 10:41a
