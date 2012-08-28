@@ -42,14 +42,22 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define MAX_FP_STRING 32
-#define MAX_PRIOR_VALUES 50
+#define MAX_FP_STRING         32
+#define MAX_PRIOR_VALUES      50
+#define MAX_TEMP_PRIOR_VALUES 16
 
 
 #define RPN_PUSH(obj)  (rpn_stack[rpn_stack_pos++] = (obj))
 #define RPN_POP        (rpn_stack[--rpn_stack_pos])
 #define RPN_STACK_CNT  (rpn_stack_pos)
 #define RPN_STACK_PURGE rpn_stack_pos = 0;
+
+
+// Macro for building GUID table key for PRIOR_SENSOR_ENTRY
+#define EVAL_MAKE_LOOKUP_KEY (type,obj,snsr)\
+                             ((type << 16) |\
+                              (obj  <<  8) |\
+                              (snsr));
 
 
 //#define DEBUG_EVALUATOR
@@ -100,9 +108,14 @@ INT32          rpn_stack_pos = 0;
 
 // Array for storing prior sensors values for all managed expressions.
 
-static PRIOR_SENSOR_ENTRY prevValues[MAX_PRIOR_VALUES];
-static UINT8 prevSensorTableCnt = 0;
-static BOOLEAN bTableFullReported = FALSE;
+static PRIOR_SENSOR_ENTRY m_prevValues[MAX_PRIOR_VALUES];
+static UINT8              m_prevSensorCnt = 0;
+static BOOLEAN            m_bTableFullReported = FALSE;
+
+static PRIOR_SENSOR_ENTRY m_tempPrevValues[MAX_TEMP_PRIOR_VALUES];
+static UINT8              m_tempPrevValuesCnt = 0;
+static UINT8              m_objType;  // Object type of current caller
+static UINT8              m_objId;    // Index/id of the Object type
 
 
 /*****************************************************************************/
@@ -116,12 +129,13 @@ static INT8    EvalGetValidCnt     ( const EVAL_RPN_ENTRY* operandA,
 static BOOLEAN EvalVerifyDataType  ( DATATYPE expectedType, const EVAL_RPN_ENTRY* opA,
                                      const EVAL_RPN_ENTRY* opB);
 
-static BOOLEAN EvalGetPrevSensorValue(UINT32 cmdAddress,
+static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
                                       FLOAT32* fPriorValue,
                                       BOOLEAN* bPriorValid);
-static void    EvalSetPrevSensorValue(UINT32 cmdAddress,
+static void    EvalSetPrevSensorValue(UINT32 key,
                                       FLOAT32 fValue,
                                       BOOLEAN bValid);
+static void    EvalUpdatePrevSensorList(void);
 
 /*********************************************************************************************/
 /* Local Functions                                                                           */
@@ -337,7 +351,8 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
  * Notes:
  *
  *****************************************************************************/
-INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
+INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
+                         const EVAL_EXPR* expr, BOOLEAN* validity)
 {
 
   INT32   i;
@@ -359,6 +374,13 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
   // Init the stack to empty
   rpn_stack_pos = 0;
 
+  // Set the module vars to reflect the type and id of the current caller
+  // so all Evaluator functions will have use-context as needed.
+  // This is re-entrant-safe because all Evaluator users are DT's so pre-emption should not
+  // be an issue.
+  m_objType = (UINT8)objType;
+  m_objId   = (UINT8)objId;
+
 
   for( i = 0; i < expr->Size; i++ )
   {
@@ -377,6 +399,12 @@ INT32 EvalExeExpression (const EVAL_EXPR* expr, BOOLEAN* validity)
       break;
     }
   } // for-loop cmd list
+
+  
+  if(m_tempPrevValuesCnt != 0 )
+  {
+    EvalUpdatePrevSensorList();
+  }
 
   // At this point there should be only a single item on the stack with the
   // results of the expression processing or in the event of an error, the error status.
@@ -871,6 +899,7 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
   EVAL_RPN_ENTRY rslt;
+  UINT32         key;
 
 
   // Need one operand off stack
@@ -889,14 +918,20 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
     {
       // Lookup/add the previous-sensor for this cmd and make an R-side operand
       oprndPrevious.DataType = DATATYPE_VALUE;
-      if (EvalGetPrevSensorValue( (UINT32)cmd, &oprndPrevious.Data, &oprndPrevious.Validity) )
+
+      // Lookup the previous sensor value for this reference.
+      // Make the lookup key using caller type, the objectId holding this expression, and the
+      // sensor being referenced.
+      key = EVAL_MAKE_LOOKUP_KEY(m_objType,m_objId,cmd->Data);
+
+      if (EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity) )
       {
         rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
         rslt.DataType = DATATYPE_BOOL;
         rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
 
         // Store the current sensor value & validity in the prev table for next time.
-        EvalSetPrevSensorValue( (UINT32)cmd, oprndCurrent.Data ,oprndCurrent.Validity );
+        EvalSetPrevSensorValue( key, oprndCurrent.Data ,oprndCurrent.Validity );
       }
       else
       {
@@ -905,10 +940,10 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
         rslt.Data     = FALSE;
         rslt.DataType = DATATYPE_BOOL;
         rslt.Validity = FALSE;
-        if (!bTableFullReported)
+        if (!m_bTableFullReported)
         {
           GSE_DebugStr(NORMAL,FALSE,"!P storage table is FULL.");
-          bTableFullReported = TRUE;
+          m_bTableFullReported = TRUE;
         }
       }      
     }
@@ -1420,48 +1455,36 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  * Notes:  
  *
  *****************************************************************************/
-static BOOLEAN EvalGetPrevSensorValue(UINT32 keyCmdAddress,
+static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
                                       FLOAT32* fPriorValue,
                                       BOOLEAN* bPriorValid)
 {
   INT16 i;
   INT16 index = -1; // Init index to "not found"    
 
-  for(i = 0; i < prevSensorTableCnt; ++i)
+  
+  // Search thru the general table to see if this
+  // sensor is already being managed
+  for(i = 0; i < m_prevSensorCnt; ++i)
   {
-    if (prevValues[i].CmdAddress == keyCmdAddress)
+    if (m_prevValues[i].KeyField == key)
     {
-      index = i;     
+      index = i;
       break;
     }
   }
-
-  // Entry not found and there is enough room for at least one one more...
-  // Add a initialized entry to table.
-  // priorSensorTableCnt is the number allocated AND the next entry to use.
-  if ( (-1 ==  index) && prevSensorTableCnt < MAX_PRIOR_VALUES )
-  { 
-    index  = prevSensorTableCnt;
-    prevValues[index].CmdAddress  = keyCmdAddress;
-    prevValues[index].PriorValue  = 0.f;
-    prevValues[index].PriorValid  = TRUE;
-    //GSE_DebugStr(NORMAL,FALSE,"prevValues[%02d] Added: 0x%08X",index,keyCmdAddress);
-    ++prevSensorTableCnt;
-  }
-
-
-  // If we found or created the table entry, return values.
+  
+  // If we found the table entry, return values.
   if (-1 != index)
   {
-    *fPriorValue = prevValues[index].PriorValue;
-    *bPriorValid = prevValues[index].PriorValid;
+    *fPriorValue = m_prevValues[index].PriorValue;
+    *bPriorValid = m_prevValues[index].PriorValid;
   }
   else
   {
     *fPriorValue = 0.f;
     *bPriorValid = FALSE;
-  }
-  
+  }  
   return ( -1 != index );
 }
 
@@ -1470,7 +1493,8 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 keyCmdAddress,
  * Function: EvalSetPrevSensorValue
  *
  * Description: Stores the passed value as the prior sensor value for the !P
- *              cmd at the passed address.
+ *              cmd in the temporary table. ( This table's contents will be merged
+ *              into the m_prevValues at the end of processing for this expression.
  *
  * Parameters:    [in]
  *
@@ -1482,7 +1506,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 keyCmdAddress,
  *
  *
  *****************************************************************************/
-static void EvalSetPrevSensorValue(UINT32 keyCmdAddress,
+static void EvalSetPrevSensorValue(UINT32 key,
                                     FLOAT32 fValue,
                                     BOOLEAN bValid)
 {
@@ -1491,12 +1515,12 @@ static void EvalSetPrevSensorValue(UINT32 keyCmdAddress,
   // Lookup the entry and update it.
   // If table is full it will be caught when trying to add
   // entry so its OK if this loop doesn't find the entry.
-  for(i = 0; i < prevSensorTableCnt; ++i)
+  for(i = 0; i < m_prevSensorCnt; ++i)
   {
-    if (prevValues[i].CmdAddress == keyCmdAddress)
+    if (m_prevValues[i].KeyField == key)
     {
-      prevValues[i].PriorValue = fValue;
-      prevValues[i].PriorValid = bValid;     
+      m_prevValues[i].PriorValue = fValue;
+      m_prevValues[i].PriorValid = bValid;     
       break;
     }
   }
