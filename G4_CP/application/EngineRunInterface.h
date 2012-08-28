@@ -3,7 +3,6 @@
 
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:         EngineRunInterface.h
@@ -67,6 +66,7 @@ EXPORT UINT32  EngRunGetStartingTime  (ENGRUN_INDEX engId);
 
 
 #endif // ENGINERUN_INTERFACE_H
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRunInterface.h $

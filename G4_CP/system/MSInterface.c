@@ -1,8 +1,6 @@
 #define SYS_MSINTERFACE_BODY
-
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
                
   File:          MSInterface.c      
@@ -1148,5 +1146,5 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
  * SCR #87 Function Prototype
  * 
  *
- *************************************************************************/
+ ***************************************************************************/
  

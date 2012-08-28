@@ -1,6 +1,6 @@
+#define F7X_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        F7XUserTables.c
@@ -26,7 +26,7 @@
 
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 #define MAX_LABEL_CHAR_ARRAY 128
 #define MAX_VALUE_CHAR_ARRAY 32
@@ -309,7 +309,13 @@ USER_MSG_TBL F7XProtocolRootTblPtr = {"F7X",F7XProtocolRoot,NULL,NO_HANDLER_DATA
 USER_MSG_TBL F7XProtocolDumpListTblPtr = {"F7X_DUMPLIST",F7XDumpListRoot,NULL,NO_HANDLER_DATA};
 USER_MSG_TBL F7XProtocolParamTblPtr = {"F7X_PARAM",F7XParamRoot,NULL,NO_HANDLER_DATA};
 
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */ 
+/*****************************************************************************/
 
+/*****************************************************************************/
+/* Public Functions                                                          */  
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */

@@ -3,7 +3,6 @@
 
 /******************************************************************************
             Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTStateMgr.h
@@ -193,6 +192,9 @@ typedef struct{
 EXPORT void FSM_Init(void);
 EXPORT BOOLEAN FSM_GetIsTimerExpired(INT32 param);
 EXPORT BOOLEAN FSM_GetStateFALSE(INT32 param);
+
+
+#endif // FASTSTATEMGR_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.h $
@@ -227,5 +229,3 @@ EXPORT BOOLEAN FSM_GetStateFALSE(INT32 param);
  * User: Jim Mood     Date: 7/20/11    Time: 10:03a
  * Created in $/software/control processor/code/application
  ***************************************************************************/
-
-#endif // FASTSTATEMGR_H

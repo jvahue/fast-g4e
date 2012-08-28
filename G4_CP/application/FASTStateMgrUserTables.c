@@ -1,6 +1,6 @@
+#define FASTSTATEMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        FastMgrUserTables.c
@@ -11,10 +11,17 @@
    $Revision: 6 $  $Date: 10/11/11 5:31p $
     
 ******************************************************************************/
-
 #ifndef FASTSTATEMGR_BODY
 #error FastStateMgrUserTables.c should only be included by FASTStateMgr.c
 #endif
+
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
 
 #include "utility.h"
 /*****************************************************************************/
@@ -805,6 +812,10 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
   return result;
 }
 
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
+
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTStateMgrUserTables.c $
@@ -838,4 +849,4 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
  * *****************  Version 1  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:03a
  * Created in $/software/control processor/code/application
-*************************************************************************/
+****************************************************************************/

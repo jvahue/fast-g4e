@@ -1,6 +1,6 @@
+#define CYCLE_USERTABLE_BODY
 /******************************************************************************
 Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
 All Rights Reserved. Proprietary and Confidential.
 
 File:          CycleUserTables.c
@@ -152,7 +152,7 @@ static USER_MSG_TBL RootCycleMsg = {"CYCLE",CycleCmd, NULL,NO_HANDLER_DATA};
 * Returns:      USER_HANDLER_RESULT
 *
 * Notes:
-*****************************************************************************/
+******************************************************************************/
 
 USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
                                 USER_MSG_PARAM Param,
@@ -194,7 +194,7 @@ USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
 * Returns:      USER_HANDLER_RESULT
 *
 * Notes:
-*****************************************************************************/
+******************************************************************************/
 
 USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
                                 USER_MSG_PARAM Param,
@@ -331,7 +331,9 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 
 
 
-
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/
 
 
 /*************************************************************************

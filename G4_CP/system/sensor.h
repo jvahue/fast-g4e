@@ -2,7 +2,6 @@
 #define SENSOR_H
 /******************************************************************************
             Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
  
    File: sensor.h
@@ -543,6 +542,8 @@ EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
                                         INT32  snsrMaskSizeBytes);
 EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
 
+
+#endif // SENSOR_H
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
@@ -702,4 +703,4 @@ EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
  * Implemented missing requirements.
  *
  ******************************************************************************/
-#endif  /* SENSOR_H */
+

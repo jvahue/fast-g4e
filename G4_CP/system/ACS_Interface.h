@@ -1,8 +1,7 @@
 #ifndef ACS_INTERFACE_H
 #define ACS_INTERFACE_H
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        ACS_Interface.h
@@ -106,6 +105,10 @@ typedef struct
 typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 
 /******************************************************************************
+                                 Package Typedefs
+******************************************************************************/
+
+/******************************************************************************
                                  Package Exports
 ******************************************************************************/
 #undef EXPORT
@@ -124,9 +127,8 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
                              Package Exports Functions
 ******************************************************************************/
 
-#endif 
 
-
+#endif // ACS_INTERFACE_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $

@@ -1,6 +1,6 @@
+#define BOX_USERTABLE_BODY
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File: BoxUserTables.c
@@ -35,6 +35,10 @@
 #ifndef INSTALL_STR_LIMIT
 #define INSTALL_STR_LIMIT 0,TEXT_BUF_SIZE
 #endif
+
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -201,7 +205,9 @@ static USER_MSG_TBL BoxMsgs[] =
 USER_MSG_TBL BoxRoot   = {"BOX",BoxMsgs,NULL,NO_HANDLER_DATA};
 
 
-
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */

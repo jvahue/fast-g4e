@@ -1,12 +1,11 @@
 #define CYCLE_BODY
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
-    FILE:        cycle.c
+    File:         Cycle.c
 
-    DESCRIPTION
+    Description:
         Cycle runtime processing
 
         An Cycle is an indication that some measured input has exceeded
@@ -119,9 +118,9 @@ static void    CycleSyncPersistFiles(BOOLEAN bNow);
 #include "CycleUserTables.c"
 
 
-/*********************************************************************************************/
-/* Public Functions                                                                          */
-/*********************************************************************************************/
+/*****************************************************************************/
+/* Public Functions                                                          */               
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:     CycleUpdateAll
@@ -1132,4 +1131,4 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
  * User: Contractor V&v Date: 5/10/12    Time: 6:42p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Cycle 
- *************************************************************************/
+ ***************************************************************************/

@@ -2,8 +2,7 @@
 #define AMD_FUJI_SCS_H
 
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        AmdFujiSCS.h
@@ -120,8 +119,9 @@ EXPORT void AmdFujiSCS_SectorEraseCmd       (FLASHDATA *BaseAddr, FLASHADDR offs
 EXPORT void AmdFujiSCS_ChipErase            (FLASHDATA *BaseAddr);
 EXPORT FLASH_STATUS AmdFujiSCS_GetStatus    (FLASHDATA *BaseAddr, FLASHADDR offset, 
                                              BOOLEAN WriteBufferProgramming);
-#endif // AMD_FUJI_SCS_H                             
 
+
+#endif // AMD_FUJI_SCS_H                             
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AmdFujiSCS.h $

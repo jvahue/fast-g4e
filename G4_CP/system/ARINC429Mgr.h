@@ -1,8 +1,7 @@
 #ifndef ARINC429MGR_H
 #define ARINC429MGR_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Arinc429Mgr.h      
@@ -10,7 +9,7 @@
     Description: Contains data structures related to the Arinc429 
     
 VERSION
-     $Revision: 11 $  $Date: 12-07-13 9:03a $
+     $Revision: 11 $  $Date: 7/13/12 9:03a $
     
 ******************************************************************************/
 

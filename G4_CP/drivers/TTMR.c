@@ -1,8 +1,7 @@
 #define DRV_TTMR_BODY
 
 /******************************************************************************
-           Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.                 
                All Rights Reserved.  Proprietary and Confidential.
 
 
@@ -351,6 +350,9 @@ void TTMR_GetLastIntLvl(UINT32* IntLvl)
    return (TestCounter); 
  }
 
+/*****************************************************************************/
+/* Local Functions                                                           */ 
+/*****************************************************************************/ 
 
 /*************************************************************************
  *  MODIFICATIONS

@@ -2,8 +2,7 @@
 #define FASTSTATEMGRINTERFACES_H
 
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTStateMgrInterfaces.h
@@ -111,6 +110,8 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
                              Package Exports Functions
 ******************************************************************************/
 
+
+#endif // FASTSTATEMGRINTERFACES_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
@@ -140,6 +141,4 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
  * User: Jim Mood     Date: 7/20/11    Time: 10:03a
  * Created in $/software/control processor/code/application
  ***************************************************************************/
-
-#endif // FASTSTATEMGRINTERFACES_H
 

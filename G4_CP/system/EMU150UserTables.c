@@ -1,6 +1,6 @@
+#define EMU150_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EMU150UserTables.c
@@ -26,7 +26,7 @@
 
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 
@@ -143,6 +143,13 @@ USER_MSG_TBL EMU150ProtocolRoot[] =
 
 USER_MSG_TBL EMU150ProtocolRootTblPtr = {"EMU150",EMU150ProtocolRoot,NULL,NO_HANDLER_DATA};
 
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */ 
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Public Functions                                                          */ 
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */

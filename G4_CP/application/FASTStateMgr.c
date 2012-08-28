@@ -1,7 +1,6 @@
 #define FASTSTATEMGR_BODY
 /******************************************************************************
-            Copyright (C) 2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTStateMgr.c
@@ -86,9 +85,7 @@ static const FSM_STATE m_InitState = FSM_INIT_STATE;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
+
 static INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states);
 static INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin);
 static void  FSM_TCBinToStr( CHAR* str, FSM_TC* bin );

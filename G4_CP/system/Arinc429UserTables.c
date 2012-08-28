@@ -1,6 +1,6 @@
+#define ARINC429_USERTABLE_BODY
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Arinc429UserTables.c
@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 40 $  $Date: 12-07-13 9:03a $
+     $Revision: 40 $  $Date: 7/13/12 9:03a $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -3138,6 +3138,14 @@ USER_MSG_TBL Arinc429RootTblPtr = {"ARINC429", Arinc429Root, NULL, NO_HANDLER_DA
 
 #pragma ghs endnowarning
 
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */  
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Public Functions                                                          */  
+/*****************************************************************************/								  
+								  
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/

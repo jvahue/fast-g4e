@@ -1,6 +1,6 @@
+#define POWERMANAGER_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        PowerManagerUserTables.c
@@ -21,6 +21,10 @@
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Defines                                                             */  
 /*****************************************************************************/
 
 /*****************************************************************************/

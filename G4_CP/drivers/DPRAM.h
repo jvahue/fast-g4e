@@ -1,9 +1,7 @@
 #ifndef DRV_DPRAM_H
 #define DRV_DPRAM_H
-
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
   File:          DPRAM.h
@@ -134,9 +132,8 @@ EXPORT void DPRAM_KickMS(void);
 EXPORT RESULT DPRAM_InitStatus(void);
 EXPORT __interrupt void DPRAM_EP5_ISR(void);
 
+
 #endif // DRV_DPRAM_H
-
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DPRAM.h $

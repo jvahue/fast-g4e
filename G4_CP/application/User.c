@@ -1,7 +1,6 @@
 #define USER_BODY
 /******************************************************************************
             Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
 
     File:       User.c

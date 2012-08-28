@@ -1,6 +1,7 @@
+#define AIRCFGMGR_USERTABLES_BODY
+
 /******************************************************************************
-Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
+		Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
 All Rights Reserved. Proprietary and Confidential.
 
 File:          AircraftConfigMgrUserTables.c
@@ -11,6 +12,7 @@ VERSION
 $Revision: 15 $  $Date: 9/03/10 1:49p $ 
 
 ******************************************************************************/
+
 #ifndef AIRCRAFTCONFIGMGR_BODY
 #error AircraftConfigMgrUserTables.c should only be included by AircraftConfigMgr.c
 #endif
@@ -454,7 +456,9 @@ USER_HANDLER_RESULT AircraftShowConfig(USER_DATA_TYPE DataType,
   }  
   return result;
 }
-
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 
 

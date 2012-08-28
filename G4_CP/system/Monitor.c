@@ -1,8 +1,6 @@
 #define MONITOR_BODY
-
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
  
@@ -2194,4 +2192,4 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
  * Removed DebugStr and moved implementation to Fault Mgr.  Updated file
  * header to the new "P&W ES" format.  
  *
- *************************************************************************/
+ ***************************************************************************/

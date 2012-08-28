@@ -1,9 +1,7 @@
 #ifndef UTILITY_H
 #define UTILITY_H
-
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         Utility.h
@@ -243,4 +241,4 @@ EXPORT void DumpMemory(UINT8* addr, UINT32 size, CHAR* string);
  * Updated in $/control processor/code/system
  *
  *
- *************************************************************************/
+ ****************************************************************************/

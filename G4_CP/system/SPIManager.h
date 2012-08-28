@@ -2,8 +2,7 @@
 #define SPI_MANAGER_H
 
 /******************************************************************************
-            Copyright (C) 2010-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2010-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:         SPIManager.h
@@ -185,7 +184,6 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
 
 
 #endif // SPI_MANAGER_H        
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.h $
@@ -242,4 +240,3 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
  * 
  *
  *****************************************************************************/
-                                            

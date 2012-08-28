@@ -2,7 +2,6 @@
 #define INITIALIZATION_MANAGER_H
 /******************************************************************************
             Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
                All Rights Reserved. Proprietary and Confidential.
  
   File:        InitializationManager.h
@@ -12,7 +11,7 @@
  VERSION
      $Revision: 5 $  $Date: 7/27/10 2:26p $
 
- *****************************************************************************/
+******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -51,6 +50,8 @@
 EXPORT void Im_InitializeControlProcessor(void);
 EXPORT void Im_StartupTickHandler        (void);
 
+
+#endif // INITIALIZATION_MANAGER_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.h $
@@ -73,7 +74,6 @@ EXPORT void Im_StartupTickHandler        (void);
  *
  ***************************************************************************/
  
- #endif        // End INITIALIZATION_MANAGER_H
 
 // End Of File
 

@@ -1,6 +1,6 @@
+#define DIOMGR_USERTABLE_BODY
 /******************************************************************************
-Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
-Altair Engine Diagnostic Solutions
+Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
 All Rights Reserved. Proprietary and Confidential.
 
 File:        DioMgrUserTables.c
@@ -28,6 +28,9 @@ $Revision: 9 $  $Date: 10/18/10 11:59a $
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Local Defines                                                             */ 
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -94,6 +97,10 @@ static USER_MSG_TBL DIOCmd [] =
 
 
 static USER_MSG_TBL DioMgr_RootMsg = {"DIO",DIOCmd,NULL,NO_HANDLER_DATA};
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */

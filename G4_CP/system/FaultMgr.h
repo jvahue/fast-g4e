@@ -1,8 +1,7 @@
 #ifndef FAULTMGR_H
 #define FAULTMGR_H
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:          FaultMgr.h

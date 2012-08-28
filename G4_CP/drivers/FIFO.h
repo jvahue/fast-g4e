@@ -1,8 +1,7 @@
 #ifndef FIFO_H
 #define FIFO_H
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
  
   File:        FIFO.h
@@ -67,6 +66,7 @@ EXPORT void    FIFO_PopBlock  (FIFO* FIFO, void* Data, UINT32 Len);
 EXPORT UINT32  FIFO_FreeBytes (FIFO* FIFO);
 EXPORT void    FIFO_Flush     (FIFO* FIFO);
 
+#endif // FIFO_H
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FIFO.h $
@@ -98,5 +98,3 @@ EXPORT void    FIFO_Flush     (FIFO* FIFO);
  * 
  *
  *****************************************************************************/
-
-#endif  //FIFO_H

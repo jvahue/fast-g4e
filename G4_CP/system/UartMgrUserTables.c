@@ -1,6 +1,6 @@
+#define UARTMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc. 
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        UartMgrUserTables.c
@@ -14,7 +14,6 @@
 #ifndef UART_MGR_BODY
 #error UartMgrUserTables.c should only be included by UartMgr.c
 #endif
-
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -39,9 +38,12 @@
 
 #define UARTMGR_DEBUG_TEST 0
 
-
 /*****************************************************************************/
 /* Local Typedefs                                                            */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
 /*****************************************************************************/
 USER_HANDLER_RESULT UartMgrMsg_Status(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
@@ -298,7 +300,6 @@ USER_MSG_TBL UartMgrRoot[] =
 
 
 USER_MSG_TBL UartMgrRootTblPtr = {"UART",UartMgrRoot,NULL,NO_HANDLER_DATA};
-
 
 
 /*****************************************************************************/
