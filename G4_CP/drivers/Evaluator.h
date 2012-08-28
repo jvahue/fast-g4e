@@ -66,6 +66,7 @@
                                EVAL_CMD_DEFAULT\
                               }
 
+
 /******************************************************************************
                              Package Typedefs                              
 ******************************************************************************/
@@ -117,7 +118,16 @@ typedef enum
   RPN_ERR_PRIOR_SENSR_TABLE_FULL   = -11, // The table storing Prior-sensor values is full.
   //-----                                                                                         
   RPN_ERR_MAX                      = -12                                                          
-}RPN_ERR;                                                                                         
+}RPN_ERR;    
+
+typedef enum
+{
+  EVAL_CALLER_TYPE_TRIGGER = 1,
+  EVAL_CALLER_TYPE_EVENT,
+  /*--- Add new types above this line ----*/
+  MAX_EVAL_CALLER_TYPE
+}EVAL_CALLER_TYPE;
+
 
 #pragma pack(1)
 typedef struct
@@ -147,11 +157,16 @@ typedef struct
 }EVAL_RPN_ENTRY;
 
 // Entry to handle prior sensor values in expressions
+// KeyField layout:
+//0x000000FF - Sensor ID 00-255
+//0x0000FF00 - Object ID 00-255
+//0x00FF0000 - Object Type 0- Trigger, 1- Event, etc
+
 typedef struct  
 {
-  UINT32  CmdAddress; // Lookup key - address of the !P Cmd object.
-  FLOAT32 PriorValue; // The previous stored value of this sensor.
-  BOOLEAN PriorValid; // The validity of the previous stored value.
+  UINT32  KeyField; // Lookup key - GUID for use of this sensor in a given object(Trig, Event)
+  FLOAT32 PriorValue;// The previous stored value of this sensor.
+  BOOLEAN PriorValid;// The validity of the previous stored value.
 }PRIOR_SENSOR_ENTRY;
 
 
@@ -211,7 +226,9 @@ typedef struct
 
 EXPORT INT32 EvalExprStrToBin  ( CHAR* str, EVAL_EXPR* bin, UINT8 maxOperands );
 EXPORT void  EvalExprBinToStr  ( CHAR* str, const EVAL_EXPR* bin );
-EXPORT INT32 EvalExeExpression ( const EVAL_EXPR* expr, BOOLEAN* validity );
+EXPORT INT32 EvalExeExpression  ( EVAL_CALLER_TYPE objType, INT32 objID,
+                                const EVAL_EXPR* expr, BOOLEAN* validity );
+
 EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 
 // Functions listed in the function table not really "exported" but
