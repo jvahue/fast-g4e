@@ -12,7 +12,7 @@
                   events.
 
    VERSION
-   $Revision: 106 $  $Date: 12-08-24 9:30a $
+   $Revision: 107 $  $Date: 12-08-28 8:32a $
 
 
 ******************************************************************************/
@@ -1479,6 +1479,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ *
+ * *****************  Version 107  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:32a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - ETM Fault Logic Updates
  *
  * *****************  Version 106  *****************
  * User: John Omalley Date: 12-08-24   Time: 9:30a

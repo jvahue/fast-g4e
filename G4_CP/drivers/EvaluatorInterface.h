@@ -10,7 +10,7 @@
     Description:
 
     VERSION
-    $Revision: 8 $  $Date: 8/15/12 7:22p $
+    $Revision: 9 $  $Date: 12-08-28 8:32a $
 
 ******************************************************************************/
 
@@ -99,6 +99,11 @@ DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EvaluatorInterface.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:32a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107 - Evaluator Bug Fixes
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:22p

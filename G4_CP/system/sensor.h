@@ -11,7 +11,7 @@
    Description: Definitions for sensor types
  
    VERSION
-      $Revision: 32 $  $Date: 7/18/12 6:27p $  
+      $Revision: 33 $  $Date: 12-08-28 8:35a $  
  
 ******************************************************************************/
 
@@ -546,6 +546,12 @@ EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:35a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Updated the sensor summary to include the time of min and
+ * time of max.
  * 
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p

@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 51 $  $Date: 12-08-24 9:30a $
+      $Revision: 52 $  $Date: 12-08-28 8:34a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -467,31 +467,6 @@ void Flt_UpdateAction ( FLT_STATUS sysCond )
      m_Previous = m_Current;
 
   }
-
-
-  // if ( (STA_NORMAL != sysCond) &&
-  //     ((OFF == FaultActionState) || (ACTION_NO_REQ == FaultActionID)))
-  //{
-  //   // The System Condition just transitioned to CAUTION or FAULT
-  //   FaultActionState = ACTION_ON;
-
-  //   FaultActionID = ActionRequest( FaultActionID,
-  //                                  CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action[sysCond],
-  //                                  FaultActionState,
-  //                                  FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
-  //                                  FALSE );
-  //}
-  //else if ((STA_NORMAL == SysCond) && (ON == FaultActionState))
-  //{
-  //   // The System Condition just transitioned back to NORMAL
-  //   FaultActionState = ACTION_OFF;
-
-  //   FaultActionID = ActionRequest( FaultActionID,
-  //                                  CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.action[sysCond],
-  //                                  FaultActionState,
-  //                                  FALSE,//CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.faultACK,
-  //                                  FALSE );
-  //}
 }
 
 /*****************************************************************************/
@@ -623,6 +598,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ *
+ * *****************  Version 52  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:34a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ETM Fault Logic
  *
  * *****************  Version 51  *****************
  * User: John Omalley Date: 12-08-24   Time: 9:30a

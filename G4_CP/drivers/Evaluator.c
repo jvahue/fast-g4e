@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 13 $  $Date: 8/22/12 5:28p $
+  $Revision: 14 $  $Date: 12-08-28 8:32a $
 
 ******************************************************************************/
 
@@ -1506,6 +1506,11 @@ static void EvalSetPrevSensorValue(UINT32 keyCmdAddress,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:32a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107 - Evaluator Bug Fixes
  * 
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:28p

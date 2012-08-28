@@ -10,7 +10,7 @@
     Description:
 
   VERSION
-    $Revision: 28 $  $Date: 12-08-24 9:30a $
+    $Revision: 29 $  $Date: 12-08-28 8:34a $
 
 ******************************************************************************/
 
@@ -144,6 +144,11 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:34a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ETM Fault Logic
  *
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12-08-24   Time: 9:30a

@@ -8,7 +8,7 @@
          Description:
 
          VERSION
-         $Revision: 26 $  $Date: 12-08-16 4:15p $
+         $Revision: 27 $  $Date: 12-08-28 8:34a $
 ******************************************************************************/
 #ifndef FAULTMGR_BODY
 #error FaultMgrUserTables.c should only be included by FaultMgr.c
@@ -380,6 +380,11 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ *
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:34a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ETM Fault Logic
  *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:15p

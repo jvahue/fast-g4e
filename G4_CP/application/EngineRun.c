@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 14 $  $Date: 8/15/12 7:17p $
+      $Revision: 15 $  $Date: 12-08-28 8:32a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -976,6 +976,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:32a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Reset and Initialization Logic Cleanup
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:17p

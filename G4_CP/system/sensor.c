@@ -26,7 +26,7 @@
     Notes: 
   
     VERSION
-      $Revision: 69 $  $Date: 8/22/12 5:27p $     
+      $Revision: 70 $  $Date: 12-08-28 8:35a $     
   
 ******************************************************************************/
 
@@ -1840,6 +1840,12 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:35a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Updated the sensor summary to include the time of min and
+ * time of max.
  * 
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:27p

@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 8 $  $Date: 12-08-24 9:30a $
+ $Revision: 9 $  $Date: 12-08-28 8:33a $
 
 ******************************************************************************/
 
@@ -362,7 +362,7 @@ void ActionResetNVPersist ( void )
  * Notes:        None.
  *
  *****************************************************************************/
-BOOLEAN ActionAcknowledgable (  INT32 TrigIdx )
+BOOLEAN ActionAcknowledgable (  INT32 nAction )
 {
    // Local Data
    ACTION_DATA *pData;
@@ -967,6 +967,11 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ *
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-08-28   Time: 8:33a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Action Acknowledgable function for the evaluator
  *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 12-08-24   Time: 9:30a
