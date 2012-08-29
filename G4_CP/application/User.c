@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 96 $  $Date: 8/28/12 12:43p $
+   $Revision: 97 $  $Date: 8/29/12 6:41p $
 
 ******************************************************************************/
 
@@ -1558,65 +1558,68 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         UINT32  arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
 
         // Display a string containing both the hex and enumeration string:
-        // e.g. 0x0000000000000000000000000000001F : [0,1,2,3]
+        // e.g. 0x0000000000000000000000000000001F [0,1,2,3]
 
         // CHECK FOR EMPTY
         tempWord = 0;
         for (i = 0; tempWord == 0 && i < arraySizeWords; ++i )
         {
           tempWord = word32Ptr[i];
+        }     
+        
+        // DISPLAY THE HEX STRING
+        destPtr = bufHex128;
+        strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
+        destPtr += 2;
+
+        // Display order: 127...0
+        // Read the array from back to front and convert each word
+        // to hex string.
+
+        for( i = 0; i < arraySizeWords; ++i )
+        {          
+          tempWord = word32Ptr[(arraySizeWords - 1)-i];          
+          sprintf( destPtr, "%08X", tempWord );
+          destPtr += 8;
         }
+        strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
+
+        // APPEND THE ENUMERATED LIST
+
+        // Check each bit in the BITARRAY128.
+        // For each 'on' bit, convert the index to a string
+        // and concatenate to the output buffer.
+        
+        destPtr = tempOutput + strlen(tempOutput);
+        
+        SuperStrcat(destPtr, " [", sizeof(tempOutput));
+        destPtr += 2;
 
         if ( 0 == tempWord )
         {
           // Display "NONE SELECTED" String
-          snprintf(tempOutput,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED");
-          strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
+          snprintf(destPtr,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED,");
+          destPtr = tempOutput + strlen(tempOutput);
         }
         else
-        {
-          // DISPLAY THE HEX STRING
-          destPtr = bufHex128;
-          strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
-          destPtr += 2;
-
-          // Display order: 127...0
-          // Read the array from back to front and convert each word
-          // to hex string.
-
-          for( i = 0; i < arraySizeWords; ++i )
-          {          
-            tempWord = word32Ptr[(arraySizeWords - 1)-i];          
-            sprintf( destPtr, "%08X", tempWord );
-            destPtr += 8;
-          }
-          strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
-
-          // APPEND THE ENUMERATED LIST
-
-          // Check each bit in the BITARRAY128.
-          // For each 'on' bit, convert the index to a string
-          // and concatenate to the output buffer.
-          
-          SuperStrcat(tempOutput, " [", sizeof(tempOutput));
-          
-          destPtr = tempOutput + strlen(tempOutput);
+        {        
+          // Display a list of integer values, one for each "on" bit.
           for( i = 0; i < 128; ++i )
           {          
             if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
             {
               snprintf(numStr, sizeof(numStr), "%d,", i);
-              SuperStrcat(tempOutput, numStr, sizeof(tempOutput));
+              SuperStrcat(destPtr, numStr, sizeof(tempOutput));
               destPtr += strlen(numStr);
-            }         
+            }
           }
-
-          // replace the final ',' with ']' and 'null'
-          *(--destPtr) = ']';
-          *(++destPtr) = '\0';
-             
-          strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
         }
+
+        // replace the final ',' with ']' and 'null'
+        *(--destPtr) = ']';
+        *(++destPtr) = '\0';
+           
+        strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);        
         
         
       } // USER_TYPE_HEX128 scope for decls
@@ -2702,6 +2705,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 97  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 6:41p
+ * Updated in $/software/control processor/code/application
+ * SCR#1107 BIT128 LIST Read Display show None Selected
  * 
  * *****************  Version 96  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
