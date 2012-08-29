@@ -351,10 +351,12 @@ void ActionResetNVPersist ( void )
 /******************************************************************************
  * Function:     ActionAcknowledgable
  *
- * Description:  The Action Acknowledgable function allows other determine if
+ * Description:  The Action Acknowledgable function allows others to determine if
  *               there are any acknowledgable actions active.
  *
- * Parameters:   None
+ * Parameters:   INT32 nAction - Not Used but needed for evaluator
+ *                               This could be used in the future if a specific
+ *                               Action Acknowledge needed to be checked.
  *
  * Returns:      BOOLEAN [ TRUE  = Acknowledgable Actions Active,
  *                         FALSE = No acknowledgable actions ]
@@ -374,7 +376,7 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
    ACK = FALSE;
    pData = &m_ActionData;
 
-   // Loop through all the Action
+   // Loop through all the Actions
    for (  nActionIndex = 0;
         ((nActionIndex < MAX_ACTION_DEFINES) && (ACK == FALSE));
           nActionIndex++ )
@@ -889,7 +891,8 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                      ActionSetOutput ( i, output );
                      if (OFF == pFlags->bState)
                      {
-                        GSE_DebugStr(NORMAL,TRUE,"Output ON: LSS %d  State %d", i, output );
+                        GSE_DebugStr(VERBOSE,TRUE,"Action %d ON: LSS %d  State %d",
+                                     nActionIndex, i, output );
                      }
                   }
                }
@@ -911,13 +914,15 @@ void ActionRectifyOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData, BOOLEAN bPersi
                        ( ON == BIT( pCfg->activeState,   i )) )
                   {
                      ActionSetOutput ( i, DIO_SetLow );
-                     GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, DIO_SetLow  );
+                     GSE_DebugStr(VERBOSE,TRUE,"Action %d OFF: LSS %d  State %d",
+                                                nActionIndex, i, DIO_SetLow  );
                   }
                   else if ( (ON  == BIT( pOutCfg->nLSS_Mask, i )) &&
                             (OFF == BIT( pCfg->activeState,  i )))
                   {
                      ActionSetOutput ( i, DIO_SetHigh );
-                     GSE_DebugStr(NORMAL,TRUE,"Output OFF: LSS %d  State %d", i, DIO_SetHigh );
+                     GSE_DebugStr(VERBOSE,TRUE,"Action %d OFF: LSS %d  State %d",
+                                  nActionIndex, i, DIO_SetHigh );
                   }
                }
             }
@@ -967,7 +972,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

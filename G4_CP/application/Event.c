@@ -813,9 +813,9 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
          if ( foundRegion != pTableData->currentRegion )
          {
             // New Region Enterd
-            GSE_DebugStr ( NORMAL, TRUE, "Entered:   R: %d S: %f D: %d",
-                           foundRegion,  pTableData->fCurrentSensorValue,
-                           pTableData->nTotalDuration_ms );
+            GSE_DebugStr ( VERBOSE, TRUE, "Table %d Entered:  R: %d S: %f D: %d",
+                           pTableData->nTableIndex, foundRegion,
+                           pTableData->fCurrentSensorValue, pTableData->nTotalDuration_ms );
             // We just entered this region record the time
             pTableData->regionStats[foundRegion].nEnteredTime = nCurrentTick;
          }
@@ -940,8 +940,9 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    // If we found a new region then dump a debug message
    if (foundRegion != pTableData->currentRegion)
    {
-      GSE_DebugStr(NORMAL,TRUE,"FoundRegion: %d Dur: %d Th: %f S: %f",
-                   foundRegion, pTableData->nTotalDuration_ms, fSavedThreshold, fSensorValue);
+      GSE_DebugStr(VERBOSE,TRUE,"Table %d FoundRegion: %d Dur: %d Th: %f S: %f",
+                   pTableData->nTableIndex, foundRegion, pTableData->nTotalDuration_ms,
+                   fSavedThreshold, fSensorValue);
    }
    return foundRegion;
 }
@@ -998,8 +999,8 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
          // Count that we have entered this region
          pTableData->regionStats[foundRegion].logStats.nEnteredCount++;
 
-         GSE_DebugStr ( NORMAL,TRUE,"Confirmed: R: %d S: %f D: %d",
-                        foundRegion,  pTableData->fCurrentSensorValue,
+         GSE_DebugStr ( NORMAL,TRUE,"Table %d Confirmed: R: %d S: %f D: %d",
+                        pTableData->nTableIndex, foundRegion, pTableData->fCurrentSensorValue,
                         pTableData->nTotalDuration_ms );
 
          EventTableExitRegion ( pTableCfg, pTableData, foundRegion, nCurrentTick );
@@ -1066,8 +1067,8 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
          // Reset the entered time so we don't keep performing this calculation
          pTableData->regionStats[pTableData->confirmedRegion].nEnteredTime = 0;
 
-         GSE_DebugStr(NORMAL,TRUE,"Exit:      R: %d", pTableData->confirmedRegion );
-
+         GSE_DebugStr(NORMAL,TRUE,"Table %d Exit:      R: %d", pTableData->nTableIndex,
+                                                               pTableData->confirmedRegion );
          EventTableLogTransition ( pTableCfg, pTableData,
                                    foundRegion, pTableData->confirmedRegion );
 
@@ -1380,8 +1381,9 @@ void EventLogUpdate( EVENT_DATA *pData )
        pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
        // Update the summary data for the trigger
        pLog->sensor[numSensor].SensorIndex = pSummary->SensorIndex;
-       pLog->sensor[numSensor].fTotal      = pSummary->fTotal;
+       pLog->sensor[numSensor].timeMinValue = pSummary->timeMinValue;
        pLog->sensor[numSensor].fMinValue   = pSummary->fMinValue;
+       pLog->sensor[numSensor].timeMaxValue = pSummary->timeMaxValue;
        pLog->sensor[numSensor].fMaxValue   = pSummary->fMaxValue;
        pLog->sensor[numSensor].bValid      = pSummary->bValid;
        // if sensor is valid, calculate the final average,
@@ -1393,7 +1395,6 @@ void EventLogUpdate( EVENT_DATA *pData )
     else // Sensor Not Used
     {
        pLog->sensor[numSensor].SensorIndex   = SENSOR_UNUSED;
-       pLog->sensor[numSensor].fTotal        = 0.0;
        pLog->sensor[numSensor].fMinValue     = 0.0;
        pLog->sensor[numSensor].fMaxValue     = 0.0;
        pLog->sensor[numSensor].fAvgValue     = 0.0;

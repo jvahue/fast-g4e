@@ -1,20 +1,18 @@
 #ifndef EVENT_H
 #define EVENT_H
-/******************************************************************************
+/*****************************************************************************
                 Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
 
     File:        event.h
 
-
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 20 $  $Date: 8/28/12 12:43p $
+  $Revision: 19 $  $Date: 12-08-20 9:00a $
 
 ******************************************************************************/
-
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -33,7 +31,7 @@
 #include "timehistory.h"
 
 /******************************************************************************
-                                 Package Defines                                           
+                                 Package Defines                              *
 ******************************************************************************/
 /*------------------------------------  EVENT  ----------------------------------------------*/
 #define MAX_EVENTS              32      /* Total Events defined in the system           */
@@ -134,7 +132,7 @@
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT
 
 /******************************************************************************
-                                  Package Typedefs                                        
+                                 Package Typedefs                             *
 ******************************************************************************/
 typedef enum
 {
@@ -229,18 +227,30 @@ typedef struct
    TIMESTAMP  tsStartTime;                          /* Time when the event started       */
 } EVENT_START_LOG;
 
+/* Event Sensor Summary */
+typedef struct
+{
+   SENSOR_INDEX SensorIndex;
+   BOOLEAN      bValid;
+   TIMESTAMP    timeMinValue;
+   FLOAT32      fMinValue;
+   TIMESTAMP    timeMaxValue;
+   FLOAT32      fMaxValue;
+   FLOAT32      fAvgValue;
+} EVENT_SNSR_SUMMARY;
+
 /* End Log definition for the event                                                      */
 typedef struct
 {
-   UINT16          nEventIndex;                     /* Event Index                       */
-   EVENT_END_TYPE  endType;                         /* Reason for the event ending       */
-   TIMESTAMP       tsCriteriaMetTime;               /* Time the start criteria was met   */
-   TIMESTAMP       tsDurationMetTime;               /* Time when the min duration was met*/
-   UINT32          nDuration_ms;                    /* Length of the event from start    */
+   UINT16             nEventIndex;                     /* Event Index                       */
+   EVENT_END_TYPE     endType;                         /* Reason for the event ending       */
+   TIMESTAMP          tsCriteriaMetTime;               /* Time the start criteria was met   */
+   TIMESTAMP          tsDurationMetTime;               /* Time when the min duration was met*/
+   UINT32             nDuration_ms;                    /* Length of the event from start    */
                                                     /* criteria being met until event end*/
-   TIMESTAMP       tsEndTime;                       /* Time when the event ended         */
-   UINT16          nTotalSensors;                   /* Total sensors sampled by event    */
-   SNSR_SUMMARY    sensor[MAX_EVENT_SENSORS];       /* Sensor Summary                    */
+   TIMESTAMP          tsEndTime;                       /* Time when the event ended         */
+   UINT16             nTotalSensors;                   /* Total sensors sampled by event    */
+   EVENT_SNSR_SUMMARY sensor[MAX_EVENT_SENSORS];       /* Sensor Summary                    */
 } EVENT_END_LOG;
 #pragma pack()
 
@@ -396,7 +406,7 @@ typedef struct
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 
 /******************************************************************************
-                                   Package Exports 
+                                 Package Exports                              *
 ******************************************************************************/
 #undef EXPORT
 #if defined( EVENT_BODY )
@@ -421,41 +431,35 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 #else
    EXPORT USER_ENUM_TBL evt_Region_UserEnumType[];
 #endif
-/******************************************************************************
+/**********************************************************************************************
                                   Package Exports Variables
-******************************************************************************/
+**********************************************************************************************/
 
-/******************************************************************************
+/**********************************************************************************************
                                   Package Exports Functions
-*******************************************************************************/
+**********************************************************************************************/
 EXPORT void EventsInitialize       ( void );
 EXPORT void EventTablesInitialize  ( void );
 
-#endif // EVENT_H 
-/*************************************************************************
+/**********************************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- * 
- * *****************  Version 20  *****************
- * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
- * Updated in $/software/control processor/code/application
- * SCR# 1142
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Bit Bucket Issues Cleanup
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Log Cleanup
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- * 
+ *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
@@ -548,4 +552,8 @@ EXPORT void EventTablesInitialize  ( void );
  * Created in $/software/control processor/code/application
  *
  *
- ***************************************************************************/
+ *********************************************************************************************/
+#endif  // EVENT_H
+
+
+
