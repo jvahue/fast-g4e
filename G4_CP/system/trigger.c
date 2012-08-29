@@ -686,7 +686,10 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
   // Call the configured Trigger-start check rule.
   // Criteria is in return value.
   // Validity of sensors is in IsValid pointer.
-  StartCriteriaMet = (BOOLEAN)EvalExeExpression(&pTrigCfg->StartExpr, IsValid);
+  StartCriteriaMet = (BOOLEAN)EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
+                                                 pTrigData->TriggerIndex,
+                                                 &pTrigCfg->StartExpr,
+                                                 IsValid);
 
   // If any sensor in the expression was unused/invalid, the start state must be false
   // todo DaveB move this inside the eval so apps using expressions directly will be
@@ -777,11 +780,17 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
 
   if(pTrigCfg->EndExpr.Size > 0)
   {
-    result = EvalExeExpression(&pTrigCfg->EndExpr, &validity );
+    result = EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
+                                pTrigData->TriggerIndex,
+                                &pTrigCfg->EndExpr,
+                                &validity );
   }
   else
   {
-    result = EvalExeExpression(&pTrigCfg->StartExpr, &validity );
+    result = EvalExeExpression(EVAL_CALLER_TYPE_TRIGGER,
+                               pTrigData->TriggerIndex,
+                               &pTrigCfg->StartExpr,
+                               &validity );
     // If the returned value is 0 or 1, do a boolean inversion.
     result = (result >= 0) ?  (INT32) ! (BOOLEAN)(result) : result;
   }
@@ -1343,7 +1352,8 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 
     // Finished making an expression string for this criteria.
     // Send it to the evaluator for encoding and a proof-run.
-    StrToBinResult = EvalExprStrToBin(exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
+    StrToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx, 
+                                       exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
     if ( StrToBinResult >= 0)
     {
       // Move the binary expression to shadow RAM

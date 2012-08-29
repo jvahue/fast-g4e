@@ -31,9 +31,9 @@
 #define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd)
 
 #define EVAL_OPCODE_LIST \
-/*       OpCode       Token   Len  AddCmd             FmtString             ExeCmd             */\
-/* Load/Fetch commands                                                                         */\
-/* Operands: KEEP LIST IN SAME ORDER AS EVAL_DAI_LIST BELOW. LOOKUPS USE OPCMD AS INDEXES      */\
+/*       OpCode       Token   Len  AddCmd             FmtString                      ExeCmd */\
+/* Load/Fetch commands                                                                      */\
+/* Operands: KEEP LIST IN SAME ORDER AS EVAL_DAI_LIST BELOW. LOOKUPS USE OPCMD AS INDEXES   */\
 OPCMD(OP_GETSNRVAL,   "SVLU",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
 OPCMD(OP_GETSNRVALID, "SVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
 OPCMD(OP_GETTRIGVAL,  "TACT",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
