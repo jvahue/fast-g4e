@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 25 $  $Date: 8/29/12 3:09p $    
+$Revision: 26 $  $Date: 8/29/12 6:20p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -411,7 +411,7 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);    
      
-    StrToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_TRIGGER, Index,
+    StrToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_PARSE, Index,
                                       str, (EVAL_EXPR*) Param.Ptr, MAX_TRIG_EXPR_OPRNDS);
 
     if( StrToBinResult >= 0 )
@@ -480,6 +480,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1107 - !P Table Full processing
  * 
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 3:09p
