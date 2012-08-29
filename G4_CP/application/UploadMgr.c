@@ -12,7 +12,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 157 $  $Date: 8/28/12 12:43p $
+   $Revision: 158 $  $Date: 8/29/12 1:21p $
     
 ******************************************************************************/
 
@@ -1151,19 +1151,19 @@ static
 INT32 UploadMgr_GetFileVfy(const INT8* FN, UPLOADMGR_FILE_VFY* VfyRow)
 {
   INT32 i;
-  INT32 Row = -1 ;
+  INT32 row = -1 ;
 
   //Filename search.
-  for( i = 0; (i < UPLOADMGR_VFY_TBL_MAX_ROWS) && (Row == -1); i++)
+  for( i = 0; (i < UPLOADMGR_VFY_TBL_MAX_ROWS) && (row == -1); i++)
   {
     NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(i),VfyRow,sizeof(*VfyRow));    
     if( 0 == strncmp(FN, VfyRow->Name, sizeof(VfyRow->Name)))
     {
-      Row = i;
+      row = i;
     }    
   } 
 
-  return Row;
+  return row;
 }
 
 /******************************************************************************
@@ -2272,7 +2272,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
   static INT32        RowRetry = 0;
   MSCP_CHECK_FILE_CMD cmd;
   UPLOADMGR_FILE_VFY  VfyRow;
-  BOOLEAN             FileFound;
+  BOOLEAN             bFileFound;
     
   //While the task is running, search for any files that may be in the
   //ground verify state so that we can deal multiple Ground Verify
@@ -2332,7 +2332,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
                                        sizeof(cmd),
                                        5000,
                                        UploadMgr_CheckLogCmdCallback) == SYS_OK ? Row : -2;
-        FileFound = TRUE;
+        bFileFound = TRUE;
         m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0;
       }
     } // while Row remaining...
@@ -2340,7 +2340,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
     //If no file found after looping through entire table, decrement
     //CheckCnt to prevent getting stuck in this table should another
     //process (ex. user mgr) delete the entry while in this process
-    !FileFound ? m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0 : 0;
+    !bFileFound ? m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0 : 0;
   }
 
   //When all rows checked, reset row back to zero and kill task
@@ -2433,32 +2433,32 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
 {
   UINT32 LogSize;
   UINT32 ReadOffset = *FlightStart;
-  LOG_SOURCE Source;
+  LOG_SOURCE source;
   LOG_FIND_STATUS result = LOG_NOT_FOUND;
-  UINT32 EndOffset = LogGetLastAddress();
+  UINT32 endOffset = LogGetLastAddress();
  
   //If not FlightStart == 0, then this is the not the first flight that is
   //being processed.  The Start pointer is at the LAST log of the previous
   //flight, so call twice to advance it to the first log in this flight.
   if(*FlightStart != 0)
   {
-    Source.nNumber = LOG_SOURCE_DONT_CARE;
+    source.nNumber = LOG_SOURCE_DONT_CARE;
     result = LogFindNextRecord(LOG_DONT_CARE,
                                LOG_TYPE_SYSTEM,
-                               Source,
+                               source,
                                LOG_PRIORITY_DONT_CARE,
                                &ReadOffset,
-                               EndOffset,
+                               endOffset,
                                FlightStart,
                                &LogSize);
     if(result != LOG_BUSY)
     {
       result = LogFindNextRecord(LOG_DONT_CARE,
                                  LOG_TYPE_SYSTEM,
-                                 Source,
+                                 source,
                                  LOG_PRIORITY_DONT_CARE,
                                  &ReadOffset,
-                                 EndOffset,
+                                 endOffset,
                                  FlightStart,
                                  &LogSize);
     }
@@ -2467,13 +2467,13 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
   {
     
     //Now look for the next end of flight log
-    Source.ID = APP_ID_END_OF_FLIGHT;
+    source.ID = APP_ID_END_OF_FLIGHT;
     result = LogFindNextRecord(LOG_DONT_CARE,
                                LOG_TYPE_SYSTEM,
-                               Source,
+                               source,
                                LOG_PRIORITY_DONT_CARE,
                                &ReadOffset,
-                               EndOffset,
+                               endOffset,
                                FlightEnd,
                                &LogSize);
 
@@ -2482,19 +2482,19 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
     if(LOG_NOT_FOUND == result)
     {
       ReadOffset = *FlightStart;
-      Source.nNumber = LOG_SOURCE_DONT_CARE;
+      source.nNumber = LOG_SOURCE_DONT_CARE;
       result = LogFindNextRecord(LOG_NEW,
                                  LOG_TYPE_DONT_CARE,
-                                 Source,
+                                 source,
                                  LOG_PRIORITY_DONT_CARE,
                                  &ReadOffset,
-                                 EndOffset,
+                                 endOffset,
                                  FlightEnd,
                                  &LogSize);
 
       if(LOG_FOUND == result)
       {
-        *FlightEnd = EndOffset;
+        *FlightEnd = endOffset;
       }
     }
   }
@@ -2510,10 +2510,14 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
  *              this function.  File checksum is computed and written back
  *              into the header.
  *
- * Parameters:  [in/out] Header:  Fills in all file header fields except the
+ * Parameters:  [in/out] FileHeader:  Fills in all file header fields except the
  *                                checksum. Once the header is filled in, the 
  *                                checksum is updated to reflect the new data
  *                                in the file.
+ *              [in] Type
+ *              [in] Priority
+ *              [in] ACS
+ *              [in] Timestamp
  *
  * Returns:     None
  *
@@ -2525,9 +2529,9 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
                               LOG_PRIORITY Priority, LOG_SOURCE ACS, 
                               TIMESTAMP* Timestamp)
 {
-  UINT32 DataChecksum;
+  UINT32 dataChecksum;
   INT8   BoxStr[BOX_INFO_STR_LEN];
-  CHAR   SwVerStr[32];
+  CHAR   swVerStr[32];
   BINARY_DATA_HDR *pBinSubHdr;
   
   pBinSubHdr = &BinarySubHdr;
@@ -2555,8 +2559,8 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
   strncpy_safe(FileHeader->MfgRev,sizeof(FileHeader->MfgRev),BoxStr,_TRUNCATE);
   
   // Software Version
-  FAST_GetSoftwareVersion(SwVerStr);
-  strncpy_safe(FileHeader->SwVersion,sizeof(FileHeader->SwVersion),SwVerStr,_TRUNCATE);
+  FAST_GetSoftwareVersion(swVerStr);
+  strncpy_safe(FileHeader->SwVersion,sizeof(FileHeader->SwVersion),swVerStr,_TRUNCATE);
   
   // TimeSource
   FileHeader->TimeSource = FAST_TimeSourceCfg();
@@ -2653,15 +2657,15 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
   
   //Save and zero-out existing header checksum so that it won't
   //be added into the
-  DataChecksum = FileHeader->CheckSum;
+  dataChecksum = FileHeader->CheckSum;
   FileHeader->CheckSum = 0;
   
   //Add checksum of the header data into the existing checksum value
-  DataChecksum += ChecksumBuffer(FileHeader,sizeof(*FileHeader),0xFFFFFFFF);
-  DataChecksum += ChecksumBuffer(pBinSubHdr->Buf, pBinSubHdr->SizeUsed, 0xFFFFFFFF);
+  dataChecksum += ChecksumBuffer(FileHeader,sizeof(*FileHeader),0xFFFFFFFF);
+  dataChecksum += ChecksumBuffer(pBinSubHdr->Buf, pBinSubHdr->SizeUsed, 0xFFFFFFFF);
   
   //Finally, copy the checksum back into the header
-  FileHeader->CheckSum = DataChecksum;
+  FileHeader->CheckSum = dataChecksum;
 }
 
 
@@ -3117,7 +3121,7 @@ void UploadMgr_PrintUploadStats(UINT32 BytesSent)
  *              return.  
  *
  * Parameters:  [in] Id: Message ID (see MSCPInterface.h)
- *              [in] Timeout: Message timeout in milliseconds, this value is
+ *              [in] TO: Message timeout in milliseconds, this value is
  *                            defined by the application and depends on the
  *                            expected response time from the micro-server
  *              [in] Data:    Pointer to the block containing the message data
@@ -3431,6 +3435,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 158  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 1:21p
+ * Updated in $/software/control processor/code/application
+ * Code Review Tool Findings
  * 
  * *****************  Version 157  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

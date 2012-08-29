@@ -7,8 +7,9 @@
     File:      EngineRun.c  
 
     Description:
+
    VERSION
-      $Revision: 17 $  $Date: 8/28/12 2:36p $
+      $Revision: 18 $  $Date: 8/29/12 12:28p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -266,13 +267,13 @@ void EngRunTask(void* pParam)
 }
 
 /******************************************************************************
- * Function:     EngRunGetDataCollectPtr
+ * Function:     EngRunGetPtrToCycleCounts
  *
  * Description:  Returns pointer to the data collection area for this engine-run .
  *               This function is called to retrieve cycle counts owned by the 
  *               indicated engine run object.
  *
- * Parameters:   
+ * Parameters:   [in] engId
  *
  * Returns:      Pointer to the array of floats containing the cycle counts 
  *
@@ -292,9 +293,9 @@ UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId)
  *               This function is called to retrieve cycle counts owned by the 
  *               indicated engine run object.
  *
- * Parameters:   
+ * Parameters:   [in] engId
  *
- * Returns:      Pointer to the array of floats containing the cycle counts 
+ * Returns:      Pointer to the engine run log 
  *
  * Notes:        None
  *
@@ -312,9 +313,9 @@ ENGRUN_RUNLOG* EngRunGetPtrToLog(ENGRUN_INDEX engId)
  * Description:  Returns value of the starting time 
  *               tick of the START for this engine-run .
  *
- * Parameters:   
+ * Parameters:   [in] engId
  *
- * Returns:      Pointer to the 
+ * Returns:      Engine run data starting time 
  *
  * Notes:        None
  *
@@ -388,7 +389,8 @@ static void EngRunForceEnd( void )
  * Description:  clear out any leftover
  *               vars that will confuse future processing.
  *
- * Parameters:   [in] erIdx - index of the engine run object to init.
+ * Parameters:   [in] pErCfg - engine run cfg
+ *               [in/out] pErData - engine run data
  *
  * Returns:      None
  *
@@ -458,7 +460,8 @@ static void EngRunUpdateAll(void)
  * Description:  Update Engine Run data for the specified engine
  *               
  *
- * Parameters:   [in] erIndex - the index for the specified engine run.
+ * Parameters:   [in] pErCfg - engine run cfg
+ *               [in/out] pErData - engine run data
  *
  * Returns:      None
  *
@@ -634,7 +637,8 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 * Description:  Start taking EngineRunlog data
 *               
 *
-* Parameters:   [in] erIndex - the index for the specified engine run.
+* Parameters:   [in] pErCfg
+*               [in/out] pErData
 *
 * Returns:      None
 *
@@ -687,7 +691,9 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
  * Description:  
  *               
  *
- * Parameters:   None
+ * Parameters:   [in] reason
+ *               [in] pErCfg
+ *               [in] pErData
  *
  * Returns:      None
  *
@@ -729,7 +735,9 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
  * Description:  
  *               
  *
- * Parameters:   None
+ * Parameters:   [in] reason
+ *               [in] pErCfg
+ *               [in] pErData
  *
  * Returns:      None
  *
@@ -813,7 +821,8 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
  * Description:  Update the log with the sensor elements for this engine run
  *               
  *
- * Parameters:   [in] engine run Index.
+ * Parameters:   [in] pErCfg - engine run cfg
+ *               [in] pErData - engine run data
  *
  * Returns:      None
  *
@@ -879,7 +888,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
  * Description:  Checks and returns the state of all EngineRun determining
  *               factors.
  *
- * Parameters:   [in] erIndex - the index of the engine run
+ * Parameters:   [in] pErCfg - engine run cfg
  *
  * Returns:      None
  *
@@ -904,9 +913,9 @@ static BOOLEAN EngRunIsError( ENGRUN_CFG* pErCfg)
  * Description:  Update the EngineRun start data.
  *               The enginerun is in ER_STATE_STARTING.
  *
- * Parameters:   [in] - config
- *               [in] - data
- *               [in] - start duration update flag.
+ * Parameters:   [in] pErCfg - config
+ *               [in] pErData - data
+ *               [in] bUpdateDuration - start duration update flag.
  *
  * Returns:      None
  *
@@ -975,6 +984,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 12:28p
+ * Updated in $/software/control processor/code/application
+ * Code Review Tool Findings
  * 
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p

@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 108 $  $Date: 8/28/12 12:43p $
+   $Revision: 109 $  $Date: 8/29/12 12:40p $
 
 
 ******************************************************************************/
@@ -314,7 +314,7 @@ TIME_SOURCE_ENUM FAST_TimeSourceCfg( void )
  *
  * Description: Returns the Software Version String
  *
- * Parameters:  [in/out] Software Version Str
+ * Parameters:  [in/out] SwVerStr - Software Version Str
  *
  * Returns:     None
  *
@@ -1478,6 +1478,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 109  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 12:40p
+ * Updated in $/software/control processor/code/application
+ * Code Review Tool Findings
  * 
  * *****************  Version 108  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

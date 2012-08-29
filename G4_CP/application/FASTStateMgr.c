@@ -12,7 +12,7 @@
 
      
    VERSION
-   $Revision: 17 $  $Date: 8/28/12 12:43p $
+   $Revision: 18 $  $Date: 8/29/12 12:50p $
 
 ******************************************************************************/
 
@@ -259,17 +259,17 @@ void FSM_TaskFunc(void* pParam)
   FSM_STATE* current = &m_Cfg.States[m_CurState];
   static FSM_STATE* next;
   static INT32      TCIndex;
-  static BOOLEAN    PwrOnInit = TRUE;
+  static BOOLEAN    bPwrOnInit = TRUE;
   INT32             i;
   static CHAR       input_states[FSM_NUM_OF_INPUTS_PER_TC+1];
 
   //Run this one time only after power on to "transition" into State0
-  if(PwrOnInit)
+  if(bPwrOnInit)
   {
     //Stop tasks that are running at power on
     FSM_StopThisStateTasks(&m_InitState,&m_Cfg.States[0]);         
     FSM_StartNextStateTasks(&m_InitState,&m_Cfg.States[0]);
-    PwrOnInit = FALSE;
+    bPwrOnInit = FALSE;
   }
   
   //Evaluate timer if enabled
@@ -315,7 +315,7 @@ void FSM_TaskFunc(void* pParam)
  *
  * Parameters:  [in] current: Pointer to location for the current state
  *              [in] next: Pointer to location for the next state
- *              [in] TC: Index of the TC that caused the state change
+ *              [in] tc: Index of the TC that caused the state change
  *              [in] input_states: pointer to string containing the input
  *                                 states to the TC that caused the transition.
  *
@@ -377,25 +377,25 @@ void FSM_ChangeState(const FSM_STATE* current, const FSM_STATE* next,
 void FSM_StopThisStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 {
   INT32 n,c;
-  BOOLEAN TaskNotInNext;
+  BOOLEAN bTaskNotInNext;
   INT32   param;
   
   //For every task in the current state.....
   for(c = 0; c < current->Size; c++)
   {
-    TaskNotInNext = TRUE;
+    bTaskNotInNext = TRUE;
     //....check if it exists in the next state.....
     for(n = 0; n < next->Size; n++)
     {
       if(IS_TASKS_EQUAL(next,n,current,c))
       {
-        TaskNotInNext = FALSE;
+        bTaskNotInNext = FALSE;
       }
       //Double-increment n if "IsNumerated" to skip the number param.
       n = m_Tasks[next->RunTasks[n]].IsNumerated ? n+1 : n;
     }
     //.....and if it is not in the next state, stop it.
-    if(TaskNotInNext)
+    if(bTaskNotInNext)
     {
       //Get param value if the task is the "numerated" type,else use zero
       param = m_Tasks[current->RunTasks[c]].IsNumerated ? current->RunTasks[c+1]:0;
@@ -429,24 +429,24 @@ void FSM_StopThisStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 void FSM_StartNextStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 {
   INT32 n,c,param;
-  BOOLEAN TaskNotInCurrent;
+  BOOLEAN bTaskNotInCurrent;
   
   //for each task in the next state....
   for(n = 0; n < next->Size; n++)
   {
-    TaskNotInCurrent = TRUE;
+    bTaskNotInCurrent = TRUE;
     //....check if it is running the the current state....
     for(c = 0; c < current->Size; c++)
     {
       if(IS_TASKS_EQUAL(next,n,current,c))
       {
-        TaskNotInCurrent = FALSE;
+        bTaskNotInCurrent = FALSE;
       }
       //Double-increment c if "IsNumerated" to skip the number param.
       c = m_Tasks[current->RunTasks[c]].IsNumerated ? c+1 : c;
     }
     //.....and if it is not in the current state, start running it.
-    if(TaskNotInCurrent)
+    if(bTaskNotInCurrent)
     {
       //Get param value if the task is the "numerated" type,else use zero
       param = m_Tasks[next->RunTasks[n]].IsNumerated ? next->RunTasks[n+1]:0;
@@ -927,6 +927,11 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 12:50p
+ * Updated in $/software/control processor/code/application
+ * Code Review Tool Findings
  * 
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

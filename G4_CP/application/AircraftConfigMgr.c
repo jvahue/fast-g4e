@@ -9,7 +9,7 @@
   Description:   Aircraft Auto Re-Configuration Routines 
   
   VERSION
-      $Revision: 52 $  $Date: 8/28/12 12:43p $ 
+      $Revision: 53 $  $Date: 8/29/12 11:56a $ 
  
 ******************************************************************************/
 
@@ -274,6 +274,7 @@ void AircraftConfigInitialization ( void )
  * Returns:      BOOLEAN TRUE  The file reset was successful.
  *                       FALSE The file reset failed.
  *
+ * Notes:
  *****************************************************************************/
 BOOLEAN AC_FileInit(void)
 {
@@ -417,7 +418,7 @@ AIRCRAFT_CONFIG_STATE AC_GetConfigState(void)
 
 
 /******************************************************************************
- * Function:     AircraftConfig_StartAutoRecfg
+ * Function:     AC_StartAutoRecfg
  *
  * Description:  Start an automatic reconfiguration.  This retrieves the
  *               FAST config files through the Micro-Server and updates the
@@ -447,7 +448,7 @@ BOOLEAN AC_StartAutoRecfg(void)
 
 
 /******************************************************************************
- * Function:     AircraftConfig_StartManualRecfg
+ * Function:     AC_StartManualRecfg
  *
  * Description:  Start a manual reconfiguration.  It is expected that the
  *               .xml and .cfg files are in the manual reconfiguration folder
@@ -482,7 +483,7 @@ BOOLEAN AC_StartManualRecfg(void)
 
 
 /******************************************************************************
- * Function:     AircraftConfig_SendClearCfgDir
+ * Function:     AC_SendClearCfgDir
  *
  * Description:  Send a shell command to clear the configuration directory
  *               in the tmp configuration folder
@@ -529,7 +530,7 @@ BOOLEAN AC_SendClearCfgDir(void)
 
 
 /******************************************************************************
- * Function:     AircraftConfig_CancelRecfg()
+ * Function:     AC_CancelRecfg()
  *
  * Description:  Cancel a reconfiguration in progress.  This will stop the
  *               load of data from the micro server, then restore the
@@ -619,7 +620,8 @@ void AC_FSMAutoRun(BOOLEAN Run, INT32 param)
  *
  * Parameters:   [in] param : Not used, for matching FSM call sig.
  *
- * Returns:      
+ * Returns:   	 TRUE : m_TaskState is not (STOPPED or ERROR)
+ *               FALSE : m_TaskState is (STOPPED or ERROR)
  *
  * Notes:
  *****************************************************************************/
@@ -1646,7 +1648,9 @@ static BOOLEAN AC_IsAircraftIDSensorsValid(void)
  * Description:  Store the sensor values into EEPROM.  Update
  *               mACStoreSensorVals at the same time. 
  *
- * Parameters:   none
+ * Parameters:   [in] Type : FLOAT32 Type Sensor Value
+ *               [in] Fleet : FLOAT32 Fleet Sensor Value
+ *               [in] Number : FLOAT32 Number Sensor Value
  *
  * Returns:      none
  *
@@ -1680,7 +1684,7 @@ static void AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number)
  *                 is a "non-elegant" or "cheesy" way of dealing with this
  *                 mis-alignment.  
  *
- * Parameters:   none
+ * Parameters:   [in]: ACCfg_Packed: Packed AIRCRAFT_CONFIG to copy into
  *
  * Returns:      none
  *
@@ -1720,6 +1724,11 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.c $
+ * 
+ * *****************  Version 53  *****************
+ * User: Jeff Vahue   Date: 8/29/12    Time: 11:56a
+ * Updated in $/software/control processor/code/application
+ * Code Review Tool Findings
  * 
  * *****************  Version 52  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
