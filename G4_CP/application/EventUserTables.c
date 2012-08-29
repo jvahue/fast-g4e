@@ -814,7 +814,7 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);
 
-    strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_EVENT, Index, str,
+    strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_PARSE, Index, str,
                                        (EVAL_EXPR*) Param.Ptr, MAX_EVENT_EXPR_OPRNDS );
 
     if(strToBinResult >= 0)

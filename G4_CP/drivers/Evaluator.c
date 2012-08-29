@@ -56,7 +56,9 @@
 #define KEY_MASK_TYPE   0x00FF0000
 #define KEY_MASK_OBJID  0x0000FF00
 #define KEY_MASK_SNSR   0x000000FF
+
 #define EVAL_MAKE_LOOKUP_KEY(type,obj,snsr) ((type << 16) | (obj  <<  8) | (snsr))
+#define EVAL_GET_TYPE(key) ((key & KEY_MASK_TYPE) >> 16)
 
 //#define DEBUG_EVALUATOR
 /*****************************************************************************/
@@ -346,7 +348,7 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
 INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
                          const EVAL_EXPR* expr, BOOLEAN* validity)
 {
-
+  static BOOLEAN fullTableReported = FALSE;
   INT32   i;
   const EVAL_OPCODE_TBL_ENTRY* pOpCodeTbl = NULL;
   const EVAL_CMD* cmd;
@@ -406,6 +408,11 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
       result.DataType = DATATYPE_RPN_PROC_ERR;
       result.Validity = FALSE;
       RPN_PUSH(result);
+      if (!fullTableReported)
+      {
+        GSE_DebugStr(NORMAL, TRUE, "Expression Runtime Error. %s", EvalGetMsgFromErrCode(RPN_ERR_NOT_PREV_TABLE_FULL));
+        fullTableReported = TRUE;
+      }
     }
   }
 
@@ -1503,33 +1510,37 @@ static void EvalSetPrevSensorValue(UINT32 key,
                                    BOOLEAN bValid)
 {
   INT16 i;
+  UINT32 objType = EVAL_GET_TYPE(key);
   BOOLEAN status = FALSE;
 
-  // Lookup entry in temp table and update it.
-  for(i = 0; i < context->tempTblCnt; ++i)
+  if (objType > EVAL_CALLER_TYPE_PARSE && objType < MAX_EVAL_CALLER_TYPE)
   {
-    if (context->tempTbl[i].KeyField == key)
+    // Lookup entry in temp table and update it.
+    for(i = 0; i < context->tempTblCnt; ++i)
     {
-      context->tempTbl[i].PriorValue = fValue;
-      context->tempTbl[i].PriorValid = bValid;
-      status = TRUE;
-      break;
+      if (context->tempTbl[i].KeyField == key)
+      {
+        context->tempTbl[i].PriorValue = fValue;
+        context->tempTbl[i].PriorValid = bValid;
+        status = TRUE;
+        break;
+      }
     }
-  }
-  
-  // If entry not found, add it.
-  if (!status)
-  {
-    // THIS CAN NEVER BE TRUE because MAX_TEMP_PRIOR_VALUES is defined as
-    // the max # of expression tokens PLUS one. Parsing would fail first!
     
-    ASSERT_MESSAGE(context->tempTblCnt + 1 < MAX_TEMP_PRIOR_VALUES,
-                   "Temporary previous-sensor array is FULL",NULL);
-  
-    context->tempTbl[context->tempTblCnt].KeyField   = key;
-    context->tempTbl[context->tempTblCnt].PriorValue = fValue;
-    context->tempTbl[context->tempTblCnt].PriorValid = bValid;
-    ++context->tempTblCnt;       
+    // If entry not found, add it.
+    if (!status)
+    {
+      // THIS CAN NEVER BE TRUE because MAX_TEMP_PRIOR_VALUES is defined as
+      // the max # of expression tokens PLUS one. Parsing would fail first!
+      
+      ASSERT_MESSAGE(context->tempTblCnt + 1 < MAX_TEMP_PRIOR_VALUES,
+                     "Temporary previous-sensor array is FULL",NULL);
+    
+      context->tempTbl[context->tempTblCnt].KeyField   = key;
+      context->tempTbl[context->tempTblCnt].PriorValue = fValue;
+      context->tempTbl[context->tempTblCnt].PriorValid = bValid;
+      ++context->tempTblCnt;       
+    }
   }
 }
 
@@ -1578,7 +1589,7 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
     // INSERT attempt if update failed AND table not reported as full.
     if ( !bFound && !bTableFull )
     {
-      if ( (m_masterTblCnt + 1) < MAX_PRIOR_VALUES )
+      if ( m_masterTblCnt < MAX_PRIOR_VALUES )
       { 
         m_masterTbl[m_masterTblCnt].KeyField    = context->tempTbl[idxTempTbl].KeyField;
         m_masterTbl[m_masterTblCnt].PriorValue  = context->tempTbl[idxTempTbl].PriorValue;

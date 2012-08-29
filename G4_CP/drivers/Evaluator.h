@@ -126,7 +126,7 @@ typedef enum
 
 typedef enum
 {
-  EVAL_CALLER_TYPE_UNUSED,
+  EVAL_CALLER_TYPE_PARSE,    // Do not insert into !P tables during the parse of a Cfg
   EVAL_CALLER_TYPE_TRIGGER,
   EVAL_CALLER_TYPE_EVENT,
   /*--- Add new types above this line ----*/
