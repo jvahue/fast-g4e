@@ -1,7 +1,6 @@
 #define LOGMNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
-                      Altair Engine Diagnostic Solutions
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        LogManager.c
@@ -16,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 96 $  $Date: 7/19/12 11:08a $
+      $Revision: 97 $  $Date: 8/28/12 1:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2563,7 +2562,6 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
    LOG_SOURCE Source;
    TIMESTAMP  Ts;
    UINT32     i;
-   UINT32     intLevel;
 
 
    // TBD: Should we protect against being interrupted in the middle of
@@ -2604,8 +2602,6 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
      {
         if (LOG_REQ_NULL == SystemTable[i].WrStatus)
         {
-           intLevel = __DIR();
-
            SystemTable[i] = SysLog;
 
            Source.ID = SysLog.Source;
@@ -2619,8 +2615,6 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
                      ChecksumBuffer(&SysLog.Payload.Hdr.nChecksum,
                      sizeof(UINT32), LOG_CHKSUM_BLANK)),
                     &SystemTable[i].WrStatus);
-
-              __RIR(intLevel);
 
            // Enable the RMT Task
            if ( LogSystemInit )
@@ -2734,6 +2728,11 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  *
+ * *****************  Version 97  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review Findings
+ * 
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:08a
  * Updated in $/software/control processor/code/system

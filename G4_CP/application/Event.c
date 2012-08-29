@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 20 $  $Date: 12-08-20 9:00a $
+ $Revision: 21 $  $Date: 8/29/12 2:53p $
 
 ******************************************************************************/
 
@@ -1493,6 +1493,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 2:53p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 !P Processing
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a

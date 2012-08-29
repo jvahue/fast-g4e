@@ -1,18 +1,20 @@
 #ifndef EVENT_H
 #define EVENT_H
-/*****************************************************************************
+/******************************************************************************
                 Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
 
     File:        event.h
 
+
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 19 $  $Date: 12-08-20 9:00a $
+  $Revision: 21 $  $Date: 12-08-29 3:23p $
 
 ******************************************************************************/
+
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
@@ -31,7 +33,7 @@
 #include "timehistory.h"
 
 /******************************************************************************
-                                 Package Defines                              *
+                                 Package Defines                                           
 ******************************************************************************/
 /*------------------------------------  EVENT  ----------------------------------------------*/
 #define MAX_EVENTS              32      /* Total Events defined in the system           */
@@ -132,7 +134,7 @@
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT
 
 /******************************************************************************
-                                 Package Typedefs                             *
+                                  Package Typedefs                                        
 ******************************************************************************/
 typedef enum
 {
@@ -406,7 +408,7 @@ typedef struct
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 
 /******************************************************************************
-                                 Package Exports                              *
+                                   Package Exports 
 ******************************************************************************/
 #undef EXPORT
 #if defined( EVENT_BODY )
@@ -431,20 +433,31 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 #else
    EXPORT USER_ENUM_TBL evt_Region_UserEnumType[];
 #endif
-/**********************************************************************************************
+/******************************************************************************
                                   Package Exports Variables
-**********************************************************************************************/
+******************************************************************************/
 
-/**********************************************************************************************
+/******************************************************************************
                                   Package Exports Functions
-**********************************************************************************************/
+*******************************************************************************/
 EXPORT void EventsInitialize       ( void );
 EXPORT void EventTablesInitialize  ( void );
 
-/**********************************************************************************************
+#endif // EVENT_H 
+/*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
  *
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12-08-29   Time: 3:23p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Event End Log Update
+ * 
+ * *****************  Version 20  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142
+ * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
@@ -552,8 +565,4 @@ EXPORT void EventTablesInitialize  ( void );
  * Created in $/software/control processor/code/application
  *
  *
- *********************************************************************************************/
-#endif  // EVENT_H
-
-
-
+ ***************************************************************************/
