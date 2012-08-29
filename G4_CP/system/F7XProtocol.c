@@ -4,13 +4,13 @@
             Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    File:        FX7Protocol.c
+    File:        F7XProtocol.c
 
     Description: Contains all functions and data related to the F7X Protocol 
                  Handler 
     
     VERSION
-      $Revision: 15 $  $Date: 8/28/12 1:43p $     
+      $Revision: 16 $  $Date: 8/28/12 2:36p $     
 
 ******************************************************************************/
 
@@ -1990,6 +1990,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1142 - more format corrections
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

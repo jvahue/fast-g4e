@@ -2,15 +2,15 @@
 #define AIRCRAFTCONFIGMGR_H
 
 /******************************************************************************
-Copyright (C) 1999-2012 Pratt & Whitney Engine Services, Inc.                 
-                All Rights Reserved.  Proprietary and Confidential.
+          Copyright (C) 1999-2012 Pratt & Whitney Engine Services, Inc.                 
+                All Rights Reserved. Proprietary and Confidential.
 
  File: AircraftConfigMgr.h
 
  Description: This file defines structures for the AirCraft reconfigure module. 
 
    VERSION
-   $Revision: 18 $  $Date: 8/28/12 12:43p $
+   $Revision: 19 $  $Date: 8/28/12 2:36p $
 
 ******************************************************************************/
 
@@ -147,6 +147,7 @@ typedef struct
                                    Package Exports
 ******************************************************************************/
 #undef EXPORT
+
 #if defined( AIRCRAFTCONFIGMGR_BODY )
   #define EXPORT
 #else
@@ -194,6 +195,11 @@ extern "C" {
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1142 - more format corrections
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

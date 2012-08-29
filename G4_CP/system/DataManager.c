@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 77 $  $Date: 8/28/12 1:43p $ 
+      $Revision: 78 $  $Date: 8/28/12 7:08p $ 
     
 ******************************************************************************/
 
@@ -1334,12 +1334,12 @@ void DataMgrInitChannels(void)
     taskId     = (TASK_INDEX)(i + (UINT32)Data_Mgr0);
     
 	/*Override ACS priority for Full Flight Data sources if Full Flight Data mode is enabled
-	  Full Flight Data inhibit.  This modifies the prioriy in the configuration memory before
+	  Full Flight Data inhibit.  This modifies the priority in the configuration memory before
     it is copied to the DataManager local configuration.  If the configuration is changed
     at runtime, it will not change DataManager local configuration. */
     if( DataMgrIsPortFFD(pACSConfig) && DataMgrIsFFDInhibtMode( ) )
     {
-	pACSConfig->Priority = LOG_PRIORITY_4;
+	   pACSConfig->Priority = LOG_PRIORITY_4;
     }
 
 	
@@ -1830,6 +1830,11 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 78  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1142 - Windows Emulation Update and Typos
  * 
  * *****************  Version 77  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

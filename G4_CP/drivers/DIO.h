@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 37 $  $Date: 8/28/12 1:06p $    
+      $Revision: 38 $  $Date: 8/28/12 7:08p $    
 ******************************************************************************/
 
 
@@ -37,10 +37,18 @@
     #define DIO_R(a) *(a)
     #define DIO_W(a,m,o) *(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m))
     #define DIO_S(a,v) *(a) = (v)
+
+    #define DIO_R16(a) *(a)
+    #define DIO_W16(a,m,o) *(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m))
+    #define DIO_S16(a,v) *(a) = (v)
 #else
     #define DIO_R(a) hw_DioRead(a)
     #define DIO_W(a,m,o) hw_DioWrite(a,m,o)
     #define DIO_S(a,v) hw_DioSet(a,v)
+
+    #define DIO_R16(a) hw_DioRead16(a)
+    #define DIO_W16(a,m,o) hw_DioWrite16(a,m,o)
+    #define DIO_S16(a,v) hw_DioSet16(a,v)
 #endif
 //Input and output pin lists are used to generate an enumerated type. 
 //
@@ -253,6 +261,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 38  *****************
+ * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p
+ * Updated in $/software/control processor/code/drivers
+ * SCR# 1142 - Windows Emulation Update and Typos
  * 
  * *****************  Version 37  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
