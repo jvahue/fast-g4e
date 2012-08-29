@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 11 $  $Date: 8/28/12 1:06p $
+  $Revision: 12 $  $Date: 8/29/12 2:55p $
 
 ******************************************************************************/
 
@@ -282,6 +282,11 @@ INT16 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 2:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Issue #24 Eval: Not Equal Previous does not work
  * 
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

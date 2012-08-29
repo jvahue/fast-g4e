@@ -1339,7 +1339,7 @@ void DataMgrInitChannels(void)
     at runtime, it will not change DataManager local configuration. */
     if( DataMgrIsPortFFD(pACSConfig) && DataMgrIsFFDInhibtMode( ) )
     {
-	   pACSConfig->Priority = LOG_PRIORITY_4;
+	pACSConfig->Priority = LOG_PRIORITY_4;
     }
 
 	

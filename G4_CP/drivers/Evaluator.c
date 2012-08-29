@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 15 $  $Date: 8/28/12 1:06p $
+  $Revision: 16 $  $Date: 8/29/12 2:55p $
 
 ******************************************************************************/
 
@@ -1601,6 +1601,11 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 2:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Issue #24 Eval: Not Equal Previous does not work
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

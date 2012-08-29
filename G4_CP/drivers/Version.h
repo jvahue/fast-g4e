@@ -9,7 +9,7 @@
   Description: Build related external references.
  
     VERSION
-      $Revision: 62 $  $Date: 8/28/12 1:06p $
+      $Revision: 63 $  $Date: 8/29/12 2:56p $
     
 ******************************************************************************/
 /*****************************************************************************/
@@ -66,6 +66,11 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 63  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 2:56p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Updated to reflect build node #
  * 
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

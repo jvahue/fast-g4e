@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 69 $  $Date: 8/28/12 1:43p $
+  $Revision: 70 $  $Date: 8/29/12 3:08p $
 
 ******************************************************************************/
 
@@ -1356,17 +1356,8 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
                                        exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
     if ( StrToBinResult >= 0)
     {
-      // Move the binary expression to shadow RAM
-      memcpy(&CfgMgr_ConfigPtr()->TriggerConfigs[trigIdx],
-              &ConfigTriggerTemp,
-              sizeof(ConfigTriggerTemp));
-
-      //Store the modified shadow image of this config entry in the EEPROM.
-      CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
-                              &CfgMgr_ConfigPtr()->TriggerConfigs[trigIdx],
-                              sizeof(ConfigTriggerTemp) );
-
-      // Update the local m_TriggerCfg working area.
+      // Update the local m_TriggerCfg working area ONLY. This change is not propagated to
+      // ShadowRAM/EEPROM
       memcpy(&m_TriggerCfg[trigIdx], &ConfigTriggerTemp, sizeof(ConfigTriggerTemp));
 
       GSE_DebugStr(NORMAL,FALSE,
@@ -1392,6 +1383,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Contractor V&v Date: 8/29/12    Time: 3:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 !P Processing
  * 
  * *****************  Version 69  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
