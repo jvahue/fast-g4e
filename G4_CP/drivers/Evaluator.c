@@ -44,7 +44,6 @@
 /*****************************************************************************/
 #define MAX_FP_STRING         32
 #define MAX_PRIOR_VALUES      50
-#define MAX_TEMP_PRIOR_VALUES 16
 
 
 #define RPN_PUSH(obj)  (rpn_stack[rpn_stack_pos++] = (obj))
@@ -54,11 +53,10 @@
 
 
 // Macro for building GUID table key for PRIOR_SENSOR_ENTRY
-#define EVAL_MAKE_LOOKUP_KEY (type,obj,snsr)\
-                             ((type << 16) |\
-                              (obj  <<  8) |\
-                              (snsr));
-
+#define KEY_MASK_TYPE   0x00FF0000
+#define KEY_MASK_OBJID  0x0000FF00
+#define KEY_MASK_SNSR   0x000000FF
+#define EVAL_MAKE_LOOKUP_KEY(type,obj,snsr) ((type << 16) | (obj  <<  8) | (snsr))
 
 //#define DEBUG_EVALUATOR
 /*****************************************************************************/
@@ -108,15 +106,8 @@ INT32          rpn_stack_pos = 0;
 
 // Array for storing prior sensors values for all managed expressions.
 
-static PRIOR_SENSOR_ENTRY m_prevValues[MAX_PRIOR_VALUES];
-static UINT8              m_prevSensorCnt = 0;
-static BOOLEAN            m_bTableFullReported = FALSE;
-
-static PRIOR_SENSOR_ENTRY m_tempPrevValues[MAX_TEMP_PRIOR_VALUES];
-static UINT8              m_tempPrevValuesCnt = 0;
-static UINT8              m_objType;  // Object type of current caller
-static UINT8              m_objId;    // Index/id of the Object type
-
+static PRIOR_SENSOR_ENTRY m_masterTbl[MAX_PRIOR_VALUES];
+static UINT8              m_masterTblCnt       = 0;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -133,9 +124,10 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
                                       FLOAT32* fPriorValue,
                                       BOOLEAN* bPriorValid);
 static void    EvalSetPrevSensorValue(UINT32 key,
+                                      EVAL_EXE_CONTEXT* context,
                                       FLOAT32 fValue,
                                       BOOLEAN bValid);
-static void    EvalUpdatePrevSensorList(void);
+static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context);
 
 /*****************************************************************************/
 /* Local Functions                                                           */                
@@ -359,12 +351,18 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
   const EVAL_OPCODE_TBL_ENTRY* pOpCodeTbl = NULL;
   const EVAL_CMD* cmd;
   EVAL_RPN_ENTRY  result;
+  EVAL_EXE_CONTEXT  context;
 #ifdef DEBUG_EVALUATOR
   /*vcast_dont_instrument_start*/
   CHAR expString[256];
   EvalExprBinToStr(expString,expr);
   /*vcast_dont_instrument_end*/
 #endif
+
+  // Setup the context structure
+  context.objType    = (UINT8)objType;
+  context.objId      = (UINT8)objId;
+  context.tempTblCnt = 0;  
 
   // Init the results
   result.DataType = DATATYPE_BOOL;
@@ -374,25 +372,20 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
   // Init the stack to empty
   rpn_stack_pos = 0;
 
-  // Set the module vars to reflect the type and id of the current caller
-  // so all Evaluator functions will have use-context as needed.
-  // This is re-entrant-safe because all Evaluator users are DT's so pre-emption should not
-  // be an issue.
-  m_objType = (UINT8)objType;
-  m_objId   = (UINT8)objId;
-
-
+  // Process the commands in this expression.
   for( i = 0; i < expr->Size; i++ )
   {
-    // Get ptr to next cmd in list.
+    // Get a ptr to next cmd in list.
     cmd = &expr->CmdList[i];
 
     // The OpCode value is the index into the OpCodeTable for this operation
     // see: EVAL_OPCODE_LIST in EvaluatorInterface.h
     pOpCodeTbl = &OpCodeTable[cmd->OpCode]; 
 
-    // process the command.
-    if ( !pOpCodeTbl->ExeCmd(cmd))
+    // Set the current command ptr into the context struct
+    // and process it.
+    context.cmd = cmd;
+    if ( !pOpCodeTbl->ExeCmd( &context ) )
     {
       // Something failed, break out.
       // the most recent stack-push entry has details.
@@ -401,9 +394,19 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
   } // for-loop cmd list
 
   
-  if(m_tempPrevValuesCnt != 0 )
+  // If this expression has added entries to the temp prev-sensor table,
+  // merge the temp into the master.
+  if(context.tempTblCnt > 0 )
   {
-    EvalUpdatePrevSensorList();
+    // The update function will return false if table full. Only report this once per run.
+    if ( !EvalUpdatePrevSensorList(&context) )
+    {
+      RPN_STACK_PURGE;
+      result.Data     = RPN_ERR_NOT_PREV_TABLE_FULL;
+      result.DataType = DATATYPE_RPN_PROC_ERR;
+      result.Validity = FALSE;
+      RPN_PUSH(result);
+    }
   }
 
   // At this point there should be only a single item on the stack with the
@@ -454,7 +457,8 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
  *
  *****************************************************************************/
 
-INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
+INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
+                        CHAR* str,  EVAL_EXPR* expr, UINT8 maxOperands)
 {
   INT16 i;
   INT32 len;
@@ -545,7 +549,7 @@ INT32 EvalExprStrToBin( CHAR* str, EVAL_EXPR* expr, UINT8 maxOperands)
   // of the cmd sequence.
   if((retval >= 0 && expr->Size != 0))
   {
-    retval = EvalExeExpression( expr, &temp);
+    retval = EvalExeExpression( objType, objID, expr, &temp);
   }
 
   // If expression is invalid, disable it
@@ -617,12 +621,13 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadConstValue(const EVAL_CMD* cmd)
+BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
+  
 
-  rslt.Data = cmd->Data;
+  rslt.Data = context->cmd->Data;
   rslt.DataType = DATATYPE_VALUE;
   rslt.Validity = TRUE;
 
@@ -645,12 +650,12 @@ BOOLEAN EvalLoadConstValue(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadConstFalse(const EVAL_CMD* cmd)
+BOOLEAN EvalLoadConstFalse(EVAL_EXE_CONTEXT* context)
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
 
-  rslt.Data = cmd->Data;
+  rslt.Data = context->cmd->Data;
   rslt.DataType = DATATYPE_BOOL;
   // Const FALSE is always VALID
   rslt.Validity = TRUE;
@@ -674,10 +679,11 @@ BOOLEAN EvalLoadConstFalse(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
+BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
+  const EVAL_CMD* cmd = context->cmd;
 
   // Get a pointer to the DataAccess table for the set of
   // function-pointers supporting this opCode.
@@ -743,10 +749,11 @@ BOOLEAN EvalLoadInputSrc(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadFuncCall (const EVAL_CMD* cmd)
+BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
+  const EVAL_CMD* cmd = context->cmd;
 
   // Get a pointer to the DataAccess table for the set of
   // function-pointers supporting this opCode.
@@ -796,11 +803,12 @@ BOOLEAN EvalLoadFuncCall (const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
+BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
+  const EVAL_CMD* cmd = context->cmd;
 
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
@@ -894,14 +902,13 @@ BOOLEAN EvalCompareOperands(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
+BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
   EVAL_RPN_ENTRY rslt;
   UINT32         key;
-
-
+  
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
@@ -922,30 +929,15 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
       // Lookup the previous sensor value for this reference.
       // Make the lookup key using caller type, the objectId holding this expression, and the
       // sensor being referenced.
-      key = EVAL_MAKE_LOOKUP_KEY(m_objType,m_objId,cmd->Data);
+      key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->Data);
 
-      if (EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity) )
-      {
-        rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
-        rslt.DataType = DATATYPE_BOOL;
-        rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
+      EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
+      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
+      rslt.DataType = DATATYPE_BOOL;
+      rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
 
-        // Store the current sensor value & validity in the prev table for next time.
-        EvalSetPrevSensorValue( key, oprndCurrent.Data ,oprndCurrent.Validity );
-      }
-      else
-      {
-        // Previous-sensor table is full. This !P cannot be handled
-        // treat processing as false and invalid
-        rslt.Data     = FALSE;
-        rslt.DataType = DATATYPE_BOOL;
-        rslt.Validity = FALSE;
-        if (!m_bTableFullReported)
-        {
-          GSE_DebugStr(NORMAL,FALSE,"!P storage table is FULL.");
-          m_bTableFullReported = TRUE;
-        }
-      }      
+      // Store the current sensor value & validity in table for next processing.
+      EvalSetPrevSensorValue( key, context, oprndCurrent.Data ,oprndCurrent.Validity );     
     }
     else
     {
@@ -958,7 +950,7 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
   }
 
   RPN_PUSH(rslt);
-  return rslt.DataType != DATATYPE_RPN_PROC_ERR;;
+  return rslt.DataType != DATATYPE_RPN_PROC_ERR;
 }
 
 
@@ -977,11 +969,11 @@ BOOLEAN EvalIsNotEqualPrev(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
+BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprnd;
   EVAL_RPN_ENTRY rslt;
-
+  
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
@@ -1030,12 +1022,12 @@ BOOLEAN EvalPerformNot(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
+BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
-
+  
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
@@ -1085,12 +1077,12 @@ BOOLEAN EvalPerformAnd(const EVAL_CMD* cmd)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformOr(const EVAL_CMD* cmd)
+BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
-
+  
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
@@ -1460,14 +1452,13 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
                                       BOOLEAN* bPriorValid)
 {
   INT16 i;
-  INT16 index = -1; // Init index to "not found"    
-
+  INT16 index = -1; // Init index to "not found"
   
   // Search thru the general table to see if this
   // sensor is already being managed
-  for(i = 0; i < m_prevSensorCnt; ++i)
+  for(i = 0; i < m_masterTblCnt; ++i)
   {
-    if (m_prevValues[i].KeyField == key)
+    if (m_masterTbl[i].KeyField == key)
     {
       index = i;
       break;
@@ -1477,8 +1468,8 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
   // If we found the table entry, return values.
   if (-1 != index)
   {
-    *fPriorValue = m_prevValues[index].PriorValue;
-    *bPriorValid = m_prevValues[index].PriorValid;
+    *fPriorValue = m_masterTbl[index].PriorValue;
+    *bPriorValid = m_masterTbl[index].PriorValid;
   }
   else
   {
@@ -1494,7 +1485,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
  *
  * Description: Stores the passed value as the prior sensor value for the !P
  *              cmd in the temporary table. ( This table's contents will be merged
- *              into the m_prevValues at the end of processing for this expression.
+ *              into the m_masterTbl at the end of processing for this expression.
  *
  * Parameters:    [in]
  *
@@ -1507,25 +1498,105 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
  *
  *****************************************************************************/
 static void EvalSetPrevSensorValue(UINT32 key,
-                                    FLOAT32 fValue,
-                                    BOOLEAN bValid)
+                                   EVAL_EXE_CONTEXT* context,
+                                   FLOAT32 fValue,
+                                   BOOLEAN bValid)
 {
   INT16 i;
+  BOOLEAN status = FALSE;
 
-  // Lookup the entry and update it.
-  // If table is full it will be caught when trying to add
-  // entry so its OK if this loop doesn't find the entry.
-  for(i = 0; i < m_prevSensorCnt; ++i)
+  // Lookup entry in temp table and update it.
+  for(i = 0; i < context->tempTblCnt; ++i)
   {
-    if (m_prevValues[i].KeyField == key)
+    if (context->tempTbl[i].KeyField == key)
     {
-      m_prevValues[i].PriorValue = fValue;
-      m_prevValues[i].PriorValid = bValid;     
+      context->tempTbl[i].PriorValue = fValue;
+      context->tempTbl[i].PriorValid = bValid;
+      status = TRUE;
       break;
     }
   }
+  
+  // If entry not found, add it.
+  if (!status)
+  {
+    // THIS CAN NEVER BE TRUE because MAX_TEMP_PRIOR_VALUES is defined as
+    // the max # of expression tokens PLUS one. Parsing would fail first!
+    
+    ASSERT_MESSAGE(context->tempTblCnt + 1 < MAX_TEMP_PRIOR_VALUES,
+                   "Temporary previous-sensor array is FULL",NULL);
+  
+    context->tempTbl[context->tempTblCnt].KeyField   = key;
+    context->tempTbl[context->tempTblCnt].PriorValue = fValue;
+    context->tempTbl[context->tempTblCnt].PriorValid = bValid;
+    ++context->tempTblCnt;       
+  }
 }
 
+/******************************************************************************
+ * Function: EvalUpdatePrevSensorList
+ *
+ * Description: Merge the contents of the temp prev-value
+ *              cmd in the temporary table. ( This table's contents will be merged
+ *              into the m_masterTbl at the end of processing for this expression.
+ *
+ * Parameters:    [in]
+ *
+ *                [out]
+ *
+ * Returns:
+ *
+ * Notes:
+ *
+ *
+ *****************************************************************************/
+static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
+{
+  INT16 idxTempTbl;
+  INT16 idxMastTbl;
+  BOOLEAN bFound     = FALSE;
+  BOOLEAN bTableFull = FALSE;
+  INT16   updateCnt = 0;        // updateCnt should equal m_tempTblCnt at end of function
+
+  // Lookup entry in temp table.
+  for(idxTempTbl = 0; idxTempTbl < context->tempTblCnt; ++idxTempTbl)
+  {
+    bFound = FALSE;
+    // UPDATE attempt on existing entry
+    for (idxMastTbl = 0; idxMastTbl < m_masterTblCnt; ++idxMastTbl)
+    {
+      if (context->tempTbl[idxTempTbl].KeyField == m_masterTbl[idxMastTbl].KeyField)
+      {
+        m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
+        m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
+        ++updateCnt;
+        bFound = TRUE;
+        break;
+      }
+    } // master lookup
+
+    // INSERT attempt if update failed AND table not reported as full.
+    if ( !bFound && !bTableFull )
+    {
+      if ( (m_masterTblCnt + 1) < MAX_PRIOR_VALUES )
+      { 
+        m_masterTbl[m_masterTblCnt].KeyField    = context->tempTbl[idxTempTbl].KeyField;
+        m_masterTbl[m_masterTblCnt].PriorValue  = context->tempTbl[idxTempTbl].PriorValue;
+        m_masterTbl[m_masterTblCnt].PriorValid  = context->tempTbl[idxTempTbl].PriorValid;        
+        ++m_masterTblCnt;
+        ++updateCnt;
+      }
+      else
+      {
+        bTableFull = TRUE;
+      }
+    }
+   
+  } // temp processing.
+
+  return (updateCnt == context->tempTblCnt);
+ 
+}
 
 /*************************************************************************
  *  MODIFICATIONS

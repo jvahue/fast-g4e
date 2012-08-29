@@ -37,7 +37,11 @@
 #define EVAL_OPERAND_DIGIT_LEN     3
 #define EVAL_PREFIX_LEN  (EVAL_OPRND_LEN - EVAL_OPERAND_DIGIT_LEN)
 
-#define EVAL_EXPR_BIN_LEN  16//((1+1+EVAL_OPS_PER_OPERAND) * EVAL_MAX_OPERANDS_PER_EXPR)
+#define EVAL_EXPR_BIN_LEN  16
+
+#define MAX_TEMP_PRIOR_VALUES (EVAL_EXPR_BIN_LEN + 1)// Number of temp array items ==
+// max expression size + 1 so array
+// will always be large enough at runtime
 
 #define EVAL_MAX_EXPR_STR_LEN 256
 //#define EVAL_MAX_EXPR_STR_LEN ((EVAL_OPS_PER_OPERAND +\
@@ -115,14 +119,15 @@ typedef enum
   RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation       
   RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack                      
   RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval
-  RPN_ERR_PRIOR_SENSR_TABLE_FULL   = -11, // The table storing Prior-sensor values is full.
+  RPN_ERR_NOT_PREV_TABLE_FULL      = -11, // The table storing Prior-sensor values is full.
   //-----                                                                                         
   RPN_ERR_MAX                      = -12                                                          
 }RPN_ERR;    
 
 typedef enum
 {
-  EVAL_CALLER_TYPE_TRIGGER = 1,
+  EVAL_CALLER_TYPE_UNUSED,
+  EVAL_CALLER_TYPE_TRIGGER,
   EVAL_CALLER_TYPE_EVENT,
   /*--- Add new types above this line ----*/
   MAX_EVAL_CALLER_TYPE
@@ -158,9 +163,9 @@ typedef struct
 
 // Entry to handle prior sensor values in expressions
 // KeyField layout:
-//0x000000FF - Sensor ID 00-255
-//0x0000FF00 - Object ID 00-255
-//0x00FF0000 - Object Type 0- Trigger, 1- Event, etc
+// 0x000000FF - Sensor ID 00-255
+// 0x0000FF00 - Object ID 00-255
+// 0x00FF0000 - Object Type 0- Trigger, 1- Event, etc
 
 typedef struct  
 {
@@ -169,11 +174,22 @@ typedef struct
   BOOLEAN PriorValid;// The validity of the previous stored value.
 }PRIOR_SENSOR_ENTRY;
 
+// Structure used during expression execution to
+// define context
+typedef struct  
+{
+  const EVAL_CMD*    cmd;      // Pointer to currently executing cmd in Expression.
+  UINT8              objType;  // Object type of current caller.
+  UINT8              objId;    // Object ID   of current caller.
+  PRIOR_SENSOR_ENTRY tempTbl[MAX_TEMP_PRIOR_VALUES];
+  UINT8              tempTblCnt;
+}EVAL_EXE_CONTEXT;
+
 
 // Typedef to function pointers.
 typedef INT32   ADD_CMD (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 typedef INT16   FMT_CMD (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-typedef BOOLEAN OP_CMD  (const EVAL_CMD* cmd);
+typedef BOOLEAN OP_CMD  (EVAL_EXE_CONTEXT* context);
 
 typedef struct
 {
@@ -199,7 +215,6 @@ typedef struct
   GET_BOOL_FUNC*  GetSrcValidity;   // Return source validity 
 }EVAL_DATAACCESS;
 
-
 /******************************************************************************
                                  Package Exports
 ******************************************************************************/
@@ -224,7 +239,8 @@ typedef struct
 // Declare before inclusion of user-table because EvaluatorUserTable.c will need to see them for
 // processing the "SC" and "EC" strings.
 
-EXPORT INT32 EvalExprStrToBin  ( CHAR* str, EVAL_EXPR* bin, UINT8 maxOperands );
+EXPORT INT32 EvalExprStrToBin  ( EVAL_CALLER_TYPE objType, INT32 objID,
+                                 CHAR* str,EVAL_EXPR* expr, UINT8 maxOperands );
 EXPORT void  EvalExprBinToStr  ( CHAR* str, const EVAL_EXPR* bin );
 EXPORT INT32 EvalExeExpression  ( EVAL_CALLER_TYPE objType, INT32 objID,
                                 const EVAL_EXPR* expr, BOOLEAN* validity );
@@ -234,19 +250,19 @@ EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 // Functions listed in the function table not really "exported" but
 // need to be declared because EvaluatorInterface.h will use them.
 
-BOOLEAN EvalLoadConstValue      (const EVAL_CMD* cmd);
-BOOLEAN EvalLoadConstFalse      (const EVAL_CMD* cmd);
-BOOLEAN EvalLoadInputSrc        (const EVAL_CMD* cmd);
-BOOLEAN EvalLoadFuncCall        (const EVAL_CMD* cmd);
+BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalLoadInputSrc   (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalLoadFuncCall   (EVAL_EXE_CONTEXT* context);
 
 // Comparison Operators
-BOOLEAN EvalCompareOperands     (const EVAL_CMD* cmd);
-BOOLEAN EvalIsNotEqualPrev      (const EVAL_CMD* cmd);
+BOOLEAN EvalCompareOperands (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalIsNotEqualPrev  (EVAL_EXE_CONTEXT* context);
 
 // Logical Operators
-BOOLEAN EvalPerformNot          (const EVAL_CMD* cmd);
-BOOLEAN EvalPerformAnd          (const EVAL_CMD* cmd);
-BOOLEAN EvalPerformOr           (const EVAL_CMD* cmd);
+BOOLEAN EvalPerformNot      (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalPerformAnd      (EVAL_EXE_CONTEXT* context);
+BOOLEAN EvalPerformOr       (EVAL_EXE_CONTEXT* context);
 
 // String-to-Cmd Converter functions.
 INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);

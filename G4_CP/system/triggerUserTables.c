@@ -411,7 +411,8 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);    
      
-    StrToBinResult = EvalExprStrToBin(str, (EVAL_EXPR*) Param.Ptr, MAX_TRIG_EXPR_OPRNDS);
+    StrToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_TRIGGER, Index,
+                                      str, (EVAL_EXPR*) Param.Ptr, MAX_TRIG_EXPR_OPRNDS);
 
     if( StrToBinResult >= 0 )
     {
