@@ -172,6 +172,7 @@ void TriggerInitialize(void)
     pTrigData->nRateCountdown    = (UINT16)((pTrigCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pTrigData->bStartCompareFail = FALSE;
     pTrigData->bEndCompareFail   = FALSE;
+    pTrigData->bLegacyConfig     = FALSE;
     pTrigData->EndType           = TRIG_NO_END;
 
     for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
@@ -185,6 +186,7 @@ void TriggerInitialize(void)
          pTrigCfg->EndExpr.Size == 0)  &&
          SENSOR_UNUSED != pTrigCfg->TrigSensor[0].SensorIndex )
     {
+      pTrigData->bLegacyConfig = TRUE;
       GSE_DebugStr(NORMAL,FALSE,
         "Trigger: Trigger[%d] - Expressions not defined, creating...", i);
       TriggerConvertLegacyCfg( i );
@@ -619,8 +621,13 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             pTrigData->State  = TRIG_START;
             // Reset trigger flag
             ResetBit(pTrigData->TriggerIndex, TriggerFlags, sizeof(TriggerFlags));
-            // Log the End
-            TriggerLogEnd(pTrigCfg, pTrigData);
+            
+            if (TRUE == pTrigData->bLegacyConfig )
+            {
+              // Log the End
+              TriggerLogEnd(pTrigCfg, pTrigData);
+            }
+
             // reset the trigger data
             TriggerReset( pTrigData );
 
@@ -734,15 +741,19 @@ static BOOLEAN TriggerCheckDuration (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTr
       // Check if flag is already set
       if ( FALSE == GetBit(pTrigData->TriggerIndex,TriggerFlags,sizeof(TriggerFlags) ) )
       {
-         // Not Set Record the TRIGGER Start Log
-         nTriggerStorage = (UINT32)pTrigData->TriggerIndex;
-         LogWriteSystem (SYS_ID_INFO_TRIGGER_STARTED,
-                         LOG_PRIORITY_LOW,
-                         &nTriggerStorage,
-                         sizeof(nTriggerStorage),
-                         NULL);
-         GSE_DebugStr(NORMAL,TRUE,"Trigger Start (%d) %s ", pTrigData->TriggerIndex,
-                                        pTrigCfg->TriggerName );
+         // If this trigger is a legacy definition(has sensors defined) start the log.
+         if (pTrigData->bLegacyConfig)
+         {
+           // Not Set Record the TRIGGER Start Log
+           nTriggerStorage = (UINT32)pTrigData->TriggerIndex;
+           LogWriteSystem (SYS_ID_INFO_TRIGGER_STARTED,
+                           LOG_PRIORITY_LOW,
+                           &nTriggerStorage,
+                           sizeof(nTriggerStorage),
+                           NULL);
+           GSE_DebugStr(NORMAL,TRUE,"Trigger Start (%d) %s ", pTrigData->TriggerIndex,
+                                          pTrigCfg->TriggerName );
+         }
 
       }
    }

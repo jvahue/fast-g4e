@@ -253,6 +253,7 @@ typedef struct
   INT16              nRateCountdown;
   BOOLEAN            bStartCompareFail;
   BOOLEAN            bEndCompareFail;
+  BOOLEAN            bLegacyConfig;
   TRIG_END_TYPE      EndType;
 } TRIGGER_DATA;
 
