@@ -132,7 +132,7 @@ void TriggerInitialize(void)
   // Local Data
   UINT32           i;
   UINT8           tsi;
-
+  
   TRIGGER_CONFIG  *pTrigCfg;
   TRIGGER_DATA    *pTrigData;
   TCB             TaskInfo;
@@ -175,10 +175,14 @@ void TriggerInitialize(void)
     pTrigData->bLegacyConfig     = FALSE;
     pTrigData->EndType           = TRIG_NO_END;
 
-    for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
-    {
-        pTrigData->fValuePrevious[tsi] = 0;
-    }
+    // Init the array of monitored sensors for legacy configs
+    pTrigData->nTotalSensors     = 0;
+    memset(pTrigData->sensorMap, 0, sizeof(pTrigData->sensorMap));
+
+//     for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
+//     {
+//         pTrigData->fValuePrevious[tsi] = 0;
+//     }
 
     // If start AND end expressions are empty, but a sensor IS defined in the cfg...
     // this is a legacy-style cfg. Create a start and end cfg expression.
@@ -192,7 +196,32 @@ void TriggerInitialize(void)
       TriggerConvertLegacyCfg( i );
     }
 
-    // There should be always be a configuration by the time we get here
+
+    // If this is a legacy configuration. Check which sensors are used
+    // by this trigger config the sensor map as though it was configured by the user    
+    if(pTrigData->bLegacyConfig)
+    {
+      for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
+      {
+        if ( SENSOR_UNUSED != pTrigCfg->TrigSensor[tsi].SensorIndex )
+        {
+          // Flag this sensor for tracking during trigger-active
+          SetBit( pTrigCfg->TrigSensor[tsi].SensorIndex,
+                  pTrigData->sensorMap,
+                  sizeof(pTrigData->sensorMap) );
+        }        
+      }
+
+      // Setup the sensor summary array based on whatever was set in the SensorMap above.
+#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+      pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
+                                                         MAX_TRIG_SENSORS,
+                                                         pTrigData->sensorMap,
+                                                         sizeof (pTrigData->sensorMap) );
+#pragma ghs endnowarning
+    }
+
+    // There should always be a configuration by the time we get here
     // (legacy, expression, expression-from-legacy) unless nothing was defined.
 
     if(TriggerIsConfigured(i))
@@ -622,7 +651,7 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             // Reset trigger flag
             ResetBit(pTrigData->TriggerIndex, TriggerFlags, sizeof(TriggerFlags));
             
-            if (TRUE == pTrigData->bLegacyConfig )
+            if ( pTrigData->bLegacyConfig )
             {
               // Log the End
               TriggerLogEnd(pTrigCfg, pTrigData);
@@ -843,7 +872,7 @@ void TriggerLogEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
    LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
                    LOG_PRIORITY_LOW,
                    &TriggerLog[pTrigData->TriggerIndex],
-                   sizeof(TriggerLog[pTrigData->TriggerIndex]),
+                   sizeof(TRIGGER_LOG),
                    NULL);
 }
 
@@ -865,9 +894,7 @@ static
 void TriggerReset( TRIGGER_DATA *pTrigData)
 {
    // Local Data
-   SNSR_SUMMARY *pSummary;
-   UINT8        i;
-
+     
    // Reinit the trigger data
    pTrigData->State         = TRIG_START;
    pTrigData->nStartTime_ms = 0;
@@ -875,17 +902,10 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
    pTrigData->nSampleCount  = 0;
    pTrigData->EndType       = TRIG_NO_END;
 
-   // Reinit the sensor summary data for the trigger
-   for (i = 0; i < MAX_TRIG_SENSORS; i++)
-   {
-      pSummary  = &(pTrigData->Summary[i]);
-
-      pSummary->bValid        = FALSE;
-      pSummary->fTotal  = 0;
-      pSummary->fMinValue    = FLT_MAX;
-      pSummary->fMaxValue    = 0;
-      pSummary->fAvgValue    = 0;
-   }
+   pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
+                                                      MAX_TRIG_SENSORS,
+                                                      pTrigData->sensorMap,
+                                                      sizeof (pTrigData->sensorMap) );   
 }
 
 /******************************************************************************
@@ -905,7 +925,7 @@ static
 void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 {
    // Local Data
-   TRIG_SENSOR      *pTrigSensor;
+   FLOAT32  oneOverN;
    SNSR_SUMMARY     *pSummary;
    UINT8            i;
 
@@ -924,28 +944,32 @@ void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
    pTrigData->nSampleCount++;
 
    // Loop through the Triggers Sensors
-   for ( i = 0; i < MAX_TRIG_SENSORS; i++)
+   for ( i = 0; i < pTrigData->nTotalSensors; i++ )
    {
-      // Set a pointer to the triggers sensor
-      pTrigSensor = &(pTrigCfg->TrigSensor[i]);
-      // Set a pointer to the data summary
-      pSummary    = &(pTrigData->Summary[i]);
+     // Set a pointer to the data summary
+     pSummary    = &(pTrigData->snsrSummary[i]);
 
-      // Make sure the sensor index is valid
-      if (pTrigSensor->SensorIndex < MAX_SENSORS)
-      {
-         // Verify the sensor is used
-         if (SensorIsUsed(pTrigSensor->SensorIndex))
-         {
-          SensorUpdateSummaryItem(pSummary);
-         }
-         pSummary->bValid = SensorIsValid(pTrigSensor->SensorIndex);
-      }
-      else // The index is not valid
-      {
-         // exit the loop
-         break;
-      }
+     // If the sensor is known to be invalid and was valid in the past(initialized)...
+     // ignore processing for the remainder of this event.
+     if( !pSummary->bValid && pSummary->bInitialized )
+     {
+       continue;
+     }
+
+     pSummary->bValid = SensorIsValid(pSummary->SensorIndex);
+
+     if ( pSummary->bValid )
+     {
+       pSummary->bInitialized = TRUE;
+       SensorUpdateSummaryItem(pSummary);
+     }
+     else if ( pSummary->bInitialized)
+     {
+       // Sensor is now invalid but had been valid
+       // calculate average for valid period.
+       oneOverN = (1.0f / (FLOAT32)(pTrigData->nSampleCount - 1));
+       pSummary->fAvgValue = pSummary->fTotal * oneOverN;
+     }
    }
 
    // update the Trigger duration
@@ -971,13 +995,12 @@ void TriggerLogUpdate( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 {
   // Local Data
   FLOAT32         oneOverN;
-  TRIG_SENSOR     *pTrigSensor;
   TRIGGER_LOG     *pLog;
   SNSR_SUMMARY    *pSummary;
   UINT8           i;
 
   // Initialize Local Data
-  pLog        = &TriggerLog[pTrigData->TriggerIndex];
+  pLog = &TriggerLog[pTrigData->TriggerIndex];
 
   // Calculate the multiplier for the average
   oneOverN = (1.0f / (FLOAT32)pTrigData->nSampleCount);
@@ -992,34 +1015,33 @@ void TriggerLogUpdate( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
   pLog->DurationMetTime = pTrigData->DurationMetTime;
   pLog->EndTime         = pTrigData->EndTime;
 
-  // Loop through all the triggers
-  for ( i = 0; i < MAX_TRIG_SENSORS; i++)
+  // Loop through all configured sensors
+  for ( i = 0; i < pTrigData->nTotalSensors; i++)
   {
     // Set a pointer to the current trigger
-    pTrigSensor = &(pTrigCfg->TrigSensor[i]);
+    pSummary = &(pTrigData->snsrSummary[i]);
 
     // Check for a valid sensor index and the sensor is used
-    if ((pTrigSensor->SensorIndex < MAX_SENSORS) && (SensorIsUsed(pTrigSensor->SensorIndex)))
+    if ( (SensorIsUsed(pSummary->SensorIndex)) )
     {
-       // Set a pointer the summary
-       pSummary = &(pTrigData->Summary[i]);
-       pSummary->bValid = SensorIsValid(pTrigSensor->SensorIndex);
-       // Update the summary data for the trigger
-       pLog->Sensor[i].SensorIndex   = pTrigSensor->SensorIndex;
-       pLog->Sensor[i].fTotal  = pSummary->fTotal;
-       pLog->Sensor[i].fMinValue    = pSummary->fMinValue;
-       pLog->Sensor[i].fMaxValue    = pSummary->fMaxValue;
-       pLog->Sensor[i].fAvgValue    = pSummary->fTotal * oneOverN;
-       pLog->Sensor[i].bValid        = pSummary->bValid;
+      pSummary->bValid = SensorIsValid (pSummary->SensorIndex);
+      
+      // Update the summary data for the trigger
+      pLog->Sensor[i].SensorIndex   = pSummary->SensorIndex;
+      pLog->Sensor[i].fTotal        = pSummary->fTotal;
+      pLog->Sensor[i].fMinValue     = pSummary->fMinValue;
+      pLog->Sensor[i].fMaxValue     = pSummary->fMaxValue;
+      pLog->Sensor[i].fAvgValue     = pSummary->fTotal * oneOverN;
+      pLog->Sensor[i].bValid        = pSummary->bValid;
     }
     else // Sensor Not Used
     {
-       pLog->Sensor[i].SensorIndex   = SENSOR_UNUSED;
-       pLog->Sensor[i].fTotal  = 0.0;
-       pLog->Sensor[i].fMinValue    = 0.0;
-       pLog->Sensor[i].fMaxValue    = 0.0;
-       pLog->Sensor[i].fAvgValue    = 0.0;
-       pLog->Sensor[i].bValid        = FALSE;
+      pLog->Sensor[i].SensorIndex  = SENSOR_UNUSED;
+      pLog->Sensor[i].fTotal       = 0.0;
+      pLog->Sensor[i].fMinValue    = 0.0;
+      pLog->Sensor[i].fMaxValue    = 0.0;
+      pLog->Sensor[i].fAvgValue    = 0.0;
+      pLog->Sensor[i].bValid       = FALSE;
     }
   }
 }
@@ -1052,20 +1074,23 @@ void TriggersEnd( void)
     pTrigSensor = &(pTrigCfg->TrigSensor[0]);
     pTrigData   = &(TriggerData[i]);
 
-    if ( pTrigData->State == TRIG_ACTIVE)
+    if ( pTrigData->State == TRIG_ACTIVE )
     {
       CM_GetTimeAsTimestamp(&pTrigData->EndTime);
       if (( pTrigSensor->SensorIndex != SENSOR_UNUSED ) &&
           ( SensorIsUsed(pTrigSensor->SensorIndex) ))
       {
         pTrigData->EndType = TRIG_COMMANDED_END;
-
-        TriggerLogUpdate ( pTrigCfg, pTrigData );
-        LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
-                        LOG_PRIORITY_LOW,
-                        &TriggerLog[pTrigData->TriggerIndex],
-                        sizeof(TriggerLog[pTrigData->TriggerIndex]),
-                        NULL);
+        if( pTrigData->bLegacyConfig )
+        {
+          TriggerLogUpdate ( pTrigCfg, pTrigData );
+          LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
+            LOG_PRIORITY_LOW,
+            &TriggerLog[pTrigData->TriggerIndex],
+            sizeof(TRIGGER_LOG),
+            NULL);
+        }
+        
       }
     }
   }
@@ -1428,7 +1453,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  * *****************  Version 64  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2 Refactor for common Sensor Summary
+ * SCR #1107 FAST 2 Refactor for common Sensor snsrSummary
  *
  * *****************  Version 63  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:36p

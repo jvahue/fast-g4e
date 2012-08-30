@@ -208,6 +208,22 @@ typedef struct
   EVAL_EXPR      EndExpr;
 } TRIGGER_CONFIG;
 
+
+// Specialized Trigger version of SNSR_SUMMARY
+// (Does not store times for sensor MIN and MAX
+#pragma pack(1)
+typedef struct
+{
+  SENSOR_INDEX SensorIndex;
+  BOOLEAN      bInitialized;
+  BOOLEAN      bValid;
+  FLOAT32      fMinValue;
+  FLOAT32      fMaxValue;  
+  FLOAT32      fAvgValue;
+  FLOAT32      fTotal;
+} TRIG_SNSR_SUMMARY;
+#pragma pack()
+
 typedef struct
 {
    TRIGGER_INDEX      TriggerIndex;
@@ -247,8 +263,10 @@ typedef struct
   UINT32             nStartTime_ms;
   UINT32             nDuration_ms;
   UINT32             nSampleCount;   /* For calculating averages */
-  SNSR_SUMMARY       Summary[MAX_TRIG_SENSORS];
-  FLOAT32            fValuePrevious[MAX_TRIG_SENSORS];
+  BITARRAY128        sensorMap;      /* Bit encoded flags of sensors used. Only for legacy  */
+  UINT16             nTotalSensors;  /* Total sensors being sampled */
+  SNSR_SUMMARY       snsrSummary[MAX_TRIG_SENSORS];
+//  FLOAT32            fValuePrevious[MAX_TRIG_SENSORS];
   INT16              nRateCounts;
   INT16              nRateCountdown;
   BOOLEAN            bStartCompareFail;
@@ -336,7 +354,7 @@ EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSen
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2 Refactor for common Sensor Summary
+ * SCR #1107 FAST 2 Refactor for common Sensor snsrSummary
  * 
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
