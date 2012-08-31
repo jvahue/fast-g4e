@@ -414,7 +414,8 @@ void SensorDisableLiveStream( void )
   // "Clear" the summary table by setting all indexes to "unused"
   for (summaryIdx = 0; summaryIdx < summarySize; ++summaryIdx)
   {
-    summary[summaryIdx].SensorIndex = SENSOR_UNUSED;    
+    memset(&summary[summaryIdx],0, sizeof(SNSR_SUMMARY));
+    summary[summaryIdx].SensorIndex = SENSOR_UNUSED;
   }
 
   CM_GetTimeAsTimestamp(&timeStampNow);
