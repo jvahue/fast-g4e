@@ -939,7 +939,7 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
       key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->Data);
 
       EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
-      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
+      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
       rslt.DataType = DATATYPE_BOOL;
       rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
 
