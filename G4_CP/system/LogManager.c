@@ -2563,6 +2563,7 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
    TIMESTAMP  Ts;
    UINT32     i;
 
+   ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
 
    // TBD: Should we protect against being interrupted in the middle of
    // finding a location and writing the data to the payload?
@@ -2732,7 +2733,7 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:08a
  * Updated in $/software/control processor/code/system
