@@ -168,6 +168,19 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 extern USER_ENUM_TBL EngRunIdEnum[];
 
+#if defined( ENGINERUN_BODY )
+ USER_ENUM_TBL EngineRunStateEnum[] =
+{
+  { "STOPPED",  ER_STATE_STOPPED  },
+  { "STARTING", ER_STATE_STARTING },
+  { "RUNNING",  ER_STATE_RUNNING  },
+  { NULL, 0 }
+};
+#else
+EXPORT USER_ENUM_TBL EngineRunStateEnum[];
+#endif
+
+
 
 
 /******************************************************************************

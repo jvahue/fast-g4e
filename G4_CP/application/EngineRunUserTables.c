@@ -62,13 +62,13 @@ USER_HANDLER_RESULT       EngRunShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* User command tables                                                       */
 /*****************************************************************************/
-static USER_ENUM_TBL EngineRunStateEnum[] =
-{
-  { "STOPPED",  ER_STATE_STOPPED  },
-  { "STARTING", ER_STATE_STARTING },
-  { "RUNNING",  ER_STATE_RUNNING  },
-  { NULL, 0 }
-};
+//static USER_ENUM_TBL EngineRunStateEnum[] =
+//{
+//  { "STOPPED",  ER_STATE_STOPPED  },
+//  { "STARTING", ER_STATE_STARTING },
+//  { "RUNNING",  ER_STATE_RUNNING  },
+//  { NULL, 0 }
+//};
 
 USER_ENUM_TBL EngRunIdEnum[] =
 {  

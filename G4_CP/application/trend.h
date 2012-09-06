@@ -91,7 +91,6 @@ typedef enum
 } TREND_INDEX;
 
 #pragma pack(1)
-
 typedef struct  
 {
   CHAR  Name[ MAX_TREND_NAME + 1 ];    /* name of trend or autotrend  */
@@ -117,7 +116,7 @@ typedef struct
    CHAR          TrendName[MAX_TREND_NAME+1]; /* the name of the trend                       */
    TREND_RATE    Rate;               /* Rate in ms at which trend is run.                    */
    UINT32        nOffset_ms;         /* Offset in millisecs this object runs within it's MIF */
-   UINT32        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
+   UINT16        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
    ENGRUN_INDEX  EngineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
    UINT16        nTrendSamples;      /* # of trend-samples to take                           */
    TRIGGER_INDEX StartTrigger;       /* Starting trigger                                     */
@@ -128,12 +127,10 @@ typedef struct
    CYCLE_INDEX   nCycleB;            /* Persistent Cycle B to include in trend               */
    CYCLE_INDEX   nCycleC;            /* Persistent Cycle C to include in trend               */
    CYCLE_INDEX   nCycleD;            /* Persistent Cycle D to include in trend               */
-   UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */
-
-   STABILITY_CRITERIA Stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
-   UINT16        nTimeStable_s;     /* Stability period for sensor(0-3600) in 1sec intervals*/
-
+   UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */   
+   UINT16        nTimeStable_s;     /* Stability period for sensor(0-3600) in 1sec intervals */
    BOOLEAN       lampEnabled;        /* will the trend lamp flash                            */
+   STABILITY_CRITERIA Stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG, *TREND_CFG_PTR;
 
 // LOGS HERE
