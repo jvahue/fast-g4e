@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 97 $  $Date: 8/28/12 1:43p $
+      $Revision: 98 $  $Date: 12-09-05 9:42a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2729,6 +2729,11 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  *
+ * *****************  Version 98  *****************
+ * User: John Omalley Date: 12-09-05   Time: 9:42a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ASSERT for ETM and System Logs larger than 1K
+ * 
  * *****************  Version 97  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

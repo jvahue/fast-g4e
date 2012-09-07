@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 48 $  $Date: 8/28/12 1:43p $
+    $Revision: 49 $  $Date: 12-09-05 9:42a $
 
 ******************************************************************************/
 
@@ -182,7 +182,7 @@ typedef enum
   // ... Add additional log types here
   LOG_REGISTER_END
 } LOG_REGISTER_TYPE;
-
+  
 
 typedef union
 {
@@ -250,7 +250,7 @@ typedef struct
 {
   UINT32  nRdAccess;
   UINT32  nErAccess;
-  UINT32  nDiscarded;
+  UINT32  nDiscarded;  
 } LOG_ERROR_CNTS;
 
 typedef struct
@@ -258,7 +258,7 @@ typedef struct
   LOG_ERROR_CNTS Counts;
   BOOLEAN bReadAccessFail;
   BOOLEAN bWriteAccessFail;
-  BOOLEAN bEraseAccessFail;
+  BOOLEAN bEraseAccessFail;  
 } LOG_ERROR_STATUS;
 
 typedef struct
@@ -284,7 +284,7 @@ typedef struct
     LOG_REQUEST   CurrentEntry;
     UINT32        FaultCount;
     // Array of indexes into the the SystemTable which contains an outstanding
-    // write pending/in-progress for the corresponding LOG_REGISTER_TYPE.
+    // write pending/in-progress for the corresponding LOG_REGISTER_TYPE. 
     // A value of LOG_INDEX_NOT_SET means the associated log type is not active.
     UINT32       LogWritePending[LOG_REGISTER_END];
 
@@ -326,11 +326,11 @@ typedef struct
    LOG_MNG_TASK_PARMS **pTaskParams;
 } LOG_BCKGRD_ERASE_PARMS;
 
-// Log CBIT Health Status
-typedef struct
+// Log CBIT Health Status 
+typedef struct 
 {
-  UINT32    nCorruptCnt;
-} LOG_CBIT_HEALTH_COUNTS;
+  UINT32    nCorruptCnt; 
+} LOG_CBIT_HEALTH_COUNTS; 
 
 #pragma pack(1)
 // Log Manager Fail Logs
@@ -343,7 +343,7 @@ typedef struct
 typedef struct
 {
    RESULT         Result;
-   LOG_ERASE_DATA EraseData;
+   LOG_ERASE_DATA EraseData;     
 } LOG_ERASE_FAIL_LOG;
 #pragma pack()
 
@@ -373,7 +373,7 @@ EXPORT USER_ENUM_TBL LM_UserEnumPriority[] =
 { { "1",   LOG_PRIORITY_1      },
   { "2",   LOG_PRIORITY_2      },
   { "3",   LOG_PRIORITY_3      },
-  { "4",   LOG_PRIORITY_4      },
+  { "4",   LOG_PRIORITY_4      },  
   { NULL,     0                      }
 };
 #else
@@ -430,147 +430,152 @@ EXPORT UINT32            LogGetLogCount          ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
- *
+ * 
+ * *****************  Version 49  *****************
+ * User: John Omalley Date: 12-09-05   Time: 9:42a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ASSERT for ETM and System Logs larger than 1K
+ * 
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- *
+ * 
  * *****************  Version 47  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- *
+ * 
  * *****************  Version 46  *****************
  * User: John Omalley Date: 12-05-24   Time: 9:38a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added the ETM Write function
- *
+ * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 4/24/12    Time: 12:01p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Cessna Caravan
- *
+ * 
  * *****************  Version 44  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- *
+ * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR #1105 End of Flight Log Race Condition
- *
+ * 
  * *****************  Version 41  *****************
  * User: Contractor2  Date: 8/25/11    Time: 1:17p
  * Updated in $/software/control processor/code/system
  * SCR #1021 Error: Data Manager Buffers Full Fault Detected
- *
+ * 
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 4:21p
  * Updated in $/software/control processor/code/system
  * SCR# 974 - remove LogFull Log
- *
+ * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 10/21/10   Time: 1:46p
  * Updated in $/software/control processor/code/system
  * SCR 960 - Modified the checksum to load it across frames
- *
+ * 
  * *****************  Version 38  *****************
  * User: Jim Mood     Date: 10/21/10   Time: 9:22a
  * Updated in $/software/control processor/code/system
  * SCR 959 Upload Manager code coverage changes
- *
+ * 
  * *****************  Version 37  *****************
  * User: John Omalley Date: 10/07/10   Time: 11:38a
  * Updated in $/software/control processor/code/system
  * SCR 923 - Code Review Updates
- *
+ * 
  * *****************  Version 36  *****************
  * User: John Omalley Date: 9/30/10    Time: 1:25p
  * Updated in $/software/control processor/code/system
  * SCR 894 - LogManager Code Coverage and Code Review Updates
- *
+ * 
  * *****************  Version 35  *****************
  * User: John Omalley Date: 9/09/10    Time: 9:01a
  * Updated in $/software/control processor/code/system
  * SCR 790 - Added function to return the last used address
- *
+ * 
  * *****************  Version 34  *****************
  * User: John Omalley Date: 7/30/10    Time: 5:03p
  * Updated in $/software/control processor/code/system
  * SCR 699 - Changed the LogInitialize return value to void.
- *
+ * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 7/30/10    Time: 8:51a
  * Updated in $/software/control processor/code/system
  * SCR 678 - Remove files in the FVT that are marked not deleted
- *
+ * 
  * *****************  Version 32  *****************
  * User: Jim Mood     Date: 7/28/10    Time: 8:02p
  * Updated in $/software/control processor/code/system
  * SCR 639 ModFix: Added function prototypes for the LogPauseWrite
  * commands
- *
+ * 
  * *****************  Version 31  *****************
  * User: John Omalley Date: 7/27/10    Time: 4:42p
  * Updated in $/software/control processor/code/system
  * SCR 730 - Removed Log Write Failed Log
- *
+ * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 7/26/10    Time: 10:37a
  * Updated in $/software/control processor/code/system
  * SCR 306 - ASSERT on three write attempts failing
- *
+ * 
  * *****************  Version 29  *****************
  * User: John Omalley Date: 7/23/10    Time: 10:15a
  * Updated in $/software/control processor/code/system
  * SCR 306 / SCR 639 - Updated the error paths, Added pause feature and
  * fixed the Queue ASSERT
- *
+ * 
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:18p
  * Updated in $/software/control processor/code/system
  * SCR #260 Implement BOX status command
- *
+ * 
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 6/30/10    Time: 3:19p
  * Updated in $/software/control processor/code/system
  * SCR #531 Log Erase and NV_Write Timing
- *
+ * 
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 6/30/10    Time: 11:59a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
  * Corrected variable name.
- *
+ * 
  * *****************  Version 25  *****************
  * User: Contractor2  Date: 6/30/10    Time: 11:04a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
- *
+ * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 5/12/10    Time: 3:48p
  * Updated in $/software/control processor/code/system
  * SCR #351 fast.reset=really housekeeping
- *
+ * 
  * *****************  Version 23  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- *
+ * 
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:08p
  * Updated in $/software/control processor/code/system
  * SCR #579 Change LogWriteSys to return void
- *
+ * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:41p
  * Updated in $/software/control processor/code/system
  * SCR #306 Log Manager Errors
- *
+ * 
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:18p
  * Updated in $/software/control processor/code/system

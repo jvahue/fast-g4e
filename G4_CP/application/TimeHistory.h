@@ -9,7 +9,7 @@
     Description: 
 
     VERSION
-    $Revision: 3 $  $Date: 8/28/12 12:43p $   
+    $Revision: 4 $  $Date: 9/06/12 5:59p $   
     
 ******************************************************************************/
 
@@ -25,69 +25,48 @@
 
 /******************************************************************************
                                        Package Defines                                       
-******************************************************************************/
-#define MAX_PREHISTORY_MINUTES   6
-#define MAX_TIMEHISTORY_BUFFER   (UINT32)((MAX_PREHISTORY_MINUTES * 60) * THR_10HZ * sizeof(TIMEHISTORYRECORD) )
+**********************************************************************************************/
+#define TH_MAX_RATE                 20
+#define TH_PRE_HISTORY_S            360 //Time max pre duration in seconds (6m*60s/m=360s)
+#define TH_POST_HISTORY_S           360 //Time max post duration in seconds (6m*60s/m=360s)
+#define TH_PRE_HISTORY_DATA_SZ      100     
+#define TH_MAX_RECORD_SZ            100 //TODO: Define acutal size 
 
-//*****************************************************************************
+#define TH_PRE_HISTORY_REC_CNT      (TH_MAX_RATE*TH_PRE_HISTORY_S)
+
+#define TH_MAX_LOG_WRITE_PER_FRAME  10 //Maximum number of TH records to write to log memory
+                                       //per MIF
+#define TH_REC_SEARCH_PER_FRAME     10 //Number of records to search per frame, in the TH 
+                                       //buffer to see if they are pending write to log memeory
+
+#define TH_LOG_PRIORITY             LOG_PRIORITY_3
+//*********************************************************************************************
 // TIMEHISTORY CONFIGURATION DEFAULT
-//*****************************************************************************
-#define TIMEHISTORY_DEFAULT        FALSE,                 /* bEnabled                   */\
-                                   THR_1HZ,               /* TimeHistory Rate           */\
-                                   0                      /* TimeHistory Offset         */
+//*********************************************************************************************
+#define TIMEHISTORY_DEFAULT        TH_1HZ,                 /* bEnabled                   */\
+                                   0,                      /* TimeHistory Rate           */\
 
 /******************************************************************************
                                        Package Typedefs
 ******************************************************************************/
 typedef enum 
 {
-   THR_1HZ  =  1,  /*  1Hz Rate */
-   THR_2HZ  =  2,  /*  2Hz Rate */
-   THR_4HZ  =  4,  /*  4Hz Rate */
-   THR_5HZ  =  5,  /*  5Hz Rate */
-   THR_10HZ = 10,  /* 10Hz Rate */
+   TH_1HZ  =  1,            /*  1Hz Rate */
+   TH_2HZ  =  2,            /*  2Hz Rate */
+   TH_4HZ  =  4,            /*  4Hz Rate */
+   TH_5HZ  =  5,            /*  5Hz Rate */
+   TH_10HZ = 10,            /* 10Hz Rate */
+   TH_20HZ = TH_MAX_RATE,   /* 20Hz Rate */
 } TIMEHISTORY_SAMPLERATE;
 
-typedef enum
-{
-   TH_NONE,
-   TH_ALL,
-   TH_PORTION
-} TIMEHISTORY_TYPE;
-
-typedef enum 
-{
-   TH_END_IMMEDIATELY,
-   TH_END_AFTER_PORTION
-} TIMEHISTORY_END;
 
 typedef struct
 {
-   UINT8   Index;
-   FLOAT32 Value;
-   BOOLEAN Validity;
-} TIMEHISTORY_SENSOR_SUMMARY; // TBD: Maybe this should be in the sensor object
-
-typedef struct
-{
-   BOOLEAN                 bEnabled;
    TIMEHISTORY_SAMPLERATE  SampleRate;        /* Rate to sample (1,2,4,5,10Hz)     */
    UINT16                  nSampleOffset_ms;  /* Offset to start sampling in mS    */
 }  TIMEHISTORY_CONFIG;
 
-typedef struct
-{
-   TIMESTAMP  Time;                 /* time for log entry       */
-   UINT16     nNumSensors;
-   UINT8      RawSensorBuffer[sizeof(TIMEHISTORY_SENSOR_SUMMARY) * MAX_SENSORS];
-} TIMEHISTORYRECORD, *TIMEHISTORYRECORD_PTR;
 
-typedef struct
-{
-   UINT32 Head;
-   UINT32 Tail;
-   UINT8  Buffer[MAX_TIMEHISTORY_BUFFER];
-} TIMEHISTORY_QUEUE;
 
 
 /******************************************************************************
@@ -100,12 +79,19 @@ typedef struct
 #else
    #define EXPORT extern
 #endif
+#define TH_NONE 0  //TODO Temporary
+#define TH_ALL 1
+#define TH_PORTION 2
 
+#define TimeHistoryStart(A, B) 
+#define TimeHistoryEnd(A, B)      
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
 #if defined ( TIMEHISTORY_BODY )
+// TODO: Remove and use just the time in seconds instead. 
 // Note: Updates to TIMEHISTORY_TYPE has dependency to TH_UserEnumType[]
+
 EXPORT USER_ENUM_TBL TH_UserEnumType[] =
 { { "NONE",     TH_NONE    },
   { "ALL",      TH_ALL     },
@@ -116,19 +102,30 @@ EXPORT USER_ENUM_TBL TH_UserEnumType[] =
 EXPORT USER_ENUM_TBL TH_UserEnumType[];
 #endif
 
-/******************************************************************************
+typedef struct
+{int A; } TIMEHISTORY_TYPE;
+/**********************************************************************************************
                                      Package Exports Variables
-******************************************************************************/
-EXPORT void        TimeHistoryStart     ( TIMEHISTORY_TYPE Type, UINT16 Time_s );
-EXPORT void        TimeHistoryEnd       ( TIMEHISTORY_TYPE Type, UINT16 Time_s );
-/******************************************************************************
+**********************************************************************************************/
+/**********************************************************************************************
                                      Package Exports Functions
-******************************************************************************/
+**********************************************************************************************/
+EXPORT BOOLEAN TH_FSMAppBusyGetState(INT32 param);
+EXPORT void TH_Open(INT32 pre_s);
+EXPORT void TH_Close(INT32 time_s);
+
+#define TimeHistoryStart(A, B) 
+#define TimeHistoryEnd(A, B)                
 
 #endif // TIMEHISTORY_H 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jim Mood     Date: 9/06/12    Time: 5:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Time History implementation changes
  * 
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
