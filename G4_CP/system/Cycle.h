@@ -133,7 +133,7 @@ typedef enum
 #ifdef PEAK_CUM_PROCESSING
 typedef struct
 {
-  FLOAT32 CycleCount;   /* value to use for incrementing cycle */
+  FLOAT32 cycleCount;   /* value to use for incrementing cycle */
   FLOAT32 SensorValueA; /* fractional value for sensor A       */
   FLOAT32 SensorValueB; /* fractional value for sensor B       */
 } CYCLEVALUE, *PCYCLEVALUE;
@@ -188,7 +188,7 @@ typedef struct
 // Collection of cycle entries with csum for persisting to NV Memory.
 typedef struct
 {
-  CYCLE_ENTRY data[MAX_CYCLES]; 
+  CYCLE_ENTRY data[MAX_CYCLES];
 } CYCLE_COUNTS;
 #pragma pack()
 
