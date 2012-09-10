@@ -118,15 +118,13 @@ static USER_MSG_TBL eventCmd [] =
   { "NAME",           NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_STR,     USER_RW,   &configEventTemp.sEventName,        0,(MAX_EVENTS-1),    0,MAX_EVENT_NAME,    NULL                },
   { "ID",             NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_STR,     USER_RW,   &configEventTemp.sEventID,          0,(MAX_EVENTS-1),    0,MAX_EVENT_ID,      NULL                },
   { "RATE",           NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.rate,              0,(MAX_EVENTS-1),    NO_LIMIT,            eventRateType       },
-  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nOffset_ms,        0,(MAX_EVENTS-1),    0,1000,              NULL                },
+  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.nOffset_ms,        0,(MAX_EVENTS-1),    0,1000,              NULL                },
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
   { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "PRETIMEHISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.preTimeHistory,    0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
-  { "PRETIME_S",      NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "POSTTIMEHISTORY",NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.postTimeHistory,   0,(MAX_EVENTS-1),    NO_LIMIT,            TH_UserEnumType     },
-  { "POSTTIME_S",     NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "POST_HISTORY_S", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
   { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_SENSORS-1,     NULL                },
@@ -842,22 +840,22 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - !P Table Full processing
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:54p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 !P Processing
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:18p
  * Updated in $/software/control processor/code/application
@@ -867,7 +865,7 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-08-09   Time: 8:37a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Removed Enumeration for Tables 8 and 9
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application
