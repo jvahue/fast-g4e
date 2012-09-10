@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 97 $  $Date: 8/28/12 1:43p $
+      $Revision: 98 $  $Date: 12-09-05 9:42a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2563,6 +2563,7 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
    TIMESTAMP  Ts;
    UINT32     i;
 
+   ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
 
    // TBD: Should we protect against being interrupted in the middle of
    // finding a location and writing the data to the payload?
@@ -2728,11 +2729,16 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  *
+ * *****************  Version 98  *****************
+ * User: John Omalley Date: 12-09-05   Time: 9:42a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ASSERT for ETM and System Logs larger than 1K
+ * 
  * *****************  Version 97  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:08a
  * Updated in $/software/control processor/code/system

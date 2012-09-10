@@ -2,7 +2,7 @@
 #define ENGINE_RUN_H
 
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EngineRun.h
@@ -34,14 +34,14 @@
 #define MAX_ENGINERUN_NAME  32
 
 
-#define ENGRUN_DEFAULT   "Unused",        /* Engine Name    */\
-                         TRIGGER_UNUSED,  /* start criteria */\
-                         TRIGGER_UNUSED,  /* run criteria   */\
-                         TRIGGER_UNUSED,  /* stop criteria  */\
-                         ER_1HZ,          /* Rate           */\
-                         0,               /* MIF Offset in millisecs */\
-                         SENSOR_UNUSED,   /* Sensor for temp max */\
-                         SENSOR_UNUSED,   /* Sensor for battery min */\
+#define ENGRUN_DEFAULT   "Unused",        /* Engine Name                   */\
+                         TRIGGER_UNUSED,  /* start criteria                */\
+                         TRIGGER_UNUSED,  /* run criteria                  */\
+                         TRIGGER_UNUSED,  /* stop criteria                 */\
+                         ER_1HZ,          /* Rate                          */\
+                         0,               /* MIF Offset in ms              */\
+                         SENSOR_UNUSED,   /* Sensor for temp max           */\
+                         SENSOR_UNUSED,   /* Sensor for battery min        */\
                          {0,0,0,0}        /* 128-Bit map of managed sensors*/
 
 #define ENGRUN_CFG_DEFAULT ENGRUN_DEFAULT,\
@@ -50,29 +50,26 @@
                            ENGRUN_DEFAULT /* EngineRun[MAX_ENGINES] */
 
 
-
-
-
 /******************************************************************************
                                Package Typedefs
 ******************************************************************************/
 typedef enum
 {
-  ER_1HZ            =  1,  /*  1Hz Rate    */
-  ER_2HZ            =  2,  /*  2Hz Rate    */
-  ER_4HZ            =  4,  /*  4Hz Rate    */
-  ER_5HZ            =  5,  /*  5Hz Rate    */
-  ER_10HZ           = 10,  /* 10Hz Rate    */
-  ER_20HZ           = 20,  /* 20Hz Rate    */
-  ER_50HZ           = 50   /* 50Hz Rate    */
+  ER_1HZ            =  1,  /*  1Hz Rate */
+  ER_2HZ            =  2,  /*  2Hz Rate */
+  ER_4HZ            =  4,  /*  4Hz Rate */
+  ER_5HZ            =  5,  /*  5Hz Rate */
+  ER_10HZ           = 10,  /* 10Hz Rate */
+  ER_20HZ           = 20,  /* 20Hz Rate */
+  ER_50HZ           = 50   /* 50Hz Rate */
 } ENGRUN_RATE;
 
 typedef enum
 {
   /* Start of states within an engine run */  
-  ER_STATE_STOPPED,    /* Engine stopped for this engine run                            */
-  ER_STATE_STARTING,    /* Engine starting for this engine run                           */
-  ER_STATE_RUNNING,     /* Engine running for this engine run                            */
+  ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
+  ER_STATE_STARTING,    /* Engine starting for this engine run */
+  ER_STATE_RUNNING,     /* Engine running for this engine run  */
   MAX_ER_STATE
 } ER_STATE;
 
@@ -90,66 +87,69 @@ typedef enum
 
 typedef struct  
 {
-  ENGRUN_INDEX ErIndex;                   /* Which enginerun object this came from           */
-  ER_REASON    Reason;                    /* Reason for creating this start log              */
-  TIMESTAMP    StartTime;                 /* Timestamp EngineRun entered the START state     */
-  TIMESTAMP    EndTime;                   /* Timestamp EngineRun exited  the RUNNING state   */
-  UINT32       StartingDuration_ms;       /* Time from STARTED until transition to RUNNING   */
-  SENSOR_INDEX MaxStartSensorId;          /* Sensor Id of the item monitored for max start   */
-  FLOAT32      MonMaxValue;         /* Max Monitored value during start                */
-  SENSOR_INDEX MinStartSensorId;          /* Sensor Id of the item  monitored for min start  */
-  FLOAT32      MonMinValue;         /* Min monitored value throughout EngineRun        */
+  ENGRUN_INDEX erIndex;             /* Which engine run object this came from          */
+  ER_REASON    reason;              /* reason for creating this start log              */
+  TIMESTAMP    startTime;           /* Timestamp EngineRun entered the START state     */
+  TIMESTAMP    endTime;             /* Timestamp EngineRun exited  the RUNNING state   */
+  UINT32       startingDuration_ms; /* Time from STARTED until transition to RUNNING   */
+  SENSOR_INDEX maxStartSensorId;    /* Sensor Id of the item monitored for max start   */
+  BOOLEAN      maxValueValid;       /* was the max value valid through the start       */
+  FLOAT32      monMaxValue;         /* Max Monitored value during start                */
+  SENSOR_INDEX minStartSensorId;    /* Sensor Id of the item  monitored for min start  */
+  BOOLEAN      minValueValid;       /* was the min value valid through the start       */
+  FLOAT32      monMinValue;         /* Min monitored value throughout EngineRun        */
 }ENGRUN_STARTLOG;
 
 typedef struct
 {
-  ENGRUN_INDEX ErIndex;                   /* Which enginerun object this came from           */
-  ER_REASON    Reason;
-  TIMESTAMP    StartTime;                 /* Timestamp EngineRun entered the START state     */
-  TIMESTAMP    EndTime;                   /* Timestamp EngineRun exited  the RUNNING state   */
-  UINT32       StartingDuration_ms;       /* Time from STARTED until transition to RUNNING   */
-  UINT32       Duration_ms;               /* Time from STARTED until transit. to ENDED/ERROR */  
-  SNSR_SUMMARY SnsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries                  */
-  UINT32       CycleCounts[MAX_CYCLES];   /* Array of cycle counts                           */
+  ENGRUN_INDEX erIndex;                         /* Which engine run object this came from  */
+  ER_REASON    reason;                          /* why did the Engine run end              */
+  TIMESTAMP    startTime;                       /* Time EngineRun entered the START state  */
+  TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
+  UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
+  UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */  
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
+  UINT32       CycleCounts[MAX_CYCLES];         /* Array of cycle counts                   */
 } ENGRUN_RUNLOG;
 #pragma pack()
 
 typedef struct
 {
   /* runtime data */
-  ENGRUN_INDEX ErIndex;                 /* Which enginerun object this came from            */
-  ER_STATE     State;                   /* State of this engine run                         */
-  TIMESTAMP    StartTime;               /* Timestamp EngineRun entered the START state      */
-  UINT32       startingTime;            /* tick time when EngineRun entered the START state */
-  UINT32       StartingDuration_ms;     /* Time EngRun was in START state                   */
-  UINT32       Duration_ms;             /* Time from entering START until end of RUNNING    */    
-  FLOAT32      MonMinValue;             /* minimum monitored value recorded during start    */  
-  FLOAT32      MonMaxValue;             /* Maximum monitored value recorded while starting  */                                   
-  UINT32       nSampleCount;            /* For calculating averages                         */
-  INT16        nRateCounts;             /* Count of cycles until this engine run is executed*/
-  INT16        nRateCountdown;          /* Number cycles remaining until next execution.    */
-  UINT16       nTotalSensors;           /* Count of sensors actively defined in SnsrSummary */
-  SNSR_SUMMARY SnsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries            */
+  ENGRUN_INDEX erIndex;                 /* Which engine run object this came from            */
+  ER_STATE     erState;                 /* State of this engine run                          */
+  TIMESTAMP    startTime;               /* Timestamp EngineRun entered the START state       */
+  UINT32       startingTime;            /* tick time when EngineRun entered the START state  */
+  UINT32       startingDuration_ms;     /* Time EngRun was in START state                    */
+  UINT32       erDuration_ms;           /* Time from entering START until end of RUNNING     */
+  BOOLEAN      maxValueValid;           /* was the max value sensor valid through stop/start */
+  FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */                                   
+  BOOLEAN      minValueValid;           /* was the min value valid through the start       */
+  FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */  
+  UINT32       nSampleCount;            /* For calculating averages                          */
+  INT16        nRateCounts;             /* Count of cycles until this engine run is executed */
+  INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
+  UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
   UINT32       CycleCounts[MAX_CYCLES];   /* Array of cycle counts */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;
 
 /* Configuration */
 typedef struct
 {
-  CHAR           EngineName[MAX_ENGINERUN_NAME]; /* the name of the trigger                */
-  TRIGGER_INDEX  StartTrigID;             /* Index into Trig array - start criteria        */
-  TRIGGER_INDEX  RunTrigID;               /* Index into Trig array - run criteria          */
-  TRIGGER_INDEX  StopTrigID;              /* Index into Trig array - stop criteria         */
-  ENGRUN_RATE    Rate;                    /* Rate at which this ER and it's cycles are run.*/
-  UINT32         nOffset_ms;              /* Offset in ms this object runs within it's MIF */
-  SENSOR_INDEX   MonMaxSensorID;          /* Sensor ID for monitored max                   */
-  SENSOR_INDEX   MonMinSensorID;          /* Sensor ID for monitored min                   */
-  BITARRAY128    SensorMap;    /* Bit map of flags of sensors managed by this ER 0-127     */
+  CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the trigger                 */
+  TRIGGER_INDEX  startTrigID;             /* Index into Trig array - start criteria         */
+  TRIGGER_INDEX  runTrigID;               /* Index into Trig array - run criteria           */
+  TRIGGER_INDEX  stopTrigID;              /* Index into Trig array - stop criteria          */
+  ENGRUN_RATE    erRate;                  /* Hz at which this ER and it's cycles are run.   */
+  UINT32         nOffset_ms;              /* Offset in ms this object runs within it's MIF  */
+  SENSOR_INDEX   monMaxSensorID;          /* Sensor ID for monitored max                    */
+  SENSOR_INDEX   monMinSensorID;          /* Sensor ID for monitored min                    */
+  BITARRAY128    sensorMap;    /* Bit map of flags of sensors managed by this ER 0-127      */
 }
 ENGRUN_CFG, *ENGRUN_CFG_PTR;
 
 typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
-
 
 /******************************************************************************
                                Package Exports
@@ -168,7 +168,17 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 extern USER_ENUM_TBL EngRunIdEnum[];
 
-
+#if defined( ENGINERUN_BODY )
+USER_ENUM_TBL EngineRunStateEnum[] =
+{
+  { "STOPPED",  ER_STATE_STOPPED  },
+  { "STARTING", ER_STATE_STARTING },
+  { "RUNNING",  ER_STATE_RUNNING  },
+  { NULL, 0 }
+};
+#else
+EXPORT USER_ENUM_TBL EngineRunStateEnum[];
+#endif
 
 /******************************************************************************
                              Package Exports Functions
@@ -178,7 +188,6 @@ EXPORT void     EngRunInitialize(void);
 EXPORT void     EngRunTask(void* pParam);
 EXPORT ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags);
 EXPORT ENGRUN_RUNLOG*  EngRunGetPtrToLog(ENGRUN_INDEX engId);
-
 
 #endif // SYS_CLOCKMGR_H
 

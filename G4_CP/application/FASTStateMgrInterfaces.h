@@ -10,7 +10,7 @@
     Description:  
 
     VERSION
-    $Revision: 6 $  $Date: 8/28/12 12:43p $
+    $Revision: 7 $  $Date: 9/06/12 5:56p $
 
 ******************************************************************************/
 
@@ -87,6 +87,7 @@ FSM_TASK_ITEM(LACH, FALSE,       0,      PmFSMAppBusyRun,         PmFSMAppBusyGe
 FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFALSE)
 
 
+
 /******************************************************************************
                                  Package Typedefs                             *
 ******************************************************************************/
@@ -115,6 +116,11 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jim Mood     Date: 9/06/12    Time: 5:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Time History implementation changes
  * 
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

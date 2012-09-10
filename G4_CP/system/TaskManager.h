@@ -10,7 +10,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 61 $  $Date: 8/28/12 1:43p $  
+     $Revision: 62 $  $Date: 9/06/12 6:04p $  
 ******************************************************************************/
 
 
@@ -98,6 +98,7 @@ TASK_ENTRY(Data_Mgr5,                   70,      DT,   SYS_MODE_GP0, 0x22222222,
 TASK_ENTRY(Data_Mgr6,                   70,      DT,   SYS_MODE_GP0, 0x44444444,   0,          0          )\
 TASK_ENTRY(Data_Mgr7,                   70,      DT,   SYS_MODE_GP0, 0x88888888,   0,          0          )\
 TASK_ENTRY(Log_Manage_Task,             90,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
+TASK_ENTRY(TH_Task_ID,                  95,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(TP_SUPPORT_DT1,             253,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(TP_SUPPORT_DT2,             254,      DT,   SYS_MODE_GP2, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(CBIT_Manager,               255,      DT,   SYS_MODE_GP1, 0x11111111,   0,          0          )\
@@ -383,6 +384,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 62  *****************
+ * User: Jim Mood     Date: 9/06/12    Time: 6:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Time History implementation changes
  * 
  * *****************  Version 61  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

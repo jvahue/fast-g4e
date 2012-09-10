@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 100 $  $Date: 8/28/12 1:43p $
+      $Revision: 101 $  $Date: 9/06/12 6:04p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -57,6 +57,7 @@ SYS_LOG_ID(APP_ID_EVENT_ENDED                       ,0xB001 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
 SYS_LOG_ID(APP_ID_TIMEHISTORY                       ,0xB200 ,0)\
+SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
 \
 SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
@@ -348,6 +349,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 101  *****************
+ * User: Jim Mood     Date: 9/06/12    Time: 6:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Time History implementation changes
  * 
  * *****************  Version 100  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

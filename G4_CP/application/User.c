@@ -1212,7 +1212,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   //For numerical types, test the sign and base
   switch(Type)
   {
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
     case USER_TYPE_HEX16:
     case USER_TYPE_UINT16:
@@ -1238,7 +1238,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     table*/
   switch(Type)
   {
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
       /*UINT8 type, check min/max bounds incl. the max value a uint8 can
         represent.  Value also must be positive*/
@@ -1535,9 +1535,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     //  sprintf(GetStr,"%d",*(UINT8*)GetPtr);
     //  break;
 
-    //case USER_TYPE_HEX8:
-    //  sprintf(GetStr,"0x%02X",*(UINT8*)GetPtr);
-    //  break;
+    case USER_TYPE_HEX8:
+      sprintf(GetStr,"0x%02X",*(UINT8*)GetPtr);
+      break;
 
     case USER_TYPE_HEX16:
       sprintf(GetStr,"0x%04X",*(UINT16*)GetPtr);
@@ -1724,7 +1724,7 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
   switch(Type)
   {
     case USER_TYPE_UINT8:
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
       Min->Uint = NoLimit ? 0          : Min->Uint;
       Max->Uint = NoLimit ? UINT8_MAX  : MIN(UINT8_MAX,Max->Uint);
       break;
@@ -1824,7 +1824,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
               Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_HEX16:
     case USER_TYPE_HEX32:
       sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is 0x%x to 0x%x.%s",
@@ -2301,10 +2301,13 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
      /*
       case USER_TYPE_INT8:
       case USER_TYPE_INT16:
-      case USER_TYPE_HEX8:
       case USER_TYPE_ENUM8:
       case USER_TYPE_ENUM16:
      */
+
+      case USER_TYPE_HEX8:
+        *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
+        break;
 
       case USER_TYPE_INT32:
         *(INT32*)Param.Ptr = *(INT32*)SetPtr;

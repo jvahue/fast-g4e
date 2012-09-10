@@ -62,13 +62,13 @@ USER_HANDLER_RESULT       EngRunShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* User command tables                                                       */
 /*****************************************************************************/
-static USER_ENUM_TBL EngineRunStateEnum[] =
-{
-  { "STOPPED",  ER_STATE_STOPPED  },
-  { "STARTING", ER_STATE_STARTING },
-  { "RUNNING",  ER_STATE_RUNNING  },
-  { NULL, 0 }
-};
+//static USER_ENUM_TBL EngineRunStateEnum[] =
+//{
+//  { "STOPPED",  ER_STATE_STOPPED  },
+//  { "STARTING", ER_STATE_STARTING },
+//  { "RUNNING",  ER_STATE_RUNNING  },
+//  { NULL, 0 }
+//};
 
 USER_ENUM_TBL EngRunIdEnum[] =
 {  
@@ -98,208 +98,208 @@ USER_ENUM_TBL EngRunRateType[] =
 static USER_MSG_TBL EngRunS0Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[0].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[0].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[0].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[0].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[0].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[0].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[0].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[0].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[0].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[0].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS1Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[1].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[1].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[1].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[1].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[1].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[1].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[1].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[1].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[1].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[1].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[1].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[1].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[1].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[1].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS2Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[2].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[2].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[2].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[2].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[2].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[2].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[2].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[2].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[2].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[2].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[2].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[2].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[2].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[2].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS3Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[3].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[3].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[3].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[3].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[3].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[3].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[3].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[3].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[3].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[3].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[3].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[3].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[3].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[3].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS4Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[4].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[4].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[4].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[4].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[4].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[4].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[4].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[4].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[4].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[4].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[4].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[4].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[4].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[4].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS5Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[5].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[5].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[5].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[5].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[5].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[5].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[5].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[5].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[5].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[5].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[5].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[5].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[5].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[5].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS6Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[6].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[6].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[6].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[6].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[6].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[6].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[6].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[6].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[6].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[6].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[6].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[6].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[6].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[6].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS7Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[7].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[7].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[7].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[7].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[7].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[7].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[7].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[7].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[7].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[7].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[7].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[7].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[7].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[7].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS8Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[8].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[8].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[8].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[8].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[8].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[8].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[8].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[8].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[8].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[8].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[8].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[8].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[8].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[8].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS9Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[9].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[9].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[9].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[9].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[9].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[9].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[9].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[9].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[9].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[9].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[9].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[9].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[9].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[9].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS10Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[10].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[10].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[10].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[10].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[10].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[10].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[10].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[10].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[10].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[10].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[10].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[10].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[10].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[10].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS11Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[11].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[11].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[11].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[11].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[11].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[11].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[11].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[11].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[11].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[11].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[11].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[11].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[11].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[11].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS12Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[12].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[12].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[12].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[12].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[12].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[12].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[12].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[12].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[12].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[12].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[12].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[12].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[12].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[12].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS13Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[13].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[13].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[13].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[13].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[13].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[13].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[13].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[13].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[13].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[13].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[13].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[13].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[13].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[13].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS14Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[14].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[14].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[14].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[14].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[14].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[14].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[14].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[14].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[14].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[14].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[14].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[14].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[14].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[14].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS15Tbl[] = 
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.SnsrSummary[15].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[15].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.SnsrSummary[15].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[15].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[15].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[15].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.SnsrSummary[15].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[15].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
+  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[15].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[15].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[15].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[15].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[15].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
+  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[15].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
@@ -594,13 +594,13 @@ static USER_MSG_TBL EngRunCycTbl[] =
 static USER_MSG_TBL EngRunStatusCmd [] =
 {
   /*Str            Next Tbl Ptr    Handler Func Data Type         Access    Parameter                        IndexRange              DataLimit   EnumTbl*/
-  {"ENGINEID",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.ErIndex,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngRunIdEnum      },
-  {"STATE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.State,               0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
+  {"ENGINEID",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erIndex,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngRunIdEnum      },
+  {"STATE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erState,               0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
   {"STARTINGTIME", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"START_DUR_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.StartingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.Duration_ms,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MINVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.MonMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.MonMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },                                                                                                          
+  {"START_DUR_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MINVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },                                                                                                          
   {"SAMPLECOUNT",  NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"RATECOUNTS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCounts,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"COUNTDOWN",    NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCountdown,      0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
@@ -612,15 +612,15 @@ static USER_MSG_TBL EngRunStatusCmd [] =
 static USER_MSG_TBL EngRunCfgCmd[] =
 {
   /*Str              Next Tbl Ptr   Handler Func     Data Type        Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
-  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,     USER_RW,  &m_CfgTemp.EngineName,     0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
-  {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.StartTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.RunTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.StopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.Rate,           0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
+  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,     USER_RW,  &m_CfgTemp.engineName,     0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
+  {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.startTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.runTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.stopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
+  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.erRate,           0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
   {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
-  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.MonMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.SensorMap,      0,(MAX_ENGINES-1), 0,MAX_SENSORS-1,      NULL            },
+  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.sensorMap,      0,(MAX_ENGINES-1), 0,MAX_SENSORS-1,      NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
@@ -634,7 +634,7 @@ static USER_MSG_TBL EngRunCmd [] =
 };
 #pragma ghs endnowarning
 
-static USER_MSG_TBL RootEngRunMsg = {"ENG",EngRunCmd, NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL rootEngRunMsg = {"ENG",EngRunCmd, NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
@@ -718,7 +718,7 @@ USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
 
    result = USER_RESULT_ERROR;
 
-   memcpy(&m_DataTemp, &EngineRunData[Index], sizeof(m_DataTemp));
+   memcpy(&m_DataTemp, &engineRunData[Index], sizeof(m_DataTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 

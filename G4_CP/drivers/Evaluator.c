@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 17 $  $Date: 8/29/12 6:20p $
+  $Revision: 18 $  $Date: 8/31/12 12:23p $
 
 ******************************************************************************/
 
@@ -939,7 +939,7 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
       key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->Data);
 
       EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
-      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data) >= FLT_EPSILON ));
+      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
       rslt.DataType = DATATYPE_BOOL;
       rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
 
@@ -1612,6 +1612,11 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Jeff Vahue   Date: 8/31/12    Time: 12:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR# 1107 - !P paren position error fix
  * 
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p

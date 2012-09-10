@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 48 $  $Date: 8/28/12 1:43p $
+    $Revision: 49 $  $Date: 12-09-05 9:42a $
 
 ******************************************************************************/
 
@@ -47,6 +47,7 @@
 #define LOG_MAX_FAIL            2
 #define LOG_BUF_MAX             0x10000
 #define LOG_INDEX_NOT_SET       UINT32_MAX
+#define LOG_SYSTEM_ETM_MAX_SIZE 1024
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -429,6 +430,11 @@ EXPORT UINT32            LogGetLogCount          ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 49  *****************
+ * User: John Omalley Date: 12-09-05   Time: 9:42a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added ASSERT for ETM and System Logs larger than 1K
  * 
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

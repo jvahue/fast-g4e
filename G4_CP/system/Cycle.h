@@ -81,6 +81,7 @@
 ******************************************************************************/
 #define MAX_CYCLENAME        32
 #define MAX_CYCLEPARAM_SIZE 128
+
 #ifdef PEAK_CUM_PROCESSING
 #define CYCLEVALUE_COUNT 15
 #endif
@@ -132,7 +133,7 @@ typedef enum
 #ifdef PEAK_CUM_PROCESSING
 typedef struct
 {
-  FLOAT32 CycleCount;   /* value to use for incrementing cycle */
+  FLOAT32 cycleCount;   /* value to use for incrementing cycle */
   FLOAT32 SensorValueA; /* fractional value for sensor A       */
   FLOAT32 SensorValueB; /* fractional value for sensor B       */
 } CYCLEVALUE, *PCYCLEVALUE;
@@ -187,7 +188,7 @@ typedef struct
 // Collection of cycle entries with csum for persisting to NV Memory.
 typedef struct
 {
-  CYCLE_ENTRY data[MAX_CYCLES]; 
+  CYCLE_ENTRY data[MAX_CYCLES];
 } CYCLE_COUNTS;
 #pragma pack()
 
@@ -221,7 +222,21 @@ typedef struct
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
-
+#if defined ( CYCLE_BODY )
+USER_ENUM_TBL CycleEnumType [] =
+{ {"0", CYCLE_ID_0}, {"1", CYCLE_ID_1}, {"2", CYCLE_ID_2}, {"3", CYCLE_ID_3},
+  {"4", CYCLE_ID_4}, {"5", CYCLE_ID_5}, {"6", CYCLE_ID_6}, {"7", CYCLE_ID_7},
+  {"8", CYCLE_ID_8}, {"9", CYCLE_ID_9}, {"10",CYCLE_ID_10},{"11",CYCLE_ID_11},
+  {"12",CYCLE_ID_12},{"13",CYCLE_ID_13},{"14",CYCLE_ID_14},{"15",CYCLE_ID_15},
+  {"16",CYCLE_ID_16},{"17",CYCLE_ID_17},{"18",CYCLE_ID_18},{"19",CYCLE_ID_19},
+  {"20",CYCLE_ID_20},{"21",CYCLE_ID_21},{"22",CYCLE_ID_22},{"23",CYCLE_ID_23},
+  {"24",CYCLE_ID_24},{"25",CYCLE_ID_25},{"26",CYCLE_ID_26},{"27",CYCLE_ID_27},
+  {"28",CYCLE_ID_28},{"29",CYCLE_ID_29},{"30",CYCLE_ID_30},{"31",CYCLE_ID_31},
+  {"UNUSED",CYCLE_UNUSED },{ NULL,0}
+};
+#else
+EXPORT USER_ENUM_TBL CycleEnumType[];
+#endif
 
 
 /******************************************************************************
