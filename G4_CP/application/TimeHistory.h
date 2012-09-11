@@ -1,22 +1,22 @@
 #ifndef TIMEHISTORY_H
 #define TIMEHISTORY_H
 /******************************************************************************
-                    Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+                    Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                        All Rights Reserved. Proprietary and Confidential.
 
     File:        TimeHistory.h
-    
-    Description: 
+
+    Description:
 
     VERSION
-    $Revision: 4 $  $Date: 9/06/12 5:59p $   
-    
+    $Revision: 5 $  $Date: 12-09-11 2:00p $   
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
- 
+
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -24,19 +24,19 @@
 #include "sensor.h"
 
 /******************************************************************************
-                                       Package Defines                                       
+                                       Package Defines
 **********************************************************************************************/
 #define TH_MAX_RATE                 20
 #define TH_PRE_HISTORY_S            360 //Time max pre duration in seconds (6m*60s/m=360s)
 #define TH_POST_HISTORY_S           360 //Time max post duration in seconds (6m*60s/m=360s)
-#define TH_PRE_HISTORY_DATA_SZ      100     
-#define TH_MAX_RECORD_SZ            100 //TODO: Define acutal size 
+#define TH_PRE_HISTORY_DATA_SZ      100
+#define TH_MAX_RECORD_SZ            100 //TODO: Define acutal size
 
 #define TH_PRE_HISTORY_REC_CNT      (TH_MAX_RATE*TH_PRE_HISTORY_S)
 
 #define TH_MAX_LOG_WRITE_PER_FRAME  10 //Maximum number of TH records to write to log memory
                                        //per MIF
-#define TH_REC_SEARCH_PER_FRAME     10 //Number of records to search per frame, in the TH 
+#define TH_REC_SEARCH_PER_FRAME     10 //Number of records to search per frame, in the TH
                                        //buffer to see if they are pending write to log memeory
 
 #define TH_LOG_PRIORITY             LOG_PRIORITY_3
@@ -49,7 +49,7 @@
 /******************************************************************************
                                        Package Typedefs
 ******************************************************************************/
-typedef enum 
+typedef enum
 {
    TH_1HZ  =  1,            /*  1Hz Rate */
    TH_2HZ  =  2,            /*  2Hz Rate */
@@ -66,8 +66,10 @@ typedef struct
    UINT16                  nSampleOffset_ms;  /* Offset to start sampling in mS    */
 }  TIMEHISTORY_CONFIG;
 
-
-
+typedef struct
+{
+   TIMEHISTORY_SAMPLERATE  sampleRate;
+} TH_HDR;
 
 /******************************************************************************
                                        Package Exports
@@ -83,13 +85,13 @@ typedef struct
 #define TH_ALL 1
 #define TH_PORTION 2
 
-#define TimeHistoryStart(A, B) 
-#define TimeHistoryEnd(A, B)      
+#define TimeHistoryStart(A, B)
+#define TimeHistoryEnd(A, B)
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
 #if defined ( TIMEHISTORY_BODY )
-// TODO: Remove and use just the time in seconds instead. 
+// TODO: Remove and use just the time in seconds instead.
 // Note: Updates to TIMEHISTORY_TYPE has dependency to TH_UserEnumType[]
 
 EXPORT USER_ENUM_TBL TH_UserEnumType[] =
@@ -110,38 +112,44 @@ typedef struct
 /**********************************************************************************************
                                      Package Exports Functions
 **********************************************************************************************/
-EXPORT BOOLEAN TH_FSMAppBusyGetState(INT32 param);
-EXPORT void TH_Open(INT32 pre_s);
-EXPORT void TH_Close(INT32 time_s);
+EXPORT BOOLEAN TH_FSMAppBusyGetState ( INT32 param );
+EXPORT void    TH_Open               ( INT32 pre_s );
+EXPORT void    TH_Close              ( INT32 time_s );
+EXPORT UINT16  TH_GetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
 
-#define TimeHistoryStart(A, B) 
-#define TimeHistoryEnd(A, B)                
+#define TimeHistoryStart(A, B)
+#define TimeHistoryEnd(A, B)
 
-#endif // TIMEHISTORY_H 
+#endif // TIMEHISTORY_H
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
+ *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:00p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Time History Binary Header Function
  * 
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 5:59p
  * Updated in $/software/control processor/code/application
  * SCR #1107 Time History implementation changes
- * 
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 2  *****************
  * User: John Omalley Date: 4/27/12    Time: 5:04p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 4/24/12    Time: 10:59a
  * Created in $/software/control processor/code/application
- * 
+ *
  *
  *****************************************************************************/
- 
- 
+
+
 

@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 97 $  $Date: 8/29/12 6:41p $
+   $Revision: 98 $  $Date: 12-09-11 2:21p $
 
 ******************************************************************************/
 
@@ -2708,6 +2708,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 98  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:21p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added HEX8 logic
  * 
  * *****************  Version 97  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 6:41p

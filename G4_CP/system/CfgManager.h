@@ -12,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 46 $  $Date: 8/28/12 1:43p $
+ $Revision: 47 $  $Date: 12-09-11 2:09p $
 
 ******************************************************************************/
 
@@ -56,6 +56,7 @@
 ******************************************************************************/
 #define TEXT_BUF_SIZE 64
 #define SYS_HDR_VERSION 3
+#define ETM_HDR_VERSION 1
 
 
 
@@ -192,27 +193,33 @@ EXPORT void CfgMgr_CancelBatchCfg(void);
 EXPORT void CfgMgr_CommitBatchCfg(void);
 EXPORT BOOLEAN CfgMgr_IsEEWritePending(void);
 EXPORT UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
+EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 #endif // CMUTIL_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ *
+ * *****************  Version 47  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Binary ETM Header Logic
  * 
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:34a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Updated the System Binary Header to Version 3
- * 
+ *
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:28a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added new Action Object
- * 
+ *
  * *****************  Version 43  *****************
  * User: John Omalley Date: 12-07-13   Time: 3:49p
  * Updated in $/software/control processor/code/system

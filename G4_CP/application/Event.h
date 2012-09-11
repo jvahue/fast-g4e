@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 21 $  $Date: 12-08-29 3:23p $
+  $Revision: 22 $  $Date: 12-09-11 1:56p $
 
 ******************************************************************************/
 
@@ -33,7 +33,7 @@
 #include "timehistory.h"
 
 /******************************************************************************
-                                 Package Defines                                           
+                                 Package Defines
 ******************************************************************************/
 /*------------------------------------  EVENT  ----------------------------------------------*/
 #define MAX_EVENTS              32      /* Total Events defined in the system           */
@@ -62,9 +62,7 @@
                                    0,                     /* Minimum Duration           */\
                                    0,                     /* Event Action               */\
                                    {0,0,0,0},             /* Sensor Map                 */\
-                                   TH_NONE,               /* Pre Time History           */\
                                    0,                     /* Pre Time History Time Sec  */\
-                                   TH_NONE,               /* Post Time History          */\
                                    0,                     /* Post Time History Time Sec */\
                                    LOG_PRIORITY_3,        /* Log Priority               */\
                                    EVENT_TABLE_UNUSED     /* Event Table                */
@@ -134,7 +132,7 @@
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT
 
 /******************************************************************************
-                                  Package Typedefs                                        
+                                  Package Typedefs
 ******************************************************************************/
 typedef enum
 {
@@ -212,12 +210,8 @@ typedef struct
    UINT32              nAction;                     /* Bit encoded action flags          */
    BITARRAY128         sensorMap;                   /* Bit encoded flags of sensors to   */
                                                     /* sample during the event           */
-   TIMEHISTORY_TYPE    preTimeHistory;              /* Type of previous time history to  */
-                                                    /* take; NONE, ALL, OR PORTION       */
-   UINT16              preTime_s;                   /* PORTION Amount of time history    */
-   TIMEHISTORY_TYPE    postTimeHistory;             /* Type of post time history to      */
-                                                    /* take; NONE, ALL, OR PORTION       */
-   UINT16              postTime_s;                  /* PORTION Amount of time history    */
+   INT32               preTime_s;                   /* Amount of pre-time history        */
+   INT32               postTime_s;                  /* Amount of post-time history       */
    LOG_PRIORITY        priority;                    /* Priority to write the event log   */
    EVENT_TABLE_INDEX   eventTableIndex;             /* Related Event Table to process    */
 }EVENT_CFG;
@@ -252,8 +246,17 @@ typedef struct
                                                     /* criteria being met until event end*/
    TIMESTAMP       tsEndTime;                       /* Time when the event ended         */
    UINT16          nTotalSensors;                   /* Total sensors sampled by event    */
-   EVENT_SNSR_SUMMARY sensor[MAX_EVENT_SENSORS];       /* Sensor Summary                    */
+   EVENT_SNSR_SUMMARY sensor[MAX_EVENT_SENSORS];    /* Sensor Summary                    */
 } EVENT_END_LOG;
+
+typedef struct
+{
+   INT8              sName[MAX_EVENT_NAME];         /* the name of the event             */
+   INT8              sID  [MAX_EVENT_ID];           /* 4 char cfg id for the event       */
+   EVENT_TABLE_INDEX tableIndex;                    /* Index of table being monitored    */
+   INT32             preTime_s;                     /* Amount of history prior to event  */
+   INT32             postTime_s;                    /* Amount of history post event      */
+} EVENT_HDR;
 #pragma pack()
 
 /* Runtime storage object for the event data                                             */
@@ -370,6 +373,12 @@ typedef struct
    EVENT_REGION      maximumCfgRegion;              /* Maximum configured region         */
    REGION_LOG_STATS  regionStats[MAX_TABLE_REGIONS];/* Enter, Exit and Duration of Regs  */
 } EVENT_TABLE_SUMMARY_LOG;
+
+typedef struct
+{
+   SENSOR_INDEX nSensor;                            /* Index of sensor to monitor        */
+   FLOAT32      fTableEntryValue;                   /* Value that must be reached to     */
+} EVENT_TABLE_HDR;
 #pragma pack()
 
 /* Structure to hold the calculated line parameters                                      */
@@ -408,7 +417,7 @@ typedef struct
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 
 /******************************************************************************
-                                   Package Exports 
+                                   Package Exports
 ******************************************************************************/
 #undef EXPORT
 #if defined( EVENT_BODY )
@@ -440,39 +449,47 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 /******************************************************************************
                                   Package Exports Functions
 *******************************************************************************/
-EXPORT void EventsInitialize       ( void );
-EXPORT void EventTablesInitialize  ( void );
+EXPORT void   EventsInitialize       ( void );
+EXPORT void   EventTablesInitialize  ( void );
+EXPORT UINT16 EventGetBinaryHdr      ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 
-#endif // EVENT_H 
+#endif // EVENT_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Add ETM Binary Header
+ *                    Updated Time History Calls to new prototypes
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-08-29   Time: 3:23p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Event End Log Update
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Bit Bucket Issues Cleanup
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Log Cleanup
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-09   Time: 8:38a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed code to properly implement requirements
- * 
+ *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:03p
  * Updated in $/software/control processor/code/application

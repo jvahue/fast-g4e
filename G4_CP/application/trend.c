@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 4 $  $Date: 8/28/12 12:43p $
+ $Revision: 5 $  $Date: 12-09-11 2:20p $
 
 ******************************************************************************/
 
@@ -106,15 +106,15 @@ static void TrendUpdateTimeElapsed( UINT32  currentTime,
  *****************************************************************************/
 void TrendInitialize( void )
 {
-  TCB tcb; 
+  TCB tcb;
   UINT8     i;
-  
+
   // Add user commands for Trend to the user command tables.
   User_AddRootCmd(&RootTrendMsg);
 
   // Clear and Load the current cfg info.
   memset(&m_TrendData, 0, sizeof(m_TrendData));
-  
+
   memcpy(m_TrendCfg,
     &(CfgMgr_RuntimeConfigPtr()->TrendConfigs),
     sizeof(m_TrendCfg));
@@ -124,11 +124,11 @@ void TrendInitialize( void )
 
   for (i = 0; i < MAX_TRENDS; i++)
   {
-    m_TrendData[i].trendIndex   = (TREND_INDEX)i;    
-    m_TrendData[i].PrevEngState = ER_STATE_STOPPED;   
+    m_TrendData[i].trendIndex   = (TREND_INDEX)i;
+    m_TrendData[i].PrevEngState = ER_STATE_STOPPED;
 
-    // Call the reset functions to init the others fields 
-    TrendReset(&m_TrendCfg[i], &m_TrendData[i]);   
+    // Call the reset functions to init the others fields
+    TrendReset(&m_TrendCfg[i], &m_TrendData[i]);
   }
 #pragma ghs endnowarning
 
@@ -183,7 +183,7 @@ void TrendInitialize( void )
  *
  *****************************************************************************/
 void TrendTask( void* pParam )
-{  
+{
   if(Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     TrendForceEnd();
@@ -225,6 +225,65 @@ static BOOLEAN TrendIsActive( void )
   return bTrendActive;
 }
 
+/******************************************************************************
+ * Function:     TrendGetBinaryHdr
+ *
+ * Description:  Retrieves the binary header for the trend
+ *               configuration.
+ *
+ * Parameters:   void *pDest         - Pointer to storage buffer
+ *               UINT16 nMaxByteSize - Amount of space in buffer
+ *
+ * Returns:      UINT16 - Total number of bytes written
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
+{
+   // Local Data
+   TREND_HDR  trendHdr[MAX_TRENDS];
+   UINT16     trendIndex;
+   INT8       *pBuffer;
+   UINT16     nRemaining;
+   UINT16     nTotal;
+
+   // Initialize Local Data
+   pBuffer    = (INT8 *)pDest;
+   nRemaining = nMaxByteSize;
+   nTotal     = 0;
+   memset ( &trendHdr, 0, sizeof(trendHdr) );
+
+   // Loop through all the Trends
+   for ( trendIndex = 0;
+         ((trendIndex < MAX_TRENDS) && (nRemaining > sizeof (trendHdr[trendIndex])));
+         trendIndex++ )
+   {
+      // Copy the Trend names
+      strncpy_safe( trendHdr[trendIndex].trendName,
+                    sizeof(trendHdr[trendIndex].trendName),
+                    m_TrendCfg[trendIndex].trendName,
+                    _TRUNCATE);
+
+      trendHdr[trendIndex].rate          = m_TrendCfg[trendIndex].rate;
+      trendHdr[trendIndex].samplePeriod  = m_TrendCfg[trendIndex].nSamplePeriod_s;
+      trendHdr[trendIndex].maxTrends     = m_TrendCfg[trendIndex].maxTrendSamples;
+      trendHdr[trendIndex].trendInterval = m_TrendCfg[trendIndex].TrendInterval_s;
+      trendHdr[trendIndex].nTimeStable_s = m_TrendCfg[trendIndex].nTimeStable_s;
+      trendHdr[trendIndex].StartTrigger  = m_TrendCfg[trendIndex].StartTrigger;
+      trendHdr[trendIndex].ResetTrigger  = m_TrendCfg[trendIndex].ResetTrigger;
+
+
+      // Increment the total number of bytes and decrement the remaining
+      nTotal     += sizeof (trendHdr[trendIndex]);
+      nRemaining -= sizeof (trendHdr[trendIndex]);
+   }
+   // Copy the Trend header to the buffer
+   memcpy ( pBuffer, &trendHdr, nTotal );
+   // Return the total number of bytes written
+   return ( nTotal );
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -244,13 +303,13 @@ static BOOLEAN TrendIsActive( void )
 static void TrendProcess( void )
 {
   UINT16      trendIdx;
-  ER_STATE    erState;  
+  ER_STATE    erState;
   TREND_CFG*  pCfg;
   TREND_DATA* pData;
   BITARRAY128 trigMask;
 
   CLR_TRIGGER_FLAGS(trigMask);
-  
+
   for (trendIdx = 0; trendIdx < MAX_TRENDS; ++trendIdx)
   {
     // Process each Trend based on trend state according to Eng-run state.
@@ -263,12 +322,12 @@ static void TrendProcess( void )
     switch ( erState )
     {
       case ER_STATE_STOPPED:
-        // If we have entered stopped mode from some other mode, 
+        // If we have entered stopped mode from some other mode,
         // finish any outstanding trends
         if (pData->PrevEngState != ER_STATE_STOPPED)
         {
           TrendFinish(pCfg, pData);
-        }      
+        }
         pData->PrevEngState = ER_STATE_STOPPED;
         break;
 
@@ -284,7 +343,7 @@ static void TrendProcess( void )
 
 
       case ER_STATE_RUNNING:
-        
+
         // Upon entering RUNNING state, reset the auto-trending
         if (pData->PrevEngState != ER_STATE_RUNNING)
         {
@@ -292,7 +351,7 @@ static void TrendProcess( void )
         }
 
         // While in running mode, update trends and autotrends
-        
+
         TrendUpdateAutoTrend(pCfg, pData);
         TrendUpdateData(pCfg, pData);
 
@@ -300,7 +359,7 @@ static void TrendProcess( void )
         // start taking trending-data
 
         SetBit(pCfg->StartTrigger, trigMask, sizeof(BITARRAY128 ));
-       
+
         if ( TriggerIsActive(&trigMask) )
         {
           TrendStartManualTrend(pCfg, pData);
@@ -322,7 +381,7 @@ static void TrendProcess( void )
  * Function: TrendStartManualTrend
  *
  * Description: Initiate a manual trend in response to button press
- *              The trend will be sampled for the 
+ *              The trend will be sampled for the
  *              duration of TREND_CFG.nSamplePeriod_s
  *
  * Parameters:   None
@@ -361,7 +420,7 @@ static void TrendStartManualTrend( TREND_CFG* pCfg, TREND_DATA* pData )
  *
  *****************************************************************************/
 static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
-{ 
+{
   BOOLEAN bAutoTrendFailed = FALSE;
   UINT32 timeNow;
   UINT16 i;
@@ -391,7 +450,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
         TrendLogAutoTrendFailure(pCfg, pData);
       }
     }
-    else  
+    else
     {
       timeNow = CM_GetTickCount();
       if (pData->TimeNextSampleMs <= timeNow )
@@ -406,7 +465,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
           pSummary = &pData->snsrSummary[i];
 
           // If the sensor is known to be invalid and was valid in the past(initialized)...
-          // ignore processing for the remainder of this engine run.    
+          // ignore processing for the remainder of this engine run.
           if( !pSummary->bValid && pSummary->bInitialized )
           {
             continue;
@@ -418,13 +477,13 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
           {
             pSummary->bInitialized = TRUE;
             SensorUpdateSummaryItem(pSummary);
-          }    
+          }
           else if ( pSummary->bInitialized)
           {
-            // Sensor is now invalid but had been valid... 
+            // Sensor is now invalid but had been valid...
             // calculate average for valid period.
             oneOverN = (1.0f / (FLOAT32)(pData->cntTrendSamples - 1));
-            pSummary->fAvgValue = pSummary->fTotal * oneOverN;      
+            pSummary->fAvgValue = pSummary->fTotal * oneOverN;
           }
         } // for nTotalSensors
 
@@ -442,7 +501,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
 /******************************************************************************
  * Function: TrendFinish
  *
- * Description:  
+ * Description:
  *
  * Parameters:   None
  *
@@ -452,8 +511,8 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
  *
  *****************************************************************************/
 static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
-{ 
-#ifndef TREND_UNDER_CONSTRUCTION 
+{
+#ifndef TREND_UNDER_CONSTRUCTION
   UINT8 i;
 
 
@@ -466,7 +525,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
       //If this sensor is not to be included in the trend, then skip it.
       if ((!Sensors[i].bTrendDefined) || (Sensors[i].Type == UNUSED)) {
         continue;
-      }        
+      }
 
       // For a sensor which has failed, show the output as FAILED_VALUE
       if (!SensorIsValid(i)) {
@@ -506,7 +565,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
  * Description: Reset the processing state data for the passed Trend.
  *
  * Parameters:   None
- * 
+ *
  * Returns:      None
  *
  * Notes:
@@ -518,7 +577,7 @@ static void TrendReset(TREND_CFG* pCfg, TREND_DATA* pData)
   UINT8 j;
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
   for ( i = 0; i < MAX_TRENDS; i++)
-  {    
+  {
     pData->bTrendActive    = FALSE;
     pData->bIsAutoTrend    = FALSE;
     pData->TimeNextSampleMs  = 0;
@@ -529,13 +588,13 @@ static void TrendReset(TREND_CFG* pCfg, TREND_DATA* pData)
 
     pData->nTimeSinceLastMs    = pCfg->TrendInterval_s * ONE_SEC_IN_MILLSECS;
     pData->lastIntervalCheckMs = 0;
-    
+
     // Reset the stability data
     for ( j = 0; j <  pData->nStability; j++)
     {
       pData->prevStabValue[j] = 0.f;
     }
-    
+
     // Reset(Init) the monitored sensors
     pData->nTotalSensors = SensorSetupSummaryArray(pData->snsrSummary,
                                                      MAX_TREND_SENSORS,
@@ -634,16 +693,16 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
   FLOAT32 fVal;
   FLOAT32 fPrevValue;
   FLOAT32 delta;
-  INT32   i;  
- 
+  INT32   i;
+
   BOOLEAN bStatus = TRUE;
   STABILITY_CRITERIA* pStabCrit;
-  
+
   // Check all stability sensors for this trend obj.
   for (i = 0; i < pData->nStability; ++i)
   {
     pStabCrit = &pCfg->stability[i];
-    
+
     if ( SensorIsUsed(pStabCrit->sensorIndex) )
     {
       if ( SensorIsValid(pStabCrit->sensorIndex))
@@ -652,7 +711,7 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         fVal       = SensorGetValue(pStabCrit->sensorIndex);
         fPrevValue = pData->prevStabValue[i];
 
-        // Check absolute min/max values        
+        // Check absolute min/max values
         bStatus = (fVal >= pStabCrit->criteria.lower) &&
                   (fVal <= pStabCrit->criteria.upper);
         if (bStatus)
@@ -683,7 +742,7 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
       }
     }
   }
-  
+
   return bStatus;
 }
 
@@ -709,11 +768,11 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
 
 /******************************************************************************
  * Function: TrendUpdateAutoTrend
- *  
+ *
  * Description: Create a log that a AutoTrend did not reach stability
  *
  * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task. 
+ *                  TRUE  - Enable the Trend task.
  *                  FALSE - Disable the Trend task.
  *
  * Returns:      None
@@ -724,8 +783,8 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
 static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 {
   UINT32 timeNow;
-  
-  // Each Trend shall reset the maximum trend count when the 
+
+  // Each Trend shall reset the maximum trend count when the
   // configured trend reset trigger becomes ACTIVE.
   if( pCfg->ResetTrigger != TRIGGER_UNUSED    &&
       TriggerIsConfigured(pCfg->ResetTrigger) &&
@@ -745,14 +804,14 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // Are more trend-samples be taken?
   if( pData->cntTrendSamples < pCfg->maxTrendSamples )
   {
-    // Update minimum time between trends 
+    // Update minimum time between trends
     TrendUpdateTimeElapsed(timeNow,
                            &pData->lastIntervalCheckMs,
                            &pData->nTimeSinceLastMs);
-    
+
     // Check if all configured criteria are/still stable.
     if (TrendCheckStability(pCfg, pData) )
-    {     
+    {
       // Criteria is stable... update time-elapsed since sensors-stable.
       TrendUpdateTimeElapsed(timeNow, &pData->lastStabCheckMs, &pData->nTimeStableMs);
 
@@ -764,7 +823,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
       {
         TrendStartAutoTrend(pCfg, pData);
       }
-      
+
     }
     else // Criteria sensors non-stable
     {
@@ -780,16 +839,16 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   else if(pData->cntTrendSamples < pCfg->maxTrendSamples )
   {
     // if we take more trends, then we're here because the interval hasn't been reached
-    
+
   }
 }
 
 /******************************************************************************
  * Function: TrendUpdateTimeElapsed
- *  
+ *
  * Description: Generalized routine to update time elapsed
  *
- * Parameters:   
+ * Parameters:
  *
  * Returns:      None
  *
@@ -801,7 +860,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
    // If first time thru, set last time to current so elapsed will be zero.
    if (0 == *lastTime)
    {
-     // if elapsed time is zero we are starting a        
+     // if elapsed time is zero we are starting a
      *lastTime    = currentTime;
      *elapsedTime = 0;
    }
@@ -811,13 +870,13 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
    *lastTime    =  currentTime;
  }
 
- 
+
 /******************************************************************************
  * Function: TrendStartAutoTrend
- *  
+ *
  * Description: Generalized routine to update time elapsed
  *
- * Parameters:   
+ * Parameters:
  *
  * Returns:      None
  *
@@ -851,22 +910,27 @@ static void TrendStartAutoTrend(TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- * 
+ *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:20p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - General Trend Development and Binary ETM Header
+ *
  * *****************  Version 4  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Checking in prelim trends
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:25p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  coding  trend module
- * 
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-06-07   Time: 11:32a
  * Created in $/software/control processor/code/application

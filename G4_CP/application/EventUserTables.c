@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 17 $  $Date: 8/29/12 6:20p $
+$Revision: 18 $  $Date: 12-09-11 1:58p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -841,6 +841,12 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
  *
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:58p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updated to new Timehistory fields
+ *                     Fixed rate offset size in the table
+ * 
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
  * Updated in $/software/control processor/code/application

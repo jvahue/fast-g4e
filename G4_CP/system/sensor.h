@@ -1,22 +1,22 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
- 
+
    File: sensor.h
- 
- 
+
+
    Description: Definitions for sensor types
- 
+
    VERSION
-      $Revision: 34 $  $Date: 8/28/12 1:43p $  
- 
+      $Revision: 35 $  $Date: 12-09-11 2:13p $  
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -249,7 +249,7 @@ typedef enum
   SENSOR_120  =  120, SENSOR_121  =  121, SENSOR_122  = 122, SENSOR_123 =  123,
   SENSOR_124  =  124, SENSOR_125  =  125, SENSOR_126  = 126, SENSOR_127 =  127,
   SENSOR_UNUSED = 255
-} SENSOR_INDEX;       
+} SENSOR_INDEX;
 
 typedef enum
 {
@@ -263,7 +263,7 @@ typedef enum
    FAULT_28  =  28, FAULT_29  =  29, FAULT_30  =  30, FAULT_31  =  31,
    FAULT_UNUSED = 255
 } FAULT_INDEX;
-      
+
 typedef enum
 {
   NONE               = 1,   /* No Conversion  */
@@ -290,7 +290,7 @@ typedef enum
     MAX_SAMPLETYPE         /* For validation */
 } SAMPLETYPE;
 
-typedef enum 
+typedef enum
 {
    SSR_1HZ            =  1,  /* Sensor  1Hz Rate    */
    SSR_2HZ            =  2,  /* Sensor  2Hz Rate    */
@@ -312,7 +312,7 @@ typedef enum
 {
    FILTERNONE         = 1,   /* No smoothing takes place        */
    EXPO_AVERAGE       = 2,   /* Exponential Smoothing           */
-   SPIKEREJECTION     = 3,   /* Spike rejection                 */  
+   SPIKEREJECTION     = 3,   /* Spike rejection                 */
    MAXREJECT          = 4,   /* reject max values, average rest */
    SLOPEFILTER        = 5,   /* Slope over a number of values   */
    MAXFILTER          = 5
@@ -325,7 +325,7 @@ typedef enum
    SENSOR_FAILED
 } SENSOR_STATUS;
 
-typedef enum 
+typedef enum
 {
     NO_FAILURE,              /* No Test failure   */
     BIT_FAILURE,             /* BIT Test failure  */
@@ -357,14 +357,14 @@ typedef struct
 
 #pragma pack(1)
 // Definition of a conversion configuration
-typedef struct 
+typedef struct
 {
     CONVERSIONTYPE  Type;                       /* Type of conversion     */
     FLOAT32         fParams[MAX_CONV_PARAMS];   /* Specific to conversion */
 } CONVERSION;
 
 // Definition of a filter configuration
-typedef struct 
+typedef struct
 {
   FILTERTYPE      Type;              /* Type of conversion                      */
   FLOAT32         fFullScale;        /* Spike Rejection 100% value              */
@@ -383,14 +383,14 @@ typedef struct
     CHAR              SensorName[MAX_SENSORNAME];       /* "Engine RPM", etc. */
     CHAR              OutputUnits[MAX_SENSORUNITS];     /* Units after conversion
                                                          *   (ie - "RPM", "Deg. C", etc.) */
-    UINT8             nInputChannel;                /* Input channel, specific to type of 
+    UINT8             nInputChannel;                /* Input channel, specific to type of
                                                      * sensor (ie - which analog channel)*/
                                                         /* "Engine RPM", etc. */
     UINT8             nMaximumSamples;              /* Maximum Number of Samples to take */
 
     SENSOR_SAMPLERATE SampleRate;                   /* Rate to sample (1,2,5,10,20,50Hz) */
     UINT16            nSampleOffset_ms;             /* Offset to start sampling in mS    */
-                                                     
+
     CONVERSION        Calibration;                      /* Calibration calculation */
     CONVERSION        Conversion;                       /* Conversion to perform */
     FILTER_CONFIG     FilterCfg;                    /* Filter Configuration              */
@@ -402,7 +402,7 @@ typedef struct
     UINT16            RangeDuration_ms;             /* Number of milliseconds to wait    */
     FLOAT32           fMinValue;                        /* Min value for proper operation */
     FLOAT32           fMaxValue;                        /* Max value for proper operation */
-    
+
     BOOLEAN           RateTest;                     /* Is there a rate test              */
     FLOAT32           RateThreshold;                /* Rate to be exceeded               */
     UINT16            RateDuration_ms;              /* Number of milliseconds to wait    */
@@ -410,11 +410,11 @@ typedef struct
     BOOLEAN           SignalTest;                   /* Is there a signal test            */
     FAULT_INDEX       SignalTestIndex;              /* Which fault to use                */
     UINT16            SignalDuration_ms;            /* Number of milliseconds to wait    */
-    
+
     BOOLEAN           bInspectInclude;              /* TRUE if value should be outputted */
 
     UINT32            GeneralPurposeA;                  /* General Purpose Field A */
-    UINT32            GeneralPurposeB;                  /* General Purpose Field B */    
+    UINT32            GeneralPurposeB;                  /* General Purpose Field B */
 } SENSOR_CONFIG;
 
 // Sensor Live Data Configuration
@@ -492,7 +492,7 @@ typedef struct
     INT8          Name[MAX_SENSORNAME]; /* Name of the sensor that failed      */
     FLOAT32       fCurrentValue;        /* Current Value of sensor             */
     FLOAT32       fValue;               /* Valid Value being reported          */
-    FLOAT32       fPreviousValue;       /* Previous Valid Value of sensor      */    
+    FLOAT32       fPreviousValue;       /* Previous Valid Value of sensor      */
     FLOAT32       fExpectedMin;         /*                                     */
     FLOAT32       fExpectedMax;         /*                                     */
     FLOAT32       fExpectedThreshold;   /*                                     */
@@ -505,6 +505,13 @@ typedef struct
    CHAR Name[MAX_SENSORNAME];
    CHAR Units[MAX_SENSORUNITS];
 } SENSOR_HDR;
+
+typedef struct
+{
+   BOOLEAN    configured;
+   SENSOR_HDR sensor;
+} SENSOR_ETM_HDR;
+
 
 #pragma pack()
 
@@ -536,6 +543,7 @@ EXPORT BOOLEAN SensorGetPreviousValid  ( SENSOR_INDEX Sensor );
 EXPORT void    SensorsInitialize       ( void );
 EXPORT void    SensorDisableLiveStream ( void );
 EXPORT UINT16  SensorGetSystemHdr      ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT16  SensorGetETMHdr         ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
                                         INT32 summarySize,
                                         UINT32 snsrMask[],
@@ -547,111 +555,116 @@ EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ *
+ * *****************  Version 35  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:13p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Binary ETM Header
  * 
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:35a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Updated the sensor summary to include the time of min and
  * time of max.
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Refactor for common Sensor Summary
- * 
+ *
  * *****************  Version 31  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
  * Updated in $/software/control processor/code/system
  * SCR 1124 - Packed the configuration structures for ARINC429 Mgr,
  * Sensors and Triggers. Suppressed the alignment warnings for those three
  * objects also.
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 4/11/12    Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2  Accessor API for PriorValidity & 128sensors
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor2  Date: 10/04/10   Time: 4:31p
  * Updated in $/software/control processor/code/system
  * SCR #916 Code Review Updates
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor2  Date: 10/04/10   Time: 1:27p
  * Updated in $/software/control processor/code/system
  * SCR #916 Code Review Updates
- * 
+ *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 9/09/10    Time: 2:15p
  * Updated in $/software/control processor/code/system
  * SCR 855 - Removed unused functions
- * 
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 7/20/10    Time: 9:04a
  * Updated in $/software/control processor/code/system
  * SCR 294 - Add system binary header
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 6/22/10    Time: 6:25p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence and Box Configuration
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:29p
  * Updated in $/software/control processor/code/system
  * SCR #486 Livedata enhancement
- * 
+ *
  * *****************  Version 23  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * SCR #618 F7X and UartMgr Requirements Implementation
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 11:20a
  * Updated in $/software/control processor/code/system
  * SCR# 404 - remove unused sensor status cmds
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 1/19/10    Time: 3:52p
  * Updated in $/software/control processor/code/system
  * SCR# 399
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 1/15/10    Time: 5:29p
  * Updated in $/software/control processor/code/system
- * SCR 296 
+ * SCR 296
  * * Updated the sensor read procesing to check if the interface is alive.
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 1/11/10    Time: 12:23p
  * Updated in $/software/control processor/code/system
  * SCR# 388
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:27p
  * Updated in $/software/control processor/code/system
  * SCR 18
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 12/07/09   Time: 4:25p
  * Updated in $/software/control processor/code/system
  * SCR# 364 - set sensor test durations defaults per requirements
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 12/03/09   Time: 5:00p
  * Updated in $/software/control processor/code/system
  * SCR# 350
- * 
+ *
  * *****************  Version 14  *****************
  * User: John Omalley Date: 11/24/09   Time: 2:14p
  * Updated in $/software/control processor/code/system
@@ -660,48 +673,48 @@ EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
  * * Set the rate value before the absolute is calculated.
  * * Updated the rate calculation
  * * Corrected the current and previous value lock mechanism.
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 11/02/09   Time: 1:57p
  * Updated in $/software/control processor/code/system
- * Misc non code update to support WIN32 version and spelling. 
- * 
+ * Misc non code update to support WIN32 version and spelling.
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 10/26/09   Time: 1:54p
  * Updated in $/software/control processor/code/system
  * SCR 292
  * - Updated the rate countdown logic because the 1st calculated countdonw
  * was incorrect.
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 10/22/09   Time: 4:24p
  * Updated in $/software/control processor/code/system
  * SCR 136
  * - Packed log structures
- * 
+ *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 10/20/09   Time: 3:35p
  * Updated in $/software/control processor/code/system
- * SCR 310 
+ * SCR 310
  * - Added last valid value logic
  * - Added countdown precalc
  * - Added time based checks >=
- * 
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 10/14/09   Time: 5:15p
  * Updated in $/software/control processor/code/system
  * SCR 298 - Update the name size to 32 characters
- * 
+ *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 10/07/09   Time: 5:46p
  * Updated in $/software/control processor/code/system
  * SCR 283 - Added FATAL assert logic to default cases
- * 
+ *
  * *****************  Version 7  *****************
  * User: John Omalley Date: 10/06/09   Time: 5:30p
  * Updated in $/software/control processor/code/system
  * Updated to remove multiple system condition configuration items
- * 
+ *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 10/01/09   Time: 4:27p
  * Updated in $/software/control processor/code/system

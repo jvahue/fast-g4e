@@ -10,7 +10,7 @@
     Description:
     
     VERSION
-    $Revision: 40 $  $Date: 8/28/12 12:43p $
+    $Revision: 41 $  $Date: 12-09-11 2:21p $
     
 ******************************************************************************/
 
@@ -266,6 +266,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 41  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:21p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added HEX8 logic
  * 
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

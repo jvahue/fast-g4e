@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 3 $  $Date: 8/28/12 12:43p $
+$Revision: 4 $  $Date: 12-09-11 2:20p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -504,6 +504,11 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:20p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - General Trend Development and Binary ETM Header
  * 
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

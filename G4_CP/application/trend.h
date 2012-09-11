@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 3 $  $Date: 8/28/12 12:43p $
+  $Revision: 4 $  $Date: 12-09-11 2:20p $
 
 *******************************************************************************/
 
@@ -28,7 +28,7 @@
 
 
 /******************************************************************************
-                                    Package Defines                           
+                                    Package Defines
 ******************************************************************************/
 #define MAX_TREND_NAME    32
 #define MAX_STAB_SENSORS  16
@@ -69,7 +69,7 @@
 
 
 /*********************************************************************************************
-                                   Package Typedefs                                        
+                                   Package Typedefs
 *********************************************************************************************/
 typedef enum
 {
@@ -98,22 +98,22 @@ typedef enum
 // TREND_LOG
 
 
-typedef struct  
+typedef struct
 {
   CYCLE_INDEX cycIndex;
   UINT32      cycleCount;
 } CYCLE_COUNT;
 
-typedef struct  
+typedef struct
 {
   CHAR         name[ MAX_TREND_NAME + 1 ];      /* name of trend or autotrend               */
   SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS];  /* The stats for the configured sensors     */
-  UINT16       cntTrendSamples;                 /* The number of samples taken for this log */ 
+  UINT16       cntTrendSamples;                 /* The number of samples taken for this log */
   CYCLE_COUNT  cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
 }TREND_LOG;
 
 // STABILITY_CRITERIA
-typedef struct 
+typedef struct
 {
   FLOAT32 lower;
   FLOAT32 upper;
@@ -129,7 +129,7 @@ typedef struct
 
 // TREND_CFG
 typedef struct
-{ 
+{
    CHAR          trendName[MAX_TREND_NAME+1]; /* the name of the trend                       */
    /* Trend execution control */
    TREND_RATE    rate;               /* Rate in ms at which trend is run.                    */
@@ -139,14 +139,14 @@ typedef struct
    ENGRUN_INDEX  EngineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
    UINT16        maxTrendSamples;    /* Max # of samples to be taken by this trend           */
    TRIGGER_INDEX StartTrigger;       /* Starting trigger                                     */
-   TRIGGER_INDEX ResetTrigger;       /* Ending trigger                                       */   
+   TRIGGER_INDEX ResetTrigger;       /* Ending trigger                                       */
    UINT32        TrendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
-   BITARRAY128   SensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */   
+   BITARRAY128   SensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
    CYCLE_INDEX   nCycleA;            /* Persistent Cycle A to include in trend               */
    CYCLE_INDEX   nCycleB;            /* Persistent Cycle B to include in trend               */
    CYCLE_INDEX   nCycleC;            /* Persistent Cycle C to include in trend               */
    CYCLE_INDEX   nCycleD;            /* Persistent Cycle D to include in trend               */
-   UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */   
+   UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */
    UINT16        nTimeStable_s;     /* Stability period for sensor(0-3600) in 1sec intervals */
    BOOLEAN       lampEnabled;        /* will the trend lamp flash                            */
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
@@ -155,6 +155,19 @@ typedef struct
 // A typedef for an array of the maximum number of trends
 // Used for storing Trend configurations in the configuration manager
 typedef TREND_CFG TREND_CONFIGS[MAX_TRENDS];
+
+typedef struct
+{
+   CHAR          trendName[MAX_TREND_NAME];
+   TREND_RATE    rate;
+   UINT16        samplePeriod;
+   UINT16        maxTrends;
+   UINT32        trendInterval;
+   UINT16        nTimeStable_s;
+   TRIGGER_INDEX StartTrigger;
+   TRIGGER_INDEX ResetTrigger;
+}TREND_HDR;
+
 #pragma pack()
 
 
@@ -176,7 +189,7 @@ typedef struct
   UINT16       nStability;         /* Count of sensors used in Stability                     */
   UINT32       lastStabCheckMs;/* Starting time (CM_GetTickCount()                       */
   UINT32       nTimeStableMs;      /* Time in ms the stability-sensors have been stable.     */
-  FLOAT32      prevStabValue[MAX_STAB_SENSORS];  
+  FLOAT32      prevStabValue[MAX_STAB_SENSORS];
   // Monitored sensors during trends.
   UINT16       nTotalSensors;     /* Count of sensors used in SnsrSummary                    */
   SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS]; /* Storage for max, average and counts.       */
@@ -200,19 +213,25 @@ typedef struct
 /******************************************************************************
                                   Package Exports Functions
 *******************************************************************************/
-EXPORT void TrendInitialize( void );
-EXPORT void TrendTask( void* pParam );
+EXPORT void   TrendInitialize   ( void );
+EXPORT void   TrendTask         ( void* pParam );
+EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 
-#endif // TREND_H 
+#endif // TREND_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
- * 
+ *
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:20p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - General Trend Development and Binary ETM Header
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p
  * Updated in $/software/control processor/code/application
