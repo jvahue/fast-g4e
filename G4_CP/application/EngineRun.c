@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 18 $  $Date: 8/29/12 12:28p $
+      $Revision: 19 $  $Date: 9/07/12 4:05p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -966,6 +966,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - V&V fixes, code review updates
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 12:28p

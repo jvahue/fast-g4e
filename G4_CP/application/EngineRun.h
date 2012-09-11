@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 12 $  $Date: 8/28/12 12:43p $     
+      $Revision: 13 $  $Date: 9/07/12 4:05p $     
     
 ******************************************************************************/
 
@@ -194,6 +194,11 @@ EXPORT ENGRUN_RUNLOG*  EngRunGetPtrToLog(ENGRUN_INDEX engId);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - V&V fixes, code review updates
  * 
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
