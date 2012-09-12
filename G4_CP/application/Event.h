@@ -464,7 +464,7 @@ EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Add ETM Binary Header
  *                    Updated Time History Calls to new prototypes
- * 
+ *
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-08-29   Time: 3:23p
  * Updated in $/software/control processor/code/application

@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 22 $  $Date: 12-09-11 1:56p $
+ $Revision: 23 $  $Date: 12-09-12 3:59p $
 
 ******************************************************************************/
 
@@ -447,6 +447,9 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    pData->state         = EVENT_START;
    pData->nStartTime_ms = 0;
    pData->nDuration_ms  = 0;
+   memset ( &pData->tsCriteriaMetTime, 0, sizeof(pData->tsCriteriaMetTime) );
+   memset ( &pData->tsDurationMetTime, 0, sizeof(pData->tsDurationMetTime) );
+   memset ( &pData->tsEndTime, 0, sizeof(pData->tsEndTime) );
    pData->nSampleCount  = 0;
    pData->endType       = EVENT_NO_END;
 
@@ -485,8 +488,12 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    pTableData->confirmedRegion          = REGION_NOT_FOUND;
    pTableData->nTotalDuration_ms        = 0;
    pTableData->maximumRegionEntered     = REGION_NOT_FOUND;
+   pTableData->fCurrentSensorValue      = 0;
    pTableData->fMaxSensorValue          = 0.0;
    pTableData->nMaxSensorElaspedTime_ms = 0;
+
+   memset(&pTableData->tsExceedanceStartTime, 0, sizeof(pTableData->tsExceedanceStartTime));
+   memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
    for (nRegionIndex = 0; nRegionIndex <= pTableData->maximumCfgRegion; nRegionIndex++)
@@ -883,6 +890,12 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
    // Get Sensor Value
    pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
 
+   // If we haven't entered the table but we are processing then clear the data
+   if ( FALSE == pTableData->bStarted)
+   {
+      EventTableResetData ( pTableData );
+   }
+
    // Don't do anything until the sensor is valid and the table is entered
    if (( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue ) &&
        ( TRUE == SensorIsValid( pTableCfg->nSensor ) ) )
@@ -890,7 +903,6 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
       // Check if this Table was already running
       if ( FALSE == pTableData->bStarted )
       {
-         EventTableResetData ( pTableData );
          pTableData->bStarted      = TRUE;
          pTableData->nStartTime_ms = nCurrentTick;
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceStartTime );
@@ -1599,12 +1611,17 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 12-09-12   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updated how Event Data gets reset
+ * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:56p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Add ETM Binary Header
  *                    Updated Time History Calls to new prototypes
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:53p
  * Updated in $/software/control processor/code/application
