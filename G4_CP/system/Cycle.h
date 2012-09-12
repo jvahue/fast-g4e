@@ -260,6 +260,7 @@ EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
 EXPORT void    CycleResetAll         ( void );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT32  CycleGetPersistentCount( UINT8 nCycle );
 
 //EXPORT BOOLEAN CheckCycleValues(const CYCLEVALUE * valueTable);
 //EXPORT BOOLEAN CyclePersistentDuration( UINT8 nCycle );

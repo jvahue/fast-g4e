@@ -87,8 +87,8 @@ static CYCLE_CFG    m_Cfg [MAX_CYCLES];  // Cycle Cfg Array
 static CYCLE_DATA   m_Data[MAX_CYCLES];  // Runtime data related to the cycles
 
 static CYCLE_COUNTS m_CountsEEProm;  // master count list, Persisted to EE at end of ER
-                               // otherwise is used as the compare base for
-                               // counts during this ER
+                                     // otherwise is used as the compare base for
+                                     // counts during this ER
 
 
 static CYCLE_COUNTS m_CountsRTC; // buffer for counts written to RTC during the ER
@@ -311,6 +311,26 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
    memcpy ( pBuffer, &cycleHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
+}
+
+
+/******************************************************************************
+ * Function:     CycleGetPersistentCount
+ *
+ * Description:  Retrieves the count for cycle 'nCycle'
+ *               
+ *
+ * Parameters:   UINT8 nCycle         - Cycle Index of the value to return
+ *              
+ *
+ * Returns:      UINT32 - Value of cycle as persisted to RTCRam
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT32  CycleGetPersistentCount( UINT8 nCycle )
+{  
+  return m_CountsRTC.data[nCycle].count.n;
 }
 
 /*********************************************************************************************/
@@ -941,7 +961,7 @@ static BOOLEAN CycleRestoreCountsFromPersistFiles(void)
   if ((resultEE != SYS_OK) && (resultRTC != SYS_OK))
   {
     // Both locations are corrupt ! Create ETM log ? Will this be a duplicate ?
-    LogWriteETM( SYS_ID_CYCLES_PERSIST_FILES_INVALID, LOG_PRIORITY_LOW, NULL, 0, NULL );
+    LogWriteETM( SYS_ID_CYCLES_PERSIST_FILES_INVALID, LOG_PRIORITY_3, NULL, 0, NULL );
     GSE_DebugStr(NORMAL,TRUE, "Cycle - Both Persisted Cycle Files Bad - Resetting");
 
     for ( i = 0; i < MAX_CYCLES; i++)
@@ -1025,7 +1045,7 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
                    m_Cfg[nCycle].Name,  MAX_CYCLENAME);
       sprintf( changeLog.PrevValue, "0x%04x", m_CountsEEProm.data[nCycle].checkID);
       sprintf( changeLog.NewValue, "0x%04x",  iTempID);
-      LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED, LOG_PRIORITY_LOW, NULL, 0, NULL );
+      LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED, LOG_PRIORITY_3, NULL, 0, NULL );
     }
 
     m_CountsEEProm.data[nCycle].checkID = iTempID;

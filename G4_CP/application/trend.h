@@ -45,19 +45,19 @@
                       TREND_1HZ,             /* Rate */\
                       0,                     /* nOffset_ms */\
                       0,                     /* nSamplePeriod_s */\
-                      ENGRUN_UNUSED,         /* EngineRunId */\
-                      0,                     /* maxTrendSamples */\
-                      TRIGGER_UNUSED,        /* StartTrigger */\
-                      TRIGGER_UNUSED,        /* ResetTrigger */\
+                      ENGRUN_UNUSED,         /* engineRunId */\
+                      0,                     /* maxTrends */\
+                      TRIGGER_UNUSED,        /* startTrigger */\
+                      TRIGGER_UNUSED,        /* resetTrigger */\
                       0,                     /* TrendTicks */\
-                      {0,0,0,0},             /* SensorMap */\
+                      {0,0,0,0},             /* sensorMap */\
                       CYCLE_UNUSED,          /* nCycleA */\
                       CYCLE_UNUSED,          /* nCycleB */\
                       CYCLE_UNUSED,          /* nCycleC */\
                       CYCLE_UNUSED,          /* nCycleD */\
                       0,                     /* LssMask */\
                       STABILITY_DEFAULT,     /* Stability[MAX_STAB_SENSORS] */\
-                      0,                     /* nTimeStable_s */\
+                      0,                     /* stabilityPeriod_s */\
                       FALSE                  /* lampEnabled */
 
 
@@ -93,10 +93,17 @@ typedef enum
    TREND_UNUSED = 255
 } TREND_INDEX;
 
+typedef enum
+{
+  TREND_STATE_INACTIVE,
+  TREND_STATE_MANUAL,
+  TREND_STATE_AUTO,
+  MAX_TREND_STATES
+}TREND_STATE;
+
 #pragma pack(1)
 
 // TREND_LOG
-
 
 typedef struct
 {
@@ -106,10 +113,18 @@ typedef struct
 
 typedef struct
 {
-  CHAR         name[ MAX_TREND_NAME + 1 ];      /* name of trend or autotrend               */
-  SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS];  /* The stats for the configured sensors     */
-  UINT16       cntTrendSamples;                 /* The number of samples taken for this log */
-  CYCLE_COUNT  cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
+  SENSOR_INDEX SensorIndex;
+  BOOLEAN      bValid;
+  FLOAT32      fMaxValue;
+  FLOAT32      fAvgValue;
+}TREND_SENSORS;
+
+typedef struct  
+{
+  CHAR          name[ MAX_TREND_NAME + 1 ];      /* name of trend or autotrend               */
+  UINT16        nSamples;  
+  TREND_SENSORS sensor[MAX_TREND_SENSORS];  /* The stats for the configured sensors     */
+  CYCLE_COUNT   cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
 }TREND_LOG;
 
 // STABILITY_CRITERIA
@@ -136,18 +151,20 @@ typedef struct
    UINT32        nOffset_ms;         /* Offset in millisecs this object runs within it's MIF */
    /* Sampling control */
    UINT16        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
-   ENGRUN_INDEX  EngineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
-   UINT16        maxTrendSamples;    /* Max # of samples to be taken by this trend           */
-   TRIGGER_INDEX StartTrigger;       /* Starting trigger                                     */
-   TRIGGER_INDEX ResetTrigger;       /* Ending trigger                                       */
-   UINT32        TrendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
-   BITARRAY128   SensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
+   ENGRUN_INDEX  engineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
+   UINT16        maxTrends;          /* Max # of trends to be recorded by this trend         */
+   TRIGGER_INDEX startTrigger;       /* Starting trigger                                     */
+   TRIGGER_INDEX resetTrigger;       /* Ending trigger                                       */   
+   UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
+   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */ 
+   // Keep cycle indexes allocation contiguous!
    CYCLE_INDEX   nCycleA;            /* Persistent Cycle A to include in trend               */
    CYCLE_INDEX   nCycleB;            /* Persistent Cycle B to include in trend               */
    CYCLE_INDEX   nCycleC;            /* Persistent Cycle C to include in trend               */
    CYCLE_INDEX   nCycleD;            /* Persistent Cycle D to include in trend               */
+   // Keep cycle indexes allocation contiguous!
    UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */
-   UINT16        nTimeStable_s;     /* Stability period for sensor(0-3600) in 1sec intervals */
+   UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1-sec intervals */
    BOOLEAN       lampEnabled;        /* will the trend lamp flash                            */
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG, *TREND_CFG_PTR;
@@ -174,20 +191,24 @@ typedef struct
 // TREND_DATA - Run Time Data
 typedef struct
 {
+  // Run control
   TREND_INDEX  trendIndex;          /* Index for 'this' trend.                               */
-  // Trend state/status info
-  BOOLEAN      bTrendActive;        /* is a trend active                                     */
-  BOOLEAN      bIsAutoTrend;        /* Is this trend an autotrend                            */
-  UINT32       TimeNextSampleMs;    /* Time to take next sample                              */
-  ER_STATE     PrevEngState;        /* last op mode for trending                             */
+  INT16        nRateCounts;         /* Countdown interval for this trend                     */
+  INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
+  // State/status info
+  TREND_STATE  trendState;           /* Current trend type                                    */
+  ER_STATE     prevEngState;        /* last op mode for trending                             */
   BOOLEAN      bTrendLamp;          /* does a [Auto]Trend want to flash the lamp             */
-  UINT16       cntTrendSamples;    /* # of samples already taken                             */
+  UINT16       trendCnt;            /* # of trends taken since Reset                         */
+  // Trend instance sampling
+  UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
+  UINT32       sampleCnt;           /* Counts of samples take this period                    */          
   // Interval handling
   UINT32       lastIntervalCheckMs;/* Starting time (CM_GetTickCount()                       */
-  UINT32       nTimeSinceLastMs;    /* time since last trend                                 */
+  UINT32       nTimeSinceLastMs;   /* time since last trend                                  */
   // Stability handling
   UINT16       nStability;         /* Count of sensors used in Stability                     */
-  UINT32       lastStabCheckMs;/* Starting time (CM_GetTickCount()                       */
+  UINT32       lastStabCheckMs;/* Starting time (CM_GetTickCount()                           */
   UINT32       nTimeStableMs;      /* Time in ms the stability-sensors have been stable.     */
   FLOAT32      prevStabValue[MAX_STAB_SENSORS];
   // Monitored sensors during trends.

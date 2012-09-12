@@ -773,7 +773,7 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
   pLog->monMinValue         = pErData->monMinValue;
 
   LogWriteETM( APP_ID_ENGINERUN_STARTED,
-               LOG_PRIORITY_LOW,
+               LOG_PRIORITY_3,
                pLog,
                sizeof(ENGRUN_STARTLOG),
                NULL);
@@ -858,7 +858,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
   }
 
   LogWriteETM( APP_ID_ENGINERUN_ENDED,
-               LOG_PRIORITY_LOW,
+               LOG_PRIORITY_3,
                pLog,
                sizeof(ENGRUN_RUNLOG),
                NULL);

@@ -64,7 +64,9 @@ SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 \
 SYS_LOG_ID(APP_ID_TREND_MANUAL                      ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_AUTO                        ,0xB501 ,0)\
-SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB502 ,0)\
+SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
+SYS_LOG_ID(APP_ID_TREND_AUTO_FAILED                 ,0xB503 ,0)\
+SYS_LOG_ID(APP_ID_TREND_AUTO_NOT_DETECTED           ,0xB504 ,0)\
 \
 SYS_LOG_ID(DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL        ,0x0500 ,0)\
 SYS_LOG_ID(DRV_ID_TTMR_PBIT_REG_INIT_FAIL           ,0x0700 ,0)\
