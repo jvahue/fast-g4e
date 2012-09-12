@@ -887,14 +887,14 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
    pTableData   = &m_EventTableData[eventTableIndex];
    foundRegion  = REGION_NOT_FOUND;
 
-   // Get Sensor Value
-   pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
-
    // If we haven't entered the table but we are processing then clear the data
    if ( FALSE == pTableData->bStarted)
    {
       EventTableResetData ( pTableData );
    }
+
+   // Get Sensor Value
+   pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
 
    // Don't do anything until the sensor is valid and the table is entered
    if (( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue ) &&
@@ -1615,7 +1615,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * User: John Omalley Date: 12-09-12   Time: 3:59p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Updated how Event Data gets reset
- * 
+ *
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:56p
  * Updated in $/software/control processor/code/application
