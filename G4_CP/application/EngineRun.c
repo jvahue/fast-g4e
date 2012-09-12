@@ -241,6 +241,7 @@ static void EngRunEnableTask ( BOOLEAN bEnable )
 {
    TmTaskEnable (EngRun_Task, bEnable);
 }
+
 /******************************************************************************
  * Function:     EngRunTask
  *
@@ -434,9 +435,7 @@ static void EngRunForceEnd( void )
 
     CycleFinishEngineRun(i);
   }
-
 }
-
 
 /******************************************************************************
  * Function:     EngRunReset
@@ -483,7 +482,6 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       pErData->CycleCounts[i] = 0;
     }
   }
-
 }
 
 /******************************************************************************
@@ -566,7 +564,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
             if ( TriggerGetState( pErCfg->startTrigID) ||
                  TriggerGetState( pErCfg->runTrigID  ) )
             {
-
               // init the start-log entry and set start-time
               // clear the cycle counts for this engine run
               EngRunStartLog(pErCfg, pErData);
@@ -600,33 +597,35 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
         // Finish the engine run log
         EngRunWriteStartLog( ER_LOG_ERROR, pErCfg, pErData);
-        pErData->erState = ER_STATE_STOPPED;
-        break;
-      }
-
-      //
-      // Update the Engine Run-log data during START state
-      EngRunUpdateRunData(pErCfg, pErData);
-
-      // STARTING -> RUNNING
-      if ( TriggerGetState( pErCfg->runTrigID) )
-      {
-        // Write ETM START log
-        EngRunWriteStartLog( ER_LOG_RUNNING, pErCfg, pErData);
-        pErData->erState = ER_STATE_RUNNING;
-        break;
-      }
-
-      // STARTING -> STOP
-      // STARTING -> (Aborted) -> STOP
-      if ( TriggerGetState( pErCfg->stopTrigID) ||
-          !TriggerGetState( pErCfg->startTrigID) )
-      {
-        // Finish the engine run log
-        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
-        break;
+      }
+      else
+      {
+        //
+        // Update the Engine Run-log data during START state
+        EngRunUpdateRunData(pErCfg, pErData);
+
+        // STARTING -> RUNNING
+        if ( TriggerGetState( pErCfg->runTrigID) )
+        {
+          // Write ETM START log
+          EngRunWriteStartLog( ER_LOG_RUNNING, pErCfg, pErData);
+          pErData->erState = ER_STATE_RUNNING;
+        }
+        else
+        {
+          // STARTING -> STOP
+          // STARTING -> (Aborted) -> STOP
+          if ( TriggerGetState( pErCfg->stopTrigID) ||
+              !TriggerGetState( pErCfg->startTrigID) )
+          {
+            // Finish the engine run log
+            EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+            EngRunReset(pErCfg, pErData);
+            pErData->erState = ER_STATE_STOPPED;
+          }
+        }
       }
       break;
 
@@ -645,30 +644,30 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
-        break;
       }
-
-      // Update the EngineRun log data
-      // Allow additional update so that is ER is closed, this last second
-      // is counted.
-      EngRunUpdateRunData( pErCfg, pErData);
-
-      // If the engine run has stopped, finish the engine run and change states
-      // RUNNING -> STOP
-      if ( TriggerGetState( pErCfg->stopTrigID) ||
-          !TriggerGetState( pErCfg->runTrigID) )
+      else
       {
-        // Finish the engine run log
-        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
-        EngRunReset(pErCfg, pErData);
-        pErData->erState = ER_STATE_STOPPED;
+        // Update the EngineRun log data
+        // Allow additional update so that is ER is closed, this last second
+        // is counted.
+        EngRunUpdateRunData( pErCfg, pErData);
+
+        // If the engine run has stopped, finish the engine run and change states
+        // RUNNING -> STOP
+        if ( TriggerGetState( pErCfg->stopTrigID) ||
+            !TriggerGetState( pErCfg->runTrigID) )
+        {
+          // Finish the engine run log
+          EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+          EngRunReset(pErCfg, pErData);
+          pErData->erState = ER_STATE_STOPPED;
+        }
       }
       break;
 
     default:
       FATAL("Unrecognized engine run state %d", pErData->erState );
       break;
-
     }
 
     // Display msg when state changes.
@@ -679,7 +678,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
                      EngineRunStateEnum[curState].Str,
                      EngineRunStateEnum[pErData->erState].Str);
     }
-
   }
 }
 
@@ -779,7 +777,6 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
                NULL);
 }
 
-
 /******************************************************************************
  * Function:     EngRunWriteRunLog
  *
@@ -807,6 +804,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
   pLog = &engineRunLog[pErData->erIndex];
 
   oneOverN = (1.0f / (FLOAT32)pErData->nSampleCount);
+  GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
 
   // Finish the cycles for this engine run
   CycleFinishEngineRun( pErData->erIndex);
@@ -931,6 +929,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
   } // for nTotalSensors
 }
+
 /******************************************************************************
  * Function:     EngRunIsError
  *
@@ -1014,9 +1013,8 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 
     pErData->startingDuration_ms = CM_GetTickCount() - pErData->startingTime;
   }
-
-
 }
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
