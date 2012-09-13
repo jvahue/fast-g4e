@@ -101,8 +101,11 @@ static void TrendUpdateTimeElapsed( UINT32  currentTime,
  *****************************************************************************/
 void TrendInitialize( void )
 {
-  TCB tcb;
-  UINT8     i;
+  TCB   tcb;
+  UINT8 i;
+  UINT8 j;
+  TREND_CFG*  pCfg;
+  TREND_DATA* pData;
 
   // Add user commands for Trend to the user command tables.
   User_AddRootCmd(&RootTrendMsg);
@@ -119,15 +122,29 @@ void TrendInitialize( void )
 
   for (i = 0; i < MAX_TRENDS; i++)
   {
-    m_TrendData[i].trendIndex   = (TREND_INDEX)i;    
-    m_TrendData[i].prevEngState    = ER_STATE_STOPPED;
-    m_TrendData[i].nRateCounts     = (UINT16)(MIFs_PER_SECOND / m_TrendCfg[i].rate);
-    m_TrendData[i].nRateCountdown  = (UINT16)((m_TrendCfg[i].nOffset_ms / MIF_PERIOD_mS) + 1);
+    pCfg  = &m_TrendCfg[i];
+    pData = &m_TrendData[i];   
+    
+    pData->trendIndex      = (ENGRUN_UNUSED == pCfg->engineRunId) ?
+                              TREND_UNUSED : (TREND_INDEX)i;    
+    pData->prevEngState    = ER_STATE_STOPPED;
+    pData->nRateCounts     = (UINT16)(MIFs_PER_SECOND / pCfg->rate);
+    pData->nRateCountdown  = (UINT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
 
-    m_TrendData[i].nSamplesPerPeriod = m_TrendCfg[i].nSamplePeriod_s * m_TrendCfg[i].rate;
+    pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * pCfg->rate;
+
+    // Calculate the expected number of stability sensors based on config
+    pData->nStabExpectedCnt = 0;
+    for (j = 0; j < MAX_STAB_SENSORS; ++j)
+    {
+      if (SENSOR_UNUSED != pCfg->stability[j].sensorIndex)
+      {
+        pData->nStabExpectedCnt++;
+      }
+    }    
 
     // Call the reset functions to init the others fields
-    TrendReset(&m_TrendCfg[i], &m_TrendData[i]);
+    TrendReset(pCfg, pData);
   }
 #pragma ghs endnowarning
 
@@ -309,12 +326,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
  *****************************************************************************/
 static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
 {
-  ER_STATE    erState;
- 
-  BITARRAY128 trigMask;
-
-  CLR_TRIGGER_FLAGS(trigMask);  
-  
+  ER_STATE    erState;  
 
   // Get the state of the associated EngineRun
   erState = EngRunGetState(pCfg->engineRunId, NULL);
@@ -344,29 +356,24 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
 
     case ER_STATE_RUNNING:
         
-      // Upon entering RUNNING state, reset the trending info
+      // Upon entering RUNNING state, reset any trending info from previous runs
       if (pData->prevEngState != ER_STATE_RUNNING)
       {
         TrendReset(pCfg, pData);
       }
-
       
-      // Check to see if an Autotrend has met it criteria to start or has
-        
+      // Check to see if an Autotrend has met/maintained stability        
       TrendUpdateAutoTrend(pCfg, pData);
 
-      // Update current state of active trends and autotrends.
+      // Update current state of active trends/autotrends.
       TrendUpdateData(pCfg, pData);
 
       // If the button has been pressed(as defined by startTrigger)
-      // start taking trending-data
-
-      SetBit(pCfg->startTrigger, trigMask, sizeof(BITARRAY128 ));
+      // start an manual trending      
        
-      if ( TriggerIsActive(&trigMask) )
+      if ( TriggerGetState(pCfg->startTrigger) )
       {
-        TrendStartManualTrend(pCfg, pData);
-        pData->trendCnt++; // todo DaveB verify that trend-counting applies to manual trends in G3 it was only for Autotrends, SRS not specific.
+        TrendStartManualTrend(pCfg, pData);        
       }
 
       /* set the last engine run state */
@@ -378,7 +385,6 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       FATAL("Unrecognized Engine Run State: %d", erState);
       break;
   }
-
 }
 
 /******************************************************************************
@@ -402,9 +408,9 @@ static void TrendStartManualTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Manual Trend started.",pData->trendIndex ); 
     
     pData->bTrendLamp = pCfg->lampEnabled;
-    pData->trendState = pData->trendState;
+    pData->trendState = pData->trendState;    
 
-     LogWriteETM( APP_ID_TREND_AUTO,
+     LogWriteETM( APP_ID_TREND_MANUAL,
                   LOG_PRIORITY_3,
                   &pData->trendIndex,
                   sizeof(pData->trendIndex),
@@ -434,14 +440,13 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
 
   // If this trend is active. Update it's status
   if ( pData->trendState != TREND_STATE_INACTIVE )
-    
-    // Check if an active AutoTrend has been flagged as
-    // failed to maintain stability
+  {    
+    // Check if the preceding call to TrendUpdateAutoTrend flagged this trend
+    // as failing to maintain stability
     if( TREND_STATE_AUTO ==  pData->trendState )
-    {      
-      if(0 == pData->nTimeStableMs && pData->trendCnt < pCfg->maxTrends)
+    {
+      if( 0 == pData->nTimeStableMs && pData->trendCnt < pCfg->maxTrends )
       {
-        // Auto trend did not maintain stability.
         // Force a finish to this sampling and flag it for autotrend-failure logging.
         pData->sampleCnt = pData->nSamplesPerPeriod;
         bAutoTrendFailed = TRUE;
@@ -460,44 +465,39 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
     }
     else  
     {
-      if (pData->sampleCnt <= pData->nSamplesPerPeriod )
+      // Increment the count of samples for this period
+      ++pData->sampleCnt;
+
+      // Update the monitored-sensors
+      for ( i = 0; i < pData->nTotalSensors; i++ )
       {
-        // Increment the count of samples for this period
-        ++pData->sampleCnt;
+        pSummary = &pData->snsrSummary[i];
 
-        // Update the monitored-sensors
-        for ( i = 0; i < pData->nTotalSensors; i++ )
+        // If the sensor is flagged invalid but WAS valid in the past(i.e. initialized)...
+        // ignore processing for the remainder of this engine run.    
+        if( !pSummary->bValid && pSummary->bInitialized )
         {
-          pSummary = &pData->snsrSummary[i];
+          continue;
+        }
 
-          // If the sensor is flagged invalid but WAS valid in the past(i.e. initialized)...
-          // ignore processing for the remainder of this engine run.    
-          if( !pSummary->bValid && pSummary->bInitialized )
-          {
-            continue;
-          }
+        pSummary->bValid = SensorIsValid(pSummary->SensorIndex);
 
-          pSummary->bValid = SensorIsValid(pSummary->SensorIndex);
+        if ( pSummary->bValid )
+        {
+          pSummary->bInitialized = TRUE;
+          SensorUpdateSummaryItem(pSummary);
+        }
+        else if ( pSummary->bInitialized)
+        {
+          // Sensor is now invalid but had been valid...
+          // calculate average for valid period.
+          oneOverN = (1.0f / (FLOAT32)(pData->trendCnt - 1));
+          pSummary->fAvgValue = pSummary->fTotal * oneOverN;
+        }
+      } // for nTotalSensors
 
-          if ( pSummary->bValid )
-          {
-            pSummary->bInitialized = TRUE;
-            SensorUpdateSummaryItem(pSummary);
-          }
-          else if ( pSummary->bInitialized)
-          {
-            // Sensor is now invalid but had been valid...
-            // calculate average for valid period.
-            oneOverN = (1.0f / (FLOAT32)(pData->trendCnt - 1));
-            pSummary->fAvgValue = pSummary->fTotal * oneOverN;
-          }
-        } // for nTotalSensors        
-
-      }// Take a new sample
-
-    }// trend is active
-
-
+    }// take next trend sample
+  }// Process active trend
 } // TrendUpdateData
 
 
@@ -529,9 +529,11 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
      oneOverN = (1.0f / (FLOAT32)pData->sampleCnt);
     
     // Trend name
-    strncpy_safe( pLog->name, sizeof(pLog->name), pCfg->trendName, _TRUNCATE);
+    //strncpy_safe( pLog->name, sizeof(pLog->name), pCfg->trendName, _TRUNCATE);
 
-    // Number of samples collected this period
+    // Log the type/state: MANUAL|AUTO
+    pLog->type     = pData->trendState;
+
     pLog->nSamples = pData->sampleCnt;
 
     // Loop through all the sensors
@@ -633,10 +635,15 @@ static void TrendReset(TREND_CFG* pCfg, TREND_DATA* pData)
   pData->nTimeSinceLastMs    = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
   pData->lastIntervalCheckMs = 0;
     
-  // Reset the stability data
-  for ( i = 0; i <  pData->nStability; i++)
+  // Reset the stability and max-stability history
+  // todo DaveB confirm we want to clear max-history during reset. If engine-restart w/o WOW, this info will be cleared! OK?
+  pData->stability.stableCnt = 0;
+  pData->maxStability.stableCnt = 0;
+
+  for ( i = 0; i < MAX_STAB_SENSORS; i++)
   {
-    pData->prevStabValue[i] = 0.f;
+    pData->stability.prevStabValue[i]    = 0.f;
+    pData->maxStability.prevStabValue[i] = 0.f;
   }
     
   // Reset(Init) the monitored sensors
@@ -692,7 +699,7 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
   STABILITY_CRITERIA* pStabCrit;
 
   // Check all stability sensors for this trend obj.
-  for (i = 0; i < pData->nStability; ++i)
+  for (i = 0; i < MAX_STAB_SENSORS; ++i)
   {
     pStabCrit = &pCfg->stability[i];
 
@@ -702,7 +709,7 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
       {
         // get the current sensor value
         fVal       = SensorGetValue(pStabCrit->sensorIndex);
-        fPrevValue = pData->prevStabValue[i];
+        fPrevValue = pData->stability.prevStabValue[i];
 
         // Check absolute min/max values
         bStatus = (fVal >= pStabCrit->criteria.lower) &&
@@ -719,14 +726,25 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
           {
             delta = fVal - fPrevValue;
           }
-
           bStatus = (delta < pStabCrit->criteria.variance);
         }
-
-        // if any test fails, reset stored sensor value to start over next time
-        if ( !bStatus)
+        
+        if ( bStatus)
         {
-          pData->prevStabValue[i] = fVal;
+          // If the sensor is in stable range and variance increment the count
+          // If this is the max observed during this trend store it for
+          // potential TREND_AUTO_NOT_DETECTED log
+          
+          ++pData->stability.stableCnt;
+          if (pData->stability.stableCnt > pData->maxStability.stableCnt)
+          {
+            memcpy(&pData->maxStability, &pData->stability, sizeof(STABILITY_DATA));
+          }
+         
+        }
+        else // if any test fails, reset stored sensor value to start over next time
+        {
+           pData->stability.prevStabValue[i] = fVal;
         }
       }
       else
@@ -742,7 +760,7 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendLogAutoTrendFailure
  *
- * Description: Create a log that a AutoTrend did not reach stability
+ * Description: Create a log that an active AutoTrend did not maintain stability
  *
  * Parameters:   BOOLEAN flag
  *                  TRUE  - Enable the Trend task.
@@ -761,7 +779,38 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
               sizeof(pCfg->trendName),
               NULL);
 
-  GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Auto-Trend failed.",pData->trendIndex );
+  GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Auto-Trend failure logged.",pData->trendIndex );
+}
+
+/******************************************************************************
+ * Function: TrendLogAutoTrendNotDetected
+ *
+ * Description: Create a log that a triggered AutoTrend did not atain stability
+ *
+ * Parameters:   BOOLEAN flag
+ *                  TRUE  - Enable the Trend task.
+ *                  FALSE - Disable the Trend task.
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static void TrendLogAutoTrendNotDetected( TREND_CFG* pCfg, TREND_DATA* pData )
+{
+  TREND_NOT_DETECTED_LOG log;
+
+  memcpy(&log.crit, &pCfg->stability,     sizeof(STABILITY_CRITERIA));
+  memcpy(&log.data, &pData->maxStability, sizeof(STABILITY_DATA));
+  
+  
+  LogWriteETM(APP_ID_TREND_AUTO_NOT_DETECTED,
+              LOG_PRIORITY_3,
+              &log,
+              sizeof(TREND_NOT_DETECTED_LOG),
+              NULL);
+
+  GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Auto-Trend Not Detected Logged.",pData->trendIndex );
 }
 
 
@@ -786,11 +835,16 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // Each Trend shall reset the maximum trend count when the
   // configured trend reset trigger becomes ACTIVE.
   if ( pCfg->resetTrigger != TRIGGER_UNUSED    &&
-      TriggerIsConfigured(pCfg->resetTrigger) &&
-      TriggerGetState(pCfg->resetTrigger))
-  {
+       TriggerIsConfigured(pCfg->resetTrigger) &&
+       TriggerGetState(pCfg->resetTrigger))
+  {    
+    if (pData->trendCnt)
+    {
+      // No autotrends taken? Log it.
+      TrendLogAutoTrendNotDetected(pCfg, pData);
+    }
+    
     pData->trendCnt         = 0;
-
     pData->nTimeStableMs    = 0;
     pData->lastStabCheckMs  = 0;
 
@@ -800,7 +854,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 
   timeNow = CM_GetTickCount();
 
-  // Can more trend-samples be taken OR is a current trend | autotrend in progress?
+  // Can more trend-samples be taken OR is an autotrend in progress?
   if ( pData->trendCnt < pCfg->maxTrends || TREND_STATE_AUTO == pData->trendState)
   {
     
@@ -809,7 +863,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
                            &pData->lastIntervalCheckMs,
                            &pData->nTimeSinceLastMs);
 
-    // Check if the configured criteria are stable.
+    // Check if the configured criteria reached/maintained stable.
     if (TrendCheckStability(pCfg, pData) )
     {
       // Criteria is stable... update stability time-elapsed.
@@ -821,8 +875,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
            (pData->nTimeSinceLastMs >= (pCfg->trendInterval_s   * ONE_SEC_IN_MILLSECS)) &&
             TREND_STATE_INACTIVE == pData->trendState)
       {
-        TrendStartAutoTrend(pCfg, pData);
-        pData->trendCnt++;
+        TrendStartAutoTrend(pCfg, pData);        
       }
       
     }
@@ -887,13 +940,15 @@ static void TrendStartAutoTrend(TREND_CFG* pCfg, TREND_DATA* pData)
     LOG_PRIORITY_3,
     &nTrendStorage,
     sizeof(nTrendStorage),
-    NULL);
-
- GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Auto-Trend started.",pData->trendIndex );
-
-  // SNSR_SUMMARY s/b init at this point. todo DaveB verify
+    NULL); 
+  
   pData->trendState   = TREND_STATE_AUTO;
   pData->bTrendLamp   = pCfg->lampEnabled;
+
+  pData->trendCnt++;
+
+  GSE_DebugStr( NORMAL,TRUE, "Trend[%d]: Auto-Trend started Trend count: %d",
+                pData->trendIndex, pData->trendCnt );
 }
 
 /*************************************************************************

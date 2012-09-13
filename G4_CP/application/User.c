@@ -1507,7 +1507,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
                        void* GetPtr, USER_ENUM_TBL* MsgEnumTbl)
 {
   BOOLEAN result = TRUE;
-  UINT32 i;  
+  UINT32 i;
 
   switch(Type)
   {
@@ -1549,6 +1549,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 
     case USER_TYPE_128_LIST:
       {
+        BOOLEAN bEmptyArray;
         CHAR    numStr[5];
         CHAR    tempOutput[GSE_GET_LINE_BUFFER_SIZE];
         CHAR*   destPtr = tempOutput;
@@ -1565,7 +1566,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         for (i = 0; tempWord == 0 && i < arraySizeWords; ++i )
         {
           tempWord = word32Ptr[i];
-        }     
+        }
+        bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
+       
         
         // DISPLAY THE HEX STRING
         destPtr = bufHex128;
@@ -1595,7 +1598,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         SuperStrcat(destPtr, " [", sizeof(tempOutput));
         destPtr += 2;
 
-        if ( 0 == tempWord )
+        if ( bEmptyArray )
         {
           // Display "NONE SELECTED" String
           snprintf(destPtr,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED,");
@@ -2667,21 +2670,19 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   if ( inputLen >= 1 )
   {
     ptr = SetStr;
-
     // Loop until null-terminator is found.
+
     while((*ptr != '\0' && bResult) )
     {
       //Ignore spaces
       if(*ptr == ' ' || *ptr == ',' )
       {
-        ptr++;
-        continue;
-      }
 
-      if ( !isdigit(*ptr) )
+        ptr++;
+      }
+      else if ( !isdigit(*ptr) )
       {
         bResult = FALSE;
-        break;
       }
       else
       {
@@ -2696,13 +2697,12 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
         else
         {
           bResult = FALSE;
-          break;
         }
       }
-    } // while more tokens   
-  }
+    } // while more tokens
 
-  return bResult;
+    return bResult;
+  }
 }
 
 /*************************************************************************

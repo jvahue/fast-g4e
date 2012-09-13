@@ -164,8 +164,8 @@ static USER_MSG_TBL StabCritTbl[] =
 #define DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY( n )\
 static USER_MSG_TBL PrevStableTbl##n[] =\
 {\
-  /*Str      Next Tbl Ptr   Handler Func   Data Type         Access    Parameter                     IndexRange            DataLimit     EnumTbl*/\
-  {"VALUE",  NO_NEXT_TABLE,  Trend_State,   USER_TYPE_FLOAT,  USER_RO,  &StateTrendTemp.prevStabValue[n], 0,(MAX_TRENDS-1),    NO_LIMIT,     NULL     },\
+  /*Str      Next Tbl Ptr   Handler Func   Data Type         Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/\
+  {"VALUE",  NO_NEXT_TABLE,  Trend_State,   USER_TYPE_FLOAT,  USER_RO,  &StateTrendTemp.stability.prevStabValue[n], 0,(MAX_TRENDS-1),    NO_LIMIT,     NULL     },\
   { NULL,    NULL,           NULL, NO_HANDLER_DATA}\
 }
 
@@ -332,11 +332,11 @@ static USER_MSG_TBL TrendStatus [] =
 //   { "NEXTSAMPLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.timeNextSampleMs,   0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   EngineRunStateEnum},
    { "TRENDLAMP",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_BOOLEAN, USER_RO,   &StateTrendTemp.bTrendLamp,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "SAMPLECOUNT",      NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,    0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "SAMPLECOUNT",      NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeSinceLastMs,   0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
-   { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.nStability,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,     0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.stability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "PREVSTABLEVALUE",  PrevStableTbl,     NULL,            NO_HANDLER_DATA,                                                                                                     },
    // Monitored sensors during trends.
    { "SENSOR_COUNT",     NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.nTotalSensors,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },

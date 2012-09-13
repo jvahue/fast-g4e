@@ -543,8 +543,8 @@ static void Im_Application_Initialize(void)
   STARTUP_ID(appStartupId++);
   EventsInitialize();
 
- /* STARTUP_ID(appStartupId++);
-  TrendInitialize(); */
+  STARTUP_ID(appStartupId++);
+  TrendInitialize();
   
   STARTUP_ID(appStartupId);
 }

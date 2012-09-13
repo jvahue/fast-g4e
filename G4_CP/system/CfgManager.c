@@ -103,7 +103,9 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // ENGINERUN Config
                                           {ENGRUN_CFG_DEFAULT},
                                           // CYCLE Config
-                                          {CYCLE_CFG_DEFAULT}
+                                          {CYCLE_CFG_DEFAULT},
+                                          // TREND Config
+                                          {TREND_CFG_DEFAULT}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
