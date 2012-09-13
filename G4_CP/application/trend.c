@@ -695,11 +695,15 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
   FLOAT32 delta;
   INT32   i;
 
-  BOOLEAN bStatus = TRUE;
+  BOOLEAN bStatus = FALSE;
   STABILITY_CRITERIA* pStabCrit;
 
+  // Reset the count of stable sensors.
+  pData->stability.stableCnt = 0;
+
   // Check all stability sensors for this trend obj.
-  for (i = 0; i < MAX_STAB_SENSORS; ++i)
+  // If no stability configured, we never perform this loop
+  for (i = 0; i < MAX_STAB_SENSORS && (pData->nStabExpectedCnt > 0); ++i)
   {
     pStabCrit = &pCfg->stability[i];
 
@@ -739,22 +743,19 @@ BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
           if (pData->stability.stableCnt > pData->maxStability.stableCnt)
           {
             memcpy(&pData->maxStability, &pData->stability, sizeof(STABILITY_DATA));
-          }
-         
+          }         
         }
         else // if any test fails, reset stored sensor value to start over next time
         {
            pData->stability.prevStabValue[i] = fVal;
         }
-      }
-      else
-      {
-        bStatus = FALSE;
-      }
-    }
+      }      
+    }    
   }
+  // if all configured sensors are stable, return true
 
-  return bStatus;
+  return (pData->stability.stableCnt == pData->nStabExpectedCnt && 
+          pData->nStabExpectedCnt > 0);
 }
 
 /******************************************************************************

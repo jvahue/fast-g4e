@@ -220,6 +220,7 @@ void TH_Init ( void )
  *********************************************************************************************/
 void TH_Open(INT32 pre_s)
 {
+#ifndef WIN32
   TH_RECORD_CTL_BLK* pre_ptr;
   INT32 i;
   INT32 int_save;
@@ -240,6 +241,7 @@ void TH_Open(INT32 pre_s)
     {
       pre_ptr = &m_THDataBuf.cwrite_ptr[TH_PRE_HISTORY_REC_CNT-1];
     }
+
     int_save = __DIR();
     m_WriteReqCnt += pre_ptr->write ? 0 : 1;  //Increment write req only if
                                                     //write is not already set
@@ -248,6 +250,7 @@ void TH_Open(INT32 pre_s)
     pre_ptr->write = TRUE;
     pre_ptr--;
   }
+  #endif
 }
 
 
