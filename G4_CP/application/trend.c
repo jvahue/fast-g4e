@@ -408,13 +408,13 @@ static void TrendStartManualTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Manual Trend started.",pData->trendIndex ); 
     
     pData->bTrendLamp = pCfg->lampEnabled;
-    pData->trendState = pData->trendState;    
+    pData->trendState = TREND_STATE_MANUAL;    
 
-     LogWriteETM( APP_ID_TREND_MANUAL,
-                  LOG_PRIORITY_3,
-                  &pData->trendIndex,
-                  sizeof(pData->trendIndex),
-                  NULL );
+    LogWriteETM( APP_ID_TREND_MANUAL,
+                 LOG_PRIORITY_3,
+                 &pData->trendIndex,
+                 sizeof(pData->trendIndex),
+                 NULL );
   }
 
 }
@@ -597,7 +597,9 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
                  NULL);
 
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Ended.",pData->trendIndex );
-
+    
+    pData->trendState = TREND_STATE_INACTIVE;
+    
     // Don't reset the data here!
     // An error log may follow which will require logging details
     // Reset will occur the next time this trend enters the run state.
