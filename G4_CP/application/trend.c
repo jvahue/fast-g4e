@@ -106,6 +106,7 @@ void TrendInitialize( void )
   UINT8 j;
   TREND_CFG*  pCfg;
   TREND_DATA* pData;
+  UINT32      timeNow = CM_GetTickCount();
 
   // Add user commands for Trend to the user command tables.
   User_AddRootCmd(&RootTrendMsg);
@@ -117,7 +118,7 @@ void TrendInitialize( void )
     &(CfgMgr_RuntimeConfigPtr()->TrendConfigs),
     sizeof(m_TrendCfg));
 
-
+  
   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
   for (i = 0; i < MAX_TRENDS; i++)
@@ -141,10 +142,16 @@ void TrendInitialize( void )
       {
         pData->nStabExpectedCnt++;
       }
-    }    
-
+    }
     // Call the reset functions to init the others fields
     TrendReset(pCfg, pData);
+
+    // TrendReset() just set the following values to zero which is nornally OK.
+    // However for the first time thru there's no need to wait for inter-trend interval,
+    // so pretend it just elapsed.
+    pData->nTimeSinceLastMs    = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
+    pData->lastIntervalCheckMs = timeNow;
+
   }
 #pragma ghs endnowarning
 
@@ -604,7 +611,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     // An error log may follow which will require logging details
     // Reset will occur the next time this trend enters the run state.
 
-  } // End of if Trend in progress
+  } // End of finishing up a log for trend in progress.
 
 }
 
@@ -634,11 +641,11 @@ static void TrendReset(TREND_CFG* pCfg, TREND_DATA* pData)
   pData->nTimeStableMs    = 0;
   pData->lastStabCheckMs  = 0;
 
-  pData->nTimeSinceLastMs    = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
+  pData->nTimeSinceLastMs    = 0;
   pData->lastIntervalCheckMs = 0;
     
   // Reset the stability and max-stability history
-  // todo DaveB confirm we want to clear max-history during reset. If engine-restart w/o WOW, this info will be cleared! OK?
+  // todo DaveB confirm we want to clear max-history during reset. If inflight engine-restart (i.e. no reset-trigger), this info will be cleared! OK?
   pData->stability.stableCnt = 0;
   pData->maxStability.stableCnt = 0;
 

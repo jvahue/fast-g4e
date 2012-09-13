@@ -469,14 +469,15 @@ void SensorDisableLiveStream( void )
                                  UINT32       snsrMask[], INT32 snsrMaskSizeBytes)
 {
   SENSOR_INDEX snsrIdx;
-  INT16        summaryIdx;
+  INT16        summaryCnt;
+  INT16        i;
   TIMESTAMP    timeStampNow;
 
   // "Clear" the summary table by setting all indexes to "unused"
-  for (summaryIdx = 0; summaryIdx < summarySize; ++summaryIdx)
+  for (i = 0; i < summarySize; ++i)
   {
-    memset(&summary[summaryIdx],0, sizeof(SNSR_SUMMARY));
-    summary[summaryIdx].SensorIndex = SENSOR_UNUSED;
+    memset(&summary[i],0, sizeof(SNSR_SUMMARY));
+    summary[i].SensorIndex = SENSOR_UNUSED;
   }
 
   CM_GetTimeAsTimestamp(&timeStampNow);
@@ -484,34 +485,32 @@ void SensorDisableLiveStream( void )
   // Loop thru the mask-of-sensors to be added to the Summary array
   // For each "ON" bit, initialize the next available SnsrSummary entry.
 
-  summaryIdx = -1;
-  for(snsrIdx = SENSOR_0; snsrIdx < MAX_SENSORS; ++snsrIdx)
+  summaryCnt = 0;
+  for(snsrIdx = SENSOR_0; snsrIdx < MAX_SENSORS && summaryCnt < summarySize; ++snsrIdx)
   {
     if ( TRUE == GetBit(snsrIdx, snsrMask, snsrMaskSizeBytes ))
     {
-      ++summaryIdx;
       // Only store the first <summarySize> number of sensors.
       // Get the TOTAL COUNT of configured sensors in the mask.
       //  notify the caller if they have accidentally
       // configured more in the snsrMask than can be stored in the provided SNSR_SUMMARY
-      if (summaryIdx < summarySize)
-      {
-        summary[summaryIdx].SensorIndex  = snsrIdx;
-        summary[summaryIdx].bInitialized = FALSE;
-        summary[summaryIdx].bValid       = FALSE;
-        summary[summaryIdx].fMinValue    = FLT_MAX;
-        summary[summaryIdx].timeMinValue = timeStampNow;
-        summary[summaryIdx].fMaxValue    = 0.f;
-        summary[summaryIdx].timeMaxValue = timeStampNow;
-        summary[summaryIdx].fTotal       = 0.f;
-        summary[summaryIdx].fAvgValue    = 0.f;
-      }
+      i =  ++summaryCnt - 1;
+      summary[i].SensorIndex  = snsrIdx;
+      summary[i].bInitialized = FALSE;
+      summary[i].bValid       = FALSE;
+      summary[i].fMinValue    = FLT_MAX;
+      summary[i].timeMinValue = timeStampNow;
+      summary[i].fMaxValue    = 0.f;
+      summary[i].timeMaxValue = timeStampNow;
+      summary[i].fTotal       = 0.f;
+      summary[i].fAvgValue    = 0.f;
     }
   }
+
   // Return the count of "ON" bits
   // in the snsrMask[]. Caller should check this to
   // ensure that the count did not exceed <summarySize>
-  return (UINT16)(summaryIdx + 1);
+  return summaryCnt;
 }
 
 
