@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 23 $  $Date: 12-09-12 3:59p $
+ $Revision: 24 $  $Date: 12-09-13 9:41a $
 
 ******************************************************************************/
 
@@ -1611,6 +1611,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-09-13   Time: 9:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Fixed the event table logic that I broke with previous
+ * checkin
+ * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-09-12   Time: 3:59p
  * Updated in $/software/control processor/code/application
