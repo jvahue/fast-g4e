@@ -2700,9 +2700,9 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
         }
       }
     } // while more tokens
-
-    return bResult;
+    
   }
+  return bResult;
 }
 
 /*************************************************************************
