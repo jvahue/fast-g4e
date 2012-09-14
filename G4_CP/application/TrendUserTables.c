@@ -309,7 +309,7 @@ static USER_MSG_TBL TrendCmd [] =
   { "STARTTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.startTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
   { "RESETTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.resetTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
   { "INTERVAL_S",     NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &ConfigTrendTemp.trendInterval_s,   0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "SENSORS",        NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &ConfigTrendTemp.sensorMap,         0,(MAX_TRENDS-1),    0,MAX_TREND_SENSORS, NULL                 },
+  { "SENSORS",        NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &ConfigTrendTemp.sensorMap,         0,(MAX_TRENDS-1),    0,MAX_TREND_SENSORS, NULL                 },
   { "CYCLEA",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.nCycleA,           0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
   { "CYCLEB",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.nCycleB,           0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
   { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.nCycleC,           0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
