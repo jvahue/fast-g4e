@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 11 $  $Date: 12-09-11 2:11p $
+      $Revision: 12 $  $Date: 9/14/12 4:53p $
 
 ******************************************************************************/
 
@@ -276,6 +276,11 @@ EXPORT UINT32  CycleGetPersistentCount( UINT8 nCycle );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:53p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Refactor Cycle for externing variable to Trend
  *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:11p

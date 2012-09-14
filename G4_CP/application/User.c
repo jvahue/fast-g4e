@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 98 $  $Date: 12-09-11 2:21p $
+   $Revision: 99 $  $Date: 9/14/12 4:45p $
 
 ******************************************************************************/
 
@@ -2857,6 +2857,11 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 99  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:45p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 User SensorArray GSE handling
  * 
  * *****************  Version 98  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:21p

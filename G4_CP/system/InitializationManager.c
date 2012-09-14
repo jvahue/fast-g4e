@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 110 $  $Date: 8/28/12 1:43p $
+     $Revision: 111 $  $Date: 9/14/12 5:15p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -758,6 +758,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 111  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 5:15p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Activate Trend
  * 
  * *****************  Version 110  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

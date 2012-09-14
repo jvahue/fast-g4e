@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 70 $  $Date: 8/29/12 3:08p $
+  $Revision: 71 $  $Date: 9/14/12 4:46p $
 
 ******************************************************************************/
 
@@ -1417,6 +1417,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 71  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Trigger fix for using SensorArray
  * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 3:08p

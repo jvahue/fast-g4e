@@ -7,7 +7,7 @@ File:          EngineRunUserTables.c
 Description: 
 
 VERSION
-$Revision: 11 $  $Date: 9/07/12 4:05p $ 
+$Revision: 12 $  $Date: 9/14/12 4:03p $ 
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -789,6 +789,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:03p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for sensor list
  * 
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p

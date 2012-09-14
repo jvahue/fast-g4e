@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 72 $  $Date: 12-09-11 2:13p $     
+      $Revision: 73 $  $Date: 9/14/12 4:48p $     
 
 ******************************************************************************/
 
@@ -1904,6 +1904,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 73  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 fixed SensorSummary handling
  *
  * *****************  Version 72  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:13p

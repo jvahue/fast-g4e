@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 68 $  $Date: 12-09-11 2:26p $
+    $Revision: 69 $  $Date: 9/14/12 4:49p $
 
 ******************************************************************************/
 
@@ -711,6 +711,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:49p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Trend config support
  *
  * *****************  Version 68  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:26p

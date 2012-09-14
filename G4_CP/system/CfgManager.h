@@ -12,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 47 $  $Date: 12-09-11 2:09p $
+ $Revision: 48 $  $Date: 9/14/12 4:49p $
 
 ******************************************************************************/
 
@@ -199,6 +199,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 48  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:49p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Trend config support
  *
  * *****************  Version 47  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:09p

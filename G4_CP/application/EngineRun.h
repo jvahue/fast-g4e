@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 14 $  $Date: 12-09-11 1:56p $     
+      $Revision: 15 $  $Date: 9/14/12 4:02p $     
 
 ******************************************************************************/
 
@@ -203,6 +203,11 @@ EXPORT UINT16         EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 fixes for sensor list
  *
  * *****************  Version 14  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:56p

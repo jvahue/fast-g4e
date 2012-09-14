@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 22 $  $Date: 12-09-11 1:56p $
+  $Revision: 23 $  $Date: 9/14/12 4:05p $
 
 ******************************************************************************/
 
@@ -458,6 +458,10 @@ EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:05p
+ * Updated in $/software/control processor/code/application
  *
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:56p

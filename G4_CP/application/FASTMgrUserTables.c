@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 26 $  $Date: 8/28/12 12:43p $
+   $Revision: 27 $  $Date: 9/14/12 4:06p $
     
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -496,6 +496,11 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:06p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for bitarray list 
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

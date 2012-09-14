@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 101 $  $Date: 9/06/12 6:04p $
+      $Revision: 102 $  $Date: 9/14/12 4:47p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -351,6 +351,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 102  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Trend log types
  * 
  * *****************  Version 101  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 6:04p
