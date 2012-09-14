@@ -111,6 +111,7 @@ typedef enum{
   //USER_TYPE_ENUM16,
   USER_TYPE_ENUM,
   USER_TYPE_STR,
+  USER_TYPE_SNS_LIST,  // a list of sensor ids
   USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list  
   USER_TYPE_FLOAT,
   USER_TYPE_BOOLEAN,
