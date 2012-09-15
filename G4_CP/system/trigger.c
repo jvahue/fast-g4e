@@ -648,27 +648,28 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             CM_GetTimeAsTimestamp(&pTrigData->EndTime);
             // Change trigger state back to start
             pTrigData->State  = TRIG_START;
+
             // Reset trigger flag
             ResetBit(pTrigData->TriggerIndex, TriggerFlags, sizeof(TriggerFlags));
             
-            if ( pTrigData->bLegacyConfig )
-            {
-              // Log the End
-              TriggerLogEnd(pTrigCfg, pTrigData);
-            }
-
-            // reset the trigger data
-            TriggerReset( pTrigData );
-
+            // Set the validity based on EndType
             if( pTrigData->EndType == TRIG_SENSOR_INVALID )
             {
-              ResetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
+                ResetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
             }
             else
             {
-              SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
+                SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
             }
 
+            // Log the End - if we are a legacy trigger
+            if ( pTrigData->bLegacyConfig )
+            {
+              TriggerLogEnd(pTrigCfg, pTrigData);
+            }
+
+            // reset the trigger data - MUST be last
+            TriggerReset( pTrigData );
          }
          else // Trigger is still active
          {
