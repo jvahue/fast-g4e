@@ -1303,30 +1303,6 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       break;
 
     case USER_TYPE_SNS_LIST:
-      memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
-
-      // Check if value has a hex prefix
-      if (0 != strstr(SetStr, "0X"))
-      {
-        result = User_SetBitArrayFromHexString(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
-      }
-      // ...otherwise it could be a list of 1..128 CSV decimal-values
-      else if ( isdigit(*SetStr) )
-      {
-        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
-      }
-      // ... if nothing in the set string, the user just wants to clear all  bits.
-      else if (0 == strlen(SetStr))
-      {
-        result = TRUE;
-      }
-      else
-        // Invalid assignment, display a error msg.
-      {
-        result = FALSE;
-      }
-      break;
-
     case USER_TYPE_128_LIST:
 
       memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
@@ -2328,6 +2304,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
         break;
 
+      case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
@@ -2750,7 +2727,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
         // Attempt to convert to a base 10 integer and
         // verify within range for this entry.
         index = strtol(ptr, &end, base );
-        if (index >= 0 && index <= 127)
+        if (index >= 0 && index < MAX_SENSORS)
         {
           SetBit(index, destPtr, sizeof(BITARRAY128));
           ptr = end;
