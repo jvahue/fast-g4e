@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 101 $  $Date: 9/17/12 3:45p $
+   $Revision: 102 $  $Date: 9/17/12 5:50p $
 
 ******************************************************************************/
 
@@ -1559,26 +1559,38 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     case USER_TYPE_128_LIST:
       {
         BOOLEAN bEmptyArray;
+        UINT32  tempWord;
+        UINT32  arraySizeWords;
+        UINT32  displayHexStart;
         CHAR    numStr[5];
         CHAR    tempOutput[GSE_GET_LINE_BUFFER_SIZE];
-        CHAR*   destPtr = tempOutput;
-        UINT32  tempWord;
         CHAR    bufHex128[16 * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
+
+        CHAR*   destPtr = tempOutput;
         UINT32* word32Ptr = (UINT32*)GetPtr;
-        UINT32  arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
+
+        if (Type == USER_TYPE_ACT_LIST)
+        {
+          arraySizeWords = 1;
+          displayHexStart = 0;
+        }
+        else
+        {
+          arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
+          displayHexStart = 3;
+        }
 
         // Display a string containing both the hex and enumeration string:
         // e.g. 0x0000000000000000000000000000001F [0,1,2,3]
 
         // CHECK FOR EMPTY
         tempWord = 0;
-        for (i = 0; tempWord == 0 && i < arraySizeWords; ++i )
+        for (i = 0; i < arraySizeWords; ++i )
         {
-          tempWord = word32Ptr[i];
+          tempWord |= word32Ptr[i];
         }
         bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
-       
-        
+               
         // DISPLAY THE HEX STRING
         destPtr = bufHex128;
         strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
@@ -1590,9 +1602,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 
         for( i = 0; i < arraySizeWords; ++i )
         {          
-          tempWord = word32Ptr[(arraySizeWords - 1)-i];          
+          tempWord = word32Ptr[displayHexStart];          
           sprintf( destPtr, "%08X", tempWord );
           destPtr += 8;
+          displayHexStart -= 1;
         }
         strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
 
@@ -1616,7 +1629,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         else
         {        
           // Display a list of integer values, one for each "on" bit.
-          for( i = 0; i < 128; ++i )
+          for( i = 0; i < (arraySizeWords*32); ++i )
           {          
             if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
             {
@@ -2316,6 +2329,9 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         break;
 
       case USER_TYPE_ACT_LIST:
+        memcpy(Param.Ptr, SetPtr, sizeof(UINT32));
+        break;
+
       case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
@@ -2863,6 +2879,11 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 102  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 5:50p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107: ACT_LIST conversion fix
  * 
  * *****************  Version 101  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 3:45p
