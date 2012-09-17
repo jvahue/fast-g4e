@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 100 $  $Date: 9/17/12 10:53a $
+   $Revision: 101 $  $Date: 9/17/12 3:45p $
 
 ******************************************************************************/
 
@@ -2863,6 +2863,11 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 101  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 3:45p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - Fix Action List validation
  * 
  * *****************  Version 100  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
