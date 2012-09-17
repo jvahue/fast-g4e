@@ -10,7 +10,7 @@
     Description:
     
     VERSION
-    $Revision: 42 $  $Date: 9/14/12 4:45p $
+    $Revision: 43 $  $Date: 9/17/12 10:53a $
     
 ******************************************************************************/
 
@@ -111,6 +111,7 @@ typedef enum{
   //USER_TYPE_ENUM16,
   USER_TYPE_ENUM,
   USER_TYPE_STR,
+  USER_TYPE_ACT_LIST,  // a list of bits in the action word
   USER_TYPE_SNS_LIST,  // a list of sensor ids
   USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list  
   USER_TYPE_FLOAT,
@@ -267,6 +268,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 43  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - Add ACT_LIST, clean up msgs
  * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:45p

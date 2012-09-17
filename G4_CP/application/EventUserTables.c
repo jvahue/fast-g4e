@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 20 $  $Date: 9/14/12 4:06p $
+$Revision: 21 $  $Date: 9/17/12 10:53a $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -122,7 +122,7 @@ static USER_MSG_TBL eventCmd [] =
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
-  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "POST_HISTORY_S", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
@@ -640,7 +640,7 @@ static USER_MSG_TBL eventTableRegionA [] =
   { "SEG5_START_TIME_S", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[5].nStartTime_s, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
   { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[0].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+  { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[0].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
   { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
@@ -677,7 +677,7 @@ static USER_MSG_TBL eventTableRegionB [] =
    { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[1].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[1].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
@@ -714,7 +714,7 @@ static USER_MSG_TBL eventTableRegionC [] =
    { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[2].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[2].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
@@ -751,7 +751,7 @@ static USER_MSG_TBL eventTableRegionD [] =
    { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[3].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[3].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
@@ -788,7 +788,7 @@ static USER_MSG_TBL eventTableRegionE [] =
    { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[4].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[4].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
@@ -825,7 +825,7 @@ static USER_MSG_TBL eventTableRegionF [] =
    { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { "SEG5_STOP_TIME_S",  NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[5].nStopTime_s,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_HEX32,  USER_RW, &configEventTableTemp.region[5].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[5].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,                NULL,          NULL,               NO_HANDLER_DATA }
 };
 
@@ -1293,6 +1293,11 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - Add ACT_LIST, clean up msgs
  * 
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:06p
