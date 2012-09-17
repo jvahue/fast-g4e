@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 66 $  $Date: 8/28/12 1:43p $
+    $Revision: 69 $  $Date: 9/14/12 4:49p $
 
 ******************************************************************************/
 
@@ -103,7 +103,9 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // ENGINERUN Config
                                           {ENGRUN_CFG_DEFAULT},
                                           // CYCLE Config
-                                          {CYCLE_CFG_DEFAULT}
+                                          {CYCLE_CFG_DEFAULT},
+                                          // TREND Config
+                                          {TREND_CFG_DEFAULT}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
@@ -378,6 +380,74 @@ UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
 }
 
 /******************************************************************************
+ * Function:     CfgMgr_GetETMBinaryHdr
+ *
+ * Description:  Retrieves the Binary header data from each of the interfaces.
+ *
+ * Parameters:   INT8   *pDest       - Pointer to the destination buffer
+ *               UINT16 nMaxByteSize - Total number of bytes available
+ *
+ * Returns:      UINT16 - Total Number of bytes in binary header
+ *
+ *****************************************************************************/
+UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
+{
+   // Local Data
+   UINT16 Remaining;
+   UINT16 Total;
+   INT8   *pBuffer;
+   UINT32 Version;
+
+   // Initialize Local Data
+   Version   = ETM_HDR_VERSION;
+   Remaining = nMaxByteSize;
+   pBuffer   = pDest;
+   Total     = sizeof(Version);
+
+   // First Copy the version to the header
+   memcpy ( pBuffer, &Version, Total );
+
+   // Increment the buffer and decrement the amount of space left
+   pBuffer   += Total;
+   Remaining -= Total;
+
+   // Get Sensor Hdr
+   Total      = SensorGetETMHdr ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Trigger Hdr
+   Total      = TriggerGetSystemHdr ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Event Header
+   Total      = EventGetBinaryHdr ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Event Table
+   Total      = EventTableGetBinaryHdr ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Engine Run
+   Total      = EngRunGetBinaryHeader ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Cycle
+   Total      = CycleGetBinaryHeader ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get Trend
+   Total      = TrendGetBinaryHdr ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Get TimeHistory
+   Total      = TH_GetBinaryHeader ( pBuffer, Remaining );
+   Remaining -= Total;
+   pBuffer   += Total;
+   // Calculate and return the total number of bytes
+   return (nMaxByteSize - Remaining);
+}
+
+/******************************************************************************
  * Function:     CfgMgr_RetrieveConfig
  *
  * Description:  Read a configuration item from shadow RAM
@@ -635,28 +705,43 @@ void CfgMgr_GenerateDebugLogs(void)
 #endif //GENERATE_SYS_LOGS
 
 /*****************************************************************************/
-/* Local Functions                                                           */ 
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
  * 
+ * *****************  Version 69  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:49p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Trend config support
+ *
+ * *****************  Version 68  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:26p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Fixed Trend Binary Header Call
+ *
+ * *****************  Version 67  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:05p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Get Binary ETM Header
+ * 
  * *****************  Version 66  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 65  *****************
  * User: Jeff Vahue   Date: 8/13/12    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 1145 - remove UINT16 cast
- * 
+ *
  * *****************  Version 64  *****************
  * User: John Omalley Date: 12-07-17   Time: 11:28a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added new Action Object
- * 
+ *
  * *****************  Version 63  *****************
  * User: John Omalley Date: 12-07-13   Time: 3:48p
  * Updated in $/software/control processor/code/system

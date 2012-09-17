@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 21 $  $Date: 8/29/12 2:53p $
+ $Revision: 25 $  $Date: 9/14/12 4:04p $
 
 ******************************************************************************/
 
@@ -299,6 +299,111 @@ void EventTablesInitialize ( void )
    }
 }
 
+/******************************************************************************
+ * Function:     EventGetBinaryHdr
+ *
+ * Description:  Retrieves the binary header for the event
+ *               configuration.
+ *
+ * Parameters:   void *pDest         - Pointer to storage buffer
+ *               UINT16 nMaxByteSize - Amount of space in buffer
+ *
+ * Returns:      UINT16 - Total number of bytes written
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT16 EventGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
+{
+   // Local Data
+   EVENT_HDR  eventHdr[MAX_EVENTS];
+   UINT16     eventIndex;
+   INT8       *pBuffer;
+   UINT16     nRemaining;
+   UINT16     nTotal;
+
+   // Initialize Local Data
+   pBuffer    = (INT8 *)pDest;
+   nRemaining = nMaxByteSize;
+   nTotal     = 0;
+   memset ( &eventHdr, 0, sizeof(eventHdr) );
+
+   // Loop through all the events
+   for ( eventIndex = 0;
+         ((eventIndex < MAX_EVENTS) && (nRemaining > sizeof (eventHdr[eventIndex])));
+         eventIndex++ )
+   {
+      // Copy the event names
+      strncpy_safe( eventHdr[eventIndex].sName,
+                    sizeof(eventHdr[eventIndex].sName),
+                    m_EventCfg[eventIndex].sEventName,
+                    _TRUNCATE);
+      strncpy_safe( eventHdr[eventIndex].sID,
+                    sizeof(eventHdr[eventIndex].sID),
+                    m_EventCfg[eventIndex].sEventID,
+                    _TRUNCATE);
+      eventHdr[eventIndex].tableIndex = m_EventCfg[eventIndex].eventTableIndex;
+      eventHdr[eventIndex].preTime_s  = m_EventCfg[eventIndex].preTime_s;
+      eventHdr[eventIndex].postTime_s = m_EventCfg[eventIndex].postTime_s;
+
+      // Increment the total number of bytes and decrement the remaining
+      nTotal     += sizeof (eventHdr[eventIndex]);
+      nRemaining -= sizeof (eventHdr[eventIndex]);
+   }
+   // Copy the Event header to the buffer
+   memcpy ( pBuffer, &eventHdr, nTotal );
+   // Return the total number of bytes written
+   return ( nTotal );
+}
+
+/******************************************************************************
+ * Function:     EventTableGetBinaryHdr
+ *
+ * Description:  Retrieves the binary header for the event table
+ *               configuration.
+ *
+ * Parameters:   void *pDest         - Pointer to storage buffer
+ *               UINT16 nMaxByteSize - Amount of space in buffer
+ *
+ * Returns:      UINT16 - Total number of bytes written
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
+{
+   // Local Data
+   EVENT_TABLE_HDR tableHdr[MAX_TABLES];
+   UINT16          tableIndex;
+   INT8            *pBuffer;
+   UINT16          nRemaining;
+   UINT16          nTotal;
+
+   // Initialize Local Data
+   pBuffer    = (INT8 *)pDest;
+   nRemaining = nMaxByteSize;
+   nTotal     = 0;
+   memset ( &tableHdr, 0, sizeof(tableHdr) );
+
+   // Loop through all the event tables
+   for ( tableIndex = 0;
+         ((tableIndex < MAX_TABLES) && (nRemaining > sizeof (tableHdr[tableIndex])));
+         tableIndex++ )
+   {
+      tableHdr[tableIndex].nSensor           = m_EventTableCfg[tableIndex].nSensor;
+      tableHdr[tableIndex].fTableEntryValue  = m_EventTableCfg[tableIndex].fTableEntryValue;
+      // Increment the total number of bytes and decrement the remaining
+      nTotal     += sizeof (tableHdr[tableIndex]);
+      nRemaining -= sizeof (tableHdr[tableIndex]);
+   }
+   // Copy the event table header to the buffer
+   memcpy ( pBuffer, &tableHdr, nTotal );
+   // Return the total number of bytes written
+   return ( nTotal );
+}
+
+
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -342,6 +447,9 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    pData->state         = EVENT_START;
    pData->nStartTime_ms = 0;
    pData->nDuration_ms  = 0;
+   memset ( &pData->tsCriteriaMetTime, 0, sizeof(pData->tsCriteriaMetTime) );
+   memset ( &pData->tsDurationMetTime, 0, sizeof(pData->tsDurationMetTime) );
+   memset ( &pData->tsEndTime, 0, sizeof(pData->tsEndTime) );
    pData->nSampleCount  = 0;
    pData->endType       = EVENT_NO_END;
 
@@ -380,8 +488,12 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    pTableData->confirmedRegion          = REGION_NOT_FOUND;
    pTableData->nTotalDuration_ms        = 0;
    pTableData->maximumRegionEntered     = REGION_NOT_FOUND;
+   pTableData->fCurrentSensorValue      = 0;
    pTableData->fMaxSensorValue          = 0.0;
    pTableData->nMaxSensorElaspedTime_ms = 0;
+
+   memset(&pTableData->tsExceedanceStartTime, 0, sizeof(pTableData->tsExceedanceStartTime));
+   memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
    for (nRegionIndex = 0; nRegionIndex <= pTableData->maximumCfgRegion; nRegionIndex++)
@@ -555,7 +667,7 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
                // Log the Event Start
                EventLogStart ( pConfig, pData );
                // Start Time History
-               TimeHistoryStart(pConfig->preTimeHistory, pConfig->preTime_s);
+               TH_Open(pConfig->preTime_s);
             }
          }
          // Check if event stopped being met before duration was met
@@ -617,7 +729,7 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
             pData->bStarted         = FALSE;
             pData->bTableWasEntered = FALSE;
             // End the time history
-            TimeHistoryEnd(pConfig->postTimeHistory, pConfig->postTime_s);
+            TH_Close(pConfig->postTime_s);
             // reset the event Action
             pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
                                                   EVENT_ACTION_ON_DURATION(pConfig->nAction) |
@@ -775,6 +887,12 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
    pTableData   = &m_EventTableData[eventTableIndex];
    foundRegion  = REGION_NOT_FOUND;
 
+   // If we haven't entered the table but we are processing then clear the data
+   if ( FALSE == pTableData->bStarted)
+   {
+      EventTableResetData ( pTableData );
+   }
+
    // Get Sensor Value
    pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
 
@@ -785,7 +903,6 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
       // Check if this Table was already running
       if ( FALSE == pTableData->bStarted )
       {
-         EventTableResetData ( pTableData );
          pTableData->bStarted      = TRUE;
          pTableData->nStartTime_ms = nCurrentTick;
          CM_GetTimeAsTimestamp( &pTableData->tsExceedanceStartTime );
@@ -1494,27 +1611,49 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  * 
+ * *****************  Version 25  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:04p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for sensor list 
+ *
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-09-13   Time: 9:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Fixed the event table logic that I broke with previous
+ * checkin
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 12-09-12   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updated how Event Data gets reset
+ *
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Add ETM Binary Header
+ *                    Updated Time History Calls to new prototypes
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:53p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 !P Processing
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-08-20   Time: 9:00a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Bit Bucket Issues Cleanup
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-08-16   Time: 4:16p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Block Action Request for OFF State if the Event never
  * started.
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:54p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-08-13   Time: 4:22p
  * Updated in $/software/control processor/code/application

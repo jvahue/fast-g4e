@@ -12,7 +12,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 158 $  $Date: 8/29/12 1:21p $
+   $Revision: 159 $  $Date: 12-09-11 2:03p $
     
 ******************************************************************************/
 
@@ -1473,6 +1473,11 @@ void UploadMgr_FileCollectionTask(void *pParam)
           snprintf(Task->FN, sizeof(Task->FN), "FAST-%s-%s-%d.dtu",
                   "SYS", BoxStr, Timestamp.Timestamp);
         }
+        else if (LOG_TYPE_ETM == UploadOrderTbl[Task->UploadOrderIdx].Type)
+        {
+           snprintf(Task->FN, sizeof(Task->FN), "FAST-%s-%s-%d.dtu",
+                    "ETM", BoxStr, Timestamp.Timestamp);
+        }
         else
         {
           snprintf(Task->FN, sizeof(Task->FN), "FAST-%s-%s-%d.dtu",
@@ -2643,6 +2648,10 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
      pBinSubHdr->SizeUsed = CfgMgr_GetSystemBinaryHdr (pBinSubHdr->Buf,
                                                        sizeof(pBinSubHdr->Buf));
   }  
+  else if (LOG_TYPE_ETM == Type)
+  {
+     pBinSubHdr->SizeUsed = CfgMgr_GetETMBinaryHdr (pBinSubHdr->Buf, sizeof(pBinSubHdr->Buf));
+  }
   else // Get the Binary Data Header
   {
      pBinSubHdr->SizeUsed = DataMgrGetHeader(pBinSubHdr->Buf, ACS.ACS,
@@ -3435,6 +3444,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 159  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Logic for the ETM file and ETM Binary Header
  * 
  * *****************  Version 158  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 1:21p

@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 97 $  $Date: 8/29/12 6:41p $
+   $Revision: 99 $  $Date: 9/14/12 4:45p $
 
 ******************************************************************************/
 
@@ -56,8 +56,6 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
-
- 
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -76,6 +74,7 @@
 #include "Assert.h"
 #include "Utility.h"
 #include "NVMgr.h"
+#include "sensor.h"
 
 /*****************************************************************************/
 /* Local Defines                                                             */
@@ -85,6 +84,9 @@
 #define Q_INDEX_MASK    MASK(0,3)
 
 #define USER_ACTION_TOKEN "<USR_ACTION>"
+
+#define MIN_HEX_STRING  3
+#define MAX_HEX_STRING 34
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -163,6 +165,9 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
 static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
                                         USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max);
+
+static BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
+                             USER_RANGE *Min, USER_RANGE *Max);
 
 
 /*****************************************************************************/
@@ -1297,7 +1302,8 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       }
       break;
 
-  case USER_TYPE_128_LIST:
+    case USER_TYPE_SNS_LIST:
+    case USER_TYPE_128_LIST:
 
       memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
 
@@ -1507,7 +1513,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
                        void* GetPtr, USER_ENUM_TBL* MsgEnumTbl)
 {
   BOOLEAN result = TRUE;
-  UINT32 i;  
+  UINT32 i;
 
   switch(Type)
   {
@@ -1547,8 +1553,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       sprintf(GetStr,"0x%08X",*(UINT32*)GetPtr);
       break;
 
+    case USER_TYPE_SNS_LIST:
     case USER_TYPE_128_LIST:
       {
+        BOOLEAN bEmptyArray;
         CHAR    numStr[5];
         CHAR    tempOutput[GSE_GET_LINE_BUFFER_SIZE];
         CHAR*   destPtr = tempOutput;
@@ -1565,7 +1573,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         for (i = 0; tempWord == 0 && i < arraySizeWords; ++i )
         {
           tempWord = word32Ptr[i];
-        }     
+        }
+        bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
+       
         
         // DISPLAY THE HEX STRING
         destPtr = bufHex128;
@@ -1595,7 +1605,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         SuperStrcat(destPtr, " [", sizeof(tempOutput));
         destPtr += 2;
 
-        if ( 0 == tempWord )
+        if ( bEmptyArray )
         {
           // Display "NONE SELECTED" String
           snprintf(destPtr,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED,");
@@ -1878,6 +1888,12 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
         }
       }
       SuperStrcat(RspStr, "]", destLength);
+      break;
+
+    case USER_TYPE_SNS_LIST:
+      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
+        "accepts comma separated numbers 0..%u or 0x followed by 1 to 32 hex digits and %u..%u bits set.",
+        MAX_SENSORS-1, Min.Uint, Max.Uint);
       break;
 
     case USER_TYPE_128_LIST:
@@ -2288,6 +2304,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
         break;
 
+      case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
@@ -2573,14 +2590,23 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
 *
 * Description:  Sets a BitArray128 storage using a hex string as input
 *
-* Parameters:   
+* Parameters:   [in] Type: Class of data to be set as indicated by this
+*                          commands' table entry
+*               [in] SetStr: ASCII terminated string the user entered after
+*                            the "=" delimiter
+*               [in/out] SetPtr: Pointer to the location to contain the
+*                                converted result.  Needs to point to a
+*                                32-bit location on entry for number
+*                                conversions
+*               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
+*                                the string to enum table
+*               [in/out] Min,Max: Minimum and Maximum range the value can
+*                                 be set to.  See User_SetMinMax.
 *
 * Returns:      True if successful otherwise false.
 *
 * Notes:
 ******************************************************************************/
-#define MIN_HEX_STRING  3
-#define MAX_HEX_STRING 34
 static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
                                              USER_ENUM_TBL* MsgEnumTbl,
                                              USER_RANGE *Min,USER_RANGE *Max)
@@ -2595,8 +2621,8 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   CHAR    reverseBuffer[11];
   UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
   INT16   offset = 0;                   // word-offset index into output buffer
-  INT16   inputLen  = strlen( SetStr ); // length of the input string.     
-  
+  INT16   inputLen  = strlen( SetStr ); // length of the input string.   
+
   // Input can be empty otherwise 
   // s/b "0x0" -> "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
@@ -2636,6 +2662,10 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
     }
     while( ptr > &SetStr[2] && offset >= 0 && bResult );
   }  
+
+  // Validate the conversion based on the Min/Max and Type values passed in
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+
   return bResult;
 }
 
@@ -2644,7 +2674,18 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
 *
 * Description:  Sets a BitArray128 storage using a string of CSV decimal values as input
 *
-* Parameters:   
+* Parameters:   [in] Type: Class of data to be set as indicated by this
+*                          commands' table entry
+*               [in] SetStr: ASCII terminated string the user entered after
+*                            the "=" delimiter
+*               [in/out] SetPtr: Pointer to the location to contain the
+*                                converted result.  Needs to point to a
+*                                32-bit location on entry for number
+*                                conversions
+*               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
+*                                the string to enum table
+*               [in/out] Min,Max: Minimum and Maximum range the value can
+*                                 be set to.  See User_SetMinMax.
 *
 * Returns:      True if successful otherwise false.
 *
@@ -2667,28 +2708,26 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   if ( inputLen >= 1 )
   {
     ptr = SetStr;
-
     // Loop until null-terminator is found.
+
     while((*ptr != '\0' && bResult) )
     {
       //Ignore spaces
       if(*ptr == ' ' || *ptr == ',' )
       {
-        ptr++;
-        continue;
-      }
 
-      if ( !isdigit(*ptr) )
+        ptr++;
+      }
+      else if ( !isdigit(*ptr) )
       {
         bResult = FALSE;
-        break;
       }
       else
       {
         // Attempt to convert to a base 10 integer and
         // verify within range for this entry.
         index = strtol(ptr, &end, base );
-        if (index >= Min->Sint && index <= Max->Sint)
+        if (index >= 0 && index < MAX_SENSORS)
         {
           SetBit(index, destPtr, sizeof(BITARRAY128));
           ptr = end;
@@ -2696,18 +2735,115 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
         else
         {
           bResult = FALSE;
-          break;
         }
       }
-    } // while more tokens   
+    } // while more tokens
   }
 
+  // Validate the conversion based on the Min/Max and Type values passed in
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+
   return bResult;
+}
+
+/******************************************************************************
+* Function:     User_CheckBits
+*
+* Description:  Verifies that only valid bits are set in the 128 bit structure
+*
+* Parameters:   Type (i): the type of object being operated on
+*               destPtr (i): pointer to a 128 bit array
+*               Min (i): min acceptable value (interpretation depends on Type)
+*               Max (i): max acceptable value (interpretation depends on Type)
+*
+* Returns:      True if successful otherwise false.
+*
+* Notes:
+******************************************************************************/
+static 
+BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
+                      USER_RANGE *Min, USER_RANGE *Max)
+{
+#define MAX_BIT 128
+  UINT32 mask;
+  UINT8 iWord;
+  UINT8 iBit;
+  UINT8 minBit = MAX_BIT;
+  UINT8 maxBit = 0;
+  UINT8 bitIndex = 0;
+  UINT8 bitCount = 0;
+  UINT32* word = destPtr;
+  BOOLEAN status = TRUE;
+
+  // scan the bits set and collect stats, min Bit, maxBit, count of bits set
+  bitIndex = 0;
+  for (iWord = 0; iWord < 4; ++iWord)
+  {
+    mask = 1;
+
+    // see which bits are turned on and keep stats
+    for ( iBit=0; iBit < 32; iBit++)
+    {
+      // is the bit on?
+      if (*word & mask)
+      {
+        // only get to set min once as we walk through the bit array
+        if (minBit == MAX_BIT)
+        {
+          minBit = bitIndex;
+        }
+
+        // Max always gets set as we walk through the bit array
+        maxBit = bitIndex;
+
+        // count the total number of bits set
+        bitCount += 1;
+      }
+
+      // move to the next bit
+      bitIndex += 1;
+      mask <<= 1;
+    }
+
+    // move to the next word in the 128 bit array
+    word += 1;
+  }
+
+  // based on the type determine is we are good
+  if (Type == USER_TYPE_SNS_LIST)
+  {
+    // range for a SNS_LIST is the number of bits allowed
+    if ( bitCount < Min->Uint || bitCount > Max->Uint )
+    {
+      status = FALSE;
+    }
+  }
+  else
+  {
+    // range for other types (USER_TYPE_128_LIST) is min/max bit set
+    // - count does not matter
+    if (minBit < Min->Uint || maxBit > Max->Uint)
+    {
+      status = FALSE;
+    }
+  }
+
+  return status;
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 99  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:45p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 User SensorArray GSE handling
+ * 
+ * *****************  Version 98  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:21p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added HEX8 logic
  * 
  * *****************  Version 97  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 6:41p

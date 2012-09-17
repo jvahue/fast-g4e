@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 101 $  $Date: 9/06/12 6:04p $
+      $Revision: 102 $  $Date: 9/14/12 4:47p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -64,7 +64,9 @@ SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 \
 SYS_LOG_ID(APP_ID_TREND_MANUAL                      ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_AUTO                        ,0xB501 ,0)\
-SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB502 ,0)\
+SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
+SYS_LOG_ID(APP_ID_TREND_AUTO_FAILED                 ,0xB503 ,0)\
+SYS_LOG_ID(APP_ID_TREND_AUTO_NOT_DETECTED           ,0xB504 ,0)\
 \
 SYS_LOG_ID(DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL        ,0x0500 ,0)\
 SYS_LOG_ID(DRV_ID_TTMR_PBIT_REG_INIT_FAIL           ,0x0700 ,0)\
@@ -349,6 +351,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 102  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Trend log types
  * 
  * *****************  Version 101  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 6:04p

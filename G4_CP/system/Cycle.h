@@ -1,17 +1,17 @@
 #ifndef CYCLE_H
 #define CYCLE_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Cycle.h
-    
+
     Description: The data manager contains the functions used to record
                  data from the various interfaces.
-    
+
     VERSION
-      $Revision: 10 $  $Date: 8/28/12 1:43p $
-    
+      $Revision: 12 $  $Date: 9/14/12 4:53p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -95,7 +95,7 @@ typedef enum
   CYCLE_ID_16   = 16,  CYCLE_ID_17   = 17,  CYCLE_ID_18   = 18,  CYCLE_ID_19   = 19,
   CYCLE_ID_20   = 20,  CYCLE_ID_21   = 21,  CYCLE_ID_22   = 22,  CYCLE_ID_23   = 23,
   CYCLE_ID_24   = 24,  CYCLE_ID_25   = 25,  CYCLE_ID_26   = 26,  CYCLE_ID_27   = 27,
-  CYCLE_ID_28   = 28,  CYCLE_ID_29   = 29,  CYCLE_ID_30   = 30,  CYCLE_ID_31   = 31,  
+  CYCLE_ID_28   = 28,  CYCLE_ID_29   = 29,  CYCLE_ID_30   = 30,  CYCLE_ID_31   = 31,
   CYCLE_UNUSED = 255
 } CYCLE_INDEX;
 
@@ -104,7 +104,7 @@ typedef enum
 // Below is the the enum list of supported cycle types.
 // Unsupported cycle types are listed to maintain values for compatibility
 // with configuration tools and support support programs (e.g. TurbineTracker)
-// 
+//
 typedef enum
 {
   CYC_TYPE_SIMPLE_CNT              = 1,
@@ -125,7 +125,7 @@ typedef enum
   //CYC_TYPE_CUM_CNT               = 10,
   //------------------------------------------
 #endif
-  MAX_CYC_TYPE 
+  MAX_CYC_TYPE
 }CYC_TYPE;
 
 // Cycle value is part of a table used to look up
@@ -137,7 +137,7 @@ typedef struct
   FLOAT32 SensorValueA; /* fractional value for sensor A       */
   FLOAT32 SensorValueB; /* fractional value for sensor B       */
 } CYCLEVALUE, *PCYCLEVALUE;
-#endif 
+#endif
 
 #pragma pack(1)
 // A cycle is counted when some sensor exceeds some threshold.
@@ -159,6 +159,16 @@ typedef struct
 #endif
 //  UINT32     MinDuration;   /* minimum duration required for incr and duration cycles */
 } CYCLE_CFG, *CYCLE_CFG_PTR;
+
+typedef struct
+{
+   char          Name[MAX_CYCLENAME];     /* cycle name                                   */
+   CYC_TYPE      Type;          /* How cycle is counted 0xFFFF == This cycle unused       */
+   UINT32        nCount;        /* value added for incrementing cycle                     */
+   TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
+   ENGRUN_INDEX  nEngineRunId;  /* which EngineRun this cycle is associated               */
+} CYCLE_HDR;
+
 #pragma pack()
 
 typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
@@ -176,7 +186,7 @@ typedef struct
 
 
 typedef struct
-{  
+{
   union
   {
     UINT32  n;    /* used for duration count in seconds */
@@ -242,26 +252,24 @@ EXPORT USER_ENUM_TBL CycleEnumType[];
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT void CycleInitialize(void);
-
-EXPORT void CycleUpdateAll(ENGRUN_INDEX erIndex);
-EXPORT void CycleClearAll ( void);
-
-
-EXPORT BOOLEAN CycleIsPersistentType( UINT8 nCycle );
+EXPORT void    CycleInitialize       ( void );
+EXPORT void    CycleUpdateAll        ( ENGRUN_INDEX erIndex );
+EXPORT void    CycleClearAll         ( void );
+EXPORT BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
+EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
+EXPORT void    CycleResetAll         ( void );
+EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
+EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT32  CycleGetPersistentCount( UINT8 nCycle );
 
 //EXPORT BOOLEAN CheckCycleValues(const CYCLEVALUE * valueTable);
-
 //EXPORT BOOLEAN CyclePersistentDuration( UINT8 nCycle );
 //EXPORT BOOLEAN InitPCycles( BOOLEAN bStateCorrupted );
 //EXPORT void ClearCycleDefn(UINT8 nCycle);
 //EXPORT void CompPCycleCheckId( void );
 //EXPORT void CompPCycleCount( UINT8 nCycle );
-EXPORT void CycleFinishEngineRun( ENGRUN_INDEX erID);
 //EXPORT void LoadCycleDefn(UINT8 nCycle);
 //EXPORT void LoadCycleDefns(void);
-EXPORT void CycleResetAll(void);
-EXPORT void CycleResetEngineRun( ENGRUN_INDEX erID);
 
 #endif // CYCLE_H
 
@@ -269,38 +277,48 @@ EXPORT void CycleResetEngineRun( ENGRUN_INDEX erID);
  *  MODIFICATIONS
  *    $History: Cycle.h $
  * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:53p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Refactor Cycle for externing variable to Trend
+ *
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:11p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Binary ETM Header
+ * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:29p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Cleanup
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:35p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Cycle impl and persistence
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:16p
  * Updated in $/software/control processor/code/system
  * fix default cycle to use all 32
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:05p
  * Updated in $/software/control processor/code/system
  * FAST2 Refactoring
- * 
+ *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:17p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Check in for Dave
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:42p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2  Cycle 
+ * SCR #1107 FAST 2  Cycle
  ***************************************************************************/

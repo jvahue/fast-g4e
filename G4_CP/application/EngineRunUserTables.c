@@ -7,7 +7,7 @@ File:          EngineRunUserTables.c
 Description: 
 
 VERSION
-$Revision: 10 $  $Date: 8/28/12 12:43p $ 
+$Revision: 12 $  $Date: 9/14/12 4:03p $ 
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -616,11 +616,11 @@ static USER_MSG_TBL EngRunCfgCmd[] =
   {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.startTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
   {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.runTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
   {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.stopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
-  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.erRate,           0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
+  {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.erRate,         0,(MAX_ENGINES-1), NO_LIMIT,             EngRunRateType  },
   {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
   {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
   {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_128_LIST,USER_RW,  &m_CfgTemp.sensorMap,      0,(MAX_ENGINES-1), 0,MAX_SENSORS-1,      NULL            },
+  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_SNS_LIST,USER_RW,  &m_CfgTemp.sensorMap,      0,(MAX_ENGINES-1), 0,MAX_ENGRUN_SENSORS-1, NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
@@ -789,6 +789,16 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:03p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for sensor list
+ * 
+ * *****************  Version 11  *****************
+ * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - V&V fixes, code review updates
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

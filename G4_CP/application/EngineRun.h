@@ -11,8 +11,8 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 12 $  $Date: 8/28/12 12:43p $     
-    
+      $Revision: 15 $  $Date: 9/14/12 4:02p $     
+
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -66,7 +66,7 @@ typedef enum
 
 typedef enum
 {
-  /* Start of states within an engine run */  
+  /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
   ER_STATE_RUNNING,     /* Engine running for this engine run  */
@@ -85,7 +85,7 @@ typedef enum
 
 #pragma pack(1)
 
-typedef struct  
+typedef struct
 {
   ENGRUN_INDEX erIndex;             /* Which engine run object this came from          */
   ER_REASON    reason;              /* reason for creating this start log              */
@@ -107,10 +107,18 @@ typedef struct
   TIMESTAMP    startTime;                       /* Time EngineRun entered the START state  */
   TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
   UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
-  UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */  
+  UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
   UINT32       CycleCounts[MAX_CYCLES];         /* Array of cycle counts                   */
 } ENGRUN_RUNLOG;
+
+typedef struct
+{
+   CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the engine run            */
+   TRIGGER_INDEX  startTrigID;                    /* Engine Run Start Trigger              */
+   TRIGGER_INDEX  runTrigID;                      /* Engine Run Running Trigger            */
+   TRIGGER_INDEX  stopTrigID;                     /* Engine Run Stop Trigger               */
+} ENGRUN_HDR;
 #pragma pack()
 
 typedef struct
@@ -123,9 +131,9 @@ typedef struct
   UINT32       startingDuration_ms;     /* Time EngRun was in START state                    */
   UINT32       erDuration_ms;           /* Time from entering START until end of RUNNING     */
   BOOLEAN      maxValueValid;           /* was the max value sensor valid through stop/start */
-  FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */                                   
+  FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */
   BOOLEAN      minValueValid;           /* was the min value valid through the start       */
-  FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */  
+  FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
   UINT32       nSampleCount;            /* For calculating averages                          */
   INT16        nRateCounts;             /* Count of cycles until this engine run is executed */
   INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
@@ -184,10 +192,11 @@ EXPORT USER_ENUM_TBL EngineRunStateEnum[];
                              Package Exports Functions
 ******************************************************************************/
 // Task init and execution.
-EXPORT void     EngRunInitialize(void);
-EXPORT void     EngRunTask(void* pParam);
-EXPORT ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags);
-EXPORT ENGRUN_RUNLOG*  EngRunGetPtrToLog(ENGRUN_INDEX engId);
+EXPORT void           EngRunInitialize(void);
+EXPORT void           EngRunTask            ( void* pParam );
+EXPORT ER_STATE       EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
+EXPORT ENGRUN_RUNLOG* EngRunGetPtrToLog     ( ENGRUN_INDEX engId );
+EXPORT UINT16         EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 
 #endif // SYS_CLOCKMGR_H
 
@@ -195,52 +204,67 @@ EXPORT ENGRUN_RUNLOG*  EngRunGetPtrToLog(ENGRUN_INDEX engId);
  *  MODIFICATIONS
  *    $History: EngineRun.h $
  * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 fixes for sensor list
+ *
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added ETM Binary Header
+ * 
+ * *****************  Version 13  *****************
+ * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - V&V fixes, code review updates
+ * 
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:33p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Fixed bug in persist count writing Refactor temp and
  * voltage to max and min
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Add shutdown handling
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:29p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  cleanup
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 2:28p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Use LogWriteETM, separate log structures
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:26p
  * Updated in $/software/control processor/code/application
  * Change EngRunGetState signature
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/05/12    Time: 6:41p
  * Updated in $/software/control processor/code/application
  * Engine ID change
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:04p
  * Updated in $/software/control processor/code/application
  * FAST2 Refactoring
- * 
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:15p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Check In for Dave
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:41p
  * Updated in $/software/control processor/code/application

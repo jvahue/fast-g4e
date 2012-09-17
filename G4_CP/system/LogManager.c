@@ -74,7 +74,7 @@ static LOG_REQUEST            LogEraseRequest;
 // be filled with pending writes
 static SYSTEM_LOG SystemTable[SYSTEM_TABLE_MAX_SIZE];
 
-// Log Erase Cleanup
+// Log Erase Cleanup 
 DO_CLEANUP DoCleanup;
 
 #include "LogUserTables.c"
@@ -97,9 +97,9 @@ static void LogSaveEraseData       ( UINT32 nOffset,
                                      BOOLEAN bWriteNow );
 static void LogSystemLogManageTask ( void *pParam );
 /*****************************************************************************/
-static void           LogCheckResult         ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID,
-                                               FLT_STATUS FaultStatus, BOOLEAN *pFailFlag,
-                                               UINT32 *pCnt, void *LogData,
+static void           LogCheckResult         ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID, 
+                                               FLT_STATUS FaultStatus, BOOLEAN *pFailFlag, 
+                                               UINT32 *pCnt, void *LogData, 
                                                INT32 LogDataSize );
 static BOOLEAN        LogFindNextWriteOffset ( UINT32 *pOffset,
                                                RESULT *Result );
@@ -160,8 +160,8 @@ void LogInitialize (void)
 
    // This assert ensures that LOG_INDEX_NOT_SET is a safe value to represent
    // index-not-set.
-   ASSERT( SYSTEM_TABLE_MAX_SIZE != LOG_INDEX_NOT_SET );
-
+   ASSERT( SYSTEM_TABLE_MAX_SIZE != LOG_INDEX_NOT_SET );      
+  
    // Open the log erase status file
    if( SYS_OK == NV_Open(NV_LOG_ERASE) )
    {
@@ -190,7 +190,7 @@ void LogInitialize (void)
            (LogError.Counts.nRdAccess  != 0) )
       {
          // Record the counts in a system log
-         Flt_SetStatus(STA_NORMAL, SYS_LOG_MEM_ERRORS,
+         Flt_SetStatus(STA_NORMAL, SYS_LOG_MEM_ERRORS, 
                        &LogError.Counts, sizeof(LogError.Counts));
       }
    }
@@ -241,7 +241,7 @@ void LogInitialize (void)
             Flt_SetStatus(STA_CAUTION, SYS_LOG_85_PERCENT_FULL, NULL, 0);
          }
       }
-      // No Logs were found but the SysStatus is OK...
+      // No Logs were found but the SysStatus is OK... 
       else if (SYS_OK == SysStatus)
       {
          // The memory is corrupted. Immediately initiate a chip erase and
@@ -253,41 +253,41 @@ void LogInitialize (void)
          // functioning. That is why this blocking and will not return until the
          // erase has completed. If the Chip Erase did not block then the Log
          // Manager Queues would overflow......
-
+         
          // Write the log erase status and stay here until the log erase
          // status has been persisted before starting the (blocking) chip erase.
          // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
          LogSaveEraseData ( 0, 0, TRUE, TRUE, TRUE);
-
+           
          SysStatus = MemChipErase();
 
          // Do a sanity check on the erase after it has completed.
          if (SYS_OK != SysStatus)
          {
             // The chip erase has not completed successfully and
-            // the FAST box cannot operate without data flash - FATAL
-            // The box will reboot and keep attempting to correct the
+            // the FAST box cannot operate without data flash - FATAL 
+            // The box will reboot and keep attempting to correct the 
             // situation
             FATAL( "LogInitialize: Chip Erase Fail FATAL! ResultCode: 0x%08X", SysStatus );
          }
          // Erase is now complete reset the flags
-         // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
+         // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )         
          LogSaveEraseData (0, 0, FALSE, FALSE, TRUE);
-         // Log the Erase
+         // Log the Erase 
          Flt_SetStatus( STA_NORMAL, SYS_LOG_MEM_CORRUPTED_ERASED, NULL, 0);
       }
       else // No Logs found because the System Status returned is bad
       {
-         // the FAST box cannot operate without data flash - FATAL
-         // The box will reboot and keep attempting to correct the
+         // the FAST box cannot operate without data flash - FATAL 
+         // The box will reboot and keep attempting to correct the 
          // situation
          FATAL( "LogInitialize: FindNextWriteOffset Fail. ResultCode: 0x%08X", SysStatus );
       }
    }
    else // Memory did not initialize and is faulted
    {
-      // the FAST box cannot operate without data flash - FATAL
-      // The box will reboot and keep attempting to correct the
+      // the FAST box cannot operate without data flash - FATAL 
+      // The box will reboot and keep attempting to correct the 
       // situation
       FATAL ( "LogInitialize: Memory Faulted. ResultCode: 0x%08X", MemMgrStatus() );
    }
@@ -364,7 +364,7 @@ void LogInitialize (void)
    // Log Manager Monitor Erase Task
    memset(&TaskInfo, 0, sizeof(TaskInfo));
    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),// Log_Monitor_Erase_Task
-                "Log Monitor Erase Task",_TRUNCATE);
+                "Log Monitor Erase Task",_TRUNCATE); 
    TaskInfo.TaskID                  = Log_Monitor_Erase_Task;
    TaskInfo.Function                = LogMonEraseTask;
    TaskInfo.Priority                = taskInfo[Log_Monitor_Erase_Task].priority;
@@ -433,7 +433,7 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
    {
       Status = LOG_QUEUE_FULL;
    }
-   else
+   else 
    {
       pQueue->Buffer[pQueue->Head & (LOG_QUEUE_SIZE - 1)] = Entry;
       pQueue->Head++;
@@ -486,17 +486,17 @@ void LogPreInit(void)
 }
 
 /******************************************************************************
- * Function:    LogPauseWrites
+ * Function:    LogPauseWrites 
  *
- * Description: The LogPauseRequests function will stop the Log Manager from
- *              processing any write requests.
+ * Description: The LogPauseRequests function will stop the Log Manager from 
+ *              processing any write requests. 
  *
  * Parameters:  BOOLEAN Enable - Enables and Disables the pause
  *              UINT16  Delay  - Number of seconds to pause
  *
  * Returns:     None
  *
- * Notes:
+ * Notes:       
  *
  *****************************************************************************/
 void LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S )
@@ -505,7 +505,7 @@ void LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S )
    {
       LogManagerPause.StartTime_ms = 0;
    }
-
+      
    LogManagerPause.Enable   = Enable;
    LogManagerPause.Delay_S  = Delay_S;
 }
@@ -520,31 +520,31 @@ void LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S )
  * Returns:     [TRUE  : Writes are paused]
  *              [FALSE : Writes are not paused]
  *
- * Notes:
+ * Notes:       
  *
  *****************************************************************************/
 BOOLEAN LogWriteIsPaused ( void )
 {
-   // Local Data
+   // Local Data 
    BOOLEAN Paused;
-
+   
    Paused = FALSE; // Assumed it isn't commanded to Pause then set true if it is
-
+   
    // Check if Log Write has been commanded to pause
    if ( TRUE == LogManagerPause.Enable )
    {
       // Temporarily set the Pause to TRUE until the timeout is checked
       Paused = TRUE;
-
+      
       // Is this the first time checking this?
-      if ( 0 == LogManagerPause.StartTime_ms )
+      if ( 0 == LogManagerPause.StartTime_ms ) 
       {
          // Set the Start Time
          LogManagerPause.StartTime_ms = CM_GetTickCount();
       }
       // We were already paused keep checking for the timeout
-      else if ( (CM_GetTickCount() - LogManagerPause.StartTime_ms) >
-                (LogManagerPause.Delay_S * MILLISECONDS_PER_SECOND) )
+      else if ( (CM_GetTickCount() - LogManagerPause.StartTime_ms) > 
+                (LogManagerPause.Delay_S * MILLISECONDS_PER_SECOND) ) 
       {
          LogManagerPause.Enable       = FALSE;
          Paused                       = FALSE;
@@ -571,7 +571,7 @@ BOOLEAN LogWriteIsPaused ( void )
 void LogRegisterEraseCleanup ( DO_CLEANUP Func )
 {
    ASSERT (NULL != Func);
-
+   
    DoCleanup = Func;
 }
 
@@ -634,7 +634,7 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
       }
 
       // Check the Read Offset has not exceeded end of block OR Last Offset
-      while ((*pRdOffset <= EndOffset) &&
+      while ((*pRdOffset <= EndOffset) && 
              ((*pRdOffset + sizeof(Hdr)) < LogConfig.nEndOffset))
       {
          // Read the header at the current Read Offset
@@ -699,11 +699,11 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
 
             LogReadFailTemp.Result = Result;
             LogReadFailTemp.Offset = *pRdOffset;
-
-            LogCheckResult ( Result, "LogFindNextRecord:",
-                             SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
+            
+            LogCheckResult ( Result, "LogFindNextRecord:", 
+                             SYS_LOG_MEM_READ_FAIL, STA_NORMAL, 
                              &LogError.bReadAccessFail, &LogError.Counts.nRdAccess,
-                             &LogReadFailTemp, sizeof(LogReadFailTemp)
+                             &LogReadFailTemp, sizeof(LogReadFailTemp) 
                            );
 
             // Exit the loop
@@ -772,12 +772,12 @@ LOG_READ_STATUS LogRead ( UINT32 nOffset, LOG_BUF *pBuf )
 
             LogReadFailTemp.Result = Result;
             LogReadFailTemp.Offset = nOffset - Hdr.nSize;
-
-            LogCheckResult ( Result, "LogRead:",
-                             SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
+            
+            LogCheckResult ( Result, "LogRead:", 
+                             SYS_LOG_MEM_READ_FAIL, STA_NORMAL, 
                              &LogError.bReadAccessFail, &LogError.Counts.nRdAccess,
-                             &LogReadFailTemp, sizeof(LogReadFailTemp)
-                           );
+                             &LogReadFailTemp, sizeof(LogReadFailTemp) 
+                           );            
 
          }
       }
@@ -789,12 +789,12 @@ LOG_READ_STATUS LogRead ( UINT32 nOffset, LOG_BUF *pBuf )
 
       LogReadFailTemp.Result = Result;
       LogReadFailTemp.Offset = nOffset - sizeof(LOG_HEADER);
-
-      LogCheckResult ( Result, "LogRead:",
-                       SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
+            
+      LogCheckResult ( Result, "LogRead:", 
+                       SYS_LOG_MEM_READ_FAIL, STA_NORMAL, 
                        &LogError.bReadAccessFail, &LogError.Counts.nRdAccess,
-                       &LogReadFailTemp, sizeof(LogReadFailTemp)
-                     );
+                       &LogReadFailTemp, sizeof(LogReadFailTemp) 
+                     );      
    }
 
    return Status;
@@ -835,7 +835,7 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    LOG_REQUEST New;
    LOG_REQUEST Old;
    UINT32      *pData = pBuf;
-
+   
    ASSERT (NULL != pWrStatus);
 
    // Build Write Request
@@ -858,11 +858,11 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
       if ( LOG_QUEUE_EMPTY != LogQueueGet(&Old) )
       {
          // Queue Shouldn't be empty because we just detected it was full.
-
+         
          // Update the status of the LOG to complete even though
          // it wasn't recorded
          *(Old.pStatus) = LOG_REQ_COMPLETE;
-         // Count the log that was just discarded
+         // Count the log that was just discarded   
          LogError.Counts.nDiscarded++;
          // Store count to RTC RAM
          NV_Write(NV_LOG_COUNTS,0,&LogError.Counts,sizeof(LogError.Counts));
@@ -912,7 +912,7 @@ void LogErase ( UINT32 *pFoundLogOffset, LOG_REQ_STATUS *pErStatus )
    LogEraseRequest = New;
 
    // Set the write status as pending
-   *pErStatus = LOG_REQ_PENDING;
+   *pErStatus = LOG_REQ_PENDING;   
 
 } // LogErase
 
@@ -970,7 +970,7 @@ void LogMarkState (LOG_STATE State, LOG_TYPE Type,
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
  *
  * Returns:       UINT32 index value in SystemTable where the log is stored.
- *                This can be used by caller to track the commit-status
+ *                This can be used by caller to track the commit-status 
  *                of the Write.
  *
  * Notes:         The nSize value cannot be larger than 1Kbyte.
@@ -1005,7 +1005,7 @@ UINT32 LogWriteETM (SYS_APP_ID LogID, LOG_PRIORITY Priority,
                     void *pData, UINT16 nSize, TIMESTAMP *pTs)
 {
 
-   // Return the SystemTable index in case the caller needs to track the status.
+   // Return the SystemTable index in case the caller needs to track the status.   
    return ( LogManageWrite ( LogID, Priority, pData, nSize, pTs, LOG_TYPE_ETM ) );
 }
 
@@ -1019,7 +1019,7 @@ UINT32 LogWriteETM (SYS_APP_ID LogID, LOG_PRIORITY Priority,
 * Parameters:  none
 *
 * Returns:     BOOLEAN  TRUE  - The log file is empty.
-*                       FALSE - The log has entries which have not been unloaded
+*                       FALSE - The log has entries which have not been unloaded 
 *
 * Notes:       None.
 *
@@ -1038,7 +1038,7 @@ BOOLEAN LogIsLogEmpty( void )
 * Parameters:  none
 *
 * Returns:     UINT32   Number of logs in memory
-*
+*                        
 * Notes:       None.
 *
 *****************************************************************************/
@@ -1056,7 +1056,7 @@ UINT32 LogGetLogCount( void )
 * Parameters:  none
 *
 * Returns:     BOOLEAN  TRUE  - Erase is in progress.
-*                       FALSE - Erase not in progress.
+*                       FALSE - Erase not in progress. 
 *
 * Notes:       None.
 *
@@ -1097,7 +1097,7 @@ BOOLEAN LogIsEraseInProgress( void )
  *****************************************************************************/
 LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus ( void )
 {
-  return (LogHealthCounts);
+  return (LogHealthCounts); 
 }
 
 
@@ -1105,7 +1105,7 @@ LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus ( void )
  * Function:    LogCalcDiffCBITHealthStatus
  *
  * Description: Calc the difference in CBIT Health Counts to support PWEH SEU
- *              (Used to support determining SEU cnt during data capture)
+ *              (Used to support determining SEU cnt during data capture) 
  *
  * Parameters:  PrevCnt - Initial count value
  *
@@ -1120,9 +1120,9 @@ LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS Prev
 {
   LOG_CBIT_HEALTH_COUNTS DiffCount;
 
-  DiffCount.nCorruptCnt = LogConfig.nCorrupt;
-
-  return (DiffCount);
+  DiffCount.nCorruptCnt = LogConfig.nCorrupt; 
+  
+  return (DiffCount); 
 }
 
 
@@ -1130,7 +1130,7 @@ LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS Prev
  * Function:     LogAddPrevCBITHealthStatus
  *
  * Description:  Add CBIT Health Counts to support PWEH SEU
- *               (Used to support determining SEU cnt during data capture)
+ *               (Used to support determining SEU cnt during data capture) 
  *
  * Parameters:   PrevCnt - Prev count value
  *               CurrCnt - Current count value
@@ -1143,11 +1143,11 @@ LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS Prev
 LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS CurrCnt,
                                                     LOG_CBIT_HEALTH_COUNTS PrevCnt )
 {
-  LOG_CBIT_HEALTH_COUNTS AddCount;
-
-  AddCount.nCorruptCnt = CurrCnt.nCorruptCnt + PrevCnt.nCorruptCnt;
-
-  return (AddCount);
+  LOG_CBIT_HEALTH_COUNTS AddCount; 
+  
+  AddCount.nCorruptCnt = CurrCnt.nCorruptCnt + PrevCnt.nCorruptCnt; 
+  
+  return (AddCount); 
 }
 
 /*****************************************************************************
@@ -1183,7 +1183,7 @@ LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS CurrC
  *
  * Returns:     None
  *
- * Notes:
+ * Notes:       
  *
  *****************************************************************************/
 static
@@ -1215,10 +1215,10 @@ void LogManageTask( void *pParam )
       // Check if the request has completed
       LogMngStatus(pTCB);
    }
-
+   
    // Check/Update the completion statuses of registered logs writes for
-   // any observers that are watching.
-   LogUpdateWritePendingStatuses();
+   // any observers that are watching. 
+   LogUpdateWritePendingStatuses();   
 
 } // LogManageTask
 
@@ -1253,7 +1253,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
    bStarted       = FALSE;
    pBuf           = (UINT8 *)&LogBuffer[0];
    bProcessRequest = FALSE;
-
+   
    // Is an Erase Pending
    if ( (NULL != LogEraseRequest.pStatus) && (LOG_REQ_PENDING == *(LogEraseRequest.pStatus)) )
    {
@@ -1265,7 +1265,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
    {
       if (FALSE == LogWriteIsPaused())
       {
-         bProcessRequest = ( LOG_QUEUE_EMPTY == LogQueueGet(&(pTCB->CurrentEntry)))
+         bProcessRequest = ( LOG_QUEUE_EMPTY == LogQueueGet(&(pTCB->CurrentEntry))) 
                              ? FALSE : TRUE;
       }
    }
@@ -1321,9 +1321,9 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
          }
          else
          {
-            // Data is too large to write...
-            // Since the only operations make the write are Data Manager (12K max)
-            // and System Log Write (1K max) the only way to get here is through
+            // Data is too large to write... 
+            // Since the only operations make the write are Data Manager (12K max) 
+            // and System Log Write (1K max) the only way to get here is through 
             // a memory corruption.
             FATAL( "LogMngStart: Log Write To Big. ResultCode: 0x%08X", Result );
          }
@@ -1505,7 +1505,7 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
         LogConfig.fPercentUsage = ((FLOAT32)LogConfig.nWrOffset/
                                    (FLOAT32)LogConfig.nEndOffset) * 100.0f;
 
-        if ( (LogConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX) &&
+        if ( (LogConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX) && 
              (LogConfig.bEightyFiveExceeded == FALSE) )
         {
            LogConfig.bEightyFiveExceeded = TRUE;
@@ -1536,17 +1536,17 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
            {
               LogEraseFailTemp.Result    = result;
               LogEraseFailTemp.EraseData = pTCB->CurrentEntry.Request.Erase;
-
-              LogCheckResult ( result, "LogMngStatus:",
-                               SYS_LOG_MEM_ERASE_FAIL, STA_NORMAL,
-                               &LogError.bEraseAccessFail, &LogError.Counts.nErAccess,
-                               &LogEraseFailTemp, sizeof(LogEraseFailTemp) );
+              
+              LogCheckResult ( result, "LogMngStatus:", 
+                               SYS_LOG_MEM_ERASE_FAIL, STA_NORMAL, 
+                               &LogError.bEraseAccessFail, &LogError.Counts.nErAccess, 
+                               &LogEraseFailTemp, sizeof(LogEraseFailTemp) );              
            }
            else
            {
-              FATAL( "LogMngPending: Write Failed. ResultCode: 0x%08X", result );
+              FATAL( "LogMngPending: Write Failed. ResultCode: 0x%08X", result );       
            }
-
+           
            pTCB->State      = LOG_MNG_IDLE;
            pTCB->FaultCount = 0;
            *(pTCB->CurrentEntry.pStatus) = LOG_REQ_FAILED;
@@ -1582,7 +1582,7 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
 /******************************************************************************
  * Function:    LogCheckResult
  *
- * Description: This function will check the result code, count the fails and
+ * Description: This function will check the result code, count the fails and 
  *              log a failure if an error is encountered.
  *
  * Parameters:  RESULT      Result       - Result code to check
@@ -1596,11 +1596,11 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
  *
  * Returns:     None
  *
- * Notes:
+ * Notes:       
  *
  *****************************************************************************/
-static void LogCheckResult ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID,
-                             FLT_STATUS FaultStatus, BOOLEAN *pFailFlag, UINT32 *pCnt,
+static void LogCheckResult ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID, 
+                             FLT_STATUS FaultStatus, BOOLEAN *pFailFlag, UINT32 *pCnt, 
                              void *LogData, INT32 LogDataSize )
 {
    // Check if there was an error
@@ -1618,7 +1618,7 @@ static void LogCheckResult ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID,
       }
       // Count the failure
       *pCnt += 1;
-
+      
       NV_Write(NV_LOG_COUNTS,0,&LogError.Counts,sizeof(LogError.Counts));
    }
 }
@@ -1662,9 +1662,9 @@ void LogMarkTask( void *pParam )
    // Check if writes are paused and the Log Manager is IDLE
    // This will avoid LOG_MARK_FAIL because Writes are being performed
    if (LogWriteIsPaused() && (LOG_MNG_IDLE == LogMngBlock.State))
-   {
+   {      
       nStartTime     = TTMR_GetHSTickCount();
-
+     
       // While not at the end of the block and 2 milliseconds has not passed
       while ( (pTCB->nRdOffset <= pTCB->nEndOffset) &&
               (TTMR_GetHSTickCount() - nStartTime < (2 * TICKS_PER_mSec)) )
@@ -1798,7 +1798,7 @@ void LogCmdEraseTask ( void *pParam )
                pTCB->bDone  = TRUE;
                // Kill this task
                TmTaskEnable (Log_Command_Erase_Task, FALSE);
-
+            
             }
          }
          break;
@@ -1826,7 +1826,7 @@ void LogCmdEraseTask ( void *pParam )
         break;
 
       case LOG_ERASE_MEMORY:
-
+         
          // Command Erase
          bStarted =  MemErase (MEM_BLOCK_LOG, &pTCB->nOffset,
                                pTCB->nSize, &pTCB->Result);
@@ -1851,11 +1851,11 @@ void LogCmdEraseTask ( void *pParam )
          {
             pTCB->Result    |= SYS_LOG_ERASE_CMD_FAILED;
             pTCB->bDone      = TRUE;
-
+            
             // Update the EEPROM to reflect finished
             // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
             LogSaveEraseData (0, 0, FALSE, FALSE, FALSE);
-
+            
             // Kill this task
             TmTaskEnable (Log_Command_Erase_Task, FALSE);
 
@@ -1895,7 +1895,7 @@ void LogCmdEraseTask ( void *pParam )
             // Update the EEPROM to reflect finished
             // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
             LogSaveEraseData (0, 0, FALSE, FALSE, FALSE);
-
+            
             // Kill self
             TmTaskEnable (Log_Command_Erase_Task, FALSE);
          }
@@ -2032,8 +2032,8 @@ static void LogSaveEraseData (UINT32 nOffset, UINT32 nSize,
    EraseData.SavedSize        = nSize;
 
    // Update the EEPROM
-   memcpy(&LogEraseData, &EraseData, sizeof(EraseData));
-
+   memcpy(&LogEraseData, &EraseData, sizeof(EraseData));  
+   
    if (TRUE == bWriteNow)
    {
       NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
@@ -2480,7 +2480,7 @@ static
 void LogQueueInit(void)
 {
     ASSERT((LOG_QUEUE_SIZE & (LOG_QUEUE_SIZE - 1)) == 0);
-
+   
     // Initializes the Log Manager Queue
     LogQueue.Head = 0;
     LogQueue.Tail = 0;
@@ -2520,7 +2520,7 @@ LOG_QUEUE_STATUS LogQueueGet(LOG_REQUEST *Entry)
    {
       Status = LOG_QUEUE_EMPTY;
    }
-   else
+   else 
    {
       *Entry = pQueue->Buffer[pQueue->Tail & (LOG_QUEUE_SIZE - 1)];
       pQueue->Tail++;
@@ -2638,11 +2638,11 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
 /*****************************************************************************
  * Function:    LogRegisterEofIndex
  *
- * Description: Function called by a logger to register the passed SystemTable
+ * Description: Function called by a logger to register the passed SystemTable 
  *              index containing the location of an end of flight log.
  *              LogMngTask will monitor the status of the write at this index
  *              until it is complete.
-
+ 
  *
  * Parameters:  regType is the type of log being written LOG_REGISTER_TYPE.
  *
@@ -2660,7 +2660,7 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
 void LogRegisterIndex ( LOG_REGISTER_TYPE regType, UINT32 SystemTableIndex)
 {
   ASSERT( SystemTableIndex < SYSTEM_TABLE_MAX_SIZE);
-
+  
   LogMngBlock.LogWritePending[regType] = SystemTableIndex;
   GSE_DebugStr(NORMAL,TRUE,"LogMgr: Log Type: %d registered SystemTable index registered: %u",SystemTableIndex);
 }
@@ -2700,19 +2700,19 @@ void LogUpdateWritePendingStatuses( void )
         GSE_DebugStr(NORMAL,TRUE,"LogMgr: LOG_REGISTER_TYPE: %d - Write completed",i);
       }
     }// i is in-use
-  }  // for i
+  }  // for i  
 }
 
 
 /*****************************************************************************
  * Function:    LogIsWriteComplete
  *
- * Description: Accessor Function allow callers to determine if the write
+ * Description: Accessor Function allow callers to determine if the write 
  *              for the registered type of log has completed.
  *
  * Parameters:  regType is the type of logwrite which was registered for monitoring
  *
- * Returns:     TRUE: (Complete)
+ * Returns:     TRUE: (Complete) 
  *                    LOG_INDEX_NOT_SET == LogMngBlock.LogWritePending[regType]
  *              FALSE:(In prog)
  *                    0 <= LogMngBlock.LogWritePending[regType] < SYSTEM_TABLE_MAX_SIZE
@@ -2720,7 +2720,7 @@ void LogUpdateWritePendingStatuses( void )
  ****************************************************************************/
 BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 {
-  // Use the value of the index as indicator of write-complete
+  // Use the value of the index as indicator of write-complete  
   return (LogMngBlock.LogWritePending[regType] == LOG_INDEX_NOT_SET);
 }
 
@@ -2728,7 +2728,7 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
- *
+ * 
  * *****************  Version 98  *****************
  * User: John Omalley Date: 12-09-05   Time: 9:42a
  * Updated in $/software/control processor/code/system
@@ -2738,289 +2738,289 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- *
+ * 
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:08a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- *
+ * 
  * *****************  Version 95  *****************
  * User: John Omalley Date: 12-05-24   Time: 9:38a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added the ETM Write function
- *
+ * 
  * *****************  Version 94  *****************
  * User: John Omalley Date: 4/24/12    Time: 12:01p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Cessna Caravan
- *
+ * 
  * *****************  Version 93  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- *
+ * 
  * *****************  Version 91  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR #1105 End of Flight Log Race Condition
- *
+ * 
  * *****************  Version 90  *****************
  * User: Contractor2  Date: 6/01/11    Time: 1:45p
  * Updated in $/software/control processor/code/system
  * SCR #473 Enhancement: Restriction of System Logs
- *
+ * 
  * *****************  Version 89  *****************
  * User: John Omalley Date: 11/16/10   Time: 3:32p
  * Updated in $/software/control processor/code/system
  * SCR 996 - Log Queue Updates
- *
+ * 
  * *****************  Version 88  *****************
  * User: Jeff Vahue   Date: 11/11/10   Time: 9:55p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 87  *****************
  * User: Jeff Vahue   Date: 11/10/10   Time: 11:04p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 86  *****************
  * User: Jeff Vahue   Date: 11/09/10   Time: 9:08p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 85  *****************
  * User: John Omalley Date: 11/09/10   Time: 2:25p
  * Updated in $/software/control processor/code/system
  * SCR 990 - Dead Code Removal
- *
+ * 
  * *****************  Version 84  *****************
  * User: John Omalley Date: 11/04/10   Time: 7:10p
  * Updated in $/software/control processor/code/system
  * SCR 983 - Missed one error path
- *
+ * 
  * *****************  Version 83  *****************
  * User: John Omalley Date: 11/04/10   Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR 983 - Clear the Log Erase Status when the erase fails
- *
+ * 
  * *****************  Version 82  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 9:17p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 81  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 8:38p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 80  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 7:50p
  * Updated in $/software/control processor/code/system
  * SCR# 975 - Code Coverage refactor
- *
+ * 
  * *****************  Version 79  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 4:22p
  * Updated in $/software/control processor/code/system
  * SCR# 974 - Log Full Removal
- * SCR# 848 - Test Point
- *
+ * SCR# 848 - Test Point 
+ * 
  * *****************  Version 78  *****************
  * User: John Omalley Date: 10/25/10   Time: 6:10p
  * Updated in $/software/control processor/code/system
  * SCR 964 - Check for Log Write and Pause before marking logs for
  * deletion
- *
+ * 
  * *****************  Version 77  *****************
  * User: John Omalley Date: 10/25/10   Time: 6:03p
  * Updated in $/software/control processor/code/system
  * SCR 961 - Code Review Updates
- *
+ * 
  * *****************  Version 76  *****************
  * User: John Omalley Date: 10/21/10   Time: 1:46p
  * Updated in $/software/control processor/code/system
  * SCR 960 - Modified the checksum to load it across frames
- *
+ * 
  * *****************  Version 75  *****************
  * User: Jim Mood     Date: 10/21/10   Time: 9:22a
  * Updated in $/software/control processor/code/system
  * SCR 959 Upload Manager code coverage changes
- *
+ * 
  * *****************  Version 74  *****************
  * User: Jeff Vahue   Date: 10/19/10   Time: 7:25p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 73  *****************
  * User: John Omalley Date: 9/30/10    Time: 1:25p
  * Updated in $/software/control processor/code/system
  * SCR 894 - LogManager Code Coverage and Code Review Updates
- *
+ * 
  * *****************  Version 72  *****************
  * User: Jeff Vahue   Date: 9/21/10    Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR #848 - Code Cov
- *
+ * 
  * *****************  Version 71  *****************
  * User: John Omalley Date: 9/09/10    Time: 9:00a
  * Updated in $/software/control processor/code/system
  * SCR 790 - Added function to return the last used address
- *
+ * 
  * *****************  Version 70  *****************
  * User: Jeff Vahue   Date: 9/03/10    Time: 1:48p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Covergae Mod
- *
+ * 
  * *****************  Version 69  *****************
  * User: John Omalley Date: 8/31/10    Time: 8:47a
  * Updated in $/software/control processor/code/system
  * SCR 826 - Add a write now feature to the LogSaveErase function
- *
+ * 
  * *****************  Version 68  *****************
  * User: John Omalley Date: 8/12/10    Time: 7:53p
  * Updated in $/software/control processor/code/system
  * SCR 787 - Un-did last change
- *
+ * 
  * *****************  Version 67  *****************
  * User: John Omalley Date: 8/11/10    Time: 5:21p
  * Updated in $/software/control processor/code/system
  * SCR 787
- *
+ * 
  * *****************  Version 66  *****************
  * User: John Omalley Date: 8/11/10    Time: 3:08p
  * Updated in $/software/control processor/code/system
  * SCR 787 - Check the size before looking for the next offset.
- *
+ * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 7/30/10    Time: 5:03p
  * Updated in $/software/control processor/code/system
  * SCR 699 - Changed the LogInitialize return value to void.
- *
+ * 
  * *****************  Version 64  *****************
  * User: Peter Lee    Date: 7/30/10    Time: 4:42p
  * Updated in $/software/control processor/code/system
- * SCR #759 Error: How to properly use "*pPtr++".
- *
+ * SCR #759 Error: How to properly use "*pPtr++". 
+ * 
  * *****************  Version 63  *****************
  * User: John Omalley Date: 7/30/10    Time: 8:51a
  * Updated in $/software/control processor/code/system
  * SCR 678 - Remove files in the FVT that are marked not deleted
- *
+ * 
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 7/29/10    Time: 4:06p
  * Updated in $/software/control processor/code/system
  * SCR# 698 - cleanup
- *
+ * 
  * *****************  Version 61  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- *
+ * 
  * *****************  Version 60  *****************
  * User: John Omalley Date: 7/27/10    Time: 4:42p
  * Updated in $/software/control processor/code/system
  * SCR 730 - Removed Log Write Failed Log
- *
+ * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 7/26/10    Time: 10:36a
  * Updated in $/software/control processor/code/system
- * SCR 306
+ * SCR 306 
  * - Added the ASSERT for 3 writes
  * - Fixed Uninitialized Erase Request logic
- *
+ * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 7/23/10    Time: 10:15a
  * Updated in $/software/control processor/code/system
  * SCR 306 / SCR 639 - Update the error paths, Added pause feature and
  * fixed the Queue ASSERT
- *
+ * 
  * *****************  Version 57  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:17p
  * Updated in $/software/control processor/code/system
  * SCR #260 Implement BOX status command
- *
+ * 
  * *****************  Version 56  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:35p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Code Coverage TP
- *
+ * 
  * *****************  Version 55  *****************
  * User: Contractor2  Date: 7/13/10    Time: 10:56a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
  * Corrected count calculation.
- *
+ * 
  * *****************  Version 54  *****************
  * User: Contractor V&v Date: 7/07/10    Time: 6:19p
  * Updated in $/software/control processor/code/system
  * "SCR #531 Log Erase and NV_Write Timing
  * comment out debugStr "
- *
+ * 
  * *****************  Version 53  *****************
  * User: Contractor3  Date: 7/06/10    Time: 10:38a
  * Updated in $/software/control processor/code/system
  * SCR #672 - Changes based on Code Review.
- *
+ * 
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 6/30/10    Time: 3:18p
  * Updated in $/software/control processor/code/system
  * SCR #531 Log Erase and NV_Write Timing
- *
+ * 
  * *****************  Version 51  *****************
  * User: Contractor2  Date: 6/30/10    Time: 11:59a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
  * Corrected variable name.
- *
+ * 
  * *****************  Version 50  *****************
  * User: Contractor2  Date: 6/30/10    Time: 11:04a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
- *
+ * 
  * *****************  Version 49  *****************
  * User: Contractor2  Date: 6/14/10    Time: 1:07p
  * Updated in $/software/control processor/code/system
  * SCR #483 Function Names must begin with the CSC it belongs with.
- *
+ * 
  * *****************  Version 48  *****************
  * User: Contractor V&v Date: 5/12/10    Time: 3:48p
  * Updated in $/software/control processor/code/system
  * SCR #351 fast.reset=really housekeeping
- *
+ * 
  * *****************  Version 47  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- *
+ * 
  * *****************  Version 46  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:08p
  * Updated in $/software/control processor/code/system
  * SCR #579 Change LogWriteSys to return void
- *
+ * 
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:51p
  * Updated in $/software/control processor/code/system
  * SCR #573 - Startup WD changes
- *
+ * 
  * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 4/26/10    Time: 1:27p
  * Updated in $/software/control processor/code/system
  * SCR #566 - disable interrupts in Put/Get operations on Log Q.  Set
  * default fault.cfg.verbosity to OFF
- *
+ * 
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:41p
  * Updated in $/software/control processor/code/system
  * SCR #140 Log erase status to own file SCR #306 Log Manager Erro
- *
+ * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:10p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- *
+ * 
  * *****************  Version 41  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:18p
  * Updated in $/software/control processor/code/system

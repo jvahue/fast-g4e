@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 70 $  $Date: 8/29/12 3:08p $
+  $Revision: 72 $  $Date: 9/15/12 7:12p $
 
 ******************************************************************************/
 
@@ -648,27 +648,28 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             CM_GetTimeAsTimestamp(&pTrigData->EndTime);
             // Change trigger state back to start
             pTrigData->State  = TRIG_START;
+
             // Reset trigger flag
             ResetBit(pTrigData->TriggerIndex, TriggerFlags, sizeof(TriggerFlags));
             
-            if ( pTrigData->bLegacyConfig )
-            {
-              // Log the End
-              TriggerLogEnd(pTrigCfg, pTrigData);
-            }
-
-            // reset the trigger data
-            TriggerReset( pTrigData );
-
+            // Set the validity based on EndType
             if( pTrigData->EndType == TRIG_SENSOR_INVALID )
             {
-              ResetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
+                ResetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
             }
             else
             {
-              SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
+                SetBit(pTrigData->TriggerIndex, TriggerValidFlags, sizeof(TriggerValidFlags));
             }
 
+            // Log the End - if we are a legacy trigger
+            if ( pTrigData->bLegacyConfig )
+            {
+              TriggerLogEnd(pTrigCfg, pTrigData);
+            }
+
+            // reset the trigger data - MUST be last
+            TriggerReset( pTrigData );
          }
          else // Trigger is still active
          {
@@ -1417,6 +1418,15 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 72  *****************
+ * User: Jeff Vahue   Date: 9/15/12    Time: 7:12p
+ * Updated in $/software/control processor/code/system
+ * 
+ * *****************  Version 71  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Trigger fix for using SensorArray
  * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 3:08p

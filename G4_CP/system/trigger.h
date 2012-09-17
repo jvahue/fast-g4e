@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing. 
 
   VERSION
-  $Revision: 34 $  $Date: 8/28/12 1:43p $       
+  $Revision: 35 $  $Date: 9/14/12 4:46p $       
 
 ******************************************************************************/
 
@@ -344,6 +344,11 @@ EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSen
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Trigger fix for using SensorArray
  * 
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

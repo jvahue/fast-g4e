@@ -16,7 +16,7 @@
                  after 49.7 days of continous operation.
  
     VERSION
-    $Revision: 5 $  $Date: 9/06/12 5:58p $   
+    $Revision: 6 $  $Date: 12-09-11 1:59p $   
    
 ******************************************************************************/
 
@@ -315,6 +315,46 @@ BOOLEAN TH_FSMAppBusyGetState(INT32 param)
   return FALSE;//(if during or post, if log writing is active);
 }
 
+/******************************************************************************
+ * Function:     TH_GetBinaryHeader
+ *
+ * Description:  Retrieves the binary header for the time history
+ *               configuration.
+ *
+ * Parameters:   void *pDest         - Pointer to storage buffer
+ *               UINT16 nMaxByteSize - Amount of space in buffer
+ *
+ * Returns:      UINT16 - Total number of bytes written
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT16 TH_GetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
+{
+   // Local Data
+   TH_HDR  header;
+   INT8    *pBuffer;
+   UINT16  nRemaining;
+   UINT16  nTotal;
+
+   // Initialize Local Data
+   pBuffer    = (INT8 *)pDest;
+   nRemaining = nMaxByteSize;
+   nTotal     = 0;
+
+   memset ( &header, 0, sizeof(header) );
+
+   header.sampleRate = m_Cfg.SampleRate;
+
+   // Increment the total number of bytes and decrement the remaining
+   nTotal     += sizeof (header);
+   nRemaining -= sizeof (header);
+
+   // Copy the TH header to the buffer
+   memcpy ( pBuffer, &header, nTotal );
+   // Return the total number of bytes written
+   return ( nTotal );
+}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -683,6 +723,11 @@ CHAR* TH_GetDataBufPtr(INT32 size)
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Binary ETM Header Function
  * 
  * *****************  Version 5  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 5:58p

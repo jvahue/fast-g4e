@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 26 $  $Date: 8/28/12 12:43p $
+   $Revision: 27 $  $Date: 9/14/12 4:06p $
     
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -112,8 +112,8 @@ static FASTMGR_CONFIG FASTConfigTemp;
 
 static USER_MSG_TBL CfgFlagsCmd [] =
 {  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                         IndexRange   DataLimit          EnumTbl*/
-  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       0,MAX_TRIGGERS-1,  NULL },
-  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       0,MAX_TRIGGERS-1,  NULL },
+  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       0,MAX_TRIGGERS,    NULL },
+  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       0,MAX_TRIGGERS,    NULL },
   { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.AutoULPer_s,      -1,-1,       NO_LIMIT,          NULL },
   { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &FASTConfigTemp.TimeSource,       -1,-1,       NO_LIMIT,          TimeSourceStrs },
   { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                             -1,-1,       NO_LIMIT,          NULL },
@@ -496,6 +496,11 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:06p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for bitarray list 
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

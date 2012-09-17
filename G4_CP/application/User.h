@@ -10,7 +10,7 @@
     Description:
     
     VERSION
-    $Revision: 40 $  $Date: 8/28/12 12:43p $
+    $Revision: 42 $  $Date: 9/14/12 4:45p $
     
 ******************************************************************************/
 
@@ -111,6 +111,7 @@ typedef enum{
   //USER_TYPE_ENUM16,
   USER_TYPE_ENUM,
   USER_TYPE_STR,
+  USER_TYPE_SNS_LIST,  // a list of sensor ids
   USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list  
   USER_TYPE_FLOAT,
   USER_TYPE_BOOLEAN,
@@ -266,6 +267,16 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 42  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:45p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 User SensorArray GSE handling
+ * 
+ * *****************  Version 41  *****************
+ * User: John Omalley Date: 12-09-11   Time: 2:21p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added HEX8 logic
  * 
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

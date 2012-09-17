@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 17 $  $Date: 8/29/12 6:20p $
+$Revision: 20 $  $Date: 9/14/12 4:06p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -127,10 +127,462 @@ static USER_MSG_TBL eventCmd [] =
   { "POST_HISTORY_S", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
-  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_128_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_SENSORS-1,     NULL                },
+  { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_EVENT_SENSORS, NULL                },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 
+static USER_MSG_TBL eventS0Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[0].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[0].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[0].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[0].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[0].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[0].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[0].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS1Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[1].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[1].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[1].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[1].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[1].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[1].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[1].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS2Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[2].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[2].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[2].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[2].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[2].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[2].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[2].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS3Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[3].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[3].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[3].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[3].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[3].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[3].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[3].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS4Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[4].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[4].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[4].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[4].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[4].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[4].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[4].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS5Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[5].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[5].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[5].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[5].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[5].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[5].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[5].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS6Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[6].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[6].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[6].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[6].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[6].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[6].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[6].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS7Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[7].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[7].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[7].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[7].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[7].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[7].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[7].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS8Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[8].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[8].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[8].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[8].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[8].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[8].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[8].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS9Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[9].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[9].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[9].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[9].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[9].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[9].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[9].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS10Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[10].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[10].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[10].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[10].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[10].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[10].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[10].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS11Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[11].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[11].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[11].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[11].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[11].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[11].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[11].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS12Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[12].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[12].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[12].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[12].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[12].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[12].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[12].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS13Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[13].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[13].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[13].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[13].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[13].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[13].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[13].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS14Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[14].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[14].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[14].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[14].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[14].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[14].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[14].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS15Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[15].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[15].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[15].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[15].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[15].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[15].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[15].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS16Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[16].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[16].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[16].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[16].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[16].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[16].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[16].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS17Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[17].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[17].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[17].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[17].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[17].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[17].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[17].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS18Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[18].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[18].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[18].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[18].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[18].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[18].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[18].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS19Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[19].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[19].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[19].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[19].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[19].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[19].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[19].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS20Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[20].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[20].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[20].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[20].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[20].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[20].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[20].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS21Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[21].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[21].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[21].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[21].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[21].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[21].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[21].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS22Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[22].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[22].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[22].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[22].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[22].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[22].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[22].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS23Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[23].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[23].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[23].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[23].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[23].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[23].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[23].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS24Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[24].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[24].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[24].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[24].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[24].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[24].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[24].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS25Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[25].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[25].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[25].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[25].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[25].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[25].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[25].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS26Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[26].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[26].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[26].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[26].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[26].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[26].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[26].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS27Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[27].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[27].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[27].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[27].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[27].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[27].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[27].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS28Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[28].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[28].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[28].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[28].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[28].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[28].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[28].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS29Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[29].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[29].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[29].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[29].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[29].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[29].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[29].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS30Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[30].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[30].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[30].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[30].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[30].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[30].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[30].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventS31Tbl[] =
+{
+   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
+   {"SENSORID",   NO_NEXT_TABLE, Event_State,   USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.sensor[31].SensorIndex,       0,(MAX_EVENTS-1),    NO_LIMIT,     SensorIndexType },
+   {"INITIALIZE", NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[31].bInitialized,      0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"VALID",      NO_NEXT_TABLE, Event_State,   USER_TYPE_BOOLEAN, USER_RO,  &stateEventTemp.sensor[31].bValid,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MIN",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[31].fMinValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"MAX",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[31].fMaxValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"AVG",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[31].fAvgValue,         0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   {"TOT",        NO_NEXT_TABLE, Event_State,   USER_TYPE_FLOAT,   USER_RO,  &stateEventTemp.sensor[31].fTotal,            0,(MAX_EVENTS-1),    NO_LIMIT,     NULL            },
+   { NULL,        NULL,        NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL eventSensrTbl[] =
+{
+   { "S0",   eventS0Tbl,   NULL, NO_HANDLER_DATA },
+   { "S1",   eventS1Tbl,   NULL, NO_HANDLER_DATA },
+   { "S2",   eventS2Tbl,   NULL, NO_HANDLER_DATA },
+   { "S3",   eventS3Tbl,   NULL, NO_HANDLER_DATA },
+   { "S4",   eventS4Tbl,   NULL, NO_HANDLER_DATA },
+   { "S5",   eventS5Tbl,   NULL, NO_HANDLER_DATA },
+   { "S6",   eventS6Tbl,   NULL, NO_HANDLER_DATA },
+   { "S7",   eventS7Tbl,   NULL, NO_HANDLER_DATA },
+   { "S8",   eventS8Tbl,   NULL, NO_HANDLER_DATA },
+   { "S9",   eventS9Tbl,   NULL, NO_HANDLER_DATA },
+   { "S10",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
+   { "S11",  eventS11Tbl,  NULL, NO_HANDLER_DATA },
+   { "S12",  eventS12Tbl,  NULL, NO_HANDLER_DATA },
+   { "S13",  eventS13Tbl,  NULL, NO_HANDLER_DATA },
+   { "S14",  eventS14Tbl,  NULL, NO_HANDLER_DATA },
+   { "S15",  eventS15Tbl,  NULL, NO_HANDLER_DATA },
+   { "S16",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
+   { "S17",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
+   { "S18",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
+   { "S19",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
+   { "S20",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
+   { "S21",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
+   { "S22",  eventS2Tbl,   NULL, NO_HANDLER_DATA },
+   { "S23",  eventS3Tbl,   NULL, NO_HANDLER_DATA },
+   { "S24",  eventS4Tbl,   NULL, NO_HANDLER_DATA },
+   { "S25",  eventS5Tbl,   NULL, NO_HANDLER_DATA },
+   { "S26",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
+   { "S27",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
+   { "S28",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
+   { "S29",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
+   { "S30",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
+   { "S31",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
+   { NULL,   NULL,         NULL, NO_HANDLER_DATA }
+};
 
 static USER_MSG_TBL eventStatus [] =
 {
@@ -139,6 +591,7 @@ static USER_MSG_TBL eventStatus [] =
    { "STARTTIME_MS", NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nStartTime_ms,       0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
    { "DURATION_MS",  NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nDuration_ms,        0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
    { "SAMPLECOUNT",  NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nSampleCount,        0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
+   { "SENSOR",       eventSensrTbl,     NULL,            NO_HANDLER_DATA },
    { NULL          , NULL,              NULL ,           NO_HANDLER_DATA }
 };
 
@@ -840,6 +1293,22 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Contractor V&v Date: 9/14/12    Time: 4:06p
+ * Updated in $/software/control processor/code/application
+ * FAST 2 fixes for sensor list 
+ *
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 12-09-13   Time: 9:42a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added sensor statistics to the status command
+ * 
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-09-11   Time: 1:58p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updated to new Timehistory fields
+ *                     Fixed rate offset size in the table
  *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
