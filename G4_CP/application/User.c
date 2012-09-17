@@ -2797,7 +2797,7 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
     for ( iBit=0; iBit < 32; iBit++)
     {
       // is the bit on?
-      if (*word & mask)
+      if (word[iWord] & mask)
       {
         // only get to set min once as we walk through the bit array
         if (minBit == MAX_BIT)
@@ -2816,9 +2816,6 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
       bitIndex += 1;
       mask <<= 1;
     }
-
-    // move to the next word in the 128 bit array
-    word += 1;
   }
 
   // based on the type determine is we are good
@@ -2833,7 +2830,7 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
   else if (type == USER_TYPE_ACT_LIST)
   {
     // verify only bit 0-7, 12-19, 27 and 31 are on
-    if ( (*word & 0x880ff0ff) != 0)
+    if ( (word[0] & ~0x880ff0ff) != 0)
     {
       status = FALSE;
     }
