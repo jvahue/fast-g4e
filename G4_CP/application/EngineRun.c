@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 21 $  $Date: 9/14/12 4:02p $
+      $Revision: 22 $  $Date: 9/18/12 6:11p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -196,6 +196,11 @@ void EngRunInitialize(void)
       // Initialize the common fields in the EngineRun data structure
       pErData->erIndex = (ENGRUN_INDEX)i;
       EngRunReset(pErCfg,pErData);
+
+      // Init Task scheduling data
+      pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / pErCfg->erRate);
+      pErData->nRateCountdown = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
+
     }
     else // Invalid config...
     {
@@ -458,7 +463,6 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   {
     pErData->erState   = ER_STATE_STOPPED;
     memset(&pErData->startTime, 0, sizeof(TIMESTAMP));
-   //memset(&pErData->endTime, 0, sizeof(TIMESTAMP));
     pErData->startingTime        = 0;
     pErData->startingDuration_ms = 0;
     pErData->erDuration_ms       = 0;
@@ -467,8 +471,6 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     pErData->maxValueValid       = TRUE;
     pErData->monMaxValue         = -FLT_MAX;
     pErData->nSampleCount        = 0;
-    pErData->nRateCounts         = (UINT16)(MIFs_PER_SECOND / pErCfg->erRate);
-    pErData->nRateCountdown      = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
 
     /* SNSR_SUMMARY field setup */
 
@@ -1018,6 +1020,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jeff Vahue   Date: 9/18/12    Time: 6:11p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - ER Offset scheduling BB Issue# 53
  * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:02p
