@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 99 $  $Date: 9/14/12 4:45p $
+   $Revision: 101 $  $Date: 9/17/12 3:45p $
 
 ******************************************************************************/
 
@@ -1302,6 +1302,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       }
       break;
 
+    case USER_TYPE_ACT_LIST:
     case USER_TYPE_SNS_LIST:
     case USER_TYPE_128_LIST:
 
@@ -1553,6 +1554,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       sprintf(GetStr,"0x%08X",*(UINT32*)GetPtr);
       break;
 
+    case USER_TYPE_ACT_LIST:
     case USER_TYPE_SNS_LIST:
     case USER_TYPE_128_LIST:
       {
@@ -1890,16 +1892,25 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
       SuperStrcat(RspStr, "]", destLength);
       break;
 
+    case USER_TYPE_ACT_LIST:
+      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR 
+              "Valid Action bits are 0-7(When met), 12-19(On duration), 27(Latch) "
+              "and 31(Acknowledge)."NEW_LINE
+              "Set via number list or hex value.");
+      break;
+
     case USER_TYPE_SNS_LIST:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
-        "accepts comma separated numbers 0..%u or 0x followed by 1 to 32 hex digits and %u..%u bits set.",
-        MAX_SENSORS-1, Min.Uint, Max.Uint);
+      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR
+              "Accepts sensor numbers 0-%d or a hex value of up to %d bits."NEW_LINE
+              "Allows for %u..%u sensors to be selected.",
+              MAX_SENSORS-1, MAX_SENSORS, Min.Uint, Max.Uint);
       break;
 
     case USER_TYPE_128_LIST:
       sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
-        "valid set is comma separated decimals from %u to %u, or hex strings of 0x followed by 1 to 32 hex digits.%s",
-        Min.Uint, Max.Uint, USER_MSG_VFY_FORMAT);
+              "Accepts a number list consisting of values in the range %u-%u, "NEW_LINE
+              "or a hex string where only bits %u-%u are allowed on.",
+              Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1);
       break;
 
     default:
@@ -2304,6 +2315,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
         break;
 
+      case USER_TYPE_ACT_LIST:
       case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
@@ -2751,18 +2763,18 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 *
 * Description:  Verifies that only valid bits are set in the 128 bit structure
 *
-* Parameters:   Type (i): the type of object being operated on
+* Parameters:   type (i): the type of object being operated on
 *               destPtr (i): pointer to a 128 bit array
-*               Min (i): min acceptable value (interpretation depends on Type)
-*               Max (i): max acceptable value (interpretation depends on Type)
+*               usrMin (i): min acceptable value (interpretation depends on type)
+*               usrMax (i): max acceptable value (interpretation depends on type)
 *
 * Returns:      True if successful otherwise false.
 *
 * Notes:
 ******************************************************************************/
 static 
-BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
-                      USER_RANGE *Min, USER_RANGE *Max)
+BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
+                      USER_RANGE *usrMin, USER_RANGE *usrMax)
 {
 #define MAX_BIT 128
   UINT32 mask;
@@ -2785,7 +2797,7 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
     for ( iBit=0; iBit < 32; iBit++)
     {
       // is the bit on?
-      if (*word & mask)
+      if (word[iWord] & mask)
       {
         // only get to set min once as we walk through the bit array
         if (minBit == MAX_BIT)
@@ -2793,7 +2805,7 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
           minBit = bitIndex;
         }
 
-        // Max always gets set as we walk through the bit array
+        // usrMax always gets set as we walk through the bit array
         maxBit = bitIndex;
 
         // count the total number of bits set
@@ -2804,25 +2816,42 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
       bitIndex += 1;
       mask <<= 1;
     }
-
-    // move to the next word in the 128 bit array
-    word += 1;
   }
 
   // based on the type determine is we are good
-  if (Type == USER_TYPE_SNS_LIST)
+  if (type == USER_TYPE_SNS_LIST)
   {
     // range for a SNS_LIST is the number of bits allowed
-    if ( bitCount < Min->Uint || bitCount > Max->Uint )
+    if ( bitCount < usrMin->Uint || bitCount > usrMax->Uint )
     {
       status = FALSE;
+    }
+  }
+  else if (type == USER_TYPE_ACT_LIST)
+  {
+    // verify only bit 0-7, 12-19, 27 and 31 are on
+    if ( (word[0] & ~0x880ff0ff) != 0)
+    {
+      status = FALSE;
+    }
+    // verify bit 23-127 are zero
+    else
+    {
+      for ( iWord=1; iWord < 4; ++iWord)
+      {
+        if ( word[iWord] != 0)
+        {
+          status = FALSE;
+          break;
+        }
+      }
     }
   }
   else
   {
     // range for other types (USER_TYPE_128_LIST) is min/max bit set
     // - count does not matter
-    if (minBit < Min->Uint || maxBit > Max->Uint)
+    if (minBit < usrMin->Uint || maxBit > usrMax->Uint)
     {
       status = FALSE;
     }
@@ -2834,6 +2863,16 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 101  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 3:45p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - Fix Action List validation
+ * 
+ * *****************  Version 100  *****************
+ * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - Add ACT_LIST, clean up msgs
  * 
  * *****************  Version 99  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:45p
