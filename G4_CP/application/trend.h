@@ -245,7 +245,7 @@ typedef struct
   
   // Interval handling
   UINT32       lastIntervalCheckMs;/* Starting time (CM_GetTickCount()                       */
-  UINT32       nTimeSinceLastMs;   /* time since last trend                                  */
+  UINT32       TimeSinceLastTrendMs;/* time since last trend                                 */
   
   // Stability handling
   UINT16       nStabExpectedCnt;  /* Expected count based on configured.                     */

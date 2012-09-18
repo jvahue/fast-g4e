@@ -333,7 +333,7 @@ static USER_MSG_TBL TrendStatus [] =
    { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   EngineRunStateEnum},
    { "TRENDLAMP",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_BOOLEAN, USER_RO,   &StateTrendTemp.bTrendLamp,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "SAMPLECOUNT",      NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeSinceLastMs,   0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
    { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.stability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },

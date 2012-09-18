@@ -492,18 +492,17 @@ void SensorDisableLiveStream( void )
     {
       // Only store the first <summarySize> number of sensors.
       // Get the TOTAL COUNT of configured sensors in the mask.
-      //  notify the caller if they have accidentally
-      // configured more in the snsrMask than can be stored in the provided SNSR_SUMMARY
-      i =  ++summaryCnt - 1;
-      summary[i].SensorIndex  = snsrIdx;
-      summary[i].bInitialized = FALSE;
-      summary[i].bValid       = FALSE;
-      summary[i].fMinValue    = FLT_MAX;
-      summary[i].timeMinValue = timeStampNow;
-      summary[i].fMaxValue    = 0.f;
-      summary[i].timeMaxValue = timeStampNow;
-      summary[i].fTotal       = 0.f;
-      summary[i].fAvgValue    = 0.f;
+      
+      summary[summaryCnt].SensorIndex  = snsrIdx;
+      summary[summaryCnt].bInitialized = FALSE;
+      summary[summaryCnt].bValid       = FALSE;
+      summary[summaryCnt].fMinValue    = FLT_MAX;
+      summary[summaryCnt].timeMinValue = timeStampNow;
+      summary[summaryCnt].fMaxValue    = 0.f;
+      summary[summaryCnt].timeMaxValue = timeStampNow;
+      summary[summaryCnt].fTotal       = 0.f;
+      summary[summaryCnt].fAvgValue    = 0.f;
+      ++summaryCnt;
     }
   }
 
