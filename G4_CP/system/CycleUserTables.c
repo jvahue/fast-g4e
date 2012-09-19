@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description: 
 
 VERSION
-$Revision: 9 $  $Date: 8/28/12 1:43p $ 
+$Revision: 10 $  $Date: 12-09-19 6:49p $ 
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -79,7 +79,8 @@ static USER_ENUM_TBL CycleTypeEnum[] =
   { "SIMPLE",           CYC_TYPE_SIMPLE_CNT           },
   { "PERSIST_SIMPLE",   CYC_TYPE_PERSIST_SIMPLE_CNT   },
   { "DURATION",         CYC_TYPE_DURATION_CNT         },
-  { "PERSIST_DURATION", CYC_TYPE_PERSIST_DURATION_CNT }
+  { "PERSIST_DURATION", CYC_TYPE_PERSIST_DURATION_CNT },
+  { NULL,               0                             }
 };
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
@@ -339,6 +340,11 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 6:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #   FAST 2 add end NULL entry to cyle type table
  * 
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

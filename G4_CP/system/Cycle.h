@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 12 $  $Date: 9/14/12 4:53p $
+      $Revision: 13 $  $Date: 12-09-19 3:23p $
 
 ******************************************************************************/
 
@@ -260,7 +260,7 @@ EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
 EXPORT void    CycleResetAll         ( void );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
-EXPORT UINT32  CycleGetPersistentCount( UINT8 nCycle );
+EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
 
 //EXPORT BOOLEAN CheckCycleValues(const CYCLEVALUE * valueTable);
 //EXPORT BOOLEAN CyclePersistentDuration( UINT8 nCycle );
@@ -276,6 +276,11 @@ EXPORT UINT32  CycleGetPersistentCount( UINT8 nCycle );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 3:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Coding standard 
  * 
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:53p

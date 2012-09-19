@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 6 $  $Date: 9/14/12 4:07p $
+ $Revision: 8 $  $Date: 12-09-19 6:48p $
 
 ******************************************************************************/
 
@@ -63,8 +63,8 @@ static void TrendProcess         ( TREND_CFG* pCfg, TREND_DATA* pData );
 static void TrendFinish          ( TREND_CFG* pCfg, TREND_DATA* pData );
 
 
-static void TrendStartManualTrend( TREND_CFG* pCfg, TREND_DATA* pData );
-static void TrendStartAutoTrend  (TREND_CFG* pCfg, TREND_DATA* pData);
+static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData );
+static void TrendStartAutoTrend  (const TREND_CFG* pCfg, TREND_DATA* pData);
 
 static void TrendUpdateData      ( TREND_CFG* pCfg, TREND_DATA* pData );
 static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData );
@@ -102,12 +102,11 @@ static void TrendUpdateTimeElapsed( UINT32  currentTime,
 void TrendInitialize( void )
 {
   TCB   tcb;
-  UINT8 i;
+  TREND_INDEX i;
   UINT8 j;
   TREND_CFG*  pCfg;
   TREND_DATA* pData;
-  UINT32      timeNow = CM_GetTickCount();
-
+  
   // Add user commands for Trend to the user command tables.
   User_AddRootCmd(&RootTrendMsg);
 
@@ -121,7 +120,7 @@ void TrendInitialize( void )
   
   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-  for (i = 0; i < MAX_TRENDS; i++)
+  for (i = TREND_0; i < MAX_TRENDS; i++)
   {
     pCfg  = &m_TrendCfg[i];
     pData = &m_TrendData[i];   
@@ -129,10 +128,10 @@ void TrendInitialize( void )
     pData->trendIndex      = (ENGRUN_UNUSED == pCfg->engineRunId) ?
                               TREND_UNUSED : (TREND_INDEX)i;    
     pData->prevEngState    = ER_STATE_STOPPED;
-    pData->nRateCounts     = (UINT16)(MIFs_PER_SECOND / pCfg->rate);
-    pData->nRateCountdown  = (UINT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
+    pData->nRateCounts     = (INT16)(MIFs_PER_SECOND / (INT16)pCfg->rate);
+    pData->nRateCountdown  = (INT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pData->trendState      = TREND_STATE_INACTIVE;
-
+	
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * pCfg->rate;
 
     // Calculate the expected number of stability sensors based on config
@@ -184,12 +183,12 @@ void TrendTask( void* pParam )
   // Local Data
   TREND_CFG    *pCfg;
   TREND_DATA   *pData;
-  UINT16       nTrend;
+  TREND_INDEX  nTrend;
 
   if(Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     
-    for ( nTrend = 0; nTrend < MAX_TRENDS; nTrend++ )
+    for ( nTrend = TREND_0; nTrend < MAX_TRENDS; nTrend++ )
     {
       // Log and terminate any active trends
       TrendFinish(&m_TrendCfg[nTrend], &m_TrendData[nTrend]);
@@ -199,7 +198,7 @@ void TrendTask( void* pParam )
   else // Normal task execution.
   {
     // Loop through all available triggers
-    for ( nTrend = 0; nTrend < MAX_TRENDS; nTrend++ )
+    for ( nTrend = TREND_0; nTrend < MAX_TRENDS; nTrend++ )
     {
       // Set pointers to Trend cfg and data
       pCfg  = &m_TrendCfg[nTrend];
@@ -270,7 +269,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
    TREND_HDR  trendHdr[MAX_TRENDS];
-   UINT16     trendIndex;
+   TREND_INDEX trendIndex;
    INT8       *pBuffer;
    UINT16     nRemaining;
    UINT16     nTotal;
@@ -282,7 +281,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    memset ( &trendHdr, 0, sizeof(trendHdr) );
 
    // Loop through all the Trends
-   for ( trendIndex = 0;
+   for ( trendIndex = TREND_0;
          ((trendIndex < MAX_TRENDS) && (nRemaining > sizeof (trendHdr[trendIndex])));
          trendIndex++ )
    {
@@ -306,7 +305,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (trendHdr[trendIndex]);
    }
    // Copy the Trend header to the buffer
-   memcpy ( pBuffer, &trendHdr, nTotal );
+   memcpy ( pBuffer, trendHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
@@ -374,7 +373,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       // If the button has been pressed(as defined by startTrigger)
       // start an manual trending      
        
-      if ( TriggerGetState(pCfg->startTrigger) )
+      if ( TriggerGetState((INT32)pCfg->startTrigger) )
       {
         TrendStartManualTrend(pCfg, pData);        
       }
@@ -384,7 +383,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       break;
 
       // Should never get here!
-    default:
+	default:
       FATAL("Unrecognized Engine Run State: %d", erState);
       break;
   }
@@ -404,7 +403,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
-static void TrendStartManualTrend( TREND_CFG* pCfg, TREND_DATA* pData )
+static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
 {
   if ( TREND_STATE_INACTIVE  == pData->trendState )
   {
@@ -633,10 +632,10 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
-void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
+static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
 {
   UINT8 i;
-#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+  #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
    
   if (TREND_STATE_INACTIVE != pData->trendState)
   {
@@ -646,9 +645,9 @@ void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   }
   
   pData->trendState       = TREND_STATE_INACTIVE;
-  
+  pData->bResetDetected   = FALSE;  
   pData->bTrendLamp       = FALSE;
-
+  
   pData->nTimeStableMs    = 0;
   pData->lastStabCheckMs  = 0;
 
@@ -719,7 +718,7 @@ static void TrendEnableTask(BOOLEAN bEnable)
  * Notes:
  *
  *****************************************************************************/
-BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
+static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
 {
   FLOAT32 fVal;
   FLOAT32 fPrevValue;
@@ -807,7 +806,7 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
 {
   LogWriteETM(APP_ID_TREND_AUTO_FAILED,
               LOG_PRIORITY_3,
-              &pCfg->trendName,
+              pCfg->trendName,
               sizeof(pCfg->trendName),
               NULL);
 
@@ -830,15 +829,15 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
  *****************************************************************************/
 static void TrendLogAutoTrendNotDetected( TREND_CFG* pCfg, TREND_DATA* pData )
 {
-  TREND_NOT_DETECTED_LOG log;
+  TREND_NOT_DETECTED_LOG trendLog;
 
-  memcpy(&log.crit, &pCfg->stability,     sizeof(STABILITY_CRITERIA));
-  memcpy(&log.data, &pData->maxStability, sizeof(STABILITY_DATA));
+  memcpy(&trendLog.crit, &pCfg->stability,     sizeof(trendLog.crit));
+  memcpy(&trendLog.data, &pData->maxStability, sizeof(STABILITY_DATA));
   
   
   LogWriteETM(APP_ID_TREND_AUTO_NOT_DETECTED,
               LOG_PRIORITY_3,
-              &log,
+              &trendLog,
               sizeof(TREND_NOT_DETECTED_LOG),
               NULL);
 
@@ -866,14 +865,20 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 
   // Each Trend shall reset the maximum trend count when the
   // configured trend reset trigger becomes ACTIVE.
-  if ( pCfg->resetTrigger != TRIGGER_UNUSED    &&
-       TriggerIsConfigured(pCfg->resetTrigger) &&
-       TriggerGetState(pCfg->resetTrigger))
+ 
+  // Only handle the reset-event on detection, the flag
+  // will be cleared by the trigger becoming inactive or
+  // the next engine-run starting.
+  if ( FALSE == pData->bResetDetected                 &&
+	   pCfg->resetTrigger != TRIGGER_UNUSED           &&
+       TriggerIsConfigured((INT32)pCfg->resetTrigger) &&
+       TriggerGetState((INT32)pCfg->resetTrigger))
   {    
-    
-    GSE_DebugStr(NORMAL,TRUE,"Trend[%d] Autotrend Reset Detected ",pData->trendIndex);
+    pData->bResetDetected = TRUE;
 
-    if ( 0 == pData->trendCnt)
+    GSE_DebugStr(NORMAL,TRUE,"Trend[%d] Autotrend Reset Detected ",pData->trendIndex);	
+    
+	if ( 0 == pData->trendCnt)
     {
       // No autotrends taken? Log it.
       TrendLogAutoTrendNotDetected(pCfg, pData);
@@ -886,6 +891,13 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 
     pData->TimeSinceLastTrendMs = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
     pData->lastIntervalCheckMs  = 0;
+  }
+  else if(pData->bResetDetected &&
+	      !TriggerGetState((INT32)pCfg->resetTrigger))
+  {
+	// If trend-reset was detected and is now clear,
+    // clear the flag for next use.
+	pData->bResetDetected = FALSE;
   }
 
   timeNow = CM_GetTickCount();
@@ -949,7 +961,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
- void TrendUpdateTimeElapsed(UINT32 currentTime, UINT32* lastTimeCalled, UINT32* elapsedTime)
+ static void TrendUpdateTimeElapsed(UINT32 currentTime, UINT32* lastTimeCalled, UINT32* elapsedTime)
  {
    // If first time thru, set last time to current so elapsed will be zero.
    if (0 == *lastTimeCalled)
@@ -976,7 +988,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
-static void TrendStartAutoTrend(TREND_CFG* pCfg, TREND_DATA* pData)
+static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 {
   // Local Data
   UINT32  nTrendStorage;
@@ -1006,6 +1018,16 @@ static void TrendStartAutoTrend(TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 6:48p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2  Reset trigger handling
+ * 
+ * *****************  Version 7  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 3:22p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2  Fix AutoTrends
  * 
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:07p

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 5 $  $Date: 9/14/12 4:07p $
+  $Revision: 7 $  $Date: 12-09-19 6:48p $
 
 *******************************************************************************/
 
@@ -167,16 +167,16 @@ typedef struct
 typedef struct  
 {
   TREND_STATE   type;                            /* The type/state of trend manual vs auto   */
-  UINT16        nSamples;                        /* The number of samples taken during trend */
-  TREND_SENSORS sensor[MAX_TREND_SENSORS];      /* The stats for the configured sensors      */
+  UINT32        nSamples;                        /* The number of samples taken during trend */
+  TREND_SENSORS sensor[MAX_TREND_SENSORS];       /* The stats for the configured sensors     */
   CYCLE_COUNT   cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
 }TREND_LOG;
 
 typedef struct  
 {
-  STABILITY_CRITERIA crit;  /* The configured criteria range for the trend                   */
-  STABILITY_DATA     data;  /* The max observed stability data during the un-activated trend */
-}TREND_NOT_DETECTED_LOG;
+  STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
+  STABILITY_DATA     data;                    /* The max observed stability data during      */
+}TREND_NOT_DETECTED_LOG;                      /* the un-activated trend                      */
 
 
 // TREND_CFG
@@ -234,17 +234,18 @@ typedef struct
   INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
   
   // State/status info
-  TREND_STATE  trendState;           /* Current trend type                                    */
+  TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
   BOOLEAN      bTrendLamp;          /* does a [Auto]Trend want to flash the lamp             */
   UINT16       trendCnt;            /* # of autotrends taken since Reset                     */
+  BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
   
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
   UINT32       sampleCnt;           /* Counts of samples take this period                    */          
   
   // Interval handling
-  UINT32       lastIntervalCheckMs;/* Starting time (CM_GetTickCount()                       */
+  UINT32       lastIntervalCheckMs; /* Starting time (CM_GetTickCount()                      */
   UINT32       TimeSinceLastTrendMs;/* time since last trend                                 */
   
   // Stability handling
@@ -285,6 +286,16 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 6:48p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2  Reset trigger handling
+ * 
+ * *****************  Version 6  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 3:22p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2  Fix AutoTrends
  * 
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:07p

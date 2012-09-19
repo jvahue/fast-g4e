@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 73 $  $Date: 9/14/12 4:48p $     
+      $Revision: 75 $  $Date: 12-09-19 6:49p $     
 
 ******************************************************************************/
 
@@ -498,7 +498,7 @@ void SensorDisableLiveStream( void )
       summary[summaryCnt].bValid       = FALSE;
       summary[summaryCnt].fMinValue    = FLT_MAX;
       summary[summaryCnt].timeMinValue = timeStampNow;
-      summary[summaryCnt].fMaxValue    = 0.f;
+      summary[summaryCnt].fMaxValue    = -FLT_MAX;
       summary[summaryCnt].timeMaxValue = timeStampNow;
       summary[summaryCnt].fTotal       = 0.f;
       summary[summaryCnt].fAvgValue    = 0.f;
@@ -1903,6 +1903,16 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 75  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 6:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Init max sensor to -FLT_MAX
+ * 
+ * *****************  Version 74  *****************
+ * User: Contractor V&v Date: 12-09-19   Time: 3:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2  Fix AutoTrends
  * 
  * *****************  Version 73  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:48p
