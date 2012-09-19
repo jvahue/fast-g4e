@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 25 $  $Date: 9/14/12 4:04p $
+ $Revision: 26 $  $Date: 12-09-19 10:54a $
 
 ******************************************************************************/
 
@@ -666,8 +666,12 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
                CM_GetTimeAsTimestamp(&pData->tsDurationMetTime);
                // Log the Event Start
                EventLogStart ( pConfig, pData );
-               // Start Time History
-               TH_Open(pConfig->preTime_s);
+               // Only open time history if there is pre-history or during history
+               if (TRUE == pConfig->bEnableTH)
+               {
+                  // Start Time History
+                  TH_Open(pConfig->preTime_s);
+               }
             }
          }
          // Check if event stopped being met before duration was met
@@ -728,8 +732,12 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
             pData->state            = EVENT_START;
             pData->bStarted         = FALSE;
             pData->bTableWasEntered = FALSE;
-            // End the time history
-            TH_Close(pConfig->postTime_s);
+            // Need to make sure the TH was opened before attempting to close
+            if (TRUE == pConfig->bEnableTH)
+            {
+               // End the time history
+               TH_Close(pConfig->postTime_s);
+            }
             // reset the event Action
             pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
                                                   EVENT_ACTION_ON_DURATION(pConfig->nAction) |
@@ -1610,18 +1618,23 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 26  *****************
+ * User: John Omalley Date: 12-09-19   Time: 10:54a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Time History enable configuration 
  * 
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:04p
  * Updated in $/software/control processor/code/application
- * FAST 2 fixes for sensor list 
+ * FAST 2 fixes for sensor list
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-13   Time: 9:41a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed the event table logic that I broke with previous
  * checkin
- * 
+ *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-09-12   Time: 3:59p
  * Updated in $/software/control processor/code/application

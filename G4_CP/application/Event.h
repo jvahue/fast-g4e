@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 23 $  $Date: 9/14/12 4:05p $
+  $Revision: 24 $  $Date: 12-09-19 10:54a $
 
 ******************************************************************************/
 
@@ -62,6 +62,7 @@
                                    0,                     /* Minimum Duration           */\
                                    0,                     /* Event Action               */\
                                    {0,0,0,0},             /* Sensor Map                 */\
+                                   FALSE,                 /* Recording TH During Event  */\
                                    0,                     /* Pre Time History Time Sec  */\
                                    0,                     /* Post Time History Time Sec */\
                                    LOG_PRIORITY_3,        /* Log Priority               */\
@@ -151,7 +152,7 @@ typedef enum
 {
    EVENT_TABLE_0   =   0, EVENT_TABLE_1   =   1, EVENT_TABLE_2   =   2, EVENT_TABLE_3   =   3,
    EVENT_TABLE_4   =   4, EVENT_TABLE_5   =   5, EVENT_TABLE_6   =   6, EVENT_TABLE_7   =   7,
-   EVENT_TABLE_8   =   8, EVENT_TABLE_9   =   9, EVENT_TABLE_UNUSED = 255
+   EVENT_TABLE_UNUSED = 255
 } EVENT_TABLE_INDEX;
 
 typedef enum
@@ -210,6 +211,7 @@ typedef struct
    UINT32              nAction;                     /* Bit encoded action flags          */
    BITARRAY128         sensorMap;                   /* Bit encoded flags of sensors to   */
                                                     /* sample during the event           */
+   BOOLEAN             bEnableTH;                   /* Time History Enabled for Event    */
    INT32               preTime_s;                   /* Amount of pre-time history        */
    INT32               postTime_s;                  /* Amount of post-time history       */
    LOG_PRIORITY        priority;                    /* Priority to write the event log   */
@@ -458,6 +460,11 @@ EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-09-19   Time: 10:54a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Time History enable configuration 
  * 
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:05p
