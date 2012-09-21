@@ -131,6 +131,7 @@ void TrendInitialize( void )
     pData->nRateCounts     = (INT16)(MIFs_PER_SECOND / (INT16)pCfg->rate);
     pData->nRateCountdown  = (INT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pData->trendState      = TREND_STATE_INACTIVE;
+    pData->nActionReqNum             = ACTION_NO_REQ;
 	
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * pCfg->rate;
 
@@ -410,7 +411,13 @@ static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Manual Trend started.",pData->trendIndex ); 
     
     pData->bTrendLamp = pCfg->lampEnabled;
-    pData->trendState = TREND_STATE_MANUAL;    
+    pData->trendState = TREND_STATE_MANUAL;
+
+    // Activate Action
+    if( pCfg->nAction)
+    {
+      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_ON, FALSE, FALSE);
+    }
 
     LogWriteETM( APP_ID_TREND_MANUAL,
                  LOG_PRIORITY_3,
@@ -521,9 +528,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
   FLOAT32       oneOverN;
   UINT8         i;
   SNSR_SUMMARY  *pSummary;
-  TREND_LOG*    pLog = &m_TrendLog[pData->trendIndex];
-  CYCLE_INDEX*  pCycleList;
-  CYCLE_INDEX   cycIdx;
+  TREND_LOG*    pLog = &m_TrendLog[pData->trendIndex]; 
 
   // If no trend is active. Return
   if (pData->trendState > TREND_STATE_INACTIVE )
@@ -571,18 +576,14 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning  
     
-    // Update persistent cycle counter data if present.
-
-    // Set a pointer to the first
-    pCycleList = &pCfg->nCycleA;
-
+    // Update persistent cycle counter data, if configured.
+    
     for (i = 0; i < MAX_TREND_CYCLES; i++)
     {
-      cycIdx = (CYCLE_INDEX) *(pCycleList + i); 
-      pLog->cycleCounts[i].cycIndex = cycIdx;
-      if (CYCLE_UNUSED != cycIdx)
+      pLog->cycleCounts[i].cycIndex =pCfg->cycle[i];
+      if (CYCLE_UNUSED != pCfg->cycle[i])
       {
-        pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(cycIdx);
+        pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(pCfg->cycle[i]);
       }
       else
       {
@@ -605,11 +606,17 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
 
     // Reset sensor stability timer
     pData->lastStabCheckMs  = 0;
-    pData->nTimeStableMs    = 0;    
+    pData->nTimeStableMs    = 0;
 
     // Reset interval timer
     pData->TimeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
+
+    // Activate Action
+    if( pCfg->nAction)
+    {
+      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_OFF, FALSE, FALSE);
+    }
 
 #ifdef TREND_DEBUG   
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Sample Ended...Logged\n",pData->trendIndex );
@@ -1000,7 +1007,13 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
     LOG_PRIORITY_3,
     &nTrendStorage,
     sizeof(nTrendStorage),
-    NULL); 
+    NULL);
+
+  // Activate Action
+  if( pCfg->nAction)
+  {
+    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_ON, FALSE, FALSE);
+  }
   
   pData->trendState   = TREND_STATE_AUTO;
   pData->bTrendLamp   = pCfg->lampEnabled;

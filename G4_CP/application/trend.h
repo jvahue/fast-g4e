@@ -26,6 +26,7 @@
 #include "cycle.h"
 #include "EngineRun.h"
 #include "sensor.h"
+#include "ActionManager.h"
 
 
 /******************************************************************************
@@ -79,7 +80,7 @@
                       CYCLE_UNUSED,               /* nCycleB */\
                       CYCLE_UNUSED,               /* nCycleC */\
                       CYCLE_UNUSED,               /* nCycleD */\
-                      0,                          /* LssMask */\
+                      0x00000000,                 /* nAction */\
                       0,                          /* stabilityPeriod_s */\
                       FALSE,                      /* lampEnabled */\
                       STABILITY_CRITERIA_DEFAULT /* Stability[MAX_STAB_SENSORS] */
@@ -184,7 +185,7 @@ typedef struct
 {
    CHAR          trendName[MAX_TREND_NAME+1]; /* the name of the trend                       */
    /* Trend execution control */
-   TREND_RATE    rate;               /* Rate in ms at which trend is run.                    */
+   TREND_RATE    rate;               /* Rate in ms at which trend is run.                    */
    UINT32        nOffset_ms;         /* Offset in millisecs this object runs within it's MIF */
    /* Sampling control */
    UINT16        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
@@ -193,15 +194,10 @@ typedef struct
    TRIGGER_INDEX startTrigger;       /* Starting trigger                                     */
    TRIGGER_INDEX resetTrigger;       /* Ending trigger                                       */
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
-   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
-   // Keep cycle indexes allocation contiguous!
-   CYCLE_INDEX   nCycleA;            /* Persistent Cycle A to include in trend               */
-   CYCLE_INDEX   nCycleB;            /* Persistent Cycle B to include in trend               */
-   CYCLE_INDEX   nCycleC;            /* Persistent Cycle C to include in trend               */
-   CYCLE_INDEX   nCycleD;            /* Persistent Cycle D to include in trend               */
-   // Keep cycle indexes allocation contiguous!
-   UINT8         LssMask;            /* Mask of LSS outputs used by this trend when active   */
-   UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1-sec intervals */
+   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */   
+   CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/   
+   UINT32        nAction;           /* Mask of LSS outputs used by this trend when active   */
+   UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
    BOOLEAN       lampEnabled;        /* will the trend lamp flash                            */
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG, *TREND_CFG_PTR;
@@ -239,6 +235,7 @@ typedef struct
   BOOLEAN      bTrendLamp;          /* does a [Auto]Trend want to flash the lamp             */
   UINT16       trendCnt;            /* # of autotrends taken since Reset                     */
   BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
+  INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
   
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */

@@ -26,7 +26,7 @@
 #define VER_FUNC    "2"       // FN - Functional Build
 #define VER_MAJOR   "0"       // MJ - Major Functional Change
 #define VER_MINOR   "0"       // MN - Minor Functional Change
-#define DEV_BUILD   " Dev 8099d8841f8d+"  // ER - Development Build = "" for release
+#define DEV_BUILD   " Dev 61fdb76cecdc+"  // ER - Development Build = "" for release
 
 /******************************************************************************
                                  Package Typedefs
