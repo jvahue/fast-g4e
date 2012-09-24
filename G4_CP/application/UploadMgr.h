@@ -70,7 +70,7 @@
 /******************************************************************************
                                  Package Typedefs                             *
 ******************************************************************************/
-#define FILE_HEADER_VER   1   // Version identifies changes to the UPLOADMGR_FILE_HEADER
+#define FILE_HEADER_VER   2   // Version identifies changes to the UPLOADMGR_FILE_HEADER
                               //    or data log format.  Stored in FileVersion parameter.
 #pragma pack(1)
 typedef struct
