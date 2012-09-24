@@ -61,6 +61,7 @@ SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
 \
 SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
+SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
 \
 SYS_LOG_ID(APP_ID_TREND_MANUAL                      ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_AUTO                        ,0xB501 ,0)\
@@ -351,324 +352,324 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
- * 
+ *
  * *****************  Version 102  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:47p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Trend log types
- * 
+ *
  * *****************  Version 101  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 6:04p
  * Updated in $/software/control processor/code/system
  * SCR #1107 Time History implementation changes
- * 
+ *
  * *****************  Version 100  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 99  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:22p
  * Updated in $/software/control processor/code/system
  * SCR 1076 - Code Review Update
- * 
+ *
  * *****************  Version 98  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:30p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Change Cycle log # offset to +0x20
- * 
+ *
  * *****************  Version 97  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:02p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Action Manager Persistent updates
- * 
+ *
  * *****************  Version 96  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- * 
+ *
  * *****************  Version 95  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:36p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Cycle impl and persistence
- * 
+ *
  * *****************  Version 94  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 2:32p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Changed names start and run log sys id
- * 
+ *
  * *****************  Version 93  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:42p
  * Updated in $/software/control processor/code/system
  * FAST 2  Cycle  Added 0xB300 APP_ID_ENGINERUN and 0xB400 APP_ID_
- * 
+ *
  * *****************  Version 92  *****************
  * User: John Omalley Date: 4/24/12    Time: 12:00p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Cessna Caravan Updates
- * 
+ *
  * *****************  Version 91  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 89  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR #307 Add System Status to Fault / Event / etc logs
- * 
+ *
  * *****************  Version 88  *****************
  * User: Contractor2  Date: 8/15/11    Time: 1:48p
  * Updated in $/software/control processor/code/system
  * SCR #1021 Error: Data Manager Buffers Full Fault Detected
- * 
+ *
  * *****************  Version 87  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:57a
  * Updated in $/software/control processor/code/system
  * SCR 575: GSM Enable when engine status is lost.  (Part of changes for
  * the Fast State Machine)
- * 
+ *
  * *****************  Version 86  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:47p
  * Updated in $/software/control processor/code/system
  * SCR #515 Enhancement - sys.get.mem.l halts processor when invalid
  * memory is referenced
- * 
+ *
  * *****************  Version 85  *****************
  * User: Contractor2  Date: 6/20/11    Time: 11:31a
  * Updated in $/software/control processor/code/system
  * SCR #113 Enhancement - QAR bad baud rate setting and continuous
  * DATA_PRES trans ind
- * 
+ *
  * *****************  Version 84  *****************
  * User: Contractor2  Date: 6/14/11    Time: 11:41a
  * Updated in $/software/control processor/code/system
  * SCR #473 Enhancement: Restriction of System Logs
- * 
+ *
  * *****************  Version 83  *****************
  * User: Contractor2  Date: 6/01/11    Time: 1:45p
  * Updated in $/software/control processor/code/system
  * SCR #473 Enhancement: Restriction of System Logs
- * 
+ *
  * *****************  Version 82  *****************
  * User: Contractor2  Date: 5/10/11    Time: 2:33p
  * Updated in $/software/control processor/code/system
  * SCR #891 Enhancement: Incomplete FPGA initialization functionality
- * 
+ *
  * *****************  Version 81  *****************
  * User: Peter Lee    Date: 4/11/11    Time: 10:32a
  * Updated in $/software/control processor/code/system
  * SCR #1029 EMU150 Download
- * 
+ *
  * *****************  Version 80  *****************
  * User: John Omalley Date: 11/05/10   Time: 11:16a
  * Updated in $/software/control processor/code/system
  * SCR 985 - Data Manager Code Coverage Updates
- * 
+ *
  * *****************  Version 79  *****************
  * User: Peter Lee    Date: 9/03/10    Time: 6:05p
  * Updated in $/software/control processor/code/system
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 78  *****************
  * User: Contractor2  Date: 8/02/10    Time: 3:42p
  * Updated in $/software/control processor/code/system
  * SCR #762 Error: Micro-Server Interface Logic doesn't work
- * 
+ *
  * *****************  Version 77  *****************
  * User: Contractor2  Date: 7/30/10    Time: 2:17p
  * Updated in $/software/control processor/code/system
  * SCR #90;243;252 Implementation: CBIT of mssim
- * 
+ *
  * *****************  Version 76  *****************
  * User: John Omalley Date: 7/30/10    Time: 11:59a
  * Updated in $/software/control processor/code/system
  * SCR 730 - Fixed problems with the IDs
- * 
+ *
  * *****************  Version 75  *****************
  * User: John Omalley Date: 7/27/10    Time: 4:43p
  * Updated in $/software/control processor/code/system
  * SCR 730 - Removed Log Write Failed log
- * 
+ *
  * *****************  Version 74  *****************
  * User: John Omalley Date: 7/23/10    Time: 10:17a
  * Updated in $/software/control processor/code/system
  * SCR 306 / SCR 639 - Added Log Manager System Logs
- * 
+ *
  * *****************  Version 73  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #8 Implementation: External Interrupt Monitors
- * 
+ *
  * *****************  Version 72  *****************
  * User: Contractor2  Date: 7/09/10    Time: 1:44p
  * Updated in $/software/control processor/code/system
  * SCR #687 Implementation: Watchdog Reset Log
- * 
+ *
  * *****************  Version 71  *****************
  * User: Contractor V&v Date: 7/07/10    Time: 6:19p
  * Updated in $/software/control processor/code/system
  * SCR #681 The system shall set SC to FAULT if both copies of sys
- * 
+ *
  * *****************  Version 70  *****************
  * User: Jim Mood     Date: 6/29/10    Time: 6:05p
  * Updated in $/software/control processor/code/system
  * SCR 623  Updated system log IDs for aircraft reconfiguration.
- * 
+ *
  * *****************  Version 69  *****************
  * User: Contractor2  Date: 6/18/10    Time: 11:34a
  * Updated in $/software/control processor/code/system
  * SCR #611 Write Logs  on CRC Pass/Fail
  * Added sys log for SRS-2465.
- * 
+ *
  * *****************  Version 68  *****************
  * User: Peter Lee    Date: 6/17/10    Time: 5:36p
  * Updated in $/software/control processor/code/system
  * SCR #635 Create log to indicate "unrecognized" dump list detected.
- * 
+ *
  * *****************  Version 67  *****************
  * User: Peter Lee    Date: 6/08/10    Time: 5:08p
  * Updated in $/software/control processor/code/system
  * SCR #635 Uart PBIT System Log Id
- * 
+ *
  * *****************  Version 66  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:09p
  * Updated in $/software/control processor/code/system
  * SCR #618 F7X and UartMgr Requirements Implementation
- * 
+ *
  * *****************  Version 65  *****************
  * User: Contractor2  Date: 5/25/10    Time: 3:04p
  * Updated in $/software/control processor/code/system
  * SCR #611 Write Logs  on CRC Pass/Fail
- * 
+ *
  * *****************  Version 64  *****************
  * User: Contractor2  Date: 5/06/10    Time: 3:58p
  * Updated in $/software/control processor/code/system
  * SCR #530 - Error: Trigger NO_COMPARE infinite logs
  * Removed SYS_ID_CBIT_START_TRIG_BAD_COMPARE and
  * SYS_ID_CBIT_END_TRIG_BAD_COMPARE
- * Related to obsolete requirements SRS-3307 and SRS-3308 
- * 
+ * Related to obsolete requirements SRS-3307 and SRS-3308
+ *
  * *****************  Version 63  *****************
  * User: Contractor V&v Date: 4/28/10    Time: 4:54p
  * Updated in $/software/control processor/code/system
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 4/23/10    Time: 6:52p
  * Updated in $/software/control processor/code/system
  * SCR #563 - clean up System Log ID values and insert comment into
  * TaskManager.h
- * 
+ *
  * *****************  Version 61  *****************
  * User: Contractor2  Date: 4/23/10    Time: 2:09p
  * Updated in $/software/control processor/code/system
  * Implementation: Req SRS-1811,1813,1814,1815,3162 - CBIT RAM Tests
- * 
+ *
  * *****************  Version 60  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:42p
  * Updated in $/software/control processor/code/system
  * SCR #453 Misc fix
- * 
+ *
  * *****************  Version 59  *****************
  * User: Jeff Vahue   Date: 4/13/10    Time: 11:59a
  * Updated in $/software/control processor/code/system
  * SCR #470 - remove unused system logs - moved unused to after the list
  * and commented out for now.
- * 
+ *
  * *****************  Version 58  *****************
  * User: Contractor V&v Date: 4/12/10    Time: 7:22p
  * Updated in $/software/control processor/code/system
  * SCR #540 Log reason for cfg reset
- * 
+ *
  * *****************  Version 57  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR #533 DOUT wrap-around
- * 
+ *
  * *****************  Version 56  *****************
  * User: Contractor2  Date: 4/06/10    Time: 3:56p
  * Updated in $/software/control processor/code/system
  * SCR 525 - Implement periodic CBIT CRC test.
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 54  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #492 Log SPI timeouts events
- * 
+ *
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:41p
  * Updated in $/software/control processor/code/system
  * SCR #248 Parameter Log Change
- * 
+ *
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 4:04p
  * Updated in $/software/control processor/code/system
  * SCR #67 Interrupted SPI Access-  Added log code for SpiManager
- * 
+ *
  * *****************  Version 51  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 50  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 2:45p
  * Updated in $/software/control processor/code/system
  * SCR# 405 - Add DT overrun Log on each occurance, save actual MIF of max
  * Duty Cycle vs. 0-32, so we can tell if issues happen at startup.
- * 
+ *
  * *****************  Version 49  *****************
  * User: Peter Lee    Date: 2/01/10    Time: 3:28p
  * Updated in $/software/control processor/code/system
  * SCR #432 Add Arinc429 Tx-Rx LoopBack PBIT
- * 
+ *
  * *****************  Version 48  *****************
  * User: Peter Lee    Date: 1/28/10    Time: 9:20a
  * Updated in $/software/control processor/code/system
  * SCR #427 ClockMgr.c Issues and SRS-3090
- * 
+ *
  * *****************  Version 47  *****************
  * User: Peter Lee    Date: 1/27/10    Time: 4:31p
  * Updated in $/software/control processor/code/system
- * SCR #427 Misc Clock Updates 
- * 
+ * SCR #427 Misc Clock Updates
+ *
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 7:32p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- * 
+ *
  * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 12/17/09   Time: 12:13p
  * Updated in $/software/control processor/code/system
  * SCR# 364 INT8 -> CHAR
- * 
+ *
  * *****************  Version 43  *****************
  * User: Peter Lee    Date: 12/16/09   Time: 2:17p
  * Updated in $/software/control processor/code/system
  * QAR Req 3110, 3041, 3114 and 3118
- * 
+ *
  * *****************  Version 42  *****************
  * User: Peter Lee    Date: 12/01/09   Time: 5:17p
  * Updated in $/software/control processor/code/system
  * SCR #347 Time Sync Requirements
- * 
+ *
  * *****************  Version 41  *****************
  * User: John Omalley Date: 11/24/09   Time: 2:44p
  * Updated in $/software/control processor/code/system
  * SCR 348
  * * Updated the system log size to 512 bytes and sized the LogWriteSystem
  * table to 128 entries.
- * 
+ *
  * *****************  Version 40  *****************
  * User: Peter Lee    Date: 11/23/09   Time: 2:04p
  * Updated in $/software/control processor/code/system
