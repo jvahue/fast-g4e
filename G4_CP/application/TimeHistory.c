@@ -5,48 +5,58 @@
 
     File:        TimeHistory.c
     
-    Description: Contains a buffer sufficient to hold 6 minutes of data from 128 sensor
-                 objects at 20Hz.  The buffer stores configured sensors only, at the rate
-                 configured in time history configuration.
+    Description: Contains a buffer sufficient to hold 6 minutes of data from
+                 128 sensor objects at 20Hz.  The buffer stores configured
+                 sensors only, at the rate configured in time history
+                 configuration.
  
-                 Real-time sensor data and bufferd sensor data is recorded to ETM logs when
-                 requested by another module.
+                 Real-time sensor data and bufferd sensor data is recorded to
+                 ETM logs when requested by another module.
  
-                 The post-time history uses the millisecond counter and will not operate
-                 after 49.7 days of continous operation.
+                 The post-time history uses the millisecond counter and will
+                 not operate after 49.7 days of continous operation.
  
     VERSION
-    $Revision: 6 $  $Date: 12-09-11 1:59p $   
+    $Revision: 9 $  $Date: 9/21/12 5:49p $   
    
 ******************************************************************************/
 
 /*****************************************************************************/
-/* Compiler Specific Includes                                                                */
+/* Compiler Specific Includes                                                */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Software Specific Includes                                                                */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "timehistory.h"
 #include "clockmgr.h"
 #include "sensor.h"
 #include "CfgManager.h"
-/*********************************************************************************************/
-/* Local Defines                                                                             */
-/*********************************************************************************************/
+#include "GSE.h"
+#include "user.h"
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
+#define TH_SENSOR_CT_TO_VALID_BITS_SZ(cnt) ( cnt/8 + MIN((cnt % 8),1) )
+
 //Each record is 1 timestamp, 1..128 sensor values, 1 bit for each validitiy flag
-#define TH_SENSOR_CT_TO_REC_SZ(cnt) (sizeof(TIMESTAMP)+(sizeof(FLOAT32)*cnt)+(cnt/8 + 1)) 
+#define TH_SENSOR_CT_TO_REC_SZ(cnt) (sizeof(TH_DATA_RECORD_HEADER) + (sizeof(FLOAT32)*cnt) \
+                                    + TH_SENSOR_CT_TO_VALID_BITS_SZ(cnt) ) 
 
 //Convert number of seconds into 
-#define TH_SENSOR_REC_PER_SEC(s) (CfgMgr_ConfigPtr()->TimeHistoryConfig.SampleRate * s)
+#define TH_SENSOR_REC_PER_SEC(s) (CfgMgr_ConfigPtr()->TimeHistoryConfig.sample_rate * s)
+
+//Data buffer size (Number of records * (size of record header+size of biggest data record))
+#define TH_PRE_HISTORY_DATA_BUFFER_SZ  \
+                                (TH_PRE_HISTORY_REC_CNT * TH_SENSOR_CT_TO_REC_SZ(MAX_SENSORS))
 
 //TH_Task activities for writing TH records to log memeory
-#define TH_TASK_SEARCH 0
+#define TH_TASK_SEARCH 0 
 #define TH_TASK_WRITE  1
 #define TH_TASK_WAIT   2
-/*********************************************************************************************/
-/* Local Typedefs                                                                            */
-/*********************************************************************************************/
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
 /*Time history buffer consists of values of all configured sensors written to a buffer 
   at a configured rate.
 
@@ -63,8 +73,8 @@
   Stats:
   6 minutes * 60 s/m *20Hz = 7200 records
  
-  7200 records * ((4 bytes/value * 128 values + (128/8 bits/byte)) + 6 bytes/timestamp)
-                           = 3844800B data buffer //TODO redo-math for new records with header
+  7200 records * ((4 bytes/value * 128 values + (128/8 bits/byte)) + 20 bytes/header)
+                           = 3945600B data buffer
   */
 typedef struct
 {
@@ -73,62 +83,71 @@ typedef struct
   void*   data;     //Location of data to write to log memory (each block must be contigous)
 }TH_RECORD_CTL_BLK;
 
-/*RECORD_HEADER - Header for the time history data written to log memory*/
+/*RECORD_HEADER - Header for the time history data written to log memory.  The ETM Header fields 
+  are structure and format are mandated outside of the Time History definition and should always
+  match that definition.  The TH Specific timestamp is recorded after the ETM Header fields */
 #pragma pack(1)
 typedef struct
 {
-  UINT32 cs;              //record checksum (all bytes, excluding CS itself)
-  TIMESTAMP ts_written;   //Timestamp - When the record is written to flash
-  TIMESTAMP ts_recorded;  //Timestamp - Time when the sensor values were put in the TH buffer
-  UINT16 size;            //Size - Size of bytes follwing this header (depends on # of sensors configured)
+  UINT32    cs;           //ETM Header: record checksum - (all bytes, excluding CS itself)
+  TIMESTAMP ts_written;   //ETM Header: Timestamp - When the record is written to flash
+  UINT16    id;           //ETM Header: LogID - Should always be the TH log id 
+                          //                   (APP_ID_TIMEHISTORY_ETM_LOG) from systemlog.h
+  UINT16    size;         //ETM Header: Size - Size of bytes follwing this header (depends on # of
+                          //                    sensors configured)
+                          
+  TIMESTAMP ts_recorded;  //TH Specific: Timestamp - Time when the sensor values were put 
+                          //                         in the TH buffer
 } TH_DATA_RECORD_HEADER;
 #pragma pack
 
-/*Time History sensor data buffering TODO: Define actual sizes 
+/*Time History sensor data buffering 
   Access is performed though PutBuf/GetBuf*/
 typedef struct
 {
-  CHAR *dwrite_ptr;                     //data[] buffer write pointer
+  BYTE *dwrite_ptr;                     //data[] buffer write pointer
   TH_RECORD_CTL_BLK *cwrite_ptr;        //ctrl[] buffer write pointer
   TH_RECORD_CTL_BLK *csearch_ptr;       //ctrl[] buffer pointer for searching records.
-  TH_RECORD_CTL_BLK ctrl[TH_PRE_HISTORY_REC_CNT];    //Holds control structures (semaphors etc.) for 
-  //records in data[] 
-  CHAR data[100];            //TH record to be written to data flash on request TODO Define real value
+  TH_RECORD_CTL_BLK ctrl[TH_PRE_HISTORY_REC_CNT];   //Holds control structures 
+                                                    //(semaphors etc.) for records in data[] 
+  BYTE data[TH_PRE_HISTORY_DATA_BUFFER_SZ]; //TH record to be written to data flash on request 
 }TH_BUF;
-/*********************************************************************************************/
-/* Local Variables                                                                           */
-/*********************************************************************************************/
-static INT32  m_SensorList[MAX_SENSORS+1]; //List of configured sensors, 1 extra for a terminator.
-static INT32  m_SensorCnt;
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static INT32  m_SensorList[MAX_SENSORS+1]; //List of configured sensors, +1 for a terminator.
+static UINT16 m_SensorCnt;
 static TH_BUF m_THDataBuf;    
-static INT32  m_OpenCnt;     
+static UINT32 m_OpenCnt;     
 static UINT32 m_StopTime;
 static TIMEHISTORY_CONFIG m_Cfg;
 static UINT32 m_WriteReqCnt;   //Number of records to write to log mem since PO
                                      // used to track app BUSY/IDLE status
 static UINT32 m_WrittenCnt;    //Number of records written to log mem 
-                                     // used to track app BUSY/IDLE status //TODO # records pending write good debug info
-/*********************************************************************************************/
-/* Local Function Prototypes                                                                 */
-/*********************************************************************************************/
-static void  TH_BuildRec(CHAR *rec);
+                                     // used to track app BUSY/IDLE status 
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
+static void  TH_BuildRec(BYTE *rec);
 static void  TH_PutNewRec(INT32 sz, BOOLEAN init_write);
-static CHAR* TH_GetDataBufPtr(INT32 size);
+static BYTE* TH_GetDataBufPtr(INT32 size);
 static INT32 TH_FindRecToWriteToLog(TH_RECORD_CTL_BLK **start_blk);
 static void  TH_WriteRecToLog(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt,
                                LOG_REQ_STATUS *lm_sta);
 static void  TH_MarkTHRecordWritten(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt);
-static void  TH_Task(void);
-/*********************************************************************************************/
-/* Public Functions                                                                          */
-/*********************************************************************************************/
+static void  TH_Task ( void* pParam );
+
+#include "TimeHistoryUserTables.c"
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /**********************************************************************************************
  * Function:    TH_Init
  *
  * Description: Initiailizes the Time History data and buffers.
  *
- * Parameters:
+ * Parameters:  
  *
  * Returns:
  *
@@ -139,7 +158,8 @@ void TH_Init ( void )
 {
   INT32 list_idx = 0;
   INT32 i;
-  //TCB TaskInfo;
+  TCB task_info;
+  USER_MSG_TBL root_msg = {"TH", time_history_root, NULL, NO_HANDLER_DATA};
 
   //Generate a list of sensors that are used
   for ( i = 0; i < MAX_SENSORS; i++ )
@@ -173,21 +193,24 @@ void TH_Init ( void )
   m_WrittenCnt = 0;
 
   // Create Time History Task - DT
-  /*memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Time History",_TRUNCATE);
-  TaskInfo.TaskID           = TH_Task_ID;
-  TaskInfo.Function         = TH_Task;
-  TaskInfo.Priority         = taskInfo[Sensor_Task].priority;
-  TaskInfo.Type             = taskInfo[Sensor_Task].taskType;
-  TaskInfo.modes            = taskInfo[Sensor_Task].modes;
-  TaskInfo.MIFrames         = taskInfo[Sensor_Task].MIFframes;
-  TaskInfo.Enabled          = TRUE;
-  TaskInfo.Locked           = FALSE;
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"Time History",_TRUNCATE);
+  task_info.TaskID           = TH_Task_ID;
+  task_info.Function         = TH_Task;
+  task_info.Priority         = taskInfo[TH_Task_ID].priority;
+  task_info.Type             = taskInfo[TH_Task_ID].taskType;
+  task_info.modes            = taskInfo[TH_Task_ID].modes;
+  task_info.MIFrames         = taskInfo[TH_Task_ID].MIFframes;
+  task_info.Enabled          = TRUE;
+  task_info.Locked           = FALSE;
 
-  TaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Task].InitialMif;
-  TaskInfo.Rmt.MifRate      = taskInfo[Sensor_Task].MIFrate;
-  TaskInfo.pParamBlock      = NULL; 
-   */
+  task_info.Rmt.InitialMif   = taskInfo[TH_Task_ID].InitialMif;
+  task_info.Rmt.MifRate      = taskInfo[TH_Task_ID].MIFrate;
+  task_info.pParamBlock      = NULL; 
+  
+  TmTaskCreate(&task_info);
+
+  User_AddRootCmd(&root_msg);
 }
 
 
@@ -214,34 +237,39 @@ void TH_Init ( void )
  *
  * Notes:       reentrant ok
  *
- *          TODO: if DT TH task interrupts someone opening a TH record, will this cause
- *                multiple access to the th buffer issues?
+ *         
  *
  *********************************************************************************************/
-void TH_Open(INT32 pre_s)
+void TH_Open(UINT32 pre_s)
 {
   TH_RECORD_CTL_BLK* pre_ptr;
-  INT32 i;
+  UINT32 i;
   INT32 int_save;
+
   m_OpenCnt++;
 
-  pre_ptr = m_THDataBuf.cwrite_ptr;
+  //Set starting point for marking pre-timehistory.  cwrite_ptr is pointing to the next 
+  //location to write, so back it up (with wrap-around) to the previously written location
+  pre_ptr = m_THDataBuf.cwrite_ptr == &m_THDataBuf.ctrl[0] ? 
+            &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT-1] : m_THDataBuf.cwrite_ptr-1;
 
   //range-check input parameter
-  pre_s = MAX(0,pre_s);
   pre_s = MIN(TH_PRE_HISTORY_S,pre_s);
+
+  GSE_DebugStr(NORMAL,TRUE,"TH: Open; pre-hist: %ds; open: %d",pre_s,m_OpenCnt);
 
   //Mark records from now back to the number of seconds requested by the caller.
   //TEST: boundary condidions here, wrap around at end of buffer
   for (i = 0; i < TH_SENSOR_REC_PER_SEC(pre_s); i++ )
   {
     //Handle wrap to beginning of buffer
-    if (pre_ptr < m_THDataBuf.cwrite_ptr)
+    if (pre_ptr < &m_THDataBuf.ctrl[0])
     {
-      pre_ptr = &m_THDataBuf.cwrite_ptr[TH_PRE_HISTORY_REC_CNT-1];
+      pre_ptr = &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT-1];
     }
     int_save = __DIR();
-    m_WriteReqCnt += pre_ptr->write ? 0 : 1;  //Increment write req only if 
+    m_WriteReqCnt += 
+      pre_ptr->write || pre_ptr->written ? 0 : 1;  //Increment write req only if 
                                                     //write is not already set
     __RIR(int_save);
 
@@ -270,20 +298,20 @@ void TH_Open(INT32 pre_s)
  * Notes:       reentrant ok
  *
  *********************************************************************************************/
-void TH_Close(INT32 time_s)
+void TH_Close(UINT32 time_s)
 {
   INT32 int_save;
 
   m_OpenCnt -= (m_OpenCnt == 0) ? 0 : 1;
 
+  GSE_DebugStr(NORMAL,TRUE,"TH: Close; post-hist: %ds; open: %d",time_s,m_OpenCnt);
   //range-check input parameter
-  time_s = MAX(0,time_s);
   time_s = MIN(TH_POST_HISTORY_S,time_s);
 
   int_save = __DIR();
-  if(m_StopTime < CM_GetTickCount() + time_s)
+  if(m_StopTime < CM_GetTickCount() + (time_s*1000)  )
   {
-    m_StopTime = CM_GetTickCount() + time_s;
+    m_StopTime = CM_GetTickCount() + (time_s*1000);
   }
   __RIR(int_save);
 
@@ -305,14 +333,17 @@ void TH_Close(INT32 time_s)
  *
  * Parameters:  [in] param: ignored.  Included to match FSM call sig.
  *                      
- * Returns:     
+ * Returns:     TRUE: Time History is busy, 1 or more of the 3 conditions are true
+ *              FALSE: Time History is idle, none of the 3 conditions above are true
  *
  * Notes:
  *
  *********************************************************************************************/
 BOOLEAN TH_FSMAppBusyGetState(INT32 param)
 {
-  return FALSE;//(if during or post, if log writing is active);
+  return (m_OpenCnt != 0)                 || 
+         (m_StopTime > CM_GetTickCount()) || 
+         (m_WriteReqCnt != m_WrittenCnt);
 }
 
 /******************************************************************************
@@ -344,7 +375,7 @@ UINT16 TH_GetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
 
    memset ( &header, 0, sizeof(header) );
 
-   header.sampleRate = m_Cfg.SampleRate;
+   header.sampleRate = m_Cfg.sample_rate;
 
    // Increment the total number of bytes and decrement the remaining
    nTotal     += sizeof (header);
@@ -363,39 +394,47 @@ UINT16 TH_GetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
 /**********************************************************************************************
  * Function:     TH_Task
  *
- * Description:  
+ * Description:  Time history task.  Performs the following:
+ * 
+ *               -Save sensor data to the pre-history buffer at the
+ *                configured rate.
+ *                  -Pending the records for write if during or post-history
+ *                   is active.
+ *               -Search for time history records in the pre-history buffer
+ *                pending write.
+ *               -Writing time history records to Log Memory.
  *
- * Parameters:
+ * Parameters:   [in] pParam: Not used, to match TM call signature 
  *
  * Returns:
  *
  * Notes:
  *
  *********************************************************************************************/
-static void TH_Task ( void )
+static void TH_Task ( void* pParam )
 {  
-  CHAR* rec_buf;
+  BYTE* rec_buf;
   BOOLEAN is_post_during;
-  static UINT32 frame_cnt;
+  static UINT32 frame_cnt  = 0;
   static UINT32 task_state = TH_TASK_SEARCH;
   static TH_RECORD_CTL_BLK *blk_start_ptr;   //First record to be written to logs
   static INT32              blk_write_cnt;   //# of blocks after first record to write to logs
-  static LOG_MNG_STATE      log_mgr_status;
+  static LOG_REQ_STATUS     log_mgr_state;
 
-  //TEST: Make sure this mess of offset and sample rate is correct
-  //if (Current frame - Offset) is a multiple of the configured sample rate
-  if ( ( (  (frame_cnt++ - ( m_Cfg.nSampleOffset_ms/MIF_PERIOD_mS )) % 
-            (m_Cfg.SampleRate/MIFs_PER_SECOND)  )              == 0)  )
+
+  if (   (  (frame_cnt++ - ( m_Cfg.sample_offset_ms/MIF_PERIOD_mS )) % 
+            (MIFs_PER_SECOND/m_Cfg.sample_rate)  )              == 0  )
   {
     //For # of sensors, read value/validity and build TH record
     rec_buf = TH_GetDataBufPtr(TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt));
     TH_BuildRec(rec_buf);
 
-    //Write record to buffer, set the write flag if post/during requests writing of current data
-    //Increment write request count is write flag is to be set
+    //Write record to buffer, set the write flag if post/during requests writing of current 
+    //data. Increment write request count is write flag is to be set
     is_post_during = (CM_GetTickCount() < m_StopTime) || (m_OpenCnt != 0);
     m_WriteReqCnt += is_post_during ? 1 : 0;  
     TH_PutNewRec(TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt),is_post_during);
+
   }
   else  //Use other frames to write TH logs
   {
@@ -409,22 +448,25 @@ static void TH_Task ( void )
         }
       break;
 
-
       case TH_TASK_WRITE:
-        TH_WriteRecToLog(blk_start_ptr,blk_write_cnt,&log_mgr_status);
+        TH_WriteRecToLog(blk_start_ptr,blk_write_cnt,&log_mgr_state);
+        task_state = TH_TASK_WAIT;
       break;
 
       case TH_TASK_WAIT:
-        if(log_mgr_status == LOG_REQ_COMPLETE)
+        if(log_mgr_state == LOG_REQ_COMPLETE)
         {
           TH_MarkTHRecordWritten(blk_start_ptr,blk_write_cnt);
           task_state = TH_TASK_SEARCH;
         }
-        else if(log_mgr_status == LOG_REQ_FAILED)
+        else if(log_mgr_state == LOG_REQ_FAILED)
         {
           task_state = TH_TASK_SEARCH;
-          //TODO: Write a system log w/ timestamps, limit occurances
         }
+      break;
+
+      default:
+        FATAL("TH: Task State %d, not valid",task_state);
       break;
     }
   }
@@ -445,10 +487,16 @@ static void TH_Task ( void )
  * 
  *               1. The position of the first record
  *               2. A count of consecutive records after the first that need to be written
+ *               3. NO BUFFER-WRAPPING RECORDS ARE RETURNED. This makes down the line
+ *                  processing simpler as logs are written straight from the buffer memory
+ *                  and a wrapped buffer cannot be passed to log write
  * 
- * Parameters:   none
+ * Parameters:   [out] start_blk: Returns a pointer to the start of the control blocks to be
+ *                                written to log memory
+ *               
  *                         
- * Returns:      none
+ * Returns:      INT32: Count of records to be written to log memory including and following
+ *                      the start_blk
  *
  * Notes:
  *********************************************************************************************/
@@ -457,20 +505,27 @@ static INT32 TH_FindRecToWriteToLog(TH_RECORD_CTL_BLK **start_blk)
   INT32 i;
   INT32 blk_cnt = 0;
 
+  *start_blk = NULL;
+
   for( i = 0; i < TH_REC_SEARCH_PER_FRAME; i++)
   {
+    //Wrap pointer if pointing past last record.
+    if(m_THDataBuf.csearch_ptr == &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT])
+    {
+      m_THDataBuf.csearch_ptr = m_THDataBuf.ctrl;
+    }
+
+    //Find the start of a section needing writes.  Add to count as long as the records are
+    //contigous.
     if(m_THDataBuf.csearch_ptr->write && !m_THDataBuf.csearch_ptr->written)
     {
-      //Found first TH record needing to be written
-      *start_blk = m_THDataBuf.csearch_ptr++;
-      //Count up other logs needing to be written up to the max per frame and as long as they
-      // are consecutive
-      //TEST: verify blk_cnt and search ptr are correct when the loop exits on blk_cnt == MAX or 
-      //      non-consectuive TH.
-      for( blk_cnt = 1; (blk_cnt < TH_MAX_LOG_WRITE_PER_FRAME) && 
-                        (m_THDataBuf.csearch_ptr->write && !m_THDataBuf.csearch_ptr->written);
-                         blk_cnt++ )
+      for( blk_cnt = 0;(blk_cnt < TH_MAX_LOG_WRITE_PER_FRAME) && 
+                       (m_THDataBuf.csearch_ptr->write && !m_THDataBuf.csearch_ptr->written) &&
+                       (m_THDataBuf.csearch_ptr != &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT]);
+                        blk_cnt++ )
       {
+        //Set start block only for the first block found
+        *start_blk = *start_blk == NULL ? m_THDataBuf.csearch_ptr : *start_blk;
         m_THDataBuf.csearch_ptr++;
       }
       break;
@@ -485,21 +540,24 @@ static INT32 TH_FindRecToWriteToLog(TH_RECORD_CTL_BLK **start_blk)
 
 
 
-/********************************************************************************************** 
+/**********************************************************************************************
  * Function:     TH_WriteRecToLog
  *
  * Description:  Write a set of TH records from the TH data buffer to log memory.  The input
- *               parameter specifies a list of records to be written.
+ *               parameter specifies a list of records to be written.  Records to be written
+ *               must NOT wrap to the beginning of the buffer.
  * 
  *               The current timestamp and checksum is added to each record header
  * 
- * Parameters:   
+ * Parameters:   [in]     start_blk:     Pointer to first control block to write
+ *               [in]     blk_write_cnt: Number of contiguous block to write 
+ *               [in/out] lm_sta:        Pointer to a location to save LogWrite status flag
  *                         
  * Returns:       none
  *
  * Notes:         Max write size is dependant on number of configured sensors and the value of
  *                TH_MAX_LOG_WRITE_PER_FRAME.  For 128 sensors each block will be 564 bytes.
- *                At a MAX of 10 logs/frame this is 5,640 bytes.  TODO: Might be too much.
+ *                At a MAX of 10 logs/frame this is 5,640 bytes.  
  *********************************************************************************************/
 static void TH_WriteRecToLog(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt,
                              LOG_REQ_STATUS *lm_sta)
@@ -507,34 +565,31 @@ static void TH_WriteRecToLog(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt,
   INT32 i;
   TIMESTAMP now;
   TH_DATA_RECORD_HEADER* log_hdr;
-  INT32 record_sz;
+  UINT32 record_sz;
   UINT32 log_write_cs = 0;
   LOG_SOURCE source;
 
   CM_GetTimeAsTimestamp(&now);
-  //TODO: Timing for this activity per log
 
   //Do checksums/timestamps
-  //TEST: Need to verify log_write_cs is correct, b/c is not checked by LM and won't fail even
-  // if it is wrong
   for(i = 0; i < blk_write_cnt; i++)
   {
     log_hdr             = (TH_DATA_RECORD_HEADER*)start_blk[i].data;
     log_hdr->ts_written = now;
-    record_sz           = log_hdr->size+sizeof(*log_hdr);
+    //total size of log is data size + header size - TS (because it is included in data size)
+    record_sz           = log_hdr->size+sizeof(*log_hdr)-sizeof(log_hdr->ts_recorded); 
 #pragma ghs nowarning 1545  //supress packed structure alignment warning
-    log_hdr->cs = ChecksumBuffer(&log_hdr->size, record_sz-sizeof(log_hdr->cs),0xFFFFFFFF);
+    log_hdr->cs = ChecksumBuffer(&log_hdr->ts_written, record_sz-sizeof(log_hdr->cs),0xFFFFFFFF);
     log_write_cs += ChecksumBuffer(&log_hdr->cs,sizeof(log_hdr->cs),0xFFFFFFFF) + log_hdr->cs;
 #pragma ghs endnowarning
   }
-
-  //TEST: Verify log format and boundaries are correct, no extra or missing bytes.
+  //TODO: Test checksum
   //Write logs
   source.ID = APP_ID_TIMEHISTORY_ETM_LOG;
   LogWrite(LOG_TYPE_ETM,
            source,
            TH_LOG_PRIORITY,
-           log_hdr,
+           start_blk->data,
            TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt)*blk_write_cnt,
            log_write_cs, 
            lm_sta);
@@ -545,15 +600,16 @@ static void TH_WriteRecToLog(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt,
 /********************************************************************************************** 
  * Function:     TH_MarkTHRecordWritten
  *
- * Description:  
+ * Description:  Set the written flag on a contiguous set of time history records.
  * 
- * Parameters:  
+ * Parameters:   [in/out] start_blk:     First block to start marking at
+ *               [in]     blk_write_cnt: Number of contiguous blocks to mark after the first
  *                         
- * Returns:
+ * Returns:      none
  *
  * Notes:
  *********************************************************************************************/
-void TH_MarkTHRecordWritten(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt)
+static void TH_MarkTHRecordWritten(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt)
 {
   INT32 i;
 
@@ -581,7 +637,8 @@ void TH_MarkTHRecordWritten(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt)
  *               Log/Record Header  = Checksum and timestamp information, in the format of the
  *                                    log.
  *               TimeStamp          = 48-bit Altair Timestamp
- *               ValidFlags         = Variable size sensor validity booleans as packed bitfields
+ *               ValidFlags         = Variable size sensor validity booleans as packed
+ *                                    bitfields
  *               Value 0.. Value n  = Variable size list of float formatted sensor values of
  *                                    configured sensors
  * 
@@ -596,16 +653,16 @@ void TH_MarkTHRecordWritten(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt)
  * Parameters:  [out] rec: Location to store the built record.  Size required is dependant on
  *                         the number of sensors configured.
  *                         
- * Returns:
+ * Returns:     none
  *
  * Notes:
  *********************************************************************************************/
-static void TH_BuildRec(CHAR *rec)
+static void TH_BuildRec(BYTE *rec)
 {
   // Local Data
-  CHAR *bit_ptr;
-  CHAR *value_ptr;
-  INT32 i;
+  BYTE *bit_ptr;
+  FLOAT32 *value_ptr;
+  UINT32 i;
   TH_DATA_RECORD_HEADER *hdr = (void*)rec;
 
   memset(hdr,0,sizeof(*hdr));
@@ -614,22 +671,25 @@ static void TH_BuildRec(CHAR *rec)
   bit_ptr   = rec + sizeof(*hdr);
 
   //Set pointer to the sensor values after the ValidFlag bitfields
-  value_ptr = bit_ptr + (m_SensorCnt / 8) + 1;
+  value_ptr = (void*)(bit_ptr + TH_SENSOR_CT_TO_VALID_BITS_SZ(m_SensorCnt));
 
-  //Add timestamp and size to header, the checksum and record time will be added later if this
-  //record is recorded to FLASH.
+  //Add timestamp and size to header, the checksum and record time 
+  //will be added later if this record is recorded to FLASH.
   CM_GetTimeAsTimestamp(&hdr->ts_recorded);
-  hdr->size = TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt);
-
+  hdr->size = TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt) - sizeof(*hdr) + sizeof(hdr->ts_recorded);
+  hdr->id   = APP_ID_TIMEHISTORY_ETM_LOG;
 
   //Read sensor values/validity and build the rest of the buffer
-  //TEST: Check buffer pointer math for the number of bit field bytes, and validity bit math
-  // for boundary conditions
+  //TEST: Check buffer pointer math for the number of bit field bytes, 
+  //and validity bit math for boundary conditions
   for (i = 0; (i < MAX_SENSORS) && m_SensorList[i] != SENSOR_UNUSED; i++)
   {
     //Sensor Values
     *value_ptr = SensorGetValue((SENSOR_INDEX)m_SensorList[i]);
-    value_ptr += sizeof(FLOAT32);
+    value_ptr++;
+
+    //Increment valid bit pointer one byte each 8 sensors.
+    bit_ptr += ((i / 8) > 0) && (i % 8 == 0) ? 1 : 0; 
 
     //Sensor Validity
     if (SensorIsValid((SENSOR_INDEX)m_SensorList[i]))
@@ -640,9 +700,6 @@ static void TH_BuildRec(CHAR *rec)
     {
       *bit_ptr &= ~(1 << (i%8));
     }
-
-    //Increment valid bit pointer on byte each 8 sensors.
-    bit_ptr += ((i / 8) > 0) && (i % 8 == 0) ? 1 : 0; 
   }
 }   
 
@@ -652,9 +709,9 @@ static void TH_BuildRec(CHAR *rec)
  * Function:     TH_PutNewRec
  * 
  * Description:  Add a new time history record to the m_THDataBuf time history buffer.  This 
- *               routine modifies the control buffer, adding a reference to the new th_rec data,
- *               and set the control flags "write" and "written" to zero. Then, it increments the
- *               data ptr
+ *               routine modifies the control buffer, adding a reference to the new th_rec 
+ *               data, and set the control flags "write" and "written" to zero. Then, it 
+ *               increments the data ptr
  * 
  *               See TH_GetDataBuf
  * 
@@ -666,7 +723,7 @@ static void TH_BuildRec(CHAR *rec)
  *                                         (meaning it will be written only if the write flag
  *                                          is set later)
  * 
- * Returns:
+ * Returns:      none
  * 
  * Notes:        not reentrant
  *
@@ -674,14 +731,14 @@ static void TH_BuildRec(CHAR *rec)
 static void TH_PutNewRec(INT32 sz, BOOLEAN init_write)
 {
   //Setup control pointer to store the new TH
-  if (m_THDataBuf.cwrite_ptr == &m_THDataBuf.ctrl[TH_PRE_HISTORY_DATA_SZ])
+  if (m_THDataBuf.cwrite_ptr == &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT])
   {
     m_THDataBuf.cwrite_ptr = &m_THDataBuf.ctrl[0];
   }
 
   //Add control data for the new time history record, increment pointer
   m_THDataBuf.cwrite_ptr->data = m_THDataBuf.dwrite_ptr;
-  m_THDataBuf.cwrite_ptr->write = FALSE;
+  m_THDataBuf.cwrite_ptr->write = init_write;
   m_THDataBuf.cwrite_ptr->written = FALSE;
   m_THDataBuf.cwrite_ptr++;
 
@@ -695,10 +752,11 @@ static void TH_PutNewRec(INT32 sz, BOOLEAN init_write)
  * Function:     TH_GetDataBufPtr
  * 
  * Description:  Returns a pointer to a location in the time history data buffer that is at
- *               least size bytes long.
+ *               least size bytes long.  The buffer returned is contiguous, and does not
+ *               wrap.
  * 
- *               The write to the buffer must be completed by calling PutCtrlBuf, which creates
- *               a data control record and increments the data buffer write pointer.
+ *               The write to the buffer must be completed by calling TH_PutNewRec, which
+ *               creates a data control record and increments the data buffer write pointer.
  * 
  * Parameters:   [in] size: Number of bytes the caller needs to store in the TH buffer
  * 
@@ -707,11 +765,11 @@ static void TH_PutNewRec(INT32 sz, BOOLEAN init_write)
  * Notes:        not reentrant
  *
  *********************************************************************************************/
-CHAR* TH_GetDataBufPtr(INT32 size)
+static BYTE* TH_GetDataBufPtr(INT32 size)
 {
   //Wrap to beginning if the new TH record won't fit before the end of the buffer
   // size <= BufferEndAddr - BufferWriteAddr 
-  if (size > ((m_THDataBuf.data + sizeof(m_THDataBuf.data)) - m_THDataBuf.dwrite_ptr))
+  if ( (m_THDataBuf.dwrite_ptr + size) > (m_THDataBuf.data + sizeof(m_THDataBuf.data))  )
   {
     m_THDataBuf.dwrite_ptr = m_THDataBuf.data;
   }
@@ -723,6 +781,21 @@ CHAR* TH_GetDataBufPtr(INT32 size)
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Jim Mood     Date: 9/21/12    Time: 5:49p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: 2.0.0 Requirements - Time History
+ * 
+ * *****************  Version 8  *****************
+ * User: Jim Mood     Date: 9/21/12    Time: 5:44p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: 2.0.0 Requirements - Time History
+ * 
+ * *****************  Version 7  *****************
+ * User: Jim Mood     Date: 9/21/12    Time: 5:12p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107: 2.0.0 Requirements - Time History
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:59p
