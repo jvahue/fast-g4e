@@ -1,9 +1,9 @@
-Link Date:	Fri Sep 21 17:10:50 2012
+Link Date:	Wed Sep 26 17:01:59 2012
 Host OS:	Windows XP Service Pack 3
 Version:	ELXR 5.0 (c) 1998-2009 Green Hills Software    Build: Nov  9 2009
 
 
-Load Map Fri Sep 21 17:10:50 2012
+Load Map Wed Sep 26 17:01:59 2012
 Image Summary
 
   Section              Base      Size(hex)    Size(dec)  SecOffs
@@ -26,7 +26,7 @@ Image Summary
   .crcDefault          00194da0  00000004            4   0094f40
   .buildDate           00194da4  00000020           32   0094f44
 
-Load Map Fri Sep 21 17:10:50 2012
+Load Map Wed Sep 26 17:01:59 2012
 Module Summary
 
   Origin+Size    Section          Module
@@ -247,7 +247,7 @@ Module Summary
 314019b0+000004  .bss             libsys.a(ind_thrd.o)
 00168640+000056  .text            libarch.a(indclz32.o)
 
-Load Map Fri Sep 21 17:10:50 2012
+Load Map Wed Sep 26 17:01:59 2012
 Global Symbols (sorted alphabetically)
 
  .text            00117a28 A0Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
