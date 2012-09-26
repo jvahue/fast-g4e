@@ -109,7 +109,7 @@ typedef struct
   UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
   UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
-  UINT32       CycleCounts[MAX_CYCLES];         /* Array of cycle counts                   */
+  UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts                   */
 } ENGRUN_RUNLOG;
 
 typedef struct
@@ -124,28 +124,28 @@ typedef struct
 typedef struct
 {
   /* runtime data */
-  ENGRUN_INDEX erIndex;                 /* Which engine run object this came from            */
+  ENGRUN_INDEX erIndex;                 /* The index of the configured engine run object.    */
   ER_STATE     erState;                 /* State of this engine run                          */
   TIMESTAMP    startTime;               /* Timestamp EngineRun entered the START state       */
-  UINT32       startingTime;            /* tick time when EngineRun entered the START state  */
+  UINT32       startingTime_ms;         /* tick time when EngineRun entered the START state  */
   UINT32       startingDuration_ms;     /* Time EngRun was in START state                    */
   UINT32       erDuration_ms;           /* Time from entering START until end of RUNNING     */
-  BOOLEAN      maxValueValid;           /* was the max value sensor valid through stop/start */
+  BOOLEAN      maxValueValid;           /* Was the max value sensor valid through stop/start */
   FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */
-  BOOLEAN      minValueValid;           /* was the min value valid through the start       */
+  BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
   FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
   UINT32       nSampleCount;            /* For calculating averages                          */
   INT16        nRateCounts;             /* Count of cycles until this engine run is executed */
   INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
-  UINT32       CycleCounts[MAX_CYCLES];   /* Array of cycle counts */
+  UINT32       cycleCounts[MAX_CYCLES];   /* Array of cycle counts */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;
 
 /* Configuration */
 typedef struct
 {
-  CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the trigger                 */
+  CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the engine run              */
   TRIGGER_INDEX  startTrigID;             /* Index into Trig array - start criteria         */
   TRIGGER_INDEX  runTrigID;               /* Index into Trig array - run criteria           */
   TRIGGER_INDEX  stopTrigID;              /* Index into Trig array - stop criteria          */

@@ -329,224 +329,224 @@ static USER_MSG_TBL EngRunSensrTbl[] =
 static USER_MSG_TBL EngRunC0Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[0], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[0], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC1Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[1], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[1], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC2Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[2], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[2], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC3Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[3], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[3], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC4Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                          IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[4], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[4], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC5Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[5], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[5], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC6Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[6], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[6], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC7Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[7], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[7], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC8Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[8], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[8], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC9Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[9], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[9], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC10Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[10], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[10], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC11Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[11], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[11], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC12Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[12], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[12], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC13Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[13], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[13], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC14Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[14], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[14], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC15Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[15], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[15], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC16Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[16], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[16], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC17Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[17], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[17], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC18Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[18], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[18], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC19Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[19], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[19], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC20Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[20], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[20], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC21Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[21], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[21], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC22Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[22], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[22], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC23Tbl[] = 
 { 
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[23], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[23], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC24Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[24], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[24], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC25Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[25], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[25], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC26Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[26], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[26], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC27Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[27], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[27], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC28Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[28], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[28], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC29Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[29], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[29], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC30Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[30], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[30], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunC31Tbl[] = 
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
-  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleCounts[31], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
+  {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[31], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
@@ -595,10 +595,10 @@ static USER_MSG_TBL EngRunStatusCmd [] =
 {
   /*Str            Next Tbl Ptr    Handler Func Data Type         Access    Parameter                        IndexRange              DataLimit   EnumTbl*/
   {"ENGINEID",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erIndex,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngRunIdEnum      },
-  {"STATE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erState,               0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
-  {"STARTINGTIME", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"STATE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erState,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
+  {"STARTINGTIME", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime_ms,     0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"START_DUR_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"MINVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },                                                                                                          
   {"SAMPLECOUNT",  NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },

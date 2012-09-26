@@ -290,7 +290,7 @@ void EngRunTask(void* pParam)
 UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId)
 {
   ASSERT(engId < MAX_ENGINES);
-  return &engineRunData[engId].CycleCounts[0];
+  return &engineRunData[engId].cycleCounts[0];
 }
 
 /******************************************************************************
@@ -329,7 +329,7 @@ ENGRUN_RUNLOG* EngRunGetPtrToLog(ENGRUN_INDEX engId)
 UINT32 EngRunGetStartingTime(ENGRUN_INDEX engId)
 {
   ASSERT(engId < MAX_ENGINES);
-  return engineRunData[engId].startingTime;
+  return engineRunData[engId].startingTime_ms;
 }
 
 /******************************************************************************
@@ -463,7 +463,7 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   {
     pErData->erState   = ER_STATE_STOPPED;
     memset(&pErData->startTime, 0, sizeof(TIMESTAMP));
-    pErData->startingTime        = 0;
+    pErData->startingTime_ms     = 0;
     pErData->startingDuration_ms = 0;
     pErData->erDuration_ms       = 0;
     pErData->minValueValid       = TRUE;
@@ -481,7 +481,7 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     // CYCLES Init
     for(i = 0; i < MAX_CYCLES; ++i)
     {
-      pErData->CycleCounts[i] = 0;
+      pErData->cycleCounts[i] = 0;
     }
   }
 }
@@ -706,7 +706,7 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   CM_GetTimeAsTimestamp(&pErData->startTime);
 
   // Set the 'tick count' of the start time( used to calc duration)
-  pErData->startingTime = CM_GetTickCount();
+  pErData->startingTime_ms = CM_GetTickCount();
   pErData->nSampleCount = 0;
   pErData->erDuration_ms  = 0;
 
@@ -733,7 +733,7 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   // Initialize the cycle counts.
   for( i = 0; i < MAX_CYCLES; ++i)
   {
-    pErData->CycleCounts[i] = 0;
+    pErData->cycleCounts[i] = 0;
   }
 }
 
@@ -854,7 +854,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
 
   for (i = 0; i < MAX_CYCLES; ++i)
   {
-    pLog->CycleCounts[i] =  pErData->CycleCounts[i];
+    pLog->cycleCounts[i] =  pErData->cycleCounts[i];
   }
 
   LogWriteETM( APP_ID_ENGINERUN_ENDED,
@@ -888,16 +888,16 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   // if the starting time is zero, needs to be initialized
   // todo DaveB  - this could be a code coverage issue
   // unless we can transition directly from STOPPED to RUNNING.
-  // Normally startingTime is set on STOPPED->START transition.
-  if ( 0 == pErData->startingTime )
+  // Normally startingTime_ms is set on STOPPED->START transition.
+  if ( 0 == pErData->startingTime_ms )
   {
     // general Trigger initialization
-    pErData->startingTime = CM_GetTickCount();
+    pErData->startingTime_ms = CM_GetTickCount();
     pErData->nSampleCount = 0;
   }
 
   // Update the total run duration
-  pErData->erDuration_ms = CM_GetTickCount() - pErData->startingTime;
+  pErData->erDuration_ms = CM_GetTickCount() - pErData->startingTime_ms;
 
   // update the sample count so average can be calculated at end of engine run.
   pErData->nSampleCount++;
@@ -1013,7 +1013,7 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
       pErData->maxValueValid = FALSE;
     }
 
-    pErData->startingDuration_ms = CM_GetTickCount() - pErData->startingTime;
+    pErData->startingDuration_ms = CM_GetTickCount() - pErData->startingTime_ms;
   }
 }
 

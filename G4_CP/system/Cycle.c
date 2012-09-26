@@ -840,7 +840,7 @@ static void CycleFinish( UINT16 nCycle )
       // Update the log entry with the aggregate persisted count from EEPROM/RTCNvRAM
       if ( pCycleCfg->Type == CYC_TYPE_PERSIST_SIMPLE_CNT )
       {
-        pLog->CycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
+        pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
       }
       break;
 
@@ -854,12 +854,12 @@ static void CycleFinish( UINT16 nCycle )
 
       if (pCycleCfg->Type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
-        pLog->CycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
+        pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
       }
       else
       {
         /* convert ticks to seconds correcting for CLK time error */
-        pLog->CycleCounts[nCycle] *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
+        pLog->cycleCounts[nCycle] *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
       }
 
       break;
