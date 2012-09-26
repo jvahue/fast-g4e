@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 15 $  $Date: 9/14/12 4:02p $     
+      $Revision: 15 $  $Date: 9/14/12 4:02p $
 
 ******************************************************************************/
 
@@ -32,6 +32,11 @@
                                  Package Defines
 ******************************************************************************/
 #define MAX_ENGINERUN_NAME  32
+#define MAX_ENGINE_ID       16
+
+#define ENGINE_DEFAULT_SERIAL_NUMBER "000000"
+#define ENGINE_DEFAULT_SERVICE_PLAN  "NONE"
+#define ENGINE_DEFAULT_MODEL_NUMBER  "NONE"
 
 
 #define ENGRUN_DEFAULT   "Unused",        /* Engine Name                   */\
@@ -119,6 +124,19 @@ typedef struct
    TRIGGER_INDEX  runTrigID;                      /* Engine Run Running Trigger            */
    TRIGGER_INDEX  stopTrigID;                     /* Engine Run Stop Trigger               */
 } ENGRUN_HDR;
+
+typedef struct
+{
+   CHAR serialNumber[MAX_ENGINE_ID];
+   CHAR modelNumber[MAX_ENGINE_ID];
+}ENGINE_ID;
+
+typedef struct
+{
+   CHAR      servicePlan[MAX_ENGINE_ID];
+   ENGINE_ID engine[MAX_ENGINES];
+} ENGINE_FILE_HDR;
+
 #pragma pack()
 
 typedef struct
@@ -192,18 +210,20 @@ EXPORT USER_ENUM_TBL EngineRunStateEnum[];
                              Package Exports Functions
 ******************************************************************************/
 // Task init and execution.
-EXPORT void           EngRunInitialize(void);
-EXPORT void           EngRunTask            ( void* pParam );
-EXPORT ER_STATE       EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
-EXPORT ENGRUN_RUNLOG* EngRunGetPtrToLog     ( ENGRUN_INDEX engId );
-EXPORT UINT16         EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
+EXPORT void             EngRunInitialize(void);
+EXPORT void             EngRunTask            ( void* pParam );
+EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
+EXPORT ENGRUN_RUNLOG*   EngRunGetPtrToLog     ( ENGRUN_INDEX engId );
+EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
+EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
+EXPORT void             Eng_ReInitFile        ( void );
 
 #endif // SYS_CLOCKMGR_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:02p
  * Updated in $/software/control processor/code/application
@@ -213,12 +233,12 @@ EXPORT UINT16         EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
  * User: John Omalley Date: 12-09-11   Time: 1:56p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added ETM Binary Header
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - V&V fixes, code review updates
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application

@@ -2,17 +2,17 @@
 
 /******************************************************************************
             Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
-               All Rights Reserved. Proprietary and Confidential. 
-  
-    File:       TaskManager.c  
-  
+               All Rights Reserved. Proprietary and Confidential.
+
+    File:       TaskManager.c
+
    Description: Executive Task Manager functions
-  
+
  VERSION
       $Revision: 62 $  $Date: 8/28/12 1:43p $
 
 ******************************************************************************
-  
+
  ******************************************************************************
  * Functions:
  *
@@ -38,7 +38,7 @@
 #include <string.h>
 
 /*****************************************************************************/
-/* Software Specific Includes                                               */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_basic.h"
 #include "assert.h"
@@ -53,12 +53,12 @@
 #include "TestPoints.h"
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 #define PULSE(x,s) if (x>=0 && x <=3) {DIO_SetPin((DIO_OUTPUT)x, s);}
 
 /*****************************************************************************/
-/* Local Typedefs                                                           */
+/* Local Typedefs                                                            */
 /*****************************************************************************/
 #pragma pack(1)
 typedef struct rmtOverrunTag {
@@ -68,11 +68,11 @@ typedef struct rmtOverrunTag {
 #pragma pack()
 
 /*****************************************************************************/
-/* Local Variables                                                          */
+/* Local Variables                                                           */
 /*****************************************************************************/
 static TCB TcbArray[MAX_TASKS]; //TCBs to allocate from in TaskCreate()
 
-static TM_HEALTH_COUNTS TMHealthCounts; 
+static TM_HEALTH_COUNTS TMHealthCounts;
 
 static SYS_MODE_IDS pendingSystemMode; // pending system mode, next MIF
 
@@ -80,11 +80,11 @@ static SYS_MODE_IDS pendingSystemMode; // pending system mode, next MIF
 static BOOLEAN systemModeTransitions[SYS_MAX_MODE_ID][SYS_MAX_MODE_ID];
 
 /*****************************************************************************/
-/* Local Function Prototypes                                                */
+/* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Public Functions                                                         */
+/* Public Functions                                                          */
 /*****************************************************************************/
 
 
@@ -121,8 +121,8 @@ void TmInitializeTaskManager (void)
     Tm.DutyCycle.Max     = 0;
     Tm.DutyCycle.CumExecTime = 0;
     Tm.DutyCycle.Cur     = 0;
-    Tm.MifCount          = 0;     //Frames executed since power on.  
-    Tm.MifPeriod         = TTMR_TASK_MGR_TICK_INTERRUPT_INTERVAL_uS; 
+    Tm.MifCount          = 0;     //Frames executed since power on.
+    Tm.MifPeriod         = TTMR_TASK_MGR_TICK_INTERRUPT_INTERVAL_uS;
 
     memset ( &TMHealthCounts, 0, sizeof(TM_HEALTH_COUNTS) );
 
@@ -172,11 +172,11 @@ void TmInitializeTaskManager (void)
  ****************************************************************************/
 void TmStartTaskManager (void)
 {
-    
+
     Tm.bStarted = TRUE;             //Set enabled flag
     // TTMR_Init();                 //Setup and start the Task Timer
     TTMR_SetTaskManagerTickFunc(TmTick);
-}  
+}
 
 /*****************************************************************************
  * Function:    TmTaskCreate
@@ -210,7 +210,7 @@ void TmTaskCreate (TCB* pTaskInfo)
     pTCB = (TCB*)&TcbArray[Tm.nTasks];
 
     // Fill in TCB info
-    strncpy_safe (pTCB->Name, sizeof(pTCB->Name), pTaskInfo->Name,_TRUNCATE);    
+    strncpy_safe (pTCB->Name, sizeof(pTCB->Name), pTaskInfo->Name,_TRUNCATE);
     pTCB->TaskID      = pTaskInfo->TaskID;
     pTCB->Function    = pTaskInfo->Function;
     pTCB->modes       = pTaskInfo->modes;
@@ -244,7 +244,7 @@ void TmTaskCreate (TCB* pTaskInfo)
     pTCB->ExecutionCount       = 0;
     pTCB->TotExecutionTime     = 0;
     pTCB->TotExecutionTimeCnt  = 0;     // NOTE: protection is needed for divide by zero
-    
+
     // Add to task list
     Tm.TaskList[TaskID] = pTCB;
 }
@@ -375,7 +375,7 @@ void TmInitializeTaskDispatcher (void)
 /*****************************************************************************
 * Function:    TmTick
 *
-* Description: Function to be called by a periodic timer.  This runs the 
+* Description: Function to be called by a periodic timer.  This runs the
 *              task manager DT and RMT task dispatching
 *
 * Parameters:  [in] LastIntLvl: The core interrupt level before the timer
@@ -408,40 +408,40 @@ void TmTick (UINT32 LastIntLvl)
         {
             DT_OVERRUN_LOG dtOverrun;
 
-            if (++Tm.nDtOverRuns >= TPU( MAX_DT_OVERRUNS, eTpNoDtOverrun))
-            {
-                // More than 3 sequential overruns
-                FATAL("DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
-                    Tm.nDtOverRuns, Tm.CurrentMIF, Tm.DtTaskInProgressID,
-                    Tm.TaskList[Tm.DtTaskInProgressID]->Name);
-            }
+              if (++Tm.nDtOverRuns >= TPU( MAX_DT_OVERRUNS, eTpNoDtOverrun))
+              {
+                  // More than 3 sequential overruns
+                  FATAL("DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
+                      Tm.nDtOverRuns, Tm.CurrentMIF, Tm.DtTaskInProgressID,
+                      Tm.TaskList[Tm.DtTaskInProgressID]->Name);
+              }
 
-            TMHealthCounts.nDtOverRuns++;
-            ++Tm.nDtRecover;
+              TMHealthCounts.nDtOverRuns++;
+              ++Tm.nDtRecover;
 
-#if STE_TP
-            // allows us to disable & enable recording Overruns when instrumented to ensure
-            // System Log file match expected results
-            // if we set eTpNoDtOverrun = 3 the system operates as normal
-            // otherwise we will not record DT overruns unless we set eTpNoDtOverrun = 3
-            if ( TPU( 0, eTpNoDtOverrun) == MAX_DT_OVERRUNS)
-#endif
-            {
-                // record the fact that we had an overrun
-                dtOverrun.count = Tm.nDtOverRuns;
-                dtOverrun.MIF = Tm.CurrentMIF;
-                dtOverrun.activeTask = Tm.DtTaskInProgressID;
-                strncpy_safe( dtOverrun.activeTaskName,TASK_NAME_SIZE,
-                    Tm.TaskList[Tm.DtTaskInProgressID]->Name,_TRUNCATE);
-                LogWriteSystem( SYS_TASK_MAN_DT_OVERRUN, LOG_PRIORITY_LOW,
-                    &dtOverrun, sizeof( dtOverrun), NULL);
-            }
+  #if STE_TP
+              // allows us to disable & enable recording Overruns when instrumented to ensure
+              // System Log file match expected results
+              // if we set eTpNoDtOverrun = 3 the system operates as normal
+              // otherwise we will not record DT overruns unless we set eTpNoDtOverrun = 3
+              if ( TPU( 0, eTpNoDtOverrun) == MAX_DT_OVERRUNS)
+  #endif
+              {
+                  // record the fact that we had an overrun
+                  dtOverrun.count = Tm.nDtOverRuns;
+                  dtOverrun.MIF = Tm.CurrentMIF;
+                  dtOverrun.activeTask = Tm.DtTaskInProgressID;
+                  strncpy_safe( dtOverrun.activeTaskName,TASK_NAME_SIZE,
+                      Tm.TaskList[Tm.DtTaskInProgressID]->Name,_TRUNCATE);
+                  LogWriteSystem( SYS_TASK_MAN_DT_OVERRUN, LOG_PRIORITY_LOW,
+                      &dtOverrun, sizeof( dtOverrun), NULL);
+              }
 
-            // Display a debug message about the overrun      
-            GSE_DebugStr(NORMAL, TRUE, 
-              "DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
-              Tm.nDtOverRuns, Tm.CurrentMIF, Tm.DtTaskInProgressID,
-              Tm.TaskList[Tm.DtTaskInProgressID]);
+              // Display a debug message about the overrun
+              GSE_DebugStr(NORMAL, TRUE,
+                "DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
+                Tm.nDtOverRuns, Tm.CurrentMIF, Tm.DtTaskInProgressID,
+                Tm.TaskList[Tm.DtTaskInProgressID]);
         }
         else
         {
@@ -452,7 +452,7 @@ void TmTick (UINT32 LastIntLvl)
 
                 if ( Tm.RmtTasks[rmt]->State == TASK_ACTIVE)
                 {
-                    Tm.RmtTasks[rmt]->Rmt.SumExeTime += 
+                    Tm.RmtTasks[rmt]->Rmt.SumExeTime +=
                       (MifStartTime - Tm.RmtTasks[rmt]->Rmt.StartExeTime)/TTMR_HS_TICKS_PER_uS;
                     ++Tm.RmtTasks[rmt]->Rmt.InterruptedCount;
                 }
@@ -465,7 +465,7 @@ void TmTick (UINT32 LastIntLvl)
             do
             {
                 // update time and correct overrun count
-                CM_RTCTick(); 
+                CM_RTCTick();
                 if ( Tm.nDtRecover > 0)
                 {
                     Tm.nDtRecover--;
@@ -475,7 +475,7 @@ void TmTick (UINT32 LastIntLvl)
                 TmDispatchDtTasks();
 
                 //Increment the number of frames executed since power on
-                Tm.MifCount++;          
+                Tm.MifCount++;
             } while ( Tm.nDtRecover > 0);
 
             // Reset Consecutive DT Overrun counter as we are done with DT tasks now
@@ -597,7 +597,7 @@ void TmDispatchDtTasks (void)
     Tm.mifDc[Tm.CurrentMIF].Cur = (TTMR_GetHSTickCount() - mifStart);
 
     // Handle condition when cumulative execution time rolls over.
-    if (Tm.mifDc[Tm.CurrentMIF].CumExecTime + Tm.mifDc[Tm.CurrentMIF].Cur < 
+    if (Tm.mifDc[Tm.CurrentMIF].CumExecTime + Tm.mifDc[Tm.CurrentMIF].Cur <
         Tm.mifDc[Tm.CurrentMIF].CumExecTime)
     {
       Tm.mifDc[Tm.CurrentMIF].CumExecTime = Tm.mifDc[Tm.CurrentMIF].Cur;
@@ -609,7 +609,7 @@ void TmDispatchDtTasks (void)
       ++Tm.mifDc[Tm.CurrentMIF].exeCount;
      // GSE_DebugStr(NORMAL,TRUE,"MIF: %d Cur: %d Cum Time: %d", Tm.CurrentMIF, Tm.mifDc[Tm.CurrentMIF].Cur, Tm.mifDc[Tm.CurrentMIF].CumExecTime);
     }
-    
+
 
     if (Tm.mifDc[Tm.CurrentMIF].Cur > Tm.mifDc[Tm.CurrentMIF].Max)
     {
@@ -688,10 +688,10 @@ void TmScheduleRmtTasks (void)
                             strncpy_safe( rmtLog.taskName,TASK_NAME_SIZE,
                                      Tm.RmtTasks[i]->Name,_TRUNCATE);
                             rmtLog.taskId = Tm.RmtTasks[i]->TaskID;
-                            LogWriteSystem( SYS_TASK_MAN_RMT_OVERRUN, LOG_PRIORITY_LOW, 
+                            LogWriteSystem( SYS_TASK_MAN_RMT_OVERRUN, LOG_PRIORITY_LOW,
                                     &rmtLog, sizeof( rmtLog), NULL);
-                            // Display a debug message about the overrun      
-                            GSE_DebugStr(NORMAL,TRUE,"RMT Overrun - ID: %02d Name: %s\r\n", 
+                            // Display a debug message about the overrun
+                            GSE_DebugStr(NORMAL,TRUE,"RMT Overrun - ID: %02d Name: %s\r\n",
                                     rmtLog.taskId, rmtLog.taskName);
                         }
                     }
@@ -701,7 +701,7 @@ void TmScheduleRmtTasks (void)
     }   // End for(each RMT task)
 
     TaskTime = TTMR_GetHSTickCount() - TaskTime;
-    
+
     ExecutionTime = TaskTime / TTMR_HS_TICKS_PER_uS;
     Tm.DutyCycle.CumExecTime += ExecutionTime;
 }
@@ -725,7 +725,7 @@ void TmDispatchRmtTasks (void)
     UINT32  DutyCycle;
     TCB*    pTask;
     UINT32  IntSave;
-    
+
     IntSave = __DIR();
     while ( Tm.NextRmt < Tm.nRmtTasks)
     {
@@ -756,24 +756,24 @@ void TmDispatchRmtTasks (void)
 
             //Save the start time in a globally accessible location.  This
             //time will be adjusted if overruns occur, maintaining only the
-            //total execution time of this RMT.  
+            //total execution time of this RMT.
             pTask->Rmt.SumExeTime = 0;
             PULSE(pTask->timingPulse, DIO_SetHigh);
             pTask->Rmt.StartExeTime = TTMR_GetHSTickCount();
 
             // Call the function
             pTask->Function(pTask->pParamBlock);
-            
+
             //Disable Interrupts for timing calculation, restored using the
             //int level at the top of this function.
             __DI();
 
             //Calculate execution time.
-            ExecutionTime = 
+            ExecutionTime =
               (TTMR_GetHSTickCount() - pTask->Rmt.StartExeTime)/TTMR_HS_TICKS_PER_uS;
-            
+
             PULSE(pTask->timingPulse, DIO_SetLow);
-            
+
             // Indicate the task has completed and is now idle
             pTask->State = TASK_IDLE;
 
@@ -884,7 +884,7 @@ void TmScheduleTask (TASK_INDEX TaskID)
   if (Tm.TaskList[TaskID] != NULL)
   {
     ASSERT_MESSAGE(Tm.TaskList[TaskID]->Rmt.MifRate == EVENT_DRIVEN_RMT,
-                   "Attempt to schedule Task [%s]", 
+                   "Attempt to schedule Task [%s]",
                    Tm.TaskList[TaskID]->Name);
 
     if ( Tm.TaskList[TaskID]->Enabled )
@@ -911,7 +911,7 @@ void TmScheduleTask (TASK_INDEX TaskID)
 ****************************************************************************/
 void TmSetMode(const SYS_MODE_IDS newMode)
 {
-    if ( newMode < SYS_MAX_MODE_ID && 
+    if ( newMode < SYS_MAX_MODE_ID &&
          systemModeTransitions[Tm.systemMode][newMode])
     {
         pendingSystemMode = newMode;
@@ -921,27 +921,27 @@ void TmSetMode(const SYS_MODE_IDS newMode)
 /*****************************************************************************
  * Function:    Tm_GetTMHealthStatus
  *
- * Description: Returns current TM Health Status Counts 
+ * Description: Returns current TM Health Status Counts
  *
  * Parameters:  none
  *
- * Returns:     Current TMHealtCounts status 
+ * Returns:     Current TMHealtCounts status
  *
  * Notes:       none
  *
  ****************************************************************************/
 TM_HEALTH_COUNTS Tm_GetTMHealthStatus (void)
 {
-  TMHealthCounts.nRmtOverRuns = Tm.nRmtOverRuns; 
-  
-  return (TMHealthCounts); 
+  TMHealthCounts.nRmtOverRuns = Tm.nRmtOverRuns;
+
+  return (TMHealthCounts);
 }
 
 /*****************************************************************************
  * Function:    Tm_CalcDiffInTMHealthStatus
  *
  * Description:  Calculate the difference in TM Health Counts to for PWEH SEU
- *               (Used to support determining SEU count during data capture) 
+ *               (Used to support determining SEU count during data capture)
  *
  * Parameters:   PrevCnt - Initial count value
  *
@@ -953,15 +953,15 @@ TM_HEALTH_COUNTS Tm_GetTMHealthStatus (void)
 TM_HEALTH_COUNTS Tm_CalcDiffTMHealthStatus (TM_HEALTH_COUNTS PrevCnt)
 {
   TM_HEALTH_COUNTS DiffCount;
-  TM_HEALTH_COUNTS CurrCount; 
-  
+  TM_HEALTH_COUNTS CurrCount;
 
-  CurrCount = Tm_GetTMHealthStatus(); 
 
-  DiffCount.nDtOverRuns = CurrCount.nDtOverRuns - PrevCnt.nDtOverRuns; 
-  DiffCount.nRmtOverRuns = CurrCount.nRmtOverRuns - PrevCnt.nRmtOverRuns; 
+  CurrCount = Tm_GetTMHealthStatus();
 
-  return ( DiffCount ); 
+  DiffCount.nDtOverRuns = CurrCount.nDtOverRuns - PrevCnt.nDtOverRuns;
+  DiffCount.nRmtOverRuns = CurrCount.nRmtOverRuns - PrevCnt.nRmtOverRuns;
+
+  return ( DiffCount );
 }
 
 
@@ -969,7 +969,7 @@ TM_HEALTH_COUNTS Tm_CalcDiffTMHealthStatus (TM_HEALTH_COUNTS PrevCnt)
  * Function:     TM_AddPrevTMHealthStatus
  *
  * Description:  Add TM Health Counts to support PWEH SEU
- *               (Used to support determining SEU count during data capture) 
+ *               (Used to support determining SEU count during data capture)
  *
  * Parameters:   CurrCnt - Current count value
  *               PrevCnt - Previous count value
@@ -983,11 +983,11 @@ TM_HEALTH_COUNTS Tm_AddPrevTMHealthStatus ( TM_HEALTH_COUNTS CurrCnt,
                                             TM_HEALTH_COUNTS PrevCnt )
 {
   TM_HEALTH_COUNTS AddCount;
-  
-  AddCount.nDtOverRuns = CurrCnt.nDtOverRuns + PrevCnt.nDtOverRuns; 
-  AddCount.nRmtOverRuns = CurrCnt.nRmtOverRuns + PrevCnt.nRmtOverRuns; 
-  
-  return ( AddCount ); 
+
+  AddCount.nDtOverRuns = CurrCnt.nDtOverRuns + PrevCnt.nDtOverRuns;
+  AddCount.nRmtOverRuns = CurrCnt.nRmtOverRuns + PrevCnt.nRmtOverRuns;
+
+  return ( AddCount );
 }
 
 
@@ -1030,257 +1030,257 @@ TASK_INDEX TmGetTaskId(char* name)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
- * 
+ *
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 61  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 59  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:51p
  * Updated in $/software/control processor/code/system
  * SCR #1099 Task Statistics SCR # 1087 Update copyright
- * 
+ *
  * *****************  Version 58  *****************
  * User: Jeff Vahue   Date: 9/22/11    Time: 4:31p
  * Updated in $/software/control processor/code/system
  * SCR# 1077 - inhibit DT over logs, correctly
- * 
+ *
  * *****************  Version 57  *****************
  * User: Jeff Vahue   Date: 9/22/11    Time: 3:51p
  * Updated in $/software/control processor/code/system
  * SCR# 1077 - disallow recording DT overruns when instrumented, which
  * also stops resets ... yea I like it.
- * 
+ *
  * *****************  Version 56  *****************
  * User: Jeff Vahue   Date: 9/22/11    Time: 3:11p
  * Updated in $/software/control processor/code/system
  * SCR# 1077 - Test Points
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 9/22/11    Time: 3:04p
  * Updated in $/software/control processor/code/system
  * SCR# 1077 - Test Point addition to inhibit DT overrun when instrumented
- * 
+ *
  * *****************  Version 54  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 5:13p
  * Updated in $/software/control processor/code/system
  * SCR #845 Code Review Updates
- * 
+ *
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:38p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Code Coverage TP
- * 
+ *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 7/19/10    Time: 5:24p
  * Updated in $/software/control processor/code/system
  * SCR 708 - Made DT Overrun count >= 3
- * 
+ *
  * *****************  Version 51  *****************
  * User: Jim Mood     Date: 6/28/10    Time: 2:18p
  * Updated in $/software/control processor/code/system
  * SCR 648
- * 
+ *
  * *****************  Version 50  *****************
  * User: Jim Mood     Date: 6/16/10    Time: 4:08p
  * Updated in $/software/control processor/code/system
  * SCR 648, change to restore pre-interrupt interrupt level instead of
  * setting interrupt level to zero with __EI()
- * 
+ *
  * *****************  Version 49  *****************
  * User: Contractor3  Date: 6/10/10    Time: 10:44a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Changes based on Code Review
- * 
+ *
  * *****************  Version 48  *****************
  * User: John Omalley Date: 6/08/10    Time: 12:14p
  * Updated in $/software/control processor/code/system
  * SCR 627 - Updated for LJ60
- * 
+ *
  * *****************  Version 47  *****************
  * User: Jeff Vahue   Date: 5/25/10    Time: 4:49p
  * Updated in $/software/control processor/code/system
  * SCR# 609 - Fix NextMif value of self-scheduling RMT tasks in disabled
  * state, overwritten/removed by Version 46
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor2  Date: 5/25/10    Time: 3:05p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
  * Removed ID translation table. Coding standard fixes
- * 
+ *
   * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 5/24/10    Time: 6:47p
  * Updated in $/software/control processor/code/system
  * SCR# 609 - Fix NextMif value of self-scheduling RMT tasks in disabled
  * state
- * 
+ *
 * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 5/12/10    Time: 6:56p
  * Updated in $/software/control processor/code/system
  * SCR# 587 - correct DataManager not being initialized properly
- * 
+ *
  * *****************  Version 43  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 42  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:05p
  * Updated in $/software/control processor/code/system
  * SCR #536 Avg Task Execution Time Incorrect
- * 
+ *
  * *****************  Version 41  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 39  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 38  *****************
  * User: Jeff Vahue   Date: 3/11/10    Time: 5:56p
  * Updated in $/software/control processor/code/system
  * SCR# 484 - MIF pulse  on any MIF#, not just MIF0
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jeff Vahue   Date: 2/26/10    Time: 10:29a
  * Updated in $/software/control processor/code/system
  * SCR# 467 - 3 consecutive DT overruns cause an assert, not 3 occurrances
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jeff Vahue   Date: 2/12/10    Time: 12:30p
  * Updated in $/software/control processor/code/system
  * SCR #449 - Add control of system mode via user command, display system
  * mode, clean up sys.get.task.x processing, provide GHS target debugging
  * hook to bypass DT overrun code.
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 5:42p
  * Updated in $/software/control processor/code/system
  * SCR# 326 - init the pending mode to NORMAL
- * 
+ *
  * *****************  Version 33  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 2:45p
  * Updated in $/software/control processor/code/system
  * SCR# 405 - Add DT overrun Log on each occurance, save actual MIF of max
  * Duty Cycle vs. 0-32, so we can tell if issues happen at startup.
- * 
+ *
  * *****************  Version 32  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 1:40p
  * Updated in $/software/control processor/code/system
  * SCR# 434 - Pulse LSSx on task execution, clean up sys cmds and
  * processing
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jeff Vahue   Date: 1/23/10    Time: 3:15p
  * Updated in $/software/control processor/code/system
  * SCR# 405
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 1/19/10    Time: 3:57p
  * Updated in $/software/control processor/code/system
  * SCR# 400
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 5:14p
  * Updated in $/software/control processor/code/system
  * SCR# 397
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:28p
  * Updated in $/software/control processor/code/system
  * SCR 371
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 12/29/09   Time: 3:28p
  * Updated in $/software/control processor/code/system
  * SCR# 329 Pack RMT Overrun Log
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 12/23/09   Time: 2:07p
  * Updated in $/software/control processor/code/system
  * SCR# 329 - implement SRS-1706
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jeff Vahue   Date: 12/23/09   Time: 12:09p
  * Updated in $/software/control processor/code/system
  * SCR# 329
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 5:23p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:49p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR  #326, #329
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:35p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 11/30/09   Time: 5:42p
  * Updated in $/software/control processor/code/system
  * SCR 350 Misc - Preliminary Code Review
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 11/20/09   Time: 10:40a
  * Updated in $/software/control processor/code/system
  * SCR 337
  * Added Fatal on three DT Task Overruns
  * Added Debug string on the first 2 DT Overruns
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 11/19/09   Time: 3:22p
  * Updated in $/software/control processor/code/system
- * SCR #315 SEU counts for TM Health Counts 
- * 
+ * SCR #315 SEU counts for TM Health Counts
+ *
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 10/08/09   Time: 6:13p
  * Updated in $/software/control processor/code/system
  * SCR #283
- * 
+ *
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 10/01/09   Time: 4:12p
  * Updated in $/software/control processor/code/system
  * SCR #283 Misc Code Review Updates
- * 
+ *
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:22p
  * Updated in $/software/control processor/code/system
- * Comment out TTMR_Init() call.  Not necessary ! 
- * 
+ * Comment out TTMR_Init() call.  Not necessary !
+ *
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 6/30/09    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #204 Misc Code Review Updates
- * 
+ *
  ***************************************************************************/
 

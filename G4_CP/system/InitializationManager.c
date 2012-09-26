@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 111 $  $Date: 9/14/12 5:15p $
+     $Revision: 112 $  $Date: 9/21/12 5:28p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -546,6 +546,9 @@ static void Im_Application_Initialize(void)
   STARTUP_ID(appStartupId++);
   TrendInitialize();
   
+  STARTUP_ID(appStartupId++);
+  TH_Init();
+
   STARTUP_ID(appStartupId);
 }
 
@@ -758,6 +761,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 112  *****************
+ * User: Jim Mood     Date: 9/21/12    Time: 5:28p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107: 2.0.0 Requirements - Time History
  * 
  * *****************  Version 111  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 5:15p

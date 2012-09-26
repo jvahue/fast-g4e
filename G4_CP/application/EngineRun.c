@@ -50,6 +50,9 @@ static ENGRUN_DATA   engineRunData[MAX_ENGINES];
 static ENGRUN_STARTLOG engineStartLog[MAX_ENGINES];
 static ENGRUN_RUNLOG   engineRunLog[MAX_ENGINES];
 
+static ENGINE_FILE_HDR m_EngineInfo;
+
+
 
 // Include cmd tables and functions here after local dependencies are declared.
 #include "EngineRunUserTables.c"
@@ -169,6 +172,7 @@ void EngRunInitialize(void)
   UINT16 i;
   ENGRUN_CFG*  pErCfg;
   ENGRUN_DATA* pErData;
+  RESULT result;
 
   // Add user commands for EngineRun to the user command tables.
 
@@ -180,6 +184,25 @@ void EngRunInitialize(void)
   memcpy( engineRunCfg,
           &(CfgMgr_RuntimeConfigPtr()->EngineRunConfigs),
           sizeof(engineRunCfg) );
+
+  // Open Engine Identification File
+  result =  NV_Open(NV_ENGINE_ID);
+  if(SYS_OK == result)
+  {
+     NV_Read(NV_ENGINE_ID,0,&m_EngineInfo,sizeof(m_EngineInfo));
+  }
+  else
+  {
+
+     if (SYS_NV_FILE_OPEN_ERR == result)
+     {
+        Flt_SetStatus(STA_NORMAL, APP_ID_ENGINE_INFO_CRC_FAIL, NULL, 0);
+     }
+
+     GSE_DebugStr(NORMAL,TRUE,"Engine: Failed to open Engine ID file, restoring defaults");
+     //Re-init file
+     Eng_ReInitFile();
+  }
 
   // Initialize Engine Runs storage objects.
   for ( i = 0; i < MAX_ENGINES; i++)
@@ -227,6 +250,42 @@ void EngRunInitialize(void)
   TaskInfo.Rmt.MifRate      = taskInfo[EngRun_Task].MIFrate;
   TaskInfo.pParamBlock      = NULL;
   TmTaskCreate (&TaskInfo);
+}
+
+/******************************************************************************
+ * Function:    Eng_ReInitFile
+ *
+ * Description: Set the NV data (Engine Serial Numbers) to
+ *              the default values
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+void Eng_ReInitFile(void)
+{
+  CHAR ResultStr[RESULTCODES_MAX_STR_LEN];
+  UINT16 i;
+
+  memset(&m_EngineInfo,0,sizeof(m_EngineInfo));
+
+  strncpy_safe(m_EngineInfo.servicePlan, sizeof(m_EngineInfo.servicePlan), ENGINE_DEFAULT_SERVICE_PLAN,_TRUNCATE);
+
+  for ( i=0; i<MAX_ENGINES; i++)
+  {
+     strncpy_safe(m_EngineInfo.engine[i].serialNumber,
+                  sizeof(m_EngineInfo.engine[i].serialNumber),
+                  ENGINE_DEFAULT_SERIAL_NUMBER, _TRUNCATE);
+     strncpy_safe(m_EngineInfo.engine[i].modelNumber,
+                  sizeof(m_EngineInfo.engine[i].modelNumber),
+                  ENGINE_DEFAULT_MODEL_NUMBER, _TRUNCATE);
+  }
+
+  NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
+  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, ResultStr));
 }
 
 /******************************************************************************
@@ -384,6 +443,23 @@ UINT16 EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
    memcpy ( pBuffer, &engineHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
+}
+
+/******************************************************************************
+ * Function:     EngRunGetFileHeader
+ *
+ * Description:  Retrieves the file header for the engine requested.
+ *
+ * Parameters:   ENGRUN_INDEX engId
+ *
+ * Returns:      ENGINE_FILE_HDR
+ *
+ * Notes:        Always returns the servicePlan with the Engine info.
+ *
+ *****************************************************************************/
+ENGINE_FILE_HDR* EngRunGetFileHeader ( void )
+{
+   return &m_EngineInfo;
 }
 
 /*****************************************************************************/
@@ -1020,27 +1096,27 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 9/18/12    Time: 6:11p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - ER Offset scheduling BB Issue# 53
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:02p
  * Updated in $/software/control processor/code/application
- * SCR #1107 FAST 2 fixes for sensor list 
+ * SCR #1107 FAST 2 fixes for sensor list
  *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:56p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added ETM Binary Header
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - V&V fixes, code review updates
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 12:28p
  * Updated in $/software/control processor/code/application

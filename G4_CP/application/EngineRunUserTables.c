@@ -1,13 +1,13 @@
 /******************************************************************************
-Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
 All Rights Reserved. Proprietary and Confidential.
 
 File:          EngineRunUserTables.c
 
-Description: 
+Description:
 
 VERSION
-$Revision: 13 $  $Date: 9/17/12 10:53a $ 
+$Revision: 13 $  $Date: 9/17/12 10:53a $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -16,7 +16,7 @@ $Revision: 13 $  $Date: 9/17/12 10:53a $
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -35,9 +35,9 @@ $Revision: 13 $  $Date: 9/17/12 10:53a $
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-static ENGRUN_CFG   m_CfgTemp;
-static ENGRUN_DATA  m_DataTemp;
-static SNSR_SUMMARY m_SnsrSummary;
+static ENGRUN_CFG      m_CfgTemp;
+static ENGRUN_DATA     m_DataTemp;
+static SNSR_SUMMARY    m_SnsrSummary;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -59,6 +59,18 @@ USER_HANDLER_RESULT       EngRunShowConfig(USER_DATA_TYPE DataType,
                                            const void *SetPtr,
                                            void **GetPtr);
 
+USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
+                                USER_MSG_PARAM Param,
+                                UINT32 Index,
+                                const void *SetPtr,
+                                void **GetPtr);
+
+USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
+                                USER_MSG_PARAM Param,
+                                UINT32 Index,
+                                const void *SetPtr,
+                                void **GetPtr);
+
 /*****************************************************************************/
 /* User command tables                                                       */
 /*****************************************************************************/
@@ -71,7 +83,7 @@ USER_HANDLER_RESULT       EngRunShowConfig(USER_DATA_TYPE DataType,
 //};
 
 USER_ENUM_TBL EngRunIdEnum[] =
-{  
+{
   { "0"     , ENGRUN_ID_0  },
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
@@ -82,11 +94,11 @@ USER_ENUM_TBL EngRunIdEnum[] =
 
 USER_ENUM_TBL EngRunRateType[] =
 { { "1HZ"    , ER_1HZ          },
-  { "2HZ"    , ER_2HZ          }, 
-  { "4HZ"    , ER_4HZ          }, 
-  { "5HZ"    , ER_5HZ          }, 
-  { "10HZ"   , ER_10HZ         }, 
-  { "20HZ"   , ER_20HZ         }, 
+  { "2HZ"    , ER_2HZ          },
+  { "4HZ"    , ER_4HZ          },
+  { "5HZ"    , ER_5HZ          },
+  { "10HZ"   , ER_10HZ         },
+  { "20HZ"   , ER_20HZ         },
   { "50HZ"   , ER_50HZ         },
   { NULL     , 0               }
 };
@@ -95,7 +107,7 @@ USER_ENUM_TBL EngRunRateType[] =
 
 
 /* SENSOR SUMMARY ELEMENTS 0 - 15 */
-static USER_MSG_TBL EngRunS0Tbl[] = 
+static USER_MSG_TBL EngRunS0Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[0].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -108,7 +120,7 @@ static USER_MSG_TBL EngRunS0Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS1Tbl[] = 
+static USER_MSG_TBL EngRunS1Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[1].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -121,7 +133,7 @@ static USER_MSG_TBL EngRunS1Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS2Tbl[] = 
+static USER_MSG_TBL EngRunS2Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[2].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -134,7 +146,7 @@ static USER_MSG_TBL EngRunS2Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS3Tbl[] = 
+static USER_MSG_TBL EngRunS3Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[3].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -147,7 +159,7 @@ static USER_MSG_TBL EngRunS3Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS4Tbl[] = 
+static USER_MSG_TBL EngRunS4Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[4].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -160,7 +172,7 @@ static USER_MSG_TBL EngRunS4Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS5Tbl[] = 
+static USER_MSG_TBL EngRunS5Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[5].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -173,7 +185,7 @@ static USER_MSG_TBL EngRunS5Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS6Tbl[] = 
+static USER_MSG_TBL EngRunS6Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[6].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -186,7 +198,7 @@ static USER_MSG_TBL EngRunS6Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS7Tbl[] = 
+static USER_MSG_TBL EngRunS7Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[7].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -199,7 +211,7 @@ static USER_MSG_TBL EngRunS7Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS8Tbl[] = 
+static USER_MSG_TBL EngRunS8Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[8].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -212,7 +224,7 @@ static USER_MSG_TBL EngRunS8Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS9Tbl[] = 
+static USER_MSG_TBL EngRunS9Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[9].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -225,7 +237,7 @@ static USER_MSG_TBL EngRunS9Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS10Tbl[] = 
+static USER_MSG_TBL EngRunS10Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[10].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -238,7 +250,7 @@ static USER_MSG_TBL EngRunS10Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS11Tbl[] = 
+static USER_MSG_TBL EngRunS11Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[11].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -251,7 +263,7 @@ static USER_MSG_TBL EngRunS11Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS12Tbl[] = 
+static USER_MSG_TBL EngRunS12Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[12].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -264,7 +276,7 @@ static USER_MSG_TBL EngRunS12Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS13Tbl[] = 
+static USER_MSG_TBL EngRunS13Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[13].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -277,7 +289,7 @@ static USER_MSG_TBL EngRunS13Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS14Tbl[] = 
+static USER_MSG_TBL EngRunS14Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[14].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -290,7 +302,7 @@ static USER_MSG_TBL EngRunS14Tbl[] =
   { NULL,          NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunS15Tbl[] = 
+static USER_MSG_TBL EngRunS15Tbl[] =
 {
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[15].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },
@@ -304,7 +316,7 @@ static USER_MSG_TBL EngRunS15Tbl[] =
 };
 
 static USER_MSG_TBL EngRunSensrTbl[] =
-{  
+{
   { "S0",   EngRunS0Tbl,   NULL, NO_HANDLER_DATA },
   { "S1",   EngRunS1Tbl,   NULL, NO_HANDLER_DATA },
   { "S2",   EngRunS2Tbl,   NULL, NO_HANDLER_DATA },
@@ -320,230 +332,230 @@ static USER_MSG_TBL EngRunSensrTbl[] =
   { "S12",  EngRunS12Tbl,  NULL, NO_HANDLER_DATA },
   { "S13",  EngRunS13Tbl,  NULL, NO_HANDLER_DATA },
   { "S14",  EngRunS14Tbl,  NULL, NO_HANDLER_DATA },
-  { "S15",  EngRunS15Tbl,  NULL, NO_HANDLER_DATA },  
+  { "S15",  EngRunS15Tbl,  NULL, NO_HANDLER_DATA },
   { NULL,   NULL,          NULL, NO_HANDLER_DATA }
 };
 
 /* CYCLE COUNT ELEMENTS 0 - 31 */
 
-static USER_MSG_TBL EngRunC0Tbl[] = 
+static USER_MSG_TBL EngRunC0Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[0], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC1Tbl[] = 
+static USER_MSG_TBL EngRunC1Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[1], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC2Tbl[] = 
+static USER_MSG_TBL EngRunC2Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[2], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC3Tbl[] = 
+static USER_MSG_TBL EngRunC3Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[3], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC4Tbl[] = 
+static USER_MSG_TBL EngRunC4Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                          IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[4], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC5Tbl[] = 
+static USER_MSG_TBL EngRunC5Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[5], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC6Tbl[] = 
+static USER_MSG_TBL EngRunC6Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[6], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC7Tbl[] = 
+static USER_MSG_TBL EngRunC7Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[7], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC8Tbl[] = 
+static USER_MSG_TBL EngRunC8Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[8], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC9Tbl[] = 
+static USER_MSG_TBL EngRunC9Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                   IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[9], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC10Tbl[] = 
+static USER_MSG_TBL EngRunC10Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[10], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC11Tbl[] = 
+static USER_MSG_TBL EngRunC11Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[11], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC12Tbl[] = 
+static USER_MSG_TBL EngRunC12Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[12], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC13Tbl[] = 
+static USER_MSG_TBL EngRunC13Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[13], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC14Tbl[] = 
+static USER_MSG_TBL EngRunC14Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[14], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC15Tbl[] = 
+static USER_MSG_TBL EngRunC15Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[15], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC16Tbl[] = 
+static USER_MSG_TBL EngRunC16Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[16], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC17Tbl[] = 
+static USER_MSG_TBL EngRunC17Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[17], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC18Tbl[] = 
+static USER_MSG_TBL EngRunC18Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[18], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC19Tbl[] = 
+static USER_MSG_TBL EngRunC19Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[19], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC20Tbl[] = 
+static USER_MSG_TBL EngRunC20Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[20], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC21Tbl[] = 
+static USER_MSG_TBL EngRunC21Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[21], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC22Tbl[] = 
+static USER_MSG_TBL EngRunC22Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[22], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC23Tbl[] = 
-{ 
+static USER_MSG_TBL EngRunC23Tbl[] =
+{
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[23], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC24Tbl[] = 
+static USER_MSG_TBL EngRunC24Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[24], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC25Tbl[] = 
+static USER_MSG_TBL EngRunC25Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[25], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC26Tbl[] = 
+static USER_MSG_TBL EngRunC26Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[26], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC27Tbl[] = 
+static USER_MSG_TBL EngRunC27Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[27], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC28Tbl[] = 
+static USER_MSG_TBL EngRunC28Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[28], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC29Tbl[] = 
+static USER_MSG_TBL EngRunC29Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[29], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC30Tbl[] = 
+static USER_MSG_TBL EngRunC30Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[30], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
   { NULL,    NULL,          NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL EngRunC31Tbl[] = 
+static USER_MSG_TBL EngRunC31Tbl[] =
 {
   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange            DataLimit     EnumTbl*/
   {"COUNT",  NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleCounts[31], 0,(MAX_ENGINES-1),    NO_LIMIT,     NULL     },
@@ -551,7 +563,7 @@ static USER_MSG_TBL EngRunC31Tbl[] =
 };
 
 static USER_MSG_TBL EngRunCycTbl[] =
-{  
+{
   { "C0",   EngRunC0Tbl,   NULL, NO_HANDLER_DATA },
   { "C1",   EngRunC1Tbl,   NULL, NO_HANDLER_DATA },
   { "C2",   EngRunC2Tbl,   NULL, NO_HANDLER_DATA },
@@ -583,7 +595,7 @@ static USER_MSG_TBL EngRunCycTbl[] =
   { "C28",  EngRunC28Tbl,  NULL, NO_HANDLER_DATA },
   { "C29",  EngRunC29Tbl,  NULL, NO_HANDLER_DATA },
   { "C30",  EngRunC30Tbl,  NULL, NO_HANDLER_DATA },
-  { "C31",  EngRunC31Tbl,  NULL, NO_HANDLER_DATA }, 
+  { "C31",  EngRunC31Tbl,  NULL, NO_HANDLER_DATA },
   { NULL,   NULL,          NULL, NO_HANDLER_DATA}
 };
 
@@ -600,7 +612,7 @@ static USER_MSG_TBL EngRunStatusCmd [] =
   {"START_DUR_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"MINVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },                                                                                                          
+  {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"SAMPLECOUNT",  NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"RATECOUNTS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCounts,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"COUNTDOWN",    NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCountdown,      0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
@@ -624,11 +636,30 @@ static USER_MSG_TBL EngRunCfgCmd[] =
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
+static USER_MSG_TBL EngIdCmd[] =
+{
+   /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                      IndexRange         DataLimit            EnumTbl*/
+   {"SN",     NO_NEXT_TABLE, EngUserInfo,   USER_TYPE_STR,     USER_RW,  m_EngineInfo.engine[0].serialNumber, 0,(MAX_ENGINES-1), 0,MAX_ENGINE_ID,     NULL            },
+   {"MODEL",  NO_NEXT_TABLE, EngUserInfo,   USER_TYPE_STR,     USER_RW,  m_EngineInfo.engine[0].modelNumber,  0,(MAX_ENGINES-1), 0,MAX_ENGINE_ID,     NULL            },
+   {NULL,            NULL,          NULL,          NO_HANDLER_DATA}
+};
+
+
+
+static USER_MSG_TBL EngInfoCmd[] =
+{
+   /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
+   {"SERVICE_PLAN",  NO_NEXT_TABLE, EngSPUserInfo, USER_TYPE_STR,     USER_RW,  &m_EngineInfo.servicePlan,   -1,-1,             0,MAX_ENGINE_ID,      NULL            },
+   {"ENGINE",        EngIdCmd,      NULL,          NO_HANDLER_DATA,                                                                                                 },
+   {NULL,            NULL,          NULL,          NO_HANDLER_DATA}
+};
+
 static USER_MSG_TBL EngRunCmd [] =
 {
-  /*Str             Next Tbl Ptr      Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/                        
+  /*Str             Next Tbl Ptr      Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/
   {"CFG",           EngRunCfgCmd,     NULL,             NO_HANDLER_DATA,                                                                                },
-  {"STATUS",        EngRunStatusCmd,  NULL,             NO_HANDLER_DATA,                                                                                },      
+  {"STATUS",        EngRunStatusCmd,  NULL,             NO_HANDLER_DATA,                                                                                },
+  {"INFO",          EngInfoCmd,       NULL,             NO_HANDLER_DATA,                                                                                },
   {DISPLAY_CFG,     NO_NEXT_TABLE,    EngRunShowConfig, USER_TYPE_ACTION,    (USER_RO|USER_NO_LOG|USER_GSE)  ,NULL,      -1,-1,      NO_LIMIT,   NULL   },
   { NULL,           NULL,             NULL,             NO_HANDLER_DATA}
 };
@@ -650,7 +681,7 @@ static USER_MSG_TBL rootEngRunMsg = {"ENG",EngRunCmd, NULL,NO_HANDLER_DATA};
  * Parameters:   See user.h command handler prototype
  *
  * Returns:      USER_RESULT_OK:    Processed successfully
- *               USER_RESULT_ERROR: Error processing command. 
+ *               USER_RESULT_ERROR: Error processing command.
  *
  * Notes:        none
  *
@@ -661,8 +692,8 @@ USER_HANDLER_RESULT EngRunUserCfg(USER_DATA_TYPE DataType,
                                   const void *SetPtr,
                                   void **GetPtr)
 {
- USER_HANDLER_RESULT result = USER_RESULT_OK; 
- 
+ USER_HANDLER_RESULT result = USER_RESULT_OK;
+
   memcpy(&m_CfgTemp,
          &CfgMgr_ConfigPtr()->EngineRunConfigs[Index],
          sizeof(m_CfgTemp));
@@ -676,12 +707,89 @@ USER_HANDLER_RESULT EngRunUserCfg(USER_DATA_TYPE DataType,
            &m_CfgTemp,
            sizeof(m_CfgTemp));
 
-    // Persist the CfgMgr's updated copy back to EEPROM.       
+    // Persist the CfgMgr's updated copy back to EEPROM.
     CfgMgr_StoreConfigItem( CfgMgr_ConfigPtr(),
                             &CfgMgr_ConfigPtr()->EngineRunConfigs[Index],
                             sizeof(m_CfgTemp) );
   }
-  return result;  
+  return result;
+}
+
+/******************************************************************************
+ * Function:     EngUserInfo
+ *
+ * Description:  User message handler to set/get engine Identification items
+ *
+ * Parameters:   See user.h command handler prototype
+ *
+ * Returns:      USER_RESULT_OK:    Processed successfully
+ *               USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+{
+   //Offsets of each member of .Board is relative to Box_Info.Board[0].
+   //Offset by the user's entered index to get the .Board[Index]
+   Param.Ptr = (char*)Param.Ptr + sizeof(m_EngineInfo.engine[0]) * Index;
+
+   if(SetPtr == NULL)
+   {
+      //Read into the global structure from NV memory, Return the parameter
+      //to user manager.
+      NV_Read(NV_ENGINE_ID,0,&m_EngineInfo,sizeof(m_EngineInfo));
+      *GetPtr = Param.Ptr;
+   }
+   else
+   {
+      //Copy the new data into the global struct and write it to NV memory
+      //Offsets of each member of .Board is relative to Box_Info.Board[0].
+      //Offset by the user's entered index to get the .Board[Index]
+      strncpy_safe(Param.Ptr,MAX_ENGINE_ID, SetPtr, _TRUNCATE );
+      NV_Write(NV_ENGINE_ID,0,&m_EngineInfo,sizeof(m_EngineInfo));
+   }
+   return USER_RESULT_OK;
+}
+
+/******************************************************************************
+ * Function:     EngSPUserInfo
+ *
+ * Description:  User message handler to set/get engine Service Plan
+ *
+ * Parameters:   See user.h command handler prototype
+ *
+ * Returns:      USER_RESULT_OK:    Processed successfully
+ *               USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+{
+  if(SetPtr == NULL)
+  {
+    //Read into the global structure from NV memory, Return the parameter
+    //to user manager.
+    NV_Read(NV_ENGINE_ID,0,&m_EngineInfo,sizeof(m_EngineInfo));
+    *GetPtr = Param.Ptr;
+  }
+  else
+  {
+    //Copy the new data into the global struct and write it to NV memory
+    strncpy_safe(Param.Ptr,MAX_ENGINE_ID, SetPtr, _TRUNCATE );
+    NV_Write(NV_BOX_CFG,0,&m_EngineInfo,sizeof(m_EngineInfo));
+  }
+
+  return USER_RESULT_OK;
 }
 
 /******************************************************************************
@@ -729,9 +837,9 @@ USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
  * Function:    EngRunShowConfig
  *
  * Description:  Handles User Manager requests to retrieve the configuration
- *               settings.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               settings.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -745,9 +853,9 @@ USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
 
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
- * Notes:        
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
@@ -755,8 +863,8 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
                                      const void *SetPtr,
                                      void **GetPtr)
 {
-  USER_HANDLER_RESULT result;   
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];   
+  USER_HANDLER_RESULT result;
+  CHAR Label[USER_MAX_MSG_STR_LEN * 3];
 
   //Top-level name is a single indented space
   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
@@ -764,7 +872,7 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
   USER_MSG_TBL*  pCfgTable;
   INT16 engIdx;
 
-  result = USER_RESULT_OK;   
+  result = USER_RESULT_OK;
 
   // Loop for each sensor.
   for (engIdx = 0; engIdx < MAX_ENGINES && result == USER_RESULT_OK; ++engIdx)
@@ -774,80 +882,80 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
     result = USER_RESULT_ERROR;
     if (User_OutputMsgString( Label, FALSE ) )
     {
-      pCfgTable = EngRunCfgCmd;  // Re-set the pointer to beginning of CFG table       
+      pCfgTable = EngRunCfgCmd;  // Re-set the pointer to beginning of CFG table
 
       // User_DisplayConfigTree will invoke itself recursively to display all fields.
       result = User_DisplayConfigTree(BranchName, pCfgTable, engIdx, 0, NULL);
-    }     
-  } 
+    }
+  }
   return result;
 }
 /*****************************************************************************/
-/* Local Functions                                                           */ 
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - Add ACT_LIST, clean up msgs
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:03p
  * Updated in $/software/control processor/code/application
  * FAST 2 fixes for sensor list
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 9/07/12    Time: 4:05p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - V&V fixes, code review updates
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:17p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 BITARRAY128 input as integer list
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:41p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 make min/max generic
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:24p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 2:28p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:27p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 6/05/12    Time: 6:41p
  * Updated in $/software/control processor/code/application
  * Engine ID change
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:05p
  * Updated in $/software/control processor/code/application
  * FAST2 Refactoring
- * 
+ *
  * *****************  Version 2  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:15p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Check In for Dave
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:39p
  * Created in $/software/control processor/code/application
