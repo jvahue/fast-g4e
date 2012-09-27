@@ -382,7 +382,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
 
     // The OpCode value is the index into the OpCodeTable for this operation
     // see: EVAL_OPCODE_LIST in EvaluatorInterface.h
-    pOpCodeTbl = &OpCodeTable[cmd->OpCode]; 
+    pOpCodeTbl = &OpCodeTable[cmd->opCode]; 
 
     // Set the current command ptr into the context struct
     // and process it.
@@ -600,14 +600,14 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
   for(i = 0; i < expr->Size; i++)
   {
     cnt  = 0;   
-    j = expr->CmdList[i].OpCode;
+    j = expr->CmdList[i].opCode;
     cnt = OpCodeTable[j].FmtCmd( j, (const EVAL_CMD*) &expr->CmdList[i], pStr);
     pStr += cnt;
     *pStr = ' ';
     pStr++;
 
     //Should never happen unless the op code table is corrupted!
-    ASSERT_MESSAGE(cnt != 0, "EvalExprBinToStr OpCode not valid: %d",expr->CmdList[i].OpCode );
+    ASSERT_MESSAGE(cnt != 0, "EvalExprBinToStr OpCode not valid: %d",expr->CmdList[i].opCode );
   } // for-loop expression entries
   --pStr;
   *pStr = '\0';
@@ -634,7 +634,7 @@ BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
   EVAL_RPN_ENTRY rslt;
   
 
-  rslt.Data = context->cmd->Data;
+  rslt.Data = context->cmd->data;
   rslt.DataType = DATATYPE_VALUE;
   rslt.Validity = TRUE;
 
@@ -662,7 +662,7 @@ BOOLEAN EvalLoadConstFalse(EVAL_EXE_CONTEXT* context)
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
 
-  rslt.Data = context->cmd->Data;
+  rslt.Data = context->cmd->data;
   rslt.DataType = DATATYPE_BOOL;
   // Const FALSE is always VALID
   rslt.Validity = TRUE;
@@ -695,20 +695,20 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
   // Get a pointer to the DataAccess table for the set of
   // function-pointers supporting this opCode.
 
-   dataAcc = EvalGetDataAccess(cmd->OpCode);
+   dataAcc = EvalGetDataAccess(cmd->opCode);
  
    // Should never be true! (Table 'coding' error)
    // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST   
    ASSERT_MESSAGE(NULL != dataAcc,
                   "Data Access Interface lookup not configured for OpCode: %d",
-                  cmd->OpCode );
+                  cmd->opCode );
 
   // Only 1 'Get' function should be defined in table for each opCode
   // Should never be true. (Table 'coding' error)
   ASSERT_MESSAGE(!((dataAcc->GetSrcByBool == NULL) && (dataAcc->GetSrcByValue == NULL)) &&
                  !((dataAcc->GetSrcByBool != NULL) && (dataAcc->GetSrcByValue != NULL)),
                  "Multiple 'Get' entries configured for DataAccessTable[%d] Cmd: [%d][%f]",
-                  cmd->OpCode, cmd->OpCode, cmd->Data);
+                  cmd->opCode, cmd->opCode, cmd->data);
 
   // Init the data-type and data here.
   // If the source is not configured we need at least
@@ -717,13 +717,13 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
   rslt.Data = 0.f;
 
   // If the input source is configured, get the data (value or bool) and validity
-  if (dataAcc->IsSrcConfigured( (INT32)cmd->Data) )
+  if (dataAcc->IsSrcConfigured( (INT32)cmd->data) )
   {
     rslt.Data = (NULL != dataAcc->GetSrcByValue) ?
-                  dataAcc->GetSrcByValue( (INT32) cmd->Data) :
-                  dataAcc->GetSrcByBool ( (INT32) cmd->Data);
+                  dataAcc->GetSrcByValue( (INT32) cmd->data) :
+                  dataAcc->GetSrcByBool ( (INT32) cmd->data);
 
-    rslt.Validity = dataAcc->GetSrcValidity( (SENSOR_INDEX)cmd->Data);
+    rslt.Validity = dataAcc->GetSrcValidity( (SENSOR_INDEX)cmd->data);
   }
   else // The indicated data source is not configured.
   {
@@ -765,27 +765,27 @@ BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
   // Get a pointer to the DataAccess table for the set of
   // function-pointers supporting this opCode.
 
-  dataAcc = EvalGetDataAccess(cmd->OpCode);
+  dataAcc = EvalGetDataAccess(cmd->opCode);
 
   // Should never be true! (Table 'coding' error)
   // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST   
   ASSERT_MESSAGE(NULL != dataAcc,
                  "Data Access Interface lookup not configured for OpCode: %d",
-                 cmd->OpCode );
+                 cmd->opCode );
 
   // Only 1 'Get' function should be defined in table for any given opCode
   ASSERT_MESSAGE(!((dataAcc->GetSrcByBool == NULL) && (dataAcc->GetSrcByValue == NULL)) &&
                  !((dataAcc->GetSrcByBool != NULL) && (dataAcc->GetSrcByValue != NULL)),
                  "Multiple 'Get' entries configured for DataAccessTable[%d] Cmd: [%d][%f]",
-                 cmd->OpCode, cmd->OpCode, cmd->Data);
+                 cmd->opCode, cmd->opCode, cmd->data);
 
   
   // Call the app-supplied function thru the DAI table ptr
   rslt.DataType = (NULL != dataAcc->GetSrcByValue) ? DATATYPE_VALUE : DATATYPE_BOOL;
  
   rslt.Data     = (NULL != dataAcc->GetSrcByValue) ?
-                   dataAcc->GetSrcByValue( (INT32) cmd->Data) :
-                   dataAcc->GetSrcByBool ( (INT32) cmd->Data);
+                   dataAcc->GetSrcByValue( (INT32) cmd->data) :
+                   dataAcc->GetSrcByBool ( (INT32) cmd->data);
 
  // A app-supplied function is always considered VALID
  rslt.Validity = TRUE;
@@ -832,7 +832,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
     if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndLeft, &oprndRight) )
     {
         // perform the comparison operation, store the result
-        switch (cmd->OpCode)
+        switch (cmd->opCode)
         {
           case OP_NE:
             rslt.Data = (FLOAT32)(fabs(oprndLeft.Data - oprndRight.Data) >= FLT_EPSILON);
@@ -862,7 +862,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
 
           // Should never get here; all Comparison Operators are handled.
           default:
-            FATAL("Unrecognized Expression OpCode: %d", cmd->OpCode);
+            FATAL("Unrecognized Expression OpCode: %d", cmd->opCode);
         }
 
       rslt.DataType = DATATYPE_BOOL;
@@ -936,7 +936,7 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
       // Lookup the previous sensor value for this reference.
       // Make the lookup key using caller type, the objectId holding this expression, and the
       // sensor being referenced.
-      key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->Data);
+      key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->data);
 
       EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
       rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
@@ -1167,8 +1167,8 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     temp_float = (FLOAT32)strtod(str, &end);
     if( temp_float <= FLT_MAX && temp_float >= -FLT_MAX)
     {
-      cmd.OpCode = (UINT8)OP_CONST_VAL;
-      cmd.Data   = temp_float;
+      cmd.opCode = (UINT8)OP_CONST_VAL;
+      cmd.data   = temp_float;
 
       // Add cmd to expression list
       expr->CmdList[expr->Size++] = cmd;
@@ -1212,8 +1212,8 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   else
   {
     // Object is a constant Boolean 'FALSE'
-    cmd.OpCode = OpCodeTable[tblIdx].OpCode;
-    cmd.Data   = 0.f;
+    cmd.opCode = OpCodeTable[tblIdx].OpCode;
+    cmd.data   = 0.f;
         
     // Add cmd to expression list
     expr->CmdList[expr->Size++] = cmd;
@@ -1278,8 +1278,8 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     objIdx = EvalParseObjectIndex( &str[OpCodeTable[tblIdx].TokenLen], maxObjects);
     if(objIdx >= 0)
     {
-      cmd.OpCode = (UINT8)OpCodeTable[tblIdx].OpCode;
-      cmd.Data   = (FLOAT32)objIdx;
+      cmd.opCode = (UINT8)OpCodeTable[tblIdx].OpCode;
+      cmd.data   = (FLOAT32)objIdx;
       // Add cmd to expression list
       expr->CmdList[expr->Size++] = cmd;
       expr->OperandCnt++;
@@ -1312,8 +1312,8 @@ INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   EVAL_CMD cmd;
 
-  cmd.OpCode = OpCodeTable[tblIdx].OpCode;
-  cmd.Data   = 0.f;
+  cmd.opCode = OpCodeTable[tblIdx].OpCode;
+  cmd.data   = 0.f;
 
   // Add cmd to expression list
   expr->CmdList[expr->Size++] = cmd;
@@ -1345,10 +1345,10 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Check the previous operation in list..
   // Verify that it is a sensor-load cmd and get idx-value stored
   // in Data so '!P' can make a call to load prev value at exe time.
-  if ( OP_GETSNRVAL == expr->CmdList[expr->Size - 1].OpCode)
+  if ( OP_GETSNRVAL == expr->CmdList[expr->Size - 1].opCode)
   {
-    cmd.OpCode = OP_NOT_EQ_PREV;
-    cmd.Data   = expr->CmdList[expr->Size - 1].Data;
+    cmd.opCode = OP_NOT_EQ_PREV;
+    cmd.data   = expr->CmdList[expr->Size - 1].data;
     expr->CmdList[expr->Size++] = cmd;
     retval = OpCodeTable[tblIdx].TokenLen;    
   }
@@ -1377,7 +1377,7 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, EVAL_OPRND_LEN + 1, "%s%03d", &OpCodeTable[tblIdx].Token,
-                                                     (INT32)cmd->Data);
+                                                     (INT32)cmd->data);
 }
 
 /******************************************************************************
@@ -1396,7 +1396,7 @@ INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *****************************************************************************/
 INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
-  return snprintf(str, MAX_FP_STRING, "%f", cmd->Data);
+  return snprintf(str, MAX_FP_STRING, "%f", cmd->data);
 }
 
 /******************************************************************************

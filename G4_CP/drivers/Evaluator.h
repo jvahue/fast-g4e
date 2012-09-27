@@ -137,8 +137,8 @@ typedef enum
 #pragma pack(1)
 typedef struct
 {
-  UINT8   OpCode; // Operation to be performed
-  FLOAT32 Data;   // Data (optional depending on opCode)
+  UINT8   opCode; // Operation to be performed
+  FLOAT32 data;   // Data (optional depending on opCode)
 }EVAL_CMD;
 
 // Structure/list for holding the binary form of the RPN-encoded logical expression

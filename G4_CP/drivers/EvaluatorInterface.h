@@ -30,6 +30,8 @@
 #undef  OPCMD
 #define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd)
 
+/*              EVAL_OPCODE_LIST is greater than 95 chars for clarity.                       */
+
 #define EVAL_OPCODE_LIST \
 /*       OpCode       Token   Len  AddCmd             FmtString                      ExeCmd */\
 /* Load/Fetch commands                                                                      */\
@@ -41,7 +43,7 @@ OPCMD(OP_GETTRIGVALID,"TVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdSt
 OPCMD(OP_CALL_ACTACK, "AACK",  4, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadFuncCall    ),\
 OPCMD(OP_CONST_FALSE, "FALSE", 5, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadConstFalse  ),\
 OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr,           EvalLoadConstValue  ),\
-/* Operators: KEEP LIST IN DESCENDING SIZE ORDER ( "!=" MUST BE FOUND BEFORE "!"               */\
+/* Operators: KEEP LIST IN DESCENDING SIZE ORDER ( "!=" MUST BE FOUND BEFORE "!" )                       */\
 OPCMD(OP_NE,          "!=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
 OPCMD(OP_EQ,          "==",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
 OPCMD(OP_NOT_EQ_PREV, "!P",    2, EvalAddNotEqPrev,   EvalFmtOperStr,                EvalIsNotEqualPrev  ),\
@@ -58,7 +60,7 @@ OPCMD(OP_OR,          "|",     1, EvalAddStdOper,     EvalFmtOperStr,           
 #undef DAI
 #define DAI(OpCode, IsConfiged, RetValueFunc, RetBoolFunc, ValidFunc)
 
-/*              EVAL_DAI_LIST is greater than 95 chars for clarity.                         */
+/*              EVAL_DAI_LIST is greater than 95 chars for clarity.                          */
 
 #define EVAL_DAI_LIST \
 /*   NOTE: RetValueFunc and RetBoolFunc are mutually exclusive -DO NOT DECLARE BOTH!                */\
