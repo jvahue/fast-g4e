@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 60 $  $Date: 8/28/12 1:43p $
+    $Revision: 61 $  $Date: 12-09-27 9:14a $
 
 ******************************************************************************/
 
@@ -391,6 +391,12 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
  *  MODIFICATIONS
  *    $History: NVMgr.h $
  *
+ * *****************  Version 61  *****************
+ * User: John Omalley Date: 12-09-27   Time: 9:14a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Added Engine Identification Fields to software and file
+ * header
+ * 
  * *****************  Version 60  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -7,7 +7,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 13 $  $Date: 9/17/12 10:53a $
+$Revision: 14 $  $Date: 12-09-27 9:13a $ 
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -898,6 +898,12 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
  *
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-09-27   Time: 9:13a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Engine Identification Fields to software and file
+ * header
+ * 
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
  * Updated in $/software/control processor/code/application

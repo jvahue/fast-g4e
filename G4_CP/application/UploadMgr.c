@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 159 $  $Date: 12-09-11 2:03p $
+   $Revision: 160 $  $Date: 12-09-27 9:13a $
 
 ******************************************************************************/
 
@@ -3474,6 +3474,12 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  *
+ * *****************  Version 160  *****************
+ * User: John Omalley Date: 12-09-27   Time: 9:13a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Engine Identification Fields to software and file
+ * header
+ * 
  * *****************  Version 159  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:03p
  * Updated in $/software/control processor/code/application

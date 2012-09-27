@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 22 $  $Date: 9/18/12 6:11p $
+      $Revision: 23 $  $Date: 12-09-27 9:13a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1097,6 +1097,12 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  *
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 12-09-27   Time: 9:13a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Engine Identification Fields to software and file
+ * header
+ * 
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 9/18/12    Time: 6:11p
  * Updated in $/software/control processor/code/application

@@ -10,7 +10,7 @@
     Description: Package system logs and application (flight data)logs
 
     VERSION
-    $Revision: 43 $  $Date: 8/28/12 12:43p $
+    $Revision: 44 $  $Date: 12-09-27 9:13a $    
 
 ******************************************************************************/
 
@@ -227,6 +227,12 @@ EXPORT void     UploadMgr_GenerateDebugLogs(void);
  *  MODIFICATIONS
  *    $History: UploadMgr.h $
  *
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 12-09-27   Time: 9:13a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Added Engine Identification Fields to software and file
+ * header
+ * 
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
