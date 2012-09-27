@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 16 $  $Date: 12-09-27 9:13a $     
+      $Revision: 15 $  $Date: 9/14/12 4:02p $
 
 ******************************************************************************/
 
@@ -163,7 +163,7 @@ typedef struct
 /* Configuration */
 typedef struct
 {
-  CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the engine run              */
+  CHAR           engineName[MAX_ENGINERUN_NAME]; /* the name of the trigger                 */
   TRIGGER_INDEX  startTrigID;             /* Index into Trig array - start criteria         */
   TRIGGER_INDEX  runTrigID;               /* Index into Trig array - run criteria           */
   TRIGGER_INDEX  stopTrigID;              /* Index into Trig array - stop criteria          */

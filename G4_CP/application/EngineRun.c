@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 23 $  $Date: 12-09-27 9:13a $
+      $Revision: 22 $  $Date: 9/18/12 6:11p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -964,7 +964,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   // if the starting time is zero, needs to be initialized
   // todo DaveB  - this could be a code coverage issue
   // unless we can transition directly from STOPPED to RUNNING.
-  // Normally startingTime_ms is set on STOPPED->START transition.
+  // Normally startingTime is set on STOPPED->START transition.
   if ( 0 == pErData->startingTime_ms )
   {
     // general Trigger initialization
