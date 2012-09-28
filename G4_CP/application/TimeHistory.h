@@ -9,7 +9,7 @@
     Description: Public functions/defintions.  See header in TimeHistory.c
 
     VERSION
-    $Revision: 6 $  $Date: 9/21/12 5:22p $   
+    $Revision: 7 $  $Date: 9/27/12 4:51p $   
     
 ******************************************************************************/
 
@@ -58,6 +58,7 @@
 ******************************************************************************/
 typedef enum 
 {
+   TH_OFF  =  0,            /*  Disabled */
    TH_1HZ  =  1,            /*  1Hz Rate */
    TH_2HZ  =  2,            /*  2Hz Rate */
    TH_4HZ  =  4,            /*  4Hz Rate */
@@ -108,6 +109,11 @@ EXPORT void TH_Init(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Jim Mood     Date: 9/27/12    Time: 4:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
  * 
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 9/21/12    Time: 5:22p
