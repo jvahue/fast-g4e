@@ -86,17 +86,17 @@ static USER_ENUM_TBL CycleTypeEnum[] =
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 static USER_MSG_TBL CycleStatusCmd [] =
 {
-  /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                   IndexRange         DataLimit   EnumTbl*/
-  {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.CycleActive,   0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
-  {"CYCLE_LAST_TIME", NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.CycleLastTime, 0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
+  /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                     IndexRange         DataLimit   EnumTbl*/
+  {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.cycleActive,      0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
+  {"CYCLE_LAST_TIME", NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleLastTime_ms, 0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL CycleCfgCmd[] =
 {
   /*Str          Next Tbl Ptr   Handler Func     Data Type       Access    Parameter               IndexRange          DataLimit              EnumTbl*/
-  {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  &m_CfgTemp.Name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
-  {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.Type,         0,(MAX_CYCLES-1),   NO_LIMIT,              CycleTypeEnum    },
+  {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  &m_CfgTemp.name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
+  {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              CycleTypeEnum    },
   {"COUNT",      NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nCount,       0,(MAX_CYCLES-1),   NO_LIMIT,              NULL             },
   {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              TriggerIndexType },
   {"ENGINERUNID",NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nEngineRunId, 0,(MAX_CYCLES-1),   NO_LIMIT,              EngRunIdEnum     },
@@ -214,7 +214,7 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
     // safeguard against updating counts for an active cycle.
-    if ( !m_Data[Index].CycleActive )
+    if ( !m_Data[Index].cycleActive )
     {
       // Copy the updated temp  back to EEPROM then persist it to both EEPROM RTC files.
       memcpy( &m_CountsEEProm.data[Index], &m_persistTemp, sizeof(m_persistTemp));

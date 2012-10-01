@@ -170,7 +170,7 @@ void CycleUpdateAll(ENGRUN_INDEX erIndex)
   // Update all active cycles associated with this enginerun
   for (cycIndex = 0; cycIndex < MAX_CYCLES; cycIndex++)
   {
-    if ( m_Cfg[cycIndex].Type != CYC_TYPE_NONE_CNT &&
+    if ( m_Cfg[cycIndex].type != CYC_TYPE_NONE_CNT &&
          m_Cfg[cycIndex].nEngineRunId == erIndex )
     {
       CycleUpdate(&m_Cfg[cycIndex], &m_Data[cycIndex], cycIndex);
@@ -196,7 +196,7 @@ void CycleResetAll(void)
 
   for (i = 0; i < MAX_CYCLES; i++)
   {
-    if ( m_Cfg[i].Type != CYC_TYPE_NONE_CNT)
+    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT)
     {
      CycleReset( &m_Cfg[i], &m_Data[i] );
     }
@@ -223,7 +223,7 @@ void CycleClearAll( void )
   for (i = 0; i < MAX_CYCLES; i++)
   {
     // Set cycle type to none
-    pCycleCfg->Type = CYC_TYPE_NONE_CNT;
+    pCycleCfg->type = CYC_TYPE_NONE_CNT;
 
     // Set cycle's trigger index to unused.
     pCycleCfg->nTriggerId = TRIGGER_UNUSED;
@@ -249,11 +249,11 @@ void CycleClearAll( void )
 BOOLEAN CycleIsPersistentType( UINT8 nCycle )
 {
   return (
-          (m_Cfg[nCycle].Type == CYC_TYPE_PERSIST_DURATION_CNT )
-           || (m_Cfg[nCycle].Type == CYC_TYPE_PERSIST_SIMPLE_CNT)
+          (m_Cfg[nCycle].type     == CYC_TYPE_PERSIST_DURATION_CNT )
+           || (m_Cfg[nCycle].type == CYC_TYPE_PERSIST_SIMPLE_CNT)
 #ifdef PEAK_CUM_PROCESSING
-           || (m_Cfg[nCycle].Type == CYC_TYPE_PEAK_VAL_CNT)
-           || (m_Cfg[nCycle].Type == CYC_TYPE_CUM_CNT)
+           || (m_Cfg[nCycle].type == CYC_TYPE_PEAK_VAL_CNT)
+           || (m_Cfg[nCycle].type == CYC_TYPE_CUM_CNT)
 #endif
        );
 }
@@ -295,10 +295,10 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       // Copy the Cycle names
       strncpy_safe( cycleHdr[cycleIndex].Name,
                     sizeof(cycleHdr[cycleIndex].Name),
-                    m_Cfg[cycleIndex].Name,
+                    m_Cfg[cycleIndex].name,
                     _TRUNCATE);
 
-      cycleHdr[cycleIndex].Type         = m_Cfg[cycleIndex].Type;
+      cycleHdr[cycleIndex].Type         = m_Cfg[cycleIndex].type;
       cycleHdr[cycleIndex].nCount       = m_Cfg[cycleIndex].nCount;
       cycleHdr[cycleIndex].nTriggerId   = m_Cfg[cycleIndex].nTriggerId;
       cycleHdr[cycleIndex].nEngineRunId = m_Cfg[cycleIndex].nEngineRunId;
@@ -385,7 +385,7 @@ static void CycleInitPersistent(void)
 
         if ( pCycCntsEE->count.n != pCycCntsRTC->count.n )
         {
-          if ( CYC_TYPE_PERSIST_DURATION_CNT == pCycCfg->Type )
+          if ( CYC_TYPE_PERSIST_DURATION_CNT == pCycCfg->type )
           {
             if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
             {
@@ -455,17 +455,17 @@ static void CycleInitPersistent(void)
  *****************************************************************************/
 static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
 {
-  if ( pCycleCfg->Type == CYC_TYPE_NONE_CNT ||
+  if ( pCycleCfg->type       == CYC_TYPE_NONE_CNT ||
        pCycleCfg->nTriggerId >= MAX_TRIGGERS ||
        !TriggerIsConfigured( pCycleCfg->nTriggerId ) )
   {
-    pCycleCfg->Type         = CYC_TYPE_NONE_CNT;
+    pCycleCfg->type         = CYC_TYPE_NONE_CNT;
     pCycleCfg->nEngineRunId = ENGRUN_UNUSED;
   }
   else
   {
-    pCycleData->CycleActive = FALSE;  /* Count not yet active */
-    pCycleData->CycleLastTime = 0;   /* Clear start time     */
+    pCycleData->cycleActive      = FALSE;  /* Count not yet active */
+    pCycleData->cycleLastTime_ms = 0;      /* Clear start time     */
 #ifdef DEBUG_CYCLE
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE,"Cycle: %s CycleReset",pCycleCfg->Name);
@@ -516,7 +516,7 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
 static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cycIndex )
 {
   // Act on the different types of cycles
-  switch (pCycleCfg->Type)
+  switch (pCycleCfg->type)
   {
     case CYC_TYPE_SIMPLE_CNT:
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
@@ -544,8 +544,10 @@ static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cy
       break;
 
     default:
-      FATAL ("Cycle[%d] %s has Unrecognized Cycle Type: %d", cycIndex, pCycleCfg->Name, pCycleCfg->Type);
-      pCycleCfg->Type = CYC_TYPE_NONE_CNT;
+      FATAL ("Cycle[%d] %s has Unrecognized Cycle Type: %d",
+             cycIndex, pCycleCfg->name,
+             pCycleCfg->type);
+      pCycleCfg->type = CYC_TYPE_NONE_CNT;
       break;
    }
 }
@@ -577,33 +579,33 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 
   pErDataCycles = EngRunGetPtrToCycleCounts(pCycleCfg->nEngineRunId);
 
-  if ( (pCycleData->CycleActive) )
+  if ( (pCycleData->cycleActive) )
   {
     // Cycle was already active from a previous pass...
 
     // If a Duration Count, update duration every time through.
-    if ( (pCycleCfg->Type == CYC_TYPE_DURATION_CNT) ||
-         (pCycleCfg->Type == CYC_TYPE_PERSIST_DURATION_CNT) )
+    if ( (pCycleCfg->type == CYC_TYPE_DURATION_CNT) ||
+         (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT) )
     {
       // Increment duration every time through when active.
 
       // Update the millisec duration in the enginerun count object.
       nowTimeMs = CM_GetTickCount();
-      pErDataCycles[cycIndex] += (nowTimeMs - pCycleData->CycleLastTime);
-      pCycleData->CycleLastTime = nowTimeMs;
+      pErDataCycles[cycIndex] += (nowTimeMs - pCycleData->cycleLastTime_ms);
+      pCycleData->cycleLastTime_ms = nowTimeMs;
 
-      if (pCycleCfg->Type == CYC_TYPE_PERSIST_DURATION_CNT)
+      if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
         CycleBackupPersistentCounts(cycIndex, CYC_BKUP_RTC);
       }
     }
     // Update the cycle active status.
-    pCycleData->CycleActive = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
+    pCycleData->cycleActive = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
 
     // If cycle has ended, reset the start-time for the next duration.
-    if(!pCycleData->CycleActive)
+    if(!pCycleData->cycleActive)
     {
-      pCycleData->CycleLastTime = 0;
+      pCycleData->cycleLastTime_ms = 0;
 #ifdef DEBUG_CYCLE
 /*vcast_dont_instrument_start*/
        GSE_DebugStr(NORMAL, TRUE,"Cycle: Cycle[%d] Ended", cycIndex);
@@ -629,15 +631,15 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
        GSE_DebugStr(NORMAL, TRUE,"Cycle: Cycle[%d] Started", cycIndex);
       #endif
 
-      pCycleData->CycleActive    = TRUE;
-      pCycleData->CycleLastTime = CM_GetTickCount();
+      pCycleData->cycleActive    = TRUE;
+      pCycleData->cycleLastTime_ms = CM_GetTickCount();
 
-      if (( pCycleCfg->Type == CYC_TYPE_SIMPLE_CNT ) ||
-          ( pCycleCfg->Type == CYC_TYPE_PERSIST_SIMPLE_CNT))
+      if (( pCycleCfg->type == CYC_TYPE_SIMPLE_CNT ) ||
+          ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT))
       {
         pErDataCycles[cycIndex] += pCycleCfg->nCount;
 
-        if (pCycleCfg->Type == CYC_TYPE_PERSIST_SIMPLE_CNT)
+        if (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT)
         {
           CycleBackupPersistentCounts(cycIndex, CYC_BKUP_RTC);
         }
@@ -681,7 +683,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
   // When the engrun ends, this function will be called with updateFlag == CYC_WRITE_EE and
   // the EEPROM memory will be synced to match RTC.
 
-  switch (pCycle->Type)
+  switch (pCycle->type)
   {
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
       temp_value.n = m_CountsEEProm.data[nCycle].count.n + pErDataCycles[nCycle];
@@ -704,7 +706,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       break;
 
     default:
-      FATAL ("Unrecognized Cycle Type Value: %d", pCycle->Type);
+      FATAL ("Unrecognized Cycle Type Value: %d", pCycle->type);
       break;
   }
 
@@ -791,7 +793,7 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
     // If the cycle entry is configured, and belongs to the EngineRun,
     // save the values and close it out.
 
-    if ( m_Cfg[i].Type != CYC_TYPE_NONE_CNT &&
+    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT &&
          m_Cfg[i].nEngineRunId == erID)
     {
       // Persist cycle info to  EEPROM from RTC at end of cycle.
@@ -829,16 +831,16 @@ static void CycleFinish( UINT16 nCycle )
 
 
   // Act on the different types of cycles
-  switch (pCycleCfg->Type)
+  switch (pCycleCfg->type)
   {
     case CYC_TYPE_SIMPLE_CNT:
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
       // Mark the cycle as completed.
-      pCycle->CycleActive    = FALSE;
-      pCycle->CycleLastTime = 0;
+      pCycle->cycleActive    = FALSE;
+      pCycle->cycleLastTime_ms = 0;
 
       // Update the log entry with the aggregate persisted count from EEPROM/RTCNvRAM
-      if ( pCycleCfg->Type == CYC_TYPE_PERSIST_SIMPLE_CNT )
+      if ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT )
       {
         pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
       }
@@ -846,13 +848,13 @@ static void CycleFinish( UINT16 nCycle )
 
     case CYC_TYPE_DURATION_CNT:
     case CYC_TYPE_PERSIST_DURATION_CNT:
-      pCycle->CycleActive    = FALSE;
-      pCycle->CycleLastTime = 0;
+      pCycle->cycleActive    = FALSE;
+      pCycle->cycleLastTime_ms = 0;
 
       // Update the log entries with the count.
       // Note: counts are in secs.
 
-      if (pCycleCfg->Type == CYC_TYPE_PERSIST_DURATION_CNT)
+      if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
         pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
       }
@@ -915,7 +917,7 @@ static void CycleFinish( UINT16 nCycle )
 #endif
 
     default:
-      FATAL ("Unrecognized Cycle Type Value: %d" ,pCycleCfg->Type);
+      FATAL ("Unrecognized Cycle Type Value: %d" ,pCycleCfg->type);
       break;
   }
 
@@ -1042,7 +1044,7 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
     if ( bLogUpdate )
     {
       strncpy_safe(changeLog.CycleName, sizeof(changeLog.CycleName),
-                   m_Cfg[nCycle].Name,  MAX_CYCLENAME);
+                   m_Cfg[nCycle].name,  MAX_CYCLENAME);
       sprintf( changeLog.PrevValue, "0x%04x", m_CountsEEProm.data[nCycle].checkID);
       sprintf( changeLog.NewValue, "0x%04x",  iTempID);
       LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED, LOG_PRIORITY_3, NULL, 0, NULL );
@@ -1077,7 +1079,7 @@ static UINT16 CycleCalcCheckID( UINT16 nCycle )
   UINT16 cksum;
   CYCLE_CFG* pCycleCfg = &m_Cfg[nCycle];
 
-  cksum = (UINT16) pCycleCfg->Type         +
+  cksum = (UINT16) pCycleCfg->type         +
           (UINT16) pCycleCfg->nCount       +
           (UINT16) pCycleCfg->nTriggerId   +
           (UINT16) pCycleCfg->nEngineRunId;
@@ -1104,7 +1106,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
 
   for (i = 0; i < MAX_CYCLES; i++)
   {
-    if ( m_Cfg[i].Type != CYC_TYPE_NONE_CNT && m_Cfg[i].nEngineRunId == erID )
+    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT && m_Cfg[i].nEngineRunId == erID )
     {
       CycleReset( &m_Cfg[i], &m_Data[i]);
     }

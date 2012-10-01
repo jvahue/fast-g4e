@@ -143,8 +143,8 @@ typedef struct
 // A cycle is counted when some sensor exceeds some threshold.
 typedef struct
 {
-  char          Name[MAX_CYCLENAME + 1]; /* cycle name                                   */
-  CYC_TYPE      Type;          /* How cycle is counted 0xFFFF == This cycle unused       */
+  char          name[MAX_CYCLENAME + 1]; /* cycle name                                   */
+  CYC_TYPE      type;          /* How cycle is counted 0xFFFF == This cycle unused       */
   UINT32        nCount;        /* value added for incrementing cycle                     */
   TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
   ENGRUN_INDEX  nEngineRunId;  /* which EngineRun this cycle is associated               */
@@ -178,8 +178,8 @@ typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
 +----------------------------------------------------------------------------------------*/
 typedef struct
 {
-  BOOLEAN CycleActive;    /* The cycle is active */
-  UINT32  CycleLastTime; /* Timestamp in ms that the cycle became active */
+  BOOLEAN cycleActive;    /* The cycle is active */
+  UINT32  cycleLastTime_ms; /* Timestamp in ms that the cycle became active */
 }CYCLE_DATA, *CYCLE_DATA_PTR;
 
 #pragma pack(1)
