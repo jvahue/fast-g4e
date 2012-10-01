@@ -17,7 +17,7 @@
                  not operate after 49.7 days of continous operation.
  
     VERSION
-    $Revision: 9 $  $Date: 9/21/12 5:49p $   
+    $Revision: 10 $  $Date: 9/27/12 4:51p $   
    
 ******************************************************************************/
 
@@ -201,7 +201,7 @@ void TH_Init ( void )
   task_info.Type             = taskInfo[TH_Task_ID].taskType;
   task_info.modes            = taskInfo[TH_Task_ID].modes;
   task_info.MIFrames         = taskInfo[TH_Task_ID].MIFframes;
-  task_info.Enabled          = TRUE;
+  task_info.Enabled          = (TH_OFF != m_Cfg.sample_rate);
   task_info.Locked           = FALSE;
 
   task_info.Rmt.InitialMif   = taskInfo[TH_Task_ID].InitialMif;
@@ -781,6 +781,11 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jim Mood     Date: 9/27/12    Time: 4:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
  * 
  * *****************  Version 9  *****************
  * User: Jim Mood     Date: 9/21/12    Time: 5:49p

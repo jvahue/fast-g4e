@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 3 $  $Date: 9/21/12 5:27p $    
+$Revision: 4 $  $Date: 9/27/12 4:51p $    
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -63,7 +63,8 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-USER_ENUM_TBL time_history_rate_type[]   =  { { "1HZ"  , TH_1HZ          },
+USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_1HZ          },
+                                              { "1HZ"  , TH_1HZ          },
                                               { "2HZ"  , TH_2HZ          }, 
                                               { "4HZ"  , TH_4HZ          }, 
                                               { "5HZ"  , TH_5HZ          }, 
@@ -95,7 +96,7 @@ static USER_MSG_TBL time_history_root [] =
    { "STATUS",      time_history_status, NULL,          NO_HANDLER_DATA},
    { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,   USER_RW,          NULL,          -1, -1,      NO_LIMIT,  NULL},
    { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,   USER_RW,          NULL,          -1, -1,      NO_LIMIT,  NULL},
-   { "DISPLAY_CFG", NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { "SHOW_CFG",    NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
 
@@ -108,7 +109,7 @@ static USER_MSG_TBL time_history_root [] =
 /*****************************************************************************/
 
 /******************************************************************************
-* Function:     TimeHistory_UserCfg
+* Function:     TH_UserCfg
 *
 * Description:  Handles User Manager requests to change event configuration
 *               items.  
@@ -163,7 +164,7 @@ USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
-* Function:    TimeHistory_ShowConfig
+* Function:     TH_ShowConfig
 *
 * Description:  Handles User Manager requests to retrieve the configuration
 *               settings. 
@@ -192,32 +193,27 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
                                              const void *SetPtr,
                                              void **GetPtr )
 {
-
-  USER_HANDLER_RESULT result = USER_RESULT_OK;
-/* 
-   CHAR  LabelStem[] = "\r\n\r\nTIMEHISTORY.CFG";
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];   
-   INT16 i;
-
-  USER_MSG_TBL*  pCfgTable;
+   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
+   USER_HANDLER_RESULT result = USER_RESULT_OK;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";   
+   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
 
-   pCfgTable = &TimeHistoryCmd;  // Get pointer to config entry
+   // Display element info above each set of data.
+   sprintf(Label, "%s", "\r\n\r\nTH.CFG", 0 );
 
-   result = USER_RESULT_ERROR;
-   if ( User_OutputMsgString( Label, FALSE ) )
+   result = USER_RESULT_ERROR;      
+   if (User_OutputMsgString( Label, FALSE ) )
    {
-      result = User_DisplayConfigTree(BranchName, pCfgTable, i, 0, NULL);
-   }
-   */
+      result = User_DisplayConfigTree(BranchName, time_history_cmd, 0, 0, NULL);
+   }   
+
    return result;
 }
 
 
 /******************************************************************************
-* Function:    TimeHistory_FOpen
+* Function:     TH_FOpen
 *
 * Description:  Command handler to force and open call to time history. 
 *               The INT32 set value specifies the duration of pre-history 
@@ -256,7 +252,7 @@ USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
 }
 
 /******************************************************************************
-* Function:     TimeHistory_FClose
+* Function:     TH_FClose
 *
 * Description:  Command handler to force a close call to time history.  Set 
 *               value specifies the duration for post-history to record up 
@@ -300,6 +296,11 @@ USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: Jim Mood     Date: 9/27/12    Time: 4:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
  * 
  * *****************  Version 3  *****************
  * User: Jim Mood     Date: 9/21/12    Time: 5:27p
