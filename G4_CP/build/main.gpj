@@ -1,28 +1,28 @@
 #!gbuild
 [Program]
-   -bsp generic
-   -G
-   -cpu=CF5485
-   --prototype_errors
-
-   -DRELEASE
-   -object_dir=.\obj
-   -I..\drivers\hwdef
-   -I..\drivers\hwdef\ASMhwdef
-   -I..\drivers
-   -I..\system
-   -I..\application
-   -I..\test
-   :outputDir=.\
-   -list
-   {optgroup=GhsCompilerOptions} -o output.elf
-   -ansi
-   -keeptempfiles
-   -passsource
-   -gtws
-   -nostartfiles
-   -o fast.elf
-#Debugger RAM RUN at 0x30000000.ld
+	-bsp generic
+	-G
+	-cpu=CF5485
+	--prototype_errors
+	
+	-DRELEASE
+	-object_dir=.\obj
+	-I..\drivers\hwdef
+	-I..\drivers\hwdef\ASMhwdef
+	-I..\drivers
+	-I..\system
+	-I..\application
+	-I..\test
+	:outputDir=.\
+	-list
+	{optgroup=GhsCompilerOptions} -o output.elf
+	-ansi
+	-keeptempfiles
+	-passsource
+	-gtws
+	-nostartfiles
+	-o fast.elf
+#Debugger RAM RUN at 0x30000000.ld	
 FASTII.ld
 ..\application\AircraftConfigMgr.c
 ..\application\EngineRun.c

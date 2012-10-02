@@ -121,7 +121,7 @@ static USER_MSG_TBL eventCmd [] =
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.nOffset_ms,        0,(MAX_EVENTS-1),    0,1000,              NULL                },
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,           NULL                },
+  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
   { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "ENABLE_HISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_BOOLEAN, USER_RW,   &configEventTemp.bEnableTH,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
@@ -1294,7 +1294,7 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- *
+ * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application
@@ -1304,17 +1304,17 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - Add ACT_LIST, clean up msgs
- *
+ * 
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:06p
  * Updated in $/software/control processor/code/application
- * FAST 2 fixes for sensor list
+ * FAST 2 fixes for sensor list 
  *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-09-13   Time: 9:42a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added sensor statistics to the status command
- *
+ * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-09-11   Time: 1:58p
  * Updated in $/software/control processor/code/application

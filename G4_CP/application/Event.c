@@ -1618,7 +1618,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- *
+ * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application
@@ -1627,14 +1627,14 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:04p
  * Updated in $/software/control processor/code/application
- * FAST 2 fixes for sensor list
+ * FAST 2 fixes for sensor list 
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-13   Time: 9:41a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed the event table logic that I broke with previous
  * checkin
- *
+ * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-09-12   Time: 3:59p
  * Updated in $/software/control processor/code/application

@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 13 $  $Date: 12-09-19 3:23p $
+      $Revision: 14 $  $Date: 12-10-02 1:24p $
 
 ******************************************************************************/
 
@@ -276,6 +276,11 @@ EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:23p

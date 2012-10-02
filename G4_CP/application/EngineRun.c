@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 22 $  $Date: 9/18/12 6:11p $
+      $Revision: 24 $  $Date: 12-10-02 1:17p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1096,6 +1096,11 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Coding standard compliance
  *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-09-27   Time: 9:13a

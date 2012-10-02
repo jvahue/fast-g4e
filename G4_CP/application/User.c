@@ -1590,7 +1590,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
           tempWord |= word32Ptr[i];
         }
         bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
-               
+       
         // DISPLAY THE HEX STRING
         destPtr = bufHex128;
         strncpy_safe(destPtr, 3, "0x", _TRUNCATE);

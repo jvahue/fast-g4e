@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description: 
 
 VERSION
-$Revision: 10 $  $Date: 12-09-19 6:49p $ 
+$Revision: 11 $  $Date: 12-10-02 1:24p $ 
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -340,6 +340,11 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:49p

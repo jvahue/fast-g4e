@@ -111,7 +111,7 @@ NV_DEV(DEV_EE_BKUP,   (128 KB), 256, 0x10000000, 10,     0xFF,    NV_EERead,  NV
   Backup -  The backup device for storing the file. This can optionally be
             defined as DEV_NONE if dual-redundant storage is not required.
   Init   -  Function pointer to init function for init'ing file upon sys reset.
-            NULL if no reset is to be performed on the associated file.
+            NULL if no reset is to be performed on the associated file. 
   Size -    Required size of the file in bytes.  It would be useful to allocate
             some extra space if the file is expected to grow.  Modifying the
             size of a file can affect the allocation of files below it in the
@@ -124,7 +124,7 @@ NV_DEV(DEV_EE_BKUP,   (128 KB), 256, 0x10000000, 10,     0xFF,    NV_EERead,  NV
  !!IMPORTANT!!: The minimum size for a file is the size of the device sector, this is
                 enforced by an assert.  This rule exists specifically for the EEPROM,
                 but is enforced on all devices.
-
+ 
 NV_BoxCfg          - Status Manager. This contains information, such as serial # and
                      other data that absolutely cannot move between code revisions
 NV_PWR_ON_CNTS_EE  - Power-On counts EE
@@ -135,11 +135,11 @@ NV_FAULT_LOG       - Fault Manager: Last 10 fault buffer
 NV_PWR_MGR         - Power Manager: Power Off State
 NV_ASSERT_LOG      - Assert/Exception log buffer.
 NV_PWEH_CNTS_SEU   - PWEH SEU
-NV_UART_F7X        - Uart F7X Protocol application non-volatile data
+NV_UART_F7X        - Uart F7X Protocol application non-volatile data 
 NV_LOG_ERASE       - Log Erase Status file: persisted info re log erase in-prog between starts
-NV_AC_CFG          - Type, Fleet, and Number sensor values read from the AC bus
+NV_AC_CFG          - Type, Fleet, and Number sensor values read from the AC bus 
                        for AircraftConfiguration
-NV_LOG_COUNTS      - Saves the errors counts during log manager operations
+NV_LOG_COUNTS      - Saves the errors counts during log manager operations                       
 NV_UART_EMU150     - Uart EMU150 Protocol application non-volatile data
 NV_PCYCLE_CNTS_EE  - Persisted Cycle Counts EE
 NV_PCYCLE_CNTS_RTC - Persisted Cycle Counts RTC Ram
@@ -325,14 +325,14 @@ typedef struct {
 
 // Structure for reporting single-file error.
 typedef struct {
-  NV_FILE_ID  FileID;
+  NV_FILE_ID  FileID; 
   NV_FILENAME Name;
   UINT16      CRC;
 } NV_FILE_OPEN_ERROR_LOG;
 
 // Structure for reporting pri <-> backup file error.
 typedef struct {
-  NV_FILE_ID  FileID;
+  NV_FILE_ID  FileID; 
   NV_FILENAME Name;
   UINT16      PriCRC;
   UINT16      BackupCRC;
@@ -372,14 +372,14 @@ EXPORT void   NV_ResetConfig(void);
 //EXPORT RESULT NV_WriteDev(NV_DEVS_ID DevID, void* Data, UINT32 Offset, UINT32 Size);
 //NV Device driver functions
 EXPORT INT32 NV_EERead(void* DestAddr, UINT32 PhysicalOffset, UINT32 Size);
-EXPORT INT32 NV_EEWrite(void* SourceAddr,
-                        UINT32 PhysicalOffset,
-                        UINT32 Size,
+EXPORT INT32 NV_EEWrite(void* SourceAddr, 
+                        UINT32 PhysicalOffset, 
+                        UINT32 Size, 
                         IO_RESULT* ioResult);
 EXPORT INT32 NV_RTCRead(void* DestAddr, UINT32 PhysicalOffset, UINT32 Size);
-EXPORT INT32 NV_RTCWrite(void* SourceAddr,
-                         UINT32 PhysicalOffset,
-                         UINT32 Size,
+EXPORT INT32 NV_RTCWrite(void* SourceAddr, 
+                         UINT32 PhysicalOffset, 
+                         UINT32 Size, 
                          IO_RESULT* ioResult );
 
 EXPORT NV_FILENAME* NV_GetFileName(NV_FILE_ID fileNum);
@@ -390,7 +390,7 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
- *
+ * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 12-09-27   Time: 9:14a
  * Updated in $/software/control processor/code/system
@@ -401,155 +401,155 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- *
+ * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-08-14   Time: 2:08p
  * Updated in $/software/control processor/code/system
  * SCR 1076 - Code Review Update
- *
+ * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 12-07-27   Time: 3:02p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Action Manager Persistent updates
- *
+ * 
  * *****************  Version 57  *****************
  * User: Jim Mood     Date: 7/27/12    Time: 10:06a
  * Updated in $/software/control processor/code/system
  * SCR 1138
- *
+ * 
  * *****************  Version 56  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:36p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Adjusted size of Cycle cnts RTC NVRAM
- *
+ * 
  * *****************  Version 55  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:06p
  * Updated in $/software/control processor/code/system
  * Resize the CFG for the change of enginerun and cycles UINT8 to ENUM
- *
+ * 
  * *****************  Version 54  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:19p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Check in for Dave
- *
+ * 
  * *****************  Version 53  *****************
  * User: John Omalley Date: 4/27/12    Time: 5:04p
  * Updated in $/software/control processor/code/system
- *
+ * 
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 4/23/12    Time: 8:01p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2  Cycle
- *
+ * SCR #1107 FAST 2  Cycle 
+ * 
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 4/11/12    Time: 5:02p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2  NvCfgMgr sizing for 128-sensors, 64 triggers
- *
+ * 
  * *****************  Version 50  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:52p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2 EngineRun/Cycle processing
- *
+ * 
  * *****************  Version 49  *****************
  * User: Peter Lee    Date: 7/25/11    Time: 5:39p
  * Updated in $/software/control processor/code/system
  * SCR #1037 Increase NVMgr for NV_UART_EMU150 to 6 KB to accomodate the
- * worst case size.
- *
+ * worst case size. 
+ * 
  * *****************  Version 48  *****************
  * User: Peter Lee    Date: 4/11/11    Time: 10:13a
  * Updated in $/software/control processor/code/system
  * SCR #1029 EMU150 Download
- *
+ * 
  * *****************  Version 47  *****************
  * User: Contractor2  Date: 9/20/10    Time: 4:11p
  * Updated in $/software/control processor/code/system
  * SCR #856 AC Reconfig File should be re-initialized during fast.reset
  * command.
- *
+ * 
  * *****************  Version 46  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 3:00p
  * Updated in $/software/control processor/code/system
  * SCR #840 Code Review Updates
- *
+ * 
  * *****************  Version 45  *****************
  * User: Jim Mood     Date: 8/10/10    Time: 10:25a
  * Updated in $/software/control processor/code/system
- * SCR 778 Fixed Recfg Sensor Value size
- *
+ * SCR 778 Fixed Recfg Sensor Value size 
+ * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 7/23/10    Time: 10:16a
  * Updated in $/software/control processor/code/system
  * SCR 306 / SCR 639 - Added the Log Error Counts
- *
+ * 
  * *****************  Version 43  *****************
  * User: Jim Mood     Date: 7/22/10    Time: 10:47a
  * Updated in $/software/control processor/code/system
  * SCR 724 NV_AC_SENSOR file size had a typo
- *
+ * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:19p
  * Updated in $/software/control processor/code/system
  * SCR #538 SPIManager startup & NV Mgr Issues
- *
+ * 
  * *****************  Version 41  *****************
  * User: Contractor3  Date: 7/16/10    Time: 8:57a
  * Updated in $/software/control processor/code/system
  * SCR #702 - Changes based on code review.
- *
+ * 
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 7/15/10    Time: 4:20p
  * Updated in $/software/control processor/code/system
  * SCR #630 NV_FILENAME is 33 characters, should it be 32
- *
+ * 
  * *****************  Version 39  *****************
  * User: Jim Mood     Date: 6/29/10    Time: 5:57p
  * Updated in $/software/control processor/code/system
  * SCR 623.  Added an EEPROM file for aircraft reconfiguration data
- *
+ * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 6/16/10    Time: 6:10p
  * Updated in $/software/control processor/code/system
  * SCR #623 SCR #636
- *
+ * 
  * *****************  Version 37  *****************
  * User: Contractor2  Date: 6/14/10    Time: 1:08p
  * Updated in $/software/control processor/code/system
  * SCR #483 Function Names must begin with the CSC it belongs with.
- *
+ * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 6/09/10    Time: 7:22p
  * Updated in $/software/control processor/code/system
  * SCR #614 fast.reset=really should initialize files
- *
+ * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:55p
  * Updated in $/software/control processor/code/system
  * SCR #614 fast.reset=really should initialize files
- *
+ * 
  * *****************  Version 34  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:20p
  * Updated in $/software/control processor/code/system
  * SCR #618 F7X and UartMgr Requirements Implementation
- *
+ * 
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 5/12/10    Time: 3:49p
  * Updated in $/software/control processor/code/system
  * SCR #548 Strings in Logs
- *
+ * 
  * *****************  Version 32  *****************
  * User: Jeff Vahue   Date: 4/13/10    Time: 11:55a
  * Updated in $/software/control processor/code/system
  * SCR #538 - put file sizes back to min == page size.  Add an assert if
  * this is not true.  Fix cut/paste error on check for over allocation on
  * the backup device.
- *
+ * 
  * *****************  Version 31  *****************
  * User: Jeff Vahue   Date: 4/09/10    Time: 4:39p
  * Updated in $/software/control processor/code/system
  * SCR #538 - optimize SPI activity, minimize file sizes and page writes
- *
+ * 
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:18p
  * Updated in $/software/control processor/code/system

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 13 $  $Date: 8/29/12 6:20p $
+  $Revision: 14 $  $Date: 12-10-02 1:23p $
 
 ******************************************************************************/
 
@@ -282,6 +282,11 @@ INT16 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p

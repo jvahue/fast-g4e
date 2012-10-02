@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 8 $  $Date: 12-09-19 6:48p $
+ $Revision: 9 $  $Date: 12-10-02 1:18p $
 
 ******************************************************************************/
 
@@ -1031,6 +1031,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Implement Trend Action
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:48p

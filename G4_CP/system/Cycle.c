@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 19 $  $Date: 12-09-19 3:23p $
+  $Revision: 20 $  $Date: 12-10-02 1:23p $
 
 ******************************************************************************/
 
@@ -1153,6 +1153,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:23p

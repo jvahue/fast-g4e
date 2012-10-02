@@ -460,7 +460,7 @@ EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- *
+ * 
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application

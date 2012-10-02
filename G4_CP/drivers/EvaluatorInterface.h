@@ -10,7 +10,7 @@
     Description:
 
     VERSION
-    $Revision: 10 $  $Date: 8/29/12 2:55p $
+    $Revision: 11 $  $Date: 12-10-02 1:23p $
 
 ******************************************************************************/
 
@@ -101,6 +101,11 @@ DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EvaluatorInterface.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:55p

@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 15 $  $Date: 9/14/12 4:02p $
+      $Revision: 17 $  $Date: 12-10-02 1:17p $
 
 ******************************************************************************/
 
@@ -223,6 +223,11 @@ EXPORT void             Eng_ReInitFile        ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Coding standard compliance
  *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-09-27   Time: 9:13a

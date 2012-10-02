@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 18 $  $Date: 8/31/12 12:23p $
+  $Revision: 19 $  $Date: 12-10-02 1:23p $
 
 ******************************************************************************/
 
@@ -1612,6 +1612,11 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 12-10-02   Time: 1:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 FAST 2 Coding standard compliance
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/31/12    Time: 12:23p
