@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 11 $  $Date: 12-08-29 3:23p $
+ $Revision: 12 $  $Date: 12-10-03 2:01p $
 
 ******************************************************************************/
 
@@ -994,6 +994,11 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ *
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-10-03   Time: 2:01p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Persistent Ack Fix and Persistent OFF fix
  *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-08-29   Time: 3:23p
