@@ -376,22 +376,29 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
    ACK = FALSE;
    pData = &m_ActionData;
 
-   // Loop through all the Actions
-   for (  nActionIndex = 0;
-        ((nActionIndex < MAX_ACTION_DEFINES) && (ACK == FALSE));
-          nActionIndex++ )
+   if (( TRUE == pData->persist.bLatch ) && ( ON == pData->persist.bState ))
    {
-      pFlags = &pData->action[nActionIndex];
-
-      // Check if any ACK flag is set
-      if ( TRUE == TestBits( maskAll, sizeof(maskAll),
-                             pFlags->flagACK, sizeof(pFlags->flagACK), FALSE ) )
+      ACK = TRUE;
+   }
+   else
+   {
+      // Loop through all the Actions
+      for (  nActionIndex = 0;
+           ((nActionIndex < MAX_ACTION_DEFINES) && (ACK == FALSE));
+             nActionIndex++ )
       {
-         // Need to check if any of the Active flags match the ACK
-         if ( TRUE == TestBits( pFlags->flagACK, sizeof(pFlags->flagACK),
-                                pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
+         pFlags = &pData->action[nActionIndex];
+
+         // Check if any ACK flag is set
+         if ( TRUE == TestBits( maskAll, sizeof(maskAll),
+                                pFlags->flagACK, sizeof(pFlags->flagACK), FALSE ) )
          {
-            ACK = TRUE;
+            // Need to check if any of the Active flags match the ACK
+            if ( TRUE == TestBits( pFlags->flagACK, sizeof(pFlags->flagACK),
+                                   pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
+            {
+               ACK = TRUE;
+            }
          }
       }
    }
@@ -792,11 +799,18 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
          if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
          {
             pData->nLSS_Priority[i] = ACTION0;
-            output = (ON == BIT ( pData->persist.action.nLSS_Mask, i )) ?
-                     DIO_SetHigh : DIO_SetLow;
+
+            if ( (ON == BIT( pData->persist.action.nLSS_Mask,i )) &&
+                 (ON == BIT( pCfg->activeState, i)) )
+            {
+               output = DIO_SetHigh;
+            }
+            else
+            {
+               output = DIO_SetLow;
+            }
             ActionSetOutput ( i, output );
          }
-
       }
       pData->bUpdatePersistOut = FALSE;
    }
@@ -814,9 +828,17 @@ void ActionUpdateOutputs ( ACTION_CFG *pCfg, ACTION_DATA *pData )
             if ( TRUE == BIT( pData->persist.action.nUsedMask, i ) )
             {
                pData->nLSS_Priority[i] = ACTION_NONE;
-               output = ( ON == BIT( pData->persist.action.nLSS_Mask,i) ) ?
-                        DIO_SetLow : DIO_SetHigh ;
-               ActionSetOutput ( i, output );
+
+               if ( ( ON == BIT( pData->persist.action.nLSS_Mask, i )) &&
+                    ( ON == BIT( pCfg->activeState,   i )) )
+               {
+                  ActionSetOutput ( i, DIO_SetLow );
+               }
+               else if ( (ON  == BIT( pData->persist.action.nLSS_Mask, i )) &&
+                         (OFF == BIT( pCfg->activeState,  i )))
+               {
+                  ActionSetOutput ( i, DIO_SetHigh );
+               }
             }
          }
          pData->bUpdatePersistOut = FALSE;
@@ -972,7 +994,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-08-29   Time: 3:23p
  * Updated in $/software/control processor/code/system
