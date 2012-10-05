@@ -638,18 +638,18 @@ static USER_MSG_TBL EngRunCfgCmd[] =
 
 static USER_MSG_TBL EngIdCmd[] =
 {
-   /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                      IndexRange         DataLimit            EnumTbl*/
+   /*Str      Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                            IndexRange         DataLimit            EnumTbl*/
    {"SN",     NO_NEXT_TABLE, EngUserInfo,   USER_TYPE_STR,     USER_RW,  m_EngineInfo.engine[0].serialNumber, 0,(MAX_ENGINES-1), 0,MAX_ENGINE_ID,     NULL            },
    {"MODEL",  NO_NEXT_TABLE, EngUserInfo,   USER_TYPE_STR,     USER_RW,  m_EngineInfo.engine[0].modelNumber,  0,(MAX_ENGINES-1), 0,MAX_ENGINE_ID,     NULL            },
-   {NULL,            NULL,          NULL,          NO_HANDLER_DATA}
+   {NULL,     NULL,          NULL,          NO_HANDLER_DATA}
 };
 
 
 
 static USER_MSG_TBL EngInfoCmd[] =
 {
-   /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
-   {"SERVICE_PLAN",  NO_NEXT_TABLE, EngSPUserInfo, USER_TYPE_STR,     USER_RW,  &m_EngineInfo.servicePlan,   -1,-1,             0,MAX_ENGINE_ID,      NULL            },
+   /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange         DataLimit             EnumTbl       */
+   {"SERVICE_PLAN",  NO_NEXT_TABLE, EngSPUserInfo, USER_TYPE_STR,     USER_RW,  &m_EngineInfo.servicePlan,   -1,-1,             0,MAX_ENGINE_ID,      NULL          },
    {"ENGINE",        EngIdCmd,      NULL,          NO_HANDLER_DATA,                                                                                                 },
    {NULL,            NULL,          NULL,          NO_HANDLER_DATA}
 };

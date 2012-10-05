@@ -62,7 +62,6 @@ typedef enum
                              Package Exports Functions
 ******************************************************************************/
 EXPORT UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId);
-EXPORT UINT32  EngRunGetStartingTime  (ENGRUN_INDEX engId);
 
 
 #endif // ENGINERUN_INTERFACE_H

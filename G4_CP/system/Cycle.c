@@ -204,37 +204,6 @@ void CycleResetAll(void)
 }
 
 /******************************************************************************
- * Function:     CycleClearAll
- *
- * Description:  Sets Type->NONE_COUNT, trigger -> TRIGGER_UNUSED
- *
- * Parameters:   None.
- *
- * Returns:      None.
- *
- * Notes:        None.
- *
- *****************************************************************************/
-void CycleClearAll( void )
-{
-  UINT8 i;
-  CYCLE_CFG_PTR pCycleCfg = m_Cfg;
-
-  for (i = 0; i < MAX_CYCLES; i++)
-  {
-    // Set cycle type to none
-    pCycleCfg->type = CYC_TYPE_NONE_CNT;
-
-    // Set cycle's trigger index to unused.
-    pCycleCfg->nTriggerId = TRIGGER_UNUSED;
-
-    // Move next cycle config
-    pCycleCfg++;
-  }
-}
-
-
-/******************************************************************************
  * Function:     CycleIsPersistentType
  *
  * Description:  checks cycle type for persistent.

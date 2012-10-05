@@ -373,25 +373,6 @@ ENGRUN_RUNLOG* EngRunGetPtrToLog(ENGRUN_INDEX engId)
 }
 
 /******************************************************************************
- * Function:     EngRunGetStartingTime
- *
- * Description:  Returns value of the starting time
- *               tick of the START for this engine-run .
- *
- * Parameters:   [in] engId
- *
- * Returns:      Engine run data starting time
- *
- * Notes:        None
- *
- *****************************************************************************/
-UINT32 EngRunGetStartingTime(ENGRUN_INDEX engId)
-{
-  ASSERT(engId < MAX_ENGINES);
-  return engineRunData[engId].startingTime_ms;
-}
-
-/******************************************************************************
  * Function:     EngRunGetBinaryHeader
  *
  * Description:  Retrieves the binary header for the engine run
