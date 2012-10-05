@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 16 $  $Date: 8/28/12 2:36p $     
+      $Revision: 18 $  $Date: 12-10-04 3:49p $     
 
 ******************************************************************************/
 
@@ -524,10 +524,10 @@ void F7XProtocol_Initialize ( void )
 
 
   // Initialize local variables / structures
-  memset ( &m_F7X_Status, 0, sizeof(m_F7X_Status) ); 
-  memset ( &m_F7X_Buff, 0, sizeof(m_F7X_Buff) ); 
-  memset ( &m_F7X_DumplistCfg, 0, sizeof(m_F7X_DumplistCfg) ); 
-  memset ( &m_F7X_DataFrame, 0, sizeof(m_F7X_DataFrame) ); 
+  memset ( m_F7X_Status, 0, sizeof(m_F7X_Status) ); 
+  memset ( m_F7X_Buff, 0, sizeof(m_F7X_Buff) ); 
+  memset ( m_F7X_DumplistCfg, 0, sizeof(m_F7X_DumplistCfg) ); 
+  memset ( m_F7X_DataFrame, 0, sizeof(m_F7X_DataFrame) ); 
   memset ( &m_F7X_ParamList, 0, sizeof(m_F7X_ParamList) ); 
   
   // Initialize the Write and Read index into Raw Buffer 
@@ -551,7 +551,7 @@ void F7XProtocol_Initialize ( void )
   User_AddRootCmd(&F7XProtocolParamTblPtr); 
   
   // Restore User Cfg 
-  memcpy(&m_F7X_DumplistCfg, &(CfgMgr_RuntimeConfigPtr()->F7XConfig), sizeof(m_F7X_DumplistCfg));
+  memcpy(m_F7X_DumplistCfg, &(CfgMgr_RuntimeConfigPtr()->F7XConfig), sizeof(m_F7X_DumplistCfg));
   memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), sizeof(m_F7X_ParamListCfg)); 
   
   // Update runtime var of Param Translation Table 
@@ -672,7 +672,7 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       // Buffer roll over 
       if ( dest_ptr >= end_ptr ) 
       {
-        dest_ptr = (UINT8 *) &buff_ptr->data; 
+        dest_ptr = (UINT8 *) buff_ptr->data; 
       }
     }
     
@@ -865,20 +865,20 @@ void F7XDispDebug_Task ( void *pParam )
       if (m_F7X_Debug.bFormatted == FALSE ) 
       {
         // Display Address Checksum
-        sprintf ( (char *) &Str, "\r\nChksum=0x%08x\r\n", pStatus->AddrChksum); 
+        sprintf ( (char *) Str, "\r\nChksum=0x%08x\r\n", pStatus->AddrChksum); 
         GSE_PutLine( (const char *) Str ); 
         
         // Display Size 
-        sprintf ( (char *) &Str, "Size=%d\r\n", pStatus->DumpListSize ); 
+        sprintf ( (char *) Str, "Size=%d\r\n", pStatus->DumpListSize ); 
         GSE_PutLine( (const char *) Str ); 
         
         // Display Raw Buffer 
           // Display sync char first
-          sprintf( (char *) &Str, "%02x\r\n\0", pFrame->sync_byte ); 
+          sprintf( (char *) Str, "%02x\r\n\0", pFrame->sync_byte ); 
           GSE_PutLine( (const char *) Str ); 
         
           // Display 4 bytes Addr Checksum 
-          sprintf( (char *) &Str, "%08x\r\n\0", pFrame->addrChksum ); 
+          sprintf( (char *) Str, "%08x\r\n\0", pFrame->addrChksum ); 
           GSE_PutLine( (const char *) Str ); 
           
           // Display 2 byte params until End Of Frame 
@@ -896,7 +896,7 @@ void F7XDispDebug_Task ( void *pParam )
       else 
       {
         // Display Address Checksum
-        sprintf ( (char *) &Str, "\r\nChksum=0x%08x\r\n", pStatus->AddrChksum); 
+        sprintf ( (char *) Str, "\r\nChksum=0x%08x\r\n", pStatus->AddrChksum); 
         GSE_PutLine( (const char *) Str ); 
       
         // Display data but format based on 
@@ -943,11 +943,11 @@ void F7XDispDebug_Task ( void *pParam )
             fval = (FLOAT32) (*sword * scale_lsb); 
             if (strlen(F7X_Param_Names[pCfg->ParamId[i]].name) == 0)
             {
-              sprintf( (char *) &Str, "UNDEFINED(%d)= %5.3f\r\n", i, fval);
+              sprintf( (char *) Str, "UNDEFINED(%d)= %5.3f\r\n", i, fval);
             }
             else
             {
-              sprintf( (char *) &Str, "%s= %5.3f\r\n", &F7X_Param_Names[pCfg->ParamId[i]].name[0],fval);
+              sprintf( (char *) Str, "%s= %5.3f\r\n", F7X_Param_Names[pCfg->ParamId[i]].name, fval);
             }
             
             GSE_PutLine( (const char *) Str ); 
@@ -1629,7 +1629,7 @@ BOOLEAN F7XProtocol_DumpListRecognized (UINT16 ch)
 
       // Update 
       m_F7X_AppData[ch].lastRecognizedDL = pStatus->nIndexCfg; 
-      NV_Write( NV_UART_F7X, 0, (void *) &m_F7X_AppData, 
+      NV_Write( NV_UART_F7X, 0, (void *) m_F7X_AppData, 
                 sizeof(F7X_APP_DATA) * UART_NUM_OF_UARTS);
       
       // Record log after the EEPROM has been queued for update. 
@@ -1923,7 +1923,7 @@ void F7XProtocol_RestoreAppData( void )
   result = NV_Open(NV_UART_F7X); 
   if ( result == SYS_OK )
   {
-    NV_Read(NV_UART_F7X, 0, (void *) &m_F7X_AppData, 
+    NV_Read(NV_UART_F7X, 0, (void *) m_F7X_AppData, 
              sizeof(F7X_APP_DATA) * UART_NUM_OF_UARTS);
   }
   
@@ -1958,7 +1958,7 @@ BOOLEAN F7XProtocol_FileInit(void)
   }
 
   // Update App data
-  NV_Write(NV_UART_F7X, 0, (void *) &m_F7X_AppData,
+  NV_Write(NV_UART_F7X, 0, (void *) m_F7X_AppData,
                        sizeof(F7X_APP_DATA) * UART_NUM_OF_UARTS);
   return TRUE;
 }
@@ -1990,6 +1990,16 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Melanie Jutras Date: 12-10-04   Time: 3:49p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
+ * 
+ * *****************  Version 17  *****************
+ * User: Melanie Jutras Date: 12-10-04   Time: 2:02p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p

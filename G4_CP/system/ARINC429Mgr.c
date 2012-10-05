@@ -10,7 +10,7 @@
                   data received on ARINC429.
     
 VERSION
-     $Revision: 44 $  $Date: 8/28/12 1:43p $
+     $Revision: 47 $  $Date: 12-10-04 3:50p $
 
 ******************************************************************************/
 
@@ -43,7 +43,6 @@ static ARINC429_SENSOR_LABEL_FILTER m_ArincSensorFilterData[FPGA_MAX_RX_CHAN][AR
 static ARINC429_MGR_TASK_PARAMS     m_Arinc429MgrBlock;
 static ARINC429_RAW_RX_BUFFER       m_Arinc429RxBuffer     [FPGA_MAX_RX_CHAN];
 static ARINC429_RECORD              m_Arinc429RxStorage    [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
-static UINT32                       m_Arinc429DebugStorage [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
 static ARINC429_RAW_RX_BUFFER       m_Arinc429DebugBuffer  [FPGA_MAX_RX_CHAN];
 static UINT32                       m_Arinc429DebugStorage [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
 static ARINC429_SENSOR_INFO         m_Arinc429SensorInfo   [ARINC429_MAX_WORDS];
@@ -311,7 +310,7 @@ void Arinc429MgrInitTasks (void)
   
    // Restore User Default 
    memcpy(&m_Arinc429Cfg, &( CfgMgr_ConfigPtr()->Arinc429Config ), sizeof( m_Arinc429Cfg ));
-   memset(&m_Arinc429BCDInvDigit, FALSE, sizeof(m_Arinc429BCDInvDigit));
+   memset(m_Arinc429BCDInvDigit, FALSE, sizeof(m_Arinc429BCDInvDigit));
          
    // Create Arinc429 Read FIFO Task
    memset(&TaskInfo, 0, sizeof(TaskInfo));
@@ -462,13 +461,13 @@ void Arinc429MgrInitialize ( void )
 
    // Initialize Local Data
    // Clear all Storage Containers
-   memset ( (void *) &m_Arinc429RxChannel,        0, sizeof( m_Arinc429RxChannel        ) );
+   memset ( (void *) m_Arinc429RxChannel,         0, sizeof( m_Arinc429RxChannel        ) );
    memset ( (void *) &m_ArincSensorFilterData,    0, sizeof( m_ArincSensorFilterData    ) ); 
    memset ( (void *) &m_Arinc429Cfg,              0, sizeof( m_Arinc429Cfg              ) );
    memset ( (void *) &m_Arinc429MgrBlock,         0, sizeof( m_Arinc429MgrBlock         ) );
-   memset ( (void *) &m_Arinc429RxBuffer,         0, sizeof( m_Arinc429RxBuffer         ) );
-   memset ( (void *) &m_Arinc429DebugBuffer,      0, sizeof( m_Arinc429DebugBuffer      ) );
-   memset ( (void *) &m_Arinc429SensorInfo,       0, sizeof( m_Arinc429SensorInfo       ) );
+   memset ( (void *) m_Arinc429RxBuffer,          0, sizeof( m_Arinc429RxBuffer         ) );
+   memset ( (void *) m_Arinc429DebugBuffer,       0, sizeof( m_Arinc429DebugBuffer      ) );
+   memset ( (void *) m_Arinc429SensorInfo,        0, sizeof( m_Arinc429SensorInfo       ) );
    memset ( (void *) &m_Arinc429_Debug,           0, sizeof( m_Arinc429_Debug           ) );
    memset ( (void *) &m_Arinc429CBITHealthStatus, 0, sizeof( m_Arinc429CBITHealthStatus ) ); 
     
@@ -489,9 +488,9 @@ void Arinc429MgrInitialize ( void )
       m_Arinc429RxBuffer[Channel].RecordSize    = sizeof(ARINC429_RECORD);
       m_Arinc429DebugBuffer[Channel].RecordSize = sizeof(UINT32);
       
-      FIFO_Init( &pRxBuffer->RecordFIFO,    (INT8*)&m_Arinc429RxStorage[Channel],    
+      FIFO_Init( &pRxBuffer->RecordFIFO,    (INT8*)m_Arinc429RxStorage[Channel],    
                  sizeof(m_Arinc429RxStorage[Channel]) );
-      FIFO_Init( &pDebugBuffer->RecordFIFO, (INT8*)&m_Arinc429DebugStorage[Channel], 
+      FIFO_Init( &pDebugBuffer->RecordFIFO, (INT8*)m_Arinc429DebugStorage[Channel], 
                  sizeof(m_Arinc429DebugStorage[Channel]) );
       
       if ( TRUE == Arinc429DrvStatus_OK ( ARINC429_RCV, Channel ) )
@@ -1145,7 +1144,7 @@ UINT16 Arinc429MgrGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    nRemaining = nMaxByteSize;
    nTotal     = 0;
    // Clear the header
-   memset ( &Arinc429SysHdr, 0, sizeof(Arinc429SysHdr) );
+   memset ( Arinc429SysHdr, 0, sizeof(Arinc429SysHdr) );
    // Loop through all the ARINC429 channels
    for ( ChannelIndex = 0;
          ((ChannelIndex < FPGA_MAX_RX_CHAN) &&
@@ -1164,7 +1163,7 @@ UINT16 Arinc429MgrGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    // Make sure the is something to copy and then copy it to the buffer
    if ( 0 != nTotal )
    {
-      memcpy ( pBuffer, &Arinc429SysHdr, nTotal );
+      memcpy ( pBuffer, Arinc429SysHdr, nTotal );
    }
    // Return the total number of bytes written to the buffer
    return ( nTotal );
@@ -1427,7 +1426,7 @@ BOOLEAN Arinc429MgrSensorTest (UINT16 nIndex)
          {
             pSensorInfo->bFailed = FALSE; 
             // Clear current counts on transition from no data to data rx
-            memset ((void *) &pSensorInfo->FailCount, 0, sizeof(pSensorInfo->FailCount)); 
+            memset ((void *) pSensorInfo->FailCount, 0, sizeof(pSensorInfo->FailCount)); 
          } // End of for (i) loop 
       } // End of else for Data has not met Data Loss Timeout Condition 
    } // End if of ->LastActivityTime != 0 
@@ -1660,7 +1659,7 @@ static void Arinc429MgrReconfigureHW ( void )
    //   Note: Dynamic updates to a sensor cfg will not force an update to the 
    //         current m_ArincSensorLabelFilter[].  A reset is required to call
    //         SensorsConfigure() which will setup m_ArincSensorLabelFilter[]. 
-   memset ( (void *) &m_Arinc429RxChannel, 0, sizeof(m_Arinc429RxChannel) );
+   memset ( (void *) m_Arinc429RxChannel, 0, sizeof(m_Arinc429RxChannel) );
                               
    // Parse arinc_rx[].FilterArray[] to run time variable
    for (Channel = 0; Channel < FPGA_MAX_RX_CHAN; Channel++)
@@ -2836,7 +2835,7 @@ static void Arinc429MgrWriteBuffer ( ARINC429_RAW_RX_BUFFER_PTR pBuffer,
    while ( FALSE == FIFO_PushBlock(&pBuffer->RecordFIFO, Data, Size))
    {
       pBuffer->bOverFlow = TRUE;
-      FIFO_PopBlock (&pBuffer->RecordFIFO, &OldestRecord, Size);
+      FIFO_PopBlock (&pBuffer->RecordFIFO, OldestRecord, Size);
       pBuffer->RecordCnt--;
    }
    
@@ -3460,11 +3459,11 @@ void Arinc429MgrDisplaySingleArincChan ( void  )
     // Read from Arinc429 Software Raw Filtered Buffer
     if ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW )
     {
-      Cnt = Arinc429MgrReadBuffer ( &RawData, sizeof(RawData), &m_Arinc429DebugBuffer[j] );
+      Cnt = Arinc429MgrReadBuffer ( RawData, sizeof(RawData), &m_Arinc429DebugBuffer[j] );
     }
     else
     {
-      Cnt = Arinc429MgrReadBuffer ( &RawDataRecords, sizeof(RawDataRecords),
+      Cnt = Arinc429MgrReadBuffer ( RawDataRecords, sizeof(RawDataRecords),
                                     &m_Arinc429RxBuffer[j]);
     }
 
@@ -3523,13 +3522,13 @@ void Arinc429MgrDisplayMultiArincChan ( )
     // Read from Arinc429 Software Raw Filtered Buffer
     if ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW )
     {
-      RawDataCnt[i] = Arinc429MgrReadBuffer ( &RawDataArinc[i],
+      RawDataCnt[i] = Arinc429MgrReadBuffer ( RawDataArinc[i],
                                             sizeof(RawDataArinc[i]),
                                             &m_Arinc429DebugBuffer[i] );
     }
     else
     {
-      RawDataCnt[i] = Arinc429MgrReadBuffer ( &RawRecords[i],
+      RawDataCnt[i] = Arinc429MgrReadBuffer ( RawRecords[i],
                                              sizeof(RawRecords[i]),
                                              &m_Arinc429RxBuffer[i] );
     }
@@ -3659,6 +3658,16 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 47  *****************
+ * User: Melanie Jutras Date: 12-10-04   Time: 3:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
+ * 
+ * *****************  Version 45  *****************
+ * User: Melanie Jutras Date: 12-10-04   Time: 1:45p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Error Suspicious use of &
  * 
  * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
