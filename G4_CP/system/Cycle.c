@@ -1016,7 +1016,11 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
                    m_Cfg[nCycle].name,  MAX_CYCLENAME);
       sprintf( changeLog.PrevValue, "0x%04x", m_CountsEEProm.data[nCycle].checkID);
       sprintf( changeLog.NewValue, "0x%04x",  iTempID);
-      LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED, LOG_PRIORITY_3, NULL, 0, NULL );
+      LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED,
+                   LOG_PRIORITY_3,
+                   &changeLog,
+                   sizeof(CYCLE_COUNT_CHANGE_ETM_LOG),
+                   NULL );
     }
 
     m_CountsEEProm.data[nCycle].checkID = iTempID;

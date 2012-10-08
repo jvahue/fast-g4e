@@ -208,7 +208,7 @@ typedef struct
 {
   SYS_APP_ID logReason;
 }CYCLE_SYSYEM_LOG;
-#pragma pack()
+
 
 typedef struct
 {
@@ -217,6 +217,7 @@ typedef struct
   char  NewValue[MAX_CYCLEPARAM_SIZE+1];  /* new parameter value      */
 
 }CYCLE_COUNT_CHANGE_ETM_LOG;
+#pragma pack()
 
 /******************************************************************************
                                Package Exports
