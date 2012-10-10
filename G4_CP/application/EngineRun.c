@@ -473,29 +473,35 @@ static void EngRunForceEnd( void )
     pErCfg  = &engineRunCfg[i];
     pErData = &engineRunData[i];
 
-    switch (pErData->erState)
+    // Ony process this engine if it's NOT UNUSED
+
+    if (pErData->erIndex != ENGRUN_UNUSED)
     {
-      case ER_STATE_STOPPED:
-        break;
 
-      case ER_STATE_STARTING:
-        EngRunWriteStartLog( ER_LOG_SHUTDOWN, pErCfg, pErData);
-        CycleFinishEngineRun(i);
-        break;
+      switch (pErData->erState)
+      {
+        case ER_STATE_STOPPED:
+          break;
 
-      case ER_STATE_RUNNING:
-        // Update persist, and create log
-        EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
-        break;
+        case ER_STATE_STARTING:
+          EngRunWriteStartLog( ER_LOG_SHUTDOWN, pErCfg, pErData);
+          CycleFinishEngineRun(i);
+          break;
 
-      default:
-        FATAL("Unrecognized engine run state %d", pErData->erState );
-        break;
+        case ER_STATE_RUNNING:
+          // Update persist, and create log
+          EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
+          break;
+
+        default:
+          FATAL("Unrecognized engine run state %d", pErData->erState );
+          break;
+      }
+
+
+        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+      CycleFinishEngineRun(i);
     }
-
-    EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
-
-    CycleFinishEngineRun(i);
   }
 }
 
