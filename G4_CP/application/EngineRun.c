@@ -473,11 +473,9 @@ static void EngRunForceEnd( void )
     pErCfg  = &engineRunCfg[i];
     pErData = &engineRunData[i];
 
-    // Ony process this engine if it's NOT UNUSED
-
+    // Only process this engine if it's USED
     if (pErData->erIndex != ENGRUN_UNUSED)
     {
-
       switch (pErData->erState)
       {
         case ER_STATE_STOPPED:
@@ -498,8 +496,7 @@ static void EngRunForceEnd( void )
           break;
       }
 
-
-        EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+      EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
       CycleFinishEngineRun(i);
     }
   }
