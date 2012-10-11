@@ -7,7 +7,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 15 $  $Date: 12-10-02 1:18p $
+$Revision: 16 $  $Date: 10/11/12 6:55p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -88,7 +88,8 @@ USER_ENUM_TBL EngRunIdEnum[] =
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
   { "3"     , ENGRUN_ID_3  },
-  { "UNUSED", ENGRUN_UNUSED   },
+  { "ANY"   , ENGRUN_ID_ANY},
+  { "UNUSED", ENGRUN_UNUSED},
   { NULL, 0 }
 };
 
@@ -117,7 +118,7 @@ static USER_MSG_TBL EngRunS0Tbl[] =
   {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
   {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[0].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },
-  { NULL,          NULL,           NULL, NO_HANDLER_DATA}
+  { NULL,        NULL,          NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunS1Tbl[] =
@@ -897,6 +898,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Contractor V&v Date: 10/11/12   Time: 6:55p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Review Findings
  * 
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:18p

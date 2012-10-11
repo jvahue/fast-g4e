@@ -10,7 +10,7 @@
     Description: Interface control EngineRun <-> Cycle
 
     VERSION
-    $Revision: 8 $  $Date: 8/28/12 12:43p $
+    $Revision: 9 $  $Date: 10/11/12 6:55p $
 
 ******************************************************************************/
 
@@ -69,6 +69,11 @@ EXPORT UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRunInterface.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Contractor V&v Date: 10/11/12   Time: 6:55p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 FAST 2 Review Findings
  * 
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
