@@ -444,58 +444,6 @@ BOOLEAN TriggerValidGetState( INT32 TrigIdx )
 }
 
 
-/******************************************************************************
-* Function:     TriggerGetSensorStates
-*
-* Description:  Accessor function which returns the state and value for
-*               all sensors configured for the indicate trigger
-*
-*
-* Parameters:   [in]  trigIdx:     index into the trigger table,
-*               [out] trigSensors: Pointer to a TRIG_SENSORS structure
-*                                  to be populated with
-*
-* Returns:      BOOLEAN indicated trigger is configured.
-*
-* Notes:        None
-*
-*****************************************************************************/
-BOOLEAN TriggerGetSensorStates(INT32 trigIdx, TRIG_SENSOR_STATES* trigSensrState)
-{
-  UINT8        i;
-  BOOLEAN      result = TRUE;
-  TRIG_SENSOR *pTrigSensor = NULL;
-
-  if( TriggerIsConfigured(trigIdx) )
-  {
-    trigSensrState->count = 0;
-    memset( trigSensrState, 0, sizeof(TRIG_SENSOR_STATES) );
-
-    for ( i = 0; i < MAX_TRIG_SENSORS; ++i)
-    {
-      // For each sensor used by this trigger, store index, value and validity.
-      pTrigSensor = &( m_TriggerCfg[trigIdx].TrigSensor[i] );
-      if ( SensorIsUsed(pTrigSensor->SensorIndex) )
-      {
-        trigSensrState->count++;
-        trigSensrState->snsrState[i].snsrIdx  = pTrigSensor->SensorIndex;
-        trigSensrState->snsrState[i].validity = SensorIsValid(pTrigSensor->SensorIndex);
-        trigSensrState->snsrState[i].fValue   = SensorGetValue(pTrigSensor->SensorIndex);
-      }
-      else // Break out when first unused sensor entry is encountered.
-      {
-        break;
-      }
-    }
-  }
-  else // Trigger is not configured.
-  {
-    result = FALSE;
-  }
-  return result;
-}
-
-
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/

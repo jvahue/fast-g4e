@@ -131,7 +131,7 @@ void TrendInitialize( void )
     pData->nRateCounts     = (INT16)(MIFs_PER_SECOND / (INT16)pCfg->rate);
     pData->nRateCountdown  = (INT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pData->trendState      = TREND_STATE_INACTIVE;
-    pData->nActionReqNum             = ACTION_NO_REQ;
+    pData->nActionReqNum   = ACTION_NO_REQ;
 	
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * pCfg->rate;
 
@@ -220,36 +220,6 @@ void TrendTask( void* pParam )
     }    
   }
 
-}
-
-/******************************************************************************
- * Function: TrendIsActive
- *
- * Description: Tests if one or more trends are active
- *
- * Parameters:   None
- *
- * Returns:      TRUE if any trend is active, otherwise FALSE.
- *
- * Notes:
- *
- *****************************************************************************/
-BOOLEAN TrendIsActive( void )
-{
-  TREND_INDEX i;
-  BOOLEAN bTrendActive = FALSE;
-
-  // Check if any trend is currently active.
-  for( i = TREND_0; i < MAX_TRENDS; ++i )
-  {
-    if (m_TrendData[i].trendState > TREND_STATE_INACTIVE )
-    {
-      bTrendActive = TRUE;
-      break;
-    }
-  }
-
-  return bTrendActive;
 }
 
 /******************************************************************************
@@ -410,7 +380,6 @@ static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
   {
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Manual Trend started.",pData->trendIndex ); 
     
-    pData->bTrendLamp = pCfg->lampEnabled;
     pData->trendState = TREND_STATE_MANUAL;
 
     // Activate Action
@@ -536,8 +505,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
      oneOverN = (1.0f / (FLOAT32)pData->sampleCnt);
     
     // Trend name
-    //strncpy_safe( pLog->name, sizeof(pLog->name), pCfg->trendName, _TRUNCATE);
-
+    pLog->trendIndex = pData->trendIndex;
     // Log the type/state: MANUAL|AUTO
     pLog->type     = pData->trendState;
 
@@ -653,8 +621,7 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   
   pData->trendState       = TREND_STATE_INACTIVE;
   pData->bResetDetected   = FALSE;  
-  pData->bTrendLamp       = FALSE;
-  
+    
   pData->nTimeStableMs    = 0;
   pData->lastStabCheckMs  = 0;
 
@@ -841,7 +808,7 @@ static void TrendLogAutoTrendNotDetected( TREND_CFG* pCfg, TREND_DATA* pData )
   memcpy(&trendLog.crit, &pCfg->stability,     sizeof(trendLog.crit));
   memcpy(&trendLog.data, &pData->maxStability, sizeof(STABILITY_DATA));
   
-  
+  trendLog.trendIndex = pData->trendIndex;
   LogWriteETM(APP_ID_TREND_AUTO_NOT_DETECTED,
               LOG_PRIORITY_3,
               &trendLog,
@@ -877,7 +844,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // will be cleared by the trigger becoming inactive or
   // the next engine-run starting.
   if ( FALSE == pData->bResetDetected                 &&
-	   pCfg->resetTrigger != TRIGGER_UNUSED           &&
+	     pCfg->resetTrigger != TRIGGER_UNUSED           &&
        TriggerIsConfigured((INT32)pCfg->resetTrigger) &&
        TriggerGetState((INT32)pCfg->resetTrigger))
   {    
@@ -885,7 +852,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 
     GSE_DebugStr(NORMAL,TRUE,"Trend[%d] Autotrend Reset Detected ",pData->trendIndex);	
     
-	if ( 0 == pData->trendCnt)
+	  if ( 0 == pData->trendCnt)
     {
       // No autotrends taken? Log it.
       TrendLogAutoTrendNotDetected(pCfg, pData);
@@ -1016,7 +983,6 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
   }
   
   pData->trendState   = TREND_STATE_AUTO;
-  pData->bTrendLamp   = pCfg->lampEnabled;
 
   pData->trendCnt++;
 

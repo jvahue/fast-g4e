@@ -37,7 +37,9 @@
 #define MAX_TREND_SENSORS 32
 #define MAX_TREND_CYCLES   4
 
-#define ONE_SEC_IN_MILLSECS      1000u
+#define ONE_SEC_IN_MILLSECS  1000u
+#define SECS_PER_HR          3600 
+#define SECS_PER_DAY         86400
 
 
 //*****************************************************************************
@@ -82,7 +84,6 @@
                       CYCLE_UNUSED,               /* nCycleD */\
                       0x00000000,                 /* nAction */\
                       0,                          /* stabilityPeriod_s */\
-                      FALSE,                      /* lampEnabled */\
                       STABILITY_CRITERIA_DEFAULT /* Stability[MAX_STAB_SENSORS] */
 
 
@@ -167,6 +168,7 @@ typedef struct
 // TREND_LOG
 typedef struct  
 {
+  TREND_INDEX   trendIndex;                      /* The Id of this trend                     */
   TREND_STATE   type;                            /* The type/state of trend manual vs auto   */
   UINT32        nSamples;                        /* The number of samples taken during trend */
   TREND_SENSORS sensor[MAX_TREND_SENSORS];       /* The stats for the configured sensors     */
@@ -175,6 +177,7 @@ typedef struct
 
 typedef struct  
 {
+  TREND_INDEX        trendIndex;              /* The Id of this trend                     */
   STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
   STABILITY_DATA     data;                    /* The max observed stability data during      */
 }TREND_NOT_DETECTED_LOG;                      /* the un-activated trend                      */
@@ -198,7 +201,6 @@ typedef struct
    CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/   
    UINT32        nAction;           /* Mask of LSS outputs used by this trend when active   */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
-   BOOLEAN       lampEnabled;        /* will the trend lamp flash                            */
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG, *TREND_CFG_PTR;
 
@@ -232,7 +234,6 @@ typedef struct
   // State/status info
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
-  BOOLEAN      bTrendLamp;          /* does a [Auto]Trend want to flash the lamp             */
   UINT16       trendCnt;            /* # of autotrends taken since Reset                     */
   BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */

@@ -439,7 +439,7 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
   return result;
 }
 /******************************************************************************
- * Function:     Trigger_CfgExprStrCmd | USER COMMAND HANDLER
+ * Function:     Trigger_Valid | USER COMMAND HANDLER
  *  
  * Description:  Returns the validity for the trigger passed in "Index'               
  *           

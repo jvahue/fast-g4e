@@ -234,12 +234,12 @@ typedef struct
    TRIG_SNSR_SUMMARY  Sensor[MAX_TRIG_SENSORS];
 } TRIGGER_LOG;
 
-typedef struct
-{
-   TRIGGER_INDEX TriggerIndex;
-   TIMESTAMP     CriteriaMetTime;
-   TIMESTAMP     DurationMetTime;
-}TRIGGER_START_LOG;
+//typedef struct
+//{
+//   TRIGGER_INDEX TriggerIndex;
+//   TIMESTAMP     CriteriaMetTime;
+//   TIMESTAMP     DurationMetTime;
+//}TRIGGER_START_LOG;
 
 typedef struct
 {
@@ -281,11 +281,6 @@ typedef struct
   BOOLEAN       validity;
 }SENSOR_STATE;
 
-typedef struct 
-{
-  UINT8        count;     // The number of configured sensors 
-  SENSOR_STATE snsrState[MAX_TRIG_SENSORS];
-}TRIG_SENSOR_STATES;
 
 //A type for an array of the maximum number of triggers
 //Used for storing sensor configurations in the configuration manager
@@ -336,8 +331,6 @@ EXPORT BOOLEAN TriggerGetState( INT32 TrigIdx );
 EXPORT BOOLEAN TriggerValidGetState( INT32 TrigIdx );
 
 EXPORT BOOLEAN TriggerIsConfigured(INT32 trigIdx);
-
-EXPORT BOOLEAN TriggerGetSensorStates(INT32 TrigIdx, TRIG_SENSOR_STATES* trigSensrState);
 
 
 #endif // TRIGGER_H
