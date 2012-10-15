@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 20 $  $Date: 12-10-02 1:23p $
+  $Revision: 21 $  $Date: 10/12/12 6:29p $
 
 ******************************************************************************/
 
@@ -1008,14 +1008,16 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
   iTempID = CycleCalcCheckID (nCycle);
 
   // If the actual is different than current log it if bLogUpdate.
+  
   if ( m_CountsEEProm.data[nCycle].checkID != iTempID )
   {
     if ( bLogUpdate )
     {
-      strncpy_safe(changeLog.CycleName, sizeof(changeLog.CycleName),
-                   m_Cfg[nCycle].name,  MAX_CYCLENAME);
-      sprintf( changeLog.PrevValue, "0x%04x", m_CountsEEProm.data[nCycle].checkID);
-      sprintf( changeLog.NewValue, "0x%04x",  iTempID);
+      changeLog.cycleId     = nCycle;
+      changeLog.prevCount   = m_CountsEEProm.data[nCycle].count.n;
+      changeLog.prevCheckID = m_CountsEEProm.data[nCycle].checkID;
+      changeLog.newCheckID  = iTempID;
+                   
       LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED,
                    LOG_PRIORITY_3,
                    &changeLog,
@@ -1023,8 +1025,11 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
                    NULL );
     }
 
+    // Reset the counter to zero and update the checkId;
+
+    m_CountsEEProm.data[nCycle].count.n = 0;
     m_CountsEEProm.data[nCycle].checkID = iTempID;
-    /* Don't Clear count to 0 in this case*/
+    
     bNeedUpdate = TRUE;
 
   }
@@ -1126,6 +1131,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 10/12/12   Time: 6:29p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Review Findings
  * 
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p

@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 14 $  $Date: 12-10-02 1:24p $
+      $Revision: 15 $  $Date: 10/12/12 6:29p $
 
 ******************************************************************************/
 
@@ -212,10 +212,10 @@ typedef struct
 
 typedef struct
 {
-  char  CycleName[MAX_CYCLENAME+1];       /* parameter name           */
-  char  PrevValue[MAX_CYCLEPARAM_SIZE+1]; /* previous parameter value */
-  char  NewValue[MAX_CYCLEPARAM_SIZE+1];  /* new parameter value      */
-
+  UINT16  cycleId;       /* Cycle ID             */
+  UINT32  prevCount;     /* Previous count value */
+  UINT16  prevCheckID;   /* Previous check ID    */
+  UINT16  newCheckID;    /* Current check ID     */
 }CYCLE_COUNT_CHANGE_ETM_LOG;
 #pragma pack()
 
@@ -267,6 +267,11 @@ EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 10/12/12   Time: 6:29p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Review Findings
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:24p

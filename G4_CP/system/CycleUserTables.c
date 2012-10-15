@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description: 
 
 VERSION
-$Revision: 11 $  $Date: 12-10-02 1:24p $ 
+$Revision: 12 $  $Date: 10/12/12 6:29p $ 
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -108,7 +108,7 @@ static USER_MSG_TBL CyclePCountsCmd[] =
 {
   /*Str        Next Tbl Ptr   Handler Func  Data Type         Access    Parameter                 IndexRange          DataLimit         EnumTbl*/
   {"COUNT",    NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT32, USER_RW,  &m_persistTemp.count.n,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },
-  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RW,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },  
+  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RO,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },  
   { NULL,        NULL,          NULL,       NO_HANDLER_DATA}
 };
 
@@ -340,6 +340,11 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 10/12/12   Time: 6:29p
+ * Updated in $/software/control processor/code/system
+ * FAST 2 Review Findings
  * 
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:24p
