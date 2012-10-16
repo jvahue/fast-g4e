@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 69 $  $Date: 12-10-10 1:13p $
+    $Revision: 70 $  $Date: 12-10-16 2:53p $
 
 
 ******************************************************************************/
@@ -1833,6 +1833,11 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  *  MODIFICATIONS
  *    $History: NVMgr.c $
  *
+ * *****************  Version 70  *****************
+ * User: John Omalley Date: 12-10-16   Time: 2:53p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 - Undo fix because it caused a compiler warning
+ * 
  * *****************  Version 69  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:13p
  * Updated in $/software/control processor/code/system
