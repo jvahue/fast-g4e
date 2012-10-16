@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 26 $  $Date: 12-09-19 10:54a $
+ $Revision: 28 $  $Date: 12-10-16 2:37p $
 
 ******************************************************************************/
 
@@ -277,13 +277,13 @@ void EventTablesInitialize ( void )
 
             // Need to protect against divide by 0 here so make sure
             // Start and Stop Times not equal
-            pConst->m = ( pSeg->nStopTime_s == pSeg->nStartTime_s ) ? 0 :
+            pConst->m = ( pSeg->nStopTime_ms == pSeg->nStartTime_ms ) ? 0 :
                         ( (pSeg->fStopValue - pSeg->fStartValue) /
-                          (pSeg->nStopTime_s - pSeg->nStartTime_s) );
-            pConst->b = pSeg->fStartValue - (pSeg->nStartTime_s * pConst->m);
+                          (pSeg->nStopTime_ms - pSeg->nStartTime_ms) );
+            pConst->b = pSeg->fStartValue - (pSeg->nStartTime_ms * pConst->m);
 
             // Find the last configured region
-            if ( pSeg->nStopTime_s != 0 )
+            if ( pSeg->nStopTime_ms != 0 )
             {
                pTableData->maximumCfgRegion = (EVENT_REGION)nRegionIndex;
             }
@@ -326,7 +326,7 @@ UINT16 EventGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &eventHdr, 0, sizeof(eventHdr) );
+   memset ( eventHdr, 0, sizeof(eventHdr) );
 
    // Loop through all the events
    for ( eventIndex = 0;
@@ -351,7 +351,7 @@ UINT16 EventGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (eventHdr[eventIndex]);
    }
    // Copy the Event header to the buffer
-   memcpy ( pBuffer, &eventHdr, nTotal );
+   memcpy ( pBuffer, eventHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
@@ -383,7 +383,7 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &tableHdr, 0, sizeof(tableHdr) );
+   memset ( tableHdr, 0, sizeof(tableHdr) );
 
    // Loop through all the event tables
    for ( tableIndex = 0;
@@ -397,12 +397,31 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (tableHdr[tableIndex]);
    }
    // Copy the event table header to the buffer
-   memcpy ( pBuffer, &tableHdr, nTotal );
+   memcpy ( pBuffer, tableHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
 
-
+/**********************************************************************************************
+ * Function:    Event_FSMAppBusyGetState   | IMPLEMENTS GetState() INTERFACE to
+ *                                         | FAST STATE MGR
+ *
+ * Description: Returns the busy/not busy state of the Event module
+ *              based on if any event is still being processed.
+ *
+ *
+ * Parameters:  [in] param: ignored.  Included to match FSM call sig.
+ *
+ * Returns:     TRUE:  Event is busy, 1 or more of the event are active
+ *              FALSE: Event is idle, none of the events are active
+ *
+ * Notes:
+ *
+ *********************************************************************************************/
+BOOLEAN Event_FSMAppBusyGetState(INT32 param)
+{
+  return (FALSE);
+}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -1010,13 +1029,11 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    EVENT_REGION  foundRegion;
    FLOAT32       fThreshold;
    FLOAT32       fSavedThreshold;
-   UINT32        nDuration;
 
    // Initialize Local Data
    foundRegion     = REGION_NOT_FOUND;
    fThreshold      = 0;
    fSavedThreshold = 0;
-   nDuration       = pTableData->nTotalDuration_ms;
 
    // Loop through all the regions
    for ( nRegIndex = 0; (nRegIndex <= pTableData->maximumCfgRegion); nRegIndex++ )
@@ -1029,16 +1046,16 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
          pSegment = &pRegion->segment[nSegIndex];
 
          // Now check if this line segment is valid for this point in time
-         if (( nDuration >= (pSegment->nStartTime_s * MILLISECONDS_PER_SECOND)) &&
-             ( nDuration <  (pSegment->nStopTime_s  * MILLISECONDS_PER_SECOND)))
+         if (( pTableData->nTotalDuration_ms >= pSegment->nStartTime_ms ) &&
+             ( pTableData->nTotalDuration_ms <  pSegment->nStopTime_ms  ))
          {
             pConst    = &pTableData->segment[nRegIndex][nSegIndex];
 
             // We found the point in time for the Regions Line Segment now
             // Check if the sensor value is greater than the line segment at this point
             // Calculate the Threshold based on the constants for this segment
-            fThreshold = (FLOAT32)
-                         ((pConst->m * ((FLOAT32)nDuration / 1000.0)) + pConst->b);
+            fThreshold = (FLOAT32)((pConst->m *
+                                    (FLOAT32)pTableData->nTotalDuration_ms) + pConst->b);
 
             // If we haven't already entered or exceeded this region then add a positive
             // Hysteresis Else we need a negetive Hysteresis to exit the region
@@ -1618,23 +1635,35 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-10-16   Time: 2:37p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates per Design Review
+ * 1. Changed segment times to milliseconds
+ * 2. Limit +/- hysteresis to positive values
+ * 
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:17p
+ * Updated in $/software/control processor/code/application
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application
- * SCR 1107 - Added Time History enable configuration 
- * 
+ * SCR 1107 - Added Time History enable configuration
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:04p
  * Updated in $/software/control processor/code/application
- * FAST 2 fixes for sensor list 
+ * FAST 2 fixes for sensor list
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-13   Time: 9:41a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Fixed the event table logic that I broke with previous
  * checkin
- * 
+ *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-09-12   Time: 3:59p
  * Updated in $/software/control processor/code/application

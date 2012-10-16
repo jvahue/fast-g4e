@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 53 $  $Date: 8/28/12 1:43p $
+      $Revision: 54 $  $Date: 12-10-10 12:43p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -152,7 +152,7 @@ void Flt_Init(void)
   else
   {
     // read the data into our local working buffer
-    NV_Read( NV_FAULT_LOG, 0, &faultHistory, sizeof( faultHistory));
+    NV_Read( NV_FAULT_LOG, 0, faultHistory, sizeof( faultHistory));
 
     // find the highest count and move to the next one
     faultIndex = -1;
@@ -182,7 +182,7 @@ void Flt_Init(void)
   }
 
   // Clear fault counter used for keeping real time system status condition
-  memset ( (void *)&FaultSystemStatusCnt, 0x00, sizeof(FaultSystemStatusCnt));
+  memset ( (void *) FaultSystemStatusCnt, 0x00, sizeof(FaultSystemStatusCnt));
 
   SetFaultInitialized = TRUE;
 }
@@ -203,9 +203,9 @@ void Flt_Init(void)
 BOOLEAN Flt_InitFltBuf(void)
 {  
   // reset the local working buffer and save it to EEPROM
-  memset( &faultHistory, 0, sizeof( faultHistory));
+  memset( faultHistory, 0, sizeof( faultHistory));
 
-  NV_Write(NV_FAULT_LOG, 0, &faultHistory, sizeof(faultHistory));
+  NV_Write(NV_FAULT_LOG, 0, faultHistory, sizeof(faultHistory));
 
   // start count at one to indicate something is written here
   faultCount = 1;
@@ -600,6 +600,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 54  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:43p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

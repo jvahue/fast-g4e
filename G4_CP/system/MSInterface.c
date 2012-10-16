@@ -13,7 +13,7 @@
                  TaskManager.h
                  
   VERSION
-      $Revision: 63 $  $Date: 8/28/12 1:43p $    
+      $Revision: 64 $  $Date: 12-10-10 1:00p $    
  
 ******************************************************************************/
 /*****************************************************************************/
@@ -107,8 +107,8 @@ void MSI_Init(void)
   TCB TaskBlock;
  
   //Initialize global vars
-  memset(&MSI_PendingMSResponseList,0,sizeof(MSI_PendingMSResponseList));
-  memset(&MSI_MSCmdHandlerList,0,sizeof(MSI_MSCmdHandlerList));
+  memset(MSI_PendingMSResponseList,0,sizeof(MSI_PendingMSResponseList));
+  memset(MSI_MSCmdHandlerList,0,sizeof(MSI_MSCmdHandlerList));
   DpramFailLogged = FALSE;
   m_MSIntSvcTimeout = FALSE;
   
@@ -244,7 +244,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
     __RIR(is);
   
     //Point dpram data block to the structure with the packet format.
-    Packet = (void*)&DPRAMBlock.data;
+    Packet = (void*) DPRAMBlock.data;
   
     //Determine total size of the data to be written to DPRAM
     DPRAMBlock.size       = size + sizeof(*Packet) - sizeof(Packet->data);
@@ -335,7 +335,7 @@ RESULT MSI_PutResponse(UINT16 Id, const void* data, UINT16 status, UINT32 size, 
   RESULT result;
 
   //Point dpram data block to the structure with the packet format.
-  Packet = (void*)&DPRAMBlock.data;
+  Packet = (void*) DPRAMBlock.data;
 
   //Fill in packet fields Id, Size and Sequence.
   DPRAMBlock.size       = size + sizeof(*Packet) - sizeof(Packet->data);
@@ -936,6 +936,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 64  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:00p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 63  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

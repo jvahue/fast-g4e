@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 24 $  $Date: 12-09-19 10:54a $
+  $Revision: 25 $  $Date: 12-10-16 2:37p $
 
 ******************************************************************************/
 
@@ -294,9 +294,9 @@ typedef EVENT_CFG EVENT_CONFIGS[MAX_EVENTS];
 typedef struct
 {
    FLOAT32 fStartValue;                              /* y value where line starts        */
-   UINT32  nStartTime_s;                             /* x value where line starts        */
+   UINT32  nStartTime_ms;                            /* x value where line starts        */
    FLOAT32 fStopValue;                               /* y value where line ends          */
-   UINT32  nStopTime_s;                              /* x value where line ends          */
+   UINT32  nStopTime_ms;                             /* x value where line ends          */
 } SEGMENT_DEF;
 
 /* This structure defines the region using line segments and event action                */
@@ -451,21 +451,29 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 /******************************************************************************
                                   Package Exports Functions
 *******************************************************************************/
-EXPORT void   EventsInitialize       ( void );
-EXPORT void   EventTablesInitialize  ( void );
-EXPORT UINT16 EventGetBinaryHdr      ( void *pDest, UINT16 nMaxByteSize );
-EXPORT UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
+EXPORT void    EventsInitialize        ( void );
+EXPORT void    EventTablesInitialize   ( void );
+EXPORT UINT16  EventGetBinaryHdr       ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT16  EventTableGetBinaryHdr  ( void *pDest, UINT16 nMaxByteSize );
+EXPORT BOOLEAN Event_FSMAppBusyGetState( INT32 param );
 
 #endif // EVENT_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-10-16   Time: 2:37p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates per Design Review
+ * 1. Changed segment times to milliseconds
+ * 2. Limit +/- hysteresis to positive values
  * 
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application
- * SCR 1107 - Added Time History enable configuration 
- * 
+ * SCR 1107 - Added Time History enable configuration
+ *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:05p
  * Updated in $/software/control processor/code/application

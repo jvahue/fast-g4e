@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 72 $  $Date: 9/15/12 7:12p $
+  $Revision: 74 $  $Date: 12-10-10 1:36p $
 
 ******************************************************************************/
 
@@ -141,11 +141,11 @@ void TriggerInitialize(void)
   User_AddRootCmd(&RootTriggerMsg);
 
   // Reset the Trigger configuration storage array
-  memset(&m_TriggerCfg, 0, sizeof(m_TriggerCfg));
+  memset(m_TriggerCfg, 0, sizeof(m_TriggerCfg));
 
 
   // Load the current configuration to the sensor configuration array.
-  memcpy(&m_TriggerCfg,
+  memcpy(m_TriggerCfg,
          &(CfgMgr_RuntimeConfigPtr()->TriggerConfigs),
          sizeof(m_TriggerCfg));
 
@@ -373,7 +373,7 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &TriggerHdr, 0, sizeof(TriggerHdr) );
+   memset ( TriggerHdr, 0, sizeof(TriggerHdr) );
 
    // Loop through all the triggers
    for ( TriggerIndex = 0;
@@ -399,7 +399,7 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (TriggerHdr[TriggerIndex]);
    }
    // Copy the Trigger header to the buffer
-   memcpy ( pBuffer, &TriggerHdr, nTotal );
+   memcpy ( pBuffer, TriggerHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
@@ -1366,6 +1366,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 74  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:36p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 72  *****************
  * User: Jeff Vahue   Date: 9/15/12    Time: 7:12p

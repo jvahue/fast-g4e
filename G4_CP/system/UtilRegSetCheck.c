@@ -10,7 +10,7 @@
           verify the register value. 
           
     VERSION
-      $Revision: 18 $  $Date: 8/28/12 1:43p $
+      $Revision: 19 $  $Date: 12-10-10 1:32p $
     
 ******************************************************************************/
 
@@ -96,8 +96,8 @@ static BOOLEAN RegCmpEntries ( UINT16 index  );
 void RegSetCheck_Init( void ) 
 {
   memset ( &RegCheckStatus, 0x00, sizeof(REG_CHECK_STATUS) ); 
-  memset ( &SystemRegTbl, 0x00, sizeof(REG_SETTING) * MAX_SYS_REG_CHECK); 
-  memset ( &SystemRegTblShadow, 0x00, sizeof(REG_SETTING) * MAX_SYS_REG_CHECK); 
+  memset ( SystemRegTbl, 0x00, sizeof(REG_SETTING) * MAX_SYS_REG_CHECK); 
+  memset ( SystemRegTblShadow, 0x00, sizeof(REG_SETTING) * MAX_SYS_REG_CHECK); 
 }
 
 
@@ -1047,6 +1047,11 @@ static BOOLEAN RegCheckUint32 ( REG_SETTING_PTR pRegData, BOOLEAN bUpdate )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UtilRegSetCheck.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

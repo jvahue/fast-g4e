@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 40 $  $Date: 8/28/12 1:43p $     
+      $Revision: 41 $  $Date: 12-10-10 1:29p $     
 
 ******************************************************************************/
 
@@ -168,12 +168,12 @@ void UartMgr_Initialize (void)
   
   
   // Initialize all local variables 
-  memset (&m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * UART_NUM_OF_UARTS); 
-  memset (&m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * UARTMGR_MAX_PARAM_WORD );
-  memset (&m_UartMgr_Data, 0, sizeof(UARTMGR_PARAM_DATA) * UARTMGR_MAX_PARAM_WORD );
-  memset (&m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * UART_NUM_OF_UARTS ); 
-  memset (&m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * UART_NUM_OF_UARTS); 
-  memset (&m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * UART_NUM_OF_UARTS); 
+  memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * UART_NUM_OF_UARTS); 
+  memset (m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * UARTMGR_MAX_PARAM_WORD );
+  memset (m_UartMgr_Data, 0, sizeof(UARTMGR_PARAM_DATA) * UARTMGR_MAX_PARAM_WORD );
+  memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * UART_NUM_OF_UARTS ); 
+  memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * UART_NUM_OF_UARTS); 
+  memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * UART_NUM_OF_UARTS); 
 
   // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
   for (k = 0; k < UART_NUM_OF_UARTS; k++) 
@@ -1150,7 +1150,7 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
   pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[chan]; 
   fileHdr.size = cnt + sizeof(UARTMGR_FILE_HDR); 
   fileHdr.ch = (UINT8)chan; 
-  strncpy ( (char *) &fileHdr.Name, pUartCfg->Name, UART_CFG_NAME_SIZE ); 
+  strncpy ( (char *) fileHdr.Name, pUartCfg->Name, UART_CFG_NAME_SIZE ); 
   fileHdr.protocol = pUartCfg->Protocol; 
   
   // Copy Uart file hdr to destination 
@@ -1187,7 +1187,7 @@ UINT16 UartMgr_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &UartSysHdr, 0, sizeof(UartSysHdr) );
+   memset ( UartSysHdr, 0, sizeof(UartSysHdr) );
    // Loop through all the channels
    for ( ChannelIndex = 1; 
          ((ChannelIndex < UART_NUM_OF_UARTS) && 
@@ -1206,7 +1206,7 @@ UINT16 UartMgr_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    // Make sure there is something to write and then copy to buffer
    if ( 0 != nTotal )
    {
-      memcpy ( pBuffer, &UartSysHdr, nTotal );
+      memcpy ( pBuffer, UartSysHdr, nTotal );
    }
    // return the total bytes written to the buffer
    return ( nTotal );
@@ -1440,14 +1440,14 @@ void UartMgrDispDebug_Task ( void *pParam )
   
   if ( (m_UartMgr_Debug.bDebug == TRUE ) && (m_UartMgr_Debug.Cnt != 0) )
   {
-    sprintf( (char *) &Str, "Last %d bytes: \r\n", m_UartMgr_Debug.num_bytes );
+    sprintf( (char *) Str, "Last %d bytes: \r\n", m_UartMgr_Debug.num_bytes );
     GSE_PutLine( (const char *) Str ); 
 
     // Output up to .num_bytes or .cnt -> 0 in if below. 
     for ( i = 0; i < m_UartMgr_Debug.num_bytes; i++ ) 
     {
       // Output one char per line 
-      sprintf( (char *) &Str, "%02x ", m_UartMgr_Debug.Data[m_UartMgr_Debug.ReadOffset++] );
+      sprintf( (char *) Str, "%02x ", m_UartMgr_Debug.Data[m_UartMgr_Debug.ReadOffset++] );
       GSE_PutLine( (const char *) Str ); 
 
       // Check for Wrap 
@@ -1951,6 +1951,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 41  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:29p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

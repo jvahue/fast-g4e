@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 112 $  $Date: 9/21/12 5:28p $
+     $Revision: 113 $  $Date: 12-10-10 12:54p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -223,7 +223,7 @@ void Im_InitializeControlProcessor(void)
    size = Assert_GetLog(AssertLogBuf);
    if(size != 0)
    {
-     LogWriteSystem( SYS_CBIT_ASSERT_LOG, LOG_PRIORITY_LOW, &AssertLogBuf,
+     LogWriteSystem( SYS_CBIT_ASSERT_LOG, LOG_PRIORITY_LOW, AssertLogBuf,
                         (UINT16)size, NULL);
      //Mark assert as written to flash
      Assert_MarkLogRead();
@@ -296,7 +296,7 @@ static void Im_Driver_Initialize(void)
   TIMESTRUCT time_struct; 
 
   //Create a local, writable copy of the driver init list
-  memcpy(&DriverInits, &DriverInitList, sizeof(DriverInits));
+  memcpy(DriverInits, DriverInitList, sizeof(DriverInits));
 
   //Clear InitMgrPbitLog Struct 
   memset ( InitMgrPbitLogs, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV ); 
@@ -310,7 +310,7 @@ static void Im_Driver_Initialize(void)
   for(i = 0; i < INIT_MGR_MAX_DRV; i++) 
   {
     DriverInits[i].InitResult = DriverInits[i].InitFunction(&pLog->SysId,
-                                            (void *) &pLog->data,  &pLog->nSize);
+                                            (void *) pLog->data,  &pLog->nSize);
     // Record Result to be used to in Im_RecordDrvStartup_Logs() to 
     pLog->InitResult = DriverInits[i].InitResult; 
     pLog++;                                                             
@@ -761,6 +761,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 113  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:54p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 112  *****************
  * User: Jim Mood     Date: 9/21/12    Time: 5:28p

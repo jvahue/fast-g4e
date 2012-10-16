@@ -9,7 +9,7 @@
    Description: Executive Task Manager functions
   
  VERSION
-      $Revision: 62 $  $Date: 8/28/12 1:43p $
+      $Revision: 63 $  $Date: 12-10-10 1:19p $
 
 ******************************************************************************
   
@@ -129,7 +129,7 @@ void TmInitializeTaskManager (void)
     Tm.systemMode = SYS_NORMAL_ID;
     pendingSystemMode = SYS_NORMAL_ID;
 
-    memset( &systemModeTransitions, 0, sizeof(systemModeTransitions));
+    memset( systemModeTransitions, 0, sizeof(systemModeTransitions));
 
     // enable the valid mode transitions
     // Normal to Shutdown
@@ -1030,6 +1030,11 @@ TASK_INDEX TmGetTaskId(char* name)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 63  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:19p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 62  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

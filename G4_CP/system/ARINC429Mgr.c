@@ -10,7 +10,7 @@
                   data received on ARINC429.
     
 VERSION
-     $Revision: 47 $  $Date: 12-10-04 3:50p $
+     $Revision: 49 $  $Date: 12-10-12 1:51p $
 
 ******************************************************************************/
 
@@ -37,24 +37,26 @@ VERSION
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static ARINC429_CFG                 m_Arinc429Cfg;
-static ARINC429_CHAN_DATA           m_Arinc429RxChannel    [FPGA_MAX_RX_CHAN];
-static ARINC429_SENSOR_LABEL_FILTER m_ArincSensorFilterData[FPGA_MAX_RX_CHAN][ARINC429_MAX_LABELS];      
-static ARINC429_MGR_TASK_PARAMS     m_Arinc429MgrBlock;
-static ARINC429_RAW_RX_BUFFER       m_Arinc429RxBuffer     [FPGA_MAX_RX_CHAN];
-static ARINC429_RECORD              m_Arinc429RxStorage    [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
-static ARINC429_RAW_RX_BUFFER       m_Arinc429DebugBuffer  [FPGA_MAX_RX_CHAN];
-static UINT32                       m_Arinc429DebugStorage [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
-static ARINC429_SENSOR_INFO         m_Arinc429SensorInfo   [ARINC429_MAX_WORDS];
-static UINT16                       m_Arinc429WordSensorCount;
-static ARINC429_DEBUG               m_Arinc429_Debug;
+static ARINC429_CFG            m_Arinc429Cfg;
+static ARINC429_CHAN_DATA      m_Arinc429RxChannel    [FPGA_MAX_RX_CHAN];
+
+static ARINC429_SENSOR_LABEL_FILTER 
+                               m_ArincSensorFilterData[FPGA_MAX_RX_CHAN][ARINC429_MAX_LABELS];      
+static ARINC429_MGR_TASK_PARAMS m_Arinc429MgrBlock;
+static ARINC429_RAW_RX_BUFFER  m_Arinc429RxBuffer     [FPGA_MAX_RX_CHAN];
+static ARINC429_RECORD         m_Arinc429RxStorage[FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
+static ARINC429_RAW_RX_BUFFER  m_Arinc429DebugBuffer  [FPGA_MAX_RX_CHAN];
+static UINT32                  m_Arinc429DebugStorage[FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
+static ARINC429_SENSOR_INFO    m_Arinc429SensorInfo   [ARINC429_MAX_WORDS];
+static UINT16                  m_Arinc429WordSensorCount;
+static ARINC429_DEBUG          m_Arinc429_Debug;
 static ARINC429_CBIT_HEALTH_COUNTS  m_Arinc429CBITHealthStatus; 
-static UINT32                       RawDataArinc[FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
-static ARINC429_RECORD              RawRecords  [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS]; 
-static UINT32                       RawDataCnt  [FPGA_MAX_RX_CHAN];
+static UINT32                  RawDataArinc[FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS];
+static ARINC429_RECORD         RawRecords  [FPGA_MAX_RX_CHAN][ARINC429_MAX_RECORDS]; 
+static UINT32                  RawDataCnt  [FPGA_MAX_RX_CHAN];
 // Invalid BCD digit log flags. One flag for each ARINC429 label.
 // Set TRUE and logged only once per label per power cycle.
-static BOOLEAN                      m_Arinc429BCDInvDigit [ARINC429_MAX_LABELS][ARINC_CHAN_MAX];
+static BOOLEAN                 m_Arinc429BCDInvDigit [ARINC429_MAX_LABELS][ARINC_CHAN_MAX];
 
 // Note: Failure Condition Array ordering is directly related to the
 //         bit ordering in Arinc429Filter->ValidSSM. Which is
@@ -191,9 +193,12 @@ static UINT16 Arinc429MgrReadBuffer                   ( void *pDest, UINT16 nMax
 static void   Arinc429MgrParseGPA_GPB                 ( UINT32 GPA, UINT32 GPB, 
                                                         ARINC429_WORD_INFO_PTR pWordInfo );
 
-static SINT32 Arinc429MgrParseMsg                     ( UINT32 Arinc429Msg, ARINC_FORM Format, 
-                                                        UINT8  Position,    UINT8 Size, 
-                                                        UINT32 Chan,        BOOLEAN *pWordValid );
+static SINT32 Arinc429MgrParseMsg                     ( UINT32 Arinc429Msg, 
+		                                                ARINC_FORM Format, 
+                                                        UINT8  Position,    
+														UINT8 Size, 
+                                                        UINT32 Chan,        
+														BOOLEAN *pWordValid );
 
 static SINT32 Arinc429MgrParseBCD                     ( UINT32 raw,  UINT32  Chan, 
                                                         UINT8  Size, BOOLEAN *pWordValid );
@@ -221,8 +226,8 @@ static BOOLEAN Arinc429MgrProcessPW305ABEngineMFD      ( MFD_DATA_TABLE_PTR   pM
                                                          UINT32               *pArincMsg, 
                                                          UINT8                Label );
 
-static void    Arinc429MgrCheckPW305AB_MFD_Timeout     ( ARINC429_CHAN_DATA_PTR pChanData, 
-                                                         ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
+static void    Arinc429MgrCheckPW305AB_MFD_Timeout   ( ARINC429_CHAN_DATA_PTR pChanData, 
+                                                       ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
 
 static ARINC429_LABEL_DATA_PTR Arinc429MgrStoreLabelData ( UINT32 Arinc429Msg, 
                                                            ARINC429_CHAN_DATA_PTR  pChanData, 
@@ -261,8 +266,10 @@ static UINT16 Arinc429MgrReadReduceSnapshot            ( ARINC429_SNAPSHOT_RECOR
                                                          ARINC429_CHAN_DATA_PTR pChanData, 
                                                          ARINC429_RX_CFG_PTR pCfg,
                                                          BOOLEAN bStartSnap );
-static UINT16 Arinc429MgrGetReduceHdr                  ( INT8 *pDest, UINT32 chan, 
-                                                         UINT16 nMaxByteSize, UINT16 *pNumParams);
+static UINT16 Arinc429MgrGetReduceHdr                  ( INT8 *pDest, 
+		                                                 UINT32 chan, 
+                                                         UINT16 nMaxByteSize, 
+														 UINT16 *pNumParams );
 
 // Shutdown
 void Arinc429MgrProcessMsgsTaskShutdown(void);
@@ -462,7 +469,7 @@ void Arinc429MgrInitialize ( void )
    // Initialize Local Data
    // Clear all Storage Containers
    memset ( (void *) m_Arinc429RxChannel,         0, sizeof( m_Arinc429RxChannel        ) );
-   memset ( (void *) &m_ArincSensorFilterData,    0, sizeof( m_ArincSensorFilterData    ) ); 
+   memset ( (void *) m_ArincSensorFilterData,     0, sizeof( m_ArincSensorFilterData    ) ); 
    memset ( (void *) &m_Arinc429Cfg,              0, sizeof( m_Arinc429Cfg              ) );
    memset ( (void *) &m_Arinc429MgrBlock,         0, sizeof( m_Arinc429MgrBlock         ) );
    memset ( (void *) m_Arinc429RxBuffer,          0, sizeof( m_Arinc429RxBuffer         ) );
@@ -942,7 +949,7 @@ UINT16 Arinc429MgrReadFilteredRaw( void *pDest, UINT32 chan, UINT16 nMaxByteSize
 }
 
 /******************************************************************************
- * Function:    Arinc429_ReadFilteredRawSnapshot
+ * Function:    Arinc429MgrReadFilteredRawSnapshot
  *
  * Description: Returns the current snapshot view of all label word data from the 
  *              m_ArincLabelData[] data store. Only if label word data has been 
@@ -952,6 +959,7 @@ UINT16 Arinc429MgrReadFilteredRaw( void *pDest, UINT32 chan, UINT16 nMaxByteSize
  * Parameters:  pDest - ptr to App Buffer to copy data 
  *              chan - Rx Chan to process raw data 
  *              nMaxByteSize - max size of App Buffer 
+ *              bStartSnap - BOOLEAN indicating TRUE if start of a snapshot
  *
  * Returns:     UINT16 cnt - Number of bytes copied into pDest Buffer. 
  *
@@ -1181,6 +1189,8 @@ UINT16 Arinc429MgrGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
  *
  * Parameters:   gpA - General Purpose A (See below for definition) 
  *               gpB - General Purpose B (See below for definition)
+ *               label - Label to be stored in word Info
+ *               nSensor - Sensor associated with this word info
  *
  * Returns:      Index into Arinc429WordInfo[]
  *               (To be used in later Arinc429 Sensor Processing)
@@ -1440,7 +1450,7 @@ BOOLEAN Arinc429MgrSensorTest (UINT16 nIndex)
  * Description:  Determines if any Arinc 429 Data has been received since 
  *               startup. 
  *
- * Parameters:   none
+ * Parameters:   nIndex - index used to initialize sensorInfo
  *
  * Returns:      TRUE - Arinc429 Data has been received since startup
  *               FALSE - Arinc429 Data has NOT been received since startup 
@@ -1519,7 +1529,7 @@ ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus ( void )
  * Description:  Calc the difference in CBIT Health Counts to support PWEH SEU
  *               (Used to support determining SEU cnt during data capture) 
  *
- * Parameters:   PrevCnt - Initial count value
+ * Parameters:   PrevCount - Initial count value
  *
  * Returns:      Diff in CBIT_HEALTH_COUNTS from (Current - PrevCnt)
  *
@@ -1806,7 +1816,8 @@ static void Arinc429MgrCfgReduction ( ARINC429_RX_CFG_PTR pRxChanCfg,
                pSdi          = &pLabelData->sd[sdi];
                pSdi->Accept  = TRUE;
                // Store the parameter configuration for the label SDI combination
-               pSdi->ProtocolStorage.ConversionData.WordInfoIndex = pChanData->ReduceParamCount;
+               pSdi->ProtocolStorage.ConversionData.WordInfoIndex = 
+				                                             pChanData->ReduceParamCount;
                pSdi->ProtocolStorage.ConversionData.Scale         = 
                         (DISCRETE == pWordInfo->Format) ? 1.0f :
                         (FLOAT32)(((FLOAT32)pRxChanCfg->Parameter[Index].Scale) 
@@ -2029,7 +2040,7 @@ static SINT32 Arinc429MgrParseMsg (UINT32 Arinc429Msg, ARINC_FORM Format,
  * Parameters:  raw         - Full Arinc Data word
  *              Chan        - Arinc Channel Number
  *              Size        - Number of bits in the data field
- *              *bWordValid - Ptr to Word Decode Result Flag
+ *              *pWordValid - Ptr to Word Decode Result Flag
  *
  * Returns:     Parsed Signed BCD Value
  *
@@ -2082,8 +2093,11 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
 #ifdef ARINC429_DEBUG_COMPILE
             /*vcast_dont_instrument_start*/
             // Debug testing
-            sprintf (GSE_OutLine, "\r\nArinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d\r\n",
-                     raw, bcdData, digit);
+            sprintf ( GSE_OutLine, 
+					  "\r\nArinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d\r\n",
+                      raw, 
+					  bcdData, 
+					  digit);
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
             /*vcast_dont_instrument_end*/
 #endif           
@@ -2436,6 +2450,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
  * Parameters:  EngVal      - Engineer Value to be converted into the Data field
  *              Scale       - Scale of the Engineering Value
  *              WordSize    - How many bits the Data field consumes
+ *              Position    - Position for building new message
  *              Format      - Format of message (BNR/BCD)
  *              Arinc429Msg - Message to store the value in
  *              bValid      - Validity of the message
@@ -2564,7 +2579,9 @@ static void Arinc429MgrCheckParameterLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                if ( TRUE == pSdiData->Accept )
                {
                   ARINC429Record.DeltaTime = pChanData->TimeSyncDelta;
-                  Arinc429MgrWriteBuffer ( pRxBuffer, &ARINC429Record, sizeof(ARINC429Record) );
+                  Arinc429MgrWriteBuffer ( pRxBuffer, 
+										   &ARINC429Record, 
+										   sizeof(ARINC429Record) );
                } 
             }
           
@@ -3116,6 +3133,7 @@ void Arinc429MgrDetermineSSMFailure ( UINT32 *pFailCount, UINT8 TotalTests, char
  * Parameters:   pBuff        - Location to store the snapshot data 
  *               nMaxRecords  - Total number of records that can be stored
  *               pChanData    - Channel Data Storage location 
+ *               pCfg         - ARINC429 RX Config Pointer
  *               bStartSnap   - Flag for Start Snapshot
  *              
  *
@@ -3392,10 +3410,9 @@ void Arinc429MgrCreateAllInternalLogs ( void )
 
 #endif
 /******************************************************************************
- * Function:     Arinc429MgrCreateAllInternalLogs
+ * Function:     Arinc429MgrDisableLiveStream
  *
- * Description:  Creates all Arinc429 internal logs for testing / debug of log 
- *               decode and structure. 
+ * Description:  Disables the output of live data streams. 
  *
  * Parameters:   None.
  *
@@ -3584,7 +3601,8 @@ void Arinc429MgrDisplayMultiArincChan ( )
         // GSE_PutLine ( " \r\n");
         if ( ( i >= 8 ) && ( i < nMaxCnt) )
         {
-          GSE_PutLine("\r\n                 more           more           more           more");
+          GSE_PutLine(
+			  "\r\n                 more           more           more           more");
         }
       }
     }  // End while i loop thru all Max Rx Cnt
@@ -3593,7 +3611,7 @@ void Arinc429MgrDisplayMultiArincChan ( )
 
 
 /******************************************************************************
- * Function:    Arinc429MgrDisplayFmtedArinc
+ * Function:    Arinc429MgrDisplayFmtedLine
  *
  * Description: Utility routine to format an Arinc DEBUG_OUT_PROTOCOL display msg.
  *
@@ -3658,6 +3676,16 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 49  *****************
+ * User: Melanie Jutras Date: 12-10-12   Time: 1:51p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 Formatting Changes for Code Review Tool findings
+ * 
+ * *****************  Version 48  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:35p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 47  *****************
  * User: Melanie Jutras Date: 12-10-04   Time: 3:50p

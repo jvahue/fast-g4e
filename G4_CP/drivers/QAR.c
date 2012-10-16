@@ -9,7 +9,7 @@
                  QAR interface.
     
    VERSION
-      $Revision: 94 $  $Date: 8/28/12 1:06p $
+      $Revision: 95 $  $Date: 12-10-10 12:31p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -231,12 +231,12 @@ RESULT QAR_Initialize ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
    pQARStatus          = &pQARCtrlStatus->Status;
 
    // Clear Variables 
-   memset ( (void *) &QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
-   memset ( (void *) &QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
+   memset ( (void *) QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
+   memset ( (void *) QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
    memset ( (void *) &QARState, 0, sizeof(QAR_STATE) ); 
    memset ( (void *) &QARCfg, 0, sizeof(QAR_CONFIGURATION) ); 
    memset ( (void *) &QARCBITHealthStatus, 0, sizeof(QAR_CBIT_HEALTH_COUNTS)); 
-   memset ( (void *) &QARWordInfo, 0, sizeof(QAR_WORD_INFO) * QAR_SF_MAX_SIZE);
+   memset ( (void *) QARWordInfo, 0, sizeof(QAR_WORD_INFO) * QAR_SF_MAX_SIZE);
    
    // PBIT FPGA Bad TBD
    if ( FPGA_GetStatus()->InitResult != DRV_OK ) 
@@ -2304,6 +2304,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 95  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:31p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 94  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

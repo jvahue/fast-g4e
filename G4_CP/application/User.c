@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 102 $  $Date: 9/17/12 5:50p $
+   $Revision: 103 $  $Date: 12-10-10 12:26p $
 
 ******************************************************************************/
 
@@ -204,7 +204,7 @@ void User_Init(void)
   //Hook into micro-server interface for the "User Mgr Cmd"
   MSI_AddCmdHandler(CMD_ID_USER_MGR_MS,User_MSMessageHandler);
 
-  memset(&RootCmdTbl, 0, sizeof(RootCmdTbl));
+  memset(RootCmdTbl, 0, sizeof(RootCmdTbl));
 
   UserRequest = 0;                        //Messages waiting for processing
   UserProcessed = 0;                      // Messages processed
@@ -800,8 +800,8 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
                            INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
   {
     UINT32 TempInt[4];  // Size of tempInt must be large enough to accommodate multi-word objs.
-    void* SetPtr = &TempInt;
-    void* GetPtr = &TempInt;
+    void* SetPtr = TempInt;
+    void* GetPtr = TempInt;
     USER_RANGE Min,Max;
     BOOLEAN bSuccess = FALSE;
 
@@ -2879,6 +2879,11 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 103  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:26p
+ * Updated in $/software/control processor/code/application
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 102  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 5:50p

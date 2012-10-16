@@ -17,7 +17,7 @@
     Notes:       
                  
   VERSION
-    $Revision: 42 $  $Date: 8/28/12 1:43p $                 
+    $Revision: 43 $  $Date: 12-10-10 1:05p $                 
                  
 ******************************************************************************/
 
@@ -144,7 +144,7 @@ void MemInitialize ( void )
   SysStatus  = SYS_OK;
   
   // Clear the MemClearBuffer
-  memset (&MemClearBuffer, 0, sizeof(MemClearBuffer));
+  memset (MemClearBuffer, 0, sizeof(MemClearBuffer));
   
   // Copy the constant memory map to a RAM copy
   memcpy (pMap, &ConstMemMap, sizeof(pMemDesc->MemMap));
@@ -1584,6 +1584,11 @@ void MemClearTask (void* pPBlock)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.c $
+ * 
+ * *****************  Version 43  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:05p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 42  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

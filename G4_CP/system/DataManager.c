@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 78 $  $Date: 8/28/12 7:08p $ 
+      $Revision: 79 $  $Date: 12-10-10 1:53p $ 
     
 ******************************************************************************/
 
@@ -702,7 +702,7 @@ static void DataMgrCreateTask( UINT32 source, ACS_CONFIG *pACSConfig,
     TCB         TaskInfo;
 
     // Initialize the Data Manager Buffers
-    memset( &DMTempBuffer, 0, sizeof(DMTempBuffer));
+    memset( DMTempBuffer, 0, sizeof(DMTempBuffer));
     DataMgrInfo[source].StartTime_mS         = 0;
     DataMgrInfo[source].CurrentBuffer        = 0;
     DataMgrInfo[source].ACS_Config           = *pACSConfig;
@@ -1830,6 +1830,11 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 79  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:53p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 78  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p

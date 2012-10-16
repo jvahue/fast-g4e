@@ -23,7 +23,7 @@
                  "transmitted" with one command.                 
 
     VERSION
-    $Revision: 27 $  $Date: 8/28/12 12:43p $   
+    $Revision: 28 $  $Date: 12-10-10 12:03p $   
     
 ******************************************************************************/
 
@@ -1435,7 +1435,7 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
     {
       //Get received and computed CRC.  CRC location differs based on YMODEM
       //packet size.
-      CalcCRC = CRC_CCITT(&YMdm->k1.Data,size-YMODEM_OVERHEAD_SIZE);
+      CalcCRC = CRC_CCITT(YMdm->k1.Data,size-YMODEM_OVERHEAD_SIZE);
       RcvdCRC = YMdm->k1.Start == SOH ? YMdm->B128.CRC : YMdm->k1.CRC;
       
       if( m_FileXfrData.yMdmB0                               &&
@@ -1736,7 +1736,7 @@ static void MSFX_Signal(BOOLEAN Success)
 static void MSFX_AddYMdm1kCRC(MSFX_YMODEM_BLK *MdmBlk)
 {
   
-  MdmBlk->k1.CRC = CRC_CCITT(&MdmBlk->k1.Data,sizeof(MdmBlk->k1.Data));
+  MdmBlk->k1.CRC = CRC_CCITT(MdmBlk->k1.Data,sizeof(MdmBlk->k1.Data));
 }
 
 
@@ -2071,6 +2071,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1172
  * 
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

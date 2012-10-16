@@ -9,7 +9,7 @@
                  to all SPI devices to the application 
     
     VERSION
-      $Revision: 26 $  $Date: 8/28/12 1:43p $     
+      $Revision: 27 $  $Date: 12-10-10 2:00p $     
 
 ******************************************************************************/
 
@@ -533,7 +533,7 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
               // Set the write pointer to local-databuffer or pointer-to-data as defined.
               ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?              
                                         (void*) pEntry->pData :
-                                        (void*)&(pEntry->data);
+                                        (void*) pEntry->data;
               // Write the block to memory.
               // Change the operation state and let the caller know the
               // the write is being committed to the device.
@@ -1306,6 +1306,11 @@ INT16 CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 2:00p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

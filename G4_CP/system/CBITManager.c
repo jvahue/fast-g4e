@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
     
     VERSION
-      $Revision: 55 $  $Date: 8/28/12 1:43p $     
+      $Revision: 56 $  $Date: 12-10-10 12:38p $     
 
 ******************************************************************************/
 
@@ -195,7 +195,7 @@ void CBITMgr_Initialize (void)
   TCB TaskInfo;
 
   memset ( (void *) &m_CbitMgrStatus, 0x00, sizeof(CBIT_MGR_STATUS)); 
-  memset ( (void *) &IntFailLogged,   0x00, sizeof(IntFailLogged));
+  memset ( (void *) IntFailLogged,   0x00, sizeof(IntFailLogged));
 
   //Add an entry in the user message handler table
   User_AddRootCmd(&CbitMgrRootTblPtr);
@@ -1350,6 +1350,11 @@ void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 12:38p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

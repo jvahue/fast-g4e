@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
     
     VERSION
-      $Revision: 56 $  $Date: 8/28/12 1:43p $    
+      $Revision: 57 $  $Date: 12-10-10 1:03p $    
     
 ******************************************************************************/
 
@@ -790,7 +790,7 @@ BOOLEAN MSSC_MSGetCPInfoCmdHandler(void* Data, UINT16 Size,
   Box_GetSerno(MsRsp.SN);
   MsRsp.Pri4DirMaxSizeMB = CfgMgr_ConfigPtr()->MsscConfig.Pri4DirMaxSizeMB;
   MSI_PutResponse(CMD_ID_GET_CP_INFO,
-                  &MsRsp.SN,
+                  MsRsp.SN,
                   MSCP_RSP_STATUS_SUCCESS,
                   sizeof(MsRsp),
                   Sequence);
@@ -1027,6 +1027,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: Melanie Jutras Date: 12-10-10   Time: 1:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 56  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
