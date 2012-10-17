@@ -489,15 +489,13 @@ static void EngRunForceEnd( void )
         case ER_STATE_RUNNING:
           // Update persist, and create log
           EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
+          CycleFinishEngineRun(i);
           break;
 
         default:
           FATAL("Unrecognized engine run state %d", pErData->erState );
           break;
       }
-
-      EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
-      CycleFinishEngineRun(i);
     }
   }
 }

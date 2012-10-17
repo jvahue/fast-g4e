@@ -762,11 +762,14 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
     // If the cycle entry is configured, and belongs to the EngineRun,
     // save the values and close it out.
 
-    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT &&
-         m_Cfg[i].nEngineRunId == erID)
+    // TODO: handle ER = ANY
+    if ( m_Cfg[i].type == CYC_TYPE_NONE_CNT  && m_Cfg[i].nEngineRunId == erID)
     {
-      // Persist cycle info to  EEPROM from RTC at end of cycle.
-      CycleBackupPersistentCounts( i, CYC_BKUP_EE );
+      if (CycleIsPersistentType( i))
+      {
+        // Persist cycle info to  EEPROM from RTC at end of cycle.
+        CycleBackupPersistentCounts( i, CYC_BKUP_EE );
+      }
       CycleFinish( i);
     }
   }
