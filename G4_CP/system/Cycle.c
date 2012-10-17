@@ -763,7 +763,7 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
     // save the values and close it out.
 
     // TODO: handle ER = ANY
-    if ( m_Cfg[i].type == CYC_TYPE_NONE_CNT  && m_Cfg[i].nEngineRunId == erID)
+    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT  && m_Cfg[i].nEngineRunId == erID)
     {
       if (CycleIsPersistentType( i))
       {
