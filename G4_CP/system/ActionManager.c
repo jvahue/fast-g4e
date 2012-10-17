@@ -165,13 +165,12 @@ static
 void ActionInitPersist ( void )
 {
    // Local Data
-   ACTION_PERSIST_NV_FAIL_LOG log;
+   RESULT resultEE;
+   RESULT resultRTC;
 
    // Clear the intermediate copies
    memset( (void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy) );
    memset( (void *)&m_EE_Copy,  0, sizeof(m_EE_Copy)  );
-   // Clear the log
-   memset( (void *)&log, 0, sizeof(log) );
    // Clear the final destination
    memset( (void *)&m_ActionData.persist, 0, sizeof(m_ActionData.persist));
 
@@ -180,53 +179,27 @@ void ActionInitPersist ( void )
    // Retrieves the stored counters from non-voltaile
    //  Note: NV_Open() performs checksum and creates sys log if checksum fails !
    //        This means we will have duplicate indication of the failure?
-   log.resultEE  = NV_Open(NV_ACT_STATUS_EE);
-   log.resultRTC = NV_Open(NV_ACT_STATUS_RTC);
+   resultEE  = NV_Open(NV_ACT_STATUS_EE);
+   resultRTC = NV_Open(NV_ACT_STATUS_RTC);
 
    NV_Read(NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy));
    NV_Read(NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ));
 
-   log.copyfromEE  = m_EE_Copy;
-   log.copyfromRTC = m_RTC_Copy;
-
-   if ((log.resultEE != SYS_OK) && (log.resultRTC != SYS_OK))
+   if ((resultEE != SYS_OK) && (resultRTC != SYS_OK))
    {
-      log.failureType = ACT_BOTH_COPIES_BAD;
-
-      // Both locations are corrupt - Set system status to CAUTION
-      Flt_SetStatus( STA_CAUTION,
-                     SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
-                     &log,
-                     sizeof(log));
-
       // Clear the persistent action data
-      NV_WriteNow( NV_ACT_STATUS_RTC, 0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
-      NV_WriteNow( NV_ACT_STATUS_EE,  0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
+      NV_Write( NV_ACT_STATUS_RTC, 0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
+      NV_Write( NV_ACT_STATUS_EE,  0, &m_ActionData.persist, sizeof(m_ActionData.persist) );
    }
-   else if (log.resultRTC != SYS_OK)
+   else if (resultRTC != SYS_OK)
    {
-      log.failureType = ACT_RTC_COPY_BAD;
-      // Write a log that the RTC was bad and restored with the EEPROM
-      LogWriteSystem( SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
-                      LOG_PRIORITY_3,
-                      &log,
-                      sizeof(log),
-                      NULL );
       // Restore the RTC version
-      NV_WriteNow( NV_ACT_STATUS_RTC, 0, &m_EE_Copy, sizeof(m_EE_Copy) );
+      NV_Write( NV_ACT_STATUS_RTC, 0, &m_EE_Copy, sizeof(m_EE_Copy) );
    }
-   else if (log.resultEE != SYS_OK)
+   else if (resultEE != SYS_OK)
    {
-      log.failureType = ACT_EE_COPY_BAD;
-      // Write a log that the RTC was bad and restored with the EEPROM
-      LogWriteSystem( SYS_ID_ACTION_PERSIST_RETRIEVE_FAIL,
-                      LOG_PRIORITY_3,
-                      &log,
-                      sizeof(log),
-                      NULL );
-
       // Restore the EE version
-      NV_WriteNow( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+      NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
    }
    else
    {
@@ -251,7 +224,7 @@ void ActionInitPersist ( void )
       {
          m_EE_Copy = m_RTC_Copy;
 
-         NV_WriteNow( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+         NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
       }
    }
 }
@@ -749,7 +722,7 @@ void ActionClearLatch ( ACTION_DATA *pData )
    UINT8         nActionIndex;
    BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
 
-   // Loop through all the Action
+   // Loop through all the Actions
    for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
    {
       pFlags = &pData->action[nActionIndex];

@@ -26,7 +26,7 @@
 #include "FIFO.H"
 
 /******************************************************************************
-                                 Package Defines                                           
+                                 Package Defines
 ******************************************************************************/
 #define MAX_ACTION_DEFINES           8
 #define MAX_ACTION_REQUESTS         32
@@ -73,7 +73,7 @@
                                       0x0F                   /* All LSS Active High        */
 
 /******************************************************************************
-                                  Package Typedefs                        
+                                  Package Typedefs
 ******************************************************************************/
 
 /* Action Types */
@@ -134,14 +134,6 @@ typedef struct
    ACTION_PERSIST          persistState;
 } ACTION_CLR_PERSIST_LOG;
 
-typedef struct
-{
-   RESULT                resultEE;
-   RESULT                resultRTC;
-   ACTION_NV_PERSIST_BAD failureType;
-   ACTION_PERSIST        copyfromEE;
-   ACTION_PERSIST        copyfromRTC;
-} ACTION_PERSIST_NV_FAIL_LOG;
 #pragma pack()
 
 /* Dynamic structure of flags for the state of the action requests */
@@ -214,7 +206,7 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
