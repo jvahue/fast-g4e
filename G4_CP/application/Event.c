@@ -1188,7 +1188,8 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
                             EVENT_REGION foundRegion,   UINT32 nCurrentTick )
 {
    // Local Data
-   UINT16                     i;
+   UINT16 i;
+   UINT32 timeDelta;
 
    // Make sure we are in a confirmed region
    if ( REGION_NOT_FOUND != pTableData->confirmedRegion )
@@ -1202,10 +1203,20 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
          // To get the duration for the region we need to subtract the entered
          // time from the CurrentTick time and then subtract the transient
          // allowance for entering the new region... unless we are coming from
-         // a higher region
+         // a higher region or foundRegion = NOT FOUND
+         if (( REGION_NOT_FOUND == foundRegion ) ||
+             ( foundRegion < pTableData->confirmedRegion ))
+         {
+            timeDelta = 0;
+         }
+         else
+         {
+            timeDelta = pTableCfg->nTransientAllowance_ms;
+         }
+
          pTableData->regionStats[pTableData->confirmedRegion].logStats.nDuration_ms  +=
           ((nCurrentTick - pTableData->regionStats[pTableData->confirmedRegion].nEnteredTime) -
-          ((foundRegion < pTableData->confirmedRegion) ? 0:pTableCfg->nTransientAllowance_ms));
+            timeDelta);
          // Reset the entered time so we don't keep performing this calculation
          pTableData->regionStats[pTableData->confirmedRegion].nEnteredTime = 0;
 
@@ -1642,12 +1653,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * SCR 1107 - Updates per Design Review
  * 1. Changed segment times to milliseconds
  * 2. Limit +/- hysteresis to positive values
- * 
+ *
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:17p
  * Updated in $/software/control processor/code/application
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application
