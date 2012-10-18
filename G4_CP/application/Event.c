@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 28 $  $Date: 12-10-16 2:37p $
+ $Revision: 29 $  $Date: 12-10-18 1:56p $
 
 ******************************************************************************/
 
@@ -960,8 +960,14 @@ BOOLEAN EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 nCurrentTic
             GSE_DebugStr ( VERBOSE, TRUE, "Table %d Entered:  R: %d S: %f D: %d",
                            pTableData->nTableIndex, foundRegion,
                            pTableData->fCurrentSensorValue, pTableData->nTotalDuration_ms );
-            // We just entered this region record the time
-            pTableData->regionStats[foundRegion].nEnteredTime = nCurrentTick;
+            // Make sure this isn't the last confirmed region because we don't want to
+            // Reset restart the duration calculation if we spiked into a region and
+            // came back before the transient allowance was execeeded.
+            if ( foundRegion != pTableData->confirmedRegion )
+            {
+               // We just entered this region record the time
+               pTableData->regionStats[foundRegion].nEnteredTime = nCurrentTick;
+            }
          }
 
          // Have we confirmed the found region yet?
@@ -1646,6 +1652,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-10-18   Time: 1:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Design Review Updates
  *
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12-10-16   Time: 2:37p

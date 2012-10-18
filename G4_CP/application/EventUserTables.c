@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 23 $  $Date: 12-10-16 2:37p $
+$Revision: 24 $  $Date: 12-10-18 1:56p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -836,8 +836,9 @@ static USER_MSG_TBL eventTableCmd [] =
   { "SENSORINDEX",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,               0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
   { "MINSENSORVALUE", NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,      0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
-  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    NO_LIMIT,      NULL            },
-  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    NO_LIMIT,      NULL            },
+  // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
+  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
+  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
   { "TRANSIENT_MS",   NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "REGION_A",       eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
   { "REGION_B",       eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
@@ -1294,6 +1295,11 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ *
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-10-18   Time: 1:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Design Review Updates
  *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-10-16   Time: 2:37p
