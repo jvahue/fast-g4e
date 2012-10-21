@@ -407,13 +407,11 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 
 
 /******************************************************************************
- * Function:     TriggerGetState | IMPLEMENTS GetState INTERFACE to
- *                               | FAST STATE MGR
+ * Function:     TriggerGetState 
  *
- * Description:  Returns trigger active/inactive state.  Function call signature
- *               satisfies the GetState interface to FastStateMgr module.
+ * Description:  Returns trigger active/inactive state.
  *
- * Parameters:   [in] Index of the Trigger [0..31]
+ * Parameters:   [in] Index of the Trigger [0..63]
  *                    if the trigger is invalid , it returns inactive.
  *                    Out of range parameter will always return inactive.
  *
@@ -427,13 +425,11 @@ BOOLEAN TriggerGetState( INT32 TrigIdx )
 
 
 /******************************************************************************
- * Function:     TriggerValidGetState | IMPLEMENTS GetState INTERFACE to
- *                                    | FAST STATE MGR
+ * Function:     TriggerValidGetState 
  *
- * Description:  Returns trigger valid/invalid state.  Function call signature
- *               satisfies the GetState interface to FastStateMgr module.
+ * Description:  Returns trigger valid/invalid state.
  *
- * Parameters:   [in] Index of the Trigger[0..31]
+ * Parameters:   [in] Index of the Trigger[0..63]
  *
  * Returns:      active/inactive state of the passed trigger.
  *

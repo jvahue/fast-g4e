@@ -1033,14 +1033,10 @@ BOOLEAN SuperStrcat(INT8* dest, const INT8* source, UINT32 len)
 BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 result;
-  if ((bitOffset < 0) || (bitOffset >= (arraySizeBytes * 8)))
-  {
-    result = 0;
-  }
-  else
-  {
-    result = array[bitOffset / 32] & ( 1 << (bitOffset % 32) );    
-  }   
+  
+  ASSERT (bitOffset >= 0 && bitOffset < (arraySizeBytes * 8));
+  result = array[bitOffset / 32] & ( 1 << (bitOffset % 32) );
+
   return (result != 0);
 }
 
@@ -1064,17 +1060,11 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 i;  
-  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;  
-  if( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) )
-  {
-    array[i] = array[i = bitOffset / 32] | (1 << (bitOffset % 32));
-  }
- //
- // else
- //{
- //   GSE_DebugStr(NORMAL, TRUE, "SetBit(%d) request is out of range (0-%d), ignored",
- //                               bitOffset, (wordCnt * 8)-1);
- // }
+  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
+
+  ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
+ 
+  array[i] = array[i = bitOffset / 32] | (1 << (bitOffset % 32)); 
 
 }
 
@@ -1099,15 +1089,9 @@ void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
   UINT32 i;  
   INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
 
-  if ( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) )
-  {
-    array[i] =( array[i = bitOffset / 32] & ~(1 << (bitOffset % 32) ) );
-  }
-//else
-//{
-//  GSE_DebugStr(NORMAL, TRUE, "ResetBit(%d) request is out of range (0-%d), ignored",
-//               bitOffset, (wordCnt * 8)-1);
-//}
+  ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
+
+  array[i] =( array[i = bitOffset / 32] & ~(1 << (bitOffset % 32) ) );
 }
 
 /******************************************************************************

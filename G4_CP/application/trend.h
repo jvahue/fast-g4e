@@ -162,7 +162,7 @@ typedef struct
 typedef struct  
 {
   UINT16       stableCnt;                       /* Count of stable sensors                   */
-  FLOAT32      prevStabValue[MAX_STAB_SENSORS]; /* Prior readings of sensors                 */
+  FLOAT32      prevStabValue[MAX_STAB_SENSORS]; /* Prior readings of sensors */
 }STABILITY_DATA;
 
 // TREND_LOG

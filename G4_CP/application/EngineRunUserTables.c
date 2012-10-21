@@ -606,20 +606,18 @@ static USER_MSG_TBL EngRunCycTbl[] =
 
 static USER_MSG_TBL EngRunStatusCmd [] =
 {
-  /*Str            Next Tbl Ptr    Handler Func Data Type         Access    Parameter                        IndexRange              DataLimit   EnumTbl*/
-  {"ENGINEID",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erIndex,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngRunIdEnum      },
-  {"STATE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erState,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
-  {"STARTINGTIME", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime_ms,     0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"START_DUR_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"RUN_DUR_MS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MINVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MAXVALUE",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"SAMPLECOUNT",  NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"RATECOUNTS",   NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCounts,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"COUNTDOWN",    NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT16, USER_RO,  &m_DataTemp.nRateCountdown,      0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"SENSOR",       EngRunSensrTbl, NULL,        NO_HANDLER_DATA,                                                                                                  },
-  {"CYCLE",        EngRunCycTbl, NULL,          NO_HANDLER_DATA,                                                                                                  },
-  { NULL,          NULL,           NULL, NO_HANDLER_DATA}
+  /*Str               Next Tbl Ptr    Handler Func Data Type         Access    Parameter                        IndexRange              DataLimit   EnumTbl*/
+  {"ENGINEID",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erIndex,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngRunIdEnum      },
+  {"STATE",           NO_NEXT_TABLE,  EngRunState, USER_TYPE_ENUM,   USER_RO,  &m_DataTemp.erState,             0,(MAX_ENGINES-1),     NO_LIMIT,   EngineRunStateEnum},
+  {"STARTINGTIME_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime_ms,     0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"START_DUR_MS",    NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"RUN_DUR_MS",      NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MINVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MAXVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"SAMPLECOUNT",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"SENSOR",          EngRunSensrTbl, NULL,        NO_HANDLER_DATA,                                                                                                  },
+  {"CYCLE",           EngRunCycTbl,   NULL,        NO_HANDLER_DATA,                                                                                                  },
+  { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL EngRunCfgCmd[] =

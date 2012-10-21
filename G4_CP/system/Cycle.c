@@ -625,7 +625,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
  * Description:  Backs up current persistent counts to RTC RAM or FLASH
  *
  * Parameters:   [in] cycle index
- *               [in] bUpdateRtcRam flag to indicate RTC RAM should be updated
+ *               [in] mode flag to indicate RTC RAM or EEPROM should be updated
  *
  * Returns:      None.
  *
@@ -794,23 +794,29 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
  *****************************************************************************/
 static void CycleFinish( UINT16 nCycle )
 {
-  CYCLE_DATA*    pCycle    = &m_Data[nCycle];
-  CYCLE_CFG*     pCycleCfg = &m_Cfg[nCycle];
+  CYCLE_DATA*    pCycle;
+  CYCLE_CFG*     pCycleCfg;
   ENGRUN_INDEX   erID      = pCycleCfg->nEngineRunId;
   ENGRUN_RUNLOG* pLog      = EngRunGetPtrToLog(erID);
   UINT32* pErDataCycles    = EngRunGetPtrToCycleCounts(erID);
+  
+  ASSERT( nCycle < MAX_CYCLES);
 
-
-
+  pCycle    = &m_Data[nCycle];
+  pCycleCfg = &m_Cfg[nCycle];
+  
+  // Mark the cycle as completed.
+  if (pCycleCfg->type > CYC_TYPE_NONE_CNT)
+  {
+    pCycle->cycleActive      = FALSE;
+    pCycle->cycleLastTime_ms = 0;
+  }
+    
   // Act on the different types of cycles
   switch (pCycleCfg->type)
   {
     case CYC_TYPE_SIMPLE_CNT:
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
-      // Mark the cycle as completed.
-      pCycle->cycleActive    = FALSE;
-      pCycle->cycleLastTime_ms = 0;
-
       // Update the log entry with the aggregate persisted count from EEPROM/RTCNvRAM
       if ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT )
       {
@@ -820,12 +826,8 @@ static void CycleFinish( UINT16 nCycle )
 
     case CYC_TYPE_DURATION_CNT:
     case CYC_TYPE_PERSIST_DURATION_CNT:
-      pCycle->cycleActive    = FALSE;
-      pCycle->cycleLastTime_ms = 0;
-
       // Update the log entries with the count.
       // Note: counts are in secs.
-
       if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
         pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
@@ -835,58 +837,7 @@ static void CycleFinish( UINT16 nCycle )
         /* convert ticks to seconds correcting for CLK time error */
         pLog->cycleCounts[nCycle] *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
       }
-
       break;
-#ifdef PEAK_CUM_PROCESSING
-    case PEAK_VALUE_COUNT:
-    case P_PEAK_COUNT:
-      // put the max value (if there is one) into the EngineRunLog (if it is still active)
-      if (EngineRunData[erID].pLog != NULL) {
-
-        if ( pCycle->Type == P_PEAK_COUNT ) {
-          EngineRunData[erID].pLog->CycleCounts[nCycle] = m_CountsEEProm[nCycle].count.f;
-        }
-        else {
-          if ( (pCycle->MaxValueA > -FLT_MAX) || (pCycle->MaxValueB > -FLT_MAX) ) {
-            EngineRunData[erID].pLog->CycleCounts[nCycle] =
-                (pCycle->MaxValueA > pCycle->MaxValueB ?
-                 pCycle->MaxValueA : pCycle->MaxValueB);
-          }
-          else {
-            EngineRunData[erID].pLog->CycleCounts[nCycle] = 0.0f;
-          }
-        }
-      }
-      pCycle->ActiveA = FALSE;
-      pCycle->ActiveB = FALSE;
-      pCycle->ACrossed = FALSE;
-      pCycle->BCrossed = FALSE;
-      pCycle->MaxValueA = -FLT_MAX;
-      pCycle->MaxValueB = -FLT_MAX;
-      break;
-
-    case CUMULATIVE_VALLEY_COUNT:
-    case P_CUMULATIVE_COUNT:
-      // no value is added to the engine run log since it is only added if the sensor
-      // threshold value is crossed from below, which would have already happened.
-      pCycle->ActiveA = FALSE;
-      pCycle->ACrossed = FALSE;
-      pCycle->MinValue = FLT_MAX;
-      pCycle->MinSensorValue = FLT_MAX;
-
-      if (EngineRunData[erID].pLog != NULL) {
-        if ( pCycle->Type == P_CUMULATIVE_COUNT ) {
-          EngineRunData[erID].pLog->CycleCounts[nCycle] =
-              m_CountsEEProm[nCycle].count.f;
-        }
-      }
-      break;
-#endif
-#ifdef RHL_PROCESSING
-    case REPETITIVE_HEAVY_LIFT:
-    case NONE_COUNT:
-      break;
-#endif
 
     default:
       FATAL ("Unrecognized Cycle Type Value: %d" ,pCycleCfg->type);

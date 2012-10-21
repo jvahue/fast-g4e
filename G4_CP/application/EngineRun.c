@@ -488,14 +488,16 @@ static void EngRunForceEnd( void )
 
         case ER_STATE_RUNNING:
           // Update persist, and create log
+          CycleFinishEngineRun( pErData->erIndex);
           EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
-          CycleFinishEngineRun(i);
           break;
 
         default:
           FATAL("Unrecognized engine run state %d", pErData->erState );
           break;
       }
+      //CycleFinishEngineRun( pErData->erIndex);
+      //EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
     }
   }
 }
@@ -681,6 +683,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
               !TriggerGetState( pErCfg->startTrigID) )
           {
             // Finish the engine run log
+            CycleFinishEngineRun( pErData->erIndex); 
             EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
             EngRunReset(pErCfg, pErData);
             pErData->erState = ER_STATE_STOPPED;
@@ -701,6 +704,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         pErData->erDuration_ms += pErCfg->erRate;
 
         // Finish the engine run log
+        CycleFinishEngineRun( pErData->erIndex);
         EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
@@ -718,6 +722,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
             !TriggerGetState( pErCfg->runTrigID) )
         {
           // Finish the engine run log
+          CycleFinishEngineRun( pErData->erIndex);
           EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
           EngRunReset(pErCfg, pErData);
           pErData->erState = ER_STATE_STOPPED;
@@ -866,8 +871,9 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
   oneOverN = (1.0f / (FLOAT32)pErData->nSampleCount);
   GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
 
-  // Finish the cycles for this engine run
-  CycleFinishEngineRun( pErData->erIndex);
+  // Tell Cycles to finish up for this engine run.
+  // This will ensure Cycles has brought it count structure up-to-date.
+  // CycleFinishEngineRun( pErData->erIndex);
 
   pLog->erIndex             = pErData->erIndex;
   pLog->reason              = reason;

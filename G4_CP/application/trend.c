@@ -918,6 +918,12 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
       // Reset the stability timing for next pass
       pData->lastStabCheckMs = 0;
       pData->nTimeStableMs   = 0;
+
+      if(TREND_STATE_AUTO == pData->trendState )
+      {
+        pData->trendState = TREND_STATE_INACTIVE;
+      }
+      
     }
     
   } // More trend-samples can be taken.
