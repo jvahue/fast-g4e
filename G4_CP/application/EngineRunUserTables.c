@@ -825,7 +825,7 @@ USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
 
    result = USER_RESULT_ERROR;
 
-   memcpy(&m_DataTemp, &engineRunData[Index], sizeof(m_DataTemp));
+   memcpy(&m_DataTemp, &m_engineRunData[Index], sizeof(m_DataTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 

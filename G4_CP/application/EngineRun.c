@@ -44,11 +44,11 @@
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static ENGRUN_CFG    engineRunCfg[MAX_ENGINES];
-static ENGRUN_DATA   engineRunData[MAX_ENGINES];
+static ENGRUN_CFG    m_engineRunCfg[MAX_ENGINES];
+static ENGRUN_DATA   m_engineRunData[MAX_ENGINES];
 
-static ENGRUN_STARTLOG engineStartLog[MAX_ENGINES];
-static ENGRUN_RUNLOG   engineRunLog[MAX_ENGINES];
+static ENGRUN_STARTLOG m_engineStartLog[MAX_ENGINES];
+static ENGRUN_RUNLOG   m_engineRunLog[MAX_ENGINES];
 
 static ENGINE_FILE_HDR m_EngineInfo;
 
@@ -94,7 +94,7 @@ static BOOLEAN EngRunIsError     (ENGRUN_CFG* pErCfg);
  * Parameters:   [in] idx - ENGRUN_ID of the EngineRun being requested or
  *                          ENGRUN_ID_ANY to return the bit array of all engine
  *                          run in the STARTING or RUNNING state.
- *               [out]      Pointer to the EngRunFlags bit array of engines in
+ *               [out] engRunFlags - Pointer to the engRunFlags bit array of engines in
  *                          RUNNING state. This field is not updated if idx is
  *                          not set to ENGRUN_ID_ANY.
  *
@@ -106,7 +106,7 @@ static BOOLEAN EngRunIsError     (ENGRUN_CFG* pErCfg);
  * Notes:        None
  *
  *****************************************************************************/
-ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
+ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
 {
   INT16 i;
   UINT8 runMask  = 0x00;  // bit map of started/running EngineRuns.
@@ -122,13 +122,13 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
 
     for (i = 0; i < MAX_ENGINES; ++i)
     {
-      if (ER_STATE_RUNNING == engineRunData[i].erState)
+      if (ER_STATE_RUNNING == m_engineRunData[i].erState)
       {
         // Set the bit in the flag
         runMask |= 1 << i;
         bRunning = TRUE;
       }
-      else if (ER_STATE_STARTING == engineRunData[i].erState)
+      else if (ER_STATE_STARTING == m_engineRunData[i].erState)
       {
         // Set the bit in the flag
         runMask |= 1 << i;
@@ -141,15 +141,15 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* EngRunFlags)
     state = bRunning ? ER_STATE_RUNNING : bStarting ? ER_STATE_STARTING : ER_STATE_STOPPED;
 
     // If the caller has passed a field to return the list, fill it.
-    if(NULL != EngRunFlags)
+    if(NULL != engRunFlags)
     {
-      *EngRunFlags = runMask;
+      *engRunFlags = runMask;
     }
   }
   else // Get the current state of the requested engine run.
   {
     ASSERT ( idx >= ENGRUN_ID_0 && idx < MAX_ENGINES);
-    state = engineRunData[idx].erState;
+    state = m_engineRunData[idx].erState;
   }
   return state;
 }
@@ -179,11 +179,11 @@ void EngRunInitialize(void)
   User_AddRootCmd(&rootEngRunMsg);
 
   // Clear and Load the current cfg info.
-  memset(&engineRunCfg, 0, sizeof(engineRunCfg));
+  memset(&m_engineRunCfg, 0, sizeof(m_engineRunCfg));
 
-  memcpy( engineRunCfg,
+  memcpy( m_engineRunCfg,
           &(CfgMgr_RuntimeConfigPtr()->EngineRunConfigs),
-          sizeof(engineRunCfg) );
+          sizeof(m_engineRunCfg) );
 
   // Open Engine Identification File
   result =  NV_Open(NV_ENGINE_ID);
@@ -207,8 +207,8 @@ void EngRunInitialize(void)
   // Initialize Engine Runs storage objects.
   for ( i = 0; i < MAX_ENGINES; i++)
   {
-    pErCfg  = &engineRunCfg[i];
-    pErData = &engineRunData[i];
+    pErCfg  = &m_engineRunCfg[i];
+    pErData = &m_engineRunData[i];
     // Cfg must specify valid sensor for start, run, stop, temp and battery
     if ( TriggerIsConfigured(pErCfg->startTrigID)     &&
          TriggerIsConfigured(pErCfg->stopTrigID )     &&
@@ -349,7 +349,7 @@ void EngRunTask(void* pParam)
 UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId)
 {
   ASSERT(engId < MAX_ENGINES);
-  return &engineRunData[engId].cycleCounts[0];
+  return &m_engineRunData[engId].cycleCounts[0];
 }
 
 /******************************************************************************
@@ -369,7 +369,7 @@ UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId)
 ENGRUN_RUNLOG* EngRunGetPtrToLog(ENGRUN_INDEX engId)
 {
   ASSERT(engId < MAX_ENGINES);
-  return &engineRunLog[engId];
+  return &m_engineRunLog[engId];
 }
 
 /******************************************************************************
@@ -409,12 +409,12 @@ UINT16 EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       // Copy the Engine Run names
       strncpy_safe( engineHdr[engineIndex].engineName,
                     sizeof(engineHdr[engineIndex].engineName),
-                    engineRunCfg[engineIndex].engineName,
+                    m_engineRunCfg[engineIndex].engineName,
                     _TRUNCATE);
 
-      engineHdr[engineIndex].startTrigID = engineRunCfg[engineIndex].startTrigID;
-      engineHdr[engineIndex].runTrigID   = engineRunCfg[engineIndex].runTrigID;
-      engineHdr[engineIndex].stopTrigID  = engineRunCfg[engineIndex].stopTrigID;
+      engineHdr[engineIndex].startTrigID = m_engineRunCfg[engineIndex].startTrigID;
+      engineHdr[engineIndex].runTrigID   = m_engineRunCfg[engineIndex].runTrigID;
+      engineHdr[engineIndex].stopTrigID  = m_engineRunCfg[engineIndex].stopTrigID;
 
       // Increment the total number of bytes and decrement the remaining
       nTotal     += sizeof (engineHdr[engineIndex]);
@@ -470,8 +470,8 @@ static void EngRunForceEnd( void )
   // Eng
   for (i = ENGRUN_ID_0; i < MAX_ENGINES; ++i)
   {
-    pErCfg  = &engineRunCfg[i];
-    pErData = &engineRunData[i];
+    pErCfg  = &m_engineRunCfg[i];
+    pErData = &m_engineRunData[i];
 
     // Only process this engine if it's USED
     if (pErData->erIndex != ENGRUN_UNUSED)
@@ -482,13 +482,12 @@ static void EngRunForceEnd( void )
           break;
 
         case ER_STATE_STARTING:
+          CycleFinishEngineRun(pErData->erIndex);
           EngRunWriteStartLog( ER_LOG_SHUTDOWN, pErCfg, pErData);
-          CycleFinishEngineRun(i);
           break;
 
         case ER_STATE_RUNNING:
           // Update persist, and create log
-          CycleFinishEngineRun( pErData->erIndex);
           EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
           break;
 
@@ -496,8 +495,6 @@ static void EngRunForceEnd( void )
           FATAL("Unrecognized engine run state %d", pErData->erState );
           break;
       }
-      //CycleFinishEngineRun( pErData->erIndex);
-      //EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
     }
   }
 }
@@ -539,6 +536,7 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
                                                      pErCfg->sensorMap,
                                                      sizeof(pErCfg->sensorMap) );
     // CYCLES Init
+    // TODO: Should this be a call to CyclesReset?
     for(i = 0; i < MAX_CYCLES; ++i)
     {
       pErData->cycleCounts[i] = 0;
@@ -564,9 +562,9 @@ static void EngRunUpdateAll(void)
   UINT16 i;
   for ( i = 0; i < MAX_ENGINES; i++)
   {
-    if (engineRunData[i].erIndex != ENGRUN_UNUSED)
+    if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
     {
-      EngRunUpdate(&engineRunCfg[i],&engineRunData[i]);
+      EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
     }
   }
 }
@@ -595,6 +593,9 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     // Reset the countdown counter for the next engine run.
     pErData->nRateCountdown = pErData->nRateCounts;
 
+    // TODO: determine if this should be at the end of the function after the states
+    //       have been set.  We miss the first possible set of data by waiting  until the 
+    //       next time we run ER
     // Update the cycles for this engine run if starting or running.
     if ( pErData->erState == ER_STATE_STARTING ||
          pErData->erState == ER_STATE_RUNNING )
@@ -659,6 +660,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
         // Finish the engine run log
         EngRunWriteStartLog( ER_LOG_ERROR, pErCfg, pErData);
+        // TODO: Cycles need to be reset here don't they?
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
       }
@@ -683,8 +685,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
               !TriggerGetState( pErCfg->startTrigID) )
           {
             // Finish the engine run log
-            CycleFinishEngineRun( pErData->erIndex); 
-            EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+            EngRunWriteStartLog(ER_LOG_STOPPED, pErCfg, pErData);
             EngRunReset(pErCfg, pErData);
             pErData->erState = ER_STATE_STOPPED;
           }
@@ -704,7 +705,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         pErData->erDuration_ms += pErCfg->erRate;
 
         // Finish the engine run log
-        CycleFinishEngineRun( pErData->erIndex);
         EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
@@ -722,7 +722,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
             !TriggerGetState( pErCfg->runTrigID) )
         {
           // Finish the engine run log
-          CycleFinishEngineRun( pErData->erIndex);
           EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
           EngRunReset(pErCfg, pErData);
           pErData->erState = ER_STATE_STOPPED;
@@ -819,7 +818,7 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
 {
   ENGRUN_STARTLOG* pLog;
 
-  pLog = &engineStartLog[pErData->erIndex];
+  pLog = &m_engineStartLog[pErData->erIndex];
 
   pLog->erIndex             = pErData->erIndex;
   pLog->reason              = reason;
@@ -840,6 +839,9 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
                pLog,
                sizeof(ENGRUN_STARTLOG),
                NULL);
+
+  // TODO: determine if we should check here if the reason would require a Cycle reset
+  // and perform the cycle reset - this would ensure it is not forgotten - or make cycles a task
 }
 
 /******************************************************************************
@@ -866,14 +868,14 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
   SNSR_SUMMARY*  pErSummary;
   SNSR_SUMMARY*  pLogSummary;
 
-  pLog = &engineRunLog[pErData->erIndex];
+  pLog = &m_engineRunLog[pErData->erIndex];
 
   oneOverN = (1.0f / (FLOAT32)pErData->nSampleCount);
   GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
 
   // Tell Cycles to finish up for this engine run.
   // This will ensure Cycles has brought it count structure up-to-date.
-  // CycleFinishEngineRun( pErData->erIndex);
+  CycleFinishEngineRun( pErData->erIndex);
 
   pLog->erIndex             = pErData->erIndex;
   pLog->reason              = reason;
@@ -948,7 +950,6 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   FLOAT32  oneOverN;
   SNSR_SUMMARY* pSummary;
 
-
   // if the starting time is zero, needs to be initialized
   // todo DaveB  - this could be a code coverage issue
   // unless we can transition directly from STOPPED to RUNNING.
@@ -992,8 +993,9 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
      oneOverN = (1.0f / (FLOAT32)(pErData->nSampleCount - 1));
      pSummary->fAvgValue = pSummary->fTotal * oneOverN;
     }
-
   } // for nTotalSensors
+
+  // TODO: do we want to call CycleUpdateAll here?
 }
 
 /******************************************************************************

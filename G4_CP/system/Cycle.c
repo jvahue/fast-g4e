@@ -424,6 +424,8 @@ static void CycleInitPersistent(void)
  *****************************************************************************/
 static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
 {
+  // TODO: this needs to handle ER_ANY by checking if it is running already
+  // we may not want to reset it.  How do we force a Cycle reset in this case?
   if ( pCycleCfg->type       == CYC_TYPE_NONE_CNT ||
        pCycleCfg->nTriggerId >= MAX_TRIGGERS ||
        !TriggerIsConfigured( pCycleCfg->nTriggerId ) )
@@ -796,14 +798,15 @@ static void CycleFinish( UINT16 nCycle )
 {
   CYCLE_DATA*    pCycle;
   CYCLE_CFG*     pCycleCfg;
-  ENGRUN_INDEX   erID      = pCycleCfg->nEngineRunId;
-  ENGRUN_RUNLOG* pLog      = EngRunGetPtrToLog(erID);
-  UINT32* pErDataCycles    = EngRunGetPtrToCycleCounts(erID);
+  ENGRUN_INDEX   erID; 
+  ENGRUN_RUNLOG* pLog;
   
   ASSERT( nCycle < MAX_CYCLES);
 
   pCycle    = &m_Data[nCycle];
   pCycleCfg = &m_Cfg[nCycle];
+  erID      = pCycleCfg->nEngineRunId;
+  pLog      = EngRunGetPtrToLog(erID);
   
   // Mark the cycle as completed.
   if (pCycleCfg->type > CYC_TYPE_NONE_CNT)
@@ -1038,6 +1041,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
 
   for (i = 0; i < MAX_CYCLES; i++)
   {
+    // TODO: handle ER_ANY
     if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT && m_Cfg[i].nEngineRunId == erID )
     {
       CycleReset( &m_Cfg[i], &m_Data[i]);

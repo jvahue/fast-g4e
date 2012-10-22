@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 9 $  $Date: 12-10-02 1:18p $
+ $Revision: 10 $  $Date: 12-10-19 2:00p $
 
 ******************************************************************************/
 
@@ -111,10 +111,10 @@ void TrendInitialize( void )
   User_AddRootCmd(&RootTrendMsg);
 
   // Clear and Load the current cfg info.
-  memset(&m_TrendData, 0, sizeof(m_TrendData));
+  memset(m_TrendData, 0, sizeof(m_TrendData));
 
   memcpy(m_TrendCfg,
-    &(CfgMgr_RuntimeConfigPtr()->TrendConfigs),
+    CfgMgr_RuntimeConfigPtr()->TrendConfigs,
     sizeof(m_TrendCfg));
 
   
@@ -249,7 +249,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &trendHdr, 0, sizeof(trendHdr) );
+   memset ( trendHdr, 0, sizeof(trendHdr) );
 
    // Loop through all the Trends
    for ( trendIndex = TREND_0;
@@ -805,7 +805,7 @@ static void TrendLogAutoTrendNotDetected( TREND_CFG* pCfg, TREND_DATA* pData )
 {
   TREND_NOT_DETECTED_LOG trendLog;
 
-  memcpy(&trendLog.crit, &pCfg->stability,     sizeof(trendLog.crit));
+  memcpy(trendLog.crit, pCfg->stability,     sizeof(trendLog.crit));
   memcpy(&trendLog.data, &pData->maxStability, sizeof(STABILITY_DATA));
   
   trendLog.trendIndex = pData->trendIndex;
@@ -1003,6 +1003,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 2:00p
+ * Updated in $/software/control processor/code/application
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:18p

@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 18 $  $Date: 12-10-04 3:49p $     
+      $Revision: 19 $  $Date: 12-10-19 1:23p $     
 
 ******************************************************************************/
 
@@ -551,7 +551,7 @@ void F7XProtocol_Initialize ( void )
   User_AddRootCmd(&F7XProtocolParamTblPtr); 
   
   // Restore User Cfg 
-  memcpy(m_F7X_DumplistCfg, &(CfgMgr_RuntimeConfigPtr()->F7XConfig), sizeof(m_F7X_DumplistCfg));
+  memcpy(m_F7X_DumplistCfg, CfgMgr_RuntimeConfigPtr()->F7XConfig, sizeof(m_F7X_DumplistCfg));
   memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), sizeof(m_F7X_ParamListCfg)); 
   
   // Update runtime var of Param Translation Table 
@@ -1990,6 +1990,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 1:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 18  *****************
  * User: Melanie Jutras Date: 12-10-04   Time: 3:49p
