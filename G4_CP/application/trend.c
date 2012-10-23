@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 10 $  $Date: 12-10-19 2:00p $
+ $Revision: 11 $  $Date: 12-10-23 2:19p $
 
 ******************************************************************************/
 
@@ -376,6 +376,9 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
  *****************************************************************************/
 static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
 {
+  // Local Data
+  TREND_START_LOG trendLog;
+
   if ( TREND_STATE_INACTIVE  == pData->trendState )
   {
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Manual Trend started.",pData->trendIndex ); 
@@ -388,13 +391,15 @@ static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
       pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_ON, FALSE, FALSE);
     }
 
-    LogWriteETM( APP_ID_TREND_MANUAL,
+    trendLog.trendIndex = pData->trendIndex;
+    trendLog.type       = pData->trendState;
+
+    LogWriteETM( APP_ID_TREND_START,
                  LOG_PRIORITY_3,
-                 &pData->trendIndex,
-                 sizeof(pData->trendIndex),
+                 &trendLog,
+                 sizeof(trendLog),
                  NULL );
   }
-
 }
 
 /******************************************************************************
@@ -780,8 +785,8 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
 {
   LogWriteETM(APP_ID_TREND_AUTO_FAILED,
               LOG_PRIORITY_3,
-              pCfg->trendName,
-              sizeof(pCfg->trendName),
+              pData->trendIndex,
+              sizeof(pData->trendIndex),
               NULL);
 
   GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Auto-Trend failure logged.",pData->trendIndex );
@@ -971,15 +976,16 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 {
   // Local Data
-  UINT32  nTrendStorage;
+  TREND_START_LOG trendLog;
 
   // Initialize Local Data
-  nTrendStorage = (UINT32)pData->trendIndex;
+  trendLog.trendIndex = pData->trendIndex;
+  trendLog.type       = TREND_STATE_AUTO;
 
-  LogWriteETM(APP_ID_TREND_AUTO,
+  LogWriteETM(APP_ID_TREND_START,
     LOG_PRIORITY_3,
-    &nTrendStorage,
-    sizeof(nTrendStorage),
+    &trendLog,
+    sizeof(trendLog),
     NULL);
 
   // Activate Action
@@ -1003,6 +1009,22 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates per Software Design Review
+ * Dave 
+ * 1. Removed Trends is Active Function
+ * 2. Fixed bug with deactivating manual trend because no stability
+ * JPO
+ * 1. Updated logs
+ *    a. Combined Auto and Manual Start into one log
+ *    b. Change fail log from name to index
+ *    c. Trend not detected added index
+ * 2. Removed Trend Lamp
+ * 3. Updated Configuration defaults
+ * 4. Updated user tables per design review
  * 
  * *****************  Version 10  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 2:00p
