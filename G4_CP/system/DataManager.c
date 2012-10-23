@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 80 $  $Date: 12-10-19 1:28p $ 
+      $Revision: 81 $  $Date: 12-10-23 1:08p $ 
     
 ******************************************************************************/
 
@@ -195,7 +195,7 @@ ACS_CONFIG DataMgrGetACSDataSet(LOG_ACS_FIELD ACS)
  *****************************************************************************/
 BOOLEAN DataMgrIsFFDInhibtMode( void )
 { 
-  return DIO_ReadPin(FFD_Inh) ? FALSE : TRUE;
+  return DIO_ReadPin(FFD_Enb) ? FALSE : TRUE;
 }
 
 /******************************************************************************
@@ -1830,6 +1830,12 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 81  *****************
+ * User: Melanie Jutras Date: 12-10-23   Time: 1:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1159 Changed FFD_Inh to FFD_Enb in DataMgrIsFFDInhibitMode()
+ * function because it had been changed in DIO.h for this SCR.
  * 
  * *****************  Version 80  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:28p

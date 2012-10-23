@@ -9,7 +9,7 @@
                     modules.
 
     VERSION
-      $Revision: 50 $  $Date: 8/28/12 1:43p $
+      $Revision: 51 $  $Date: 12-10-23 2:49p $
 
 ******************************************************************************/
 
@@ -1222,6 +1222,11 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.c $
+ * 
+ * *****************  Version 51  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:49p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 50  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

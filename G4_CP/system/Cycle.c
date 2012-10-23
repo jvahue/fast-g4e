@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 21 $  $Date: 10/12/12 6:29p $
+  $Revision: 22 $  $Date: 12-10-23 1:25p $
 
 ******************************************************************************/
 
@@ -140,8 +140,8 @@ EXPORT void CycleInitialize(void)
   User_AddRootCmd(&RootCycleMsg);
 
   // Load the current cfg info.
-  memcpy(&m_Cfg,
-         &(CfgMgr_RuntimeConfigPtr()->CycleConfigs),
+  memcpy(m_Cfg,
+         CfgMgr_RuntimeConfigPtr()->CycleConfigs,
         sizeof(m_Cfg));
 
   // Reload the persistent cycle count  info from EEPROM & RTCNVRAM
@@ -254,7 +254,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &cycleHdr, 0, sizeof(cycleHdr) );
+   memset ( cycleHdr, 0, sizeof(cycleHdr) );
 
    // Loop through all the cycles
    for ( cycleIndex = 0;
@@ -277,7 +277,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (cycleHdr[cycleIndex]);
    }
    // Copy the Cycle header to the buffer
-   memcpy ( pBuffer, &cycleHdr, nTotal );
+   memcpy ( pBuffer, cycleHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
@@ -571,7 +571,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       }
     }
     // Update the cycle active status.
-    pCycleData->cycleActive = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
+    pCycleData->cycleActive = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
 
     // If cycle has ended, reset the start-time for the next duration.
     if(!pCycleData->cycleActive)
@@ -590,7 +590,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
     // Previous cycle was inactive - see if the start criteria are met
     // Set up a bit-mask for querying the state of the trigger for this cycle
 
-    CycleStart = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
+    CycleStart = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
 
     // Cycle has started
     if (CycleStart)
@@ -1089,6 +1089,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Melanie Jutras Date: 12-10-23   Time: 1:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p

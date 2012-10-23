@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 75 $  $Date: 12-10-19 1:35p $
+  $Revision: 76 $  $Date: 12-10-23 2:54p $
 
 ******************************************************************************/
 
@@ -405,9 +405,11 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 }
 
 /******************************************************************************
- * Function:     TriggerGetState 
+ * Function:     TriggerGetState | IMPLEMENTS GetState INTERFACE to
+ *                               | FAST STATE MGR
  *
- * Description:  Returns trigger active/inactive state.
+ * Description:  Returns trigger active/inactive state.  Function call signature
+ *               satisfies the GetState interface to FastStateMgr module.
  *
  * Parameters:   [in] Index of the Trigger [0..63]
  *                    if the trigger is invalid , it returns inactive.
@@ -1368,6 +1370,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 76  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:54p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 75  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:35p

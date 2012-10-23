@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 26 $  $Date: 10/11/12 6:55p $
+      $Revision: 29 $  $Date: 12-10-23 3:03p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -179,10 +179,10 @@ void EngRunInitialize(void)
   User_AddRootCmd(&rootEngRunMsg);
 
   // Clear and Load the current cfg info.
-  memset(&m_engineRunCfg, 0, sizeof(m_engineRunCfg));
+  memset(m_engineRunCfg, 0, sizeof(m_engineRunCfg));
 
   memcpy( m_engineRunCfg,
-          &(CfgMgr_RuntimeConfigPtr()->EngineRunConfigs),
+          CfgMgr_RuntimeConfigPtr()->EngineRunConfigs,
           sizeof(m_engineRunCfg) );
 
   // Open Engine Identification File
@@ -594,7 +594,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     pErData->nRateCountdown = pErData->nRateCounts;
 
     // TODO: determine if this should be at the end of the function after the states
-    //       have been set.  We miss the first possible set of data by waiting  until the 
+    //       have been set.  We miss the first possible set of data by waiting  until the
     //       next time we run ER
     // Update the cycles for this engine run if starting or running.
     if ( pErData->erState == ER_STATE_STARTING ||
@@ -1086,12 +1086,27 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-10-23   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
  * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:40p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Design and Code Review Updates
+ *
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-10-23   Time: 1:30p
+ * Updated in $/software/control processor/code/application
+ * SCR #1172 PCLint 545 Suspicious use of & Error
+ *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 10/11/12   Time: 6:55p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Review Findings
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:17p
  * Updated in $/software/control processor/code/application
@@ -1102,7 +1117,7 @@ static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added Engine Identification Fields to software and file
  * header
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 9/18/12    Time: 6:11p
  * Updated in $/software/control processor/code/application

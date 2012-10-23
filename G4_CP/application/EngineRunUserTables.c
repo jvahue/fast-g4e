@@ -7,7 +7,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 16 $  $Date: 10/11/12 6:55p $
+$Revision: 17 $  $Date: 12-10-23 2:41p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -896,6 +896,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:41p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Design and Code Review Updates
  * 
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 10/11/12   Time: 6:55p

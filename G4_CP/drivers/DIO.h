@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 38 $  $Date: 8/28/12 7:08p $    
+      $Revision: 39 $  $Date: 10/23/12 10:50a $    
 ******************************************************************************/
 
 
@@ -97,7 +97,7 @@ DIO_PIN(WLAN_WOW_Enb,    DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR
 DIO_PIN(SW_PFEN_Sta,     DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FECI2C,0x08)\
 /*FPGA GPIO input.  Typecast 16-bit GPIO_1 reg to fit in 8-bit ptr type.  Should think about adding\
  reg width column in the future if more 16-but registers are needed*/\
-DIO_PIN(FFD_Inh,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        (void*)FPGA_GPIO_1, FPGA_GPIO_1_FFDI)
+DIO_PIN(FFD_Enb,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        (void*)FPGA_GPIO_1, FPGA_GPIO_1_FFDI)
 
 
 #define DIO_OUTPUTS_LIST \
@@ -261,6 +261,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 39  *****************
+ * User: Jim Mood     Date: 10/23/12   Time: 10:50a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1107: Rename FFD input in the dio input table
  * 
  * *****************  Version 38  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p

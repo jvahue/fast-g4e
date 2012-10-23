@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 26 $  $Date: 8/29/12 6:20p $    
+$Revision: 27 $  $Date: 12-10-23 2:56p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -480,6 +480,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:56p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
