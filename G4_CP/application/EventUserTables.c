@@ -838,8 +838,8 @@ static USER_MSG_TBL eventTableCmd [] =
   { "MINSENSORVALUE", NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,      0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
   // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
-  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
-  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
+  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
+  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
   { "TRANSIENT_MS",   NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "REGION_A",       eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
   { "REGION_B",       eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
