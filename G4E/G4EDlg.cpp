@@ -419,7 +419,7 @@ bool CG4EDlg::ProcessIocInterface()
 
         // turn on internal DINs 
         m_dinValues |= 1 << WLAN_WOW_Enb;
-        m_dinValues |= 1 << FFD_Inh;
+        m_dinValues |= 1 << FFD_Enb;
 
         // share our PS value with the G4 code
         G4sysCtrl.busV = m_busV;
