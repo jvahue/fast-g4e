@@ -560,6 +560,26 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\G4_CP\application\Creep.c"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\Creep.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\CreepUserTables.c"
+					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\G4_CP\application\EngineRun.c"
 					>
 				</File>
