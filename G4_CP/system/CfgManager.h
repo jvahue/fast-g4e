@@ -12,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 48 $  $Date: 9/14/12 4:49p $
+ $Revision: 49 $  $Date: 12-10-27 4:58p $
 
 ******************************************************************************/
 
@@ -47,6 +47,7 @@
 #include "EngineRun.h"
 #include "Cycle.h"
 #include "Trend.h"
+#include "Creep.h"
 #ifdef ENV_TEST
 #include "Etm.h"
 #endif
@@ -141,6 +142,8 @@ typedef struct
     CYCLE_CFGS              CycleConfigs;
     // TREND Configuration
     TREND_CONFIGS           TrendConfigs;
+    // CREEP Configuration
+    CREEP_CFG               CreepConfig; 
 #ifdef ENV_TEST
     TestControl             etm;
 #endif
@@ -199,6 +202,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 49  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 4:58p
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 48  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:49p

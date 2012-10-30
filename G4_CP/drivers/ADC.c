@@ -20,7 +20,7 @@
                SPI.h - Accessing the SPI bus to read the converter
  
   VERSION
-      $Revision: 28 $  $Date: 8/28/12 1:06p $ 
+      $Revision: 29 $  $Date: 12-10-27 5:08p $ 
      
  
 ******************************************************************************/
@@ -490,12 +490,13 @@ BOOLEAN ADC_SensorTest (UINT16 nIndex)
  *              different channels of the internal ADC.
  *
  * Parameters:  [in]  nIndex - ADC channel to read. See enum ADC_CHANNEL
+ *              [in]  *null - Not used.  Add to support common interface. 
  *
  * Returns:     fValue - float Value of the discrete
  *
  * Notes:       
  *****************************************************************************/
-FLOAT32 ADC_GetValue (UINT16 nIndex)
+FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 {
    // Local Data
    FLOAT32 fValue;
@@ -529,6 +530,11 @@ FLOAT32 ADC_GetValue (UINT16 nIndex)
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:08p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

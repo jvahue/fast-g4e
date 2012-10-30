@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 71 $  $Date: 12-10-19 10:21a $
+    $Revision: 72 $  $Date: 12-10-27 5:02p $
 
 
 ******************************************************************************/
@@ -1257,7 +1257,8 @@ INT32  NV_RTCWrite(void* SourceAddr, UINT32 PhysicalOffset, UINT32 Size, IO_RESU
  INT32 Written;
  RESULT WriteResult;
 
-  Written = -1;
+  // Written = -1;
+  Written = 0; 
 
   WriteResult = SPIMgr_WriteRTCNvRam(PhysicalOffset,SourceAddr,Size, ioResult);
   if(DRV_OK == WriteResult)
@@ -1833,6 +1834,11 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  *  MODIFICATIONS
  *    $History: NVMgr.c $
  *
+ * *****************  Version 72  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:02p
+ * Updated in $/software/control processor/code/system
+ * SCR #1178  NV_RTCWrite() Error
+ * 
  * *****************  Version 71  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 10:21a
  * Updated in $/software/control processor/code/system

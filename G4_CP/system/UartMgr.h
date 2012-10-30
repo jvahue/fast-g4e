@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 11 $  $Date: 8/28/12 1:43p $     
+      $Revision: 12 $  $Date: 12-10-27 5:05p $     
 
 ******************************************************************************/
 
@@ -419,7 +419,7 @@ EXPORT UINT16  UartMgr_ReadDataSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxB
 
 EXPORT BOOLEAN UartMgr_SensorTest       (UINT16 nIndex);
 EXPORT BOOLEAN UartMgr_InterfaceValid   (UINT16 nIndex);  
-EXPORT FLOAT32 UartMgr_ReadWord         (UINT16 nIndex);
+EXPORT FLOAT32 UartMgr_ReadWord         (UINT16 nIndex, UINT32 *tickCount);
 
 EXPORT UINT16  UartMgr_SensorSetup      (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor);
 
@@ -449,6 +449,11 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

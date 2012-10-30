@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 36 $  $Date: 9/14/12 4:48p $  
+      $Revision: 37 $  $Date: 12-10-27 5:04p $  
 
 ******************************************************************************/
 
@@ -335,7 +335,7 @@ typedef enum
     MAX_FAILURE
 } SENSORFAILURE;
 
-typedef FLOAT32 (*GET_SENSOR) (UINT16);
+typedef FLOAT32 (*GET_SENSOR) (UINT16, UINT32* );
 typedef BOOLEAN (*RUN_TEST) (UINT16);
 typedef BOOLEAN (*INTERFACE_ACTIVE) (UINT16);
 
@@ -456,6 +456,7 @@ typedef struct
     BOOLEAN           bWasValidOnce;                /* Sensor was Valid at least once    */
     FLOAT32           fValue;                       /* Filtered/converted value          */
     FLOAT32           fPriorValue;                  /* previous value (for rate test)    */
+    UINT32            lastUpdateTick;               /* Last update tick time of sensor   */
     BOOLEAN           PriorValueValid;              /* TRUE if prior value calculated    */
     INT16             nSampleCounts;                /* Number of cycles between sample   */
     INT16             nSampleCountdown;             /* Countdown until next sample       */
@@ -549,12 +550,18 @@ EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
                                         UINT32 snsrMask[],
                                         INT32  snsrMaskSizeBytes);
 EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
+EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
 
 
 #endif // SENSOR_H
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 37  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:48p

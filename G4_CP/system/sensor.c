@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 76 $  $Date: 12-10-19 1:42p $     
+      $Revision: 77 $  $Date: 12-10-27 5:04p $     
 
 ******************************************************************************/
 
@@ -277,6 +277,25 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
 {
   // return the current value of the sensor
   return (Sensors[Sensor].fValue);
+}
+
+/******************************************************************************
+ * Function:     SensorGetLastUpdate ( SENSOR_INDEX Sensor )
+ *
+ * Description:  This function provides a method to return the last rx time of a
+ *               sensor. 
+ *
+ * Parameters:   [in] nSensor - Index of sensor to get value
+ *
+ * Returns:      [out] UINT32 - Tick time of last sensor update
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+UINT32 SensorGetLastUpdateTime( SENSOR_INDEX Sensor)
+{
+  // return the current value of the sensor
+  return (Sensors[Sensor].lastUpdateTick);
 }
 
 /******************************************************************************
@@ -823,8 +842,14 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
    // Make sure the sensors interface is active
    if ( TRUE == pSensor->InterfaceActive(pSensor->nInterfaceIndex) )
    {
+      // Preset TickCount to current time.  For bus i/f type, TickCount will be
+      //  updated to actual param rx time.  For others (ANALOG,DISC) it will be 
+      //  this time as param rx time. 
+      pSensor->lastUpdateTick = CM_GetTickCount(); 
+    
       // Read the Sensor data from the configured interface
-      fVal      = pSensor->GetSensorData(pSensor->nInterfaceIndex);
+      fVal      = pSensor->GetSensorData(pSensor->nInterfaceIndex, 
+                                         &pSensor->lastUpdateTick);
 
       // Check if calibration is configured for sensor
       if (pConfig->Calibration.Type != NONE)
@@ -1903,6 +1928,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 77  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 76  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:42p

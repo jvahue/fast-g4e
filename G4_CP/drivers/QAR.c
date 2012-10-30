@@ -9,7 +9,7 @@
                  QAR interface.
     
    VERSION
-      $Revision: 95 $  $Date: 12-10-10 12:31p $
+      $Revision: 96 $  $Date: 12-10-27 5:09p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1495,6 +1495,7 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
  * Description:  Returns the current word data
  *
  * Parameters:   Index into QARWordInfo[] containing parse information 
+ *               *tickCount - ptr to return last rx update time of parameter  
  *
  * Returns:      FLOAT32 Word Value (partially processed)
  *
@@ -1510,7 +1511,7 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
  *      and SF4 which will be older than SF2 by about 2 seconds. 
  *
  *****************************************************************************/
-FLOAT32 QAR_ReadWord (UINT16 nIndex)
+FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
 {
    QAR_WORD_INFO_PTR pWordInfo;
    QAR_STATE_PTR     pState; 
@@ -1535,11 +1536,13 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex)
    {
       // word = QARFrame[currentSF][pWordInfo->WordLocation];
       word = QARFrame[currentSF].Word[pWordInfo->WordLocation];
+      *tickCount = QARFrame[currentSF].LastSubFrameUpdateTime;       
    }
    else 
    {
       // word = QARFramePrevGood[currentSF][pWordInfo->WordLocation]; 
       word = QARFramePrevGood[currentSF].Word[pWordInfo->WordLocation];       
+      *tickCount = QARFramePrevGood[currentSF].LastSubFrameUpdateTime; 
    }
 
    // Parse the word based on MSB Position and word size 
@@ -2304,6 +2307,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 96  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:09p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 95  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:31p

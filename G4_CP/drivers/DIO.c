@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 49 $  $Date: 8/28/12 7:08p $
+   $Revision: 50 $  $Date: 12-10-27 5:09p $
 
 
 ******************************************************************************/
@@ -687,13 +687,14 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
  *
  *
  * Parameters:  Pin: The pin to read (see DIO_INPUT enumeration)
+ *              *null: Not used.  Add to support common i/f.
  *
  * Returns:     FLOAT32 - The state of the Pin returned from DIO_ReadPin
  *
  * Notes:
  *
  ****************************************************************************/
-FLOAT32 DIO_GetValue (UINT16 Pin)
+FLOAT32 DIO_GetValue (UINT16 Pin, UINT32 *null)
 {
    // Local Data
    BOOLEAN bState;
@@ -1188,6 +1189,11 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 50  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:09p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 49  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 7:08p

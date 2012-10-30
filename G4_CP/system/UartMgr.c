@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 42 $  $Date: 12-10-19 1:48p $     
+      $Revision: 43 $  $Date: 12-10-27 5:05p $     
 
 ******************************************************************************/
 
@@ -693,13 +693,14 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor)
  *
  * Parameters:   nIndex - index into the m_UartMgr_WordInfo[] containing the 
  *                        the specific Uart Mgr Word Data to read / parse 
+ *               *tickCount - ptr to return last rx update time of parameter 
  *
  * Returns:      FLOAT32 the requested Uart Mgr Data Word Value 
  *
  * Notes:        none
  *
  *****************************************************************************/
-FLOAT32 UartMgr_ReadWord (UINT16 nIndex)
+FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
 {
   UARTMGR_WORD_INFO_PTR word_info_ptr; 
   UARTMGR_PARAM_DATA_PTR data_ptr; 
@@ -720,11 +721,13 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex)
   index = (nIndex & 0xFF); 
   
   word_info_ptr = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[ch][index]; 
+  *tickCount = 0;   
   
   if ( word_info_ptr->nIndex != UARTMGR_WORD_INDEX_NOT_FOUND )
   {
     data_ptr = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][word_info_ptr->nIndex]; 
     runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &data_ptr->runtime_data; 
+    *tickCount = runtime_data_ptr->rxTime;     
     
     switch ( word_info_ptr->type  ) 
     {
@@ -1951,6 +1954,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 43  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 42  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:48p

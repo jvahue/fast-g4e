@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 39 $  $Date: 10/23/12 10:50a $    
+      $Revision: 40 $  $Date: 12-10-27 5:09p $    
 ******************************************************************************/
 
 
@@ -250,7 +250,7 @@ EXPORT  RESULT  DIO_Init     ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize 
 EXPORT  BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig, UINT16 i );
 EXPORT  void    DIO_SetPin   ( DIO_OUTPUT Pin, DIO_OUT_OP Op) ;
 EXPORT  BOOLEAN DIO_ReadPin  ( DIO_INPUT Pin);
-EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin );
+EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
 EXPORT  void    DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState );
 
 EXPORT  void    DIO_UpdateDiscreteInputs ( void );
@@ -261,6 +261,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 40  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:09p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 39  *****************
  * User: Jim Mood     Date: 10/23/12   Time: 10:50a

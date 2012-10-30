@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 17 $  $Date: 12-10-02 1:17p $
+      $Revision: 18 $  $Date: 12-10-27 5:07p $
 
 ******************************************************************************/
 
@@ -54,6 +54,7 @@
                            ENGRUN_DEFAULT,\
                            ENGRUN_DEFAULT /* EngineRun[MAX_ENGINES] */
 
+#define ENGINERUN_UNUSED   255                           
 
 /******************************************************************************
                                Package Typedefs
@@ -223,6 +224,11 @@ EXPORT void             Eng_ReInitFile        ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:07p
+ * Updated in $/software/control processor/code/application
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:17p

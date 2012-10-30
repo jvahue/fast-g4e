@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 113 $  $Date: 12-10-10 12:54p $
+     $Revision: 114 $  $Date: 12-10-27 4:59p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -38,6 +38,7 @@
 #include "Cycle.h"
 #include "event.h"
 #include "ActionManager.h"
+#include "Creep.h"
 
 #ifdef STE_TP
   #include "TestPoints.h"
@@ -503,6 +504,10 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   STARTUP_ID(sysStartupId++);
   CycleInitialize();
 
+  STARTUP_ID(sysStartupId++);
+  Creep_Initialize(degradedMode);   
+  
+
 #ifdef ENV_TEST
 /*vcast_dont_instrument_start*/
   InitEtm();
@@ -761,6 +766,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 114  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 4:59p
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 113  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:54p

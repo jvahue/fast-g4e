@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 105 $  $Date: 12-10-23 2:20p $
+      $Revision: 106 $  $Date: 12-10-27 5:04p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -62,6 +62,11 @@ SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
+\
+SYS_LOG_ID(APP_ID_CREEP_PBIT                        ,0xB400 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_SUMMARY                     ,0xB480 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_FAULT                       ,0xB481 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB482, 0)\
 \
 SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
@@ -351,6 +356,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  *  MODIFICATIONS
  *    $History: SystemLog.h $
  *
+ * *****************  Version 106  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Requirements
+ * 
  * *****************  Version 105  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:20p
  * Updated in $/software/control processor/code/system

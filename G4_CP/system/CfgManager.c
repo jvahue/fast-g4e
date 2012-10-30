@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 69 $  $Date: 9/14/12 4:49p $
+    $Revision: 70 $  $Date: 12-10-27 4:58p $
 
 ******************************************************************************/
 
@@ -105,7 +105,9 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // CYCLE Config
                                           {CYCLE_CFG_DEFAULT},
                                           // TREND Config
-                                          {TREND_CFG_DEFAULT}
+                                          {TREND_CFG_DEFAULT},
+                                          // CREEP Config
+                                          {CREEP_DEFAULT_CFG}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
@@ -443,6 +445,10 @@ UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
    Total      = TH_GetBinaryHeader ( pBuffer, Remaining );
    Remaining -= Total;
    pBuffer   += Total;
+   // Get Creep
+   Total      = Creep_GetBinaryHdr ( pBuffer, Remaining ); 
+   Remaining -= Total;
+   pBuffer   += Total;
    // Calculate and return the total number of bytes
    return (nMaxByteSize - Remaining);
 }
@@ -711,6 +717,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 4:58p
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:49p

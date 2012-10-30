@@ -34,6 +34,7 @@ FASTII.ld
 ..\application\Event.c
 ..\application\Timehistory.c
 ..\application\trend.c
+..\application\Creep.c
 ..\drivers\ADC.c
 ..\drivers\Assert.c
 ..\drivers\BusTO.c

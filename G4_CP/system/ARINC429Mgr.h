@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429 
     
 VERSION
-     $Revision: 12 $  $Date: 8/28/12 1:43p $
+     $Revision: 13 $  $Date: 12-10-27 4:57p $
     
 ******************************************************************************/
 
@@ -662,7 +662,7 @@ EXPORT UINT16  Arinc429MgrGetFileHdr              ( void *pDest, UINT32 chan, UI
 EXPORT UINT16  Arinc429MgrGetSystemHdr            ( void *pDest, UINT16 nMaxByteSize );
 EXPORT BOOLEAN Arinc429MgrSensorTest              ( UINT16 nIndex );
 EXPORT BOOLEAN Arinc429MgrInterfaceValid          ( UINT16 nIndex );  
-EXPORT FLOAT32 Arinc429MgrReadWord                ( UINT16 nIndex );
+EXPORT FLOAT32 Arinc429MgrReadWord                ( UINT16 nIndex, UINT32 *tickCount );
 
 EXPORT UINT16  Arinc429MgrSensorSetup             ( UINT32 gpA,   UINT32 gpB, 
                                                     UINT8  label, UINT16 nSensor );
@@ -688,6 +688,11 @@ EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 4:57p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

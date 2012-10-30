@@ -10,7 +10,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 62 $  $Date: 9/06/12 6:04p $  
+     $Revision: 63 $  $Date: 12-10-27 5:04p $  
 ******************************************************************************/
 
 
@@ -31,7 +31,7 @@
                               Package Defines
 ******************************************************************************/
 // Task Related constants
-#define MAX_DT_TASKS       30
+#define MAX_DT_TASKS       31
 #define MAX_RMT_TASKS      45
 #define MAX_TASKS          (MAX_DT_TASKS+MAX_RMT_TASKS-1)  // (0 to xx)
 
@@ -99,6 +99,7 @@ TASK_ENTRY(Data_Mgr6,                   70,      DT,   SYS_MODE_GP0, 0x44444444,
 TASK_ENTRY(Data_Mgr7,                   70,      DT,   SYS_MODE_GP0, 0x88888888,   0,          0          )\
 TASK_ENTRY(Log_Manage_Task,             90,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(TH_Task_ID,                  95,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
+TASK_ENTRY(Creep,                      100,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(TP_SUPPORT_DT1,             253,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(TP_SUPPORT_DT2,             254,      DT,   SYS_MODE_GP2, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(CBIT_Manager,               255,      DT,   SYS_MODE_GP1, 0x11111111,   0,          0          )\
@@ -384,6 +385,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 63  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 62  *****************
  * User: Jim Mood     Date: 9/06/12    Time: 6:04p

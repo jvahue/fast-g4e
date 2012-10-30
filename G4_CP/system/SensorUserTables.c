@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 23 $  $Date: 8/28/12 1:43p $
+$Revision: 24 $  $Date: 12-10-27 5:04p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -309,6 +309,8 @@ static USER_MSG_TBL SensorStatus [] =
    { "FILTERDATA", FilterState, NULL, NO_HANDLER_DATA },
    { "INTERFACEINDEX" , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,
      USER_RO       , &SensorTemp.nInterfaceIndex, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
+   { "LASTTICK"    , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT32,
+     USER_RO       , &SensorTemp.lastUpdateTick, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
    { NULL          , NO_NEXT_TABLE, Sensor_State, USER_TYPE_NONE, USER_RW,
      NULL,0,MAX_SENSORS-1, NO_LIMIT, NULL  }
 };
@@ -564,6 +566,11 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

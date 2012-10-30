@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 103 $  $Date: 12-10-10 12:26p $
+   $Revision: 104 $  $Date: 12-10-27 5:08p $
 
 ******************************************************************************/
 
@@ -1206,6 +1206,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   
   INT32  int_temp;
   FLOAT32 float_temp;
+  FLOAT64 float64_temp;   
   UINT32 Base = 10;
   BOOLEAN result = FALSE;
 
@@ -1390,6 +1391,19 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       if( *end == '\0' && float_temp <= Max->Float && float_temp >= Min->Float)
       {
         **(FLOAT32**)SetPtr = float_temp;
+        result = TRUE;
+      }
+      break;
+
+    case USER_TYPE_FLOAT64:
+      /* FLOAT64 type
+         - check min/max bounds incl. the min/max value a float64 can represent.
+         - check the entire string is consumed by the conversion 
+         - Note: strtod() returns double  */
+      float64_temp= (FLOAT64)strtod(SetStr, &end);
+      if( *end == '\0' && float64_temp <= Max->Float64 && float64_temp >= Min->Float64)
+      {
+        **(FLOAT64**)SetPtr = float64_temp;
         result = TRUE;
       }
       break;
@@ -1660,6 +1674,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       sprintf(GetStr,"%f",*(FLOAT32*)GetPtr);
       break;
 
+    case USER_TYPE_FLOAT64:
+      sprintf(GetStr,"%lf",*(FLOAT64*)GetPtr);
+      break;
+
     case USER_TYPE_BOOLEAN:
       strncpy_safe(GetStr,Len, *(BOOLEAN*)GetPtr ? "TRUE" : "FALSE", _TRUNCATE);
       break;
@@ -1785,6 +1803,12 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
       Min->Float = NoLimit ? -FLT_MAX  : MAX(-FLT_MAX,Min->Float);
       Max->Float = NoLimit ? FLT_MAX  : MIN(FLT_MAX,Max->Float);
       break;
+      
+    case USER_TYPE_FLOAT64:
+      Min->Float64 = NoLimit ? -DBL_MAX  : MAX(-DBL_MAX,Min->Float64);
+      Max->Float64 = NoLimit ? DBL_MAX  : MIN(DBL_MAX,Max->Float64);
+      break;
+      
       //String length limit to half of the command string.
       //This allows ample room for the command, and should be sufficient
       //for any string value that needs to be set.
@@ -1866,6 +1890,11 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
     case USER_TYPE_FLOAT:
       sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
               Min.Float,Max.Float, NEWLINE, "Floating point number formats only.");
+      break;
+
+    case USER_TYPE_FLOAT64:
+      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
+              Min.Float64,Max.Float64, NEWLINE, "Floating64 point number formats only.");
       break;
 
     case USER_TYPE_STR:
@@ -2321,6 +2350,9 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_FLOAT:
         *(FLOAT32*)Param.Ptr = *(FLOAT32*)SetPtr;
         break;
+
+      case USER_TYPE_FLOAT64:
+        *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr; 
 
       case USER_TYPE_ENUM:
       case USER_TYPE_UINT32:
@@ -2879,6 +2911,11 @@ BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 104  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:08p
+ * Updated in $/software/control processor/code/application
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 103  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:26p

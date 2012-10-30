@@ -10,7 +10,7 @@
     Description:
     
     VERSION
-    $Revision: 43 $  $Date: 9/17/12 10:53a $
+    $Revision: 44 $  $Date: 12-10-27 5:08p $
     
 ******************************************************************************/
 
@@ -119,6 +119,7 @@ typedef enum{
   USER_TYPE_YESNO,
   USER_TYPE_ONOFF,
   USER_TYPE_ACTION,
+  USER_TYPE_FLOAT64,
   USER_TYPE_END,
 }USER_DATA_TYPE;
 
@@ -185,6 +186,7 @@ typedef union {
   INT32   Sint;
   UINT32  Uint;
   FLOAT32 Float;
+  FLOAT64 Float64;   
 }USER_RANGE;
 
 
@@ -268,6 +270,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 44  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:08p
+ * Updated in $/software/control processor/code/application
+ * SCR #1190 Creep Requirements
  * 
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a

@@ -11,7 +11,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 49 $  $Date: 8/28/12 1:06p $    
+      $Revision: 50 $  $Date: 12-10-27 5:09p $    
     
 ******************************************************************************/
 
@@ -457,7 +457,7 @@ EXPORT UINT16       QAR_GetFrameSnapShot( void *pDest, UINT32 nop, UINT16 nMaxBy
                                           BOOLEAN bStartSnap ); 
 
 EXPORT UINT16       QAR_SensorSetup     (UINT32 gpA, UINT32 gpB, UINT16 nSensor); 
-EXPORT FLOAT32      QAR_ReadWord        (UINT16 nIndex);
+EXPORT FLOAT32      QAR_ReadWord        (UINT16 nIndex, UINT32 *tickCount);
 
 // EXPORT void         QAR_Enable          (void); 
 
@@ -494,6 +494,11 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 50  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:09p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 49  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

@@ -10,7 +10,7 @@
                   data received on ARINC429.
     
 VERSION
-     $Revision: 49 $  $Date: 12-10-12 1:51p $
+     $Revision: 50 $  $Date: 12-10-27 5:06p $
 
 ******************************************************************************/
 
@@ -1241,6 +1241,7 @@ UINT16 Arinc429MgrSensorSetup (UINT32 gpA, UINT32 gpB, UINT8 label, UINT16 nSens
  *
  * Parameters:   nIndex - index into the m_Arinc429SensorInfo[] containing the 
  *                        the specific Arinc Sensor Data to read / parse 
+ *               *tickCount - ptr to return last rx update time of parameter 
  *
  * Returns:      FLOAT32 the requested Arinc429 Data Word Value 
  *
@@ -1252,7 +1253,7 @@ UINT16 Arinc429MgrSensorSetup (UINT32 gpA, UINT32 gpB, UINT8 label, UINT16 nSens
  *     is returned. 
  *
  *****************************************************************************/
-FLOAT32 Arinc429MgrReadWord (UINT16 nIndex)
+FLOAT32 Arinc429MgrReadWord (UINT16 nIndex, UINT32 *tickCount)
 {
    // Local Data
    ARINC429_SENSOR_INFO_PTR pSensorInfo;
@@ -1341,6 +1342,8 @@ FLOAT32 Arinc429MgrReadWord (UINT16 nIndex)
    // Update value previous
    // NOTE: On word decode error or no updated value, svalue initially set to previous value
    pSensorInfo->value_prev = svalue;
+
+   *tickCount = pSensorInfo->TimeSinceLastUpdate; 
 
    return( (FLOAT32) svalue );
 }
@@ -3676,6 +3679,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 50  *****************
+ * User: Peter Lee    Date: 12-10-27   Time: 5:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1191 Returns update time of param
  * 
  * *****************  Version 49  *****************
  * User: Melanie Jutras Date: 12-10-12   Time: 1:51p
