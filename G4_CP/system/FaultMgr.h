@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 30 $  $Date: 8/28/12 1:43p $
+    $Revision: 31 $  $Date: 12-10-30 5:48p $
 
 ******************************************************************************/
 
@@ -143,6 +143,11 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
  *
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 12-10-30   Time: 5:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Changed Actions to UINT8
+ * 
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -11,7 +11,7 @@
          Description:
 
          VERSION
-         $Revision: 28 $  $Date: 8/28/12 1:43p $
+         $Revision: 29 $  $Date: 12-10-30 5:48p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -398,6 +398,11 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
  *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-10-30   Time: 5:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Changed Actions to UINT8
+ * 
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
