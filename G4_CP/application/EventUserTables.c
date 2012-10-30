@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 24 $  $Date: 12-10-18 1:56p $
+$Revision: 25 $  $Date: 12-10-23 2:07p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -589,6 +589,7 @@ static USER_MSG_TBL eventStatus [] =
 {
   /* Str             Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
    { "STATE",        NO_NEXT_TABLE,     Event_State,     USER_TYPE_ENUM,    USER_RO,  &stateEventTemp.state,               0,(MAX_EVENTS-1),    NO_LIMIT,   eventStateEnum  },
+   { "SEQUENCE",     NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.seqNumber,           0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
    { "STARTTIME_MS", NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nStartTime_ms,       0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
    { "DURATION_MS",  NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nDuration_ms,        0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
    { "SAMPLECOUNT",  NO_NEXT_TABLE,     Event_State,     USER_TYPE_UINT32,  USER_RO,  &stateEventTemp.nSampleCount,        0,(MAX_EVENTS-1),    NO_LIMIT,   NULL            },
@@ -837,8 +838,8 @@ static USER_MSG_TBL eventTableCmd [] =
   { "MINSENSORVALUE", NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,      0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
   // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
-  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
-  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0xFFFFFFFF,        NULL            },
+  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
+  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
   { "TRANSIENT_MS",   NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "REGION_A",       eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
   { "REGION_B",       eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
@@ -853,6 +854,7 @@ static USER_MSG_TBL eventTableStatus [] =
 {
   /* Str                 Next Tbl Ptr    Handler Func.       Data Type          Access     Parameter                                                   IndexRange           DataLimit   EnumTbl*/
    { "STARTED",          NO_NEXT_TABLE,  EventTable_State,   USER_TYPE_BOOLEAN, USER_RO,   &stateEventTableTemp.bStarted,                              0,(MAX_TABLES-1),    NO_LIMIT,   NULL   },
+   { "SEQUENCE",         NO_NEXT_TABLE,  EventTable_State,   USER_TYPE_UINT32,  USER_RO,   &stateEventTableTemp.seqNumber,                             0,(MAX_TABLES-1),    NO_LIMIT,   NULL   },
    { "STARTTIME_MS",     NO_NEXT_TABLE,  EventTable_State,   USER_TYPE_UINT32,  USER_RO,   &stateEventTableTemp.nStartTime_ms,                         0,(MAX_TABLES-1),    NO_LIMIT,   NULL   },
    { "CURRENTREGION",    NO_NEXT_TABLE,  EventTable_State,   USER_TYPE_ENUM,    USER_RO,   &stateEventTableTemp.currentRegion,                         0,(MAX_TABLES-1),    NO_LIMIT,   evt_Region_UserEnumType },
    { "CONFIRMEDREGION",  NO_NEXT_TABLE,  EventTable_State,   USER_TYPE_ENUM,    USER_RO,   &stateEventTableTemp.confirmedRegion,                       0,(MAX_TABLES-1),    NO_LIMIT,   evt_Region_UserEnumType },
@@ -1295,6 +1297,15 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ *
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:07p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates from Design Review
+ * 1. Added Sequence Number for ground team
+ * 2. Added Reason for table end to log
+ * 3. Updated Event Index in log to ENUM
+ * 4. Fixed hysteresis cfg range from 0-FLT_MAX
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-10-18   Time: 1:56p

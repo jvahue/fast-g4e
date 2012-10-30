@@ -212,7 +212,7 @@ void FPGAemulation::Reset()
     // Initialize the FPGA   
     dio->SetDio( FPGA_Err, 0);
     dio->SetDio( FPGA_Cfg, 1);
-    dio->SetDio( FFD_Inh, 1);
+    dio->SetDio( FFD_Enb, 1);
 }
 
 //--------------------------------------------------------------------------------------------------

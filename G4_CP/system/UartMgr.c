@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 41 $  $Date: 12-10-10 1:29p $     
+      $Revision: 42 $  $Date: 12-10-19 1:48p $     
 
 ******************************************************************************/
 
@@ -210,7 +210,7 @@ void UartMgr_Initialize (void)
   User_AddRootCmd(&UartMgrRootTblPtr);
   
   // Restore User Default 
-  memcpy(&m_UartMgrCfg, &(CfgMgr_RuntimeConfigPtr()->UartMgrConfig), sizeof(m_UartMgrCfg));
+  memcpy(m_UartMgrCfg, CfgMgr_RuntimeConfigPtr()->UartMgrConfig, sizeof(m_UartMgrCfg));
   
   // Open and initialize each UART Port.  Exclude UART[0] GSE port !
   result = SYS_OK; 
@@ -446,7 +446,7 @@ static void UartMgr_Task (void *pParam)
   else  // Normal task execution.
   {
     // Process data from Uart Rx Port if Any 
-    result = UART_Receive ( (UINT8)nChannel, (INT8 *) &m_UartMgr_RawBuffer[nChannel],
+    result = UART_Receive ( (UINT8)nChannel, (INT8 *) m_UartMgr_RawBuffer[nChannel],
                             UARTMGR_RAW_BUF_SIZE, &cnt ); 
 
     bNewChanData = FALSE; 
@@ -462,11 +462,11 @@ static void UartMgr_Task (void *pParam)
     pUartMgrStatus->PortByteCnt += cnt; 
 
     // Call Serial Protocol Handler 
-    bNewChanData = pUartMgrBlock->exec_protocol( (UINT8 *) &m_UartMgr_RawBuffer[nChannel],
+    bNewChanData = pUartMgrBlock->exec_protocol( (UINT8 *) m_UartMgr_RawBuffer[nChannel],
       cnt, 
       nChannel, 
-      &m_UartMgr_Data[nChannel], 
-      &m_UartMgr_WordInfo[nChannel] );
+      m_UartMgr_Data[nChannel], 
+      m_UartMgr_WordInfo[nChannel] );
 
 
     // If we received new data then update some status data.  
@@ -520,7 +520,7 @@ static void UartMgr_Task (void *pParam)
       {
         m_UartMgr_Debug.Cnt += UartMgr_CopyRollBuff (
                         &m_UartMgr_Debug.Data[0], 
-                        (UINT8 *) &m_UartMgr_RawBuffer[nChannel], 
+                        (UINT8 *) m_UartMgr_RawBuffer[nChannel], 
                         cnt, 
                         &m_UartMgr_Debug.WriteOffset, 
                         &m_UartMgr_Debug.ReadOffset, 
@@ -1951,6 +1951,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 42  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 1:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 41  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:29p

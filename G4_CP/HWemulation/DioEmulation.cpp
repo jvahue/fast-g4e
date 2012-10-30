@@ -55,7 +55,7 @@ void DioEmulation::Reset()
 
     SetDio( WOW,             0);
     SetDio( WLAN_WOW_Enb,    0);
-    SetDio( FFD_Inh,         1);
+    SetDio( FFD_Enb,         1);
 
     Wraparounds();
 }
@@ -76,7 +76,7 @@ void DioEmulation::ProcessDio(UINT32& dins, UINT32& douts)
     SetDio( LSS_OvI,     BIT( dins, LSS_OvI));
     SetDio( WOW,         BIT( dins, WOW));
     SetDio( SW_PFEN_Sta, BIT( dins, SW_PFEN_Sta));
-    SetDio( FFD_Inh,     BIT( dins, FFD_Inh));
+    SetDio( FFD_Enb,     BIT( dins, FFD_Enb));
 
     // give back the wraparounds to the UI
     dins |= m_wrapDin;

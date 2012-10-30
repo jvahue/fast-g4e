@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 25 $  $Date: 12-10-16 2:37p $
+  $Revision: 26 $  $Date: 12-10-23 2:07p $
 
 ******************************************************************************/
 
@@ -168,6 +168,13 @@ typedef enum
 
 } EVENT_REGION;
 
+typedef enum
+{
+   ET_IN_TABLE,
+   ET_SENSOR_INVALID,
+   ET_SENSOR_VALUE_LOW,
+   ET_COMMANDED
+} EVENT_TABLE_STATE;
 /*----------------------------------  EVENT  ------------------------------------------------*/
 typedef enum
 {
@@ -190,10 +197,11 @@ typedef enum
 typedef enum
 {
    EVENT_NO_END,
-   EVENT_TRIGGER_INVALID,
+   EVENT_END_CRITERIA_INVALID,
    EVENT_END_CRITERIA,
    EVENT_COMMANDED_END,
-   EVENT_TABLE_FORCED_END
+   EVENT_TABLE_END,
+   EVENT_TABLE_SENSOR_INVALID
 } EVENT_END_TYPE;
 
 #pragma pack(1)
@@ -221,8 +229,8 @@ typedef struct
 /* The following structure defines the START LOG for the event                           */
 typedef struct
 {
-   UINT16     nEventIndex;                          /* Event Index for start log         */
-   TIMESTAMP  tsStartTime;                          /* Time when the event started       */
+   EVENT_INDEX nEventIndex;                         /* Event Index for start log         */
+   UINT32      seqNumber;                           /* Number used to id all related logs*/
 } EVENT_START_LOG;
 
 /* Event Sensor Summary */
@@ -240,7 +248,8 @@ typedef struct
 /* End Log definition for the event                                                      */
 typedef struct
 {
-   UINT16          nEventIndex;                     /* Event Index                       */
+   EVENT_INDEX     nEventIndex;                     /* Event Index                       */
+   UINT32          seqNumber;                       /* Number used to id all related logs*/
    EVENT_END_TYPE  endType;                         /* Reason for the event ending       */
    TIMESTAMP       tsCriteriaMetTime;               /* Time the start criteria was met   */
    TIMESTAMP       tsDurationMetTime;               /* Time when the min duration was met*/
@@ -266,6 +275,7 @@ typedef struct
 {
    // Run Time Data
    EVENT_INDEX        eventIndex;                   /* Index of the event                */
+   UINT32             seqNumber;                    /* Number used to relate all event logs */
    EVENT_STATE        state;                        /* State of the event: NONE, START   */
                                                     /*                     ACTIVE        */
    UINT32             nStartTime_ms;                /* Time the event started in millisec*/
@@ -282,6 +292,7 @@ typedef struct
    EVENT_END_TYPE     endType;                      /* Reason for the event ending       */
    BOOLEAN            bStarted;                     /* Was the Start Criteria met?       */
    BOOLEAN            bTableWasEntered;             /* Flag to for table entry status    */
+   EVENT_TABLE_STATE  tableState;                   /* Current State of the table        */
 } EVENT_DATA;
 
 //A type for an array of the maximum number of events
@@ -346,6 +357,7 @@ typedef struct
 typedef struct
 {
    EVENT_TABLE_INDEX eventTableIndex;               /* Index of the event table          */
+   UINT32            seqNumber;                     /* Number used to id all related logs*/
    EVENT_REGION      regionEntered;                 /* New Region Entered                */
    EVENT_REGION      regionExited;                  /* Exited region                     */
    REGION_LOG_STATS  exitedStats;                   /* Exited region log stats           */
@@ -365,6 +377,8 @@ typedef struct
 typedef struct
 {
    EVENT_TABLE_INDEX eventTableIndex;               /* Index of the event table          */
+   UINT32            seqNumber;                     /* Number used to id all related logs*/
+   EVENT_TABLE_STATE endReason;                  /* Reason why the event table ended  */
    SENSOR_INDEX      sensorIndex;                   /* Index of the sensor monitored     */
    TIMESTAMP         tsExceedanceStartTime;         /* Time the table was entered        */
    TIMESTAMP         tsExceedanceEndTime;           /* Time the table processing ended   */
@@ -394,6 +408,7 @@ typedef struct
 typedef struct
 {
    EVENT_TABLE_INDEX nTableIndex;                   /* Storage for the table index       */
+   UINT32       seqNumber;
    BOOLEAN      bStarted;                           /* Has the table been entered        */
    UINT32       nStartTime_ms;                      /* When was the table entered        */
    LINE_CONST   segment[MAX_TABLE_REGIONS][MAX_REGION_SEGMENTS];
@@ -462,13 +477,22 @@ EXPORT BOOLEAN Event_FSMAppBusyGetState( INT32 param );
  *  MODIFICATIONS
  *    $History: Event.h $
  *
+ * *****************  Version 26  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:07p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates from Design Review
+ * 1. Added Sequence Number for ground team
+ * 2. Added Reason for table end to log
+ * 3. Updated Event Index in log to ENUM
+ * 4. Fixed hysteresis cfg range from 0-FLT_MAX
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-10-16   Time: 2:37p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Updates per Design Review
  * 1. Changed segment times to milliseconds
  * 2. Limit +/- hysteresis to positive values
- * 
+ *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-09-19   Time: 10:54a
  * Updated in $/software/control processor/code/application

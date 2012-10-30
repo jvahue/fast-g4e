@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 21 $  $Date: 10/12/12 6:29p $
+  $Revision: 23 $  $Date: 10/23/12 3:54p $
 
 ******************************************************************************/
 
@@ -140,8 +140,8 @@ EXPORT void CycleInitialize(void)
   User_AddRootCmd(&RootCycleMsg);
 
   // Load the current cfg info.
-  memcpy(&m_Cfg,
-         &(CfgMgr_RuntimeConfigPtr()->CycleConfigs),
+  memcpy(m_Cfg,
+         CfgMgr_RuntimeConfigPtr()->CycleConfigs,
         sizeof(m_Cfg));
 
   // Reload the persistent cycle count  info from EEPROM & RTCNVRAM
@@ -254,7 +254,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &cycleHdr, 0, sizeof(cycleHdr) );
+   memset ( cycleHdr, 0, sizeof(cycleHdr) );
 
    // Loop through all the cycles
    for ( cycleIndex = 0;
@@ -277,7 +277,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       nRemaining -= sizeof (cycleHdr[cycleIndex]);
    }
    // Copy the Cycle header to the buffer
-   memcpy ( pBuffer, &cycleHdr, nTotal );
+   memcpy ( pBuffer, cycleHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
@@ -424,6 +424,8 @@ static void CycleInitPersistent(void)
  *****************************************************************************/
 static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
 {
+  // TODO: this needs to handle ER_ANY by checking if it is running already
+  // we may not want to reset it.  How do we force a Cycle reset in this case?
   if ( pCycleCfg->type       == CYC_TYPE_NONE_CNT ||
        pCycleCfg->nTriggerId >= MAX_TRIGGERS ||
        !TriggerIsConfigured( pCycleCfg->nTriggerId ) )
@@ -569,7 +571,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       }
     }
     // Update the cycle active status.
-    pCycleData->cycleActive = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
+    pCycleData->cycleActive = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
 
     // If cycle has ended, reset the start-time for the next duration.
     if(!pCycleData->cycleActive)
@@ -588,7 +590,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
     // Previous cycle was inactive - see if the start criteria are met
     // Set up a bit-mask for querying the state of the trigger for this cycle
 
-    CycleStart = ( TriggerIsActive(&trigMask ) )? TRUE : FALSE;
+    CycleStart = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
 
     // Cycle has started
     if (CycleStart)
@@ -625,7 +627,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
  * Description:  Backs up current persistent counts to RTC RAM or FLASH
  *
  * Parameters:   [in] cycle index
- *               [in] bUpdateRtcRam flag to indicate RTC RAM should be updated
+ *               [in] mode flag to indicate RTC RAM or EEPROM should be updated
  *
  * Returns:      None.
  *
@@ -794,23 +796,30 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
  *****************************************************************************/
 static void CycleFinish( UINT16 nCycle )
 {
-  CYCLE_DATA*    pCycle    = &m_Data[nCycle];
-  CYCLE_CFG*     pCycleCfg = &m_Cfg[nCycle];
-  ENGRUN_INDEX   erID      = pCycleCfg->nEngineRunId;
-  ENGRUN_RUNLOG* pLog      = EngRunGetPtrToLog(erID);
-  UINT32* pErDataCycles    = EngRunGetPtrToCycleCounts(erID);
+  CYCLE_DATA*    pCycle;
+  CYCLE_CFG*     pCycleCfg;
+  ENGRUN_INDEX   erID; 
+  ENGRUN_RUNLOG* pLog;
+  
+  ASSERT( nCycle < MAX_CYCLES);
 
-
-
+  pCycle    = &m_Data[nCycle];
+  pCycleCfg = &m_Cfg[nCycle];
+  erID      = pCycleCfg->nEngineRunId;
+  pLog      = EngRunGetPtrToLog(erID);
+  
+  // Mark the cycle as completed.
+  if (pCycleCfg->type > CYC_TYPE_NONE_CNT)
+  {
+    pCycle->cycleActive      = FALSE;
+    pCycle->cycleLastTime_ms = 0;
+  }
+    
   // Act on the different types of cycles
   switch (pCycleCfg->type)
   {
     case CYC_TYPE_SIMPLE_CNT:
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
-      // Mark the cycle as completed.
-      pCycle->cycleActive    = FALSE;
-      pCycle->cycleLastTime_ms = 0;
-
       // Update the log entry with the aggregate persisted count from EEPROM/RTCNvRAM
       if ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT )
       {
@@ -820,12 +829,8 @@ static void CycleFinish( UINT16 nCycle )
 
     case CYC_TYPE_DURATION_CNT:
     case CYC_TYPE_PERSIST_DURATION_CNT:
-      pCycle->cycleActive    = FALSE;
-      pCycle->cycleLastTime_ms = 0;
-
       // Update the log entries with the count.
       // Note: counts are in secs.
-
       if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
         pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
@@ -835,58 +840,7 @@ static void CycleFinish( UINT16 nCycle )
         /* convert ticks to seconds correcting for CLK time error */
         pLog->cycleCounts[nCycle] *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
       }
-
       break;
-#ifdef PEAK_CUM_PROCESSING
-    case PEAK_VALUE_COUNT:
-    case P_PEAK_COUNT:
-      // put the max value (if there is one) into the EngineRunLog (if it is still active)
-      if (EngineRunData[erID].pLog != NULL) {
-
-        if ( pCycle->Type == P_PEAK_COUNT ) {
-          EngineRunData[erID].pLog->CycleCounts[nCycle] = m_CountsEEProm[nCycle].count.f;
-        }
-        else {
-          if ( (pCycle->MaxValueA > -FLT_MAX) || (pCycle->MaxValueB > -FLT_MAX) ) {
-            EngineRunData[erID].pLog->CycleCounts[nCycle] =
-                (pCycle->MaxValueA > pCycle->MaxValueB ?
-                 pCycle->MaxValueA : pCycle->MaxValueB);
-          }
-          else {
-            EngineRunData[erID].pLog->CycleCounts[nCycle] = 0.0f;
-          }
-        }
-      }
-      pCycle->ActiveA = FALSE;
-      pCycle->ActiveB = FALSE;
-      pCycle->ACrossed = FALSE;
-      pCycle->BCrossed = FALSE;
-      pCycle->MaxValueA = -FLT_MAX;
-      pCycle->MaxValueB = -FLT_MAX;
-      break;
-
-    case CUMULATIVE_VALLEY_COUNT:
-    case P_CUMULATIVE_COUNT:
-      // no value is added to the engine run log since it is only added if the sensor
-      // threshold value is crossed from below, which would have already happened.
-      pCycle->ActiveA = FALSE;
-      pCycle->ACrossed = FALSE;
-      pCycle->MinValue = FLT_MAX;
-      pCycle->MinSensorValue = FLT_MAX;
-
-      if (EngineRunData[erID].pLog != NULL) {
-        if ( pCycle->Type == P_CUMULATIVE_COUNT ) {
-          EngineRunData[erID].pLog->CycleCounts[nCycle] =
-              m_CountsEEProm[nCycle].count.f;
-        }
-      }
-      break;
-#endif
-#ifdef RHL_PROCESSING
-    case REPETITIVE_HEAVY_LIFT:
-    case NONE_COUNT:
-      break;
-#endif
 
     default:
       FATAL ("Unrecognized Cycle Type Value: %d" ,pCycleCfg->type);
@@ -1087,6 +1041,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
 
   for (i = 0; i < MAX_CYCLES; i++)
   {
+    // TODO: handle ER_ANY
     if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT && m_Cfg[i].nEngineRunId == erID )
     {
       CycleReset( &m_Cfg[i], &m_Data[i]);
@@ -1134,6 +1089,16 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 10/23/12   Time: 3:54p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1107 - dev work
+ * 
+ * *****************  Version 22  *****************
+ * User: Melanie Jutras Date: 12-10-23   Time: 1:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p

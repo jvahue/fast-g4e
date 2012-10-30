@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 19 $  $Date: 12-10-02 1:23p $
+  $Revision: 20 $  $Date: 12-10-19 10:18a $
 
 ******************************************************************************/
 
@@ -1376,7 +1376,7 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *****************************************************************************/
 INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
-  return snprintf(str, EVAL_OPRND_LEN + 1, "%s%03d", &OpCodeTable[tblIdx].Token,
+  return snprintf(str, EVAL_OPRND_LEN + 1, "%s%03d", OpCodeTable[tblIdx].Token,
                                                      (INT32)cmd->data);
 }
 
@@ -1415,7 +1415,7 @@ INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *****************************************************************************/
 INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {  
-  return snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", &OpCodeTable[tblIdx].Token);
+  return snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", OpCodeTable[tblIdx].Token);
 }
 
 /******************************************************************************
@@ -1435,7 +1435,7 @@ INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *****************************************************************************/
 INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
-  return  snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", &OpCodeTable[tblIdx].Token);
+  return  snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", OpCodeTable[tblIdx].Token);
 }
 
 /******************************************************************************
@@ -1612,6 +1612,11 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 10:18a
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1172 PCLint Suspicious use of & Error
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p

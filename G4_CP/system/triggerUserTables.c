@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 26 $  $Date: 8/29/12 6:20p $    
+$Revision: 27 $  $Date: 12-10-23 2:56p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -33,10 +33,10 @@ $Revision: 26 $  $Date: 8/29/12 6:20p $
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static TRIGGER_CONFIG ConfigTriggerTemp; // Trigger Configuration
+static TRIGGER_CONFIG m_configTriggerTemp; // Trigger Configuration
                                          // temp storage
-static TRIGGER_DATA   StateTriggerTemp;
-static BOOLEAN        triggerValidTemp;
+static TRIGGER_DATA   m_stateTriggerTemp;
+static BOOLEAN        m_triggerValidTemp;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -130,26 +130,26 @@ static
 USER_MSG_TBL TriggerSensorCfgCmd [] =
 {
      /*Str             Next Tbl Ptr   Handler Func.    Data Type        Access     Parameter                                        IndexRange           DataLimit EnumTbl*/ 
-    { "INDEXA"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[0].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
-    { "STARTVALUEA"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[0].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "STARTCOMPAREA", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[0].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "ENDVALUEA"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[0].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "ENDCOMPAREA"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[0].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "INDEXB"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[1].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
-    { "STARTVALUEB"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[1].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "STARTCOMPAREB", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[1].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "ENDVALUEB"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[1].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "ENDCOMPAREB"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[1].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "INDEXC"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[2].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType},
-    { "STARTVALUEC"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[2].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "STARTCOMPAREC", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[2].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "ENDVALUEC"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[2].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "ENDCOMPAREC"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[2].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "INDEXD"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[3].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
-    { "STARTVALUED"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[3].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "STARTCOMPARED", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[3].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
-    { "ENDVALUED"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &ConfigTriggerTemp.TrigSensor[3].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
-    { "ENDCOMPARED"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &ConfigTriggerTemp.TrigSensor[3].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "INDEXA"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[0].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
+    { "STARTVALUEA"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[0].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "STARTCOMPAREA", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[0].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "ENDVALUEA"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[0].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "ENDCOMPAREA"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[0].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "INDEXB"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[1].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
+    { "STARTVALUEB"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[1].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "STARTCOMPAREB", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[1].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "ENDVALUEB"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[1].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "ENDCOMPAREB"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[1].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "INDEXC"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[2].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType},
+    { "STARTVALUEC"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[2].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "STARTCOMPAREC", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[2].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "ENDVALUEC"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[2].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "ENDCOMPAREC"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[2].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "INDEXD"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[3].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
+    { "STARTVALUED"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[3].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "STARTCOMPARED", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[3].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
+    { "ENDVALUED"    , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[3].End.fValue,     0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
+    { "ENDCOMPARED"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[3].End.Compare,    0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
     { NULL,            NULL,          NULL,            NO_HANDLER_DATA }
 };
 
@@ -157,13 +157,13 @@ USER_MSG_TBL TriggerSensorCfgCmd [] =
 static USER_MSG_TBL TriggerCmd [] =
 {
   /* Str              Next Tbl Ptr               Handler Func.             Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
-  { "NAME",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_STR,     USER_RW,   &ConfigTriggerTemp.TriggerName,     0,(MAX_TRIGGERS-1),  0,MAX_TRIGGER_NAME,  NULL },
+  { "NAME",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.TriggerName,     0,(MAX_TRIGGERS-1),  0,MAX_TRIGGER_NAME,  NULL },
   { "SENSOR",         &TriggerSensorCfgCmd[0],  NULL,                      NO_HANDLER_DATA },
-  { "DURATION_MS",    NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &ConfigTriggerTemp.nMinDuration_ms, 0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
-  { "RATE",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_ENUM,    USER_RW,   &ConfigTriggerTemp.Rate,            0,(MAX_TRIGGERS-1),  NO_LIMIT,            TrigRateType },
-  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &ConfigTriggerTemp.nOffset_ms,      0,(MAX_TRIGGERS-1),  0,1000,              NULL },
-  { "SC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &ConfigTriggerTemp.StartExpr,       0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
-  { "EC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &ConfigTriggerTemp.EndExpr,         0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
+  { "DURATION_MS",    NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &m_configTriggerTemp.nMinDuration_ms, 0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
+  { "RATE",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_ENUM,    USER_RW,   &m_configTriggerTemp.Rate,            0,(MAX_TRIGGERS-1),  NO_LIMIT,            TrigRateType },
+  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &m_configTriggerTemp.nOffset_ms,      0,(MAX_TRIGGERS-1),  0,1000,              NULL },
+  { "SC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.StartExpr,       0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
+  { "EC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.EndExpr,         0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
   { NULL,             NULL,                     NULL,                      NO_HANDLER_DATA }
 };
 
@@ -171,20 +171,20 @@ static USER_MSG_TBL TriggerCmd [] =
 static USER_MSG_TBL TriggerStatus [] =
 {
   /* Str            Next Tbl Ptr       Handler Func.    Data Type        Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
-  { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &StateTriggerTemp.State,          0, MAX_TRIGGERS - 1, NO_LIMIT,   TrigStateEnum },
-  { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , &triggerValidTemp,                0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
-  { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
-  { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &StateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
-  { "SAMPLECOUNT" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT16, USER_RO    , &StateTriggerTemp.nSampleCount,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
+  { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &m_stateTriggerTemp.State,          0, MAX_TRIGGERS - 1, NO_LIMIT,   TrigStateEnum },
+  { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , &m_triggerValidTemp,                0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
+  { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
+  { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
+  { "SAMPLECOUNT" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT16, USER_RO    , &m_stateTriggerTemp.nSampleCount,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { NULL          , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_NONE,   USER_RW    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
 };
 
 static USER_MSG_TBL TriggerRoot [] =
-{ /* Str            Next Tbl Ptr       Handler Func.        Data Type           Access            Parameter      IndexRange   DataLimit          EnumTbl*/
+{ /* Str            Next Tbl Ptr       Handler Func.        Data Type           Access            Parameter        IndexRange   DataLimit          EnumTbl*/
    { "CFG",         TriggerCmd   ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      TriggerStatus,     NULL,                NO_HANDLER_DATA},
-   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          &TriggerFlags, -1, -1,      0,MAX_TRIGGERS-1,  NULL },
-   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,          NULL},
+   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          &m_triggerFlags, -1, -1,      0,MAX_TRIGGERS-1,  NULL },
+   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,            -1, -1,      NO_LIMIT,          NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
@@ -233,21 +233,21 @@ USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
    //Load trigger structure into the temporary location based on index param
    //Param.Ptr points to the struct member to be read/written
    //in the temporary location
-   memcpy(&ConfigTriggerTemp,
+   memcpy(&m_configTriggerTemp,
       &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-      sizeof(ConfigTriggerTemp));
+      sizeof(m_configTriggerTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    if(SetPtr != NULL && USER_RESULT_OK == result)
    {
      memcpy(&CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-            &ConfigTriggerTemp,
+            &m_configTriggerTemp,
             sizeof(TRIGGER_CONFIG));
 
      //Store the modified temporary structure in the EEPROM.       
      CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                             &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-                            sizeof(ConfigTriggerTemp));
+                            sizeof(m_configTriggerTemp));
    }
    return result;  
 }
@@ -286,7 +286,7 @@ USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
 
    result = USER_RESULT_ERROR;
 
-   memcpy(&StateTriggerTemp, &TriggerData[Index], sizeof(StateTriggerTemp));
+   memcpy(&m_stateTriggerTemp, &m_triggerData[Index], sizeof(m_stateTriggerTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
@@ -391,11 +391,11 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
   // Move the current trigger[x] config data from shadow to the local temp storage.
   // ('Param' is pointing to either the StartExpr or EndExpr struct
-  // in the ConfigTriggerTemp; see TriggerCmd Usertable )
+  // in the m_configTriggerTemp; see TriggerCmd Usertable )
 
-  memcpy(&ConfigTriggerTemp,
+  memcpy(&m_configTriggerTemp,
          &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-         sizeof(ConfigTriggerTemp));
+         sizeof(m_configTriggerTemp));
    
   if(SetPtr == NULL)
   {
@@ -416,17 +416,17 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     if( StrToBinResult >= 0 )
     {
-      // Move the successfully updated binary expression to the ConfigTriggerTemp storage
+      // Move the successfully updated binary expression to the m_configTriggerTemp storage
       // memcpy(&Param.Ptr, &tempExpr, sizeof(EVAL_EXPR) );
       
       memcpy(&CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-             &ConfigTriggerTemp,
-             sizeof(ConfigTriggerTemp));
+             &m_configTriggerTemp,
+             sizeof(m_configTriggerTemp));
       
       //Store the modified structure in the EEPROM.       
       CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                              &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
-                             sizeof(ConfigTriggerTemp) );
+                             sizeof(m_configTriggerTemp) );
     }
     else
     {  
@@ -472,7 +472,7 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 
 {
    // Use the supplied Accessor to return the validity of the indicated trigger.
-   triggerValidTemp = TriggerValidGetState(Index);
+   m_triggerValidTemp = TriggerValidGetState(Index);
    *GetPtr = Param.Ptr;  
    return USER_RESULT_OK;
 }
@@ -480,6 +480,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:56p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p

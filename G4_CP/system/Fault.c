@@ -14,7 +14,7 @@
     Notes: 
   
     VERSION
-      $Revision: 16 $  $Date: 8/28/12 1:43p $     
+      $Revision: 17 $  $Date: 12-10-19 10:55a $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -74,11 +74,11 @@ void FaultInitialize( void)
    User_AddRootCmd(&RootFaultMsg);
  
    // Reset the Fault configuration storage array  
-   memset(&m_FaultCfg, 0, sizeof(m_FaultCfg));
+   memset(m_FaultCfg, 0, sizeof(m_FaultCfg));
   
    // Load the current configuration to the fault configuration array.
-   memcpy(&m_FaultCfg,
-          &(CfgMgr_RuntimeConfigPtr()->FaultConfig),
+   memcpy(m_FaultCfg,
+          CfgMgr_RuntimeConfigPtr()->FaultConfig,
           sizeof(m_FaultCfg));
 }
 
@@ -238,6 +238,11 @@ static BOOLEAN FaultCheckSensorTriggers( FAULT_CONFIG *pFaultCfg)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 10:55a
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

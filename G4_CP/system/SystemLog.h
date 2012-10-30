@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 104 $  $Date: 12-10-18 1:56p $
+      $Revision: 105 $  $Date: 12-10-23 2:20p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -63,8 +63,7 @@ SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
 \
-SYS_LOG_ID(APP_ID_TREND_MANUAL                      ,0xB500 ,0)\
-SYS_LOG_ID(APP_ID_TREND_AUTO                        ,0xB501 ,0)\
+SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
 SYS_LOG_ID(APP_ID_TREND_AUTO_FAILED                 ,0xB503 ,0)\
 SYS_LOG_ID(APP_ID_TREND_AUTO_NOT_DETECTED           ,0xB504 ,0)\
@@ -352,11 +351,16 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  *  MODIFICATIONS
  *    $History: SystemLog.h $
  *
+ * *****************  Version 105  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Combined the two trend start logs
+ * 
  * *****************  Version 104  *****************
  * User: John Omalley Date: 12-10-18   Time: 1:56p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Design Review Update
- * 
+ *
  * *****************  Version 103  *****************
  * User: John Omalley Date: 12-09-27   Time: 9:14a
  * Updated in $/software/control processor/code/system

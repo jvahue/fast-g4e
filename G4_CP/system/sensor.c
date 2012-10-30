@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 75 $  $Date: 12-09-19 6:49p $     
+      $Revision: 76 $  $Date: 12-10-19 1:42p $     
 
 ******************************************************************************/
 
@@ -166,11 +166,11 @@ void SensorsInitialize( void)
   User_AddRootCmd(&LiveDataMsg);
 
   // Reset the Sensor configuration storage array
-  memset(&m_SensorCfg, 0, sizeof(m_SensorCfg));
+  memset(m_SensorCfg, 0, sizeof(m_SensorCfg));
 
   // Load the current configuration to the sensor configuration array.
-  memcpy(&m_SensorCfg,
-         &(CfgMgr_RuntimeConfigPtr()->SensorConfigs),
+  memcpy(m_SensorCfg,
+         CfgMgr_RuntimeConfigPtr()->SensorConfigs,
          sizeof(m_SensorCfg));
 
   // init runtime copy of live data config
@@ -344,7 +344,7 @@ UINT16 SensorGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &SensorHdr, 0, sizeof(SensorHdr) );
+   memset ( SensorHdr, 0, sizeof(SensorHdr) );
 
    // Loop through all the sensors
    for ( SensorIndex = 0;
@@ -366,7 +366,7 @@ UINT16 SensorGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    }
 
    // Copy the Header to the buffer
-   memcpy ( pBuffer, &SensorHdr, nTotal );
+   memcpy ( pBuffer, SensorHdr, nTotal );
    // Return the total bytes written
    return ( nTotal );
 }
@@ -398,7 +398,7 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( &sensorETMHdr, 0, sizeof(sensorETMHdr) );
+   memset ( sensorETMHdr, 0, sizeof(sensorETMHdr) );
 
    // Loop through all the sensors
    for ( sensorIndex = 0;
@@ -427,7 +427,7 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
    }
 
    // Copy the Header to the buffer
-   memcpy ( pBuffer, &sensorETMHdr, nTotal );
+   memcpy ( pBuffer, sensorETMHdr, nTotal );
    // Return the total bytes written
    return ( nTotal );
 }
@@ -1903,6 +1903,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 76  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 1:42p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 75  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:49p

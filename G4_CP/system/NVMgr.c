@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 70 $  $Date: 12-10-16 2:53p $
+    $Revision: 71 $  $Date: 12-10-19 10:21a $
 
 
 ******************************************************************************/
@@ -1288,7 +1288,7 @@ NV_FILENAME* NV_GetFileName(NV_FILE_ID fileNum)
    NV_FILENAME* fileName = NULL;
    if (fileNum < NV_MAX_FILE)
    {
-      fileName = &NV_FileCRC[fileNum].Name;
+      fileName = (NV_FILENAME *) NV_FileCRC[fileNum].Name;
    }
    return fileName;
 }
@@ -1833,6 +1833,12 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  *  MODIFICATIONS
  *    $History: NVMgr.c $
  *
+ * *****************  Version 71  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 10:21a
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint Suspicious use of & Error 545.  Eliminated & and added
+ * cast in NV_GetFileName().
+ * 
  * *****************  Version 70  *****************
  * User: John Omalley Date: 12-10-16   Time: 2:53p
  * Updated in $/software/control processor/code/system

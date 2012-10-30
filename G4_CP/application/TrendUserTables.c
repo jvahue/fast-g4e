@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 7 $  $Date: 12-10-02 1:19p $
+$Revision: 8 $  $Date: 12-10-23 2:19p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -62,7 +62,7 @@ static TREND_DATA        StateTrendTemp;       // Trend State Temp Storage
 
 
 USER_ENUM_TBL TrendType[]   =
-{ 
+{
    { "0"  , TREND_0   }, { "1"  ,  TREND_1   }, {  "2"  , TREND_2   },
    { "3"  , TREND_3   }, { "4"  ,  TREND_4   }, { "UNUSED", TREND_UNUSED },
    { NULL, 0}
@@ -82,7 +82,7 @@ USER_ENUM_TBL TrendRateType[] =
 };
 
 USER_ENUM_TBL TrendEngRunIdEnum[] =
-{  
+{
   { "0"     , ENGRUN_ID_0  },
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
@@ -94,7 +94,7 @@ USER_ENUM_TBL TrendEngRunIdEnum[] =
 
 
 USER_ENUM_TBL TrendStateEnum[] =
-{  
+{
   { "INACTIVE"      , TREND_STATE_INACTIVE  },
   { "MANUAL_TREND"  , TREND_STATE_INACTIVE  },
   { "AUTO_TREND"    , TREND_STATE_MANUAL    },
@@ -104,9 +104,6 @@ USER_ENUM_TBL TrendStateEnum[] =
 
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-
-
-
 
 // Macro defines the 'prototype' declaration for entry in StabCritTbl
 #define DECL_TREND_STAB_TBL_ENTRY( n )\
@@ -160,142 +157,6 @@ static USER_MSG_TBL StabCritTbl[] =
   { NULL,   NULL,            NULL, NO_HANDLER_DATA }
 };
 
-// Macro defines the 'prototype' declaration for entry in PrevStabValue table
-#define DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY( n )\
-static USER_MSG_TBL PrevStableTbl##n[] =\
-{\
-  /*Str      Next Tbl Ptr   Handler Func   Data Type         Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/\
-  {"VALUE",  NO_NEXT_TABLE,  Trend_State,   USER_TYPE_FLOAT,  USER_RO,  &StateTrendTemp.stability.prevStabValue[n], 0,(MAX_TRENDS-1),    NO_LIMIT,     NULL     },\
-  { NULL,    NULL,           NULL, NO_HANDLER_DATA}\
-}
-
-/* TREND PREVIOUS STABILITY VALUE ELEMENTS 0 - 15 */
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(0 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(1 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(2 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(3 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(4 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(5 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(6 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(7 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(8 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(9 );
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(10);
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(11);
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(12);
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(13);
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(14);
-DECL_TREND_PREV_STAB_VALUE_TBL_ENTRY(15);
-
-
-static USER_MSG_TBL PrevStableTbl[] =
-{
-  { "V0",   PrevStableTbl0 ,  NULL, NO_HANDLER_DATA },
-  { "V1",   PrevStableTbl1 ,  NULL, NO_HANDLER_DATA },
-  { "V2",   PrevStableTbl2 ,  NULL, NO_HANDLER_DATA },
-  { "V3",   PrevStableTbl3 ,  NULL, NO_HANDLER_DATA },
-  { "V4",   PrevStableTbl4 ,  NULL, NO_HANDLER_DATA },
-  { "V5",   PrevStableTbl5 ,  NULL, NO_HANDLER_DATA },
-  { "V6",   PrevStableTbl6 ,  NULL, NO_HANDLER_DATA },
-  { "V7",   PrevStableTbl7 ,  NULL, NO_HANDLER_DATA },
-  { "V8",   PrevStableTbl8 ,  NULL, NO_HANDLER_DATA },
-  { "V9",   PrevStableTbl9 ,  NULL, NO_HANDLER_DATA },
-  { "V10",  PrevStableTbl10,  NULL, NO_HANDLER_DATA },
-  { "V11",  PrevStableTbl11,  NULL, NO_HANDLER_DATA },
-  { "V12",  PrevStableTbl12,  NULL, NO_HANDLER_DATA },
-  { "V13",  PrevStableTbl13,  NULL, NO_HANDLER_DATA },
-  { "V14",  PrevStableTbl14,  NULL, NO_HANDLER_DATA },
-  { "V15",  PrevStableTbl15,  NULL, NO_HANDLER_DATA },
-  { NULL,   NULL,             NULL, NO_HANDLER_DATA }
-};
-
-// Macro defines the 'prototype' declaration for entry in SensorSummary
-#define DECL_SENSOR_SUMMARY_TBL_ENTRY( n)\
-  static USER_MSG_TBL SnsrSummaryTbl##n[] =\
-{\
-  /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/\
-  {"SENSORID",   NO_NEXT_TABLE, Trend_State,   USER_TYPE_ENUM,    USER_RO,  &StateTrendTemp.snsrSummary[n].SensorIndex,      0,(MAX_TRENDS-1),    NO_LIMIT,     SensorIndexType },\
-  {"INITIALIZE", NO_NEXT_TABLE, Trend_State,   USER_TYPE_BOOLEAN, USER_RO,  &StateTrendTemp.snsrSummary[n].bInitialized,     0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"VALID",      NO_NEXT_TABLE, Trend_State,   USER_TYPE_BOOLEAN, USER_RO,  &StateTrendTemp.snsrSummary[n].bValid,           0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"MIN",        NO_NEXT_TABLE, Trend_State,   USER_TYPE_FLOAT,   USER_RO,  &StateTrendTemp.snsrSummary[n].fMinValue,        0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"MAX",        NO_NEXT_TABLE, Trend_State,   USER_TYPE_FLOAT,   USER_RO,  &StateTrendTemp.snsrSummary[n].fMaxValue,        0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"AVG",        NO_NEXT_TABLE, Trend_State,   USER_TYPE_FLOAT,   USER_RO,  &StateTrendTemp.snsrSummary[n].fAvgValue,        0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"TOT",        NO_NEXT_TABLE, Trend_State,   USER_TYPE_FLOAT,   USER_RO,  &StateTrendTemp.snsrSummary[n].fTotal,           0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  { NULL,        NULL,          NULL, NO_HANDLER_DATA}\
-}
-
-/* SENSOR SUMMARY ELEMENTS 0 - 31 */
-DECL_SENSOR_SUMMARY_TBL_ENTRY(0 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(1 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(2 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(3 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(4 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(5 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(6 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(7 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(8 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(9 );
-DECL_SENSOR_SUMMARY_TBL_ENTRY(10);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(11);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(12);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(13);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(14);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(15);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(16);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(17);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(18);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(19);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(20);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(21);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(22);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(23);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(24);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(25);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(26);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(27);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(28);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(29);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(30);
-DECL_SENSOR_SUMMARY_TBL_ENTRY(31);
-
-static USER_MSG_TBL SnsrSummaryTbl[] =
-{  
-  { "S0",   SnsrSummaryTbl0 ,  NULL, NO_HANDLER_DATA },
-  { "S1",   SnsrSummaryTbl1 ,  NULL, NO_HANDLER_DATA },
-  { "S2",   SnsrSummaryTbl2 ,  NULL, NO_HANDLER_DATA },
-  { "S3",   SnsrSummaryTbl3 ,  NULL, NO_HANDLER_DATA },
-  { "S4",   SnsrSummaryTbl4 ,  NULL, NO_HANDLER_DATA },
-  { "S5",   SnsrSummaryTbl5 ,  NULL, NO_HANDLER_DATA },
-  { "S6",   SnsrSummaryTbl6 ,  NULL, NO_HANDLER_DATA },
-  { "S7",   SnsrSummaryTbl7 ,  NULL, NO_HANDLER_DATA },
-  { "S8",   SnsrSummaryTbl8 ,  NULL, NO_HANDLER_DATA },
-  { "S9",   SnsrSummaryTbl9 ,  NULL, NO_HANDLER_DATA },
-  { "S10",  SnsrSummaryTbl10,  NULL, NO_HANDLER_DATA },
-  { "S11",  SnsrSummaryTbl11,  NULL, NO_HANDLER_DATA },
-  { "S12",  SnsrSummaryTbl12,  NULL, NO_HANDLER_DATA },
-  { "S13",  SnsrSummaryTbl13,  NULL, NO_HANDLER_DATA },
-  { "S14",  SnsrSummaryTbl14,  NULL, NO_HANDLER_DATA },
-  { "S15",  SnsrSummaryTbl15,  NULL, NO_HANDLER_DATA },
-  { "S16",  SnsrSummaryTbl16,  NULL, NO_HANDLER_DATA },
-  { "S17",  SnsrSummaryTbl17,  NULL, NO_HANDLER_DATA },
-  { "S18",  SnsrSummaryTbl18,  NULL, NO_HANDLER_DATA },
-  { "S19",  SnsrSummaryTbl19,  NULL, NO_HANDLER_DATA },
-  { "S20",  SnsrSummaryTbl20,  NULL, NO_HANDLER_DATA },
-  { "S21",  SnsrSummaryTbl21,  NULL, NO_HANDLER_DATA },
-  { "S22",  SnsrSummaryTbl22,  NULL, NO_HANDLER_DATA },
-  { "S23",  SnsrSummaryTbl23,  NULL, NO_HANDLER_DATA },
-  { "S24",  SnsrSummaryTbl24,  NULL, NO_HANDLER_DATA },
-  { "S25",  SnsrSummaryTbl25,  NULL, NO_HANDLER_DATA },
-  { "S26",  SnsrSummaryTbl26,  NULL, NO_HANDLER_DATA },
-  { "S27",  SnsrSummaryTbl27,  NULL, NO_HANDLER_DATA },
-  { "S28",  SnsrSummaryTbl28,  NULL, NO_HANDLER_DATA },
-  { "S29",  SnsrSummaryTbl29,  NULL, NO_HANDLER_DATA },
-  { "S30",  SnsrSummaryTbl30,  NULL, NO_HANDLER_DATA },
-  { "S31",  SnsrSummaryTbl31,  NULL, NO_HANDLER_DATA },
-  { NULL,   NULL,              NULL, NO_HANDLER_DATA }
-};
-
-
 // Trends - TREND User and Configuration Table
 static USER_MSG_TBL TrendCmd [] =
 {
@@ -303,7 +164,7 @@ static USER_MSG_TBL TrendCmd [] =
   { "NAME",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_STR,     USER_RW,   &ConfigTrendTemp.trendName,         0,(MAX_TRENDS-1),    0,MAX_TREND_NAME,    NULL                 },
   { "RATE",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.rate,              0,(MAX_TRENDS-1),    NO_LIMIT,            TrendRateType        },
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &ConfigTrendTemp.nOffset_ms,        0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "SAMPLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.nSamplePeriod_s,   0,(MAX_TRENDS-1),    0,SECS_PER_HR,       NULL                 },
+  { "SAMPLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.nSamplePeriod_s,   0,(MAX_TRENDS-1),    1,3600,              NULL                 },
   { "ENGINEID",       NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.engineRunId,       0,(MAX_TRENDS-1),    NO_LIMIT,            TrendEngRunIdEnum    },
   { "MAXSAMPLECOUNT", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.maxTrends,         0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STARTTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.startTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
@@ -315,7 +176,7 @@ static USER_MSG_TBL TrendCmd [] =
   { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[2],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
   { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
   { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_HEX8,    USER_RW,   &ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
   { "STABILITY",      StabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
@@ -324,19 +185,14 @@ static USER_MSG_TBL TrendCmd [] =
 static USER_MSG_TBL TrendStatus [] =
 {
   /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
-   { "ID",               NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendIndex,         0,(MAX_TRENDS-1),    NO_LIMIT,   TrendType           },
    { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,         0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
    { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   EngineRunStateEnum},
-   { "SAMPLECOUNT",      NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
    { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.stability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "PREVSTABLEVALUE",  PrevStableTbl,     NULL,            NO_HANDLER_DATA,                                                                                                     },
-   // Monitored sensors during trends.
-   { "SENSOR_COUNT",     NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.nTotalSensors,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "SENSOR",           SnsrSummaryTbl,    NULL,            NO_HANDLER_DATA                                                                                                      },
-   { NULL,               NULL,              NULL ,           NO_HANDLER_DATA } 
+   { NULL,               NULL,              NULL ,           NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL TrendRoot [] =
@@ -509,35 +365,51 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ *
+ * *****************  Version 8  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates per Software Design Review
+ * Dave 
+ * 1. Removed Trends is Active Function
+ * 2. Fixed bug with deactivating manual trend because no stability
+ * JPO
+ * 1. Updated logs
+ *    a. Combined Auto and Manual Start into one log
+ *    b. Change fail log from name to index
+ *    c. Trend not detected added index
+ * 2. Removed Trend Lamp
+ * 3. Updated Configuration defaults
+ * 4. Updated user tables per design review
  * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:19p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Implement Trend Action
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:22p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  Fix AutoTrends
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:42p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:20p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - General Trend Development and Binary ETM Header
- * 
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 5:40p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 12-06-07   Time: 11:32a
  * Created in $/software/control processor/code/application

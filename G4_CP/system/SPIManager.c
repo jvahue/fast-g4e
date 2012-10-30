@@ -9,7 +9,7 @@
                  to all SPI devices to the application 
     
     VERSION
-      $Revision: 27 $  $Date: 12-10-10 2:00p $     
+      $Revision: 28 $  $Date: 12-10-19 1:53p $     
 
 ******************************************************************************/
 
@@ -396,7 +396,7 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
     // Set the write pointer local data or pointer-to-data as defined.
     ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?
                              (void*) pEntry->pData :
-                             (void*)&(pEntry->data);
+                             (void*) pEntry->data;
 
     result = RTC_WriteNVRam(pEntry->addr, ptr, pEntry->size);
     if(DRV_SPI_TIMEOUT == result)
@@ -1306,6 +1306,11 @@ INT16 CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Melanie Jutras Date: 12-10-19   Time: 1:53p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 2:00p

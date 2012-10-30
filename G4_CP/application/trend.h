@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 8 $  $Date: 12-10-02 1:19p $
+  $Revision: 9 $  $Date: 12-10-23 2:19p $
 
 *******************************************************************************/
 
@@ -38,7 +38,7 @@
 #define MAX_TREND_CYCLES   4
 
 #define ONE_SEC_IN_MILLSECS  1000u
-#define SECS_PER_HR          3600 
+#define SECS_PER_HR          3600
 #define SECS_PER_DAY         86400
 
 
@@ -71,9 +71,9 @@
 #define TREND_DEFAULT "Unused",                   /* &trendName[MAX_TREND_NAME] */\
                       TREND_1HZ,                  /* Rate */\
                       0,                          /* nOffset_ms */\
-                      0,                          /* nSamplePeriod_s */\
+                      1,                          /* nSamplePeriod_s */\
                       ENGRUN_UNUSED,              /* engineRunId */\
-                      0,                          /* maxTrends */\
+                      1,                          /* maxTrends */\
                       TRIGGER_UNUSED,             /* startTrigger */\
                       TRIGGER_UNUSED,             /* resetTrigger */\
                       0,                          /* trendInterval_s */\
@@ -139,7 +139,7 @@ typedef struct
 
 typedef struct
 {
-  SENSOR_INDEX SensorIndex;  
+  SENSOR_INDEX SensorIndex;
   BOOLEAN      bValid;
   FLOAT32      fMaxValue;
   FLOAT32      fAvgValue;
@@ -159,14 +159,20 @@ typedef struct
   STABILITY_RANGE  criteria;
 }STABILITY_CRITERIA;
 
-typedef struct  
+typedef struct
 {
   UINT16       stableCnt;                       /* Count of stable sensors                   */
-  FLOAT32      prevStabValue[MAX_STAB_SENSORS]; /* Prior readings of sensors                 */
+  FLOAT32      prevStabValue[MAX_STAB_SENSORS]; /* Prior readings of sensors */
 }STABILITY_DATA;
 
+typedef struct
+{
+   TREND_INDEX trendIndex;                       /* The Id of this trend                     */
+   TREND_STATE type;                             /* The type/state of trend manual vs auto   */
+}TREND_START_LOG;
+
 // TREND_LOG
-typedef struct  
+typedef struct
 {
   TREND_INDEX   trendIndex;                      /* The Id of this trend                     */
   TREND_STATE   type;                            /* The type/state of trend manual vs auto   */
@@ -175,7 +181,7 @@ typedef struct
   CYCLE_COUNT   cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
 }TREND_LOG;
 
-typedef struct  
+typedef struct
 {
   TREND_INDEX        trendIndex;              /* The Id of this trend                     */
   STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
@@ -197,8 +203,8 @@ typedef struct
    TRIGGER_INDEX startTrigger;       /* Starting trigger                                     */
    TRIGGER_INDEX resetTrigger;       /* Ending trigger                                       */
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
-   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */   
-   CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/   
+   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
+   CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/
    UINT32        nAction;           /* Mask of LSS outputs used by this trend when active   */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
@@ -230,29 +236,29 @@ typedef struct
   TREND_INDEX  trendIndex;          /* Index for 'this' trend.                               */
   INT16        nRateCounts;         /* Countdown interval for this trend                     */
   INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
-  
+
   // State/status info
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
   UINT16       trendCnt;            /* # of autotrends taken since Reset                     */
   BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
-  
+
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
-  UINT32       sampleCnt;           /* Counts of samples take this period                    */          
-  
+  UINT32       sampleCnt;           /* Counts of samples take this period                    */
+
   // Interval handling
   UINT32       lastIntervalCheckMs; /* Starting time (CM_GetTickCount()                      */
   UINT32       TimeSinceLastTrendMs;/* time since last trend                                 */
-  
+
   // Stability handling
   UINT16       nStabExpectedCnt;  /* Expected count based on configured.                     */
   UINT32       lastStabCheckMs;   /* Starting time (CM_GetTickCount()                        */
   UINT32       nTimeStableMs;     /* Time in ms the stability-sensors have been stable.      */
   STABILITY_DATA stability;       /* Current stability                                       */
   STABILITY_DATA maxStability;    /* Max observed stable sensors and count                   */
-  
+
   // Monitored sensors during trends.
   UINT16       nTotalSensors;     /* Count of sensors used in SnsrSummary                    */
   SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS]; /* Storage for max, average and counts.       */
@@ -284,22 +290,38 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ *
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-10-23   Time: 2:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Updates per Software Design Review
+ * Dave 
+ * 1. Removed Trends is Active Function
+ * 2. Fixed bug with deactivating manual trend because no stability
+ * JPO
+ * 1. Updated logs
+ *    a. Combined Auto and Manual Start into one log
+ *    b. Change fail log from name to index
+ *    c. Trend not detected added index
+ * 2. Removed Trend Lamp
+ * 3. Updated Configuration defaults
+ * 4. Updated user tables per design review
  * 
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:19p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 Implement Trend Action
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:48p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  Reset trigger handling
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:22p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  Fix AutoTrends
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:07p
  * Updated in $/software/control processor/code/application
