@@ -30,7 +30,7 @@
 #define SYS_COND_OUTPUT_DISABLED DIO_MAX_OUTPUTS
 
 #define FAULTMGR_CONFIG_DEFAULT DBGOFF,                   /* Debug Verbosity       */\
-                                FLT_ANUNC_NONE,           /* NO ANNUNCIATION       */\
+                                FLT_ANUNC_DIRECT,         /* DIRECT Mode           */\
                                 SYS_COND_OUTPUT_DISABLED, /* Default DIO Out Pin   */\
                                 0,                        /* NORMAL Action         */\
                                 0,                        /* CAUTION Action        */\
@@ -55,7 +55,6 @@ typedef enum
 } FLT_DBG_LEVEL;
 
 typedef enum {
-  FLT_ANUNC_NONE,
   FLT_ANUNC_DIRECT,
   FLT_ANUNC_ACTION
 } FLT_ANUNC_MODE;
@@ -65,7 +64,7 @@ typedef struct
   FLT_DBG_LEVEL DebugLevel;
   FLT_ANUNC_MODE Mode;
   DIO_OUTPUT    SysCondDioOutPin;
-  UINT16        action[STA_MAX];                    /* Action to perform for FAULT/CAUTION */
+  UINT8         action[STA_MAX];                    /* Action to perform for FAULT/CAUTION */
 } FAULTMGR_CONFIG;
 
 #pragma pack(1)
@@ -85,7 +84,7 @@ typedef struct
 
 typedef struct
 {
-   UINT16     nAction;
+   UINT8      nAction;
    INT8       nID;
    BOOLEAN    state;
    FLT_STATUS sysCond;
@@ -143,7 +142,7 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

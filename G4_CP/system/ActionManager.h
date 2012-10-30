@@ -197,7 +197,7 @@ typedef struct
                                   Package Exports Functions
 ******************************************************************************/
 EXPORT void ActionsInitialize    ( void );
-EXPORT INT8 ActionRequest        ( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
+EXPORT INT8 ActionRequest        ( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
                                    BOOLEAN bACK, BOOLEAN bLatch );
 EXPORT void ActionResetNVPersist ( void );
 EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
@@ -211,7 +211,7 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
  * User: John Omalley Date: 12-10-18   Time: 1:56p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Design Review Updates
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

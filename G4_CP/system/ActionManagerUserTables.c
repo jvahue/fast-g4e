@@ -108,8 +108,6 @@ static USER_MSG_TBL actionStatus [] =
    { "PERSIST_ACTION_ID", NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT16,   USER_RO, &stateActionTemp.persist.actionNum,        -1,-1,                    NO_LIMIT,    NULL },
    { "PERSIST_USED",      NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT8,    USER_RO, &stateActionTemp.persist.action.nUsedMask, -1,-1,                    NO_LIMIT,    NULL },
    { "PERSIST_LSS",       NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT8,    USER_RO, &stateActionTemp.persist.action.nLSS_Mask, -1,-1,                    NO_LIMIT,    NULL },
-   { "PERSIST_UPDATE",    NO_NEXT_TABLE,     Action_State,      USER_TYPE_BOOLEAN,  USER_RO, &stateActionTemp.bUpdatePersistOut,        -1,-1,                    NO_LIMIT,    NULL },
-   { "PERSIST_STORED",    NO_NEXT_TABLE,     Action_State,      USER_TYPE_BOOLEAN,  USER_RO, &stateActionTemp.bNVStored,                -1,-1,                    NO_LIMIT,    NULL },
    { "LSS0_ACTION_PRI",   NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT16,   USER_RO, &stateActionTemp.nLSS_Priority[0],         -1,-1,                    NO_LIMIT,    NULL },
    { "LSS1_ACTION_PRI",   NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT16,   USER_RO, &stateActionTemp.nLSS_Priority[1],         -1,-1,                    NO_LIMIT,    NULL },
    { "LSS2_ACTION_PRI",   NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT16,   USER_RO, &stateActionTemp.nLSS_Priority[2],         -1,-1,                    NO_LIMIT,    NULL },
@@ -418,7 +416,7 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
@@ -428,7 +426,7 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-08-24   Time: 9:30a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - ETM Fault Action Logic
- * 
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 12-08-14   Time: 3:00p
  * Updated in $/software/control processor/code/system

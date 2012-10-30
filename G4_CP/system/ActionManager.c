@@ -249,7 +249,7 @@ void ActionInitPersist ( void )
  *               The ID can then be used to deactivate the action.
  *
  *****************************************************************************/
-INT8 ActionRequest( INT8 nReqNum, UINT16 nAction, ACTION_TYPE state,
+INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
                     BOOLEAN bACK, BOOLEAN bLatch )
 {
    // Local Data
