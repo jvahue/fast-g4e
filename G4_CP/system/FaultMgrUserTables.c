@@ -11,7 +11,7 @@
          Description:
 
          VERSION
-         $Revision: 28 $  $Date: 8/28/12 1:43p $
+         $Revision: 29 $  $Date: 12-10-30 5:48p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -23,11 +23,11 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Defines                                                             */ 
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Typedefs                                                            */  
+/* Local Typedefs                                                            */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -53,7 +53,6 @@ USER_ENUM_TBL Flt_SysCondOutPin[] =
 
 USER_ENUM_TBL Flt_AnuncMode[] =
 {
-   {"NONE",   FLT_ANUNC_NONE},
    {"DIRECT", FLT_ANUNC_DIRECT},
    {"ACTION", FLT_ANUNC_ACTION},
    {NULL,0}
@@ -106,9 +105,9 @@ static USER_MSG_TBL CfgCmd [] =
   { "VERBOSITY"       , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.DebugLevel,       -1,-1,         NO_LIMIT,    Flt_UserEnumVerbosityTbl },
   { "ANUNCIATION",      NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.Mode,             -1,-1,         NO_LIMIT,    Flt_AnuncMode },
   { "SYS_COND_OUTPUT" , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.SysCondDioOutPin, -1,-1,         NO_LIMIT,    Flt_SysCondOutPin},
-  { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
-  { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
-  { "FAULT_ACTION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT16,     USER_RW,   &FaultMgrConfigTemp.action[2],        -1,-1,         NO_LIMIT,    NULL },
+  { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
+  { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
+  { "FAULT_ACTION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[2],        -1,-1,         NO_LIMIT,    NULL },
   { NULL              , NULL,            NULL,            NO_HANDLER_DATA }
 };
 
@@ -392,12 +391,17 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 }
 
 /*****************************************************************************/
-/* Local Functions                                                           */  
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-10-30   Time: 5:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Changed Actions to UINT8
  * 
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

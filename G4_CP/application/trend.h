@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 9 $  $Date: 12-10-23 2:19p $
+  $Revision: 11 $  $Date: 12-10-30 5:48p $
 
 *******************************************************************************/
 
@@ -205,7 +205,7 @@ typedef struct
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
    BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
    CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/
-   UINT32        nAction;           /* Mask of LSS outputs used by this trend when active   */
+   UINT8         nAction;            /* Action to annunciate during the trend                */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG, *TREND_CFG_PTR;
@@ -291,11 +291,20 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
  *  MODIFICATIONS
  *    $History: trend.h $
  *
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-10-30   Time: 5:48p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Changed Actions to UINT8
+ * 
+ * *****************  Version 10  *****************
+ * User: Contractor V&v Date: 10/30/12   Time: 4:01p
+ * Updated in $/software/control processor/code/application
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:19p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Updates per Software Design Review
- * Dave 
+ * Dave
  * 1. Removed Trends is Active Function
  * 2. Fixed bug with deactivating manual trend because no stability
  * JPO
@@ -306,7 +315,7 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
  * 2. Removed Trend Lamp
  * 3. Updated Configuration defaults
  * 4. Updated user tables per design review
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:19p
  * Updated in $/software/control processor/code/application
