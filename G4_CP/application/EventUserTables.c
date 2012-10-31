@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 25 $  $Date: 12-10-23 2:07p $
+$Revision: 26 $  $Date: 12-10-31 2:01p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -23,7 +23,7 @@ $Revision: 25 $  $Date: 12-10-23 2:07p $
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -898,7 +898,10 @@ static
 USER_MSG_TBL rootEventTableMsg = {"EVENTTABLE", eventTableRoot, NULL, NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
-
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
+								 
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -1297,7 +1300,12 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- *
+ * 
+ * *****************  Version 26  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 2:01p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format errors
+ * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

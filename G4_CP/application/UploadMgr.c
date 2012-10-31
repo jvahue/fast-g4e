@@ -12,7 +12,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 160 $  $Date: 12-09-27 9:13a $
+   $Revision: 161 $  $Date: 12-10-31 12:01p $
     
 ******************************************************************************/
 
@@ -1389,7 +1389,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             Task->FileHeader.nLogCnt += 1;
             Task->FileHeader.nDataSize += Task->LogSize;
             //Found log, try reading it
-            ReadLogResult = LogRead(Task->LogOffset,&Task->LogBuf);
+            ReadLogResult = LogRead(Task->LogOffset,(LOG_BUF *) Task->LogBuf);
   
             if(LOG_READ_BUSY == ReadLogResult)                
             {
@@ -1400,9 +1400,9 @@ void UploadMgr_FileCollectionTask(void *pParam)
             {
 
               GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_FIND_LOG-LogRead=SUCCESS");
-              Task->FileHeader.CheckSum += ChecksumBuffer(&Task->LogBuf,
+              Task->FileHeader.CheckSum += ChecksumBuffer( Task->LogBuf,
                                                            Task->LogSize,
-                                                           0xFFFFFFFF);
+                                                           0xFFFFFFFF );
               Task->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;          
             }
             
@@ -1430,7 +1430,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
     //is only used if ReadLog returns a "BUSY" status in the
     //LOG_COLLECTION_LOG_HEADER_FIND_LOG state.
     case LOG_COLLECTION_LOG_HEADER_READ_LOG:
-      ReadLogResult = LogRead(Task->LogOffset,&Task->LogBuf);
+      ReadLogResult = LogRead(Task->LogOffset,(LOG_BUF *) Task->LogBuf);
       if(LOG_READ_BUSY == ReadLogResult)                
       {
         GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_READ_LOG-ReadLog=BUSY");
@@ -1439,9 +1439,9 @@ void UploadMgr_FileCollectionTask(void *pParam)
       else if(LOG_READ_SUCCESS == ReadLogResult)
       {
         GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_READ_LOG-ReadLog=SUCCESS");
-        Task->FileHeader.CheckSum += ChecksumBuffer(&Task->LogBuf,
+        Task->FileHeader.CheckSum += ChecksumBuffer( Task->LogBuf,
                                                      Task->LogSize,
-                                                     0xFFFFFFFF);
+                                                     0xFFFFFFFF );
         Task->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;          
       }
       //LogReadFail (Shouldn't happen, but if it does then the log memory
@@ -1508,12 +1508,12 @@ void UploadMgr_FileCollectionTask(void *pParam)
           FIFO_PushBlock(&FileDataFIFO,&Task->FileHeader,
               sizeof(Task->FileHeader));
           
-          FIFO_PushBlock(&FileDataFIFO, &BinarySubHdr.Buf, BinarySubHdr.SizeUsed);
+          FIFO_PushBlock(&FileDataFIFO, BinarySubHdr.Buf, BinarySubHdr.SizeUsed);
           
           CRC32(&Task->FileHeader,sizeof(Task->FileHeader),&Task->VfyCRC,
                 CRC_FUNC_START);
 
-          CRC32(&BinarySubHdr.Buf, BinarySubHdr.SizeUsed, &Task->VfyCRC,
+          CRC32(BinarySubHdr.Buf, BinarySubHdr.SizeUsed, &Task->VfyCRC,
                 CRC_FUNC_NEXT);
 
           //The next task state will transfer the log data for this file
@@ -1572,7 +1572,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_FIND_LOG-FindLog=FOUND");
             if(FIFO_FreeBytes(&FileDataFIFO) > Task->LogSize)
             {
-              ReadLogResult = LogRead(Task->LogOffset,&Task->LogBuf);
+              ReadLogResult = LogRead(Task->LogOffset, (LOG_BUF *) Task->LogBuf);
               //A log that was read just a minute ago is now corrupt? Something
               //is very wrong
               ASSERT(ReadLogResult != LOG_READ_FAIL);
@@ -1586,8 +1586,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
                 GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_FIND_LOG-ReadLog=SUCCESS");
 
                 //Ignore return, .
-                FIFO_PushBlock(&FileDataFIFO,&Task->LogBuf,Task->LogSize);
-                CRC32(&Task->LogBuf,Task->LogSize,&Task->VfyCRC,
+                FIFO_PushBlock(&FileDataFIFO,Task->LogBuf,Task->LogSize);
+                CRC32(Task->LogBuf,Task->LogSize,&Task->VfyCRC,
                       CRC_FUNC_NEXT);
                 //Ensure the number of logs in this file is the same as indicated
                 //in the header.  If a log is written while uploading, this will
@@ -1637,7 +1637,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         if(FIFO_FreeBytes(&FileDataFIFO) > Task->LogSize)
         {
-          ReadLogResult = LogRead(Task->LogOffset,&Task->LogBuf);
+          ReadLogResult = LogRead(Task->LogOffset, (LOG_BUF *) Task->LogBuf);
           //A log that was read just a minute ago is now corrupt? Something
           //is very wrong
           ASSERT(ReadLogResult != LOG_READ_FAIL);
@@ -1652,8 +1652,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //Add the data to the read queue and switch state to searching
             //for logs.
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_READ_LOG-ReadLog=SUCCESS");
-            FIFO_PushBlock(&FileDataFIFO,&Task->LogBuf,Task->LogSize);
-            CRC32(&Task->LogBuf,Task->LogSize,&Task->VfyCRC,
+            FIFO_PushBlock(&FileDataFIFO,Task->LogBuf,Task->LogSize);
+            CRC32(Task->LogBuf,Task->LogSize,&Task->VfyCRC,
                   CRC_FUNC_NEXT);
             //Ensure the number of logs in this file is the same as indicated
             //in the header.  If a log is written while uploading, this will
@@ -3473,6 +3473,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 161  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 12:01p
+ * Updated in $/software/control processor/code/application
+ * SCR #1172 PCLint 545 Suspicious use of & Error
  * 
  * *****************  Version 160  *****************
  * User: John Omalley Date: 12-09-27   Time: 9:13a

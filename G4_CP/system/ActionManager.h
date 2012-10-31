@@ -26,7 +26,7 @@
 #include "FIFO.H"
 
 /******************************************************************************
-                                 Package Defines
+                                 Package Defines                                           
 ******************************************************************************/
 #define MAX_ACTION_DEFINES           8
 #define MAX_ACTION_REQUESTS         32
@@ -73,7 +73,7 @@
                                       0x0F                   /* All LSS Active High        */
 
 /******************************************************************************
-                                  Package Typedefs
+                                  Package Typedefs                        
 ******************************************************************************/
 
 /* Action Types */
@@ -206,7 +206,7 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
- *
+ * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system

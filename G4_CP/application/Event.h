@@ -476,7 +476,7 @@ EXPORT BOOLEAN Event_FSMAppBusyGetState( INT32 param );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- *
+ * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

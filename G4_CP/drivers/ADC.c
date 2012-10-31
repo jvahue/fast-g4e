@@ -20,14 +20,14 @@
                SPI.h - Accessing the SPI bus to read the converter
  
   VERSION
-      $Revision: 29 $  $Date: 12-10-27 5:08p $ 
+      $Revision: 30 $  $Date: 12-10-31 1:10p $ 
      
  
 ******************************************************************************/
 
 
 /*****************************************************************************/
-/* Compiler Specific Includes                                               */
+/* Compiler Specific Includes                                                */
 /*****************************************************************************/
 #include "mcf548x.h"
 
@@ -44,7 +44,7 @@
 #include "TestPoints.h"
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 #define LI_BATT_ON    DIO_SetPin(LiBattToADC,DIO_SetHigh);
 #define LI_BATT_OFF   DIO_SetPin(LiBattToADC,DIO_SetLow);
@@ -65,7 +65,7 @@ typedef struct {
 } ADC_DATA; 
 
 /*****************************************************************************/
-/* Local Variables                                                          */
+/* Local Variables                                                           */
 /*****************************************************************************/
 
 
@@ -82,12 +82,12 @@ static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX];
 
 
 /*****************************************************************************/
-/* Local Function Prototypes                                                */
+/* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
 
 /*****************************************************************************/
-/* Public Functions                                                         */
+/* Public Functions                                                          */
 /*****************************************************************************/
 
 /******************************************************************************
@@ -530,6 +530,11 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 1:10p
+ * Updated in $/software/control processor/code/drivers
+ * SCR # 1142 File format errors
  * 
  * *****************  Version 29  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:08p

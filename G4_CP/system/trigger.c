@@ -431,14 +431,14 @@ BOOLEAN TriggerGetState( INT32 trigIdx )
 
 /******************************************************************************
  * Function:     TriggerValidGetState 
- *
+*
  * Description:  Returns trigger valid/invalid state.
- *
+*
  * Parameters:   [in] Index of the Trigger[0..63]
- *
+*
  * Returns:      active/inactive state of the passed trigger.
- *
- *****************************************************************************/
+*
+*****************************************************************************/
 BOOLEAN TriggerValidGetState( INT32 trigIdx ) 
 {
   BOOLEAN status = FALSE;

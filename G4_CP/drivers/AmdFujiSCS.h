@@ -1,5 +1,5 @@
-#ifndef AMD_FUJI_SCS_H
-#define AMD_FUJI_SCS_H
+#ifndef AMDFUJISCS_H
+#define AMDFUJISCS_H
 
 /******************************************************************************
             Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
@@ -10,7 +10,7 @@
     Description: This file contains the support definitions for the AMD,
                  FUJITISU Flash Standard Command Set.
    VERSION
-      $Revision: 8 $  $Date: 8/28/12 1:06p $    
+      $Revision: 9 $  $Date: 12-10-31 2:34p $    
     
 ******************************************************************************/
 
@@ -121,10 +121,15 @@ EXPORT FLASH_STATUS AmdFujiSCS_GetStatus    (FLASHDATA *BaseAddr, FLASHADDR offs
                                              BOOLEAN WriteBufferProgramming);
 
 
-#endif // AMD_FUJI_SCS_H                             
+#endif // AMDFUJISCS_H                             
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AmdFujiSCS.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 2:34p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File format error
  * 
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
