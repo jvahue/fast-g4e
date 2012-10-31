@@ -318,25 +318,6 @@ FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 }
 
 /******************************************************************************
- * Function:     SensorGetPreviousValid
- *
- * Description:  This function provides a method to read the previous value's
- *                validity of a sensor.
- *
- * Parameters:   [in] nSensor - Index of sensor to get value
- *
- * Returns:      [out] BOOLEAN - Validity of the prev sensor value(
- *
- * Notes:        None
- *
- *****************************************************************************/
-BOOLEAN SensorGetPreviousValid( SENSOR_INDEX Sensor )
-{
-   // return the previous validity of the sensor
-   return (Sensors[Sensor].PriorValueValid);
-}
-
-/******************************************************************************
  * Function:     SensorGetSystemHdr
  *
  * Description:  Retrieves the binary system header for the sensor

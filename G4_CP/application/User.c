@@ -166,7 +166,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
                                         USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max);
 
-static BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
+static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
                              USER_RANGE *Min, USER_RANGE *Max);
 
 
@@ -2724,7 +2724,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   }  
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
@@ -2801,13 +2801,13 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
 
 /******************************************************************************
-* Function:     User_CheckBits
+* Function:     User_BitSetIsValid
 *
 * Description:  Verifies that only valid bits are set in the 128 bit structure
 *
@@ -2821,7 +2821,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 * Notes:
 ******************************************************************************/
 static 
-BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
+BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
                       USER_RANGE *usrMin, USER_RANGE *usrMax)
 {
 #define MAX_BIT 128

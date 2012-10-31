@@ -1107,20 +1107,20 @@ void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
  * Notes:
  *
  ******************************************************************************/
-void SetBits(UINT32 mask[], INT32 maskSizeBytes,  UINT32 array[], INT32 arraySizeBytes)
-{
-   // Local Data
-   UINT16 i;
-
-   // Check that the sizes are the same
-   ASSERT(maskSizeBytes == arraySizeBytes );
-
-   for ( i = 0; i < (arraySizeBytes / BYTES_PER_WORD); i++ )
-   {
-      array[i] |= mask[i];
-   }
-
-}
+//void SetBits(UINT32 mask[], INT32 maskSizeBytes,  UINT32 array[], INT32 arraySizeBytes)
+//{
+//   // Local Data
+//   UINT16 i;
+//
+//   // Check that the sizes are the same
+//   ASSERT(maskSizeBytes == arraySizeBytes );
+//
+//   for ( i = 0; i < (arraySizeBytes / BYTES_PER_WORD); i++ )
+//   {
+//      array[i] |= mask[i];
+//   }
+//
+//}
 
 /******************************************************************************
  * Function:     ResetBits

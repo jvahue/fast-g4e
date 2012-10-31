@@ -83,8 +83,8 @@ typedef enum
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static CYCLE_CFG    m_Cfg [MAX_CYCLES];  // Cycle Cfg Array
-static CYCLE_DATA   m_Data[MAX_CYCLES];  // Runtime data related to the cycles
+static CYCLE_CFG    m_Cfg [MAX_CYCLES];      // Cycle Cfg Array
+static CYCLE_DATA   m_Data[MAX_CYCLES];      // Runtime data related to the cycles
 
 static CYCLE_COUNTS m_CountsEEProm;  // master count list, Persisted to EE at end of ER
                                      // otherwise is used as the compare base for

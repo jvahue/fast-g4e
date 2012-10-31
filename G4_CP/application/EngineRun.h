@@ -114,8 +114,8 @@ typedef struct
   TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
   UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
   UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
-  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
-  UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts                   */
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */ 
+  UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts */
 } ENGRUN_RUNLOG;
 
 typedef struct
