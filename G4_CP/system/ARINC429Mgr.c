@@ -1,5 +1,4 @@
 #define ARINC429MGR_BODY
-
 /******************************************************************************
             Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
@@ -10,7 +9,7 @@
                   data received on ARINC429.
     
 VERSION
-     $Revision: 50 $  $Date: 12-10-27 5:06p $
+     $Revision: 51 $  $Date: 12-10-31 1:46p $
 
 ******************************************************************************/
 
@@ -3419,6 +3418,8 @@ void Arinc429MgrCreateAllInternalLogs ( void )
  *
  * Parameters:   None.
  *
+ * Notes:        None.
+ *
  * Returns:      None.
  ****************************************************************************/
 void Arinc429MgrDisableLiveStream(void)
@@ -3679,6 +3680,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 51  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 1:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File format errors
  * 
  * *****************  Version 50  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:06p

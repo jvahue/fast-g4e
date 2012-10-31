@@ -1035,7 +1035,7 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
   UINT32 result;
   
   ASSERT (bitOffset >= 0 && bitOffset < (arraySizeBytes * 8));
-  result = array[bitOffset / 32] & ( 1 << (bitOffset % 32) );
+  result = array[bitOffset / 32] & ( 1 << (bitOffset % 32) );    
 
   return (result != 0);
 }
@@ -1060,11 +1060,11 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 i;  
-  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
+  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;  
 
   ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
  
-  array[i] = array[i = bitOffset / 32] | (1 << (bitOffset % 32)); 
+  array[i] = array[i = bitOffset / 32] | (1 << (bitOffset % 32));
 
 }
 

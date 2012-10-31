@@ -800,7 +800,7 @@ static void CycleFinish( UINT16 nCycle )
   CYCLE_CFG*     pCycleCfg;
   ENGRUN_INDEX   erID; 
   ENGRUN_RUNLOG* pLog;
-  
+
   ASSERT( nCycle < MAX_CYCLES);
 
   pCycle    = &m_Data[nCycle];
@@ -814,7 +814,7 @@ static void CycleFinish( UINT16 nCycle )
     pCycle->cycleActive      = FALSE;
     pCycle->cycleLastTime_ms = 0;
   }
-    
+
   // Act on the different types of cycles
   switch (pCycleCfg->type)
   {

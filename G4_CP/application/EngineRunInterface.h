@@ -1,5 +1,5 @@
-#ifndef ENGINERUN_INTERFACE_H
-#define ENGINERUN_INTERFACE_H
+#ifndef ENGINERUNINTERFACE_H
+#define ENGINERUNINTERFACE_H
 
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
@@ -10,7 +10,7 @@
     Description: Interface control EngineRun <-> Cycle
 
     VERSION
-    $Revision: 9 $  $Date: 10/11/12 6:55p $
+    $Revision: 10 $  $Date: 12-10-31 2:25p $
 
 ******************************************************************************/
 
@@ -64,11 +64,16 @@ typedef enum
 EXPORT UINT32* EngRunGetPtrToCycleCounts(ENGRUN_INDEX engId);
 
 
-#endif // ENGINERUN_INTERFACE_H
+#endif // ENGINERUNINTERFACE_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRunInterface.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 2:25p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 10/11/12   Time: 6:55p

@@ -1,5 +1,5 @@
-#ifndef ENGINE_RUN_H
-#define ENGINE_RUN_H
+#ifndef ENGINERUN_H
+#define ENGINERUN_H
 
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 18 $  $Date: 12-10-27 5:07p $
+      $Revision: 20 $  $Date: 12-10-31 2:16p $
 
 ******************************************************************************/
 
@@ -219,11 +219,21 @@ EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
 EXPORT void             Eng_ReInitFile        ( void );
 
-#endif // SYS_CLOCKMGR_H
+#endif // ENGINERUN_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 2:16p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ * 
+ * *****************  Version 19  *****************
+ * User: Melanie Jutras Date: 12-10-31   Time: 2:09p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File format error
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:07p
