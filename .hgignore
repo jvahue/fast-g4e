@@ -16,6 +16,7 @@ syntax: regexp
 ^G4E/Persist/.
 ^G4E/DEBUG_TP/.
 ^G4E/Release/.
+.lst1$
 syntax: glob
 G4E.exe
 G4E.ilk
