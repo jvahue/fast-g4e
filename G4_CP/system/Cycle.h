@@ -178,8 +178,9 @@ typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
 +----------------------------------------------------------------------------------------*/
 typedef struct
 {
-  BOOLEAN cycleActive;    /* The cycle is active */
+  BOOLEAN cycleActive;      /* The cycle is active */
   UINT32  cycleLastTime_ms; /* Timestamp in ms that the cycle became active */
+  UINT32  currentCount;     /* The current working count during this cycle active state */
 }CYCLE_DATA, *CYCLE_DATA_PTR;
 
 #pragma pack(1)
@@ -261,28 +262,29 @@ EXPORT void    CycleResetAll         ( void );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
+EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
 
 #endif // CYCLE_H
 
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system
  * FAST 2 Review Findings
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:24p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:23p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2 Coding standard 
- * 
+ * SCR #1107 FAST 2 Coding standard
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:53p
  * Updated in $/software/control processor/code/system
@@ -292,7 +294,7 @@ EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
  * User: John Omalley Date: 12-09-11   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -158,7 +158,7 @@ typedef struct
   INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
-  UINT32       cycleCounts[MAX_CYCLES];   /* Array of cycle counts */
+//  UINT32       cycleCounts[MAX_CYCLES];   /* Array of cycle counts */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;
 
 /* Configuration */
@@ -214,7 +214,6 @@ EXPORT USER_ENUM_TBL EngineRunStateEnum[];
 EXPORT void             EngRunInitialize(void);
 EXPORT void             EngRunTask            ( void* pParam );
 EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
-EXPORT ENGRUN_RUNLOG*   EngRunGetPtrToLog     ( ENGRUN_INDEX engId );
 EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
 EXPORT void             Eng_ReInitFile        ( void );

@@ -52,13 +52,6 @@
 // macros for calculating the size and offset into the RTC_RAM_PERSISTCYCLE structure.
 #define N_OFFSET(n)  (UINT8) ((n)*(sizeof(UINT32) + sizeof(UINT16)))
 
-#define INITPCYCLES_BOTH_LOCATION_BAD 0x01
-#define INITPCYCLES_FLASHBAD          0x04
-#define INITPCYCLES_RTCBAD            0x02
-#define INITPCYCLES_RTCGREATER        0x08
-#define INITPCYCLES_FLASHGREATER      0x20
-#define INITPCYCLES_CHECKIDFAIL       0x10
-
 #define CYC_COUNT_UPDATE_NOW        TRUE
 #define CYC_COUNT_UPDATE_BACKGROUND FALSE
 
@@ -108,7 +101,6 @@ static void    CycleUpdateSimpleAndDuration (CYCLE_CFG*  pCycleCfg,
 static void    CycleInitPersistent(void);
 
 static void    CycleBackupPersistentCounts( UINT16 nCycle, CYC_BKUP_TYPE mode);
-static void    CycleFinish( UINT16 nCycle);
 static BOOLEAN CycleRestoreCountsFromPersistFiles(void);
 static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate);
 static UINT16  CycleCalcCheckID ( UINT16 nCycle );
@@ -123,11 +115,11 @@ static void    CycleSyncPersistFiles(BOOLEAN bNow);
 /*****************************************************************************/
 
 /******************************************************************************
- * Function:     CycleUpdateAll
+ * Function:     CycleInitialize
  *
- * Description:  Updates all cycles for EngineRun 'erIndex'
+ * Description:  Initialize cycle processing
  *
- * Parameters:   The index into the CYCLE_CFG and CYCLE_DATA object arrays.
+ * Parameters:   None.
  *
  * Returns:      None.
  *
@@ -287,10 +279,10 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
  * Function:     CycleGetPersistentCount
  *
  * Description:  Retrieves the count for cycle 'nCycle'
- *               
+ *
  *
  * Parameters:   UINT8 nCycle         - Cycle Index of the value to return
- *              
+ *
  *
  * Returns:      UINT32 - Value of cycle as persisted to RTCRam
  *
@@ -298,8 +290,73 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
  *
  *****************************************************************************/
 UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle )
-{  
+{
   return m_CountsRTC.data[nCycle].count.n;
+}
+
+/******************************************************************************
+ * Function:     CycleCollectCounts
+ *
+ * Description:  Returns the values of all cycles associated with the erIdx,
+ *               in the provided array 'counts'
+ *
+ * Parameters:   [out] counts - array for returning cycle counts
+ *               [in]  erIdx  - EngineRun whose cycle counts are to be returned
+ *
+ * Returns:      None
+ *
+ * Notes:        This function should be preceded by a call to
+ *               CycleBackupPersistentCounts() to ensure m_CountsEEProm has
+ *               been properly updated. The updated info in m_CountsEEProm is
+ *               used to bring the cycle totals up to current persisted values.
+ *
+ *****************************************************************************/
+void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
+{
+  INT16 cyc;
+  CYCLE_DATA*    pData;
+  CYCLE_CFG*     pCfg;
+
+  ASSERT(erIdx < MAX_ENGINES);
+
+  for(cyc = 0; cyc < MAX_CYCLES; ++cyc)
+  {
+    if (m_Cfg[cyc].nEngineRunId == erIdx)
+    {
+      pData = &m_Data[cyc];
+      pCfg  = &m_Cfg[cyc];
+
+      // Act on the different types of cycles
+      // Return the aggregate count from EEPROM for persisted cycles.
+      // Return the count from from m_Data for non-persisted cycles.
+      switch (pCfg->type)
+      {
+        case CYC_TYPE_SIMPLE_CNT:
+          // Get the incremental count from local data
+          counts[cyc] = pData->currentCount;
+          break;
+
+        case CYC_TYPE_PERSIST_SIMPLE_CNT:
+          // Get the accumulated incremental from EEPROM
+          counts[cyc] = m_CountsEEProm.data[cyc].count.n;
+          break;
+
+        case CYC_TYPE_DURATION_CNT:
+          // Non-persisted duration are stored in millisecs. Convert to seconds.
+          counts[cyc] = pData->currentCount * (1.0f /(FLOAT32)MILLISECONDS_PER_SECOND);
+          break;
+
+        case CYC_TYPE_PERSIST_DURATION_CNT:
+          // Persisted Duration are stored in seconds...no need to convert
+          counts[cyc] = m_CountsEEProm.data[cyc].count.n;
+          break;
+
+        default:
+          FATAL ("Unrecognized Cycle Type Value: %d" ,pCfg->type);
+          break;
+      }
+    }
+  }
 }
 
 /*********************************************************************************************/
@@ -424,8 +481,6 @@ static void CycleInitPersistent(void)
  *****************************************************************************/
 static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
 {
-  // TODO: this needs to handle ER_ANY by checking if it is running already
-  // we may not want to reset it.  How do we force a Cycle reset in this case?
   if ( pCycleCfg->type       == CYC_TYPE_NONE_CNT ||
        pCycleCfg->nTriggerId >= MAX_TRIGGERS ||
        !TriggerIsConfigured( pCycleCfg->nTriggerId ) )
@@ -435,8 +490,10 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
   }
   else
   {
-    pCycleData->cycleActive      = FALSE;  /* Count not yet active */
-    pCycleData->cycleLastTime_ms = 0;      /* Clear start time     */
+    pCycleData->cycleActive      = FALSE;  /* Count not yet active      */
+    pCycleData->cycleLastTime_ms = 0;      /* Clear start time          */
+    pCycleData->currentCount     = 0;      /* Clear working cycle count */
+
 #ifdef DEBUG_CYCLE
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE,"Cycle: %s CycleReset",pCycleCfg->Name);
@@ -542,13 +599,10 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 {
   BOOLEAN      CycleStart = FALSE;
   BITARRAY128  trigMask;
-  UINT32*      pErDataCycles;
   UINT32       nowTimeMs;
 
   CLR_TRIGGER_FLAGS(trigMask);
   SetBit(pCycleCfg->nTriggerId, trigMask, sizeof(BITARRAY128 ));
-
-  pErDataCycles = EngRunGetPtrToCycleCounts(pCycleCfg->nEngineRunId);
 
   if ( (pCycleData->cycleActive) )
   {
@@ -562,8 +616,9 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 
       // Update the millisec duration in the enginerun count object.
       nowTimeMs = CM_GetTickCount();
-      pErDataCycles[cycIndex] += (nowTimeMs - pCycleData->cycleLastTime_ms);
-      pCycleData->cycleLastTime_ms = nowTimeMs;
+
+      pCycleData->currentCount     += nowTimeMs - pCycleData->cycleLastTime_ms;
+      pCycleData->cycleLastTime_ms =  nowTimeMs;
 
       if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
@@ -608,7 +663,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       if (( pCycleCfg->type == CYC_TYPE_SIMPLE_CNT ) ||
           ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT))
       {
-        pErDataCycles[cycIndex] += pCycleCfg->nCount;
+        pCycleData->currentCount += pCycleCfg->nCount;
 
         if (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT)
         {
@@ -643,10 +698,8 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
   } temp_value;
   BOOLEAN bDataChanged = FALSE;
 
-  CYCLE_CFG_PTR pCycle = &m_Cfg[nCycle];
-
-  // Get ptr to this cycle's enginerun collection area.
-  UINT32* pErDataCycles = EngRunGetPtrToCycleCounts(pCycle->nEngineRunId);
+  CYCLE_CFG_PTR  pCycleCfg  = &m_Cfg[nCycle];
+  CYCLE_DATA_PTR pCycleData = &m_Data[nCycle];
 
   // Update persistent count
   // The copy in EEPROM acts as the baseline since 'start of ER' against which the
@@ -654,10 +707,10 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
   // When the engrun ends, this function will be called with updateFlag == CYC_WRITE_EE and
   // the EEPROM memory will be synced to match RTC.
 
-  switch (pCycle->type)
+  switch (pCycleCfg->type)
   {
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
-      temp_value.n = m_CountsEEProm.data[nCycle].count.n + pErDataCycles[nCycle];
+      temp_value.n = m_CountsEEProm.data[nCycle].count.n + pCycleData->currentCount;
       bDataChanged = TRUE;
       break;
 
@@ -665,7 +718,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       // Get the current duration (in millisecs) for this cycle-run.
       // add 0.5 seconds for int truncation assuming
       // 50% of values > 0.5 and 50% of values < 0.5 over time
-      temp_value.f = 500 + (FLOAT32)pErDataCycles[nCycle];
+      temp_value.f = 500 + (FLOAT32)pCycleData->currentCount;
 
       // Convert the duration to secs and add to the persisted total
       temp_value.f *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
@@ -677,11 +730,9 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       break;
 
     default:
-      FATAL ("Unrecognized Cycle Type Value: %d", pCycle->type);
+      FATAL ("Unrecognized Cycle Type Value: %d", pCycleCfg->type);
       break;
   }
-
-
 
   switch (mode)
   {
@@ -719,6 +770,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       #pragma ghs endnowarning
 
       #ifdef DEBUG_CYCLE
+      /*vcast_dont_instrument_start*/
       if ( 0 != memcmp(&m_CountsEEProm, &m_CountsRTC, sizeof(CYCLE_COUNTS)) )
       {
         INT16 i;
@@ -733,6 +785,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
           }
         }
       }
+      /*vcast_dont_instrument_end*/
       #endif
     GSE_DebugStr(NORMAL,TRUE, "Cycle: Cycle[%d] EEPROM Updated P-Count: %d", nCycle,
                  m_CountsEEProm.data[nCycle].count.n);
@@ -772,88 +825,9 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
         // Persist cycle info to  EEPROM from RTC at end of cycle.
         CycleBackupPersistentCounts( i, CYC_BKUP_EE );
       }
-      CycleFinish( i);
     }
   }
 }
-
-
-/******************************************************************************
- * Function:     CycleFinish
- *
- * Description:  Finish a cycle if it is currently active
- *               Cycle data is copied to the EngineRun's cycle counts.
- *
- * Parameters:   [in] cycle table index.
- *
- * Returns:      None.
- *
- * Notes:        This function should be preceded by a call to
- *               CycleBackupPersistentCounts() to ensure m_CountsEEProm has
- *               been properly updated. The updated info in m_CountsEEProm is
- *               used to bring the cycle totals up to current persisted values.
- *
- *****************************************************************************/
-static void CycleFinish( UINT16 nCycle )
-{
-  CYCLE_DATA*    pCycle;
-  CYCLE_CFG*     pCycleCfg;
-  ENGRUN_INDEX   erID; 
-  ENGRUN_RUNLOG* pLog;
-
-  ASSERT( nCycle < MAX_CYCLES);
-
-  pCycle    = &m_Data[nCycle];
-  pCycleCfg = &m_Cfg[nCycle];
-  erID      = pCycleCfg->nEngineRunId;
-  pLog      = EngRunGetPtrToLog(erID);
-  
-  // Mark the cycle as completed.
-  if (pCycleCfg->type > CYC_TYPE_NONE_CNT)
-  {
-    pCycle->cycleActive      = FALSE;
-    pCycle->cycleLastTime_ms = 0;
-  }
-
-  // Act on the different types of cycles
-  switch (pCycleCfg->type)
-  {
-    case CYC_TYPE_SIMPLE_CNT:
-    case CYC_TYPE_PERSIST_SIMPLE_CNT:
-      // Update the log entry with the aggregate persisted count from EEPROM/RTCNvRAM
-      if ( pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT )
-      {
-        pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
-      }
-      break;
-
-    case CYC_TYPE_DURATION_CNT:
-    case CYC_TYPE_PERSIST_DURATION_CNT:
-      // Update the log entries with the count.
-      // Note: counts are in secs.
-      if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
-      {
-        pLog->cycleCounts[nCycle] = m_CountsEEProm.data[nCycle].count.n;
-      }
-      else
-      {
-        /* convert ticks to seconds correcting for CLK time error */
-        pLog->cycleCounts[nCycle] *= 1.0f /(FLOAT32)MILLISECONDS_PER_SECOND;
-      }
-      break;
-
-    default:
-      FATAL ("Unrecognized Cycle Type Value: %d" ,pCycleCfg->type);
-      break;
-  }
-
-#ifdef DEBUG_CYCLE
-/*vcast_dont_instrument_start*/
-  GSE_DebugStr(NORMAL,TRUE,"Cycle: EngRun[%d], Cycle[%d] CycleFinished",erID,nCycle);
-/*vcast_dont_instrument_end*/
-#endif
-}
-
 
 /******************************************************************************
  * Function:     CycleRestoreCountsFromPersistFiles
@@ -965,7 +939,7 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
   iTempID = CycleCalcCheckID (nCycle);
 
   // If the actual is different than current log it if bLogUpdate.
-  
+
   if ( m_CountsEEProm.data[nCycle].checkID != iTempID )
   {
     if ( bLogUpdate )
@@ -974,7 +948,7 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
       changeLog.prevCount   = m_CountsEEProm.data[nCycle].count.n;
       changeLog.prevCheckID = m_CountsEEProm.data[nCycle].checkID;
       changeLog.newCheckID  = iTempID;
-                   
+
       LogWriteETM( SYS_ID_CYCLES_CHECKID_CHANGED,
                    LOG_PRIORITY_3,
                    &changeLog,
@@ -986,7 +960,7 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
 
     m_CountsEEProm.data[nCycle].count.n = 0;
     m_CountsEEProm.data[nCycle].checkID = iTempID;
-    
+
     bNeedUpdate = TRUE;
 
   }
@@ -1041,7 +1015,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
 
   for (i = 0; i < MAX_CYCLES; i++)
   {
-    // TODO: handle ER_ANY
+    // Reset all cycles for erID
     if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT && m_Cfg[i].nEngineRunId == erID )
     {
       CycleReset( &m_Cfg[i], &m_Data[i]);
@@ -1089,32 +1063,32 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 10/23/12   Time: 3:54p
  * Updated in $/software/control processor/code/system
  * SCR# 1107 - dev work
- * 
+ *
  * *****************  Version 22  *****************
  * User: Melanie Jutras Date: 12-10-23   Time: 1:25p
  * Updated in $/software/control processor/code/system
  * SCR #1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system
  * FAST 2 Review Findings
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:23p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2 Coding standard 
- * 
+ * SCR #1107 FAST 2 Coding standard
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:53p
  * Updated in $/software/control processor/code/system
@@ -1124,7 +1098,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
  * User: John Omalley Date: 12-09-11   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
