@@ -2,9 +2,9 @@
 #define BUSTO_H
 
 /******************************************************************************
-Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.                 
+Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
 All Rights Reserved. Proprietary and Confidential..
- 
+
   File:         BusTO.h
 
   Description: This header file includes the variables and funtions necessary
@@ -12,7 +12,7 @@ All Rights Reserved. Proprietary and Confidential..
                description.
 
    VERSION
-   $Revision: 2 $  $Date: 8/28/12 1:06p $
+   $Revision: 3 $  $Date: 12-11-01 2:48p $
 
 ******************************************************************************/
 
@@ -42,8 +42,8 @@ All Rights Reserved. Proprietary and Confidential..
 
 typedef struct
 {
-  RESULT  result; 
-} BTO_DRV_PBIT_LOG; 
+  RESULT  result;
+} BTO_DRV_PBIT_LOG;
 
 #pragma pack()
 
@@ -52,7 +52,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( BUSTO_BODY )
+#if defined ( BUSTO_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -65,28 +65,33 @@ typedef struct
 /******************************************************************************
                               Package Exports Functions
 ******************************************************************************/
-EXPORT RESULT BTO_Init(SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize); 
+EXPORT RESULT BTO_Init(SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize);
 EXPORT INT8*  BTO_Handler(void);
 EXPORT void   BTO_WriteToEE(void);
 
 
-#endif        // End BUSTO_H
+#endif // BUSTO_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: BusTO.h $
  * 
+ * *****************  Version 3  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 2:48p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 2  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:42p
  * Created in $/software/control processor/code/drivers
  * SCR #515 Enhancement - sys.get.mem.l halts processor when invalid
  * memory is referenced
- * 
+ *
  *
  ***************************************************************************/
 

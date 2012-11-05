@@ -1,37 +1,37 @@
-#define DRV_UART_BODY
+#define UART_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
 
  File:        UART.c
 
- Description: UART driver for the MCF5485 PSC (Programmable Serial Controller)              
-              This file contains methods to interface (read and write) and 
-              manage (open, close, interrupts and buffering) the PSC 
+ Description: UART driver for the MCF5485 PSC (Programmable Serial Controller)
+              This file contains methods to interface (read and write) and
+              manage (open, close, interrupts and buffering) the PSC
               peripherals in UART mode. The caller can:
               1. Open a port and verify is opened successfully
-              2. Optionally define SW FIFO (see FIFO.c) extensions to handle 
+              2. Optionally define SW FIFO (see FIFO.c) extensions to handle
                  messages over 512 bytes
               3. Use the read, write the UART port or purge the buffer
               4. Close a port when it no longer needs the resource
 
-              The caller shall also be responsible for using the 
-              UART_CheckForTXDone periodically when any of the 4 PSC ports are 
-              enabled in half-duplex mode.  This function will check the 
-              transmitter status for the empty flag, and set the port to RX 
+              The caller shall also be responsible for using the
+              UART_CheckForTXDone periodically when any of the 4 PSC ports are
+              enabled in half-duplex mode.  This function will check the
+              transmitter status for the empty flag, and set the port to RX
               mode if the transmitter is empty.
-              
+
               The only serial mode supported for this driver is UART.
 
- Requires:    DIO.c (Discrete I/O driver) 
-              FIFO.c (First-in-First-out driver) 
+ Requires:    DIO.c (Discrete I/O driver)
+              FIFO.c (First-in-First-out driver)
               ResultCodes.c (Driver/system call result codes)
-              
+
   VERSION
-  $Revision: 59 $  $Date: 8/28/12 1:06p $
-              
+  $Revision: 60 $  $Date: 12-11-02 1:26p $
+
 ******************************************************************************/
 
 
@@ -99,7 +99,7 @@ static BOOLEAN     UART_Failed[UART_NUM_OF_UARTS];
 //Shadow register for the write-only IMR reg.
 static UINT16 UART_IMR[UART_NUM_OF_UARTS];
 
-const REG_SETTING UART_Registers[] = 
+const REG_SETTING UART_Registers[] =
 {
   // Pin assignments for port PSC3PSC2
   //     Pin /PSC3CTS : GPIO output
@@ -110,26 +110,26 @@ const REG_SETTING UART_Registers[] =
   //     Pin /PSC0RTS : GPIO output
   //     Pin PSC2RXD  : PSC2 receive-data
   //     Pin PSC2TXD  : PSC2 transmit-data
-  
+
   // SET_AND_CHECK(MCF_GPIO_PDDR_PSC3PSC2, (MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC27 |
   //                                       MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC26 |
   //                                       MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC23 |
   //                                       MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC22),
-  //              bInitOk); 
-  {(void *) &MCF_GPIO_PDDR_PSC3PSC2, 
+  //              bInitOk);
+  {(void *) &MCF_GPIO_PDDR_PSC3PSC2,
             (MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC27 | MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC26 |
              MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC23 | MCF_GPIO_PDDR_PSC3PSC2_PDDR_PSC3PSC22),
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-  
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_GPIO_PAR_PSC3, (MCF_GPIO_PAR_PSC3_PAR_RXD3 |
-  //                                  MCF_GPIO_PAR_PSC3_PAR_TXD3), bInitOk); 
+  //                                  MCF_GPIO_PAR_PSC3_PAR_TXD3), bInitOk);
   {(void *) &MCF_GPIO_PAR_PSC3, (MCF_GPIO_PAR_PSC3_PAR_RXD3 | MCF_GPIO_PAR_PSC3_PAR_TXD3),
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-  
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_GPIO_PAR_PSC2, (MCF_GPIO_PAR_PSC2_PAR_RXD2 |
-  //                                   MCF_GPIO_PAR_PSC2_PAR_TXD2), bInitOk); 
+  //                                   MCF_GPIO_PAR_PSC2_PAR_TXD2), bInitOk);
   {(void *) &MCF_GPIO_PAR_PSC2, (MCF_GPIO_PAR_PSC2_PAR_RXD2 | MCF_GPIO_PAR_PSC2_PAR_TXD2),
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
 
   // Pin assignments for port PSC1PSC0
   //     Pin /PSC1CTS : GPIO output
@@ -140,59 +140,59 @@ const REG_SETTING UART_Registers[] =
   //     Pin /PSC0RTS : GPIO output
   //     Pin PSC0RXD  : PSC0 receive-data
   //     Pin PSC0TXD  : PSC0 transmit-data
-  // SET_AND_CHECK(MCF_GPIO_PDDR_PSC1PSC0, 
+  // SET_AND_CHECK(MCF_GPIO_PDDR_PSC1PSC0,
   //                (MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC07 |
   //                 MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC06 |
   //                 MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC03 |
-  //                 MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC02), bInitOk); 
-  {(void *) &MCF_GPIO_PDDR_PSC1PSC0, 
+  //                 MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC02), bInitOk);
+  {(void *) &MCF_GPIO_PDDR_PSC1PSC0,
             (MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC07 | MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC06 |
-             MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC03 | MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC02), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-  
+             MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC03 | MCF_GPIO_PDDR_PSC1PSC0_PDDR_PSC1PSC02),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_GPIO_PAR_PSC1, (MCF_GPIO_PAR_PSC1_PAR_RXD1 |
-  //                                   MCF_GPIO_PAR_PSC1_PAR_TXD1 ), bInitOk); 
-  {(void *) &MCF_GPIO_PAR_PSC1, 
-            (MCF_GPIO_PAR_PSC1_PAR_RXD1 | MCF_GPIO_PAR_PSC1_PAR_TXD1 ), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-                
+  //                                   MCF_GPIO_PAR_PSC1_PAR_TXD1 ), bInitOk);
+  {(void *) &MCF_GPIO_PAR_PSC1,
+            (MCF_GPIO_PAR_PSC1_PAR_RXD1 | MCF_GPIO_PAR_PSC1_PAR_TXD1 ),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_GPIO_PAR_PSC0, (MCF_GPIO_PAR_PSC0_PAR_RXD0 |
-  //                                   MCF_GPIO_PAR_PSC0_PAR_TXD0 ), bInitOk); 
-  {(void *) &MCF_GPIO_PAR_PSC0, 
-            (MCF_GPIO_PAR_PSC0_PAR_RXD0 | MCF_GPIO_PAR_PSC0_PAR_TXD0 ), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
+  //                                   MCF_GPIO_PAR_PSC0_PAR_TXD0 ), bInitOk);
+  {(void *) &MCF_GPIO_PAR_PSC0,
+            (MCF_GPIO_PAR_PSC0_PAR_RXD0 | MCF_GPIO_PAR_PSC0_PAR_TXD0 ),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
 
   //Interrupt level changed to 6, allowing preemption of the DPRAM interrupt
   //This is necessary to prevent deadlock in the MSFX/YMODEM routine when the
   //task waits for the UART transmission to complete.
-              
+
   //Setup interrupt controller for PSC0,PSC1,PSC2,PSC3
   //PSC module RX and TX interrupts are not unmasked until a port is opened
   // SET_AND_CHECK(MCF_INTC_ICR32, (MCF_INTC_ICRn_IL(0x6) |
-  //                                MCF_INTC_ICRn_IP(0x4)), bInitOk); 
-  {(void *) &MCF_INTC_ICR32, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x4)), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-                
+  //                                MCF_INTC_ICRn_IP(0x4)), bInitOk);
+  {(void *) &MCF_INTC_ICR32, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x4)),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_INTC_ICR33, (MCF_INTC_ICRn_IL(0x6) |
-  //                                MCF_INTC_ICRn_IP(0x2)), bInitOk); 
-  {(void *) &MCF_INTC_ICR33, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x2)), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-             
+  //                                MCF_INTC_ICRn_IP(0x2)), bInitOk);
+  {(void *) &MCF_INTC_ICR33, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x2)),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
   // SET_AND_CHECK(MCF_INTC_ICR34, (MCF_INTC_ICRn_IL(0x6) |
-  //                                MCF_INTC_ICRn_IP(0x1)), bInitOk); 
-  {(void *) &MCF_INTC_ICR34, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x1)), 
-             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-                
-  // SET_AND_CHECK(MCF_INTC_ICR35, MCF_INTC_ICRn_IL(0x3), bInitOk); 
+  //                                MCF_INTC_ICRn_IP(0x1)), bInitOk);
+  {(void *) &MCF_INTC_ICR34, (MCF_INTC_ICRn_IL(0x6) | MCF_INTC_ICRn_IP(0x1)),
+             sizeof(UINT8), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
+  // SET_AND_CHECK(MCF_INTC_ICR35, MCF_INTC_ICRn_IL(0x3), bInitOk);
   {(void *) &MCF_INTC_ICR35, MCF_INTC_ICRn_IL(0x6), sizeof(UINT8), 0x0, REG_SET,
-            TRUE, RFA_FORCE_UPDATE}, 
-  
+            TRUE, RFA_FORCE_UPDATE},
+
   // SET_CHECK_MASK_AND(MCF_INTC_IMRH, (MCF_INTC_IMRH_INT_MASK32 | MCF_INTC_IMRH_INT_MASK33 |
   //                                    MCF_INTC_IMRH_INT_MASK34 | MCF_INTC_IMRH_INT_MASK35),
-  //                                    bInitOk); 
-  {(void *) &MCF_INTC_IMRH, (MCF_INTC_IMRH_INT_MASK32 | MCF_INTC_IMRH_INT_MASK33 | 
-                             MCF_INTC_IMRH_INT_MASK34 | MCF_INTC_IMRH_INT_MASK35), 
-                             sizeof(UINT32), 0x0, REG_SET_MASK_AND, TRUE, RFA_FORCE_UPDATE}, 
+  //                                    bInitOk);
+  {(void *) &MCF_INTC_IMRH, (MCF_INTC_IMRH_INT_MASK32 | MCF_INTC_IMRH_INT_MASK33 |
+                             MCF_INTC_IMRH_INT_MASK34 | MCF_INTC_IMRH_INT_MASK35),
+                             sizeof(UINT32), 0x0, REG_SET_MASK_AND, TRUE, RFA_FORCE_UPDATE},
 };
 
 
@@ -211,27 +211,29 @@ RESULT UART_PBIT(void);
  * Description: Setup the UART module to its initial state
  *              Initializes PSC I/O ports, pin assignments and direction
  *
- * Parameters:  [out] ptr to return SYS_APP_ID 
- *              [out] ptr to buffer to return result data
- *              [out] ptr to size var to return size of result data 
+ * Parameters:  [out] SysLogId - ptr to return SYS_APP_ID
+ *              [out] pdata    - ptr to buffer to return result data
+ *              [out] psize    - ptr to size var to return size of result data
  *
  * Returns:     DRV_RESULT: DRV_OK=Init successful
  *                          !DRV_OK= See ResultCodes.h
+ *
+ * Notes:       None
  *
  ****************************************************************************/
 RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UINT32 i;
-  BOOLEAN bInitOk; 
-  UART_DRV_PBIT_LOG  *pdest; 
+  BOOLEAN bInitOk;
+  UART_DRV_PBIT_LOG  *pdest;
 
   pdest = (UART_DRV_PBIT_LOG *) pdata;
-  memset ( pdest, 0, sizeof(UART_DRV_PBIT_LOG) ); 
-  pdest->result = DRV_OK; 
-  
-  *psize = sizeof(UART_DRV_PBIT_LOG); 
-  bInitOk = TRUE; 
- 
+  memset ( pdest, 0, sizeof(UART_DRV_PBIT_LOG) );
+  pdest->result = DRV_OK;
+
+  *psize = sizeof(UART_DRV_PBIT_LOG);
+  bInitOk = TRUE;
+
   for(i = 0; i < UART_NUM_OF_UARTS; i++)
   {
     memset(&UART_Config[i], 0, sizeof(UART_Config[0]));
@@ -239,19 +241,19 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     UART_Failed[i] = FALSE;
     UART_IMR[i] = 0;
   }
-  
-  bInitOk = TRUE; 
-  for (i = 0; i < (sizeof(UART_Registers)/sizeof(REG_SETTING)); i++) 
+
+  bInitOk = TRUE;
+  for (i = 0; i < (sizeof(UART_Registers)/sizeof(REG_SETTING)); i++)
   {
-    bInitOk &= RegSet( (REG_SETTING_PTR) &UART_Registers[i] ); 
+    bInitOk &= RegSet( (REG_SETTING_PTR) &UART_Registers[i] );
   }
 
   // default to error condition SUCCESS
-  pdest->result = DRV_UART_PBIT_REG_INIT_FAIL; 
-  *SysLogId = DRV_ID_PSC_PBIT_REG_INIT_FAIL; 
+  pdest->result = DRV_UART_PBIT_REG_INIT_FAIL;
+  *SysLogId = DRV_ID_PSC_PBIT_REG_INIT_FAIL;
 
   // Perform PBIT only if Reg Init SUCCESS
-  if ( TRUE == STPU( bInitOk, eTpPsc1579)) 
+  if ( TRUE == STPU( bInitOk, eTpPsc1579))
   {
     /*
     SCR 1110 It is necessary to toggle the serial isolator control lines
@@ -269,7 +271,7 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     UART2_SET_TO_RX;
     UART3_SET_TO_RX;
 
-    /*Set RX/TX enable high*/   
+    /*Set RX/TX enable high*/
     UART1_SET_TO_HDX;
     UART2_SET_TO_HDX;
     UART3_SET_TO_HDX;
@@ -279,25 +281,25 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     UART3_SET_TO_FDX;
 
     pdest->result = UART_PBIT();
-    *SysLogId = DRV_ID_PSC_PBIT_FAIL;  // Note: If ->result == DRV_OK this value is ignored. 
+    *SysLogId = DRV_ID_PSC_PBIT_FAIL;  // Note: If ->result == DRV_OK this value is ignored.
   }
-  else 
+  else
   {
     // All four ports will be disabled if set of ColdFire Processor fails
     for(i = 0; i < UART_NUM_OF_UARTS; i++)
     {
-      UART_Failed[i] = TRUE; 
+      UART_Failed[i] = TRUE;
     }
-    
+
 #ifdef STE_TP
     // When doing coverage testing ensure the GSE port is valid
     UART_Failed[0] = FALSE;
 #endif
-    
+
   }
-  
+
   return pdest->result;
-  
+
 }
 
 
@@ -317,7 +319,7 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *              Interrupt Settings
  *              RxFIFO  *Optional Rx and Tx buffer extensions.
  *              TxFIFO
- *               
+ *
  *              Optional buffer extensions may be used, however the hardware provides
  *              512 send and receive buffers by default
  *              A copy of the UART_Config structure is made locally, so the
@@ -326,6 +328,9 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  * Returns:     RESULT
  *                DRV_OK: Operation succeeded
  *                DRV_UART_ERR_PORT_NOT_OPEN: Operation failed, port already open
+ *
+ * Notes:       None
+ *
  ****************************************************************************/
 RESULT UART_OpenPort(UART_CONFIG* Config)
 {
@@ -333,7 +338,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
   BOOLEAN bInitOk;
   RESULT result;
   UINT32 port;
-  
+
   bInitOk = FALSE;
   result = DRV_OK;
   port = (UINT32)Config->Port;
@@ -350,125 +355,125 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
     memcpy(&UART_Config[port], Config, sizeof(UART_CONFIG));
     // clear error counters
     memset(&UART_Status[port], 0, sizeof(UART_STATUS));
-    
-    //Set GPIO port register to enable PSC(port) signals 
+
+    //Set GPIO port register to enable PSC(port) signals
     switch (port)
     {
       case UART_0:
         bInitOk &= RegSetOrUpdate((void *) &MCF_GPIO_PAR_PSC0,
                                   (MCF_GPIO_PAR_PSC0_PAR_TXD0 | MCF_GPIO_PAR_PSC0_PAR_RXD0),
-                                  sizeof(UINT8), 0x00); 
+                                  sizeof(UINT8), 0x00);
         break;
-      
+
       case UART_1:
         bInitOk &= RegSetOrUpdate((void *) &MCF_GPIO_PAR_PSC1,
                                   (MCF_GPIO_PAR_PSC1_PAR_TXD1 | MCF_GPIO_PAR_PSC1_PAR_RXD1),
-                                  sizeof(UINT8), 0x00); 
+                                  sizeof(UINT8), 0x00);
         break;
-      
+
     case UART_2:
         bInitOk &= RegSetOrUpdate((void *) &MCF_GPIO_PAR_PSC2,
                                   (MCF_GPIO_PAR_PSC2_PAR_TXD2 | MCF_GPIO_PAR_PSC2_PAR_RXD2),
-                                  sizeof(UINT8), 0x00); 
+                                  sizeof(UINT8), 0x00);
         break;
-      
+
     case UART_3:
         bInitOk &= RegSetOrUpdate((void *) &MCF_GPIO_PAR_PSC3,
                                   (MCF_GPIO_PAR_PSC3_PAR_TXD3 |MCF_GPIO_PAR_PSC3_PAR_RXD3),
-                                  sizeof(UINT8), 0x00); 
+                                  sizeof(UINT8), 0x00);
         break;
-      
+
     default:
        FATAL("Unrecognized UART Port = %d", port);
        break;
     }
-  
+
     //Put PSC in UART mode
-    bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_SICR(port), MCF_PSC_SICR_SIM_UART, 
-                              sizeof(UINT8), 0x00); 
-       
-    //Generate the Rx and Tx baud rate from the System Clock - Write Only Register 
+    bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_SICR(port), MCF_PSC_SICR_SIM_UART,
+                              sizeof(UINT8), 0x00);
+
+    //Generate the Rx and Tx baud rate from the System Clock - Write Only Register
     MCF_PSC_CSR(port) = (0
-        | MCF_PSC_CSR_RCSEL_SYS_CLK 
+        | MCF_PSC_CSR_RCSEL_SYS_CLK
         | MCF_PSC_CSR_TCSEL_SYS_CLK);
-  
-    //Calculate baud settings - Counter Can not verify / check. 
+
+    //Calculate baud settings - Counter Can not verify / check.
     divider = (UINT16)((UART_SYSTEM_CLOCK_MHZ*1000000)/(Config->BPS * 32));
     MCF_PSC_CTUR(port) =  (UINT8) ((divider >> 8) & 0xFF);
     MCF_PSC_CTLR(port) =  (UINT8) (divider & 0xFF);
-    
-    //Reset transmitter, receiver, mode register, and error conditions - Write Only Register 
+
+    //Reset transmitter, receiver, mode register, and error conditions - Write Only Register
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_RX;
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_TX;
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_ERROR;
     MCF_PSC_CR(port) = MCF_PSC_CR_BKCHGINT;
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_MR;
-  
-    //Configure parity, word size, and set RX interrupt to FIFO full 
-    //Register access require double access as this register is PSCMR1/PSCMR2 
+
+    //Configure parity, word size, and set RX interrupt to FIFO full
+    //Register access require double access as this register is PSCMR1/PSCMR2
     //                                                 (Ref 27-5 MCF Reference)
     //First Access to MCF_PSC_MR is PSCMR1n
     MCF_PSC_MR(port) = (((Config->Parity)&0x07)<<2) | //This sets PM and PT at same time
                           MCF_PSC_MR_BC(Config->DataBits) |
                           MCF_PSC_MR_RXIRQ ;
-  
+
     //Configure loopback and stop bits
     // Second Access to MCF_PSC_MR is PSCMR2n
-    MCF_PSC_MR(port) = ((Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0) | 
+    MCF_PSC_MR(port) = ((Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0) |
                          MCF_PSC_MR_SB(Config->StopBits));
-    
+
     // Check PSCMR1n and then PSCMR2n settings of MCF_PSC_MR. Need to reset pointer to PSCMR1n
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_MR;
-    
-    // Need to mask away MCF_PSC_MR_ERR as this is read only and 
-    // in current version always set to "1" ! 
-    CHECK_SETTING ( (MCF_PSC_MR(port) & (~MCF_PSC_MR_ERR)), 
-                    ( (((Config->Parity)&0x07)<<2) | 
-                       MCF_PSC_MR_BC(Config->DataBits) | 
-                       MCF_PSC_MR_RXIRQ), 
-                    bInitOk); 
-                                                  
-    CHECK_SETTING ( MCF_PSC_MR(port), 
-                    ( ( (Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0) 
-                        | MCF_PSC_MR_SB(Config->StopBits) ) ), 
-                    bInitOk ); 
-  
-  
+
+    // Need to mask away MCF_PSC_MR_ERR as this is read only and
+    // in current version always set to "1" !
+    CHECK_SETTING ( (MCF_PSC_MR(port) & (~MCF_PSC_MR_ERR)),
+                    ( (((Config->Parity)&0x07)<<2) |
+                       MCF_PSC_MR_BC(Config->DataBits) |
+                       MCF_PSC_MR_RXIRQ),
+                    bInitOk);
+
+    CHECK_SETTING ( MCF_PSC_MR(port),
+                    ( ( (Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0)
+                        | MCF_PSC_MR_SB(Config->StopBits) ) ),
+                    bInitOk );
+
+
     //If a software FIFO is defined, enable RX FIFO Full interrupt
-    ASSERT ( Config->RxFIFO == NULL ) 
+    ASSERT ( Config->RxFIFO == NULL )
 /*  Uncomment if SW Rx FIFO Buffer is used in the future
     if(Config->RxFIFO != NULL)
     {
       UART_SET_IMR_B(port,MCF_PSC_IMR_RXRDY_FU);
     }
-*/    
-    
+*/
+
     //Interrupt when RX is half full
-     bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_RFAR(port), 
-                                MCF_PSC_RFAR_ALARM(256), 
-                                sizeof(UINT16), 
-                                0x00); 
-    
+     bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_RFAR(port),
+                                MCF_PSC_RFAR_ALARM(256),
+                                sizeof(UINT16),
+                                0x00);
+
     //Interrupt when TX has fewer than 10 chars to TX
-     bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_TFAR(port), 
-                                MCF_PSC_TFAR_ALARM(10), 
-                                sizeof(UINT16), 
-                                0x00); 
-    
-    // Write Only Register 
+     bInitOk &= RegSetOrUpdate((void *) &MCF_PSC_TFAR(port),
+                                MCF_PSC_TFAR_ALARM(10),
+                                sizeof(UINT16),
+                                0x00);
+
+    // Write Only Register
     MCF_PSC_CR(port) =(0
         | MCF_PSC_CR_RX_ENABLED
         | MCF_PSC_CR_TX_ENABLED);
-  
-    //Set GPIO port register to enable PSC(port) signals 
+
+    //Set GPIO port register to enable PSC(port) signals
     switch (port)
     {
     case UART_0:
        // Not possible to set port as full duplex
-       ASSERT (Config->Duplex != UART_CFG_DUPLEX_FULL); 
-       
+       ASSERT (Config->Duplex != UART_CFG_DUPLEX_FULL);
+
        break;
-  
+
     case UART_1:
       if(Config->Duplex == UART_CFG_DUPLEX_FULL)
       {
@@ -479,7 +484,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
         UART1_SET_TO_HDX;
       }
       break;
-  
+
     case UART_2:
       if(Config->Duplex == UART_CFG_DUPLEX_FULL)
       {
@@ -490,7 +495,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
         UART2_SET_TO_HDX;
       }
       break;
-  
+
     case UART_3:
       if(Config->Duplex == UART_CFG_DUPLEX_FULL)
       {
@@ -501,27 +506,27 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
         UART3_SET_TO_HDX;
       }
       break;
-  
+
     default:
       FATAL("Unrecognized UART Port = %d", port);
       break;
     }
-    
-#ifdef WIN32  
+
+#ifdef WIN32
 /*vcast_dont_instrument_start*/
     bInitOk = TRUE;
 /*vcast_dont_instrument_end*/
 #endif
   }
-  
+
   if ( bInitOk  )
   {
     //Ensure the port is opened in case this was not set TRUE in the Config parameter
     UART_Config[port].Open = TRUE;
   }
-  else 
+  else
   {
-    result = DRV_UART_ERR_PORT_NOT_OPEN; 
+    result = DRV_UART_ERR_PORT_NOT_OPEN;
     UART_Failed[port] = TRUE;
   }
 
@@ -577,7 +582,7 @@ void UART_ClosePort(UINT8 Port)
     break;
   }
 
-  // Write Only Register 
+  // Write Only Register
   MCF_PSC_CR(Port) =(0
       | MCF_PSC_CR_RX_DISABLED
       | MCF_PSC_CR_TX_DISABLED);
@@ -596,7 +601,7 @@ void UART_ClosePort(UINT8 Port)
  * Notes:
  ****************************************************************************/
 void UART_Purge(UINT8 Port)
-{ 
+{
   UINT32 intrLevel;
   ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
@@ -607,17 +612,17 @@ void UART_Purge(UINT8 Port)
   __RIR(intrLevel);
 
   //Flush SW FIFOs (if present)
-  ASSERT ( UART_Config[Port].RxFIFO == NULL ); 
-/* Uncomment if SW_Rx_FIFO are used   
+  ASSERT ( UART_Config[Port].RxFIFO == NULL );
+/* Uncomment if SW_Rx_FIFO are used
   if( UART_Config[Port].RxFIFO != NULL )
   {
     FIFO_Flush(UART_Config[Port].RxFIFO);
   }
-*/  
+*/
 
-  ASSERT ( UART_Config[Port].TxFIFO == NULL ); 
-/* Although SW TX fifo used in GSE, the UART_Purge is never called from 
-   GSE.  If used by GSE, uncomment code below. 
+  ASSERT ( UART_Config[Port].TxFIFO == NULL );
+/* Although SW TX fifo used in GSE, the UART_Purge is never called from
+   GSE.  If used by GSE, uncomment code below.
   if( UART_Config[Port].TxFIFO != NULL )
   {
     FIFO_Flush(UART_Config[Port].TxFIFO);
@@ -633,15 +638,15 @@ void UART_Purge(UINT8 Port)
 
   //If a software FIFO is defined, enable RX FIFO Full interrupt
 
-  ASSERT ( UART_Config[Port].RxFIFO == NULL ); 
-/* Uncomment if SW_Rx FIFO are used  
+  ASSERT ( UART_Config[Port].RxFIFO == NULL );
+/* Uncomment if SW_Rx FIFO are used
   if(UART_Config[Port].RxFIFO != NULL)
   {
     intrLevel = __DIR();
     UART_SET_IMR_B(Port,MCF_PSC_IMR_RXRDY_FU);
     __RIR(intrLevel);
   }
-*/  
+*/
 
 }
 
@@ -664,7 +669,7 @@ void UART_Purge(UINT8 Port)
  * Returns:     DRV_RESULT: DRV_OK="Size" number of bytes copied to FIFO.
  *                          DRV_UART_TX_OVERFLOW= < Size bytes were copied
  *                          Other = See ResultCodes.h
- *              
+ *
  * Notes:
  ****************************************************************************/
 RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
@@ -673,7 +678,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
 
   UINT16 BytesSent = 0;
   RESULT result = DRV_OK;
-  
+
   ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
 
@@ -697,7 +702,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
       break;
   }
 
-  //NO SOFTWARE FIFO - Use hardware FIFO only  
+  //NO SOFTWARE FIFO - Use hardware FIFO only
   if(UART_Config[Port].TxFIFO == NULL)
   {
     BytesSent = UART_Write( Port, Data, Size );
@@ -713,7 +718,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
       // Which one is less
       BytesSent = MIN( fifoFree, Size);
       FIFO_PushBlock(UART_Config[Port].TxFIFO, Data, BytesSent);
-      
+
       intrLevel = __DIR();
       UART_SET_IMR_B(Port,MCF_PSC_IMR_TXRDY);
       __RIR(intrLevel);
@@ -729,7 +734,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
   //to TX
   if(Size != BytesSent)
   {
-    UART_Status[Port].TxOverflowErrCnt++;  
+    UART_Status[Port].TxOverflowErrCnt++;
     result = DRV_UART_TX_OVERFLOW;
   }
 
@@ -737,14 +742,14 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
   {
     *Sent = BytesSent;
   }
-  
+
   return result;
 }
 
 /*****************************************************************************
 * Function:    UART_Write
 *
-* Description: Actual Copy of data (Data) of (Size) to the Tx FIFO for 
+* Description: Actual Copy of data (Data) of (Size) to the Tx FIFO for
 *              transmission via the selected UART (Port).  Copy until the Tx
 *              FIFO is full or all data is written.
 *
@@ -753,7 +758,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
 *              [in] Size: Size of the data in the Data buffer
 *
 * Returns:     The number of bytes written to the FIFO
-*              
+*
 * Notes:
 ****************************************************************************/
 UINT16 UART_Write(  UINT8 Port, const INT8* Data, UINT16 Size)
@@ -763,7 +768,7 @@ UINT16 UART_Write(  UINT8 Port, const INT8* Data, UINT16 Size)
     while( (MCF_PSC_TFCNT(Port) < UART_MCF_PSC_FIFO_SIZE) && Size > BytesSent)
     {
         //Must cast TX buffer as Byte* to generate MOVE.B
-        *((UINT8 *) &MCF_PSC_TB(Port)) = *(Data + BytesSent);  
+        *((UINT8 *) &MCF_PSC_TB(Port)) = *(Data + BytesSent);
         BytesSent++;
     }
 #else
@@ -811,11 +816,11 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
 #ifndef WIN32
   UINT32 intrLevel;
 #endif
- 
+
   ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
-               
-  if ( result == DRV_OK ) 
+
+  if ( result == DRV_OK )
   {
     //Check for hardware or RX overflow errors
     if(MCF_PSC_SR(Port) & MCF_PSC_SR_OE)
@@ -827,46 +832,46 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
       MCF_PSC_CR(Port) = MCF_PSC_CR_RESET_ERROR;
       MCF_PSC_CR(Port) = MCF_PSC_CR_RX_ENABLED;
       ASSERT ( UART_Config[Port].RxFIFO == NULL );
-/*    Uncomment if Rx SW FIFO are defined       
+/*    Uncomment if Rx SW FIFO are defined
       if(UART_Config[Port].RxFIFO != NULL)
       {
         FIFO_Flush(UART_Config[Port].RxFIFO);
       }
-*/      
+*/
     }
     if(MCF_PSC_SR(Port) & MCF_PSC_SR_FE_PHYERR)
     {
       result = DRV_UART_RX_HW_ERROR;
-      UART_Status[Port].FramingErrCnt++;  
+      UART_Status[Port].FramingErrCnt++;
       //Reset RX and RX FIFO, then reset error flags and re-enable RX.
       MCF_PSC_CR(Port) = MCF_PSC_CR_RESET_RX;
       MCF_PSC_CR(Port) = MCF_PSC_CR_RESET_ERROR;
       MCF_PSC_CR(Port) = MCF_PSC_CR_RX_ENABLED;
       ASSERT ( UART_Config[Port].RxFIFO == NULL );
-/*    Uncomment if Rx SW FIFO are defined      
+/*    Uncomment if Rx SW FIFO are defined
       if(UART_Config[Port].RxFIFO != NULL)
       {
         FIFO_Flush(UART_Config[Port].RxFIFO);
       }
-*/      
+*/
     }
     if(MCF_PSC_SR(Port) & MCF_PSC_SR_PE_CRCERR)
     {
       result = DRV_UART_RX_HW_ERROR;
-      UART_Status[Port].ParityErrCnt++;  
+      UART_Status[Port].ParityErrCnt++;
       //Reset RX and RX FIFO, then reset error flags and re-enable RX.
       MCF_PSC_CR(Port) = MCF_PSC_CR_RESET_RX;
       MCF_PSC_CR(Port) = MCF_PSC_CR_RESET_ERROR;
       MCF_PSC_CR(Port) = MCF_PSC_CR_RX_ENABLED;
       ASSERT ( UART_Config[Port].RxFIFO == NULL );
-/*    Uncomment if Rx SW FIFO are defined        
+/*    Uncomment if Rx SW FIFO are defined
       if(UART_Config[Port].RxFIFO != NULL)
       {
         FIFO_Flush(UART_Config[Port].RxFIFO);
       }
-*/      
+*/
     }
-  
+
     if(DRV_OK == result)
     {
       //Check for data in the Rx SW FIFO if SW FIFO enabled,
@@ -881,7 +886,7 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
           ReadCount++;
           }
       }
-      */  
+      */
       //Read data (if available) from the RX HW FIFO
       //Disable interrupts until one byte is read, to prevent a race condition
       //interrupting between testing the HW FIFO count and reading the first byte
@@ -889,7 +894,7 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
       intrLevel = __DIR();
       while(MCF_PSC_RFCNT(Port) > 0 && ReadCount < Size)
       {
-        ReadCount++;      
+        ReadCount++;
         *Data++ = *((UINT8 *) &MCF_PSC_RB(Port)); // Cast RX buffer as Byte* to generate MOVE.B
       }
       __RIR(intrLevel); // move to after While loop in case there is nothing in the HW FIFO
@@ -898,9 +903,9 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
       ReadCount = hw_UART_Receive( Port, Data, Size);
   /*vcast_dont_instrument_end*/
   #endif
-  
+
     }
-  
+
     if( BytesReceived != NULL )
     {
       *BytesReceived = ReadCount;
@@ -917,8 +922,11 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
  *
  * Parameters:  port (i) - which port to check
  *
- * Returns:     TRUE when the Interrupt monitor has failed, 
+ * Returns:     TRUE when the Interrupt monitor has failed,
  *              FALSE otherwise
+ *
+ * Notes:       None
+ *
  ****************************************************************************/
 BOOLEAN UART_IntrMonitor( UINT8 port)
 {
@@ -936,12 +944,12 @@ BOOLEAN UART_IntrMonitor( UINT8 port)
  *              This function should be called frequently enough to ensure the
  *              port will be reset to receive before the connected device
  *              enters transmit mode.
- *              
+ *
  * Parameters:  None
  *
  * Returns:     UINT8: Bit fields [0:3] set bit indicates UART port 0:3 is
  *                     currently transmitting respectively.
- *              
+ *
  * Notes:       This function has been made interrupt safe, so it may be
  *              called in the idle loop.
  ****************************************************************************/
@@ -953,46 +961,46 @@ UINT8 UART_CheckForTXDone(void)
  BOOLEAN fifoEmpty = TRUE;
 
   for(i = 0; i < UART_NUM_OF_UARTS; i++)          //Check all ports, if open
-  { 
+  {
     intrLevel = __DIR();
     if (UART_Config[i].Open)
-    {                                             //Initial assumption, 
+    {                                             //Initial assumption,
                                                   //set UART_TRANSMITTING flag
       if ( UART_Config[i].TxFIFO != NULL && UART_Config[i].TxFIFO->Cnt != 0)
       {
          fifoEmpty = FALSE;
       }
 
-      TxFlags |= 1<<i;                            
-      if ( fifoEmpty && (MCF_PSC_SR(i) & MCF_PSC_SR_TXEMP_URERR)) 
+      TxFlags |= 1<<i;
+      if ( fifoEmpty && (MCF_PSC_SR(i) & MCF_PSC_SR_TXEMP_URERR))
       {                                           //If TX shifter is empty, set to RX mode
         switch(i)                                 //and clear the UART_TRANSMITTING flag
         {
-          case UART_0:                                 
+          case UART_0:
             UART0_SET_TO_RX;
             TxFlags &= ~UART0_TRANSMITTING;
             break;
-          
+
           case UART_1:
             UART1_SET_TO_RX;
-            TxFlags &= ~UART1_TRANSMITTING;            
+            TxFlags &= ~UART1_TRANSMITTING;
             break;
-          
+
           case UART_2:
             UART2_SET_TO_RX;
-            TxFlags &= ~UART2_TRANSMITTING;            
+            TxFlags &= ~UART2_TRANSMITTING;
             break;
-          
+
           case UART_3:
-            UART3_SET_TO_RX;          
+            UART3_SET_TO_RX;
             TxFlags &= ~UART3_TRANSMITTING;
-            break; 
-            
-          default: 
-            FATAL("Unrecognized UART Port = %d", i); 
-            break; 
+            break;
+
+          default:
+            FATAL("Unrecognized UART Port = %d", i);
+            break;
         }
-      }   
+      }
     }
     __RIR(intrLevel);
   }
@@ -1007,8 +1015,8 @@ UINT8 UART_CheckForTXDone(void)
  *              counts exceed the configured threshold, then resets the count
  *              for that particular fault.  Even if multiple errors are
  *              present, this routine will return only one fault per call.
- *              
- *              
+ *
+ *
  * Parameters:  none
  *
  * Returns:     RESULT code: DRV_OK = No CBIT faults detected
@@ -1016,7 +1024,7 @@ UINT8 UART_CheckForTXDone(void)
  *
  * Notes:
  ****************************************************************************/
-/* 
+/*
 RESULT UART_CBIT(void)
 {
  RESULT result = DRV_OK;
@@ -1066,17 +1074,17 @@ RESULT UART_CBIT(void)
  * Function:    UART_BITStatus
  *
  * Description: Returns the current BIT counters for the UART Interface
- *              
- * Parameters:  ch - UART channel 
  *
- * Returns:     UART_STATUS - structure for uart channel 
+ * Parameters:  ch - UART channel
+ *
+ * Returns:     UART_STATUS - structure for uart channel
  *
  * Notes:       none
  *
  ****************************************************************************/
 UART_STATUS UART_BITStatus (UINT8 Port)
 {
-  return ( UART_Status[Port] ); 
+  return ( UART_Status[Port] );
 }
 
 
@@ -1085,11 +1093,11 @@ UART_STATUS UART_BITStatus (UINT8 Port)
  * Description: INTERRUPT SERVICE ROUTINE for PSC0
  *              This routine handles RX FIFO, TX FIFO, and Bus Error interrupt
  *              causes
- *              
+ *
  * Parameters:  None
- *              
+ *
  * Returns:     None
- *              
+ *
  * Notes:
  ****************************************************************************/
 __interrupt void UART_PSC0_ISR(void)
@@ -1102,11 +1110,11 @@ __interrupt void UART_PSC0_ISR(void)
  * Description: INTERRUPT SERVICE ROUTINE for PSC1
  *              This routine handles RX FIFO, TX FIFO, and Bus Error interrupt
  *              causes
- *              
+ *
  * Parameters:  None
- *              
+ *
  * Returns:     None
- *              
+ *
  * Notes:
  ****************************************************************************/
 __interrupt void UART_PSC1_ISR(void)
@@ -1119,11 +1127,11 @@ __interrupt void UART_PSC1_ISR(void)
  * Description: INTERRUPT SERVICE ROUTINE for PSC2
  *              This routine handles RX FIFO, TX FIFO, and Bus Error interrupt
  *              causes
- *              
+ *
  * Parameters:  None
- *              
+ *
  * Returns:     None
- *              
+ *
  * Notes:
  ****************************************************************************/
 __interrupt void UART_PSC2_ISR(void)
@@ -1136,11 +1144,11 @@ __interrupt void UART_PSC2_ISR(void)
  * Description: INTERRUPT SERVICE ROUTINE for PSC3
  *              This routine handles RX FIFO, TX FIFO, and Bus Error interrupt
  *              causes
- *              
+ *
  * Parameters:  None
- *              
+ *
  * Returns:     None
- *              
+ *
  * Notes:
  ****************************************************************************/
 __interrupt void UART_PSC3_ISR(void)
@@ -1153,11 +1161,11 @@ __interrupt void UART_PSC3_ISR(void)
 * Description: INTERRUPT SERVICE ROUTINE for PSCx
 *              This routine handles RX FIFO, TX FIFO, and Bus Error interrupt
 *              causes
-*              
+*
 * Parameters:  [in] Port (i): the port number
-*              
+*
 * Returns:     None
-*              
+*
 * Notes:
 ****************************************************************************/
 void UART_PSCX_ISR( INT8 port)
@@ -1174,7 +1182,7 @@ void UART_PSCX_ISR( INT8 port)
   UINT32  entryTime;
   UINT8   buf[512];
   INT32   i,count;
-  
+
   entryTime = TTMR_GetHSTickCount() / TTMR_HS_TICKS_PER_uS;
   pUartCfg = &UART_Config[port];
   pUartSts = &UART_Status[port];
@@ -1192,7 +1200,7 @@ void UART_PSCX_ISR( INT8 port)
     FIFO_PopBlock(pUartCfg->TxFIFO,buf,count);
     for(i = 0;i<count;i++)
     {
-      *((UINT8 *) &MCF_PSC_TB(port)) = buf[i];      
+      *((UINT8 *) &MCF_PSC_TB(port)) = buf[i];
     }
     if(pUartCfg->TxFIFO->CmpltCnt == 0)  //No more bytes to TX, shut off TX empty int.
     {
@@ -1211,12 +1219,12 @@ void UART_PSCX_ISR( INT8 port)
   }
   else
   {
-    FATAL( "Spurious UART Rx Interrupt Port(%d) ISR(0x%x) Mask(0x%x)", 
+    FATAL( "Spurious UART Rx Interrupt Port(%d) ISR(0x%x) Mask(0x%x)",
       port, *isr[port], MCF_PSC_IMR(port));
   }
 
   // check interrupt count limit exceeded
-  if ( pUartSts->TxIntrCnt > UART_MAX_INTERRUPT_CNT) 
+  if ( pUartSts->TxIntrCnt > UART_MAX_INTERRUPT_CNT)
   {
     pUartSts->IntFail = TRUE;
 
@@ -1244,7 +1252,7 @@ void UART_PSCX_ISR( INT8 port)
  *              If the string received does not match the string sent, or
  *              a hardware error occurs, the channel that first fails the test
  *              is returned in the result code
- *              
+ *
  * Parameters:  void
  *
  * Returns:     RESULT: DRV_OK: PBIT passed
@@ -1269,16 +1277,16 @@ RESULT UART_PBIT(void)
   UINT16 BytesReceived;
   RESULT result;
   RESULT UARTresult;
-  RESULT PBITResultCodes[UART_NUM_OF_UARTS]; 
+  RESULT PBITResultCodes[UART_NUM_OF_UARTS];
   INT8 TestStr[UART_PBIT_MSG_SIZE];
   UINT32 startTime;
- 
+
   memset(&config,0,sizeof(config));
-  result = DRV_OK; 
-  PBITResultCodes[UART_0] = DRV_UART_0_PBIT_FAILED; 
-  PBITResultCodes[UART_1] = DRV_UART_1_PBIT_FAILED; 
-  PBITResultCodes[UART_2] = DRV_UART_2_PBIT_FAILED; 
-  PBITResultCodes[UART_3] = DRV_UART_3_PBIT_FAILED; 
+  result = DRV_OK;
+  PBITResultCodes[UART_0] = DRV_UART_0_PBIT_FAILED;
+  PBITResultCodes[UART_1] = DRV_UART_1_PBIT_FAILED;
+  PBITResultCodes[UART_2] = DRV_UART_2_PBIT_FAILED;
+  PBITResultCodes[UART_3] = DRV_UART_3_PBIT_FAILED;
   strncpy_safe( TestStr, UART_PBIT_MSG_SIZE, "Test Message", _TRUNCATE );
 
   config.Port             = UART_0;
@@ -1293,8 +1301,8 @@ RESULT UART_PBIT(void)
 
   //Open each port and force each channel to transmit the
   //data by interrupt to verify the interrupts are working
-  // NOTE: Expect UART_OpenPort() to return only DRV_UART_ERR_PORT_NOT_OPEN otherwise the 
-  //   "result != " logic need to be updated. 
+  // NOTE: Expect UART_OpenPort() to return only DRV_UART_ERR_PORT_NOT_OPEN otherwise the
+  //   "result != " logic need to be updated.
   result |= UART_OpenPort(&config);
 
   config.Duplex = UART_CFG_DUPLEX_FULL;     // all other ports full duplex
@@ -1306,8 +1314,8 @@ RESULT UART_PBIT(void)
 
   config.Port = UART_3;
   result |= UART_OpenPort(&config);
-  
-  // Perform test only if _OpenPort() is successful 
+
+  // Perform test only if _OpenPort() is successful
 
   //Transmit a short string out each port, and receive/verify it
   for(i = 0; i < UART_NUM_OF_UARTS; i++)
@@ -1321,21 +1329,21 @@ RESULT UART_PBIT(void)
   // delay 2ms for Tx to occur.
   startTime = TTMR_GetHSTickCount();
   while ( (TTMR_GetHSTickCount() - startTime) < (2*TICKS_PER_mSec));
-  
+
   //Verify test string is received correctly
   for(i = 0; i < UART_NUM_OF_UARTS; i++)
   {
     if (!UART_Failed[i])
     {
       UARTresult = UART_Receive((UINT8)i, RxBuf, sizeof(TestStr), &BytesReceived);
-    
+
       if( (STPU( UARTresult, eTpPsc1580) != DRV_OK) ||
           (BytesReceived != sizeof(TestStr)) ||
           (strncmp(TestStr, RxBuf, sizeof(TestStr)) != 0) )
       {
         result = PBITResultCodes[i];
         UART_Failed[i] = TRUE;
-      } 
+      }
     }
   }
 
@@ -1349,7 +1357,7 @@ RESULT UART_PBIT(void)
   {
     UART_ClosePort((UINT8)i);
   }
-  
+
   return result;
 }
 
@@ -1357,29 +1365,34 @@ RESULT UART_PBIT(void)
  *  MODIFICATIONS
  *    $History: UART.c $
  * 
+ * *****************  Version 60  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 1:26p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 59  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 58  *****************
  * User: Jim Mood     Date: 2/09/12    Time: 11:20a
  * Updated in $/software/control processor/code/drivers
  * SCR:1110 Update UART Driver to toggle each duplex and direction control
  * line at startup init. Update SPI ADC clock to 200kHz
- * 
+ *
  * *****************  Version 57  *****************
  * User: Contractor V&v Date: 5/31/11    Time: 1:50p
  * Updated in $/software/control processor/code/drivers
  * SCR #1038 Misc - Update EMU150 User Table to include "show cfg" Added
  * fix for bug affecting G4E.
- * 
+ *
  * *****************  Version 56  *****************
  * User: Jeff Vahue   Date: 10/26/10   Time: 9:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #965 - Only do the Tx Control for the GSE as that is the only half
  * duplex port
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 10/26/10   Time: 8:59p
  * Updated in $/software/control processor/code/drivers
@@ -1387,125 +1400,125 @@ RESULT UART_PBIT(void)
  * on Jim's note left the Tx enable in Uart Tx in case there is no FIFO,
  * but we have FIFOs.  PBIT test still worked, assume because this is an
  * "internal" wraparound.
- * 
+ *
  * *****************  Version 54  *****************
  * User: Jim Mood     Date: 10/26/10   Time: 12:29p
  * Updated in $/software/control processor/code/drivers
- * SCR 965 UART Direction Control 
- * 
+ * SCR 965 UART Direction Control
+ *
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 10/17/10   Time: 2:17p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage/WIN32 execution
- * 
+ *
  * *****************  Version 52  *****************
  * User: Jim Mood     Date: 10/12/10   Time: 2:12p
  * Updated in $/software/control processor/code/drivers
  * SCR 927 Modfix of uart race condition
- * 
+ *
  * *****************  Version 51  *****************
  * User: Jim Mood     Date: 10/11/10   Time: 5:04p
  * Updated in $/software/control processor/code/drivers
  * SCR 927 UART Half duplex direction control race condition
- * 
+ *
  * *****************  Version 50  *****************
  * User: Peter Lee    Date: 10/01/10   Time: 5:34p
  * Updated in $/software/control processor/code/drivers
- * SCR #917 Code coverage and code review updates 
- * 
+ * SCR #917 Code coverage and code review updates
+ *
  * *****************  Version 49  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 5:42p
  * Updated in $/software/control processor/code/drivers
  * SCR 904 Code Coverage changes
- * 
+ *
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 9/10/10    Time: 4:46p
  * Updated in $/software/control processor/code/drivers
  * SCR# 853 - UART Interrupt Monitor mods
- * 
+ *
  * *****************  Version 47  *****************
  * User: Jim Mood     Date: 9/09/10    Time: 4:12p
  * Updated in $/software/control processor/code/drivers
  * SCR 863 Fix for YMODEM lockup issue
- * 
+ *
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 9/03/10    Time: 8:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 853 - UART Int Monitor
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 9/02/10    Time: 4:34p
  * Updated in $/software/control processor/code/drivers
  * SCR# 847 - Fix Tx Stops error
- * 
+ *
  * *****************  Version 44  *****************
  * User: Peter Lee    Date: 8/30/10    Time: 10:24a
  * Updated in $/software/control processor/code/drivers
  * SCR #835 UartMgr - PBIT SysCond for UART_PBIT_REG_INIT_FAIL failure
- * 
+ *
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 8/29/10    Time: 3:52p
  * Updated in $/software/control processor/code/drivers
  * SCR# 830 - Code Coverage Enhancement
- * 
+ *
  * *****************  Version 42  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 5:11p
  * Updated in $/software/control processor/code/drivers
  * SCR 760 YMODEM half duplex timing issues
- * 
+ *
  * *****************  Version 41  *****************
  * User: Peter Lee    Date: 7/29/10    Time: 9:41p
  * Updated in $/software/control processor/code/drivers
- * SCR #737 Remove func with dead code cases 
- * 
+ * SCR #737 Remove func with dead code cases
+ *
  * *****************  Version 40  *****************
  * User: Peter Lee    Date: 7/29/10    Time: 7:53p
  * Updated in $/software/control processor/code/drivers
  * SCR #698 Code Review Updates
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/drivers
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 38  *****************
  * User: Peter Lee    Date: 7/20/10    Time: 7:24p
  * Updated in $/software/control processor/code/drivers
  * SCR #719 Update code to copy Uart Drv BIT cnt to Uart Mgr Status
- * 
+ *
  * *****************  Version 37  *****************
  * User: Jeff Vahue   Date: 7/20/10    Time: 2:49p
  * Updated in $/software/control processor/code/drivers
  * SCR# 717,718 - Uart Close always (718) not returning the right readByte
  * count when an error exists.
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:34p
  * Updated in $/software/control processor/code/drivers
  * SCR# 707 - Code Coverage TP
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jeff Vahue   Date: 7/17/10    Time: 5:46p
  * Updated in $/software/control processor/code/drivers
  * SCR# 707 - Add TestPoints for code coverage.
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor2  Date: 7/14/10    Time: 3:05p
  * Updated in $/software/control processor/code/drivers
  * SCR #181 Enhancements - UART Driver
  * If the UART PBIT declares the UART Bad, UART Open should return
  * failure.
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:31p
  * Updated in $/software/control processor/code/drivers
  * SCR #8 Implementation: External Interrupt Monitors
- * 
+ *
  * *****************  Version 32  *****************
  * User: Jeff Vahue   Date: 6/07/10    Time: 10:46a
  * Updated in $/software/control processor/code/drivers
  * Remove Window Emulation execution restrictions
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor2  Date: 5/28/10    Time: 1:35p
  * Updated in $/software/control processor/code/drivers
@@ -1513,116 +1526,116 @@ RESULT UART_PBIT(void)
  * Reset port registers to initial values on port close.
  * Code standard fixes including line length, spacing and elimination of
  * magic numbers.
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor2  Date: 4/15/10    Time: 2:19p
  * Updated in $/software/control processor/code/drivers
  * Fixed SCR 55: UART error counters cleared when a port is opened.
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor3  Date: 4/09/10    Time: 12:17p
  * Updated in $/software/control processor/code/drivers
  * SCR #539 Updated for Code Review
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:09p
  * Updated in $/software/control processor/code/drivers
  * SCR #317 Implement safe strncpy,SCR #70 Store/Restore interrupt
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #483 - Function Naming
  * SCR# 452 - Code Coverage Improvements
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 3/05/10    Time: 11:30a
  * Updated in $/software/control processor/code/drivers
  * SCR# 477 - Fix Interrupt Enable/disable sequence and some typos
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 4:58p
  * Updated in $/software/control processor/code/drivers
  * SCR# 455 - remove LINT issues
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 12:57p
  * Updated in $/software/control processor/code/drivers
  * SCR# 455 - remove LINT issues
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 12:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 404 - Change if/then to ASSERT in UART_Transmit
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:24p
  * Updated in $/software/control processor/code/drivers
  * SCR 371, 377
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:34p
  * Updated in $/software/control processor/code/drivers
  * SCR# 378
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 3:47p
  * Updated in $/software/control processor/code/drivers
  * Implementing SCR 172 ASSERT processing for all "default" case
  * processing
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 10/30/09   Time: 3:46p
  * Updated in $/software/control processor/code/drivers
  * SCR #315 CBIT Reg Check
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 10/20/09   Time: 6:49p
  * Updated in $/software/control processor/code/drivers
  * Updates for JV to support PC version of program
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 10/08/09   Time: 6:13p
  * Updated in $/software/control processor/code/drivers
  * SCR #283
- * 
+ *
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 10/01/09   Time: 2:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #283 Misc Code Review Updates
- * 
+ *
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:01p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:59p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * Manually initialized declared var in UART_PBIT(). 
- * 
+ * Manually initialized declared var in UART_PBIT().
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 8/31/09    Time: 6:29p
  * Updated in $/software/control processor/code/drivers
  * SCR #202 Extra NULL byte added to long output strings
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 10/29/08   Time: 2:06p
  * Updated in $/control processor/code/drivers
  * Fixed "processor runs at half speed" problem, caused by an unmasked
  * interrupt.  See SCR #22 and #82.  Also addressed SCR #56
- * 
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 2:02p
  * Updated in $/control processor/code/drivers
  * SCR #87 Function Prototype
- * 
+ *
  *
  ***************************************************************************/
  

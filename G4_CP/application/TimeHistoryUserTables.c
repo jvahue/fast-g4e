@@ -63,7 +63,7 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_OFF          },
+USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_1HZ          },
                                               { "1HZ"  , TH_1HZ          },
                                               { "2HZ"  , TH_2HZ          }, 
                                               { "4HZ"  , TH_4HZ          }, 

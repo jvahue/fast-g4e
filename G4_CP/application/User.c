@@ -166,7 +166,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
                                         USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max);
 
-static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
+static BOOLEAN BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
                              USER_RANGE *Min, USER_RANGE *Max);
 
 
@@ -1394,7 +1394,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
         result = TRUE;
       }
       break;
-
+      
     case USER_TYPE_FLOAT64:
       /* FLOAT64 type
          - check min/max bounds incl. the min/max value a float64 can represent.
@@ -2350,7 +2350,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_FLOAT:
         *(FLOAT32*)Param.Ptr = *(FLOAT32*)SetPtr;
         break;
-
+        
       case USER_TYPE_FLOAT64:
         *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr; 
 
@@ -2724,7 +2724,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   }  
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
@@ -2801,13 +2801,13 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
 
 /******************************************************************************
-* Function:     User_BitSetIsValid
+* Function:     User_CheckBits
 *
 * Description:  Verifies that only valid bits are set in the 128 bit structure
 *
@@ -2821,7 +2821,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 * Notes:
 ******************************************************************************/
 static 
-BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
+BOOLEAN BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
                       USER_RANGE *usrMin, USER_RANGE *usrMax)
 {
 #define MAX_BIT 128

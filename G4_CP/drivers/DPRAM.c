@@ -1,25 +1,25 @@
-#define DRV_DPRAM_BODY
+#define DPRAM_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
-               
-  File:        DPRAM.c      
- 
+
+  File:        DPRAM.c
+
   Description: Dual-port RAM driver provides buffering and interrupt
                driven send and receive capiblity for communicating with the
                microserver.
 
-          
- 
+
+
   Requires:    ResultCodes.h
                Interrupt Vector "DPRAM_EP5_ISR" be placed at the Edge Port 5
                location in the interrupt vector table
-               
+
   VERSION
-  $Revision: 40 $  $Date: 8/28/12 1:06p $
-               
- 
+  $Revision: 42 $  $Date: 12-11-05 12:49p $
+
+
 ******************************************************************************/
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -46,7 +46,7 @@
 //This flexbus control reg bit is not defined in the current Freescale
 //header files for some reason, so because the DPRAM configuration needs
 //it I had to add it here.
-#ifndef MCF_FBCS_CSCR_BEM       
+#ifndef MCF_FBCS_CSCR_BEM
 #define MCF_FBCS_CSCR_BEM 0x20
 #endif //MCF_FBCS_CSCR_BEM
 
@@ -95,12 +95,12 @@ static UINT32 RxMessageCnt;
 
 static INT32  m_TxSem;            //Used for _WriteBlock. The system can
                                   //accommodate multiple preemptive writers.
-static INT32  m_RxBlockCnt;       //Number of data blocks in the RX FIFO pending 
+static INT32  m_RxBlockCnt;       //Number of data blocks in the RX FIFO pending
                                   //processing.
 static INT32  m_TxBlockCnt;       //Number of data blocks in the TX FIFO
                                   //pending transmission
 
-const REG_SETTING DPRAM_Registers[] = 
+const REG_SETTING DPRAM_Registers[] =
 {
   //Setup chip select 2 for the DPRAM
   //The addressable DPRAM space is only 16kB, but the minimum that the
@@ -110,41 +110,41 @@ const REG_SETTING DPRAM_Registers[] =
   // Assert chip select on first rising clock edge after address is asserted
   // Generate internal transfer acknowledge after 0 wait states
   // Address is held for 1 clock at end of read and write cycles
-  
+
   // SET_AND_CHECK(MCF_FBCS_CSAR2, 0x40100000, bInitOk);
-  {(void *) &MCF_FBCS_CSAR2, 0x40100000, sizeof(UINT32), 0x0, REG_SET, TRUE, 
-            RFA_FORCE_UPDATE}, 
-  
-  //SET_AND_CHECK(MCF_FBCS_CSCR2, (MCF_FBCS_CSCR_AA | MCF_FBCS_CSCR_PS(0x2) | 
-  //                               MCF_FBCS_CSCR_BEM), bInitOk); 
-  {(void *) &MCF_FBCS_CSCR2, (MCF_FBCS_CSCR_AA | MCF_FBCS_CSCR_PS(0x2) | MCF_FBCS_CSCR_BEM), 
-            sizeof(UINT32), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
-  
-  //SET_AND_CHECK(MCF_FBCS_CSMR2, MCF_FBCS_CSMR_V, bInitOk); 
-  {(void *) &MCF_FBCS_CSMR2, MCF_FBCS_CSMR_V, sizeof(UINT32), 0x0, REG_SET, TRUE, 
-            RFA_FORCE_UPDATE}, 
-  
+  {(void *) &MCF_FBCS_CSAR2, 0x40100000, sizeof(UINT32), 0x0, REG_SET, TRUE,
+            RFA_FORCE_UPDATE},
+
+  //SET_AND_CHECK(MCF_FBCS_CSCR2, (MCF_FBCS_CSCR_AA | MCF_FBCS_CSCR_PS(0x2) |
+  //                               MCF_FBCS_CSCR_BEM), bInitOk);
+  {(void *) &MCF_FBCS_CSCR2, (MCF_FBCS_CSCR_AA | MCF_FBCS_CSCR_PS(0x2) | MCF_FBCS_CSCR_BEM),
+            sizeof(UINT32), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
+
+  //SET_AND_CHECK(MCF_FBCS_CSMR2, MCF_FBCS_CSMR_V, bInitOk);
+  {(void *) &MCF_FBCS_CSMR2, MCF_FBCS_CSMR_V, sizeof(UINT32), 0x0, REG_SET, TRUE,
+            RFA_FORCE_UPDATE},
+
   //SET_CHECK_MASK_AND(MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0x3), bInitOk);
-  {(void *) &MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0x3), sizeof(UINT16), 0x0, 
-            REG_SET_MASK_AND, FALSE, RFA_FORCE_NONE}, 
-  
-  //SET_CHECK_MASK_OR(MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0), bInitOk); 
-  {(void *) &MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0), sizeof(UINT16), 0x0, REG_SET_MASK_OR, 
-            TRUE, RFA_FORCE_UPDATE}, 
-  
-  //SET_CHECK_MASK_AND(MCF_EPORT_EPDDR, MCF_EPORT_EPDDR_EPDD5, bInitOk); 
-  {(void *) &MCF_EPORT_EPDDR, MCF_EPORT_EPDDR_EPDD5, sizeof(UINT8), 0x0, REG_SET_MASK_AND, 
-            TRUE, RFA_FORCE_UPDATE}, 
-  
-  //SET_CHECK_MASK_OR(MCF_EPORT_EPIER, MCF_EPORT_EPIER_EPIE5, bInitOk); 
-  {(void *) &MCF_EPORT_EPIER, MCF_EPORT_EPIER_EPIE5, sizeof(UINT8), 0x0, REG_SET_MASK_OR, 
-            FALSE, RFA_FORCE_NONE}, 
-  
-  //SET_CHECK_MASK_AND(MCF_INTC_IMRL, (MCF_INTC_IMRL_INT_MASK5|MCF_INTC_IMRL_MASKALL), 
-  //                                   bInitOk); 
-  {(void *) &MCF_INTC_IMRL, (MCF_INTC_IMRL_INT_MASK5|MCF_INTC_IMRL_MASKALL), sizeof(UINT32), 
-            0x0, REG_SET_MASK_AND, FALSE, RFA_FORCE_NONE}, 
-}; 
+  {(void *) &MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0x3), sizeof(UINT16), 0x0,
+            REG_SET_MASK_AND, FALSE, RFA_FORCE_NONE},
+
+  //SET_CHECK_MASK_OR(MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0), bInitOk);
+  {(void *) &MCF_EPORT_EPPAR, MCF_EPORT_EPPAR_EPPA5(0), sizeof(UINT16), 0x0, REG_SET_MASK_OR,
+            TRUE, RFA_FORCE_UPDATE},
+
+  //SET_CHECK_MASK_AND(MCF_EPORT_EPDDR, MCF_EPORT_EPDDR_EPDD5, bInitOk);
+  {(void *) &MCF_EPORT_EPDDR, MCF_EPORT_EPDDR_EPDD5, sizeof(UINT8), 0x0, REG_SET_MASK_AND,
+            TRUE, RFA_FORCE_UPDATE},
+
+  //SET_CHECK_MASK_OR(MCF_EPORT_EPIER, MCF_EPORT_EPIER_EPIE5, bInitOk);
+  {(void *) &MCF_EPORT_EPIER, MCF_EPORT_EPIER_EPIE5, sizeof(UINT8), 0x0, REG_SET_MASK_OR,
+            FALSE, RFA_FORCE_NONE},
+
+  //SET_CHECK_MASK_AND(MCF_INTC_IMRL, (MCF_INTC_IMRL_INT_MASK5|MCF_INTC_IMRL_MASKALL),
+  //                                   bInitOk);
+  {(void *) &MCF_INTC_IMRL, (MCF_INTC_IMRL_INT_MASK5|MCF_INTC_IMRL_MASKALL), sizeof(UINT32),
+            0x0, REG_SET_MASK_AND, FALSE, RFA_FORCE_NONE},
+};
 
 
 /*****************************************************************************/
@@ -165,11 +165,11 @@ static void    DPRAM_RxFromDPRAM(void);
  *              writes a test pattern to the entire accessable
  *              memory, except for the interrupt flag locations.  All
  *              bits in the memory array, except for interrupt flag locations,
- *              are cleared to zero at the exit of this routine.  
+ *              are cleared to zero at the exit of this routine.
  *
  * Parameters:  SysLogId - ptr to the SYS_APP_ID
- *              pdata    - ptr to return DPRAM_PBIT fail data 
- *              psize    - ptr to return the size of DPRAM_PBIT fail data 
+ *              pdata    - ptr to return DPRAM_PBIT fail data
+ *              psize    - ptr to return the size of DPRAM_PBIT fail data
  *
  * Returns:     DRV_OK: Initialized sucessfully
  *              !DRV_OK: See ResultCodes.h
@@ -177,16 +177,16 @@ static void    DPRAM_RxFromDPRAM(void);
  * Notes:       This PBIT erases the entire array, it is assumed the
  *              Micro-Sever is in reset or otherwise not attempting to access
  *              the dual-port memory.
- *              
+ *
  ****************************************************************************/
 //RESULT DPRAM_Init(void)
 RESULT DPRAM_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UINT32 i;
   UINT8* ptr;
-  BOOLEAN bInitOk; 
-  DPRAM_RAM_TEST_RESULT *dpram_result; 
-  DPRAM_DRV_PBIT_LOG  *pdest; 
+  BOOLEAN bInitOk;
+  DPRAM_RAM_TEST_RESULT *dpram_result;
+  DPRAM_DRV_PBIT_LOG  *pdest;
 
   //Initialize local FIFOs for buffering DPRAM data
   FIFO_Init(&DPRAM_TxFIFO, DPRAM_TxBuf, DPRAM_LOCAL_BUF_SIZE);
@@ -198,48 +198,48 @@ RESULT DPRAM_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   m_TxSem      = 0;
   m_TxBlockCnt = 0;
   m_RxBlockCnt = 0;
-  
+
   memset ( (void *) &m_DPRAM_Status, 0x00, sizeof(DPRAM_STATUS));
   m_DPRAM_Status.minIntrTime = (UINT32)-1;    // init minimum interrupt time
 
   pdest = (DPRAM_DRV_PBIT_LOG *) pdata;
-  memset ( pdest, 0, sizeof(DPRAM_DRV_PBIT_LOG) ); 
+  memset ( pdest, 0, sizeof(DPRAM_DRV_PBIT_LOG) );
   pdest->result = DRV_OK;
   m_InitStatus = DRV_OK;
-  
-  *psize = sizeof(DPRAM_DRV_PBIT_LOG); 
-  
-  bInitOk = TRUE; 
+
+  *psize = sizeof(DPRAM_DRV_PBIT_LOG);
+
+  bInitOk = TRUE;
   for (i = 0; i < (sizeof(DPRAM_Registers)/sizeof(REG_SETTING)); i++)
   {
-    bInitOk &= RegSet( (REG_SETTING_PTR) &DPRAM_Registers[i] ); 
+    bInitOk &= RegSet( (REG_SETTING_PTR) &DPRAM_Registers[i] );
   }
-    
-  // Perform PBIT RAM Test Only if Reg Init is Ok. 
-  if ( TRUE == STPU( bInitOk, eTpDpr3776)) 
+
+  // Perform PBIT RAM Test Only if Reg Init is Ok.
+  if ( TRUE == STPU( bInitOk, eTpDpr3776))
   {
-    dpram_result = (DPRAM_RAM_TEST_RESULT *) &pdest->dpram_result; 
-  
+    dpram_result = (DPRAM_RAM_TEST_RESULT *) &pdest->dpram_result;
+
     ptr = (UINT8*)DPRAM_BASE_ADDR;
     //Write a test pattern to the entire memory array
     for(i = 0; i < DPRAM_SIZE; i++)
     {
       *ptr++ = (UINT8)(STPU( i, eTpDpr3612) & 0xFF);
     }
-  
+
     //Read back, and verify test pattern
     ptr = (UINT8*)DPRAM_BASE_ADDR;
     for(i = 0; i < DPRAM_SIZE; i++)
     {
       if(*ptr != (i & 0xFF))
       {
-        dpram_result->expectData = (UINT8)i; 
-        dpram_result->actualData = *ptr; 
+        dpram_result->expectData = (UINT8)i;
+        dpram_result->actualData = *ptr;
         pdest->result = DRV_DPRAM_PBIT_RAM_TEST_FAILED;
         *SysLogId = DRV_ID_DPRAM_PBIT_RAM_TEST_FAIL;
         m_InitStatus = DRV_DPRAM_PBIT_RAM_TEST_FAILED;
       }
-      ptr++; 
+      ptr++;
     }
 
     //Clear the memory array to zero, ignoring the result of the pattern test
@@ -248,15 +248,15 @@ RESULT DPRAM_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     {
       *ptr++ = 0x00;
     }
-  }    
-  else 
+  }
+  else
   {
-    pdest->result = DRV_DPRAM_PBIT_REG_INIT_FAIL; 
-    *SysLogId = DRV_ID_DPRAM_PBIT_REG_INIT_FAIL; 
+    pdest->result = DRV_DPRAM_PBIT_REG_INIT_FAIL;
+    *SysLogId = DRV_ID_DPRAM_PBIT_REG_INIT_FAIL;
     m_InitStatus = DRV_DPRAM_PBIT_REG_INIT_FAIL;
   }
 
-  //Return the PBIT result 
+  //Return the PBIT result
   return pdest->result;
 }
 
@@ -270,8 +270,8 @@ RESULT DPRAM_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *
  * Returns:     RESULT
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 RESULT DPRAM_InitStatus(void)
 {
@@ -283,7 +283,7 @@ RESULT DPRAM_InitStatus(void)
  * Function:    DPRAM_WriteBlock
  *
  * Description: Copy a block into a local FIFO buffer.  Initiate transmission
- *              from the FIFO to the dual-port RAM if the RAM port is idle, 
+ *              from the FIFO to the dual-port RAM if the RAM port is idle,
  *              otherwise the block will be transmitted once the RAM is free
  *              and an interrupt is received.
  *
@@ -297,17 +297,17 @@ RESULT DPRAM_InitStatus(void)
  *                          copied in to the block, and the size field of
  *                          DPRAM_WRITE_BLOCK must be properly set.
  * Returns:     DRV_RESULT: DRV_OK: Data copied sucessfully
- *                          DRV_DPRAM_TX_FULL: Not enough free space to buffer 
+ *                          DRV_DPRAM_TX_FULL: Not enough free space to buffer
  *                                             data, or data size is larger
  *                                             than the transmit buffer.
  *                                             Verify data is not bigger than
- *                                             the total FIFO size and try 
+ *                                             the total FIFO size and try
  *                                             again later.
  *                          DRV_DPRAM_INTR_ERROR: Interrupt Error
  *                          DRV_DPRAM_PBIT_REG_INIT_FAIL
  *                          DRV_DPRAM_PBIT_RAM_TEST_FAILED
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 RESULT DPRAM_WriteBlock(const DPRAM_WRITE_BLOCK* block)
 {
@@ -338,8 +338,8 @@ RESULT DPRAM_WriteBlock(const DPRAM_WRITE_BLOCK* block)
         //Increment the total number of blocks written to the q
         m_TxSem -= 1;
         m_TxBlockCnt++;
-        if(DPRAM_CPtoMS_Own == DPRAM_TX_OWNS)     
-        {          
+        if(DPRAM_CPtoMS_Own == DPRAM_TX_OWNS)
+        {
           if(DPRAM_TxToDPRAM())
           {
             DPRAM_CPtoMS_Int = DPRAM_INT_PATTERN;
@@ -347,7 +347,7 @@ RESULT DPRAM_WriteBlock(const DPRAM_WRITE_BLOCK* block)
         }
         //Write complete, decrement number of writers
         result = DRV_OK;
-      }    
+      }
       DPRAM_ENABLE_INT;
     }
     result != DRV_OK ? m_TxSem -= 1 : 0;
@@ -367,8 +367,8 @@ RESULT DPRAM_WriteBlock(const DPRAM_WRITE_BLOCK* block)
  *
  * Returns:     returns the result of the call to FIFO_FreeBytes()
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 UINT32 DPRAM_WriteFreeCnt(void)
 {
@@ -400,8 +400,8 @@ UINT32 DPRAM_WriteFreeCnt(void)
  *                                                       caller's buffer.
  *                          DRV_DPRAM_PBIT_REG_INIT_FAIL
  *                          DRV_DPRAM_PBIT_RAM_TEST_FAILED
- * Notes:       
- *              
+ * Notes:
+ *
  *****************************************************************************/
 RESULT DPRAM_ReadBlock(INT8* Data, UINT32 Size, UINT32* BytesRead)
 {
@@ -423,9 +423,9 @@ RESULT DPRAM_ReadBlock(INT8* Data, UINT32 Size, UINT32* BytesRead)
   }
   else if(m_RxBlockCnt != 0)
   {
-    //Read the block header.  
+    //Read the block header.
    FIFO_PopBlock(&DPRAM_RxFIFO, (INT8*)&header, sizeof(header));
-        
+
     //Read the number of bytes.  If the number of bytes indicated by the
     //header is not available, something is wrong.
     ReadCount = header.Size;
@@ -446,34 +446,15 @@ RESULT DPRAM_ReadBlock(INT8* Data, UINT32 Size, UINT32* BytesRead)
       result = DRV_OK;
     }
   }
-  
+
   if(BytesRead != NULL)
   {
     *BytesRead = ReadCount;
   }
-  
+
   return result;
 }
 
-
-
-/*****************************************************************************
- * Function:    DPRAM_ReceiveCnt
- *
- * Description: Returns the number of bytes in the receive buffer
- *
- * Parameters:  None
- *
- * Returns:     
- *
- * Notes:       CURRENTLY DEAD CODE, UNCOMMENT IF NEEDED
- *              
- ***************************************************************************
-UINT32 DPRAM_ReadCnt()
-{
-  return DPRAM_RxFIFO.Cnt;
-}
-*/
 
 
 /*****************************************************************************
@@ -494,7 +475,7 @@ UINT32 DPRAM_ReadCnt()
  *                                FALSE indicates no message is in the DPRAM
  *                                TX buffer and the control processor owns the
  *                                TX buffer.
- *                                 
+ *
  *
  * Returns:     void
  *
@@ -502,7 +483,7 @@ UINT32 DPRAM_ReadCnt()
  *              a message is pending in the DPRAM queue and the TxCnt is not
  *              incrementing in a timely fashion.  This indicates the micro-
  *              server application is not servicing the DPRAM.
- *              
+ *
  ****************************************************************************/
 void DPRAM_GetTxInfo(UINT32* TxCnt, BOOLEAN* MsgPending)
 {
@@ -510,39 +491,6 @@ void DPRAM_GetTxInfo(UINT32* TxCnt, BOOLEAN* MsgPending)
   *MsgPending = (DPRAM_CPtoMS_Own == DPRAM_RX_OWNS) ? TRUE : FALSE;
 }
 
-
-
-/*****************************************************************************
- * Function:    DPRAM_GetRxInfo
- *
- * Description: Returns the number of messages received from the micro-server
- *              since power on and the semaphore status of the receive
- *              buffer.
- *
- * Parameters:  [out] RxCnt*:  Pointer to a location to store the number of
- *                             received messages count.
- *
- *              [out] MsgPending: Pointer to a location to store the semaphore
- *                                status of the DPRAM RX buffer.
- *                                TRUE indicates a message is in the DPRAM RX
- *                                buffer and the CP owns the receive
- *                                buffer
- *                                FALSE indicates no message is in the DPRAM
- *                                RX buffer and the micro server owns the
- *                                RX buffer.
- *                                 
- *
- * Returns:     void
- *
- * Notes:       CURRENTLY DEAD CODE, UNCOMMENT IF NEEDED
- *              
- ***************************************************************************
-void DPRAM_GetRxInfo(UINT32* RxCnt, BOOLEAN* MsgPending)
-{
-  *RxCnt      = RxMessageCnt;
-  *MsgPending = (DPRAM_MStoCP_Own == DPRAM_RX_OWNS) ? TRUE : FALSE;
-}
-*/
 
 
 /*****************************************************************************
@@ -559,8 +507,8 @@ void DPRAM_GetRxInfo(UINT32* RxCnt, BOOLEAN* MsgPending)
  *
  * Returns:     None
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 void DPRAM_KickMS(void)
 {
@@ -578,13 +526,13 @@ void DPRAM_KickMS(void)
  *              free
  *
  * Parameters:  none
- *              
+ *
  * Returns:     none
  *
- * Notes:       TODO: Copying 8kB of data to/from the DPRAM may be a  
- *              dangerously long operation for interrupt context.  Need to 
+ * Notes:       TODO: Copying 8kB of data to/from the DPRAM may be a
+ *              dangerously long operation for interrupt context.  Need to
  *              evaluate how this impacts the whole system.
- *              
+ *
  ****************************************************************************/
 __interrupt void DPRAM_EP5_ISR(void)
 {
@@ -619,7 +567,7 @@ __interrupt void DPRAM_EP5_ISR(void)
   clrIntr = DPRAM_MStoCP_Int;                     //Clear interrupt
   MCF_EPORT_EPFR = MCF_EPORT_EPFR_EPF5;           //Clear edge port interrupt
 
-  if(NotifyMS == TRUE) 
+  if(NotifyMS == TRUE)
   {
     //Done reading or transmitting.  Notify MS
     DPRAM_CPtoMS_Int = DPRAM_INT_PATTERN;
@@ -674,11 +622,11 @@ __interrupt void DPRAM_EP5_ISR(void)
  *              CPtoMS buffer
  *
  * Parameters:  none
- *              
+ *
  * Returns:     TRUE: Data was written to DPRAM
  *              FALSE: No data was written because none was in the queue.
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 /*__inline */
 static BOOLEAN DPRAM_TxToDPRAM(void)
@@ -704,10 +652,10 @@ static BOOLEAN DPRAM_TxToDPRAM(void)
       ASSERT( size <= DPRAM_TX_RX_SIZE);
       FIFO_PopBlock(&DPRAM_TxFIFO, DPRAM_CPtoMS_Buf, (UINT32) size);
       //Set count and owner flags
-      DPRAM_CPtoMS_Cnt = (UINT16)size;               
+      DPRAM_CPtoMS_Cnt = (UINT16)size;
       DPRAM_CPtoMS_Own = DPRAM_RX_OWNS;
-      //inc total # of blocks txd since pwr on 
-      TxMessageCnt++;                        
+      //inc total # of blocks txd since pwr on
+      TxMessageCnt++;
       m_TxBlockCnt--;
       retval = TRUE;
     }
@@ -722,7 +670,7 @@ static BOOLEAN DPRAM_TxToDPRAM(void)
   {
     __RIR(intLvl);
   }
- 
+
   return retval;
 }
 
@@ -741,11 +689,11 @@ static BOOLEAN DPRAM_TxToDPRAM(void)
  *              before additional data can be received.
  *
  * Parameters:  none
- *              
+ *
  * Returns:     none
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 /*__inline */
 static void DPRAM_RxFromDPRAM(void)
@@ -774,172 +722,183 @@ static void DPRAM_RxFromDPRAM(void)
   }
 
   DPRAM_MStoCP_Own = DPRAM_TX_OWNS;             //Return buffer to the MS
-  DPRAM_MStoCP_Cnt = 0;                         
+  DPRAM_MStoCP_Cnt = 0;
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DPRAM.c $
  * 
+ * *****************  Version 42  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 12:49p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
+ * 
+ * *****************  Version 41  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 11:39a
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 39  *****************
  * User: Jim Mood     Date: 11/15/10   Time: 5:21p
  * Updated in $/software/control processor/code/drivers
  * SCR 999 Code coverage
- * 
+ *
  * *****************  Version 38  *****************
  * User: Jim Mood     Date: 11/10/10   Time: 1:52p
  * Updated in $/software/control processor/code/drivers
  * SCR 689 Interrupt changes
- * 
+ *
  * *****************  Version 37  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 5:42p
  * Updated in $/software/control processor/code/drivers
  * SCR 904 Code Coverage changes
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 4:31p
  * Updated in $/software/control processor/code/drivers
  * SCR 902 Code Coverage Issues
- * 
+ *
  * *****************  Version 35  *****************
  * User: Contractor2  Date: 9/27/10    Time: 2:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #795 Code Review Updates
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 8/31/10    Time: 10:40a
  * Updated in $/software/control processor/code/drivers
  * SCR 839 Move init of global data before interrupts enabled
- * 
+ *
  * *****************  Version 33  *****************
  * User: Jeff Vahue   Date: 8/29/10    Time: 3:02p
  * Updated in $/software/control processor/code/drivers
  * SCR# 830 - Coverage Enhancement
- * 
+ *
  * *****************  Version 32  *****************
  * User: Jim Mood     Date: 8/16/10    Time: 6:26p
  * Updated in $/software/control processor/code/drivers
  * SCR 796.  Interrupts enabled before FIFO init
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 8/12/10    Time: 11:39a
  * Updated in $/software/control processor/code/drivers
  * SCR 699: Code Review Changes (add asserts around PopBlock in
  * DPRAM_ReadBlock)
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 8/09/10    Time: 1:42p
  * Updated in $/software/control processor/code/drivers
  * SCR# 707 - V&V TP Update
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor2  Date: 8/05/10    Time: 11:19a
  * Updated in $/software/control processor/code/drivers
  * SCR #243 Implementation: CBIT of mssim SRS-3625
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor2  Date: 7/30/10    Time: 6:28p
  * Updated in $/software/control processor/code/drivers
  * SCR #243 Implementation: CBIT of mssim
  * Disable MS Interface if DPRAM PBit Failed
- * 
+ *
  * *****************  Version 27  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/drivers
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 7/21/10    Time: 7:48p
  * Updated in $/software/control processor/code/drivers
  * SCR #689 - account for two interrupts per CP command form the MS
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:32p
  * Updated in $/software/control processor/code/drivers
  * SCR# 707 - Code Coverage TP
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 7/17/10    Time: 5:46p
  * Updated in $/software/control processor/code/drivers
  * SCR# 707 - Add TestPoints for code coverage.
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 7/09/10    Time: 7:11p
  * Updated in $/software/control processor/code/drivers
  * SCR# 688 - DPRAM interupt monitor fix for CP commanded interrupts
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:31p
  * Updated in $/software/control processor/code/drivers
  * SCR #8 Implementation: External Interrupt Monitors
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:56a
  * Updated in $/software/control processor/code/drivers
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jim Mood     Date: 5/18/10    Time: 6:24p
  * Updated in $/software/control processor/code/drivers
  * SCR 594.  YMODEM/FIFO preemption issue
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 3/24/10    Time: 4:09p
  * Updated in $/software/control processor/code/drivers
  * SCR# 504 - fix big file uploads.  Ensure single reader of DPRAM_TxFIFO
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jim Mood     Date: 3/12/10    Time: 11:08a
  * Updated in $/software/control processor/code/drivers
  * SCR #465 and #466 modfix for reentrancy of WriteBlock and size of dpram
  * TX buffer
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 10/29/09   Time: 2:39p
  * Updated in $/software/control processor/code/drivers
- * SCR #315 CBIT Reg and SEU Processing 
- * 
+ * SCR #315 CBIT Reg and SEU Processing
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 10/08/09   Time: 6:13p
  * Updated in $/software/control processor/code/drivers
  * SCR #283
- * 
+ *
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 9/29/09    Time: 1:57p
  * Updated in $/software/control processor/code/drivers
  * SCR #280 Fix misc compiler warnings
- * 
+ *
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:04p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:24p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 4/02/09    Time: 9:18a
  * Updated in $/control processor/code/drivers
  * Just noticed while building 2.0.10, a missing return at the end of
  * TxToDPRAM function.
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 4/02/09    Time: 8:58a
  * Updated in $/control processor/code/drivers
- * Changed order of interrupt clearing (clear DPRAM register last) 
- * 
+ * Changed order of interrupt clearing (clear DPRAM register last)
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 11:44a
  * Updated in $/control processor/code/drivers
  * SCR #87 Function Prototype
- * 
+ *
  *
  ***************************************************************************/

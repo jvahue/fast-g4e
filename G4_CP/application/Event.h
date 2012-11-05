@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 26 $  $Date: 12-10-23 2:07p $
+  $Revision: 27 $  $Date: 12-11-01 12:51p $
 
 ******************************************************************************/
 
@@ -434,10 +434,11 @@ typedef struct
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 
 /******************************************************************************
-                                   Package Exports
+                                 Package Exports
 ******************************************************************************/
 #undef EXPORT
-#if defined( EVENT_BODY )
+
+#if defined ( EVENT_BODY )
    #define EXPORT
 #else
    #define EXPORT extern
@@ -477,6 +478,11 @@ EXPORT BOOLEAN Event_FSMAppBusyGetState( INT32 param );
  *  MODIFICATIONS
  *    $History: Event.h $
  * 
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 12:51p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

@@ -91,8 +91,8 @@ EXPORT UINT32  UTIL_MinuteTimerDisplay    ( BOOLEAN bStartTimer );
 
 EXPORT BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
-//EXPORT void    SetBits(UINT32 mask[], INT32 maskSizeBytes,
-//                       UINT32 array[], INT32 arraySizeBytes);
+EXPORT void    SetBits(UINT32 mask[], INT32 maskSizeBytes,
+                       UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    ResetBits(UINT32 mask[], INT32 maskSizeBytes,
                          UINT32 array[], INT32 arraySizeBytes);

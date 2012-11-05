@@ -1,19 +1,19 @@
-#ifndef DRV_RTC_H
-#define DRV_RTC_H
+#ifndef RTC_H
+#define RTC_H
 
 /******************************************************************************
-Copyright (C) 2007-20012 Pratt & Whitney Engine Services, Inc.                 
-All Rights Reserved. Proprietary and Confidential.
+       Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+             All Rights Reserved. Proprietary and Confidential.
 
- File:        RTC.h    
+ File:        RTC.h
 
- Description: This file defines the interface for the the 
-              Dallas DS1306 or DS3234 real-time clock chip 
-              connected by the SPI bus. See the c module 
+ Description: This file defines the interface for the the
+              Dallas DS1306 or DS3234 real-time clock chip
+              connected by the SPI bus. See the c module
               for a detailed description.
 
   VERSION
-   $Revision: 12 $  $Date: 8/28/12 1:06p $
+   $Revision: 13 $  $Date: 12-11-02 12:42p $
 ******************************************************************************/
 
 
@@ -34,7 +34,7 @@ All Rights Reserved. Proprietary and Confidential.
 ******************************************************************************/
 
 //Size of all the clock registers.  Used for multi-byte burst reads of clock data
-#define RTC_SIZE_OF_CLOCK_DATA 7 
+#define RTC_SIZE_OF_CLOCK_DATA 7
 
 /******************************************************************************
                               Package Typedefs
@@ -49,16 +49,16 @@ typedef enum {
 } RTC_RESULT;
 
 typedef struct {
-  RESULT pbit_status; 
-} RTC_STATUS; 
+  RESULT pbit_status;
+} RTC_STATUS;
 
 
 #pragma pack(1)
 typedef struct {
-  RESULT  result; 
-  UINT8   ReadArr[RTC_SIZE_OF_CLOCK_DATA];  // For DRV_RTC_TIME_NOT_VALID 
+  RESULT  result;
+  UINT8   ReadArr[RTC_SIZE_OF_CLOCK_DATA];  // For DRV_RTC_TIME_NOT_VALID
                                             // store from RTC_ADDR_CLK_SEC to RTC_ADDR_CLK_YR
-} RTC_DRV_PBIT_LOG; 
+} RTC_DRV_PBIT_LOG;
 #pragma pack()
 
 
@@ -68,7 +68,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( DRV_RTC_BODY )
+#if defined ( RTC_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -85,7 +85,7 @@ typedef struct {
 /******************************************************************************
                               Package Exports Functions
 ******************************************************************************/
-EXPORT RESULT RTC_Init               (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize); 
+EXPORT RESULT RTC_Init               (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize);
 EXPORT RESULT RTC_GetTime            (TIMESTRUCT *Ts);
 EXPORT RESULT RTC_SetTime            (TIMESTRUCT *Ts);
 
@@ -99,39 +99,44 @@ EXPORT RESULT RTC_WriteTime(TIMESTRUCT *Ts);
 /*EXPORT RESULT RTC_SetTrickleChargeOff(void);*/
 RESULT RTC_ReadNVRam(UINT8 offset, void* data, size_t size);
 RESULT RTC_WriteNVRam(UINT8 offset, void* data, size_t size);
-RESULT RTC_GetStatus ( void ); 
+RESULT RTC_GetStatus ( void );
 
 
-#endif // DRV_RTC_H 
+#endif // RTC_H
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: RTC.h $
  * 
+ * *****************  Version 13  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 12:42p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor3  Date: 7/29/10    Time: 12:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #698 -- Fixes for code review findings
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor3  Date: 3/31/10    Time: 11:48a
  * Updated in $/software/control processor/code/drivers
  * SCR #521 Code Review Issues
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:54p
  * Updated in $/software/control processor/code/drivers
  * SCR 67 Interrupted SPI Access (Multiple / Nested SPI Access)
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  *
  *****************************************************************************/
 

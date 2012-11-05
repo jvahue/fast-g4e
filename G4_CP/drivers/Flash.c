@@ -1,10 +1,10 @@
 #define FLASH_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Flash.c
-    
+
     Description: Flash Memory Driver functions.
 
                  The Flash Memory Driver functions are a standard set of
@@ -13,13 +13,13 @@
                  to the flash device detected during initialization.
 
     VERSION
-    $Revision: 30 $  $Date: 8/28/12 1:06p $
-    
+    $Revision: 31 $  $Date: 12-11-02 12:12p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -39,21 +39,21 @@
 #define MIN_POSSIBLE_SECTORS 32
 
 /*****************************************************************************/
-/* Local Typedefs                                                            */ 
+/* Local Typedefs                                                            */
 /*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
 //---- DATA FLASH Command Set Parameter Definitions --------------------------
-// This table was created to make it easier to add new flash devices in the 
-// future. All other flash parts that are part of the CFI standard have been 
+// This table was created to make it easier to add new flash devices in the
+// future. All other flash parts that are part of the CFI standard have been
 // assigned a position in the FlashCmdSet Table and then commented out.
 static
 const FLASH_CMDS FlashCmdSet [] =
 {
-//   {  "No Command Set",                 
-//      FCS_NO_CMD_SET,   
+//   {  "No Command Set",
+//      FCS_NO_CMD_SET,
       // Function pointers
 //      NULL,             // FlashReset
 //      NULL,             // FlashProgram
@@ -63,7 +63,7 @@ const FLASH_CMDS FlashCmdSet [] =
 //      NULL,             // FlashSectorEraseSetup
 //      NULL,             // FlashSectorEraseCmd
 //      NULL,             // FlashChipErase
-//      NULL              // FlashGetStatus      
+//      NULL              // FlashGetStatus
   // },
   // {  "Intel Sharp Extended Command Set",
   //    FCS_INTEL_SHARP_EXTENDED,
@@ -111,7 +111,7 @@ const FLASH_CMDS FlashCmdSet [] =
 //      FCS_INTEL_PERFORMANCE,
       // Function pointers
 //   },
-//   {  "Intel Data Command Set",    
+//   {  "Intel Data Command Set",
 //      FCS_INTEL_DATA,
       // Function pointers
 //   }
@@ -141,9 +141,9 @@ static RESULT FlashGetCFIDeviceGeometry      ( FLASH_INFO *pInfo);
  * Description: Initialize all data and control structures necessary for FLASH.
  *              operation.
  *
- * Parameters:  SYS_APP_ID *SysLogId     ptr to return SYS_APP_ID 
+ * Parameters:  SYS_APP_ID *SysLogId     ptr to return SYS_APP_ID
  *              void *pdata              ptr to buffer to return result data
- *              UINT16 *psize            ptr to return size of result data 
+ *              UINT16 *psize            ptr to return size of result data
  *
  * Returns:     RESULT DrvStatus         Status of called flash routines
  *
@@ -160,11 +160,11 @@ RESULT FlashInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   FLASH_INFO     *pInfo;
   RESULT         DrvStatus;
   UINT32         i;
-  
-  FLASH_DRV_PBIT_LOG  *pdest; 
-  
-  
-  // Initialize Local Data 
+
+  FLASH_DRV_PBIT_LOG  *pdest;
+
+
+  // Initialize Local Data
   pFlashDesc = &FlashDescription;
   pInfo      = &pFlashDesc->Info;
   pId        = &pFlashDesc->Id;
@@ -173,10 +173,10 @@ RESULT FlashInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
 
   pdest = (FLASH_DRV_PBIT_LOG *) pdata;
-  memset ( pdest, 0, sizeof(FLASH_DRV_PBIT_LOG) ); 
-  pdest->result = DRV_OK; 
-  
-  *psize = sizeof(FLASH_DRV_PBIT_LOG); 
+  memset ( pdest, 0, sizeof(FLASH_DRV_PBIT_LOG) );
+  pdest->result = DRV_OK;
+
+  *psize = sizeof(FLASH_DRV_PBIT_LOG);
 
 
   // Set the Flash Base Address
@@ -184,36 +184,36 @@ RESULT FlashInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   // Read and Populate the CFI Data Structures
   DrvStatus = FlashPopulateCFIData(pId, pSys, pInfo);
-  
+
   // Check that the Driver Status is OK
   if ( DrvStatus == DRV_OK)
   {
      // Find the pointer to the Flash Command Set Table
      DrvStatus = FlashFindCmdSet(pId->PrimaryCmdSet, &(pFlashDesc->pCmdSet));
-     
+
      // Check that driver completes OK
      if (DrvStatus == DRV_OK)
      {
         // Initialize the Sector Status
         for (i=0; i < pInfo->EraseBlockInfo[0].NumSectors; i++ )
         {
-           // Set all sectors to not busy 
+           // Set all sectors to not busy
            pFlashDesc->SectorStatus[i] =  FSECT_IDLE;
         }
      }
   }
-  
-  // If the Driver fails initialization then set the Status in the 
+
+  // If the Driver fails initialization then set the Status in the
   // Flash Description Structure to Faulted.
   if (DRV_OK != DrvStatus)
   {
      pInfo->DrvStatus = FLASH_DRV_STATUS_FAULTED;
-     pdest->result = DrvStatus; 
-     *SysLogId = DRV_ID_DF_PBIT_CFI_BAD; 
+     pdest->result = DrvStatus;
+     *SysLogId = DRV_ID_DF_PBIT_CFI_BAD;
   }
-   
-  return pdest->result; 
-  
+
+  return pdest->result;
+
 }   // End of FlashInitialize()
 
 
@@ -222,7 +222,7 @@ RESULT FlashInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  * Function:    FlashFindCmdSet
  *
  * Description: The FlashFindCmdSet will search the Command Set Table
- *              for the Flash Devices Commands. 
+ *              for the Flash Devices Commands.
  *
  * Parameters:  FLASH_CMD_SET CmdSet   - The Command Set Id of the Device
  *              FLASH_CMDS **pTable    - Pointer to Flash commands in the Table
@@ -230,7 +230,7 @@ RESULT FlashInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  * Returns:     DRV_RESULTS - [DRV_OK if command set found
  *                             DRV_FLASH_CANNOT_FIND_CMD_SET if not found]
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 RESULT FlashFindCmdSet(FLASH_CMD_SET CmdSet, FLASH_CMDS **pTable)
@@ -245,7 +245,7 @@ RESULT FlashFindCmdSet(FLASH_CMD_SET CmdSet, FLASH_CMDS **pTable)
    pCmdSet   = (FLASH_CMDS *)&FlashCmdSet[0];
    DrvStatus = DRV_FLASH_CANNOT_FIND_CMD_SET;
    bFound    = FALSE;
-   
+
    // Loop through Table of Device Command Sets
    for (i=0; (i < (sizeof(FlashCmdSet)/sizeof(FLASH_CMDS))) &&
 	          (FALSE == bFound);
@@ -262,7 +262,7 @@ RESULT FlashFindCmdSet(FLASH_CMD_SET CmdSet, FLASH_CMDS **pTable)
       // Increment to Next Entry
       pCmdSet++;
    }
-   
+
    // Return the driver status
    return (DrvStatus);
 }
@@ -270,25 +270,25 @@ RESULT FlashFindCmdSet(FLASH_CMD_SET CmdSet, FLASH_CMDS **pTable)
 /*****************************************************************************
  * Function:    FlashWriteBufferMode
  *
- * Description: This function provides an interface to the flash write 
- *              buffer capability. 
+ * Description: This function provides an interface to the flash write
+ *              buffer capability.
  *              There are 3 main sections to the function:
  *              * Determine the number of locations to program
  *              * Set-up and write command sequence
  *              * Start programming operation with "Program Buffer to Flash"
  *
- * Parameters:  FLASHADDR Offset        - Offset from from Base Address to Write
+ * Parameters:  FLASHADDR FlashOffset   - Offset from from Base Address to Write
  *              FLASHDATA *pDataBuf     - Pointer to the data to write
  *              BYTECOUNT ByteCount     - Number of Flash Locations to Write
- *              BYTECOUNT *TotalWritten - Total Bytes written to flash 
+ *              BYTECOUNT *TotalWritten - Total Bytes written to flash
  *
  * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_BUF_WR_COUNT_INVALID,
  *                                  DRV_FLASH_BUF_WR_DEV_TIMEOUT,
  *                                  DRV_FLASH_BUF_WR_ABORT,
  *                                  DRV_FLASH_BUF_WR_SW_TIMEOUT ]
  *
- *              There is another return value for the case FS_SUSPEND which 
- *              sets the DrvStatus to DRV_FLASH_BUF_WR_SUSPENDED but is 
+ *              There is another return value for the case FS_SUSPEND which
+ *              sets the DrvStatus to DRV_FLASH_BUF_WR_SUSPENDED but is
  *              preceeded by the comment that we'll never reach this case.
  *
  * Notes:       The data MUST be properly aligned with the Flash bus width.
@@ -305,7 +305,7 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
                               FLASHDATA *pData,
                               BYTECOUNT ByteCount,
                               BYTECOUNT *TotalWritten)
-{       
+{
    // Local Data
    FLASH_DESC          *pFlashDesc;
    FLASH_CMDS          *pCmd;
@@ -316,7 +316,7 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
    FLASHADDR           LastLoadedOffset;
    FLASHADDR           CurrentOffset;
    FLASHADDR           EndOffset;
-   FLASHDATA           WriteCount;   
+   FLASHDATA           WriteCount;
    UINT32              nBytesWrite;
    UINT32              nRemainPageBytes;
    FLASH_STATUS        FlashStatus;
@@ -332,16 +332,16 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
    *TotalWritten     = 0;
    // Initialize in case the flash was busy before entering this function
    StartTime         = TTMR_GetHSTickCount();
-    
-   // Check that the Byte Count is Valid 
+
+   // Check that the Byte Count is Valid
    ASSERT (0 != ByteCount);
-   
+
    // Total Bytes that are to be written to the data flash
    nTotalBytes       = ByteCount;
-         
+
    // Mark the sector status as programming
    pFlashDesc->SectorStatus[FlashOffset >> FLASH_SECTOR_SHIFT] = FSECT_PROGRAM;
-      
+
    // Find the long word offset
    CurrentOffset    = FlashOffset / FLASH_BYTES_PER_OP;
    LastLoadedOffset = CurrentOffset;
@@ -361,7 +361,7 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
       {
          case FS_NOT_BUSY:
             // If flash is no longer busy begin buffer write sequence
-   
+
             // All buffer writes must be aligned on 128 byte page boundaries
             // Check if at the end of a page and finish writing just that page
             if ((FlashOffset % pInfo->MaxByteWrite) != 0)
@@ -391,11 +391,11 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
                nBytesWrite = nTotalBytes;
             }
 
-            // Calculate the end offset of the data to write 
+            // Calculate the end offset of the data to write
             EndOffset        = CurrentOffset +
                                (nBytesWrite/FLASH_BYTES_PER_OP) - 1;
 
-            // Set the last loaded offset to the beginning 
+            // Set the last loaded offset to the beginning
             LastLoadedOffset = CurrentOffset;
 
             // Unlocks the buffer write sequence
@@ -414,7 +414,7 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
                // Write the Data to the flash buffer
                FLASH_WR(pFlashDesc->BaseAddr, CurrentOffset++, *pData++);
             }
-             
+
             // Command the Program Buffer to Flash
             pCmd->FlashProgamBuffer(pFlashDesc->BaseAddr, LastLoadedOffset);
             // Record the time the write started
@@ -439,14 +439,14 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
             pCmd->FlashAbortBuffer(pFlashDesc->BaseAddr);
             break;
          case FS_BUSY:
-         case FS_SUSPEND: 
+         case FS_SUSPEND:
          default:
             // Still busy programming, or somehow suspended
             // Check if the timeout has been exceeded
             if (((TTMR_GetHSTickCount() - StartTime) / TICKS_PER_uSec) >
                   pSys->MaxMinBufferTime_uS)
             {
-               // Double check the status of the flash because we may have 
+               // Double check the status of the flash because we may have
                // been interrupted.
                FlashStatus = pCmd->FlashGetStatus( pFlashDesc->BaseAddr,
                                                    LastLoadedOffset,
@@ -482,9 +482,9 @@ RESULT FlashWriteBufferMode ( FLASHADDR FlashOffset,
  *
  * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_WORD_WR_COUNT_INVALID,
  *                                  DRV_FLASH_WORD_WR_DEV_TIMEOUT,
- *                                  DRV_FLASH_WORD_WR_SW_TIMEOUT ] 
+ *                                  DRV_FLASH_WORD_WR_SW_TIMEOUT ]
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
@@ -497,7 +497,7 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
    FLASH_CMDS     *pCmd;
    FLASH_SYS      *pSys;
    FLASH_STATUS   FlashStatus;
-   
+
    // Local Data Initialization
    pFlashDesc    = &FlashDescription;
    pCmd          = pFlashDesc->pCmdSet;
@@ -507,19 +507,19 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
    *TotalWritten = 0;
    // Initialize in case the flash was busy before entering this function
    StartTime     = TTMR_GetHSTickCount();
-   
-   // Check that the Byte Count is Valid 
+
+   // Check that the Byte Count is Valid
    ASSERT ((sizeof(FLASHDATA)) == ByteCount);
 
    // Mark the sector as being in program mode
    pFlashDesc->SectorStatus[Offset >> FLASH_SECTOR_SHIFT] = FSECT_PROGRAM;
-   // Program Location in the Data Flash 
-   pCmd->FlashProgram (pFlashDesc->BaseAddr, Offset/FLASH_BYTES_PER_OP, pData); 
+   // Program Location in the Data Flash
+   pCmd->FlashProgram (pFlashDesc->BaseAddr, Offset/FLASH_BYTES_PER_OP, pData);
    // Record the Start Time
    StartTime = TTMR_GetHSTickCount();
-   // Increment the number of bytes written   
+   // Increment the number of bytes written
    *TotalWritten += FLASH_BYTES_PER_OP;
-      
+
    while ( (FlashStatus == FS_BUSY) && (DrvStatus == DRV_OK) )
    {
       // Get the flash status
@@ -546,13 +546,13 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
             if (((TTMR_GetHSTickCount() - StartTime) / TICKS_PER_uSec) >
                   pSys->MaxWriteTime_uS)
             {
-               // Double check the status of the flash because we may have 
+               // Double check the status of the flash because we may have
                // been interrupted.
                FlashStatus = pCmd->FlashGetStatus( pFlashDesc->BaseAddr,
                                                    Offset/FLASH_BYTES_PER_OP,
                                                    TRUE);
                if (FS_BUSY == FlashStatus)
-               {                  
+               {
                   // The write has taken longer the maximum time
                   DrvStatus = DRV_FLASH_WORD_WR_SW_TIMEOUT;
                   // Issue a Reset Command to go to Read Mode
@@ -591,7 +591,7 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
    // Local Data
    FLASH_DESC     *pFlashDesc;
    UINT32         i;
-   
+
    // Local Data Initialization
    pFlashDesc  = &FlashDescription;
 
@@ -608,7 +608,7 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
 /*****************************************************************************
  * Function:    FlashChipErase
  *
- * Description: This Function command and erase of the entire device located 
+ * Description: This Function command and erase of the entire device located
  *              at the base address.
  *
  * Parameters:  UINT32 *pTimeout_mS  pointer to the maximum chip erase time
@@ -618,7 +618,7 @@ RESULT FlashWriteWordMode ( FLASHADDR Offset,  FLASHDATA *pData,
  *
  * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_CHIP_ERASE_FAIL]
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 RESULT FlashChipErase (UINT32 *pTimeout_mS)
@@ -634,35 +634,35 @@ RESULT FlashChipErase (UINT32 *pTimeout_mS)
    pSys         = &pFlashDesc->System;
    pCmd         = pFlashDesc->pCmdSet;
    *pTimeout_mS = pSys->MaxChipErase_mS;
-  
+
    // Command the Flash Chip Erase
    pCmd->FlashChipErase (pFlashDesc->BaseAddr);
-   
+
    // Erase never started set a driver status error or OK
    DrvStatus = (pCmd->FlashGetStatus(pFlashDesc->BaseAddr, 0, FALSE) != FS_BUSY) ?
                 DRV_FLASH_CHIP_ERASE_FAIL : DRV_OK;
-   
+
    return (DrvStatus);
 }
 
 /*****************************************************************************
  * Function:    FlashGetDirectStatus
  *
- * Description: The Flash Get Direct Status function returns a complete 
- *              indication when called. If the flash is not busy this 
+ * Description: The Flash Get Direct Status function returns a complete
+ *              indication when called. If the flash is not busy this
  *              function will return true for the complete indication. If
- *              Complete indicates false then the calling function should 
- *              check the driver status to verify there isn't an error 
- *              condition.  
+ *              Complete indicates false then the calling function should
+ *              check the driver status to verify there isn't an error
+ *              condition.
  *
- * Parameters:  UINT32  Offset     - Flash Address Offset
+ * Parameters:  UINT32  nOffset    - Flash Address Offset
  *              BOOLEAN *pComplete - [in/out] Storage location for complete
  *                                   flag.
  *
- * Returns:     RESULT - Driver Status [DRV_OK, DRV_FLASH_WR_DEV_TIMEOUT]  
+ * Returns:     RESULT - Driver Status [DRV_OK, DRV_FLASH_WR_DEV_TIMEOUT]
  *
- * Notes:       This function doers not perform a software timeout. The 
- *              calling function should consider bounding the amount of time 
+ * Notes:       This function doers not perform a software timeout. The
+ *              calling function should consider bounding the amount of time
  *              this function is called.
  *
  ****************************************************************************/
@@ -673,12 +673,12 @@ RESULT FlashGetDirectStatus (UINT32 nOffset, BOOLEAN *pComplete)
    FLASH_CMDS   *pCmd;
    FLASH_STATUS FlashStatus;
    RESULT       DrvStatus;
-   
+
    // Initialize Local Data
    DrvStatus  = DRV_OK;
    pFlashDesc = &FlashDescription;
-   pCmd       = pFlashDesc->pCmdSet;   
-      
+   pCmd       = pFlashDesc->pCmdSet;
+
    // Get the flash status
    FlashStatus = pCmd->FlashGetStatus(pFlashDesc->BaseAddr,
                                       nOffset/FLASH_BYTES_PER_OP, FALSE);
@@ -707,21 +707,21 @@ RESULT FlashGetDirectStatus (UINT32 nOffset, BOOLEAN *pComplete)
 /*****************************************************************************
  * Function:    FlashSectorErase
  *
- * Description: This function commands a sector erase of the sector specified 
+ * Description: This function commands a sector erase of the sector specified
  *              by the Address Offset.
  *
  * Parameters:  FLASHADDR       Offset   - Offset of sector from base address
- *              FLASH_ERASE_CMD EraseCmd - Command to initiate 
- *                                         [FE_SETUP_CMD, FE_SECTOR_CMD, 
+ *              FLASH_ERASE_CMD EraseCmd - Command to initiate
+ *                                         [FE_SETUP_CMD, FE_SECTOR_CMD,
  *                                          FE_STATUS_CMD, FE_COMPLETE_CMD]
- *              BOOLEAN *bDone           - Pointer to storage location for 
+ *              BOOLEAN *bDone           - Pointer to storage location for
  *                                         Done flag.
  *
  * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_WORD_WR_DEV_TIMEOUT,
- *                                  DRV_FLASH_WORD_WR_SW_TIMEOUT ] 
+ *                                  DRV_FLASH_WORD_WR_SW_TIMEOUT ]
  *
- *              There is another return value for the case FS_SUSPEND which 
- *              sets the DrvStatus to DRV_FLASH_BUF_WR_SUSPENDED but is 
+ *              There is another return value for the case FS_SUSPEND which
+ *              sets the DrvStatus to DRV_FLASH_BUF_WR_SUSPENDED but is
  *              preceeded by the comment that we'll never reach this case.
  *
  * Notes:       The calling function must first set up the sector erase by
@@ -731,7 +731,7 @@ RESULT FlashGetDirectStatus (UINT32 nOffset, BOOLEAN *pComplete)
  *              be issued on erase completion for each sector,
  *              FET_COMPLETE_CMD, this will set the sector status back to
  *              IDLE.
- *  
+ *
  *              This function will keep track of the overall software timeout.
  *
  ****************************************************************************/
@@ -752,7 +752,7 @@ RESULT FlashSectorErase (FLASHADDR Offset, FLASH_ERASE_CMD EraseCmd, BOOLEAN *bD
    pCmd       = pFlashDesc->pCmdSet;
    DrvStatus  = DRV_OK;
    *bDone     = FALSE;
-   
+
    switch (EraseCmd)
    {
       case FE_SETUP_CMD:
@@ -796,13 +796,13 @@ RESULT FlashSectorErase (FLASHADDR Offset, FLASH_ERASE_CMD EraseCmd, BOOLEAN *bD
                if (((TTMR_GetHSTickCount() - StartTime)/TICKS_PER_mSec) >
                     (pSys->MaxSectorErase_mS * SectorCount))
                {
-                  // Double check the status of the flash because we may have 
+                  // Double check the status of the flash because we may have
                   // been interrupted.
                   FlashStatus = pCmd->FlashGetStatus( pFlashDesc->BaseAddr,
                                                       Offset/FLASH_BYTES_PER_OP,
                                                       TRUE);
                   if (FS_BUSY == FlashStatus)
-                  {                  
+                  {
                      // The flash has taken much longer to erase than expected
                      DrvStatus = DRV_FLASH_WORD_WR_SW_TIMEOUT;
                      // Issue a Reset Command to go to Read Mode
@@ -851,7 +851,7 @@ BOOLEAN FlashCheckSameSector(FLASHADDR nFirstOffset, FLASHADDR nLastOffset)
 /*****************************************************************************
  * Function:    FlashGetInfo
  *
- * Description: Returns the geometry and the current state of the flash 
+ * Description: Returns the geometry and the current state of the flash
  *              driver.
  *
  * Parameters:  None.
@@ -875,8 +875,8 @@ FLASH_INFO FlashGetInfo ( void )
  * Function:    FlashPopulateCFIData
  *
  * Description: This function will populate the Common Flash Interface
- *              Information. It includes Identification, Interface, and 
- *              Geometry of the Flash Device; 
+ *              Information. It includes Identification, Interface, and
+ *              Geometry of the Flash Device;
  *
  * Parameters:  FLASH_ID  *pId  - Pointer to the Identification Storage Area
  *              FLASH_SYS *pSys - Pointer to the System Interace Storage Area
@@ -884,7 +884,7 @@ FLASH_INFO FlashGetInfo ( void )
  *
  * Returns:     RESULT
  *
- * Notes:       This function initiates the CFI Query Mode that the 
+ * Notes:       This function initiates the CFI Query Mode that the
  *              Sub-functions require to retrieve the CFI data.
  *
  ****************************************************************************/
@@ -895,29 +895,29 @@ RESULT FlashPopulateCFIData( FLASH_ID *pId, FLASH_SYS *pSys,
    // Local Data
    FLASH_DESC     *pFlashDesc;
    RESULT         DrvStatus;
-  
+
    // Local Data Initialization
    pFlashDesc = &FlashDescription;
    DrvStatus  = DRV_OK;
-   
+
    // Command the Flash Device to Enter CFI Mode
    FLASH_WR(pFlashDesc->BaseAddr, FLASH_CFI_ADDRESS, FLASH_CFI_QUERY_CMD);
-   
+
    // Retrieve the Flash Identification Data
    FlashGetCFIIdentification (pId);
-   
+
    // Retrieve the System Interface Data
    DrvStatus = FlashGetCFISystemInterfaceData (pSys);
-      
+
    // Check that the System Interface Data is OK
    if (DrvStatus == DRV_OK)
    {
       // Retrieve the Flash Device Geometry
       DrvStatus = FlashGetCFIDeviceGeometry(pInfo);
    }
-   
+
    /* Write Software RESET command */
-   FLASH_WR(pFlashDesc->BaseAddr, 0, NOR_RESET_CMD);  
+   FLASH_WR(pFlashDesc->BaseAddr, 0, NOR_RESET_CMD);
 
    // Return the Driver Status to the calling function
    return DrvStatus;
@@ -929,18 +929,18 @@ RESULT FlashPopulateCFIData( FLASH_ID *pId, FLASH_SYS *pSys,
  *
  * Description: The FlashGetCFIIdentification will retrieve the CFI
  *              Identification parameters. These parameters include the
- *              flash command set, Primary Extended Table Offset,  
+ *              flash command set, Primary Extended Table Offset,
  *              Alternate Command Set and Alternate Table Offset.
  *
  * Parameters:  FLASH_ID  *pId  - Pointer to the Identification Storage Area
  *
  * Returns:     None.
  *
- * Notes:       The CFI Query Command must be performed before entering 
+ * Notes:       The CFI Query Command must be performed before entering
  *              this function.
  *
  ****************************************************************************/
-static 
+static
 void FlashGetCFIIdentification ( FLASH_ID *pId)
 {
    // Local Data
@@ -951,25 +951,25 @@ void FlashGetCFIIdentification ( FLASH_ID *pId)
 
    //Command Set
    pId->PrimaryCmdSet = (FLASH_CMD_SET)
-           ((FLASH_RD(pFlashDesc->BaseAddr, CFI_COMMAND_SET_LSB) + 
+           ((FLASH_RD(pFlashDesc->BaseAddr, CFI_COMMAND_SET_LSB) +
             (FLASH_RD(pFlashDesc->BaseAddr, CFI_COMMAND_SET_MSB) <<
              CFI_MSB_SHIFT)) & FLASH_DEV_READ_MASK);
-   
+
    //Primary Extended Table Offset
    pId->ExtendedTableOffset = (UINT16)
-      (FLASH_RD(pFlashDesc->BaseAddr, CFI_PRIMARY_EXTENDED_TABLE_LSB) + 
+      (FLASH_RD(pFlashDesc->BaseAddr, CFI_PRIMARY_EXTENDED_TABLE_LSB) +
       (FLASH_RD(pFlashDesc->BaseAddr, CFI_PRIMARY_EXTENDED_TABLE_MSB) <<
        CFI_MSB_SHIFT)) & FLASH_DEV_READ_MASK;
 
    //Alternate Command Set
    pId->AlternateCmdSet = (FLASH_CMD_SET)
-           (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_COMMAND_SET_LSB) + 
+           (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_COMMAND_SET_LSB) +
            (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_COMMAND_SET_MSB) <<
             CFI_MSB_SHIFT)) & FLASH_DEV_READ_MASK;
-   
+
    //Alternate Extended Table Offset
    pId->AlternateTableOffset = (UINT16)
-      (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_EXTENDED_TABLE_LSB) + 
+      (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_EXTENDED_TABLE_LSB) +
       (FLASH_RD(pFlashDesc->BaseAddr, CFI_ALTERNATE_EXTENDED_TABLE_MSB) <<
        CFI_MSB_SHIFT)) & FLASH_DEV_READ_MASK;
 }
@@ -992,27 +992,27 @@ void FlashGetCFIIdentification ( FLASH_ID *pId)
  *                                  DRV_FLASH_MAX_SECTOR_ERASE_NOT_VALID,
  *                                  DRV_FLASH_MAX_CHIP_ERASE_NOT_VALID ]
  *
- * Notes:       The CFI Query Command must be performed before entering 
+ * Notes:       The CFI Query Command must be performed before entering
  *              this function.
  *
  ****************************************************************************/
-static 
+static
 RESULT FlashGetCFISystemInterfaceData ( FLASH_SYS *pSys )
 {
    // Local Data
    FLASH_DESC     *pFlashDesc;
    UINT32         DataRaw;
-   RESULT         DrvStatus;        
+   RESULT         DrvStatus;
    UINT8          i;
    UINT32         *pTypicalValue;
    FLASH_SYS_CALC *pTable;
-    
+
    // Local Data Initialization
-   
-   // Create Local Table so that a nested if structure is not needed to 
+
+   // Create Local Table so that a nested if structure is not needed to
    // check for CFI errors.
-   FLASH_SYS_CALC SystemDataTable [8] = 
-   { 
+   FLASH_SYS_CALC SystemDataTable [8] =
+   {
       // Parameter Offset,           BCD digits / Index to Typical,
       // Pointer to Parameter to Update,
       // Type of Conversion to Perform, Fault Code
@@ -1031,9 +1031,9 @@ RESULT FlashGetCFISystemInterfaceData ( FLASH_SYS *pSys )
       {CFI_MAX_SECTOR_ERASE_TIMEOUT, 2, NULL, TIME_2n_TIMES_TYPICAL,
        DRV_FLASH_MAX_SECTOR_ERASE_NOT_VALID                                 },
       {CFI_MAX_CHIP_ERASE_TIMEOUT,   3, NULL, TIME_2n_TIMES_TYPICAL,
-       DRV_FLASH_MAX_CHIP_ERASE_NOT_VALID                                   } 
+       DRV_FLASH_MAX_CHIP_ERASE_NOT_VALID                                   }
    };
-   
+
    pFlashDesc = &FlashDescription;
 
    // Initialize the pointers to the parameters to store
@@ -1045,64 +1045,64 @@ RESULT FlashGetCFISystemInterfaceData ( FLASH_SYS *pSys )
    SystemDataTable[5].pParam  = &pSys->MaxMinBufferTime_uS;
    SystemDataTable[6].pParam  = &pSys->MaxSectorErase_mS;
    SystemDataTable[7].pParam  = &pSys->MaxChipErase_mS;
-      
+
    DrvStatus  = DRV_OK;
-   
+
    // Loop through the System Data Table and retrieve CFI data and
    // check for possible errors
-   for ( i = 0; i <  (sizeof(SystemDataTable)/sizeof(FLASH_SYS_CALC)) && 
+   for ( i = 0; i <  (sizeof(SystemDataTable)/sizeof(FLASH_SYS_CALC)) &&
                      (DrvStatus == DRV_OK); i++ )
    {
       pTable = &SystemDataTable[i];
-      
+
       // Read the CFI data and mask it
       DataRaw  = (UINT32)(FLASH_RD(pFlashDesc->BaseAddr, pTable->ParameterOffset));
-      DataRaw &= FLASH_DEV_READ_MASK; 
-      
+      DataRaw &= FLASH_DEV_READ_MASK;
+
       // Check if calculating typical time (2^n)
       if (TIME_2n_TYPICAL == pTable->Conversion)
       {
-         *(pTable->pParam) = 1 << DataRaw; 
+         *(pTable->pParam) = 1 << DataRaw;
          // Check that the time value is at least 1
          if ( *(pTable->pParam) < STPU( 1, eTpFlash3105c) )
          {
             // Set the Status of the Driver Fault
             DrvStatus = pTable->DrvFaultCode;
-         }         
+         }
       }
       else // Calculating Max Time (2^n * Typical)
       {
-         pTypicalValue     = SystemDataTable[pTable->BCDSize].pParam; 
-         *(pTable->pParam) = (1 << DataRaw )* *pTypicalValue; 
-            
+         pTypicalValue     = SystemDataTable[pTable->BCDSize].pParam;
+         *(pTable->pParam) = (1 << DataRaw )* *pTypicalValue;
+
          // Check that the time value is at lease 1
          if ( *(pTable->pParam) < STPU( 1, eTpFlash3105d) )
          {
             // Set Status of the Driver Fault
             DrvStatus = pTable->DrvFaultCode;
-         }        
+         }
       }
    }
-   
+
    return DrvStatus;
 }
 
 /*****************************************************************************
  * Function:    FlashGetCFIDeviceGeometry
  *
- * Description: The FlashGetCFIDeviceGeometry will read the device geometry 
+ * Description: The FlashGetCFIDeviceGeometry will read the device geometry
  *              parameters from the Flash Device.
- *              
+ *
  * Parameters:  FLASH_INFO *pInfo - Ptr to Device Geometry
  *
- * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_GEOMETRY_NOT_VALID, 
+ * Returns:     DRV_RESULT [DRV_OK, DRV_FLASH_GEOMETRY_NOT_VALID,
  *                                  DRV_FLASH_SECTOR_DATA_NOT_VALID ]
  *
- * Notes:       The CFI Query Command must be performed before entering 
+ * Notes:       The CFI Query Command must be performed before entering
  *              this function.
  *
  ****************************************************************************/
-static 
+static
 RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
 {
    // Local Data
@@ -1113,17 +1113,17 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
    UINT32     PowerTemp;
    UINT32     DeviceSize;
    UINT32     MaxBytes;
-     
+
    // Initialize Local Data
    DrvStatus  = DRV_OK;
    pFlashDesc = &FlashDescription;
-   
+
    // Flash Device Size in Bytes
    DeviceSize = FLASH_RD(pFlashDesc->BaseAddr, CFI_DEVICE_SIZE) & FLASH_DEV_READ_MASK;
-   PowerTemp  = 1 << DeviceSize; 
-   
+   PowerTemp  = 1 << DeviceSize;
+
    pInfo->DeviceSize = PowerTemp * FLASH_NUMBER_OF_PARTS;
-                            
+
    // Flash Device Width
    pInfo->InterfaceDesc = (FLASH_INTERFACE)
                  ((FLASH_RD(pFlashDesc->BaseAddr, CFI_DEVICE_INTERFACE_LSB) +
@@ -1134,53 +1134,54 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
    MaxBytes = (FLASH_RD(pFlashDesc->BaseAddr, CFI_BYTES_PER_BUFFERED_WRITE_LSB) +
               (FLASH_RD(pFlashDesc->BaseAddr, CFI_BYTES_PER_BUFFERED_WRITE_MSB)
               << CFI_MSB_SHIFT)) & FLASH_DEV_READ_MASK;
-   PowerTemp = 1 << MaxBytes; 
+   PowerTemp = 1 << MaxBytes;
 
    pInfo->MaxByteWrite = (UINT16)(PowerTemp * FLASH_NUMBER_OF_PARTS);
 
    // Number of Erase Block Regions
    pInfo->NumEraseBlocks = (UINT16)
-                 (FLASH_RD(pFlashDesc->BaseAddr, CFI_NUMBER_OF_ERASE_BLOCK_REGIONS) 
+                 (FLASH_RD(pFlashDesc->BaseAddr, CFI_NUMBER_OF_ERASE_BLOCK_REGIONS)
                  & FLASH_DEV_READ_MASK);
-   
+
    if ( (pInfo->DeviceSize     == 0) || (pInfo->MaxByteWrite <= 1) ||
-        (pInfo->NumEraseBlocks == 0) || 
+        (pInfo->NumEraseBlocks == 0) ||
         (STPU( pInfo->NumEraseBlocks, eTpFlash3105a) > CFI_MAX_ERASE_BLOCKS) )
    {
       DrvStatus = DRV_FLASH_GEOMETRY_NOT_VALID;
-   }   
-   
+   }
+
    // Erase Block Information
    for (i = 0; (i < pInfo->NumEraseBlocks) && (DrvStatus == DRV_OK); i++)
    {
       // EbrOffset = i * 4;
       EbrOffset = i * sizeof(UINT32);
-    
+
       // Sector Size
-      pInfo->EraseBlockInfo[i].SectorSize = 
-                 ((FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START + 
+      pInfo->EraseBlockInfo[i].SectorSize =
+                 ((FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START +
                                   CFI_EBR_SECTOR_SIZE_LSB) +
                   (FLASH_RD(pFlashDesc->BaseAddr, EbrOffset+CFI_EBR_START+
-                                  CFI_EBR_SECTOR_SIZE_MSB) << CFI_MSB_SHIFT)) 
-                 & FLASH_DEV_READ_MASK) * CFI_EBR_SECTOR_MULTIPLIER * 
+                                  CFI_EBR_SECTOR_SIZE_MSB) << CFI_MSB_SHIFT))
+                 & FLASH_DEV_READ_MASK) * CFI_EBR_SECTOR_MULTIPLIER *
                  FLASH_NUMBER_OF_PARTS;
-     
+
       // Number of Sectors
-      pInfo->EraseBlockInfo[i].NumSectors = 
-                 ((FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START + 
+      pInfo->EraseBlockInfo[i].NumSectors =
+                 ((FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START +
                                        CFI_EBR_NUMBER_OF_SECTORS_LSB) +
-                  (FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START + 
-                                       CFI_EBR_NUMBER_OF_SECTORS_MSB) << CFI_MSB_SHIFT)) + 
+                  (FLASH_RD(pFlashDesc->BaseAddr, EbrOffset + CFI_EBR_START +
+                                       CFI_EBR_NUMBER_OF_SECTORS_MSB) << CFI_MSB_SHIFT)) +
                   CFI_EBR_SECTOR_ADJUST) & FLASH_DEV_READ_MASK;
-                  
-       if ( (pInfo->EraseBlockInfo[i].SectorSize == 0) || 
-            (pInfo->EraseBlockInfo[i].NumSectors< MIN_POSSIBLE_SECTORS) || 
-            (STPU( pInfo->EraseBlockInfo[i].NumSectors, eTpFlash3105b) > MAX_POSSIBLE_SECTORS) )
+
+       if ( (pInfo->EraseBlockInfo[i].SectorSize == 0) ||
+            (pInfo->EraseBlockInfo[i].NumSectors< MIN_POSSIBLE_SECTORS) ||
+            (STPU( pInfo->EraseBlockInfo[i].NumSectors, eTpFlash3105b) >
+			 MAX_POSSIBLE_SECTORS) )
        {
           DrvStatus = DRV_FLASH_SECTOR_DATA_NOT_VALID;
        }
    }
-    
+
    return (DrvStatus);
 }
 
@@ -1188,66 +1189,71 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
  *  MODIFICATIONS
  *    $History: Flash.c $
  * 
+ * *****************  Version 31  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 12:12p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 10/27/11   Time: 9:48p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1077 - Code Coverage need a startup TP
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 10/27/11   Time: 7:45p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1077 - Code Coverage Test Points
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 11/01/10   Time: 7:50p
  * Updated in $/software/control processor/code/drivers
  * SCR# 975 - Code Coverage refactor
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 10/18/10   Time: 8:31p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jeff Vahue   Date: 10/18/10   Time: 7:42p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 10/18/10   Time: 7:03p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848: Code Coverage
- * 
+ *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 10/18/10   Time: 6:47p
  * Updated in $/software/control processor/code/drivers
  * SCR 956 - Code Coverage Update
- * 
+ *
  * *****************  Version 22  *****************
  * User: John Omalley Date: 10/01/10   Time: 5:24p
  * Updated in $/software/control processor/code/drivers
  * SCR 893 - Updates for Code Coverage - Removed Commented out code
- * 
+ *
  * *****************  Version 21  *****************
  * User: John Omalley Date: 9/10/10    Time: 10:00a
  * Updated in $/software/control processor/code/drivers
  * SCR 858 - Added FATAL to defaults
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 9/03/10    Time: 9:45a
  * Updated in $/software/control processor/code/drivers
  * SCR 825 - Removed debug write checks
- * 
+ *
  * *****************  Version 19  *****************
  * User: John Omalley Date: 9/03/10    Time: 9:42a
  * Updated in $/software/control processor/code/drivers
  * SCR 825 - Checking in Debug Version that verifies buffer writes
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 2:50p
  * Updated in $/software/control processor/code/drivers
@@ -1256,53 +1262,53 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
  * User: Peter Lee    Date: 8/31/10    Time: 3:29p
  * Updated in $/software/control processor/code/drivers
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor3  Date: 5/06/10    Time: 11:27a
  * Updated in $/software/control processor/code/drivers
  * Check In SCR #586
- * 
+ *
  * *****************  Version 15  *****************
  * User: John Omalley Date: 5/05/10    Time: 1:14p
  * Updated in $/software/control processor/code/drivers
  * SCR# 350 - Changed FlashWriteBufferMode if ByteCount<=0 to ByteCount ==
  * 0
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:14p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 2/24/10    Time: 12:58p
  * Updated in $/software/control processor/code/drivers
- * SCR# 364 - remove unused functions 
- * 
+ * SCR# 364 - remove unused functions
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 12:57p
  * Updated in $/software/control processor/code/drivers
  * SCR# 455 - remove LINT issues
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:23p
  * Updated in $/software/control processor/code/drivers
  * SCR 31
- * 
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 9/16/09    Time: 1:15p
  * Updated in $/software/control processor/code/drivers
- * SCR #94, #95 System Log Id returned. 
- * 
+ * SCR #94, #95 System Log Id returned.
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:09p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:33p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 7  *****************
  * User: John Omalley Date: 8/06/09    Time: 3:45p
  * Updated in $/software/control processor/code/drivers
@@ -1311,18 +1317,18 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
  *    Added logic to not use the Flash and Memory Manager if the flash
  * driver initialization fails.
  *    Initialized any unitialized variables.
- * SCR 234 
+ * SCR 234
  *    Removed the math.h power function and used a shift instead.
- * 
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 6/29/09    Time: 2:34p
  * Updated in $/software/control processor/code/drivers
  * SCR #204 Misc Code Updates
- * 
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 11:57a
  * Updated in $/control processor/code/drivers
  * SCR #87 Function Prototype
- * 
+ *
  *
  ***************************************************************************/
