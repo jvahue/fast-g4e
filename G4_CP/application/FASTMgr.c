@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 110 $  $Date: 12-10-19 2:09p $
+   $Revision: 111 $  $Date: 11/06/12 11:54a $
 
 
 ******************************************************************************/
@@ -52,6 +52,13 @@
 #define NO_VPN_TO           600
 #define PERCENT_CONST       99
 
+//Tags for setting up "record" active events in FAST_Init.  Tags are OR'd
+//together in FAST_OnRecordChange, each should have its own bitfield.
+#define FAST_REC_EVENTS_TIME_HIST   0x1
+#define FAST_REC_EVENTS_EVENTS      0x2
+#define FAST_REC_EVENTS_ENG_RUN     0x4
+#define FAST_REC_EVENTS_DATA_MGR    0x8
+#define FAST_REC_EVENTS_LEGACY_REC  0x10
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -128,6 +135,9 @@ static BOOLEAN wlanOverride;
 static BOOLEAN gsmOverride;
 static CHAR    SwVersion[SW_VERSION_LEN];
 static BOOLEAN m_FASTControlEnb;
+static INT32   m_RecordBusyFlags;
+static BOOLEAN m_IsRecordBusy;
+
 
 #include "FastMgrUserTables.c"
 
@@ -156,6 +166,7 @@ static void FAST_TxTestTask(void* pParam);
 static void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
       FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest,
       CHAR* FailStr );
+static void FAST_OnRecordingChange(INT32 tag, BOOLEAN is_busy);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -189,6 +200,8 @@ void FAST_Init(void)
   FASTStatus.LogTransferToGSNoVPNTO = 0;
   FASTStatus.DownloadStarted        = FALSE;
   FASTStatus.AutoDownload           = FALSE;
+  m_RecordBusyFlags                 = 0;
+  m_IsRecordBusy                    = FALSE;
 
   memset(&m_FastTxTest,0,sizeof(m_FastTxTest));
 
@@ -203,7 +216,7 @@ void FAST_Init(void)
   //FAST Manager Task
 
   // Register the application busy flag with the Power Manager.
-  PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &FASTStatus.Recording);
+  PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &m_IsRecordBusy);
   PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &FASTStatus.LogTransferToGSActive);
 
   memset(&TaskInfo, 0, sizeof(TaskInfo));
@@ -289,6 +302,10 @@ void FAST_Init(void)
   TaskInfo.pParamBlock    = NULL;
   TmTaskCreate (&TaskInfo);
 
+  //Setup events for recording/not recording status change.
+  TH_SetRecStateChangeEvt(FAST_REC_EVENTS_TIME_HIST,FAST_OnRecordingChange);
+  //EngRunSetRecStateChangeEvt(FAST_REC_EVENTS_ENG_RUN,FAST_OnRecordingChange);
+  //EventSetRecStateChangeEvt(FAST_REC_EVENTS_EVENTS,FAST_OnRecordingChange);
 }
 
 
@@ -482,6 +499,35 @@ void FAST_FSMEndOfFlightRun(BOOLEAN Run, INT32 Param)
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
+/******************************************************************************
+ * Function:    FAST_OnRecordingChange
+ *
+ * Description: "Event" handler to be called by modules feeding the recording
+ *              or not recording status back to FAST Mgr.  Currently, these
+ *              are: Time History, Events, Engine Run, and
+ *              Data Manager "recording"
+ *
+ * Parameters:
+ *
+ * Returns:
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static void FAST_OnRecordingChange(INT32 tag, BOOLEAN is_busy)
+{
+  if(is_busy)
+  {
+    m_RecordBusyFlags |= tag;
+  }
+  else
+  {
+    m_RecordBusyFlags &= ~tag;
+  }
+  m_IsRecordBusy = m_RecordBusyFlags != 0;
+}
+
+
 
 /******************************************************************************
  * Function:    FAST_Task()
@@ -1013,6 +1059,9 @@ void FAST_AtStartOfRecord(void)
 {
   UploadMgr_SetUploadEnable(FALSE);
   DataMgrRecord(TRUE);                     //Signal Data Mgr
+
+  //New method to signal record busy/not busy:
+  FAST_OnRecordingChange(FAST_REC_EVENTS_LEGACY_REC, TRUE);
 }
 
 /******************************************************************************
@@ -1029,6 +1078,8 @@ void FAST_AtStartOfRecord(void)
  *****************************************************************************/
 void FAST_AtEndOfRecord(void)
 {
+  //New method to signal record busy/not busy:
+  FAST_OnRecordingChange(FAST_REC_EVENTS_LEGACY_REC, FALSE);
 }
 
 /******************************************************************************
@@ -1479,16 +1530,21 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 111  *****************
+ * User: Jim Mood     Date: 11/06/12   Time: 11:54a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107
+ *
  * *****************  Version 110  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 2:09p
  * Updated in $/software/control processor/code/application
  * SCR #1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 109  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 12:40p
  * Updated in $/software/control processor/code/application
  * Code Review Tool Findings
- * 
+ *
  * *****************  Version 108  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application

@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 4 $  $Date: 9/27/12 4:51p $    
+$Revision: 5 $  $Date: 11/06/12 11:49a $    
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -63,7 +63,7 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_1HZ          },
+USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_OFF          },
                                               { "1HZ"  , TH_1HZ          },
                                               { "2HZ"  , TH_2HZ          }, 
                                               { "4HZ"  , TH_4HZ          }, 
@@ -90,15 +90,22 @@ static USER_MSG_TBL time_history_status [] =
   { NULL,           NULL,            NULL,                    NO_HANDLER_DATA}
 };
 
+static USER_MSG_TBL time_history_debug [] =
+{
+  /* Str            Next Tbl Ptr         Handler Func.  Data Type          Access     Parameter        IndexRange DataLimit            EnumTbl*/
+   { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,   USER_WO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,   USER_WO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
+};
+
 static USER_MSG_TBL time_history_root [] =
 { /* Str            Next Tbl Ptr         Handler Func.  Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
    { "CFG",         time_history_cmd,    NULL,          NO_HANDLER_DATA},
    { "STATUS",      time_history_status, NULL,          NO_HANDLER_DATA},
-   { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,   USER_RW,          NULL,          -1, -1,      NO_LIMIT,  NULL},
-   { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,   USER_RW,          NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { "DEBUG",       time_history_debug,  NULL,          NO_HANDLER_DATA},
    { "SHOW_CFG",    NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
+
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -296,6 +303,11 @@ USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
+ * 
+ * *****************  Version 5  *****************
+ * User: Jim Mood     Date: 11/06/12   Time: 11:49a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
  * 
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 9/27/12    Time: 4:51p
