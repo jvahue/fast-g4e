@@ -1405,7 +1405,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
         result = TRUE;
       }
       break;
-      
+
     case USER_TYPE_FLOAT64:
       /* FLOAT64 type
          - check min/max bounds incl. the min/max value a float64 can represent.
@@ -2736,7 +2736,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
@@ -2867,7 +2867,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
@@ -2888,7 +2888,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 ******************************************************************************/
 static
 BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
-                      USER_RANGE *usrMin, USER_RANGE *usrMax)
+                           USER_RANGE *usrMin, USER_RANGE *usrMax)
 {
 #define MAX_BIT 128
   UINT32 mask;
