@@ -10,7 +10,7 @@
                This file contains an API and serial interrupt handlers
 
    VERSION
-   $Revision: 17 $  $Date: 12-11-02 1:25p $
+   $Revision: 18 $  $Date: 12-11-06 3:18p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -49,6 +49,10 @@ typedef enum {
     UART_2 = 2,
     UART_3 = 3,
     UART_NUM_OF_UARTS
+	
+	// Warning - target type for this enum may be as small as INT8.
+	// Do not make enum larger than 127. (SCR #1196)
+	
 } UART_ID;
 
 //UART initial configuration information , used as a parameter to UART_Init
@@ -72,12 +76,20 @@ typedef enum {
 typedef enum {
     UART_CFG_DB_7 = 0x2,
     UART_CFG_DB_8 = 0x3
+	
+	// Warning - target type for this enum may be as small as char.
+	// Do not make enum larger than 255. (SCR #1196)
+
 } UART_CFG_DB;
 
 // UART Stop Bits
 typedef enum {
     UART_CFG_SB_1 = 0x7,
     UART_CFG_SB_2 = 0xF
+	
+	// Warning - target type for this enum may be as small as char.
+	// Do not make enum larger than 255. (SCR #1196)
+
 } UART_CFG_SB;
 
 // UART Parity
@@ -85,6 +97,10 @@ typedef enum {
     UART_CFG_PARITY_EVEN = 0,
     UART_CFG_PARITY_ODD  = 1,
     UART_CFG_PARITY_NONE = 4
+	
+	// Warning - target type for this enum may be as small as char.
+	// Do not make enum larger than 255. (SCR #1196)
+
 } UART_CFG_PARITY;
 
 // UART Configuration Data
@@ -177,6 +193,12 @@ EXPORT void UART_PSCX_ISR( INT8 port);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 3:18p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 PCLint 641 Added warning comments to enum definitions to
+ * avoid making enum too large.
  * 
  * *****************  Version 17  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:25p

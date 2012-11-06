@@ -30,7 +30,7 @@
               ResultCodes.c (Driver/system call result codes)
 
   VERSION
-  $Revision: 61 $  $Date: 12-11-05 1:02p $
+  $Revision: 62 $  $Date: 12-11-06 3:17p $
 
 ******************************************************************************/
 
@@ -234,7 +234,7 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   *psize = sizeof(UART_DRV_PBIT_LOG);
   bInitOk = TRUE;
 
-  for(i = 0; i < UART_NUM_OF_UARTS; i++)
+  for(i = 0; i < (UINT32) UART_NUM_OF_UARTS; i++)
   {
     memset(&UART_Config[i], 0, sizeof(UART_Config[0]));
     memset(&UART_Status[i], 0, sizeof(UART_Status[0]));
@@ -286,7 +286,7 @@ RESULT UART_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   else
   {
     // All four ports will be disabled if set of ColdFire Processor fails
-    for(i = 0; i < UART_NUM_OF_UARTS; i++)
+    for(i = 0; i < (UINT32) UART_NUM_OF_UARTS; i++)
     {
       UART_Failed[i] = TRUE;
     }
@@ -343,7 +343,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
   result = DRV_OK;
   port = (UINT32)Config->Port;
 
-  ASSERT_MESSAGE( port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", port);
+  ASSERT_MESSAGE( port < (UINT32)UART_NUM_OF_UARTS, "Invalid UART Port (%d)", port);
   ASSERT_MESSAGE( !UART_Config[port].Open, "Port is open(%d)", port);
 
   // If UART has previously failed - don't open
@@ -398,7 +398,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
         | MCF_PSC_CSR_TCSEL_SYS_CLK);
 
     //Calculate baud settings - Counter Can not verify / check.
-    divider = (UINT16)((UART_SYSTEM_CLOCK_MHZ*1000000)/(Config->BPS * 32));
+    divider = (UINT16)((UART_SYSTEM_CLOCK_MHZ*1000000)/((UINT16)Config->BPS * 32));
     MCF_PSC_CTUR(port) =  (UINT8) ((divider >> 8) & 0xFF);
     MCF_PSC_CTLR(port) =  (UINT8) (divider & 0xFF);
 
@@ -413,14 +413,14 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
     //Register access require double access as this register is PSCMR1/PSCMR2
     //                                                 (Ref 27-5 MCF Reference)
     //First Access to MCF_PSC_MR is PSCMR1n
-    MCF_PSC_MR(port) = (((Config->Parity)&0x07)<<2) | //This sets PM and PT at same time
-                          MCF_PSC_MR_BC(Config->DataBits) |
+    MCF_PSC_MR(port) = ((( (UINT8)Config->Parity )&0x07)<<2) | //This sets PM and PT at same time
+                          MCF_PSC_MR_BC( (UINT8)Config->DataBits ) |
                           MCF_PSC_MR_RXIRQ ;
 
     //Configure loopback and stop bits
     // Second Access to MCF_PSC_MR is PSCMR2n
     MCF_PSC_MR(port) = ((Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0) |
-                         MCF_PSC_MR_SB(Config->StopBits));
+                         MCF_PSC_MR_SB( (UINT8)Config->StopBits ));
 
     // Check PSCMR1n and then PSCMR2n settings of MCF_PSC_MR. Need to reset pointer to PSCMR1n
     MCF_PSC_CR(port) = MCF_PSC_CR_RESET_MR;
@@ -428,14 +428,14 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
     // Need to mask away MCF_PSC_MR_ERR as this is read only and
     // in current version always set to "1" !
     CHECK_SETTING ( (MCF_PSC_MR(port) & (~MCF_PSC_MR_ERR)),
-                    ( (((Config->Parity)&0x07)<<2) |
-                       MCF_PSC_MR_BC(Config->DataBits) |
+                    ( ((( (UINT8)Config->Parity )&0x07)<<2) |
+                       MCF_PSC_MR_BC( (UINT8)Config->DataBits ) |
                        MCF_PSC_MR_RXIRQ),
                     bInitOk);
 
     CHECK_SETTING ( MCF_PSC_MR(port),
                     ( ( (Config->LocalLoopback ? MCF_PSC_MR_CM_LOCAL_LOOP : 0)
-                        | MCF_PSC_MR_SB(Config->StopBits) ) ),
+                        | MCF_PSC_MR_SB( (UINT8)Config->StopBits ) ) ),
                     bInitOk );
 
 
@@ -548,7 +548,7 @@ void UART_ClosePort(UINT8 Port)
 {
   UINT32 intrLevel;
 
-  ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
+  ASSERT_MESSAGE( Port < (UINT8) UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   intrLevel = __DIR();
   UART_CLR_IMR_B(Port,UART_CLR_MASK); //Disable port interrupts
   __RIR(intrLevel);
@@ -603,7 +603,7 @@ void UART_ClosePort(UINT8 Port)
 void UART_Purge(UINT8 Port)
 {
   UINT32 intrLevel;
-  ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
+  ASSERT_MESSAGE( Port < (UINT8) UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
 
   //Kill TX/RX interrupts
@@ -679,7 +679,7 @@ RESULT UART_Transmit(UINT8 Port, const INT8* Data, UINT16 Size, UINT16* Sent)
   UINT16 BytesSent = 0;
   RESULT result = DRV_OK;
 
-  ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
+  ASSERT_MESSAGE( Port < (UINT8) UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
 
   // Enable Tx
@@ -817,7 +817,7 @@ RESULT UART_Receive( UINT8 Port, INT8* Data, UINT16 Size, UINT16* BytesReceived)
   UINT32 intrLevel;
 #endif
 
-  ASSERT_MESSAGE( Port < UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
+  ASSERT_MESSAGE( Port < (UINT8) UART_NUM_OF_UARTS, "Invalid UART Port (%d)", Port);
   ASSERT_MESSAGE( UART_Config[Port].Open, "Port not open(%d)", Port);
 
   if ( result == DRV_OK )
@@ -960,7 +960,7 @@ UINT8 UART_CheckForTXDone(void)
  UINT8 TxFlags = 0;
  BOOLEAN fifoEmpty = TRUE;
 
-  for(i = 0; i < UART_NUM_OF_UARTS; i++)          //Check all ports, if open
+  for(i = 0; i < (UINT8) UART_NUM_OF_UARTS; i++)          //Check all ports, if open
   {
     intrLevel = __DIR();
     if (UART_Config[i].Open)
@@ -1126,7 +1126,7 @@ void UART_PSCX_ISR( INT8 port)
   pUartSts = &UART_Status[port];
 
   // GSE is the only half duplex
-  if (port == UART_0)
+  if (port == (INT8) UART_0)
   {
     UART0_SET_TO_TX;
   }
@@ -1227,7 +1227,7 @@ RESULT UART_PBIT(void)
   PBITResultCodes[UART_3] = DRV_UART_3_PBIT_FAILED;
   strncpy_safe( TestStr, UART_PBIT_MSG_SIZE, "Test Message", _TRUNCATE );
 
-  config.Port             = UART_0;
+  config.Port             = (BYTE) UART_0;
   config.Duplex           = UART_CFG_DUPLEX_HALF;   // UART 0 only half duplex
   config.BPS              = UART_CFG_BPS_115200;
   config.DataBits         = UART_CFG_DB_8;
@@ -1244,19 +1244,19 @@ RESULT UART_PBIT(void)
   result |= UART_OpenPort(&config);
 
   config.Duplex = UART_CFG_DUPLEX_FULL;     // all other ports full duplex
-  config.Port = UART_1;
+  config.Port = (BYTE) UART_1;
   result |= UART_OpenPort(&config);
 
-  config.Port = UART_2;
+  config.Port = (BYTE) UART_2;
   result |= UART_OpenPort(&config);
 
-  config.Port = UART_3;
+  config.Port = (BYTE) UART_3;
   result |= UART_OpenPort(&config);
 
   // Perform test only if _OpenPort() is successful
 
   //Transmit a short string out each port, and receive/verify it
-  for(i = 0; i < UART_NUM_OF_UARTS; i++)
+  for(i = 0; i < (UINT32) UART_NUM_OF_UARTS; i++)
   {
     if (!UART_Failed[i])
     {
@@ -1269,7 +1269,7 @@ RESULT UART_PBIT(void)
   while ( (TTMR_GetHSTickCount() - startTime) < (2*TICKS_PER_mSec));
 
   //Verify test string is received correctly
-  for(i = 0; i < UART_NUM_OF_UARTS; i++)
+  for(i = 0; i < (UINT32) UART_NUM_OF_UARTS; i++)
   {
     if (!UART_Failed[i])
     {
@@ -1291,7 +1291,7 @@ RESULT UART_PBIT(void)
 #endif
 
   //Close all ports
-  for(i = 0; i < UART_NUM_OF_UARTS; i++)
+  for(i = 0; i < (UINT32) UART_NUM_OF_UARTS; i++)
   {
     UART_ClosePort((UINT8)i);
   }
@@ -1302,6 +1302,12 @@ RESULT UART_PBIT(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 3:17p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 PCLint 641 Added casts for enums where necessary and added
+ * warning comment to enum definitions to avoid making enum too large.
  * 
  * *****************  Version 61  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 1:02p

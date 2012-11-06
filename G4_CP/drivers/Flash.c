@@ -13,7 +13,7 @@
                  to the flash device detected during initialization.
 
     VERSION
-    $Revision: 31 $  $Date: 12-11-02 12:12p $
+    $Revision: 32 $  $Date: 12-11-06 1:37p $
 
 ******************************************************************************/
 
@@ -1140,7 +1140,7 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
 
    // Number of Erase Block Regions
    pInfo->NumEraseBlocks = (UINT16)
-                 (FLASH_RD(pFlashDesc->BaseAddr, CFI_NUMBER_OF_ERASE_BLOCK_REGIONS)
+                 (FLASH_RD(pFlashDesc->BaseAddr, CFI_NUM_ERASE_BLOCK_REGIONS)
                  & FLASH_DEV_READ_MASK);
 
    if ( (pInfo->DeviceSize     == 0) || (pInfo->MaxByteWrite <= 1) ||
@@ -1188,6 +1188,11 @@ RESULT FlashGetCFIDeviceGeometry ( FLASH_INFO *pInfo )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Flash.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 1:37p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format error - name of define too long
  * 
  * *****************  Version 31  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:12p
