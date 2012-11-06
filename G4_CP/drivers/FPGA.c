@@ -8,7 +8,7 @@
     Description:  Contains all functions and data related to the FPGA.
 
  VERSION
-     $Revision: 61 $  $Date: 12-11-02 12:02p $
+     $Revision: 62 $  $Date: 12-11-05 12:55p $
 
 ******************************************************************************/
 
@@ -267,53 +267,7 @@ FPGA_SHADOW_RAM_PTR FPGA_GetShadowRam ( void )
 }
 
 
-/******************************************************************************
- * Function:     FPGA_Interrupt_Enable
- *
- * Description:  This function allows the enabling and disabling of interrupts
- *               associated with the FPGA.
- *
- * Parameters:   UINT16  IntBit  - Bit position of interrupt
- *               UINT16  IntMask -
- *               BOOLEAN Enable  - Enable or Disable the Interrupt
- *
- * Returns:      DRV_OK
- *
- * Notes:        This function should only be used during initialization
- *
- *****************************************************************************/
-/*
-RESULT FPGA_Interrupt_Enable (UINT16 IntBit, UINT16 IntMask, BOOLEAN Enable)
-{
-   if (Enable)
-   {
-       // Enable interrupt
-       FPGA_IMR |= (IntBit * IntMask);
-   }
-   else
-   {
-       // Disable the Interrupt
-       FPGA_IMR &= ~(IntBit * IntMask);
-   }
 
-   // Initialize the Edge Port Interupt for the FPGA to Disabled
-   MCF_EPORT_EPPAR &= ~MCF_EPORT_EPPAR_EPPA6(0x3);  //state = low
-   MCF_EPORT_EPDDR &= ~MCF_EPORT_EPDDR_EPDD6;       //Input
-
-   // Check if any FPGA interrupts are enabled
-   if (FPGA_IMR != 0)
-   {
-       // Initialize the Edge Port Interrupt for the FPGA
-       MCF_EPORT_EPPAR |= MCF_EPORT_EPPAR_EPPA6(MCF_EPORT_EPPAR_EPPAx_FALLING);
-       MCF_EPORT_EPIER |= MCF_EPORT_EPIER_EPIE6;        //Interrupt enable
-
-       //Enable interrupts for the FPGA
-       MCF_INTC_IMRL &= ~(MCF_INTC_IMRL_INT_MASK6|MCF_INTC_IMRL_MASKALL);
-   }
-
-   return DRV_OK;
-}
-*/
 
 /******************************************************************************
  * Function:    FPGA_Initialize
@@ -1109,6 +1063,12 @@ void FPGA_InitializeShadowRamVer12( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FPGA.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 12:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
  * 
  * *****************  Version 61  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:02p

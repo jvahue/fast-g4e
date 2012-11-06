@@ -9,7 +9,7 @@
   Description:   Aircraft Auto Re-Configuration Routines
 
   VERSION
-      $Revision: 54 $  $Date: 12-11-02 2:02p $
+      $Revision: 55 $  $Date: 12-11-05 1:20p $
 
 ******************************************************************************/
 
@@ -804,7 +804,7 @@ static void AC_StartManual(void)
   cmd.Mode    = MSCP_START_RECFG_MANUAL;
   m_ReceivingConfigCmds = TRUE;
   if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_START_RECFG,
-     &cmd,sizeof(cmd),5000,&AC_MSReqStartCfgRspHandler) )
+     &cmd,sizeof(cmd),5000,AC_MSReqStartCfgRspHandler) )
   {
     CfgMgr_CancelBatchCfg();
     m_ReceivingConfigCmds = FALSE;
@@ -882,7 +882,7 @@ static void AC_WaitVPNConnection(void)
     cmd.ValidateData = cfg->Aircraft.bValidateData;
 
     if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_CFG_FILES,
-       &cmd,sizeof(cmd),AC_REQ_FILES_FROM_GROUND_TO,&AC_MSReqCfgFilesHandler) )
+       &cmd,sizeof(cmd),AC_REQ_FILES_FROM_GROUND_TO,AC_MSReqCfgFilesHandler) )
     {
       AC_Error("Could not send MS cmd: Get Start Recfg");
     }
@@ -960,7 +960,7 @@ static void AC_ProcessRetrieveCfg(void)
       cmd.Mode    = MSCP_START_RECFG_AUTO;
       m_ReceivingConfigCmds = TRUE;
       if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_START_RECFG,
-         &cmd,sizeof(cmd),5000,&AC_MSReqStartCfgRspHandler) )
+         &cmd,sizeof(cmd),5000,AC_MSReqStartCfgRspHandler) )
       {
         CfgMgr_CancelBatchCfg();
         m_ReceivingConfigCmds = FALSE;
@@ -1742,6 +1742,13 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 1:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1172 PCLint 546 found during code review. Attempting to take the
+ * address of a function name with &.  Removed the & because names of
+ * functions themselves are promoted to an address so it is redundant.
  * 
  * *****************  Version 54  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 2:02p

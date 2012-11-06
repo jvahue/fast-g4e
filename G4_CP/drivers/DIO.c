@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 51 $  $Date: 12-11-01 3:19p $
+   $Revision: 52 $  $Date: 12-11-05 2:21p $
 
 
 ******************************************************************************/
@@ -227,7 +227,7 @@ static void DIO_CheckWrapAround( void );
  ****************************************************************************/
 RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
-  UINT16 i;
+  UINT32 i;
 
   UINT32 SetupPinResult;
   UINT32 PinResultSummary;
@@ -1096,7 +1096,7 @@ static void DIO_DebounceState(DIO_INPUT Pin, BOOLEAN recvdState,
 static DIO_PORT_DATA* DIO_AddPortToList( volatile UINT8* addr)
 {
   DIO_PORT_DATA* ptr = NULL;
-  INT32 i = 0;
+  UINT32 i = 0;
   BOOLEAN bFoundInList = FALSE;
 
   while (i < DIO_ENUM_MAX && bFoundInList == FALSE)
@@ -1189,6 +1189,12 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 2:21p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 PCLint 641 Warning copying enum into a UINT16 could cause a
+ * problem.  Modified target variable to be a UINT32.
  * 
  * *****************  Version 51  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 3:19p

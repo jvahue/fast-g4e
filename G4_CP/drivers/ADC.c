@@ -20,7 +20,7 @@
                SPI.h - Accessing the SPI bus to read the converter
 
   VERSION
-      $Revision: 31 $  $Date: 12-11-01 2:44p $
+      $Revision: 32 $  $Date: 12-11-05 2:10p $
 
 
 ******************************************************************************/
@@ -111,7 +111,7 @@ RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   BOOLEAN bInitOk;
   ADC_DRV_PBIT_LOG  *pdest;
-  UINT16 i;
+  UINT32 i;
 
 
   pdest = (ADC_DRV_PBIT_LOG *) pdata;
@@ -530,6 +530,12 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 2:10p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 PCLint 641 Warning copying enum into a uint16 could cause a
+ * problem.  Modified target variable to be a uint32.
  * 
  * *****************  Version 31  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 2:44p

@@ -17,7 +17,7 @@
                configuration is loaded into the registers.
 
    VERSION
-    $Revision: 32 $  $Date: 12-11-02 12:42p $
+    $Revision: 33 $  $Date: 12-11-05 12:58p $
 
 ******************************************************************************/
 
@@ -639,69 +639,6 @@ RESULT RTC_WriteNVRam(UINT8 offset, void* data, size_t size)
 
 
 
-/*****************************************************************************
- * Function:    RTC_SetTrickleChargeOn
- *
- * Description: Sets the DS1306 trickle charge register to the configuration
- *              specified to enable proper charging of the real-time clock
- *              backup battery.
- *
- * Parameters:  None
- *
- * Returns:     None
- *
- * Notes:       DEAD CODE, CAN BE UNCOMMENTED IF NEEDED
- *
- *              This function has more than one possible exit points.  The
- *              macro HNDL_ERR is defined to return in the case of
- *              an SPI operation failure.
- *
- ***************************************************************************
-RESULT RTC_SetTrickleChargeOn(void)
-{
-  UINT8 Byte;
-
-  Byte = RTC_ADDR_1306_CHRG;
-  HNDL_ERR(SPI_WriteByte(SPI_DEV_RTC,&Byte,TRUE));
-
-  Byte = RTC_CHARGE_1360_ENABLE_VAL;
-  HNDL_ERR(SPI_WriteByte(SPI_DEV_RTC,&Byte,FALSE));
-
-  return DRV_OK;
-}
-*/
-
-
-/*****************************************************************************
- * Function:    RTC_SetTrickleChargeOff
- *
- * Description: Sets the trickle charge control register to the value specified
- *              that disables the trickle charge circuit.
- *
- * Parameters:  None
- *
- * Returns:     None
- *
- * Notes:       DEAD CODE, CAN BE UNCOMMENTED IF NEEDED
- *
- *              This function has more than one possible exit points.  The
- *              macro HNDL_ERR is defined to return in the case of
- *              an SPI operation failure.
- *
- ****************************************************************************
-RESULT RTC_SetTrickleChargeOff(void)
-{
-  UINT8 Byte;
-
-  Byte = RTC_ADDR_1306_CHRG;
-  HNDL_ERR(SPI_WriteByte(SPI_DEV_RTC,&Byte,TRUE));
-
-  Byte = RTC_CHARGE_1360_DISABLE_VAL;
-  HNDL_ERR(SPI_WriteByte(SPI_DEV_RTC,&Byte,FALSE));
-
-  return DRV_OK;
-}
-*/
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -885,6 +822,12 @@ BOOLEAN RTC_ConvertRTC_BCDToTs ( UINT8 ReadArr[], TIMESTRUCT *Ts )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: RTC.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 12:58p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
  * 
  * *****************  Version 32  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:42p

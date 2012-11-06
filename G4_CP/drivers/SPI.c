@@ -22,7 +22,7 @@
  Requires:    none
 
  VERSION
-    $Revision: 26 $  $Date: 12-11-02 12:55p $
+    $Revision: 27 $  $Date: 12-11-05 1:00p $
 
 
 ******************************************************************************/
@@ -245,47 +245,6 @@ RESULT SPI_WriteByte(SPI_DEVS Device, const UINT8* Byte, BOOLEAN CS)
 
 
 /*****************************************************************************
- * Function:    SPI_WriteWord
- * Description: Writes a 16-bit word onto the SPI bus, to the selected device
- * Parameters:  Device: The device to chip select for this write
- *              Word*:  A pointer to the 16-bit word to write to the device
- *              CS:     True-Hold CS active after this transfer
- *                      False-Set CS to inactive after this transfer
- * Returns:     DRV_OK:  Write suceeded
- *              !DRV_OK: Write failed
- * Notes:       The word returned into MISO while writing is copied into the
- *              Word parameter
- ****************************************************************************/
-/*
-RESULT SPI_WriteWord(SPI_DEVS Device, UINT16* Word, BOOLEAN CS)
-{
-  MCF_GPIO_PODR_DSPI = SPI_Devices[Device].CS;              //Ensure the chip select for only
-                                                            //the one device is is set
-
-  MCF_DSPI_DSR = MCF_DSPI_DSR_TCF;                          //Clear transfer complete flag by
-                                                            //writing a 1 to the bit location
-                                                            //of TCF
-
-  MCF_DSPI_DTFR = (SPI_Devices[Device].DTFRCmd | *Word);    //Send it!
-
-  while(!(MCF_DSPI_DSR & MCF_DSPI_DSR_TCF))                 //Wait for completion
-  {
-  }
-
-  *Word = MCF_DSPI_DRFR;                                    //Dummy read to clear the data
-
-  if(CS == FALSE)                                           //Set CS inactive if the caller
-  {                                                         //requests
-    MCF_GPIO_PODR_DSPI = SPI_ALL_CS_INACTIVE;
-  }
-
-  return DRV_OK;
-
-}
-*/
-
-
-/*****************************************************************************
  * Function:    SPI_WriteBlock
  * Description: Writes a variable length block of data onto the SPI bus.
  *              Block size is limited to 65535 bytes by the 16-bit count
@@ -473,6 +432,12 @@ RESULT SPI_ReadBlock(SPI_DEVS Device, BYTE* Data, UINT16 Cnt, BOOLEAN CS)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 1:00p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
  * 
  * *****************  Version 26  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:55p

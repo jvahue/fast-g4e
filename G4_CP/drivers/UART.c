@@ -30,7 +30,7 @@
               ResultCodes.c (Driver/system call result codes)
 
   VERSION
-  $Revision: 60 $  $Date: 12-11-02 1:26p $
+  $Revision: 61 $  $Date: 12-11-05 1:02p $
 
 ******************************************************************************/
 
@@ -1007,75 +1007,13 @@ UINT8 UART_CheckForTXDone(void)
   return TxFlags;
 }
 
-/*****************************************************************************
- * Function:    UART_CBIT
- *
- * Description: Continuous-built-in-test routine.  Monitors the error counters.
- *              Returns a fault code if any of the open UART channel error
- *              counts exceed the configured threshold, then resets the count
- *              for that particular fault.  Even if multiple errors are
- *              present, this routine will return only one fault per call.
- *
- *
- * Parameters:  none
- *
- * Returns:     RESULT code: DRV_OK = No CBIT faults detected
- *                           !DRV_OK = CBIT fault, see ResultCodes.h
- *
- * Notes:
- ****************************************************************************/
-/*
-RESULT UART_CBIT(void)
-{
- RESULT result = DRV_OK;
- UINT32 i;
-
- const RESULT CBITCodeTbl[UART_NUM_OF_UARTS][UART_ERROR_MAX] = {
-  {DRV_UART_0_CBIT_TXOV_CNT,        DRV_UART_0_CBIT_RXOV_CNT,
-   DRV_UART_0_CBIT_FRAMING_ERR_CNT, DRV_UART_0_CBIT_PARITY_ERR_CNT},
-  {DRV_UART_1_CBIT_TXOV_CNT,        DRV_UART_1_CBIT_RXOV_CNT,
-   DRV_UART_1_CBIT_FRAMING_ERR_CNT, DRV_UART_1_CBIT_PARITY_ERR_CNT},
-  {DRV_UART_2_CBIT_TXOV_CNT,        DRV_UART_2_CBIT_RXOV_CNT,
-   DRV_UART_2_CBIT_FRAMING_ERR_CNT, DRV_UART_2_CBIT_PARITY_ERR_CNT},
-  {DRV_UART_3_CBIT_TXOV_CNT,        DRV_UART_3_CBIT_RXOV_CNT,
-   DRV_UART_3_CBIT_FRAMING_ERR_CNT, DRV_UART_3_CBIT_PARITY_ERR_CNT}
-  };
-
-  for( i = 0; i < UART_NUM_OF_UARTS; i++ )
-  {
-    if(UART_Status[i].TxOverflowErrCnt > 0)
-    {
-      result = CBITCodeTbl[i][TX_OVERFLOW];
-      UART_Status[i].TxOverflowErrCnt = 0;
-    }
-    else if(UART_Status[i].RxOverflowErrCnt > 0)
-    {
-      result = CBITCodeTbl[i][RX_OVERFLOW];
-      UART_Status[i].RxOverflowErrCnt = 0;
-    }
-    else if(UART_Status[i].ParityErrCnt > 0)
-    {
-      result = CBITCodeTbl[i][PARITY_ERR];
-      UART_Status[i].RxOverflowErrCnt = 0;
-    }
-    else if(UART_Status[i].FramingErrCnt > 0)
-    {
-      result = CBITCodeTbl[i][FRAMING_ERR];
-      UART_Status[i].RxOverflowErrCnt = 0;
-    }
-  }
-
-  return result;
-}
-*/
-
 
 /*****************************************************************************
  * Function:    UART_BITStatus
  *
  * Description: Returns the current BIT counters for the UART Interface
  *
- * Parameters:  ch - UART channel
+ * Parameters:  Port - UART channel
  *
  * Returns:     UART_STATUS - structure for uart channel
  *
@@ -1364,6 +1302,12 @@ RESULT UART_PBIT(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.c $
+ * 
+ * *****************  Version 61  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 1:02p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
  * 
  * *****************  Version 60  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:26p
