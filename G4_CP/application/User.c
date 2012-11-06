@@ -56,6 +56,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
+#include <errno.h>
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -118,7 +119,7 @@ BOOLEAN   UserPrivilegedMode;
 BOOLEAN   UserFactoryMode;
 
 static UINT16  CheckSum;                     // Running checksum value.
-static BOOLEAN RspBuffOverflowDetected;      // The micro-server response msg is too long 
+static BOOLEAN RspBuffOverflowDetected;      // The micro-server response msg is too long
 static USER_MSG_SOURCES MsgSource;           // source of the current command.
 static UINT32 MsgTag;                        // tag passed by caller of current command.
 static CHAR msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs to Micro-server
@@ -166,7 +167,11 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
                                         USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max);
 
-static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr, 
+static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                                USER_ENUM_TBL* MsgEnumTbl,
+                                                USER_RANGE *Min,USER_RANGE *Max);
+
+static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
                              USER_RANGE *Min, USER_RANGE *Max);
 
 
@@ -300,7 +305,7 @@ BOOLEAN User_GSEMessageHandler(INT8* msg)
 BOOLEAN User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence)
 {
   MSCP_USER_MGR_CMD* msg = Data;
-  BOOLEAN bOk = FALSE; 
+  BOOLEAN bOk = FALSE;
 
   if(Size < sizeof(*msg))
   {
@@ -309,9 +314,9 @@ BOOLEAN User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence)
     GSE_DebugStr(NORMAL,FALSE,"User: Got MS Cmd -%s-",msg->cmd);
     bOk = User_PutMsg(msg->cmd,USER_MSG_SOURCE_MS,Sequence);
   }
-  
-  return (bOk); 
-  
+
+  return (bOk);
+
 }
 
 //Define additional message handlers (for messages from other sources here)
@@ -397,7 +402,7 @@ void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
   // USER_SINGLE_MSG_MAX_SIZE + checksum!
   ASSERT_MESSAGE( (msgSize < USER_SINGLE_MSG_MAX_SIZE),
        "Output msg exceeds buffer size: %d", msgSize);
-  
+
   strncpy_safe(WriteBuffer,USER_SINGLE_MSG_MAX_SIZE,Msg, strlen(Msg) );
 
   User_AppendChecksum(WriteBuffer);
@@ -414,13 +419,13 @@ void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
       MSI_PutResponse(CMD_ID_USER_MGR_MS,WriteBuffer,MSCP_RSP_STATUS_SUCCESS,
                                strlen(WriteBuffer), Tag);
       break;
-      
+
 
     //...Put additional response routers here
-    
+
     default: FATAL("Unrecognized msg source: %d",Source);
       break;
-  }  
+  }
 }
 
 
@@ -508,9 +513,9 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
   CHAR  rspString[USER_SINGLE_MSG_MAX_SIZE];
   BOOLEAN bLogThisChange   = FALSE;
   BOOLEAN bExecutionResult = FALSE;
-  
+
   rspString[0] = '\0';
-    
+
   // Initialize the output and checksum variables.
   MsgSource = source;
   MsgTag    = tag;
@@ -528,12 +533,12 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
   if( 0 == strlen(msg) || *msg == '=' )
   {
     //Empty/malformed Message found
-    User_OutputMsgString( "\r\n"USER_MSG_INVALID_CMD, TRUE );    
-  }  
+    User_OutputMsgString( "\r\n"USER_MSG_INVALID_CMD, TRUE );
+  }
   //Validate the message checksum (if present)
   else if(!User_ValidateChecksum(msg))
   {
-    User_OutputMsgString(USER_MSG_BAD_CHECKSUM, TRUE); 
+    User_OutputMsgString(USER_MSG_BAD_CHECKSUM, TRUE);
   }
   // Validate Factory mode command
   else if(User_AuthenticateModeRequest(msg, USER_FACT) )
@@ -566,9 +571,9 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
 
     //Get ready to search the command message tables, setup the initial
     //table pointer and get the first message token
-    MsgTokPtr = strtok_r(msg,".",&TokPtr);    
-    
-    
+    MsgTokPtr = strtok_r(msg,".",&TokPtr);
+
+
     // Check for global-scope commands. These are not associated with a specific command table.
 
     // ===============
@@ -578,8 +583,8 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     {
       // Only GSE can issue this command
       if ( USER_MSG_SOURCE_GSE != source )
-      {        
-        User_OutputMsgString(USER_MSG_GSE_ONLY, TRUE);       
+      {
+        User_OutputMsgString(USER_MSG_GSE_ONLY, TRUE);
       }
       else if( User_ShowAllConfig() )
       {
@@ -592,7 +597,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
       {
         // Something went wrong,
         FATAL("ShowCfg Failure", NULL);
-      }      
+      }
     }
     else
     {
@@ -660,8 +665,8 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
         bExecutionResult = User_ExecuteSingleMsg(CmdTblPtr, source, Index,
                                                  SetTokPtr, rspString,
                                                  USER_SINGLE_MSG_MAX_SIZE);
-        
-        // Output the results and finalize the display with CS and fast prompt        
+
+        // Output the results and finalize the display with CS and fast prompt
         User_OutputMsgString(rspString, TRUE);
 
         // if cmd is loggable and executed ok,
@@ -684,7 +689,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
           {
             User_LogUserActivity(origCmdString, oldValue, newValue);
           }
-        }        
+        }
       }
       else
       {
@@ -906,12 +911,12 @@ void User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
     {
       sprintf(TempStr,"\r\n %s =",MsgTblPtr->MsgStr);
       PadString(TempStr,USER_MAX_MSG_STR_LEN+6);
-      
+
       //Append MsgStr to message, exit loop if rsp buffer is full
       if(!User_OutputMsgString(TempStr, FALSE))
       {
         break;
-      }      
+      }
 
       //Execute the message as a get function if it is not an "action" type
       if( MsgTblPtr->MsgHandler != NULL &&
@@ -1137,7 +1142,7 @@ INT32 User_ExtractIndex(INT8* msg)
   INT32 i,index = -1;
   INT8* OpenBktPtr;
   INT8* CloseBktPtr;
-  
+
   //search for index delimiters
   OpenBktPtr = strchr(msg,'[');
   CloseBktPtr = strchr(msg,']');
@@ -1203,10 +1208,10 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   CHAR* end;
   UINT32 i;
   UINT32 uint_temp;
-  
+
   INT32  int_temp;
   FLOAT32 float_temp;
-  FLOAT64 float64_temp;   
+  FLOAT64 float64_temp;
   UINT32 Base = 10;
   BOOLEAN result = FALSE;
 
@@ -1309,15 +1314,21 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
 
       memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
 
-      // Check if value has a hex prefix
-      if (0 != strstr(SetStr, "0X"))
+      // Check if value is a list of 1..128 CSV decimal-values enclosed by square brackets
+      // e.g.: [ 2,6,23, 56,127 ]
+      if (0 != strstr(SetStr, "[") && 0 != strstr(SetStr, "]") )
+      {
+        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+      }
+      // Bit list defined as a Hex string?
+      else if (0 != strstr(SetStr, "0X"))
       {
         result = User_SetBitArrayFromHexString(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
       }
-      // ...otherwise it could be a list of 1..128 CSV decimal-values
+      // Bit list defined as a decimal integer
       else if ( isdigit(*SetStr) )
       {
-        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+        result = User_SetBitArrayFromIntegerValue(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
       }
       // ... if nothing in the set string, the user just wants to clear all  bits.
       else if (0 == strlen(SetStr))
@@ -1329,7 +1340,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       {
         result = FALSE;
       }
-    break;     
+    break;
 
 
     //case USER_TYPE_INT8:
@@ -1398,7 +1409,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_FLOAT64:
       /* FLOAT64 type
          - check min/max bounds incl. the min/max value a float64 can represent.
-         - check the entire string is consumed by the conversion 
+         - check the entire string is consumed by the conversion
          - Note: strtod() returns double  */
       float64_temp= (FLOAT64)strtod(SetStr, &end);
       if( *end == '\0' && float64_temp <= Max->Float64 && float64_temp >= Min->Float64)
@@ -1604,7 +1615,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
           tempWord |= word32Ptr[i];
         }
         bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
-       
+
         // DISPLAY THE HEX STRING
         destPtr = bufHex128;
         strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
@@ -1615,8 +1626,8 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         // to hex string.
 
         for( i = 0; i < arraySizeWords; ++i )
-        {          
-          tempWord = word32Ptr[displayHexStart];          
+        {
+          tempWord = word32Ptr[displayHexStart];
           sprintf( destPtr, "%08X", tempWord );
           destPtr += 8;
           displayHexStart -= 1;
@@ -1628,9 +1639,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         // Check each bit in the BITARRAY128.
         // For each 'on' bit, convert the index to a string
         // and concatenate to the output buffer.
-        
+
         destPtr = tempOutput + strlen(tempOutput);
-        
+
         SuperStrcat(destPtr, " [", sizeof(tempOutput));
         destPtr += 2;
 
@@ -1641,10 +1652,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
           destPtr = tempOutput + strlen(tempOutput);
         }
         else
-        {        
+        {
           // Display a list of integer values, one for each "on" bit.
           for( i = 0; i < (arraySizeWords*32); ++i )
-          {          
+          {
             if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
             {
               snprintf(numStr, sizeof(numStr), "%d,", i);
@@ -1657,10 +1668,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         // replace the final ',' with ']' and 'null'
         *(--destPtr) = ']';
         *(++destPtr) = '\0';
-           
-        strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);        
-        
-        
+
+        strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
+
+
       } // USER_TYPE_HEX128 scope for decls
       break;
 
@@ -1688,7 +1699,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 
     case USER_TYPE_ONOFF:
       strncpy_safe(GetStr,Len,*(BOOLEAN*)GetPtr ? "ON" : "OFF", _TRUNCATE);
-      break; 
+      break;
 
     case USER_TYPE_ENUM:
     //case USER_TYPE_ENUM16:
@@ -1704,7 +1715,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
           break;
         }
         //Cast based on enum width.
-        //if( MsgEnumTbl[i].Num == 
+        //if( MsgEnumTbl[i].Num ==
         //    (Type == USER_TYPE_ENUM ? *(UINT32*)GetPtr :
         //     Type == USER_TYPE_ENUM16 ? *(UINT16*)GetPtr : *(UINT8*)GetPtr) )
         //if ( MsgEnumTbl[i].Num == *(UINT32*)GetPtr)
@@ -1803,16 +1814,16 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
       Min->Float = NoLimit ? -FLT_MAX  : MAX(-FLT_MAX,Min->Float);
       Max->Float = NoLimit ? FLT_MAX  : MIN(FLT_MAX,Max->Float);
       break;
-      
+
     case USER_TYPE_FLOAT64:
       Min->Float64 = NoLimit ? -DBL_MAX  : MAX(-DBL_MAX,Min->Float64);
       Max->Float64 = NoLimit ? DBL_MAX  : MIN(DBL_MAX,Max->Float64);
       break;
-      
+
       //String length limit to half of the command string.
       //This allows ample room for the command, and should be sufficient
       //for any string value that needs to be set.
-    case USER_TYPE_STR:    
+    case USER_TYPE_STR:
       Min->Uint = NoLimit ? 0          : Min->Uint;
       Max->Uint = NoLimit ? USER_SINGLE_MSG_MAX_SIZE/2 :
                                     MIN(USER_SINGLE_MSG_MAX_SIZE/2, Max->Uint);
@@ -1935,7 +1946,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
       break;
 
     case USER_TYPE_ACT_LIST:
-      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR 
+      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR
               "Valid Action bits are 0-7(When met), 12-19(On duration), 27(Latch) "
               "and 31(Acknowledge)."NEW_LINE
               "Set via number list or hex value.");
@@ -1951,8 +1962,9 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
     case USER_TYPE_128_LIST:
       sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
               "Accepts a number list consisting of values in the range %u-%u, "NEW_LINE
-              "or a hex string where only bits %u-%u are allowed on.",
-              Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1);
+              "a hex string where only bits %u-%u are allowed on."NEW_LINE
+              "or an integer where only bits %u-%u are allowed on.",
+              Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1 );
       break;
 
     default:
@@ -2017,7 +2029,7 @@ BOOLEAN User_ValidateChecksum( INT8 *str )
  * Function:     User_AppendChecksum
  *
  * Description:  Appends the running CheckSum value of string to the current
-*                msg buffer. 
+*                msg buffer.
  *
  *               "\r\n$nnnn\r\n"
  *
@@ -2035,7 +2047,7 @@ BOOLEAN User_ValidateChecksum( INT8 *str )
  *        of an entire stream since the last call to ResetCheckSum. The string
  *        pointed to by str may represent only the FINAL string segment being
  *        outputted.
- *        
+ *
 ******************************************************************************/
 void User_AppendChecksum( INT8 *str )
 {
@@ -2148,7 +2160,7 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
   while (pMsgTbl->MsgStr  != NULL  &&
          pMsgTbl->MsgType != USER_TYPE_ACTION &&
          result == USER_RESULT_OK)
-  {    
+  {
     // If this field is a leaf, display the value.
     if(pMsgTbl->pNext == NULL)
     {
@@ -2176,7 +2188,7 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
         index = SensorIdx;
       }
 
-      PadString(Key, USER_MAX_MSG_STR_LEN + 15);      
+      PadString(Key, USER_MAX_MSG_STR_LEN + 15);
 
       if (!User_OutputMsgString(Key, FALSE) )
       {
@@ -2208,8 +2220,8 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
             //Conversion error
             User_OutputMsgString( USER_MSG_RSP_CONVERSION_ERR, FALSE );
           }
-        }  
-      }        
+        }
+      }
     }
     else // this is a branch...
     {
@@ -2352,7 +2364,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         break;
 
       case USER_TYPE_FLOAT64:
-        *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr; 
+        *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr;
 
       case USER_TYPE_ENUM:
       case USER_TYPE_UINT32:
@@ -2368,7 +2380,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
-   
+
       case USER_TYPE_BOOLEAN:
       case USER_TYPE_YESNO:
       case USER_TYPE_ONOFF:
@@ -2412,13 +2424,13 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
 *
 * Description:  Accessor function to retrieve the current value of a param if possible
 *
-* Parameters:   MsgTbl - Ptr to specific user message table 
-*               source - source of user command 
-*               Index - index of array (if any defined) 
+* Parameters:   MsgTbl - Ptr to specific user message table
+*               source - source of user command
+*               Index - index of array (if any defined)
 *               RspStr - ptr to response for the command
-*               Len - size of reponse data 
+*               Len - size of reponse data
 *
-* Returns:      TRUE - If update was made 
+* Returns:      TRUE - If update was made
 *               FALSE - No update was made
 *
 * Notes:        Detects if the entry is associated with an action
@@ -2585,16 +2597,16 @@ BOOLEAN User_AuthenticateModeRequest(const INT8* msg, UINT8 mode)
 * Notes:
 ******************************************************************************/
 BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
-{  
+{
   BOOLEAN statusFlag = TRUE;
-    
+
   // Update checksum
   CheckSum += ChecksumBuffer(string,strlen(string),0xFFFF);
 
   switch(MsgSource)
-  {    
+  {
     case USER_MSG_SOURCE_GSE:
-      
+
       if( !finalize )
       {
         statusFlag = (DRV_OK == GSE_PutLineBlocked(string, TRUE));
@@ -2604,8 +2616,8 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
         // write out the final string with appended checksum and 'FAST>' prompt
         User_PutRsp(string, MsgSource, MsgTag );
       }
-      break;    
-    
+      break;
+
     case USER_MSG_SOURCE_MS:
 
       // If the buffer hasn't been flagged as overflowed, concatenate
@@ -2613,21 +2625,21 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
       if (!RspBuffOverflowDetected)
       {
         RspBuffOverflowDetected = !SuperStrcat(msBuffer, string, sizeof(msBuffer));
-        
+
         if ( RspBuffOverflowDetected )
         {
           GSE_DebugStr(NORMAL,TRUE,"Micro Server buffer overflow. Size: %d", strlen(msBuffer));
-          
+
           MSI_PutResponse(CMD_ID_USER_MGR_MS, USER_MSG_RESP_OVERFLOW, MSCP_RSP_STATUS_FAIL,
             strlen(USER_MSG_RESP_OVERFLOW), MsgTag);
           statusFlag = FALSE;
         }
-                
+
         // If the stream is finalized, call to write the entire msg buffer back to MS
         if (finalize)
         {
           User_PutRsp(msBuffer, MsgSource, MsgTag );
-        }        
+        }
       }
       break;
 
@@ -2671,7 +2683,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
                                              USER_ENUM_TBL* MsgEnumTbl,
                                              USER_RANGE *Min,USER_RANGE *Max)
 {
-  BOOLEAN bResult = TRUE;  
+  BOOLEAN bResult = TRUE;
   UINT32  uint_temp;
   CHAR*   ptr;
   CHAR*   end;
@@ -2681,9 +2693,9 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   CHAR    reverseBuffer[11];
   UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
   INT16   offset = 0;                   // word-offset index into output buffer
-  INT16   inputLen  = strlen( SetStr ); // length of the input string.   
+  INT16   inputLen  = strlen( SetStr ); // length of the input string.
 
-  // Input can be empty otherwise 
+  // Input can be empty otherwise
   // s/b "0x0" -> "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
   if ( inputLen >= MIN_HEX_STRING && inputLen <= MAX_HEX_STRING)
@@ -2697,7 +2709,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
     // a single 32 bit word of the HEX128 array.
     // (i.e. Big-Endian, the right-most char in string represents bits 0-3 in array entry [0])
     do
-    {           
+    {
       copyLen = MIN( (ptr - &SetStr[2]),8);
       ptr -= copyLen;
 
@@ -2721,18 +2733,72 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
       }
     }
     while( ptr > &SetStr[2] && offset >= 0 && bResult );
-  }  
+  }
 
   // Validate the conversion based on the Min/Max and Type values passed in
   bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
+/******************************************************************************
+* Function:     User_SetBitArrayFromIntegerValue
+*
+* Description:  Sets a BitArray128 storage using an UINT32 value.
+*
+*
+* Parameters:   [in] Type: Class of data to be set as indicated by this
+*                          commands' table entry
+*               [in] SetStr: ASCII terminated string the user entered after
+*                            the "=" delimiter
+*               [in/out] SetPtr: Pointer to the location to contain the
+*                                converted result.  Needs to point to a
+*                                32-bit location on entry for number
+*                                conversions
+*               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
+*                                the string to enum table
+*               [in/out] Min,Max: Minimum and Maximum range the value can
+*                                 be set to.  See User_SetMinMax.
+*
+* Returns:      True if successful otherwise false.
+*
+* Notes:        This conversion is ONLY INTENDED TO SUPPORT BACKWARD-COMPATIBILITY
+*               FOR SENSOR/'TRIGGER SETTINGS which were previously handled in a single UINT32
+*               word. Attempting to set bits using a value greater than 4294967295 will result
+*               in an error.
+*
+******************************************************************************/
+static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
+                                                USER_ENUM_TBL* MsgEnumTbl,
+                                                USER_RANGE *Min,USER_RANGE *Max)
+{
+  BOOLEAN bResult;
+  UINT32  decValue;
+  CHAR    hexString[11]; // "0X" + 8 hex-chars + 1 null
+
+  // Convert the input string to decimal integer if possible.
+  decValue = strtoul(SetStr, NULL, 10);
+
+  // In the event of a range-error the stroul above will return a value of UINT_MAX which
+  // isn't very helpful since that is a also a valid value for a bitarray. Therefore
+  // test errno to see if ERANGE was flagged.
+
+  if (decValue != 0 && errno != ERANGE)
+  {
+    sprintf(hexString,"0x%08X", decValue);
+    bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, MsgEnumTbl, Min, Max);
+  }
+  else
+  {
+    bResult = FALSE;
+  }
+  return bResult;
+}
 
 /******************************************************************************
 * Function:     User_SetBitArrayFromList
 *
-* Description:  Sets a BitArray128 storage using a string of CSV decimal values as input
+* Description:  Sets a BitArray128 storage using a string of bracket-enclosed
+*               CSV decimal values as input
 *
 * Parameters:   [in] Type: Class of data to be set as indicated by this
 *                          commands' table entry
@@ -2758,24 +2824,24 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   BOOLEAN bResult = TRUE;
   CHAR*   ptr;
   CHAR*   end;
-  UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer     
+  UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
   INT32   index;
-  INT16   inputLen = strlen( SetStr ); // length of the input string.  
-  
+  INT16   inputLen = strlen( SetStr ); // length of the input string.
+
   const INT16   base = 10;
 
-  // If the CSV list is not empty, process it.
-  if ( inputLen >= 1 )
+  // Verify the string starts with '[' and ends with ']'
+  // and the CSV list is not empty.
+  if (SetStr[0] == '[' && SetStr[inputLen - 1] == ']' && inputLen >= 3 )
   {
-    ptr = SetStr;
-    // Loop until null-terminator is found.
+    // Skip the '[' and Loop until null-terminator is found.
+    ptr = SetStr + 1;
 
     while((*ptr != '\0' && bResult) )
     {
-      //Ignore spaces
-      if(*ptr == ' ' || *ptr == ',' )
+      //Ignore spaces and delimiters
+      if(*ptr == ' ' || *ptr == ',' || *ptr == ']' )
       {
-
         ptr++;
       }
       else if ( !isdigit(*ptr) )
@@ -2820,8 +2886,8 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 *
 * Notes:
 ******************************************************************************/
-static 
-BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr, 
+static
+BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
                       USER_RANGE *usrMin, USER_RANGE *usrMax)
 {
 #define MAX_BIT 128
@@ -2911,207 +2977,207 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 104  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:08p
  * Updated in $/software/control processor/code/application
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 103  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:26p
  * Updated in $/software/control processor/code/application
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 102  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 5:50p
  * Updated in $/software/control processor/code/application
  * SCR# 1107: ACT_LIST conversion fix
- * 
+ *
  * *****************  Version 101  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 3:45p
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - Fix Action List validation
- * 
+ *
  * *****************  Version 100  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - Add ACT_LIST, clean up msgs
- * 
+ *
  * *****************  Version 99  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:45p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 User SensorArray GSE handling
- * 
+ *
  * *****************  Version 98  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:21p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added HEX8 logic
- * 
+ *
  * *****************  Version 97  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 6:41p
  * Updated in $/software/control processor/code/application
  * SCR#1107 BIT128 LIST Read Display show None Selected
- * 
+ *
  * *****************  Version 96  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 95  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:27p
  * Updated in $/software/control processor/code/application
  * FAST 2 Issue #15 legacy conversion
- * 
+ *
  * *****************  Version 94  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 BITARRAY128 input as integer list
- * 
+ *
  * *****************  Version 93  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:51p
  * Updated in $/software/control processor/code/application
  * SCR #1107 Trigger processing
- * 
+ *
  * *****************  Version 92  *****************
  * User: Contractor2  Date: 5/12/11    Time: 10:53a
  * Updated in $/software/control processor/code/application
  * SCR #914 Error: User - Param Change issue when reading FPGA register
- * 
- * 
+ *
+ *
  * *****************  Version 91  *****************
  * User: Contractor2  Date: 5/05/11    Time: 3:48p
  * Updated in $/software/control processor/code/application
  * SCR #1005 Enhancement: - User_CvtSetStr extra code
- * 
+ *
  * *****************  Version 90  *****************
  * User: Contractor2  Date: 10/18/10   Time: 3:53p
  * Updated in $/software/control processor/code/application
  * SCR #952 Misc - User_AuthenticateModeRequest add comment to offset
  * wraparound
- * 
+ *
  * *****************  Version 89  *****************
  * User: Contractor2  Date: 10/18/10   Time: 3:18p
  * Updated in $/software/control processor/code/application
  * SCR #951 Misc - User type Hex8 is not used and should be
  * removed/commented out
- * 
+ *
  * *****************  Version 88  *****************
  * User: Contractor2  Date: 10/18/10   Time: 2:48p
  * Updated in $/software/control processor/code/application
  * SCR #951 Misc - User type Hex8 is not used and should be
  * removed/commented out
- * 
+ *
  * *****************  Version 87  *****************
  * User: John Omalley Date: 10/15/10   Time: 8:56a
  * Updated in $/software/control processor/code/application
  * SCR 937 - Removed UserTbl.h
- * 
+ *
  * *****************  Version 86  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 5:02p
  * Updated in $/software/control processor/code/application
  * SCR# 925 - oh and don't forget the NULL
- * 
+ *
  * *****************  Version 85  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 4:15p
  * Updated in $/software/control processor/code/application
  * SCR# 925 - FATAL on showcfg error
- * 
+ *
  * *****************  Version 84  *****************
  * User: Jim Mood     Date: 10/01/10   Time: 6:35p
  * Updated in $/software/control processor/code/application
  * SCR 818 Code Review Changes, dead code removal
- * 
+ *
  * *****************  Version 83  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 4:10p
  * Updated in $/software/control processor/code/application
  * SCR 901 Code Coverage Issues
- * 
+ *
  * *****************  Version 82  *****************
  * User: John Omalley Date: 9/10/10    Time: 9:59a
  * Updated in $/software/control processor/code/application
  * SCR 858 - Added FATAL to defaults
- * 
+ *
  * *****************  Version 81  *****************
  * User: Peter Lee    Date: 9/03/10    Time: 11:06a
  * Updated in $/software/control processor/code/application
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 80  *****************
  * User: Contractor V&v Date: 7/22/10    Time: 6:48p
  * Updated in $/software/control processor/code/application
  * SCR #643  Add showcfg to UartMgrUserTable and F7XUserTable
- * 
+ *
  * *****************  Version 79  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:29p
  * Updated in $/software/control processor/code/application
  * SCR# 716 - fix INT32 access and unindent code in FastMgr.c
- * 
+ *
  * *****************  Version 78  *****************
  * User: Jeff Vahue   Date: 7/08/10    Time: 3:37p
  * Updated in $/software/control processor/code/application
  * SCR# 685 - Make GSE cmds read-only access form the MS
- * 
+ *
  * *****************  Version 77  *****************
  * User: Jeff Vahue   Date: 6/23/10    Time: 1:47p
  * Updated in $/software/control processor/code/application
  * SCR# 657 - fix HEX16 type conversion
- * 
+ *
  * *****************  Version 76  *****************
  * User: Jim Mood     Date: 6/16/10    Time: 6:27p
  * Updated in $/software/control processor/code/application
  * SCR 646 Micro-Server commands not getting responses fix
- * 
+ *
  * *****************  Version 75  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:51p
  * Updated in $/software/control processor/code/application
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 74  *****************
  * User: Contractor V&v Date: 6/02/10    Time: 7:09p
  * Updated in $/software/control processor/code/application
  * SCR #622 Misc - parameter change log error
- * 
+ *
  * *****************  Version 73  *****************
  * User: Contractor V&v Date: 5/19/10    Time: 6:10p
  * Updated in $/software/control processor/code/application
  * SCR #560 ShowCfg does not return FAST> prompt
- * 
+ *
  * *****************  Version 72  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:53p
  * Updated in $/software/control processor/code/application
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 71  *****************
  * User: Contractor V&v Date: 5/07/10    Time: 4:34p
  * Updated in $/software/control processor/code/application
  * SCR #560 ShowCfg does not return prompt:Add CRC at end
- * 
+ *
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:37p
  * Updated in $/software/control processor/code/application
  * SCR #560 ShowCfg does not return FAST> prompt SCR #453 Misc fix
- * 
+ *
  * *****************  Version 69  *****************
  * User: Jeff Vahue   Date: 4/16/10    Time: 11:15a
  * Updated in $/software/control processor/code/application
  * SCR #550 - reimplement ValidateMsg to check each flags required
  * conditions exist.
- * 
+ *
  * *****************  Version 68  *****************
  * User: Jeff Vahue   Date: 4/14/10    Time: 6:33p
  * Updated in $/software/control processor/code/application
- * SCR #547 - remove unused User variable types 
- * 
+ * SCR #547 - remove unused User variable types
+ *
  * *****************  Version 67  *****************
  * User: Jeff Vahue   Date: 4/14/10    Time: 6:15p
  * Updated in $/software/control processor/code/application
  * SCR #547 - remove unused User variable types
- * 
+ *
  * *****************  Version 66  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:07p
  * Updated in $/software/control processor/code/application
  * SCR# 314, SCR# 317, SCR# 70
- * 
+ *
  * *****************  Version 65  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:15p
  * Updated in $/software/control processor/code/application

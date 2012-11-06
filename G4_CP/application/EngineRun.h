@@ -54,7 +54,7 @@
                            ENGRUN_DEFAULT,\
                            ENGRUN_DEFAULT /* EngineRun[MAX_ENGINES] */
 
-#define ENGINERUN_UNUSED   255                           
+#define ENGINERUN_UNUSED   255
 
 /******************************************************************************
                                Package Typedefs
@@ -114,7 +114,7 @@ typedef struct
   TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
   UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
   UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
-  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */ 
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
   UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts */
 } ENGRUN_RUNLOG;
 
@@ -158,7 +158,6 @@ typedef struct
   INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
-//  UINT32       cycleCounts[MAX_CYCLES];   /* Array of cycle counts */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;
 
 /* Configuration */
@@ -216,29 +215,29 @@ EXPORT void             EngRunTask            ( void* pParam );
 EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
 EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
-EXPORT void             Eng_ReInitFile        ( void );
+EXPORT void             EngReInitFile        ( void );
 
 #endif // ENGINERUN_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
- * 
+ *
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:16p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Error
- * 
+ *
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:09p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File format error
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:07p
  * Updated in $/software/control processor/code/application
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:17p
  * Updated in $/software/control processor/code/application
@@ -249,7 +248,7 @@ EXPORT void             Eng_ReInitFile        ( void );
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added Engine Identification Fields to software and file
  * header
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:02p
  * Updated in $/software/control processor/code/application

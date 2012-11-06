@@ -200,7 +200,7 @@ void EngRunInitialize(void)
 
      GSE_DebugStr(NORMAL,TRUE,"Engine: Failed to open Engine ID file, restoring defaults");
      //Re-init file
-     Eng_ReInitFile();
+     EngReInitFile();
   }
 
   // Initialize Engine Runs storage objects.
@@ -252,7 +252,7 @@ void EngRunInitialize(void)
 }
 
 /******************************************************************************
- * Function:    Eng_ReInitFile
+ * Function:    EngReInitFile
  *
  * Description: Set the NV data (Engine Serial Numbers) to
  *              the default values
@@ -264,7 +264,7 @@ void EngRunInitialize(void)
  * Notes:
  *
  *****************************************************************************/
-void Eng_ReInitFile(void)
+void EngReInitFile(void)
 {
   CHAR ResultStr[RESULTCODES_MAX_STR_LEN];
   UINT16 i;
