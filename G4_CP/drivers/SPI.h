@@ -1,22 +1,22 @@
-#ifndef DRV_SPI_H
-#define DRV_SPI_H
+#ifndef SPI_H
+#define SPI_H
 /******************************************************************************
-         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
+         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
- 
+
   File:        SPI.h
- 
+
   Description: SPI driver for the MCF5485 QSPI peripheral
-               
+
    VERSION
-    $Revision: 13 $  $Date: 8/28/12 1:06p $
-               
- 
+    $Revision: 14 $  $Date: 12-11-02 12:55p $
+
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -48,17 +48,17 @@ typedef enum {  SPI_DEV_ADC_WR = 0, //-ADC Read/Write are seperate devices becau
                 SPI_DEV_ADC_RD,     // the read/write ops. of the LTC1594 are different
                 SPI_DEV_RTC,        //-Real-time clock, Maxim DS1306
                 SPI_DEV_EEPROM1,    //-EEPROM Microchip 25LC1024
-                SPI_DEV_EEPROM2,    //-EEPROM Microchip 25LC1024                
-                SPI_DEV_END         
-             } SPI_DEVS;           
-                                   
+                SPI_DEV_EEPROM2,    //-EEPROM Microchip 25LC1024
+                SPI_DEV_END
+             } SPI_DEVS;
+
 
 //Information needed for exchanging data with a device on the SPI bus
 //See Coldfire 548x Reference manual for register details
 typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
                  UINT32 DTFRCmd;     //-upper word of DTFR aka SPI Command register
                  UINT8  CS;          //-GPIO register value to chip select the device
-               } SPI_DEV_INFO;       
+               } SPI_DEV_INFO;
 
 
 //--------Initalialization of SPI_DEV_INFO for each of the 8 possible SPI bus devices---------
@@ -82,7 +82,7 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
 #define SPI_DEV_DEFAULT_0_CS       SPI_ALL_CS_INACTIVE
 
 
-                            
+
 //--DEVICE 1 - LTC1594 (A/D Converter) READ--
 //DCTAR register settings
 // Transfer size = 15 bits; data transmitted MSB first
@@ -137,7 +137,7 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
 #define SPI_DEV_DEFAULT_2_DTFRCmd (MCF_DSPI_DTFR_CTAS(2))
 #define SPI_DEV_DEFAULT_2_CS      ~MCF_GPIO_PODR_DSPI_PODR_DSPI4
 
-                              
+
 
 //--DEVICE 3 - 25LC1024 (SPI EEPROM)--
 //DCTAR register settings
@@ -189,7 +189,7 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
 
 
 
-//-No information defined for SPI 
+//-No information defined for SPI
 // devices 4-7, reserved for
 // future use
 
@@ -207,7 +207,7 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
 
 
 
-// SPI Initialization value 
+// SPI Initialization value
 #define MCF_DSPI_DMCR_VAL  (MCF_DSPI_DMCR_MSTR  | \
                             MCF_DSPI_DMCR_ROOE  | \
                             MCF_DSPI_DMCR_CSIS5 | \
@@ -215,7 +215,7 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
                             MCF_DSPI_DMCR_CSIS0 | \
                             MCF_DSPI_DMCR_DTXF  | \
                             MCF_DSPI_DMCR_DRXF)
-                             
+
 #define MCF_DSPI_DIRSR_VAL  0x0000
 
 
@@ -228,8 +228,8 @@ typedef struct { UINT32 DCTAR;       //-"Transfer Attributes"/DCTARn register
 
 #pragma pack(1)
 typedef struct {
-  RESULT  result; 
-} SPI_DRV_PBIT_LOG; 
+  RESULT  result;
+} SPI_DRV_PBIT_LOG;
 #pragma pack()
 
 
@@ -239,7 +239,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( DRV_SPI_BODY )
+#if defined ( SPI_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -253,7 +253,7 @@ typedef struct {
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT RESULT SPI_Init      (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize); 
+EXPORT RESULT SPI_Init      (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize);
 EXPORT RESULT SPI_WriteByte (SPI_DEVS Device, const UINT8* Byte,  BOOLEAN CS);
 //EXPORT RESULT SPI_WriteWord (SPI_DEVS Device, UINT16* Word, BOOLEAN CS);
 EXPORT RESULT SPI_WriteBlock(SPI_DEVS Device, const BYTE* Data,   UINT16 Cnt, BOOLEAN CS);
@@ -262,64 +262,69 @@ EXPORT RESULT SPI_ReadWord  (SPI_DEVS Device, UINT16* Word, BOOLEAN CS);
 EXPORT RESULT SPI_ReadBlock (SPI_DEVS Device, BYTE* Data,   UINT16 Cnt, BOOLEAN CS);
 
 
-#endif   //  DRV_SPI_H
+#endif   // SPI_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.h $
  * 
+ * *****************  Version 14  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 12:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 2/09/12    Time: 11:20a
  * Updated in $/software/control processor/code/drivers
  * SCR:1110 Update UART Driver to toggle each duplex and direction control
  * line at startup init. Update SPI ADC clock to 200kHz
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:56a
  * Updated in $/software/control processor/code/drivers
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- * 
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 12/01/09   Time: 5:36p
  * Updated in $/software/control processor/code/drivers
  * SCR #350 Misc code review items
- * 
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 10/26/09   Time: 4:49p
  * Updated in $/software/control processor/code/drivers
- * SCR #315 CBIT and SEU Processing 
- * 
+ * SCR #315 CBIT and SEU Processing
+ *
  * *****************  Version 8  *****************
  * User: Jim Mood     Date: 9/25/09    Time: 9:00a
  * Updated in $/software/control processor/code/drivers
  * SCR #269
- * 
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:54p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jim Mood     Date: 5/01/09    Time: 9:34a
  * Updated in $/software/control processor/code/drivers
  * SCR #189 EEPROM SPI Clock
- * 
+ *
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 2/03/09    Time: 5:09p
  * Updated in $/control processor/code/drivers
  * Added 2nd EEPROM device on CS5.  Updated comment style
- * 
- * 
+ *
+ *
  *
  ***************************************************************************/
 

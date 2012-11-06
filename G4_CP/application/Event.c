@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 30 $  $Date: 12-10-23 2:07p $
+ $Revision: 31 $  $Date: 12-11-06 11:12a $
 
 ******************************************************************************/
 
@@ -86,6 +86,10 @@ static UINT32            nEventSeqCounter;
 static void           EventsUpdateTask       ( void *pParam    );
 static void           EventsEnableTask       ( BOOLEAN bEnable );
 static void           EventProcess           ( EVENT_CFG *pConfig,       EVENT_DATA *pData   );
+static void           EventProcessStartState ( EVENT_CFG *pConfig,       EVENT_DATA *pData,
+                                               UINT32 nCurrentTick );
+static void           EventProcessActiveState( EVENT_CFG *pConfig,       EVENT_DATA *pData,
+                                               UINT32 nCurrentTick );
 static BOOLEAN        EventCheckDuration     ( const EVENT_CFG *pConfig, EVENT_DATA *pData   );
 static BOOLEAN        EventCheckStart        ( const EVENT_CFG *pConfig,
                                                const EVENT_DATA *pData,
@@ -116,7 +120,7 @@ static void           EventTableExitRegion     ( const EVENT_TABLE_CFG  *pTableC
                                                  EVENT_REGION      foundRegion,
                                                  UINT32            nCurrentTick );
 static void           EventTableLogTransition  ( const EVENT_TABLE_CFG *pTableCfg,
-                                                 EVENT_TABLE_DATA *pTableData,
+                                                 const EVENT_TABLE_DATA *pTableData,
                                                  EVENT_REGION EnteredRegion,
                                                  EVENT_REGION ExitedRegion );
 static void           EventTableLogSummary     ( const EVENT_TABLE_CFG  *pConfig,
@@ -147,7 +151,7 @@ void EventsInitialize ( void )
 {
    // Local Data
    TCB        tTaskInfo;
-   UINT16     i;
+   UINT32     i;
 
    EVENT_CFG  *pEventCfg;
    EVENT_DATA *pEventData;
@@ -237,9 +241,9 @@ void EventTablesInitialize ( void )
    REGION_DEF       *pReg;
    SEGMENT_DEF      *pSeg;
    LINE_CONST       *pConst;
-   UINT16           nTableIndex;
-   UINT16           nRegionIndex;
-   UINT16           nSegmentIndex;
+   UINT32           nTableIndex;
+   UINT32           nRegionIndex;
+   UINT32           nSegmentIndex;
 
    // Add Trigger Tables to the User Manager
    User_AddRootCmd(&rootEventTableMsg);
@@ -265,7 +269,7 @@ void EventTablesInitialize ( void )
       pTableData->nActionReqNum    = ACTION_NO_REQ;
 
       // Loop through all the Regions
-      for ( nRegionIndex = REGION_A; nRegionIndex < (UINT16)MAX_TABLE_REGIONS; nRegionIndex++ )
+      for ( nRegionIndex = REGION_A; nRegionIndex < MAX_TABLE_REGIONS; nRegionIndex++ )
       {
          // Set a pointer the Region Cfg
          pReg = &pTableCfg->region[nRegionIndex];
@@ -326,20 +330,22 @@ UINT16 EventGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
    EVENT_HDR  eventHdr[MAX_EVENTS];
-   UINT16     eventIndex;
+   UINT32     eventIndex;
    INT8       *pBuffer;
    UINT16     nRemaining;
    UINT16     nTotal;
+   UINT16     nSize;
 
    // Initialize Local Data
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
+   nSize      = sizeof(EVENT_HDR);
    memset ( eventHdr, 0, sizeof(eventHdr) );
 
    // Loop through all the events
    for ( eventIndex = 0;
-         ((eventIndex < MAX_EVENTS) && (nRemaining > sizeof (eventHdr[eventIndex])));
+         ((eventIndex < MAX_EVENTS) && (nRemaining > nSize));
          eventIndex++ )
    {
       // Copy the event names
@@ -356,8 +362,8 @@ UINT16 EventGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
       eventHdr[eventIndex].postTime_s = m_EventCfg[eventIndex].postTime_s;
 
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (eventHdr[eventIndex]);
-      nRemaining -= sizeof (eventHdr[eventIndex]);
+      nTotal     += nSize;
+      nRemaining -= nSize;
    }
    // Copy the Event header to the buffer
    memcpy ( pBuffer, eventHdr, nTotal );
@@ -383,53 +389,34 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
    EVENT_TABLE_HDR tableHdr[MAX_TABLES];
-   UINT16          tableIndex;
+   UINT32          tableIndex;
    INT8            *pBuffer;
    UINT16          nRemaining;
    UINT16          nTotal;
+   UINT16          nSize;
 
    // Initialize Local Data
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
+   nSize      = sizeof (EVENT_TABLE_HDR);
    memset ( tableHdr, 0, sizeof(tableHdr) );
 
    // Loop through all the event tables
    for ( tableIndex = 0;
-         ((tableIndex < MAX_TABLES) && (nRemaining > sizeof (tableHdr[tableIndex])));
+         ((tableIndex < MAX_TABLES) && (nRemaining > nSize));
          tableIndex++ )
    {
       tableHdr[tableIndex].nSensor           = m_EventTableCfg[tableIndex].nSensor;
       tableHdr[tableIndex].fTableEntryValue  = m_EventTableCfg[tableIndex].fTableEntryValue;
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (tableHdr[tableIndex]);
-      nRemaining -= sizeof (tableHdr[tableIndex]);
+      nTotal     += nSize;
+      nRemaining -= nSize;
    }
    // Copy the event table header to the buffer
    memcpy ( pBuffer, tableHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
-}
-
-/**********************************************************************************************
- * Function:    Event_FSMAppBusyGetState   | IMPLEMENTS GetState() INTERFACE to
- *                                         | FAST STATE MGR
- *
- * Description: Returns the busy/not busy state of the Event module
- *              based on if any event is still being processed.
- *
- *
- * Parameters:  [in] param: ignored.  Included to match FSM call sig.
- *
- * Returns:     TRUE:  Event is busy, 1 or more of the event are active
- *              FALSE: Event is idle, none of the events are active
- *
- * Notes:
- *
- *********************************************************************************************/
-BOOLEAN Event_FSMAppBusyGetState(INT32 param)
-{
-  return (FALSE);
 }
 
 /*****************************************************************************/
@@ -506,7 +493,7 @@ static
 void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
 {
    //Local Data
-   UINT16           nRegionIndex;
+   UINT32           nRegionIndex;
    REGION_STATS     *pStats;
 
    // Reset all the region statistics and max value reached
@@ -524,7 +511,7 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
-   for (nRegionIndex = 0; nRegionIndex <= pTableData->maximumCfgRegion; nRegionIndex++)
+   for (nRegionIndex = REGION_A; nRegionIndex < MAX_TABLE_REGIONS; nRegionIndex++)
    {
       pStats = &pTableData->regionStats[nRegionIndex];
 
@@ -554,7 +541,7 @@ static
 void EventsUpdateTask ( void *pParam )
 {
    // Local Data
-   UINT8      nEventIndex;
+   UINT32      nEventIndex;
    EVENT_CFG  *pConfig;
    EVENT_DATA *pData;
 
@@ -611,196 +598,22 @@ static
 void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
 {
    // Local Data
-   BOOLEAN  bStartCriteriaMet;
-   BOOLEAN  bIsStartValid;
    UINT32   nCurrentTick;
 
-   // Initialize Local Data
+   // Intialize Local Data
    nCurrentTick   = CM_GetTickCount();
-  
+
    switch (pData->state)
    {
       // Event start is looking for begining of all start triggers
       case EVENT_START:
-         // Check if all start triggers meet configured criteria
-         bStartCriteriaMet = EventCheckStart ( pConfig, pData, &bIsStartValid );
-
-         // Check the all start criteria met and valid
-         if ((TRUE == bStartCriteriaMet) && (TRUE == bIsStartValid))
-         {
-            // Check if already started
-            if ( FALSE == pData->bStarted )
-            {
-               // if we just detected the event is starting then set the flag
-               pData->bStarted = TRUE;
-               // OR sequence number with the box power-on count stored during initialization
-               nEventSeqCounter++;
-               pData->seqNumber |= (nEventSeqCounter & 0xFFFF);
-
-               // SRS-4196 - Simple Event Action is mutually exclusive with Table processing
-               // Make sure we don't have event table processing attached.
-               if ( EVENT_TABLE_UNUSED == pConfig->eventTableIndex )
-               {
-                  pData->nActionReqNum = ActionRequest(pData->nActionReqNum,
-                                                       EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                       ACTION_ON,
-                                                       EVENT_ACTION_CHK_ACK(pConfig->nAction),
-                                                    EVENT_ACTION_CHK_LATCH (pConfig->nAction));
-               }
-               // reset the event data so we can start collecting it again
-               // If we do this at the end we cannot view the status after the
-               // event has ended using GSE commands.
-               EventResetData( pConfig, pData );
-            }
-            // Since we just started begin collecting data
-            EventUpdateData ( pData );
-
-            // If this is a table event then perform table processing
-            if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
-            {
-               //pData->bTableWasEntered
-               pData->tableState = EventTableUpdate ( pConfig->eventTableIndex,
-                                                      nCurrentTick,
-                                                      pConfig->priority,
-                                                      pData->seqNumber );
-
-               // Doesn't matter if the table is entered or not, the event is now
-               // considered active because the start criteria for the simple event is
-               // met and there is no duration for events that have an event table
-               pData->state = EVENT_ACTIVE;
-            }
-            // This is a simple event check if we have exceeded the cfg duration
-            else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
-            {
-               // Duration was exceeded the event is now active
-               pData->state = EVENT_ACTIVE;
-
-               if ( 0 != EVENT_ACTION_ON_DURATION(pConfig->nAction) )
-               {
-                  // Turn off any on-met request
-                  pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
-                                                        EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                        ACTION_OFF,
-                                                        0,
-                                                        0 );
-                  // Turn on any duration action
-                  pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
-                                                EVENT_ACTION_ON_DURATION(pConfig->nAction),
-                                                ACTION_ON,
-                                                EVENT_ACTION_CHK_ACK(pConfig->nAction),
-                                                EVENT_ACTION_CHK_LATCH (pConfig->nAction) );
-               }
-            }
-
-            if ( EVENT_ACTIVE == pData->state )
-            {
-               CM_GetTimeAsTimestamp(&pData->tsDurationMetTime);
-               // Log the Event Start
-               EventLogStart ( pConfig, pData );
-               // Only open time history if there is pre-history or during history
-               if (TRUE == pConfig->bEnableTH)
-               {
-                  // Start Time History
-                  TH_Open(pConfig->preTime_s);
-               }
-            }
-         }
-         // Check if event stopped being met before duration was met
-         // or table threshold was crossed
-         else
-         {
-            if (TRUE == pData->bStarted)
-            {
-               // Reset the Start Type
-               pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
-                                                      EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                      ACTION_OFF,
-                                                      0,
-                                                      0 );
-            }
-            pData->bStarted  = FALSE;
-         }
+            EventProcessStartState( pConfig, pData, nCurrentTick );
          break;
 
       // Duration has been met or the table threshold was crossed
       // now the event is considered active
       case EVENT_ACTIVE:
-         // keep updating the cfg parameters for the event
-         EventUpdateData( pData );
-
-         // Perform table processing if configured for a table
-         if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
-         {
-            //bTableEntered
-            pData->tableState = EventTableUpdate ( pConfig->eventTableIndex,
-                                                   nCurrentTick,
-                                                   pConfig->priority,
-                                                   pData->seqNumber );
-            //if (TRUE == bTableEntered)
-            if (ET_IN_TABLE == pData->tableState)
-            {
-               pData->bTableWasEntered = TRUE;
-            }
-         }
-
-         // Check if the end criteria has been met
-         pData->endType = EventCheckEnd(pConfig, pData);
-
-         // Check if any end criteria has happened and/or the table is done
-//         if ( ((EVENT_NO_END != pData->endType) &&
-//               (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
-//              ((EVENT_NO_END != pData->endType) && (FALSE == bTableEntered) ) ||
-//              ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) &&
-//               (FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered)) )
-         if ( ((EVENT_NO_END != pData->endType) &&
-               (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
-              ((EVENT_NO_END != pData->endType) && (ET_IN_TABLE != pData->tableState) ) ||
-              ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) &&
-               (ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered)) )
-
-
-         {
-//            if ((FALSE == bTableEntered) && (TRUE == pData->bTableWasEntered) &&
-//                 (EVENT_NO_END == pData->endType))
-            if ((ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered) &&
-                 (EVENT_NO_END == pData->endType))
-            {
-               if (pData->tableState == ET_SENSOR_INVALID)
-               {
-                  pData->endType = EVENT_TABLE_SENSOR_INVALID;
-               }
-               else if (pData->tableState == ET_SENSOR_VALUE_LOW)
-               {
-                  pData->endType = EVENT_TABLE_END;
-               }
-               else // ET_END_COMMANDED
-               {
-                  pData->endType = EVENT_COMMANDED_END;
-               }
-            }
-
-            // Record the time the event ended
-            CM_GetTimeAsTimestamp(&pData->tsEndTime);
-            // Log the End
-            EventLogEnd(pConfig, pData);
-            // Change event state back to start
-            pData->state            = EVENT_START;
-            pData->bStarted         = FALSE;
-            pData->bTableWasEntered = FALSE;
-            // Need to make sure the TH was opened before attempting to close
-            if (TRUE == pConfig->bEnableTH)
-            {
-               // End the time history
-               TH_Close(pConfig->postTime_s);
-            }
-            // reset the event Action
-            pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
-                                                  EVENT_ACTION_ON_DURATION(pConfig->nAction) |
-                                                  EVENT_ACTION_ON_MET(pConfig->nAction),
-                                                  ACTION_OFF,
-                                                  0,
-                                                  0 );
-         }
+            EventProcessActiveState( pConfig, pData, nCurrentTick );
          break;
 
       case EVENT_NONE:   // This should never happen because logic not called unless
@@ -814,6 +627,212 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
 }
 
 /******************************************************************************
+ * Function:     EventProcessStartState
+ *
+ * Description:  The Event Process Start State function performs the logic to
+ *               determine when an event is starting.
+ *
+ * Parameters:   [in]     EVENT_CFG  *pConfig
+ *               [in/out] EVENT_DATA *pData
+ *               [in]     UINT32     nCurrentTick
+ *
+ * Returns:      None.
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
+static
+void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCurrentTick )
+{
+   // Local Data
+   BOOLEAN  bStartCriteriaMet;
+   BOOLEAN  bIsStartValid;
+
+   // Check if all start triggers meet configured criteria
+   bStartCriteriaMet = EventCheckStart ( pConfig, pData, &bIsStartValid );
+
+   // Check the all start criteria met and valid
+   if ((TRUE == bStartCriteriaMet) && (TRUE == bIsStartValid))
+   {
+      // Check if already started
+      if ( FALSE == pData->bStarted )
+      {
+         // if we just detected the event is starting then set the flag
+         pData->bStarted = TRUE;
+         // OR sequence number with the box power-on count stored during initialization
+         nEventSeqCounter++;
+         pData->seqNumber |= (nEventSeqCounter & 0xFFFF);
+
+         // SRS-4196 - Simple Event Action is mutually exclusive with Table processing
+         // Make sure we don't have event table processing attached.
+         if ( EVENT_TABLE_UNUSED == pConfig->eventTableIndex )
+         {
+            pData->nActionReqNum = ActionRequest(pData->nActionReqNum,
+                                                 EVENT_ACTION_ON_MET(pConfig->nAction),
+                                                 ACTION_ON,
+                                                 EVENT_ACTION_CHK_ACK(pConfig->nAction),
+                                                 EVENT_ACTION_CHK_LATCH (pConfig->nAction));
+         }
+         // reset the event data so we can start collecting it again
+         // If we do this at the end we cannot view the status after the
+         // event has ended using GSE commands.
+         EventResetData( pConfig, pData );
+      }
+      // Since we just started begin collecting data
+      EventUpdateData ( pData );
+
+      // If this is a table event then perform table processing
+      if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
+      {
+         pData->tableState = EventTableUpdate ( pConfig->eventTableIndex,
+                                                nCurrentTick,
+                                                pConfig->priority,
+                                                pData->seqNumber );
+
+         // Doesn't matter if the table is entered or not, the event is now
+         // considered active because the start criteria for the simple event is
+         // met and there is no duration for events that have an event table
+         pData->state = EVENT_ACTIVE;
+      }
+      // This is a simple event check if we have exceeded the cfg duration
+      else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
+      {
+         // Duration was exceeded the event is now active
+         pData->state = EVENT_ACTIVE;
+
+         if ( 0 != EVENT_ACTION_ON_DURATION(pConfig->nAction) )
+         {
+            // Turn off any on-met request
+            pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
+                                                   EVENT_ACTION_ON_MET(pConfig->nAction),
+                                                   ACTION_OFF,
+                                                   0,
+                                                   0 );
+            // Turn on any duration action
+            pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
+                                                   EVENT_ACTION_ON_DURATION(pConfig->nAction),
+                                                   ACTION_ON,
+                                                   EVENT_ACTION_CHK_ACK(pConfig->nAction),
+                                                   EVENT_ACTION_CHK_LATCH (pConfig->nAction) );
+         }
+      }
+
+      if ( EVENT_ACTIVE == pData->state )
+      {
+         CM_GetTimeAsTimestamp(&pData->tsDurationMetTime);
+         // Log the Event Start
+         EventLogStart ( pConfig, pData );
+         // Only open time history if there is pre-history or during history
+         if (TRUE == pConfig->bEnableTH)
+         {
+            // Start Time History
+            TH_Open(pConfig->preTime_s);
+         }
+      }
+   }
+   // Check if event stopped being met before duration was met
+   // or table threshold was crossed
+   else
+   {
+      if (TRUE == pData->bStarted)
+      {
+         // Reset the Start Type
+         pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
+                                                EVENT_ACTION_ON_MET(pConfig->nAction),
+                                                ACTION_OFF,
+                                                0,
+                                                0 );
+      }
+      pData->bStarted  = FALSE;
+   }
+}
+
+/******************************************************************************
+ * Function:     EventProcessActiveState
+ *
+ * Description:  The Event Process Active State function performs Active state
+ *               logic.
+ *
+ * Parameters:   [in]     EVENT_CFG  *pConfig
+ *               [in/out] EVENT_DATA *pData
+ *               [in]     UINT32     nCurrentTick
+ *
+ * Returns:      None.
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
+static
+void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCurrentTick )
+{
+   // keep updating the cfg parameters for the event
+   EventUpdateData( pData );
+
+   // Perform table processing if configured for a table
+   if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
+   {
+      //bTableEntered
+      pData->tableState = EventTableUpdate ( pConfig->eventTableIndex,
+                                             nCurrentTick,
+                                             pConfig->priority,
+                                             pData->seqNumber );
+      if (ET_IN_TABLE == pData->tableState)
+      {
+         pData->bTableWasEntered = TRUE;
+      }
+   }
+
+   // Check if the end criteria has been met
+   pData->endType = EventCheckEnd(pConfig, pData);
+
+   // Check if any end criteria has happened and/or the table is done
+   if ( ((EVENT_NO_END != pData->endType) &&
+         (EVENT_TABLE_UNUSED == pConfig->eventTableIndex)) ||
+        ((EVENT_NO_END != pData->endType) && (ET_IN_TABLE != pData->tableState) ) ||
+        ((EVENT_TABLE_UNUSED != pConfig->eventTableIndex) &&
+         (ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered)) )
+   {
+      if ((ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered) &&
+          (EVENT_NO_END == pData->endType))
+      {
+         if (pData->tableState == ET_SENSOR_INVALID)
+         {
+            pData->endType = EVENT_TABLE_SENSOR_INVALID;
+         }
+         else if (pData->tableState == ET_SENSOR_VALUE_LOW)
+         {
+            pData->endType = EVENT_TABLE_END;
+         }
+         else // ET_END_COMMANDED
+         {
+            pData->endType = EVENT_COMMANDED_END;
+         }
+      }
+      // Record the time the event ended
+      CM_GetTimeAsTimestamp(&pData->tsEndTime);
+      // Log the End
+      EventLogEnd(pConfig, pData);
+      // Change event state back to start
+      pData->state            = EVENT_START;
+      pData->bStarted         = FALSE;
+      pData->bTableWasEntered = FALSE;
+      // Need to make sure the TH was opened before attempting to close
+      if (TRUE == pConfig->bEnableTH)
+      {
+         // End the time history
+         TH_Close(pConfig->postTime_s);
+      }
+      // reset the event Action
+      pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
+                                             EVENT_ACTION_ON_DURATION(pConfig->nAction) |
+                                             EVENT_ACTION_ON_MET(pConfig->nAction),
+                                             ACTION_OFF,
+                                             0,
+                                             0 );
+   }
+}
+
+/******************************************************************************
  * Function:     EventCheckStart
  *
  * Description:  Checks the start of an event. This function is the entry point
@@ -821,6 +840,7 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
  *
  *
  * Parameters:   [in]  EVENT_CFG    *pConfig,
+ *               [in]  EVENT_DATA *pData
  *               [out] BOOLEAN      *isValid
  *
  * Returns:      BOOLEAN StartCriteriaMet
@@ -840,7 +860,7 @@ BOOLEAN EventCheckStart ( const EVENT_CFG *pConfig, const EVENT_DATA *pData, BOO
    *isValid = TRUE;
 
    bStartCriteriaMet = (BOOLEAN) EvalExeExpression ( EVAL_CALLER_TYPE_EVENT,
-                                                     pData->eventIndex,
+                                                     (INT32)pData->eventIndex,
                                                      &pConfig->startExpr,
                                                      isValid );
 
@@ -852,7 +872,8 @@ BOOLEAN EventCheckStart ( const EVENT_CFG *pConfig, const EVENT_DATA *pData, BOO
  *
  * Description:  Check if event end criterias are met
  *
- * Parameters:   [in] EVENT_CONFIG *pConfig,
+ * Parameters:   [in] EVENT_CONFIG *pConfig
+ *               [in] EVENT_DATA   *pData
  *
  * Returns:      EVENT_END_TYPE
  *
@@ -872,7 +893,7 @@ EVENT_END_TYPE EventCheckEnd ( const EVENT_CFG *pConfig, const EVENT_DATA *pData
    // Exit criteria is in the return value, trigger validity in 'validity'
    // Together they define how the event ended
    if( EvalExeExpression( EVAL_CALLER_TYPE_EVENT,
-                          pData->eventIndex,
+                          (INT32)pData->eventIndex,
                           &pConfig->endExpr,
                           &validity ) && (TRUE == validity))
    {
@@ -930,6 +951,7 @@ void EventLogStart (EVENT_CFG *pConfig, const EVENT_DATA *pData)
  * Parameters:   [in] EVENT_TABLE_INDEX eventTableIndex
  *               [in] UINT32            nCurrentTick
  *               [in] LOG_PRIORITY      priority
+ *               [in] UINT32            seqNumber
  *
  * Returns:      TRUE  - if the table was entered
  *               FALSE - if the table was not entered
@@ -1073,8 +1095,8 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
                                     FLOAT32 fSensorValue)
 {
    // Local Data
-   UINT16        nRegIndex;
-   UINT16        nSegIndex;
+   UINT32        nRegIndex;
+   UINT32        nSegIndex;
    REGION_DEF   *pRegion;
    SEGMENT_DEF  *pSegment;
    LINE_CONST   *pConst;
@@ -1088,7 +1110,10 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    fSavedThreshold = 0;
 
    // Loop through all the regions
-   for ( nRegIndex = 0; (nRegIndex <= pTableData->maximumCfgRegion); nRegIndex++ )
+   for ( nRegIndex = REGION_A;
+         (REGION_NOT_FOUND != pTableData->maximumCfgRegion) &&
+         (nRegIndex < pTableData->maximumCfgRegion);
+         nRegIndex++ )
    {
       pRegion   = &pTableCfg->region[nRegIndex];
 
@@ -1240,7 +1265,7 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
                             EVENT_REGION foundRegion,   UINT32 nCurrentTick )
 {
    // Local Data
-   UINT16 i;
+   UINT32 i;
    UINT32 timeDelta;
 
    // Make sure we are in a confirmed region
@@ -1308,10 +1333,10 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
  *
  * Description:  Generates the log when regions are transitioned.
  *
- * Parameters:   [in] EVENT_TABLE_CFG   *pConfig
- *               [in] EVENT_TABLE_DATA  *pData
- *               [in] EVENT_TABLE_INDEX eventTableIndex
- *               [in] LOG_PRIORITY      priority
+ * Parameters:   [in] EVENT_TABLE_CFG   *pTableCfg
+ *               [in] EVENT_TABLE_DATA  *pTableData
+ *               [in] EVENT_REGION      EnteredRegion
+ *               [in] EVENT_REGION      ExitedRegion
  *
  * Returns:      None
  *
@@ -1319,7 +1344,8 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
  *
  *****************************************************************************/
 static
-void EventTableLogTransition ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA *pTableData,
+void EventTableLogTransition ( const EVENT_TABLE_CFG *pTableCfg,
+                               const EVENT_TABLE_DATA *pTableData,
                                EVENT_REGION EnteredRegion, EVENT_REGION ExitedRegion)
 {
    // Local Data
@@ -1366,6 +1392,7 @@ void EventTableLogTransition ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DA
  *               [in] EVENT_TABLE_DATA  *pData
  *               [in] EVENT_TABLE_INDEX eventTableIndex
  *               [in] LOG_PRIORITY      priority
+ *               [in] EVENT_TABLE_STATE endReason
  *
  * Returns:      None
  *
@@ -1378,7 +1405,7 @@ void EventTableLogSummary (const EVENT_TABLE_CFG *pConfig, const EVENT_TABLE_DAT
 {
    // Local Data
    EVENT_TABLE_SUMMARY_LOG tSumm;
-   UINT16                  nRegIndex;
+   UINT32                  nRegIndex;
 
    // Gather up the data to write to the log
    tSumm.eventTableIndex          = pData->nTableIndex;
@@ -1394,7 +1421,7 @@ void EventTableLogSummary (const EVENT_TABLE_CFG *pConfig, const EVENT_TABLE_DAT
    tSumm.maximumCfgRegion         = pData->maximumCfgRegion;
 
    // Loop through the region stats and place them in the log
-   for ( nRegIndex = 0; nRegIndex < (UINT16)MAX_TABLE_REGIONS; nRegIndex++ )
+   for ( nRegIndex = REGION_A; nRegIndex < MAX_TABLE_REGIONS; nRegIndex++ )
    {
       tSumm.regionStats[nRegIndex].nEnteredCount =
                                   pData->regionStats[nRegIndex].logStats.nEnteredCount;
@@ -1589,7 +1616,7 @@ void EventLogUpdate( EVENT_DATA *pData )
     {
        pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
        // Update the summary data for the trigger
-       pLog->sensor[numSensor].SensorIndex = pSummary->SensorIndex;
+       pLog->sensor[numSensor].sensorIndex = pSummary->SensorIndex;
        pLog->sensor[numSensor].timeMinValue = pSummary->timeMinValue;
        pLog->sensor[numSensor].fMinValue   = pSummary->fMinValue;
        pLog->sensor[numSensor].timeMaxValue = pSummary->timeMaxValue;
@@ -1603,7 +1630,7 @@ void EventLogUpdate( EVENT_DATA *pData )
     }
     else // Sensor Not Used
     {
-       pLog->sensor[numSensor].SensorIndex   = SENSOR_UNUSED;
+       pLog->sensor[numSensor].sensorIndex   = SENSOR_UNUSED;
        pLog->sensor[numSensor].fMinValue     = 0.0;
        pLog->sensor[numSensor].fMaxValue     = 0.0;
        pLog->sensor[numSensor].fAvgValue     = 0.0;
@@ -1666,7 +1693,7 @@ void EventForceEnd ( void )
  * Description:  Force the event table to end.
  *
  * Parameters:   [in] EVENT_TABLE_INDEX eventTableIndex
- *               [in] LOG_PRIORITY      prioirity
+ *               [in] LOG_PRIORITY      priority
  *
  * Returns:      None.
  *
@@ -1702,7 +1729,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- * 
+ *
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 12-11-06   Time: 11:12a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

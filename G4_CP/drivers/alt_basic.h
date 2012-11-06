@@ -1,26 +1,26 @@
 #ifndef ALT_BASIC_H
 #define ALT_BASIC_H
 /******************************************************************************
-Copyright 2000-2012 Pratt & Whitney Engine Services, Inc.                
-                 All Rights Reserved.  Proprietary and Confidential.
+            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+               All Rights Reserved. Proprietary and Confidential.
 
  File: alt_basic.h
 
  Description: This file provides a set of basic defintions that are common to all Altair
  software.
- 
+
  VERSION
-      $Revision: 10 $  $Date: 8/28/12 1:06p $ 
- 
+      $Revision: 11 $  $Date: 12-11-02 1:38p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
-/* Compiler Specific Includes                                                                */
+/* Compiler Specific Includes                                                */
 /*****************************************************************************/
 
 
 /*****************************************************************************/
-/* Software Specific Includes                                                                */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_stdtypes.h"
 #include "compiler.h"
@@ -232,22 +232,22 @@ Copyright 2000-2012 Pratt & Whitney Engine Services, Inc.
 ******************************************************************************/
 
 /******************************************************************************
-                                 Package Exports                               
+                                 Package Exports
 ******************************************************************************/
-#undef EXPORT    
+#undef EXPORT
 
-#if defined ( ALT_BASIC_BODY )                                                  
-#define EXPORT                                                                 
-#else                                                                          
-#define EXPORT extern                                                          
-#endif                                                                         
+#if defined ( ALT_BASIC_BODY )
+#define EXPORT
+#else
+#define EXPORT extern
+#endif
 
 /******************************************************************************
-                             Package Exports Variables                         
+                             Package Exports Variables
 ******************************************************************************/
 
 /******************************************************************************
-                             Package Exports Functions                         
+                             Package Exports Functions
 ******************************************************************************/
 
 #endif // ALT_BASIC_H
@@ -255,36 +255,41 @@ Copyright 2000-2012 Pratt & Whitney Engine Services, Inc.
  *  MODIFICATIONS
  *    $History: alt_basic.h $
  * 
+ * *****************  Version 11  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 1:38p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:56a
  * Updated in $/software/control processor/code/drivers
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:42p
  * Updated in $/software/control processor/code/drivers
  * SCR #572 - remove warning about strncpy
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 4/12/10    Time: 7:19p
  * Updated in $/software/control processor/code/drivers
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:16p
  * Updated in $/software/control processor/code/drivers
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:02p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  *
  ***************************************************************************/

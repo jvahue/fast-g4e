@@ -1405,7 +1405,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
         result = TRUE;
       }
       break;
-
+      
     case USER_TYPE_FLOAT64:
       /* FLOAT64 type
          - check min/max bounds incl. the min/max value a float64 can represent.
@@ -2736,7 +2736,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
@@ -2867,13 +2867,13 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   }
 
   // Validate the conversion based on the Min/Max and Type values passed in
-  bResult = bResult && User_BitSetIsValid(Type, destPtr, Min, Max);
+  bResult = bResult && BitSetIsValid(Type, destPtr, Min, Max);
 
   return bResult;
 }
 
 /******************************************************************************
-* Function:     User_BitSetIsValid
+* Function:     User_CheckBits
 *
 * Description:  Verifies that only valid bits are set in the 128 bit structure
 *

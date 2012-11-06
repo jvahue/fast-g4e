@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 11 $  $Date: 12-10-30 5:48p $
+  $Revision: 12 $  $Date: 12-11-01 1:58p $
 
 *******************************************************************************/
 
@@ -269,10 +269,10 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( TREND_BODY )
-#define EXPORT
+#if defined ( TREND_BODY )
+   #define EXPORT
 #else
-#define EXPORT extern
+   #define EXPORT extern
 #endif
 
 /******************************************************************************
@@ -290,12 +290,17 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 1:58p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
  *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Changed Actions to UINT8
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 10/30/12   Time: 4:01p
  * Updated in $/software/control processor/code/application

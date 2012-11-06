@@ -1,23 +1,23 @@
-#ifndef DRV_EEPROM_H
-#define DRV_EEPROM_H
+#ifndef EEPROM_H
+#define EEPROM_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
    File:        EEPROM.h
-  
-   Description: This file defines the interface for the EEPROM Microchip 
-                connected via the SPI Bus. See the c module for a detailed 
+
+   Description: This file defines the interface for the EEPROM Microchip
+                connected via the SPI Bus. See the c module for a detailed
                 description.
 
   VERSION
-    $Revision: 14 $  $Date: 8/28/12 1:06p $
-  
+    $Revision: 15 $  $Date: 12-11-02 11:46a $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include <stdlib.h>
 
 /*****************************************************************************/
@@ -45,7 +45,7 @@
                                   //MISO:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define EEPROM_INST_WRDI  0x04    //Write Disable
                                   //MOSI:[0x04]
-                                  //MISO:xxxxxx                                  
+                                  //MISO:xxxxxx
 #define EEPROM_INST_WREN  0x06    //Write Enable
                                   //MOSI:[0x06]
                                   //MISO:xxxxxx
@@ -74,8 +74,8 @@
 ******************************************************************************/
 #pragma pack(1)
 typedef struct {
-  RESULT  result; 
-} EEPROM_DRV_PBIT_LOG; 
+  RESULT  result;
+} EEPROM_DRV_PBIT_LOG;
 #pragma pack()
 
 
@@ -84,7 +84,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( DRV_EEPROM_BODY )
+#if defined ( EEPROM_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -107,52 +107,57 @@ EXPORT RESULT EEPROM_IsWriteInProgress(SPI_DEVS Device,
                                        BOOLEAN *IsWriteInProgress);
 
 
-#endif // DRV_EEPROM_H 
+#endif // EEPROM_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EEPROM.h $
  * 
+ * *****************  Version 15  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 11:46a
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 14  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor3  Date: 3/31/10    Time: 11:48a
  * Updated in $/software/control processor/code/drivers
  * SCR #521 Code Review Issues
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:29p
  * Updated in $/software/control processor/code/drivers
  * SCR #67 Log SPI timeouts events Moved checks for Device and Wri
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:52p
  * Updated in $/software/control processor/code/drivers
  * SCR 67 Interrupted SPI Access (Multiple / Nested SPI Access)
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:14p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:10p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:24p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 7  *****************
  * User: Jim Mood     Date: 2/05/09    Time: 11:25a
  * Updated in $/control processor/code/drivers
  * Added support for 2 EEPROM devices.  Added device detection logic and
  * returns an error code on init if one of the devices is not detected.
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 9/04/08    Time: 9:33a
  * Updated in $/control processor/code/drivers

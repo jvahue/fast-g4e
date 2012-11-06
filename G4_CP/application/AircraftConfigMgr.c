@@ -1,21 +1,21 @@
 #define AIRCRAFTCONFIGMGR_BODY
 
 /******************************************************************************
-          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:          AircraftConfigMgr.c
- 
-  Description:   Aircraft Auto Re-Configuration Routines 
-  
+
+  Description:   Aircraft Auto Re-Configuration Routines
+
   VERSION
-      $Revision: 53 $  $Date: 8/29/12 11:56a $ 
- 
+      $Revision: 55 $  $Date: 12-11-05 1:20p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include <stdlib.h>
 
 #include "TestPoints.h"
@@ -41,9 +41,9 @@
 CHAR *ACConfigStatus[] =
 {
   "AC_CFG_SUCCESS",             // 0    0 - not used
-  "AC_NOT_USED",                // 1    1 - not used 
+  "AC_NOT_USED",                // 1    1 - not used
   "AC_XML_SERVER_NOT_FOUND",    // 2    2 - Server not found OK
-  "AC_XML_FILE_NOT_FOUND",      // 3    3 - File not found 
+  "AC_XML_FILE_NOT_FOUND",      // 3    3 - File not found
   "AC_XML_FAILED_TO_OPEN",      // 4    4 - File failed to open ???
   "AC_XML_FAST_NOT_FOUND",      // 5    5 - File format error (any type)
   "AC_XML_SN_NOT_FOUND",        // 6    6 - Serial number not in file
@@ -52,11 +52,11 @@ CHAR *ACConfigStatus[] =
   "AC_CFG_FILE_NO_VER",         // 9    9 - Configuration version is missing
   "AC_CFG_FILE_FMT_ERR",        // 10   10- Configuration file format error NEW
   "AC_CFG_FAILED_TO_UPDATE",    // 11   11- Reconfiguration of FAST failed
-  "AC_ID_MISMATCH",             // 12   12- Aircraft ID mismatch (was 001)     
+  "AC_ID_MISMATCH",             // 12   12- Aircraft ID mismatch (was 001)
   "AC_CFG_NO_VALIDATE",         // 13   13- Validate data == no
   "AC_CFG_NOTHING",
   "AC_CFG_STARTED",
-  "AC_CFG_CLIENT_ERROR"    
+  "AC_CFG_CLIENT_ERROR"
 };
 
 CHAR *ACUpdateMethod[] =
@@ -67,7 +67,7 @@ CHAR *ACUpdateMethod[] =
     "Check Version & Validate Data",
     "NULL"
   };
-  
+
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
@@ -75,7 +75,7 @@ CHAR *ACUpdateMethod[] =
 //Shortened up version of strncpy_safe for use with direct object references.
 #define sstrncpy(dest, source) strncpy_safe(dest, sizeof(dest), source,_TRUNCATE);
 #define EE_FILE_MAGIC_NUMBER 0x600DF00D
-//Number of times to retry getting the configuration status from the 
+//Number of times to retry getting the configuration status from the
 //Micro-Server.  10 seconds is long enough, that in the event the CP is unable
 //to send the status command, and the Micro-Server is still sending .cfg commands,
 //that it should be able to finish sending .cfg commands before recfg finally gives
@@ -128,13 +128,13 @@ static BOOLEAN               m_bVPNConn;
 static BOOLEAN               m_bMsConnected;
 static UINT32                m_ACTaskTimeoutTmr;
 #define CFG_STATUS_STR_MAX   8
-static INT8                  m_CfgStatusStr[CFG_STATUS_STR_MAX];     
-                                                    //The PWEH defined error code, 
+static INT8                  m_CfgStatusStr[CFG_STATUS_STR_MAX];
+                                                    //The PWEH defined error code,
                                                     //  see AC_SetCfgStatus()
 
 //Task state defines the current activity for the task look in the AC_Task function
-static AC_RECFG_TASK_STATE   m_TaskState; 
-#define CFG_ERROR_STR_MAX    80              
+static AC_RECFG_TASK_STATE   m_TaskState;
+#define CFG_ERROR_STR_MAX    80
 static INT8                  m_RecfgErrorStr[CFG_ERROR_STR_MAX] = "Err: undefined";
 static BOOLEAN               m_bGotCommit;
 static BOOLEAN               m_bAutoCfg;
@@ -143,8 +143,8 @@ static BOOLEAN               m_CancelWhileRcvingConfigCmds;
 static INT32                 m_GetStatusRetryCnt;
 static MSCP_MS_REQ_CFG_FILES_RSP m_ReqCfgFilesRsp;
 static MSCP_MS_GET_RECFG_STS_RSP m_ReqStsRsp;
-                              
-/*Task "wait" state control block: includes next state for success or error 
+
+/*Task "wait" state control block: includes next state for success or error
 See AC_Wait*/
 static struct {
                 AC_RECFG_TASK_STATE OnSuccess;
@@ -157,12 +157,12 @@ static struct {
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
-/*****************************************************************************/			  
-static void    AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData, 
+/*****************************************************************************/
+static void    AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData,
                                UINT16 Size, MSI_RSP_STATUS Status);
-static void    AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData, 
+static void    AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData,
                                UINT16 Size, MSI_RSP_STATUS Status);
-static void    AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData, 
+static void    AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData,
                                UINT16 Size, MSI_RSP_STATUS Status);
 
 
@@ -172,7 +172,7 @@ static void    AC_MSRspCancelCfg(UINT16 Id, void* PacketData, UINT16 Size,
                                MSI_RSP_STATUS Status);
 static BOOLEAN AC_IsAircraftIDSensorsValid(void);
 static void    AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number);
-			  
+
 static void AC_WaitMSSIMRdy(void);
 static void AC_StartManual(void);
 static void AC_StartAuto(void);
@@ -185,7 +185,7 @@ static void AC_ProcessGetCfgLoadSts(void);
 static void AC_WaitLogUploadBeforeCommit(void);
 static void AC_WaitForCommitCommand(void);
 static void AC_CommitCfg(void);
-static void AC_Rebooting(void);                                                      
+static void AC_Rebooting(void);
 
 static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *Str);
 static void AC_Error(INT8* Str);
@@ -193,7 +193,7 @@ static void AC_Signal(BOOLEAN Success);
 static void AC_SetCfgStatus(INT8* Str);
 static void AC_Task ( void *pParam );
 
-static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed );			  
+static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed );
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -215,9 +215,9 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed );
  *****************************************************************************/
 void AircraftConfigInitialization ( void )
 {
-  // Local Data    
-  TCB TaskInfo; 
-   
+  // Local Data
+  TCB TaskInfo;
+
   User_AddRootCmd(&RootMsg);
   sstrncpy(m_CfgStatusStr,AC_CLEAR);
   m_bVPNConn             = FALSE;
@@ -228,11 +228,11 @@ void AircraftConfigInitialization ( void )
   m_bOnGround            = TRUE;
   m_bAircraftIDMismatch  = FALSE;
   m_bAutoCfg             = FALSE;
-  
+
   m_ReqFilesFailCnt   = 0;
   m_TaskState         = CfgMgr_ConfigPtr()->Aircraft.bCfgEnabled
                          ? TASK_START_AUTO : TASK_STOPPED;
-  
+
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"AC Cfg Loader",_TRUNCATE);
   TaskInfo.TaskID         = AC_Task_ID;
@@ -251,14 +251,14 @@ void AircraftConfigInitialization ( void )
   {
     AC_FileInit();
   }
-  else 
+  else
   {
     NV_Read(NV_AC_CFG,0,&m_ACStoredSensorVals,sizeof(m_ACStoredSensorVals));
     if(m_ACStoredSensorVals.MagicNumber != STPU( EE_FILE_MAGIC_NUMBER,eTpAcCfg3803))
     {
       GSE_DebugStr(NORMAL,TRUE,"Recfg: Reset stored sensor values in EE");
       AC_FileInit();
-    }      
+    }
   }
 }
 
@@ -298,9 +298,9 @@ BOOLEAN AC_FileInit(void)
  * Parameters:   [in] State TRUE: RF is up and a connection to the ground
  *                                server is established
  *                          FALSE: No ground server connection is available
- *               
  *
- * Returns:      
+ *
+ * Returns:
  *
  * Notes:
  *****************************************************************************/
@@ -320,7 +320,7 @@ void AC_SetIsGroundServerConnected(BOOLEAN State)
  *
  * Parameters:   [in] State TRUE: MSSIM is running and ready for commands
  *                          FALSE: MSSIM is not running
- * Returns:      
+ * Returns:
  *
  * Notes:
  *****************************************************************************/
@@ -346,7 +346,7 @@ void AC_SetIsMSConnected(BOOLEAN State)
  * Parameters:   [in] State TRUE: A/C is on the ground
  *                          FALSE: A/C is in the air
  *
- * Returns:      
+ * Returns:
  *
  * Notes:
  *****************************************************************************/
@@ -378,7 +378,7 @@ void AC_GetConfigStatus(INT8* str)
 
 
 /******************************************************************************
- * Function:     AircraftConfig_GetConfigState
+ * Function:     AC_GetConfigState
  *
  * Description:  Get the configuration status of the aircraft.  The possible
  *               states are no configuration, configured, retrieving
@@ -398,7 +398,7 @@ void AC_GetConfigStatus(INT8* str)
 AIRCRAFT_CONFIG_STATE AC_GetConfigState(void)
 {
   AIRCRAFT_CONFIG_STATE ACCfgState = AC_CFG_STATE_NO_CONFIG;
-  
+
     // Verify Configuration
   if ( (CfgMgr_RuntimeConfigPtr()->VerId != 0) && !m_bAircraftIDMismatch)
   {
@@ -409,10 +409,10 @@ AIRCRAFT_CONFIG_STATE AC_GetConfigState(void)
   if( m_TaskState == TASK_WAIT &&
       m_WaitData.OnSuccess == TASK_PROCESS_RETRIEVE_CFG )
   {
-    ACCfgState = AC_CFG_STATE_RETRIEVING;    
+    ACCfgState = AC_CFG_STATE_RETRIEVING;
   }
 
-  return ACCfgState;  
+  return ACCfgState;
 }
 
 
@@ -435,7 +435,7 @@ AIRCRAFT_CONFIG_STATE AC_GetConfigState(void)
 BOOLEAN AC_StartAutoRecfg(void)
 {
   BOOLEAN result = FALSE;
-  
+
   if((m_TaskState == TASK_STOPPED) || (m_TaskState == TASK_ERROR))
   {
     TmTaskEnable(AC_Task_ID, TRUE);
@@ -464,12 +464,12 @@ BOOLEAN AC_StartAutoRecfg(void)
 BOOLEAN AC_StartManualRecfg(void)
 {
   BOOLEAN retval = FALSE;
-  
-  if((m_TaskState == TASK_STOPPED) || 
+
+  if((m_TaskState == TASK_STOPPED) ||
      (m_TaskState == TASK_ERROR)   ||
      (m_TaskState == TASK_WAIT_MSSIM_RDY) ||
      (m_TaskState == TASK_WAIT_LOG_UPLOAD)||
-     (m_TaskState == TASK_WAIT_VPN_CONN)  
+     (m_TaskState == TASK_WAIT_VPN_CONN)
      )
   {
     m_ReqFilesFailCnt = 0;
@@ -500,12 +500,12 @@ BOOLEAN AC_SendClearCfgDir(void)
 {
   MSCP_CP_SHELL_CMD cmd;
   BOOLEAN retval  = FALSE;
-  
-  if((m_TaskState == TASK_STOPPED) || 
+
+  if((m_TaskState == TASK_STOPPED) ||
      (m_TaskState == TASK_ERROR)   ||
      (m_TaskState == TASK_WAIT_MSSIM_RDY) ||
      (m_TaskState == TASK_WAIT_LOG_UPLOAD)||
-     (m_TaskState == TASK_WAIT_VPN_CONN)  
+     (m_TaskState == TASK_WAIT_VPN_CONN)
      )
   {
     strncpy_safe(cmd.Str,sizeof(cmd.Str),"rm [MANUAL_CFG]/*",_TRUNCATE);
@@ -514,7 +514,7 @@ BOOLEAN AC_SendClearCfgDir(void)
 
     AC_Wait(TASK_STOPPED,TASK_ERROR,
               "MS returned fail clear cfg dir");
-  
+
     if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,5000,AC_MSRspShellCmd))
     {
@@ -538,7 +538,7 @@ BOOLEAN AC_SendClearCfgDir(void)
  *               started.  This can only be executed while the task is running
  *               and not in the process of committing the configuration or
  *               rebooting the FAST box.
- *               
+ *
  *
  * Parameters:   none
  *
@@ -552,7 +552,7 @@ BOOLEAN AC_CancelRecfg(void)
 {
   BOOLEAN retval = FALSE;
   AC_RECFG_TASK_STATE save;
-  
+
   if( (m_TaskState != TASK_STOPPED)     ||
       (m_TaskState != TASK_ERROR)       ||
       (m_TaskState != TASK_COMMIT_CFG)  ||
@@ -561,7 +561,7 @@ BOOLEAN AC_CancelRecfg(void)
     save = m_TaskState;
     AC_Wait(TASK_STOPPED,TASK_ERROR,
               "MS returned fail cancel reconfig");
-     
+
     if( SYS_OK != MSI_PutCommand(CMD_ID_REQ_STOP_RECFG,NULL,0,5000,
         AC_MSRspCancelCfg) )
     {
@@ -572,7 +572,7 @@ BOOLEAN AC_CancelRecfg(void)
       //commands, then this failure is not important, just stop.
       m_TaskState = m_ReceivingConfigCmds ? save : TASK_STOPPED;
       m_CancelWhileRcvingConfigCmds = TRUE;
-      
+
     }
     retval = TRUE;
   }
@@ -582,7 +582,7 @@ BOOLEAN AC_CancelRecfg(void)
 
 
 /******************************************************************************
- * Function:     AC_FSMAutoRun()         | IMPLEMENTS GetState() INTERFACE to 
+ * Function:     AC_FSMAutoRun()         | IMPLEMENTS GetState() INTERFACE to
  *                                       | FSM
  *
  * Description:  Run the automatic reconfiguration process
@@ -591,7 +591,7 @@ BOOLEAN AC_CancelRecfg(void)
  *                        FALSE: Stop the Auto Cfg task
  *              [in] param: not used, just to match FSM call signature.
  *
- * Returns:      
+ * Returns:
  *
  * Notes:
  *****************************************************************************/
@@ -611,7 +611,7 @@ void AC_FSMAutoRun(BOOLEAN Run, INT32 param)
 
 
 /******************************************************************************
- * Function:     AC_FSMGetState()        | IMPLEMENTS GetState() INTERFACE to 
+ * Function:     AC_FSMGetState()        | IMPLEMENTS GetState() INTERFACE to
  *                                       | FSM
  *
  * Description:  Return the running/not running state of the auto-configuration
@@ -639,11 +639,11 @@ BOOLEAN AC_FSMGetState(INT32 param)
  *               manual reconfiguration.  The task handles initiating log
  *               upload, micro-server command/response, logging and reporting
  *               of the process, and storing configurations to eeprom.
- *               
  *
- * Parameters:   
  *
- * Returns:      
+ * Parameters:   pParam
+ *
+ * Returns:
  *
  * Notes:
  ******************************************************************************/
@@ -656,9 +656,9 @@ void AC_Task ( void *pParam )
   {
     case TASK_STOPPED:
       CfgMgr_CancelBatchCfg();
-      TmTaskEnable(AC_Task_ID, FALSE);    
+      TmTaskEnable(AC_Task_ID, FALSE);
     break;
-    
+
     case TASK_ERROR:
       if(m_bAutoCfg)
       {
@@ -674,19 +674,19 @@ void AC_Task ( void *pParam )
     case TASK_WAIT:
       //Do Nothing
     break;
-    
+
     case TASK_START_AUTO:
       AC_StartAuto();
     break;
-    
+
     case TASK_START_MANUAL:
       AC_StartManual();
     break;
-    
+
     case TASK_WAIT_MSSIM_RDY:
       AC_WaitMSSIMRdy();
     break;
-    
+
     case TASK_WAIT_VPN_CONN:
       AC_WaitVPNConnection();
     break;
@@ -698,11 +698,11 @@ void AC_Task ( void *pParam )
     case TASK_VALIDATE_AC_ID:
       AC_ValidateAcID();
     break;
-        
+
     case TASK_SEND_GET_CFG_LOAD_STS:
       AC_SendGetCfgLoadSts();
     break;
-    
+
     case TASK_PROCESS_GET_CFG_LOAD_STS:
       AC_ProcessGetCfgLoadSts();
     break;
@@ -714,15 +714,15 @@ void AC_Task ( void *pParam )
     case TASK_WAIT_FOR_COMMIT:
       AC_WaitForCommitCommand();
     break;
-    
+
     case TASK_COMMIT_CFG:
       AC_CommitCfg();
     break;
-    
+
     case TASK_REBOOTING:
       AC_Rebooting();
     break;
-    
+
     default:
       FATAL("Unsupported AC_RECFG_TASK_STATE = %d", m_TaskState );
     break;
@@ -741,9 +741,9 @@ void AC_Task ( void *pParam )
  *               NEXT STATE:
  *                  WAIT_MSSIM_RDY
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:
  ******************************************************************************/
@@ -753,12 +753,12 @@ static void AC_StartAuto(void)
   //confirmation to commit the new config
   m_ReqFilesFailCnt = 0;
   m_bAutoCfg        = TRUE;
-  m_GetStatusRetryCnt = AC_CFG_GET_STATUS_RETRY_CNT; 
+  m_GetStatusRetryCnt = AC_CFG_GET_STATUS_RETRY_CNT;
   m_ReceivingConfigCmds = FALSE;
   m_CancelWhileRcvingConfigCmds = FALSE;
   m_TaskState = TASK_WAIT_MSSIM_RDY;
   GSE_DebugStr(NORMAL,TRUE,"ReCfg: Starting auto configuration check....");
-  
+
 }
 
 
@@ -772,19 +772,19 @@ static void AC_StartAuto(void)
  *               commanding the Micro-Server with the "Start Recfg" command.
  *               NEXT STATE:
  *                  WAIT <then> SEND_GET_CFG_LOAD_STS.
- *               
- *               
  *
- * Parameters:   
  *
- * Returns:      
+ *
+ * Parameters:
+ *
+ * Returns:
  *
  * Notes:
  ******************************************************************************/
 static void AC_StartManual(void)
 {
   MSCP_CP_REQ_START_RECFG_CMD cmd;
-  
+
   memset(&cmd,0,sizeof(cmd));
   memset(&m_ReqStsRsp,0,sizeof(m_ReqStsRsp));
 
@@ -792,7 +792,7 @@ static void AC_StartManual(void)
   m_bAutoCfg  = FALSE;
   m_GetStatusRetryCnt = AC_CFG_GET_STATUS_RETRY_CNT;
   m_ReceivingConfigCmds = FALSE;
-  m_CancelWhileRcvingConfigCmds = FALSE;  
+  m_CancelWhileRcvingConfigCmds = FALSE;
   CfgMgr_StartBatchCfg();
 
   //Setup wait state, this stores what state to go to after the micro-server
@@ -804,13 +804,13 @@ static void AC_StartManual(void)
   cmd.Mode    = MSCP_START_RECFG_MANUAL;
   m_ReceivingConfigCmds = TRUE;
   if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_START_RECFG,
-     &cmd,sizeof(cmd),5000,&AC_MSReqStartCfgRspHandler) )
+     &cmd,sizeof(cmd),5000,AC_MSReqStartCfgRspHandler) )
   {
     CfgMgr_CancelBatchCfg();
     m_ReceivingConfigCmds = FALSE;
     AC_Error("Could not send MS cmd: Get Start Recfg");
   }
-  GSE_DebugStr(NORMAL,TRUE,"ReCfg: Starting manual reconfiguration");  
+  GSE_DebugStr(NORMAL,TRUE,"ReCfg: Starting manual reconfiguration");
 }
 
 
@@ -823,9 +823,9 @@ static void AC_StartManual(void)
  *               for VPN connection to be available
  *               NEXT STATE:
  *                 WAIT_VPN_CONN
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:
  ******************************************************************************/
@@ -836,11 +836,11 @@ static void AC_WaitMSSIMRdy(void)
     m_TaskState = TASK_WAIT_VPN_CONN;
   }
   //Set server not found error if VPN fails to connect before takeoff
-  else if(!m_bOnGround)  
+  else if(!m_bOnGround)
   {
     AC_SetCfgStatus(AC_XML_SERVER_NOT_FOUND_STR);
     AC_Error("In Air/Recording before VPN connected");
-  }  
+  }
 }
 
 
@@ -854,10 +854,10 @@ static void AC_WaitMSSIMRdy(void)
  *               on the Micro-Server
  *                NEXT STATE:
  *                 WAIT_RETRIEVE_CFG
- *              
- * Parameters:   
  *
- * Returns:      
+ * Parameters:
+ *
+ * Returns:
  *
  * Notes:        2885,2780,2886,2639,2530
  ******************************************************************************/
@@ -865,7 +865,7 @@ static void AC_WaitVPNConnection(void)
 {
   MSCP_CP_REQ_CFG_FILES_CMD cmd;
   CFGMGR_NVRAM *cfg = CfgMgr_ConfigPtr();
-    
+
   if(m_bVPNConn)
   {
     AC_Wait(TASK_PROCESS_RETRIEVE_CFG,TASK_ERROR,
@@ -880,15 +880,15 @@ static void AC_WaitVPNConnection(void)
     sstrncpy(cmd.Owner,cfg->Aircraft.Owner);
     sstrncpy(cmd.TailNumber,cfg->Aircraft.TailNumber);
     cmd.ValidateData = cfg->Aircraft.bValidateData;
-    
+
     if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_CFG_FILES,
-       &cmd,sizeof(cmd),AC_REQ_FILES_FROM_GROUND_TO,&AC_MSReqCfgFilesHandler) )
+       &cmd,sizeof(cmd),AC_REQ_FILES_FROM_GROUND_TO,AC_MSReqCfgFilesHandler) )
     {
       AC_Error("Could not send MS cmd: Get Start Recfg");
-    }    
+    }
   }
   //Set server not found error if VPN fails to connect before takeoff
-  else if(!m_bOnGround)  
+  else if(!m_bOnGround)
   {
     AC_SetCfgStatus(AC_XML_SERVER_NOT_FOUND_STR);
     AC_Error("In Air/Recording before VPN connected");
@@ -908,9 +908,9 @@ static void AC_WaitVPNConnection(void)
  *                    new configuration.
  *               3) If aircraft is not on ground, cancel cfg load
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:        2536,2942,2943,2664,2944,2548,2640,2641,3005,2911,2567,2550,
  *               2530
@@ -919,7 +919,7 @@ static void AC_ProcessRetrieveCfg(void)
 {
   BOOLEAN file_error = FALSE;
   MSCP_CP_REQ_START_RECFG_CMD cmd;
-  
+
   //Check error codes from the configuration file retrieval process
   if(0 != strncmp(m_ReqCfgFilesRsp.CfgStatus,AC_DEFAULT_NO_ERR,
       sizeof(m_ReqCfgFilesRsp.CfgStatus)))
@@ -931,11 +931,11 @@ static void AC_ProcessRetrieveCfg(void)
   if(0 != strncmp(m_ReqCfgFilesRsp.XMLStatus,AC_DEFAULT_NO_ERR,
       sizeof(m_ReqCfgFilesRsp.CfgStatus)))
   {
-    GSE_DebugStr(NORMAL,TRUE,"Recfg: XML file %s",m_ReqCfgFilesRsp.XMLStatus);    
+    GSE_DebugStr(NORMAL,TRUE,"Recfg: XML file %s",m_ReqCfgFilesRsp.XMLStatus);
     AC_SetCfgStatus(m_ReqCfgFilesRsp.XMLStatus);
     file_error = TRUE;
   }
-  
+
   if(!m_bOnGround)
   {
     GSE_DebugStr(NORMAL,TRUE,"ReCfg: Went in-air while waiting for cfg files");
@@ -949,7 +949,7 @@ static void AC_ProcessRetrieveCfg(void)
     {
       GSE_DebugStr(NORMAL,TRUE,"Recfg: %s %s",
           m_ReqCfgFilesRsp.XMLDataMatch ? "" : "XML changed,",
-          (m_ReqCfgFilesRsp.CfgFileVer > CfgMgr_ConfigPtr()->VerId) ? 
+          (m_ReqCfgFilesRsp.CfgFileVer > CfgMgr_ConfigPtr()->VerId) ?
             "cfg ver higher," : "");
 
       //Start reconfiguration
@@ -960,7 +960,7 @@ static void AC_ProcessRetrieveCfg(void)
       cmd.Mode    = MSCP_START_RECFG_AUTO;
       m_ReceivingConfigCmds = TRUE;
       if(SYS_OK != MSI_PutCommand(CMD_ID_REQ_START_RECFG,
-         &cmd,sizeof(cmd),5000,&AC_MSReqStartCfgRspHandler) )
+         &cmd,sizeof(cmd),5000,AC_MSReqStartCfgRspHandler) )
       {
         CfgMgr_CancelBatchCfg();
         m_ReceivingConfigCmds = FALSE;
@@ -986,7 +986,7 @@ static void AC_ProcessRetrieveCfg(void)
     {
       UploadMgr_StartUpload(UPLOAD_START_RECFG);
       AC_Error("Recfg: File retrieval failed");
-    }        
+    }
   }
 }
 
@@ -1021,7 +1021,7 @@ static void AC_ValidateAcID(void)
   FLOAT32 TypeSensorVal;
   FLOAT32 FleetSensorVal;
   FLOAT32 ACNumberSensorVal;
-  
+
   if(ACCfg->bValidateData)
   {
     if(AC_IsAircraftIDSensorsValid())
@@ -1030,28 +1030,28 @@ static void AC_ValidateAcID(void)
       FleetSensorVal    = SensorGetValue( ACCfg->FleetSensorIndex  );
       ACNumberSensorVal = SensorGetValue( ACCfg->NumberSensorIndex );
 
-      AC_UpdateEESensorValues(TypeSensorVal,FleetSensorVal,ACNumberSensorVal);    
+      AC_UpdateEESensorValues(TypeSensorVal,FleetSensorVal,ACNumberSensorVal);
 
-      if( ( (UINT32)(TypeSensorVal+0.5)     == strtol(ACCfg->Type,NULL,10)       )&& 
+      if( ( (UINT32)(TypeSensorVal+0.5)     == strtol(ACCfg->Type,NULL,10)       )&&
           ( (UINT32)(FleetSensorVal+0.5)    == strtol(ACCfg->FleetIdent,NULL,10) )&&
-          ( (UINT32)(ACNumberSensorVal+0.5) == strtol(ACCfg->Number,NULL,10)     )  )           
+          ( (UINT32)(ACNumberSensorVal+0.5) == strtol(ACCfg->Number,NULL,10)     )  )
       {
         m_TaskState = TASK_STOPPED;
         m_bAircraftIDMismatch = FALSE;
-        GSE_DebugStr(NORMAL,TRUE,"Recfg: AC data validated, recfg complete!");        
+        GSE_DebugStr(NORMAL,TRUE,"Recfg: AC data validated, recfg complete!");
       }
       else
       {
-        AC_UpdateEESensorValues(TypeSensorVal,FleetSensorVal,ACNumberSensorVal);    
+        AC_UpdateEESensorValues(TypeSensorVal,FleetSensorVal,ACNumberSensorVal);
 //#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 //      memcpy(&ACMismatchLog.Config,ACCfg,sizeof(*ACCfg));
-//#pragma ghs endnowarning 
- 
-        // Configurations stored in EEPROM are not PACKED, 
-        //   however log structures are PACKED.  The following func 
+//#pragma ghs endnowarning
+
+        // Configurations stored in EEPROM are not PACKED,
+        //   however log structures are PACKED.  The following func
         //   is a "non-elegant" or "cheesy way of dealing with this
-        //   mis-alignment.  
-        AC_CopyACCfgToPackedACCfg( &ACMismatchLog.Config ); 
+        //   mis-alignment.
+        AC_CopyACCfgToPackedACCfg( &ACMismatchLog.Config );
 
         ACMismatchLog.TypeValue   = TypeSensorVal;
         ACMismatchLog.FleetValue  = FleetSensorVal;
@@ -1066,15 +1066,15 @@ static void AC_ValidateAcID(void)
         //the same failure
         snprintf(m_RecfgErrorStr,sizeof(m_RecfgErrorStr),
             "Err: Validate (Type, Fleet, Num) exp %d %d %d got %1.0f %1.0f %1.0f",
-            strtol(ACCfg->Type,NULL,10),        
+            strtol(ACCfg->Type,NULL,10),
             strtol(ACCfg->FleetIdent,NULL,10),
             strtol(ACCfg->Number,NULL,10),TypeSensorVal,
             FleetSensorVal,ACNumberSensorVal);
         CfgMgr_CancelBatchCfg();
         TmTaskEnable(AC_Task_ID, FALSE);
         m_TaskState = TASK_ERROR;
-        GSE_DebugStr(NORMAL,TRUE,"Recfg %s",m_RecfgErrorStr);        
-        m_bAircraftIDMismatch = TRUE;        
+        GSE_DebugStr(NORMAL,TRUE,"Recfg %s",m_RecfgErrorStr);
+        m_bAircraftIDMismatch = TRUE;
       }
     }
   }
@@ -1085,7 +1085,7 @@ static void AC_ValidateAcID(void)
     AC_SetCfgStatus(AC_CFG_NO_VALIDATE_STR);
     m_bAircraftIDMismatch = FALSE;
     m_TaskState = TASK_STOPPED;
-  }  
+  }
 }
 
 
@@ -1099,11 +1099,11 @@ static void AC_ValidateAcID(void)
  *               NEXT STATE:
  *                WAIT <then> PROCESS_GET_CFG_LOAD_STS
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
- * Notes: 
+ * Notes:
  ******************************************************************************/
 static void AC_SendGetCfgLoadSts(void)
 {
@@ -1118,7 +1118,7 @@ static void AC_SendGetCfgLoadSts(void)
         AC_MSRspCancelCfg) )
     {
       //If a command to stop reconfig cannot be set to the MS, then we
-      //must wait for the MS to stop sending .cfg commands before 
+      //must wait for the MS to stop sending .cfg commands before
       //quitting.  Keep polling until MS says it is done.
       m_CancelWhileRcvingConfigCmds = TRUE;
       m_TaskState = TASK_SEND_GET_CFG_LOAD_STS;
@@ -1136,10 +1136,10 @@ static void AC_SendGetCfgLoadSts(void)
       //Could not send status cmd.  Jump back to ProcessGetCfg, it will
       //see the status from last time, then jump back to this state in
       //1 second.
-      m_TaskState = m_GetStatusRetryCnt-- == 0 ? TASK_PROCESS_GET_CFG_LOAD_STS : 
-        TASK_ERROR, AC_Error("Could not send MS cmd: Get Recfg Sts");    
+      m_TaskState = m_GetStatusRetryCnt-- == 0 ? TASK_PROCESS_GET_CFG_LOAD_STS :
+        TASK_ERROR, AC_Error("Could not send MS cmd: Get Recfg Sts");
     }
-      
+
     //Start timeout to send the get status command again in 1 second
     Timeout(TO_START,TICKS_PER_Sec*1,&m_ACTaskTimeoutTmr);
   }
@@ -1160,11 +1160,11 @@ static void AC_SendGetCfgLoadSts(void)
  *                  error status global.
  *               4) If the aircraft is in air, cancel reconfiguration
  *
- *            
  *
- * Parameters:   
  *
- * Returns:      
+ * Parameters:
+ *
+ * Returns:
  *
  * Notes:        3240,2530
  ******************************************************************************/
@@ -1204,7 +1204,7 @@ static void AC_ProcessGetCfgLoadSts(void)
     AC_SetCfgStatus(m_ReqStsRsp.ErrorStr);
     AC_Error(m_ReqStsRsp.StatusStr);
     GSE_DebugStr(VERBOSE,TRUE,"ReCfg: MS Sts Err: %s %s",
-        m_ReqStsRsp.StatusStr,m_ReqStsRsp.ErrorStr);  
+        m_ReqStsRsp.StatusStr,m_ReqStsRsp.ErrorStr);
   }
 }
 
@@ -1213,13 +1213,13 @@ static void AC_ProcessGetCfgLoadSts(void)
 /*******************************************************************************
  * Function:     AC_WaitLogUploadBeforeCommit | TASK STATE
  *
- * Description:  Wait until the log upload process completes.  If the log 
+ * Description:  Wait until the log upload process completes.  If the log
  *               memory is empty, go wait for the commit new configuration
  *               command.
  *
  * Parameters:   none
  *
- * Returns:      
+ * Returns:
  *
  * Notes:        3195, 2530
  ******************************************************************************/
@@ -1240,8 +1240,8 @@ static void AC_WaitLogUploadBeforeCommit(void)
     //a log in while uploading, try 3x then give up.
     if(m_UploadBeforeCommitRetryCount++ < 3)
     {
-      //Pause log writes for one minute to allow upload to clear the log memory      
-      LogPauseWrites(TRUE,60);  
+      //Pause log writes for one minute to allow upload to clear the log memory
+      LogPauseWrites(TRUE,60);
       UploadMgr_StartUpload(UPLOAD_START_RECFG);
     }
     else
@@ -1255,8 +1255,8 @@ static void AC_WaitLogUploadBeforeCommit(void)
     //Do Nothing if upload is still in progress.
   //}
 
-    
-  
+
+
   //Error
 }
 
@@ -1269,9 +1269,9 @@ static void AC_WaitLogUploadBeforeCommit(void)
  *               immediately in automatic mode.  GotCommit flag is set from
  *               the recfg.commit command.
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:        2099
  ******************************************************************************/
@@ -1284,7 +1284,7 @@ static void AC_WaitForCommitCommand(void)
     CfgMgr_CommitBatchCfg();
     m_TaskState = TASK_COMMIT_CFG;
   }
-  
+
 }
 
 
@@ -1295,9 +1295,9 @@ static void AC_WaitForCommitCommand(void)
  * Description:  Wait for the new configuration to finish writing to EEPROM,
  *               then go to reboot mode.
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:        3645
  ******************************************************************************/
@@ -1306,7 +1306,7 @@ static void AC_CommitCfg(void)
   if(!CfgMgr_IsEEWritePending())
   {
     GSE_DebugStr(VERBOSE,TRUE,
-        "ReCfg: Commit to EEPROM complete, rebooting in 10s.....");    
+        "ReCfg: Commit to EEPROM complete, rebooting in 10s.....");
     m_TaskState = TASK_REBOOTING;
     Timeout(TO_START,TICKS_PER_Sec*10,&m_ACTaskTimeoutTmr);
   }
@@ -1321,9 +1321,9 @@ static void AC_CommitCfg(void)
  *               NEXT STATE:
  *                 <NONE>
  *
- * Parameters:   
+ * Parameters:
  *
- * Returns:      
+ * Returns:
  *
  * Notes:
  *****************************************************************************/
@@ -1331,7 +1331,7 @@ static void AC_Rebooting(void)
 {
   if(Timeout(TO_CHECK,TICKS_PER_Sec*10,&m_ACTaskTimeoutTmr))
   {
-    GSE_DebugStr(VERBOSE,TRUE,"ReCfg: Waiting for dog to bark");    
+    GSE_DebugStr(VERBOSE,TRUE,"ReCfg: Waiting for dog to bark");
     WatchdogReboot(TRUE);
   }
 }
@@ -1342,11 +1342,11 @@ static void AC_Rebooting(void)
 /******************************************************************************
  * Function:    AC_Wait
  *
- * Description: Used when the reconfiguration process needs to wait for a 
- *              response from the micro-server.  The command response that 
+ * Description: Used when the reconfiguration process needs to wait for a
+ *              response from the micro-server.  The command response that
  *              the task is waiting for calls the AC_Signal() function to go to the
  *              next state when the response is received
- *              
+ *
  * Parameters:  [in] Success: State to enter when a successful response is
  *                            received
  *              [in] Fail:    State to enter when a fail response is received.
@@ -1356,11 +1356,11 @@ static void AC_Rebooting(void)
  *                            AC_Signal(FALSE).  Set to NULL if not used
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *Str)
-{  
+{
   m_WaitData.OnSuccess = Success;
   m_WaitData.OnError   = Fail;
   m_TaskState = TASK_WAIT;
@@ -1368,7 +1368,7 @@ static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *S
   {
     snprintf(m_RecfgErrorStr, CFG_ERROR_STR_MAX,"Err: %s",Str);
   }
-  
+
 }
 
 /******************************************************************************
@@ -1378,19 +1378,19 @@ static void AC_Wait(AC_RECFG_TASK_STATE Success,AC_RECFG_TASK_STATE Fail,INT8 *S
  *              a response was received from the micro-server, or that
  *              a timeout occurred while waiting for a response. If the task
  *              is not in "WAIT" no action is taken
- *              
+ *
  * Parameters:  [in] Success: TRUE:  Operation successful
  *                            FALSE: Operation failed
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void AC_Signal(BOOLEAN Success)
 {
   if(m_TaskState == TASK_WAIT)
-  {  
+  {
     if(Success)
     {
       m_TaskState = m_WaitData.OnSuccess;
@@ -1407,23 +1407,23 @@ static void AC_Signal(BOOLEAN Success)
 /******************************************************************************
  * Function:    AC_Error
  *
- * Description: Saves a descriptive string describing the condition that caused 
+ * Description: Saves a descriptive string describing the condition that caused
  *              the error.  Set the task state to ERROR.  This will stop
  *              the activity in progress and the GSE status command will
  *              contain the error string passed in Str.
  *
- *              
+ *
  * Parameters:  [in]: Str: Description of the error
  *                         must be less than 72 chars.
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void AC_Error(INT8* Str)
 {
-  snprintf(m_RecfgErrorStr,sizeof(m_RecfgErrorStr),"Err: %s",Str);  
+  snprintf(m_RecfgErrorStr,sizeof(m_RecfgErrorStr),"Err: %s",Str);
   m_TaskState = TASK_ERROR;
 }
 
@@ -1436,7 +1436,7 @@ static void AC_Error(INT8* Str)
  *              1) If the global status string is no already set to an
  *                 ERR### code, set Str as the configuration status.
  *              2) Write a system log containing the ERR### string
- *              
+ *
  * Parameters:  [in] Str: ERR### string to set in the configuration status
  *
  * Returns:     none
@@ -1463,23 +1463,27 @@ static void AC_SetCfgStatus(INT8* Str)
  * Description: Handle response to the CMD_ID_REQ_START_RECFG command.
  *              There is no data payload expected with this response, just
  *              signal success/fail to AC_Task
- *              
- * Parameters:  See MSInterface.h prototype
+ *
+ * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
+ *              PacketData: Pointer to the data returned from the microserver.
+ *              Size:       Length (in bytes) of the data returned from the
+ *                          microserver
+ *              Status:     Response status from the micro server*
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
-static void AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData, 
+static void AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData,
                                             UINT16 Size, MSI_RSP_STATUS Status)
 {
   BOOLEAN success = FALSE;
-  
+
   if(Status == MSI_RSP_SUCCESS)
   {
     success = TRUE;
-  }  
+  }
 
   AC_Signal(success);
 }
@@ -1493,15 +1497,19 @@ static void AC_MSReqStartCfgRspHandler(UINT16 Id, void* PacketData,
  *              to be downloaded through the VPN.  Response data is copied
  *              into a shared global, then signal command success/fail to the
  *              AC_Task
- *              
- * Parameters:  See MSInterface.h prototype
+ *
+ * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
+ *              PacketData: Pointer to the data returned from the microserver.
+ *              Size:       Length (in bytes) of the data returned from the
+ *                          microserver
+ *              Status:     Response status from the micro server*
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
-static void AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData, 
+static void AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData,
                                UINT16 Size, MSI_RSP_STATUS Status)
 {
   BOOLEAN success = FALSE;
@@ -1517,21 +1525,25 @@ static void AC_MSReqCfgFilesHandler(UINT16 Id, void* PacketData,
 
 
 /******************************************************************************
- * Function:    AC_MSReqCfgFilesHandler | MS Response Handler
+ * Function:    AC_MSReqCfgStsRspHandler | MS Response Handler
  *
  * Description: Handle response to the request for configuration files
  *              to be downloaded through the VPN.  Response data is copied
  *              into a shared global, then signal command success/fail to the
  *              AC_Task
- *              
- * Parameters:  See MSInterface.h prototype
+ *
+ * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
+ *              PacketData: Pointer to the data returned from the microserver.
+ *              Size:       Length (in bytes) of the data returned from the
+ *                          microserver
+ *              Status:     Response status from the micro server*
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
-static void AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData, 
+static void AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData,
                                UINT16 Size, MSI_RSP_STATUS Status)
 {
   BOOLEAN success = FALSE;
@@ -1552,12 +1564,15 @@ static void AC_MSReqCfgStsRspHandler(UINT16 Id, void* PacketData,
  * Description: Receive the response to a micro server shell command.  Signal
  *              success/fail to the AC_Task
  *
- *              
- * Parameters:  See MSInterface.h prototype
+ * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
+ *              PacketData: Pointer to the data returned from the microserver.
+ *              Size:       Length (in bytes) of the data returned from the
+ *                          microserver
+ *              Status:     Response status from the micro server*
  *
  * Returns:     none
- *              
- * Notes:       
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void AC_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
@@ -1585,12 +1600,15 @@ static void AC_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
  * Description: Receive the response to a micro server shell command.  Signal
  *              true or false depending on response success.
  *
- *              
- * Parameters:  See MSInterface.h prototype
+ * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
+ *              PacketData: Pointer to the data returned from the microserver.
+ *              Size:       Length (in bytes) of the data returned from the
+ *                          microserver
+ *              Status:     Response status from the micro server*
  *
  * Returns:     none
- *              
- * Notes:       
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void AC_MSRspCancelCfg(UINT16 Id, void* PacketData, UINT16 Size,
@@ -1617,8 +1635,8 @@ static void AC_MSRspCancelCfg(UINT16 Id, void* PacketData, UINT16 Size,
  *
  * Description:  Check the three sensors used to identify the aircraft the
  *               FAST box is installed on.  Returns true when the Type, Fleet
- *               and Number sensor are valid. 
- *               
+ *               and Number sensor are valid.
+ *
  * Parameters:   none
  *
  * Returns:      TRUE:  All three sensors are valid
@@ -1631,7 +1649,7 @@ static BOOLEAN AC_IsAircraftIDSensorsValid(void)
   BOOLEAN          retval = FALSE;
   AIRCRAFT_CONFIG  *ACCfg = &CfgMgr_RuntimeConfigPtr()->Aircraft;
 
-  
+
   if( SensorIsValid( ACCfg->TypeSensorIndex   ) &&
       SensorIsValid( ACCfg->FleetSensorIndex  ) &&
       SensorIsValid( ACCfg->NumberSensorIndex )    )
@@ -1646,7 +1664,7 @@ static BOOLEAN AC_IsAircraftIDSensorsValid(void)
  * Function:     AC_UpdateEESensorValues
  *
  * Description:  Store the sensor values into EEPROM.  Update
- *               mACStoreSensorVals at the same time. 
+ *               mACStoreSensorVals at the same time.
  *
  * Parameters:   [in] Type : FLOAT32 Type Sensor Value
  *               [in] Fleet : FLOAT32 Fleet Sensor Value
@@ -1665,7 +1683,7 @@ static void AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number)
       (Fleet != m_ACStoredSensorVals.Fleet)  ||
       (Number != m_ACStoredSensorVals.Number)||
       (EE_FILE_MAGIC_NUMBER != m_ACStoredSensorVals.MagicNumber) )
-  {    
+  {
     m_ACStoredSensorVals.MagicNumber = EE_FILE_MAGIC_NUMBER;
     m_ACStoredSensorVals.Type        = Type;
     m_ACStoredSensorVals.Fleet       = Fleet;
@@ -1677,44 +1695,44 @@ static void AC_UpdateEESensorValues(FLOAT32 Type, FLOAT32 Fleet, FLOAT32 Number)
 
 
 /******************************************************************************
- * Function:     AC_CopyACCfgToPackedACCfg 
+ * Function:     AC_CopyACCfgToPackedACCfg
  *
- * Description:  Configurations stored in EEPROM are not PACKED, 
- *                 however log structures are PACKED.  The following func 
+ * Description:  Configurations stored in EEPROM are not PACKED,
+ *                 however log structures are PACKED.  The following func
  *                 is a "non-elegant" or "cheesy" way of dealing with this
- *                 mis-alignment.  
+ *                 mis-alignment.
  *
  * Parameters:   [in]: ACCfg_Packed: Packed AIRCRAFT_CONFIG to copy into
  *
  * Returns:      none
  *
- * Notes:        If new fields are added to AIRCRAFT_CONFIG and are also  
- *               need to be included into the 
- *               AIRCRAFT_MISMATCH_LOG->AIRCRAFT_CONFIG_PACKED, this 
+ * Notes:        If new fields are added to AIRCRAFT_CONFIG and are also
+ *               need to be included into the
+ *               AIRCRAFT_MISMATCH_LOG->AIRCRAFT_CONFIG_PACKED, this
  *               func needs to be manually updated.  Ref SCR #739
- *   
+ *
  *****************************************************************************/
 static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
 {
   AIRCRAFT_CONFIG *ACCfg = &CfgMgr_RuntimeConfigPtr()->Aircraft;
-  
+
   ACCfg_Packed->bCfgEnabled = ACCfg->bCfgEnabled;
   ACCfg_Packed->bValidateData = ACCfg->bValidateData;
-  
+
   memcpy ( ACCfg_Packed->TailNumber, ACCfg->TailNumber, AIRCRAFT_CONFIG_STR_LEN);
   memcpy ( ACCfg_Packed->Operator, ACCfg->Operator, AIRCRAFT_CONFIG_STR_LEN);
   memcpy ( ACCfg_Packed->Type, ACCfg->Type, AIRCRAFT_CONFIG_STR_LEN);
-  
-  ACCfg_Packed->TypeSensorIndex = ACCfg->TypeSensorIndex; 
-  memcpy ( ACCfg_Packed->FleetIdent, ACCfg->FleetIdent, AIRCRAFT_CONFIG_STR_LEN); 
-  
-  ACCfg_Packed->FleetSensorIndex = ACCfg->FleetSensorIndex; 
-  memcpy ( ACCfg_Packed->Number, ACCfg->Number, AIRCRAFT_CONFIG_STR_LEN); 
-  
-  ACCfg_Packed->NumberSensorIndex = ACCfg->NumberSensorIndex; 
+
+  ACCfg_Packed->TypeSensorIndex = ACCfg->TypeSensorIndex;
+  memcpy ( ACCfg_Packed->FleetIdent, ACCfg->FleetIdent, AIRCRAFT_CONFIG_STR_LEN);
+
+  ACCfg_Packed->FleetSensorIndex = ACCfg->FleetSensorIndex;
+  memcpy ( ACCfg_Packed->Number, ACCfg->Number, AIRCRAFT_CONFIG_STR_LEN);
+
+  ACCfg_Packed->NumberSensorIndex = ACCfg->NumberSensorIndex;
   memcpy ( ACCfg_Packed->Owner, ACCfg->Owner, AIRCRAFT_CONFIG_STR_LEN);
   memcpy ( ACCfg_Packed->Style, ACCfg->Style, AIRCRAFT_CONFIG_STR_LEN);
-  
+
 }
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -1725,235 +1743,247 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.c $
  * 
+ * *****************  Version 55  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 1:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1172 PCLint 546 found during code review. Attempting to take the
+ * address of a function name with &.  Removed the & because names of
+ * functions themselves are promoted to an address so it is redundant.
+ * 
+ * *****************  Version 54  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 2:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Errors
+ *
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 11:56a
  * Updated in $/software/control processor/code/application
  * Code Review Tool Findings
- * 
+ *
  * *****************  Version 52  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 51  *****************
  * User: Jim Mood     Date: 10/26/11   Time: 4:04p
  * Updated in $/software/control processor/code/application
  * SCR 1095 modfix to restore error message when cfg stopped b/c in-air
- * 
+ *
  * *****************  Version 50  *****************
  * User: Jim Mood     Date: 10/21/11   Time: 4:48p
  * Updated in $/software/control processor/code/application
  * SCR 1076 (Code Review and SCR 1095 (Reconfigure cancel when in-air)
- * 
+ *
  * *****************  Version 49  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 6:07p
  * Updated in $/software/control processor/code/application
  * Update to SCR 575
- * 
+ *
  * *****************  Version 48  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:54a
  * Updated in $/software/control processor/code/application
  * SCR 575: GSM Enable when engine status is lost.  (Part of changes for
  * the Fast State Machine)
- * 
+ *
  * *****************  Version 47  *****************
  * User: Jim Mood     Date: 11/11/10   Time: 9:46p
  * Updated in $/software/control processor/code/application
  * SCR 993, checking cfg load while checking if in-air status
- * 
+ *
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 10/02/10   Time: 5:08p
  * Updated in $/software/control processor/code/application
  * SCR# 848 - Code Coverage
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jim Mood     Date: 9/22/10    Time: 7:03p
  * Updated in $/software/control processor/code/application
  * SCR 884.  Handling unexpected responses to the AC Task from the MS
  * Interface silently instead of going to error.
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor2  Date: 9/20/10    Time: 4:10p
  * Updated in $/software/control processor/code/application
  * SCR #856 AC Reconfig File should be re-initialized during fast.reset
  * command.
- * 
+ *
  * *****************  Version 43  *****************
  * User: John Omalley Date: 9/10/10    Time: 9:59a
  * Updated in $/software/control processor/code/application
  * SCR 858 - Added FATAL to defaults
- * 
+ *
  * *****************  Version 42  *****************
  * User: Jeff Vahue   Date: 9/09/10    Time: 11:53a
  * Updated in $/software/control processor/code/application
  * SCR# 833 - Perform only three attempts to get the Cfg files from the
  * MS.  Fix various typos.
- * 
+ *
  * *****************  Version 41  *****************
  * User: Peter Lee    Date: 9/03/10    Time: 11:52a
  * Updated in $/software/control processor/code/application
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jim Mood     Date: 8/31/10    Time: 9:21a
  * Updated in $/software/control processor/code/application
  * SCR 829
- * 
+ *
  * *****************  Version 39  *****************
  * User: Jim Mood     Date: 8/27/10    Time: 4:30p
  * Updated in $/software/control processor/code/application
  * SCR 828 Does not detect in-air condition while waiting for MSSIM
- * SCR 829 Log upload before pre cfg file retrevial 
- * 
+ * SCR 829 Log upload before pre cfg file retrevial
+ *
  * *****************  Version 38  *****************
  * User: Jim Mood     Date: 8/26/10    Time: 10:32a
  * Updated in $/software/control processor/code/application
  * SCR 823  Aircraft data mismatch had an extra %s in the DebugStr
- * 
+ *
  * *****************  Version 37  *****************
  * User: Jim Mood     Date: 8/12/10    Time: 5:52p
  * Updated in $/software/control processor/code/application
  * SCR 780 modfix
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jim Mood     Date: 8/10/10    Time: 11:19a
  * Updated in $/software/control processor/code/application
  * SCR 778 sensor value EE file init fix
- * 
+ *
  * *****************  Version 35  *****************
  * User: Peter Lee    Date: 7/30/10    Time: 10:25a
  * Updated in $/software/control processor/code/application
  * SCR #739 AIRCRAFT_CONFIG packed structure
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 7/28/10    Time: 8:10p
  * Updated in $/software/control processor/code/application
  * SCR 623: Implementation changes.  Allow manual cfg to start while auto
  * is waiting.  Pause log writes before final upload.
- * 
+ *
  * *****************  Version 33  *****************
  * User: Jim Mood     Date: 7/28/10    Time: 1:36p
  * Updated in $/software/control processor/code/application
  * SCR #731 Modfix.  Logic was backwards
- * 
+ *
  * *****************  Version 32  *****************
  * User: Jim Mood     Date: 7/23/10    Time: 7:13p
  * Updated in $/software/control processor/code/application
  * SCR #731 Allow auto reconfig when default config is loaded even if
  * in-air
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 7/22/10    Time: 11:50a
  * Updated in $/software/control processor/code/application
  * SCR 728 Exit task when Validate Data is no
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jim Mood     Date: 6/29/10    Time: 6:29p
  * Updated in $/software/control processor/code/application
  * SCR 623.  Automatic reconfiguration requirments complete
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jim Mood     Date: 6/16/10    Time: 6:25p
  * Updated in $/software/control processor/code/application
- * SCR 623 Batch configuration load 
- * 
+ * SCR 623 Batch configuration load
+ *
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 6/11/10    Time: 10:04a
  * Updated in $/software/control processor/code/application
  * SCR 623 Batch Configuration changes
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 5/12/10    Time: 6:55p
  * Updated in $/software/control processor/code/application
  * Temp Fix of cut/paste, until Jim finish his rework
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:53p
  * Updated in $/software/control processor/code/application
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor2  Date: 4/27/10    Time: 1:38p
  * Updated in $/software/control processor/code/application
  * SCR 187: Degraded mode. Moved watchdog reset loop to WatchDog.c
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:06p
  * Updated in $/software/control processor/code/application
- * SCR #317 Implement safe strncpy.SCR #70 Interrupt level 
- * 
+ * SCR #317 Implement safe strncpy.SCR #70 Interrupt level
+ *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:16p
  * Updated in $/software/control processor/code/application
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:37p
  * Updated in $/software/control processor/code/application
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/application
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor2  Date: 3/02/10    Time: 11:30a
  * Updated in $/software/control processor/code/application
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 2/03/10    Time: 2:55p
  * Updated in $/software/control processor/code/application
  * SCR 18, SCR 42
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 4:58p
  * Updated in $/software/control processor/code/application
  * SCR# 397
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/application
  * SCR #326
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:36p
  * Updated in $/software/control processor/code/application
  * SCR 42 and 106
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 12/04/09   Time: 4:31p
  * Updated in $/software/control processor/code/application
  * SCR# 350
- * 
+ *
  * *****************  Version 14  *****************
  * User: Jeff Vahue   Date: 12/03/09   Time: 4:58p
  * Updated in $/software/control processor/code/application
  * SCR# 359
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 10/14/09   Time: 6:09p
  * Updated in $/software/control processor/code/application
  * SCR #285 function prototype had the incorrect type for the status
  * parameter.
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 9/29/09    Time: 11:58a
  * Updated in $/software/control processor/code/application
  * SCR# 178 Updated User Manager Tables
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 9/16/09    Time: 4:16p
  * Updated in $/software/control processor/code/application
  * SCR# 242, A/C data mismatch log was written with the incorrect data
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jim Mood     Date: 7/07/09    Time: 1:37p
  * Updated in $/software/control processor/code/application
  * Added history comment block.  Change fail retry to 2x after the first
  * failure
- * 
+ *
  *
  *
  ***************************************************************************/

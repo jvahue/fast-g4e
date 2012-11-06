@@ -2,16 +2,16 @@
 #define STDDEFS_H
 
 /******************************************************************************
-Copyright (C) 2003-2012 Pratt & Whitney Engine Services, Inc.                 
+Copyright (C) 2003-2012 Pratt & Whitney Engine Services, Inc.
 All Rights Reserved. Proprietary and Confidential.
- 
+
  File:        StdDefs.h
- 
- Description: Standard "C" definitions to be used through out the DTU 
+
+ Description: Standard "C" definitions to be used through out the DTU
               firmware.
- 
+
  VERSION
- $Revision: 6 $  $Date: 8/28/12 1:06p $
+ $Revision: 7 $  $Date: 12-11-02 1:06p $
 ******************************************************************************/
 
 
@@ -148,7 +148,7 @@ typedef unsigned char STATUS;
 
 //
 extern BOOLEAN g_DebugMsgEnable;
- 
+
 #ifdef WIN32
     #define PrintDebugString(str)  if ( g_DebugMsgEnable ) printf( (str) );
     #define PRINT_DEBUG_STRING(str)      printf( (str) );
@@ -170,7 +170,7 @@ extern BOOLEAN g_DebugMsgEnable;
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( STDDEFS_BODY )
+#if defined ( STDDEFS_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -186,15 +186,21 @@ extern BOOLEAN g_DebugMsgEnable;
                               Package Exports Functions
 ******************************************************************************/
 
+#endif    // STDDEFS_H
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: StdDefs.h $
  * 
+ * *****************  Version 7  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 1:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a
  * Updated in $/software/control processor/code/drivers
@@ -202,9 +208,6 @@ extern BOOLEAN g_DebugMsgEnable;
 *
 *
 *****************************************************************************/
-
-#endif    //  STDDEFS_H
-
 
 // End Of File
 
