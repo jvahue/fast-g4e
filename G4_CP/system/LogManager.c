@@ -2624,7 +2624,6 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
      {
         // Protect against trying to write multiple logs to the same entry
         intLevel = __DIR();
-
         if (LOG_REQ_NULL == SystemTable[i].WrStatus)
         {
            SystemTable[i] = SysLog;
@@ -2648,12 +2647,12 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
            }
            bSlotFound = TRUE;
         }
+        __RIR( intLevel);
         // there is no else statement because the table should
         // never fill up because it is sized 4 bigger than the
         // log queue. Since the log queue pops out the oldest when
         // the queue fills we should always have room.
      }
-     __RIR( intLevel);
    }
 
    // Return the SystemTable index in case the caller needs to track the status.
