@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 50 $  $Date: 12-11-06 11:19a $
+    $Revision: 51 $  $Date: 12-11-07 8:28a $
 
 ******************************************************************************/
 
@@ -403,7 +403,9 @@ EXPORT void            LogMarkState      ( LOG_STATE State, LOG_TYPE Type,
                                            LOG_SOURCE Source, LOG_PRIORITY Priority,
                                            UINT32 StartOffset, UINT32 EndOffset,
                                            LOG_MARK_STATUS *pStatus );
-EXPORT UINT32          LogWriteSystem    ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
+EXPORT UINT32          LogWriteSystemEx  ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
+                                           void *pData, UINT16 nSize, TIMESTAMP *pTs );
+EXPORT void            LogWriteSystem    ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
                                            void *pData, UINT16 nSize, TIMESTAMP *pTs );
 EXPORT void            LogWriteETM       ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
                                            void *pData, UINT16 nSize, TIMESTAMP *pTs );
@@ -431,11 +433,16 @@ EXPORT UINT32            LogGetLogCount          ( void );
  *  MODIFICATIONS
  *    $History: LogManager.h $
  *
+ * *****************  Version 51  *****************
+ * User: John Omalley Date: 12-11-07   Time: 8:28a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
  * *****************  Version 50  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:19a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 49  *****************
  * User: John Omalley Date: 12-09-05   Time: 9:42a
  * Updated in $/software/control processor/code/system

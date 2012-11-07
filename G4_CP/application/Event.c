@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 31 $  $Date: 12-11-06 11:12a $
+ $Revision: 32 $  $Date: 12-11-07 8:30a $
 
 ******************************************************************************/
 
@@ -269,7 +269,8 @@ void EventTablesInitialize ( void )
       pTableData->nActionReqNum    = ACTION_NO_REQ;
 
       // Loop through all the Regions
-      for ( nRegionIndex = REGION_A; nRegionIndex < MAX_TABLE_REGIONS; nRegionIndex++ )
+      for ( nRegionIndex = (UINT32)REGION_A;
+            nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++ )
       {
          // Set a pointer the Region Cfg
          pReg = &pTableCfg->region[nRegionIndex];
@@ -511,7 +512,7 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
-   for (nRegionIndex = REGION_A; nRegionIndex < MAX_TABLE_REGIONS; nRegionIndex++)
+   for (nRegionIndex = (UINT32)REGION_A; nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
    {
       pStats = &pTableData->regionStats[nRegionIndex];
 
@@ -1110,9 +1111,9 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    fSavedThreshold = 0;
 
    // Loop through all the regions
-   for ( nRegIndex = REGION_A;
+   for ( nRegIndex = (UINT32)REGION_A;
          (REGION_NOT_FOUND != pTableData->maximumCfgRegion) &&
-         (nRegIndex < pTableData->maximumCfgRegion);
+         (nRegIndex < (UINT32)pTableData->maximumCfgRegion);
          nRegIndex++ )
    {
       pRegion   = &pTableCfg->region[nRegIndex];
@@ -1180,7 +1181,10 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
  *
  * Returns:      BOOLEAN
  *
- * Notes:
+ * Notes:        Never call this function without first checking if foundRegion is
+ *               within Range for the arrays. At release of v2.0.0 function
+ *               is never called when foundRegion = REGION_NOT_FOUND so the configuration
+ *               array will never go out of bounds.
  *
  *****************************************************************************/
 static
@@ -1198,8 +1202,7 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
    if (((nCurrentTick - pTableData->regionStats[foundRegion].nEnteredTime) >=
          pTableCfg->nTransientAllowance_ms) ||
         (( foundRegion < pTableData->confirmedRegion ) &&
-         (pTableData->confirmedRegion != REGION_NOT_FOUND)) ||
-         ( foundRegion == REGION_NOT_FOUND ) )
+         (pTableData->confirmedRegion != REGION_NOT_FOUND)))
    {
       // Has this region been confirmed yet?
       if ( FALSE == pTableData->regionStats[foundRegion].bRegionConfirmed )
@@ -1230,6 +1233,9 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
                     TRUE : FALSE;
 
          // Request the event action for the confirmed region
+         // Note: possible array out of bounds issue with pTableCfg
+         //       foundRegion should never be REGION_NOT_FOUND because it is protected
+         //       by the calling function.
          pTableData->nActionReqNum = ActionRequest ( pTableData->nActionReqNum,
                           ( EVENT_ACTION_ON_DURATION(pTableCfg->region[foundRegion].nAction) |
                             EVENT_ACTION_ON_MET(pTableCfg->region[foundRegion].nAction) ),
@@ -1305,7 +1311,7 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
       }
 
       // Clear any other event actions
-      for ( i = REGION_A; i < MAX_TABLE_REGIONS; i++ )
+      for ( i = (UINT32)REGION_A; i < (UINT32)MAX_TABLE_REGIONS; i++ )
       {
          // Make sure we don't shut off the new found region.
          if ( (EVENT_REGION)i != foundRegion )
@@ -1421,7 +1427,7 @@ void EventTableLogSummary (const EVENT_TABLE_CFG *pConfig, const EVENT_TABLE_DAT
    tSumm.maximumCfgRegion         = pData->maximumCfgRegion;
 
    // Loop through the region stats and place them in the log
-   for ( nRegIndex = REGION_A; nRegIndex < MAX_TABLE_REGIONS; nRegIndex++ )
+   for ( nRegIndex = (UINT32)REGION_A; nRegIndex < (UINT32)MAX_TABLE_REGIONS; nRegIndex++ )
    {
       tSumm.regionStats[nRegIndex].nEnteredCount =
                                   pData->regionStats[nRegIndex].logStats.nEnteredCount;
@@ -1729,6 +1735,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ *
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 12-11-07   Time: 8:30a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review updates - Enumerations
  *
  * *****************  Version 31  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:12a

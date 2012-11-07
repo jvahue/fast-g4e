@@ -30,7 +30,7 @@
               ResultCodes.c (Driver/system call result codes)
 
   VERSION
-  $Revision: 62 $  $Date: 12-11-06 3:17p $
+  $Revision: 63 $  $Date: 11/06/12 5:41p $
 
 ******************************************************************************/
 
@@ -398,7 +398,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
         | MCF_PSC_CSR_TCSEL_SYS_CLK);
 
     //Calculate baud settings - Counter Can not verify / check.
-    divider = (UINT16)((UART_SYSTEM_CLOCK_MHZ*1000000)/((UINT16)Config->BPS * 32));
+    divider = (UINT16)((UART_SYSTEM_CLOCK_MHZ*1000000)/((UINT32)Config->BPS * 32));
     MCF_PSC_CTUR(port) =  (UINT8) ((divider >> 8) & 0xFF);
     MCF_PSC_CTLR(port) =  (UINT8) (divider & 0xFF);
 
@@ -1303,18 +1303,23 @@ RESULT UART_PBIT(void)
  *  MODIFICATIONS
  *    $History: UART.c $
  * 
+ * *****************  Version 63  *****************
+ * User: Jim Mood     Date: 11/06/12   Time: 5:41p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 Update ENUM width for BPS from 16 to 32.
+ *
  * *****************  Version 62  *****************
  * User: Melanie Jutras Date: 12-11-06   Time: 3:17p
  * Updated in $/software/control processor/code/drivers
  * SCR #1196 PCLint 641 Added casts for enums where necessary and added
  * warning comment to enum definitions to avoid making enum too large.
- * 
+ *
  * *****************  Version 61  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 1:02p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Removed dead code that was also causing formatting errors to
  * be reported by the code review tool.
- * 
+ *
  * *****************  Version 60  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:26p
  * Updated in $/software/control processor/code/drivers
@@ -1588,4 +1593,4 @@ RESULT UART_PBIT(void)
  *
  *
  ***************************************************************************/
- 
+

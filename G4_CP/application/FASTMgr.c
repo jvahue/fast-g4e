@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 111 $  $Date: 11/06/12 11:54a $
+   $Revision: 112 $  $Date: 12-11-07 8:35a $
 
 
 ******************************************************************************/
@@ -491,7 +491,7 @@ void FAST_FSMEndOfFlightRun(BOOLEAN Run, INT32 Param)
   {
     // Write EOF Log and register the returned index for completion monitoring.
     LogRegisterIndex( LOG_REGISTER_END_FLIGHT,
-                      LogWriteSystem(APP_ID_END_OF_FLIGHT, LOG_PRIORITY_LOW, 0, 0, NULL) );
+                      LogWriteSystemEx(APP_ID_END_OF_FLIGHT, LOG_PRIORITY_LOW, 0, 0, NULL) );
   }
 }
 
@@ -613,7 +613,7 @@ void FAST_Task(void* pParam)
       // Write EOF Log and tell LogMgr to register the returned index so we can perform
       // completion-monitoring.
       LogRegisterIndex( LOG_REGISTER_END_FLIGHT,
-                           LogWriteSystem(APP_ID_END_OF_FLIGHT, LOG_PRIORITY_LOW, 0, 0, NULL)
+                           LogWriteSystemEx(APP_ID_END_OF_FLIGHT, LOG_PRIORITY_LOW, 0, 0, NULL)
                          );
 
       GSE_DebugStr(NORMAL,TRUE,"FAST: End of Flight/Engine Run");
@@ -1529,6 +1529,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ *
+ * *****************  Version 112  *****************
+ * User: John Omalley Date: 12-11-07   Time: 8:35a
+ * Updated in $/software/control processor/code/application
+ * SCR 1105 - Added new LogWriteSystem Function that returns a value
  * 
  * *****************  Version 111  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:54a

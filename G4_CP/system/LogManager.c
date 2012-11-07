@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 99 $  $Date: 12-11-06 11:19a $
+      $Revision: 100 $  $Date: 12-11-07 8:29a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -969,6 +969,31 @@ void LogMarkState (LOG_STATE State, LOG_TYPE Type,
  *                UINT32        nSize     - Size of the data to write
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
  *
+ * Returns:       None
+ *
+ * Notes:         The nSize value cannot be larger than 1Kbyte.
+ *
+ *****************************************************************************/
+void LogWriteSystem (SYS_APP_ID LogID, LOG_PRIORITY Priority,
+                        void *pData, UINT16 nSize, TIMESTAMP *pTs)
+{
+   // Return the SystemTable index in case the caller needs to track the status.
+   LogManageWrite ( LogID, Priority, pData, nSize, pTs, LOG_TYPE_SYSTEM );
+}
+
+/******************************************************************************
+ * Function:      LogWriteSystemEx
+ *
+ * Description:   The LogWriteSystem Enhanced function returns an index to
+ *                the caller so they can independently track the write status
+ *                of the system log.
+ *
+ * Parameters:    SYS_APP_ID    LogID     - System Log ID to write
+ *                LOG_PRIORITY  Priority  - Priority of the Log
+ *                void          *pData    - Pointer to the data location
+ *                UINT32        nSize     - Size of the data to write
+ *                TIMESTAMP     *pTs      - Timestamp to use if passed in
+ *
  * Returns:       UINT32 index value in SystemTable where the log is stored.
  *                This can be used by caller to track the commit-status
  *                of the Write.
@@ -976,12 +1001,12 @@ void LogMarkState (LOG_STATE State, LOG_TYPE Type,
  * Notes:         The nSize value cannot be larger than 1Kbyte.
  *
  *****************************************************************************/
-UINT32 LogWriteSystem (SYS_APP_ID LogID, LOG_PRIORITY Priority,
-                        void *pData, UINT16 nSize, TIMESTAMP *pTs)
+UINT32 LogWriteSystemEx ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
+                          void *pData, UINT16 nSize, TIMESTAMP *pTs )
 {
    // Return the SystemTable index in case the caller needs to track the status.
    return ( LogManageWrite ( LogID, Priority, pData, nSize, pTs, LOG_TYPE_SYSTEM ) );
-     }
+}
 
 /******************************************************************************
  * Function:      LogWriteETM
@@ -2558,11 +2583,10 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
    LOG_SOURCE Source;
    TIMESTAMP  Ts;
    UINT32     i;
+   UINT32     intLevel;
+   BOOLEAN    bSlotFound;
 
    ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
-
-   // TBD: Should we protect against being interrupted in the middle of
-   // finding a location and writing the data to the payload?
 
    if ( SystemLogLimitCheck(LogID) )
    {
@@ -2594,9 +2618,13 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
      SysLog.Payload.Hdr.nChecksum  = ChecksumBuffer(&SysLog.Payload,
                                             nSize + sizeof(SysLog.Payload.Hdr),
                                             0xFFFFFFFF);
+     bSlotFound = FALSE;
 
-     for (i = 0; i < SYSTEM_TABLE_MAX_SIZE; i++)
+     for (i = 0; (i < SYSTEM_TABLE_MAX_SIZE) && (bSlotFound == FALSE); i++)
      {
+        // Protect against trying to write multiple logs to the same entry
+        intLevel = __DIR();
+
         if (LOG_REQ_NULL == SystemTable[i].WrStatus)
         {
            SystemTable[i] = SysLog;
@@ -2618,13 +2646,14 @@ UINT32 LogManageWrite ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
            {
                TmTaskEnable (System_Log_Manage_Task, TRUE);
            }
-           break;
+           bSlotFound = TRUE;
         }
         // there is no else statement because the table should
         // never fill up because it is sized 4 bigger than the
         // log queue. Since the log queue pops out the oldest when
         // the queue fills we should always have room.
      }
+     __RIR( intLevel);
    }
 
    // Return the SystemTable index in case the caller needs to track the status.
@@ -2725,11 +2754,17 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  *
+ * *****************  Version 100  *****************
+ * User: John Omalley Date: 12-11-07   Time: 8:29a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * SCR 1154 - Fixed interrupt suseptability issue in LogManageWrite
+ * 
  * *****************  Version 99  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:19a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 98  *****************
  * User: John Omalley Date: 12-09-05   Time: 9:42a
  * Updated in $/software/control processor/code/system

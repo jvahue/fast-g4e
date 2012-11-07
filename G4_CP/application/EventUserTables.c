@@ -566,22 +566,22 @@ static USER_MSG_TBL eventSensrTbl[] =
    { "S13",  eventS13Tbl,  NULL, NO_HANDLER_DATA },
    { "S14",  eventS14Tbl,  NULL, NO_HANDLER_DATA },
    { "S15",  eventS15Tbl,  NULL, NO_HANDLER_DATA },
-   { "S16",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
-   { "S17",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
-   { "S18",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
-   { "S19",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
-   { "S20",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
-   { "S21",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
-   { "S22",  eventS2Tbl,   NULL, NO_HANDLER_DATA },
-   { "S23",  eventS3Tbl,   NULL, NO_HANDLER_DATA },
-   { "S24",  eventS4Tbl,   NULL, NO_HANDLER_DATA },
-   { "S25",  eventS5Tbl,   NULL, NO_HANDLER_DATA },
-   { "S26",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
-   { "S27",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
-   { "S28",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
-   { "S29",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
-   { "S30",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
-   { "S31",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
+   { "S16",  eventS16Tbl,  NULL, NO_HANDLER_DATA },
+   { "S17",  eventS17Tbl,  NULL, NO_HANDLER_DATA },
+   { "S18",  eventS18Tbl,  NULL, NO_HANDLER_DATA },
+   { "S19",  eventS19Tbl,  NULL, NO_HANDLER_DATA },
+   { "S20",  eventS20Tbl,  NULL, NO_HANDLER_DATA },
+   { "S21",  eventS21Tbl,  NULL, NO_HANDLER_DATA },
+   { "S22",  eventS22Tbl,  NULL, NO_HANDLER_DATA },
+   { "S23",  eventS23Tbl,  NULL, NO_HANDLER_DATA },
+   { "S24",  eventS24Tbl,  NULL, NO_HANDLER_DATA },
+   { "S25",  eventS25Tbl,  NULL, NO_HANDLER_DATA },
+   { "S26",  eventS26Tbl,  NULL, NO_HANDLER_DATA },
+   { "S27",  eventS27Tbl,  NULL, NO_HANDLER_DATA },
+   { "S28",  eventS28Tbl,  NULL, NO_HANDLER_DATA },
+   { "S29",  eventS29Tbl,  NULL, NO_HANDLER_DATA },
+   { "S30",  eventS30Tbl,  NULL, NO_HANDLER_DATA },
+   { "S31",  eventS31Tbl,  NULL, NO_HANDLER_DATA },
    { NULL,   NULL,         NULL, NO_HANDLER_DATA }
 };
 
@@ -1310,7 +1310,7 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
  * User: Melanie Jutras Date: 12-10-31   Time: 2:01p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format errors
- * 
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

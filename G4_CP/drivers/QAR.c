@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 97 $  $Date: 12-11-02 12:26p $
+      $Revision: 98 $  $Date: 12-11-06 4:00p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -231,8 +231,8 @@ RESULT QAR_Initialize ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
    pQARStatus          = &pQARCtrlStatus->Status;
 
    // Clear Variables
-   memset ( (void *) QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
-   memset ( (void *) QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * QAR_SF_MAX );
+   memset ( (void *) QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
+   memset ( (void *) QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
    memset ( (void *) &QARState, 0, sizeof(QAR_STATE) );
    memset ( (void *) &QARCfg, 0, sizeof(QAR_CONFIGURATION) );
    memset ( (void *) &QARCBITHealthStatus, 0, sizeof(QAR_CBIT_HEALTH_COUNTS));
@@ -319,7 +319,7 @@ void QAR_Init_Tasks (void)
     // Create QAR Read Sub Frame Task
     memset(&TaskInfo, 0, sizeof(TaskInfo));
     strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Read Sub Frame",_TRUNCATE);
-    TaskInfo.TaskID         = QAR_Read_Sub_Frame;
+    TaskInfo.TaskID         = (INT16)QAR_Read_Sub_Frame;
     TaskInfo.Function       = QAR_ReadSubFrameTask;
     TaskInfo.Priority       = taskInfo[QAR_Read_Sub_Frame].priority;
     TaskInfo.Type           = taskInfo[QAR_Read_Sub_Frame].taskType;
@@ -335,7 +335,7 @@ void QAR_Init_Tasks (void)
     // Create QAR Monitor Task
     memset(&TaskInfo, 0, sizeof(TaskInfo));
     strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Monitor",_TRUNCATE);
-    TaskInfo.TaskID         = QAR_Monitor;
+    TaskInfo.TaskID         = (INT16)QAR_Monitor;
     TaskInfo.Function       = QAR_MonitorTask;
     TaskInfo.Priority       = taskInfo[QAR_Monitor].priority;
     TaskInfo.Type           = taskInfo[QAR_Monitor].taskType;
@@ -391,13 +391,13 @@ void QAR_Init_Tasks (void)
 void QAR_Reframe (void)
 {
    // Force a Reframe
-   QAR_W( pQARCtrl, C_RESYNC, QAR_FORCE_REFRAME);
+   QAR_W( pQARCtrl, C_RESYNC, (UINT16)QAR_FORCE_REFRAME);
 
    // The Reframe needs a 100 nSecond wait time
    TTMR_Delay(TICKS_PER_100nSec);
 
    // Set the QAR back to Normal
-   QAR_W( pQARCtrl, C_RESYNC, QAR_NORMAL_OPERATION);
+   QAR_W( pQARCtrl, C_RESYNC, (UINT16)QAR_NORMAL_OPERATION);
 }
 
 
@@ -517,7 +517,7 @@ void QAR_ReadSubFrameTask( void *pParam )
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      QAR_ReadSubFrameTaskShutdown();
-     TmTaskEnable(QAR_Read_Sub_Frame, FALSE);
+     TmTaskEnable((INT16)QAR_Read_Sub_Frame, FALSE);
    }
    else // Normal task execution.
    {
@@ -543,7 +543,7 @@ void QAR_ReadSubFrameTask( void *pParam )
          CurrentFrame = QAR_R( pQARStatus, S_SUBFRAME);
 
          // Now determine which frame is ready for processing
-         if ( CurrentFrame == QAR_SF1)
+         if ( CurrentFrame == (UINT32)QAR_SF1)
          {
            // Set the new frame to Sub-Frame 4
            NewFrame = QAR_SF4;
@@ -873,27 +873,27 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
   // From current Frame (4 SubFrames) move backwards to determine the last four
   //   SubFrames
   currentSF = (SINT16) pState->CurrentFrame;
-  for (i=0;i<QAR_SF_MAX;i++)
+  for (i=0;i<(UINT16)QAR_SF_MAX;i++)
   {
-    nSubFrame[QAR_SF4 - i] = (QAR_SF) currentSF--;
+    nSubFrame[(SINT16)QAR_SF4 - i] = (QAR_SF) currentSF--;
     // Handle Wrap Case
     if (currentSF < 0)
     {
-      currentSF = QAR_SF4;
+      currentSF = (SINT16)QAR_SF4;
     }
   }
 
   // Determine Max Word Size to Return
   nMaxDestBuffWordSize = nMaxWordSize;
-  if ( nMaxWordSize > (QAR_SF_MAX * pState->TotalWords) )
+  if ( nMaxWordSize > ((UINT16)QAR_SF_MAX * pState->TotalWords) )
   {
-    nMaxDestBuffWordSize = (QAR_SF_MAX * pState->TotalWords);
+    nMaxDestBuffWordSize = ((UINT16)QAR_SF_MAX * pState->TotalWords);
   }
 
   // Copy all four (or as much as possible) into the Dest Buffer
   nCnt = 0;
   i = 0;
-  while ( (i < QAR_SF_MAX) && (nCnt < nMaxDestBuffWordSize) )
+  while ( (i < (UINT16)QAR_SF_MAX) && (nCnt < nMaxDestBuffWordSize) )
   {
     // SCR #29
     // Only if Sub Frame has been received will we return the SF
@@ -1192,13 +1192,13 @@ void QAR_MonitorTask ( void *pParam )
            pState->bFrameSyncOnce = TRUE;  // We have synced at least once !
            // Reset TimeOuts
            pQARFrame = (QAR_SUBFRAME_DATE_PTR) &QARFrame[QAR_SF1];
-           for (i=0;i<QAR_SF_MAX;i++)
+           for (i=0;i<(UINT16)QAR_SF_MAX;i++)
            {
              pQARFrame->LastSubFrameUpdateTime = pState->LastActivityTime;
              pQARFrame++;
            }
            pQARFrame = (QAR_SUBFRAME_DATE_PTR) &QARFramePrevGood[QAR_SF1];
-           for (i=0;i<QAR_SF_MAX;i++)
+           for (i=0;i<(UINT16)QAR_SF_MAX;i++)
            {
              pQARFrame->LastSubFrameUpdateTime = pState->LastActivityTime;
              pQARFrame++;
@@ -1904,11 +1904,11 @@ void QAR_ReconfigureFPGAShadowRam (void)
 
    // Set QAR format Bipolar or Harvard Biphase
    pShadowQarCfg->QCR = ( pShadowQarCfg->QCR & ~QCR_FORMAT ) |
-                        ( QCR_FORMAT * pQARCfg->Format );
+                        ( QCR_FORMAT * (UINT16)pQARCfg->Format );
 
    // Set QAR words per Sub Frame
    pShadowQarCfg->QCR = ( pShadowQarCfg->QCR & ~QCR_BYTES_SF_FIELD ) |
-                        ( QCR_BYTES_SF * pQARCfg->NumWords );
+                        ( QCR_BYTES_SF * (UINT16)pQARCfg->NumWords );
 
    // Set Barker Code 1
    pShadowQarCfg->QSFCODE1 = ( pQARCfg->BarkerCode[QAR_SF1] & 0x0FFF );
@@ -1955,7 +1955,7 @@ void QAR_ResetState (void)
    pState->PreviousFrame     = QAR_SF4;
    pState->LastServiced      = QAR_SF4;
    // pState->TotalWords        = pow(2, (QARCfg.NumWords + 5));
-   pState->TotalWords        = 1 << (QARCfg.NumWords + 5);
+   pState->TotalWords        = 1 << ( (UINT16)QARCfg.NumWords + 5);
    pState->LossOfFrameCount    = 0;
    pState->FrameSync           = FALSE;
    pState->LossOfFrame         = FALSE;
@@ -2199,14 +2199,14 @@ QAR_SF QAR_FindCurrentGoodSF (UINT16 nIndex)
    }
 
    // Find most recent SF for the wanted word from QAR sensor cfg SF
-   k = currentSF;
+   k = (SINT16)currentSF;
    for (i=QAR_SF1;i<QAR_SF_MAX;i++)
    {
-      k = k - i;
+      k = k - (SINT16)i;
       if ( k < 0 )
       {
         // Wrap Case
-        k = k + QAR_SF_MAX;
+        k = k + (SINT16)QAR_SF_MAX;
       }
       if (pWordInfo->bSubFrameData[k] == TRUE)
       {
@@ -2310,6 +2310,12 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 98  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 4:00p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 Added casts for enums and warning comment to enum definitions
+ * to avoid making enum too large.
  * 
  * *****************  Version 97  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:26p
