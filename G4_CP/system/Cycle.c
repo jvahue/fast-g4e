@@ -321,7 +321,8 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
 
   for(cyc = 0; cyc < MAX_CYCLES; ++cyc)
   {
-    if (m_Cfg[cyc].nEngineRunId == erIdx)
+    if (m_Cfg[cyc].nEngineRunId == erIdx &&
+        m_Cfg[cyc].type != CYC_TYPE_NONE_CNT )
     {
       pData = &m_Data[cyc];
       pCfg  = &m_Cfg[cyc];
