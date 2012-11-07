@@ -344,7 +344,7 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
 
         case CYC_TYPE_DURATION_CNT:
           // Non-persisted duration are stored in millisecs. Convert to seconds.
-          counts[cyc] = pData->currentCount * (1.0f /(FLOAT32)MILLISECONDS_PER_SECOND);
+          counts[cyc] = pData->currentCount * (UINT32)(1.0f /(FLOAT32)MILLISECONDS_PER_SECOND);
           break;
 
         case CYC_TYPE_PERSIST_DURATION_CNT:

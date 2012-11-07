@@ -107,7 +107,7 @@ static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_D
  *****************************************************************************/
 ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
 {
-  INT16 i;
+  UINT16 i;
   UINT8 runMask  = 0x00;  // bit map of started/running EngineRuns.
   ER_STATE state = ER_STATE_STOPPED;
   BOOLEAN  bRunning  = FALSE;
@@ -266,14 +266,16 @@ void EngRunInitialize(void)
  *****************************************************************************/
 void EngReInitFile(void)
 {
-  CHAR ResultStr[RESULTCODES_MAX_STR_LEN];
-  UINT16 i;
+  CHAR resultStr[RESULTCODES_MAX_STR_LEN];
+  INT16 i;
 
   memset(&m_EngineInfo,0,sizeof(m_EngineInfo));
 
-  strncpy_safe(m_EngineInfo.servicePlan, sizeof(m_EngineInfo.servicePlan), ENGINE_DEFAULT_SERVICE_PLAN,_TRUNCATE);
+  strncpy_safe(m_EngineInfo.servicePlan,
+               sizeof(m_EngineInfo.servicePlan),
+               ENGINE_DEFAULT_SERVICE_PLAN,_TRUNCATE);
 
-  for ( i=0; i<MAX_ENGINES; i++)
+  for ( i = 0; i < MAX_ENGINES; i++)
   {
      strncpy_safe(m_EngineInfo.engine[i].serialNumber,
                   sizeof(m_EngineInfo.engine[i].serialNumber),
@@ -284,7 +286,7 @@ void EngReInitFile(void)
   }
 
   NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
-  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, ResultStr));
+  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, resultStr));
 }
 
 /******************************************************************************

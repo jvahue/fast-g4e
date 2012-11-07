@@ -33,6 +33,7 @@
 ******************************************************************************/
 #define MAX_ENGINERUN_NAME  32
 #define MAX_ENGINE_ID       16
+#define MAX_ER_STATE         3
 
 #define ENGINE_DEFAULT_SERIAL_NUMBER "000000"
 #define ENGINE_DEFAULT_SERVICE_PLAN  "NONE"
@@ -75,8 +76,7 @@ typedef enum
   /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
-  ER_STATE_RUNNING,     /* Engine running for this engine run  */
-  MAX_ER_STATE
+  ER_STATE_RUNNING,     /* Engine running for this engine run  */  
 } ER_STATE;
 
 

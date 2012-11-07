@@ -849,7 +849,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // will be cleared by the trigger becoming inactive or
   // the next engine-run starting.
   if ( FALSE == pData->bResetDetected                 &&
-        pCfg->resetTrigger != TRIGGER_UNUSED           &&
+       pCfg->resetTrigger != TRIGGER_UNUSED           &&
        TriggerIsConfigured((INT32)pCfg->resetTrigger) &&
        TriggerGetState((INT32)pCfg->resetTrigger))
   {
@@ -1018,7 +1018,7 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
  * User: John Omalley Date: 12-10-23   Time: 3:04p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:19p
  * Updated in $/software/control processor/code/application

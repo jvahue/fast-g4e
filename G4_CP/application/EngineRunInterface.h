@@ -25,8 +25,9 @@
 /******************************************************************************
                                  Package Defines                              *
 ******************************************************************************/
-#define MAX_CYCLES     32 /* maximum # of cycles supported. See also NV_PER_CYCLE_CNTS */
+#define MAX_CYCLES          32 /* maximum # of cycles supported. See also NV_PER_CYCLE_CNTS */
 #define MAX_ENGRUN_SENSORS  16 /* Maximum # of sensor summaries monitored for an EngineRun  */
+#define MAX_ENGINES          4 /* Maximum # of EngineRun                                    */
 
 /******************************************************************************
                                  Package Typedefs                             *
@@ -37,7 +38,6 @@ typedef enum
   ENGRUN_ID_1   = 1,
   ENGRUN_ID_2   = 2,
   ENGRUN_ID_3   = 3,
-  MAX_ENGINES   = 4,
   //   Use 'ENGRUN_ID_0' thru 'MAX_ENGINES' for normal range checking.
   ENGRUN_ID_ANY = 100, // wildcard used to query all engineruns
   ENGRUN_UNUSED = 255
