@@ -2782,7 +2782,7 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
   // test errno to see if ERANGE was flagged.
 
-  if (decValue != 0 && errno != ERANGE)
+  if (errno != ERANGE)
   {
     sprintf(hexString,"0x%08X", decValue);
     bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, MsgEnumTbl, Min, Max);

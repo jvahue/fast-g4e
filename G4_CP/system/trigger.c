@@ -130,7 +130,7 @@ static TRIG_END_TYPE TriggerCheckEndLegacy  ( TRIGGER_CONFIG *pTrigCfg,
 void TriggerInitialize(void)
 {
   // Local Data
-  TRIGGER_INDEX   i;
+  UINT32          i;
   UINT8           tsi;
 
   TRIGGER_CONFIG  *pTrigCfg;
@@ -224,7 +224,7 @@ void TriggerInitialize(void)
     // There should always be a configuration by the time we get here
     // (legacy, expression, expression-from-legacy) unless nothing was defined.
 
-    if(TriggerIsConfigured(i))
+    if(TriggerIsConfigured((TRIGGER_INDEX)i))
     {
       // Trigger has a valid sensor configuration
       // put the trigger in the start state
