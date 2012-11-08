@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 27 $  $Date: 12-11-06 11:12a $
+$Revision: 28 $  $Date: 12-11-07 2:52p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1300,6 +1300,11 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ *
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-11-07   Time: 2:52p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
  *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:12a

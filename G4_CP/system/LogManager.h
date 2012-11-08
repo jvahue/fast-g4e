@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 51 $  $Date: 12-11-07 8:28a $
+    $Revision: 52 $  $Date: 12-11-08 3:03p $
 
 ******************************************************************************/
 
@@ -271,11 +271,12 @@ typedef struct
 
 typedef struct
 {
-   SYS_APP_ID       Source;
-   LOG_PRIORITY     Priority;
-   LOG_REQ_STATUS   WrStatus;
-   RESULT           Result;
-   SYS_LOG_PAYLOAD  Payload;
+   LOG_TYPE         logType;
+   SYS_APP_ID       source;
+   LOG_PRIORITY     priority;
+   LOG_REQ_STATUS   wrStatus;
+   RESULT           result;
+   SYS_LOG_PAYLOAD  payload;
 } SYSTEM_LOG;
 
 typedef struct
@@ -403,12 +404,12 @@ EXPORT void            LogMarkState      ( LOG_STATE State, LOG_TYPE Type,
                                            LOG_SOURCE Source, LOG_PRIORITY Priority,
                                            UINT32 StartOffset, UINT32 EndOffset,
                                            LOG_MARK_STATUS *pStatus );
-EXPORT UINT32          LogWriteSystemEx  ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
-                                           void *pData, UINT16 nSize, TIMESTAMP *pTs );
-EXPORT void            LogWriteSystem    ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
-                                           void *pData, UINT16 nSize, TIMESTAMP *pTs );
-EXPORT void            LogWriteETM       ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
-                                           void *pData, UINT16 nSize, TIMESTAMP *pTs );
+EXPORT UINT32          LogWriteSystemEx  ( SYS_APP_ID logID, LOG_PRIORITY priority,
+                                           void *pData, UINT16 nSize, const TIMESTAMP *pTs );
+EXPORT void            LogWriteSystem    ( SYS_APP_ID logID, LOG_PRIORITY priority,
+                                           void *pData, UINT16 nSize, const TIMESTAMP *pTs );
+EXPORT void            LogWriteETM       ( SYS_APP_ID logID, LOG_PRIORITY priority,
+                                           void *pData, UINT16 nSize, const TIMESTAMP *pTs );
 EXPORT BOOLEAN         LogIsLogEmpty     ( void );
 EXPORT BOOLEAN         LogIsEraseInProgress( void );
 EXPORT void            LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S );
@@ -426,6 +427,7 @@ EXPORT void              LogRegisterEraseCleanup ( DO_CLEANUP Func );
 EXPORT UINT32            LogGetLastAddress       ( void );
 EXPORT LOG_QUEUE_STATUS  LogQueuePut             ( LOG_REQUEST Entry );
 EXPORT UINT32            LogGetLogCount          ( void );
+EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // LOGMNG_H
 
@@ -433,11 +435,17 @@ EXPORT UINT32            LogGetLogCount          ( void );
  *  MODIFICATIONS
  *    $History: LogManager.h $
  *
+ * *****************  Version 52  *****************
+ * User: John Omalley Date: 12-11-08   Time: 3:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1131 - Added logic for ETM Log Write Busy
+ *                    updated Code Review findings
+ *
  * *****************  Version 51  *****************
  * User: John Omalley Date: 12-11-07   Time: 8:28a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 50  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:19a
  * Updated in $/software/control processor/code/system

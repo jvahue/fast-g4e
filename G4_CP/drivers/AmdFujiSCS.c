@@ -9,7 +9,7 @@
                  use the AMD and FUJITSU parts that use the Standard Command 
                  Set.
     VERSION
-      $Revision: 10 $  $Date: 8/28/12 1:06p $   
+      $Revision: 11 $  $Date: 12-11-08 2:27p $   
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -53,6 +53,7 @@
  * Description: Writes a Software Reset command to the flash device.
  *
  * Parameters:  FLASHDATA *BaseAddr - Pointer to flash base address
+ *              FLASHADDR offset - Offset of address
  *
  * Returns:     None.
  *
@@ -202,7 +203,8 @@ FLASH_STATUS AmdFujiSCS_GetStatus (FLASHDATA *BaseAddr, FLASHADDR offset,
    {
       /* at least one device's DQ6 toggles */
 
-      /* Checking WriteBuffer Abort condition: only check on the device that has DQ6 toggling */
+      /* Checking WriteBuffer Abort condition:          */ 
+	  /* only check on the device that has DQ6 toggling */
       /* check only when doing write buffer operation */
       if (WriteBufferProgramming && ((dq6_toggles >> 5) & status_read_2))
       {
@@ -339,6 +341,11 @@ void AmdFujiSCS_ChipErase (FLASHDATA *BaseAddr)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: AmdFujiSCS.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Melanie Jutras Date: 12-11-08   Time: 2:27p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Errors found during Code Review
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

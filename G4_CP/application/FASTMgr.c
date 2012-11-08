@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 112 $  $Date: 12-11-07 8:35a $
+   $Revision: 113 $  $Date: 12-11-08 3:03p $
 
 
 ******************************************************************************/
@@ -59,6 +59,7 @@
 #define FAST_REC_EVENTS_ENG_RUN     0x4
 #define FAST_REC_EVENTS_DATA_MGR    0x8
 #define FAST_REC_EVENTS_LEGACY_REC  0x10
+#define FAST_REC_EVENTS_ETM_LOG     0x20
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -305,7 +306,8 @@ void FAST_Init(void)
   //Setup events for recording/not recording status change.
   TH_SetRecStateChangeEvt(FAST_REC_EVENTS_TIME_HIST,FAST_OnRecordingChange);
   //EngRunSetRecStateChangeEvt(FAST_REC_EVENTS_ENG_RUN,FAST_OnRecordingChange);
-  //EventSetRecStateChangeEvt(FAST_REC_EVENTS_EVENTS,FAST_OnRecordingChange);
+  EventSetRecStateChangeEvt(FAST_REC_EVENTS_EVENTS,FAST_OnRecordingChange);
+  LogETM_SetRecStateChangeEvt(FAST_REC_EVENTS_ETM_LOG, FAST_OnRecordingChange);
 }
 
 
@@ -1530,11 +1532,16 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  *
+ * *****************  Version 113  *****************
+ * User: John Omalley Date: 12-11-08   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 - Busy Recording Logic
+ * 
  * *****************  Version 112  *****************
  * User: John Omalley Date: 12-11-07   Time: 8:35a
  * Updated in $/software/control processor/code/application
  * SCR 1105 - Added new LogWriteSystem Function that returns a value
- * 
+ *
  * *****************  Version 111  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:54a
  * Updated in $/software/control processor/code/application
