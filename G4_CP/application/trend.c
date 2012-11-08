@@ -850,7 +850,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // the next engine-run starting.
   if ( FALSE == pData->bResetDetected                 &&
        pCfg->resetTrigger != TRIGGER_UNUSED           &&
-       TriggerIsConfigured((INT32)pCfg->resetTrigger) &&
+       TriggerIsConfigured(pCfg->resetTrigger) &&
        TriggerGetState((INT32)pCfg->resetTrigger))
   {
     pData->bResetDetected = TRUE;
