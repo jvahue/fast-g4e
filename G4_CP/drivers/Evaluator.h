@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 14 $  $Date: 12-10-02 1:23p $
+  $Revision: 15 $  $Date: 12-11-07 1:09p $
 
 ******************************************************************************/
 
@@ -236,8 +236,8 @@ typedef struct
                              Package Exports Functions
 ******************************************************************************/
 
-// Declare before inclusion of user-table because EvaluatorUserTable.c will need to see them for
-// processing the "SC" and "EC" strings.
+// Declare before inclusion of user-table because EvaluatorUserTable.c will
+// need to see them for processing the "SC" and "EC" strings.
 
 EXPORT INT32 EvalExprStrToBin  ( EVAL_CALLER_TYPE objType, INT32 objID,
                                  CHAR* str,EVAL_EXPR* expr, UINT8 maxOperands );
@@ -282,6 +282,11 @@ INT16 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: Melanie Jutras Date: 12-11-07   Time: 1:09p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p
