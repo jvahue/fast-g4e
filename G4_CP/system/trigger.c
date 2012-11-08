@@ -439,7 +439,7 @@ BOOLEAN TriggerGetState( INT32 trigIdx )
  * Returns:      active/inactive state of the passed trigger.
 *
 *****************************************************************************/
-BOOLEAN TriggerValidGetState( INT32 trigIdx )
+BOOLEAN TriggerValidGetState( TRIGGER_INDEX trigIdx )
 {
   BOOLEAN status = FALSE;
 

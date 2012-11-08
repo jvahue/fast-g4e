@@ -64,20 +64,18 @@ static ENGINE_FILE_HDR m_EngineInfo;
 static void    EngRunEnableTask ( BOOLEAN bEnable );
 static void    EngRunForceEnd   ( void );
 static void    EngRunReset      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
-static BOOLEAN EngRunIsError    ( ENGRUN_CFG* pErCfg);
+static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
 
 static void EngRunUpdateAll(void);
 static void EngRunUpdate   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
 static void EngRunStartLog       ( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
-static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
-                                   ENGRUN_DATA* pErData,
-                                   BOOLEAN bUpdateDuration);
+static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration);
 
-static void EngRunWriteStartLog ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
+static void EngRunWriteStartLog ( ER_REASON reason, const ENGRUN_CFG* pErCfg, const ENGRUN_DATA* pErData );
 
-static void EngRunUpdateRunData ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
-static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
+static void EngRunUpdateRunData ( ENGRUN_DATA* pErData );
+static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_DATA* pErData );
 
 
 /*****************************************************************************/
@@ -449,7 +447,7 @@ static void EngRunForceEnd( void )
 
         case ER_STATE_RUNNING:
           // Update persist, and create log
-          EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErCfg, pErData);
+          EngRunWriteRunLog(ER_LOG_SHUTDOWN, pErData);
           EngRunReset( pErCfg, pErData);
           break;
 
@@ -616,7 +614,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {
         // Normal processing while in START state.
         // Update the Engine Run-log data
-        EngRunUpdateRunData(pErCfg, pErData);
+        EngRunUpdateRunData(pErData);
 
         // STARTING -> RUNNING
         if ( TriggerGetState( pErCfg->runTrigID) )
@@ -654,7 +652,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         pErData->erDuration_ms += pErCfg->erRate;
 
         // Finish the engine run log
-        EngRunWriteRunLog(ER_LOG_ERROR, pErCfg, pErData);
+        EngRunWriteRunLog(ER_LOG_ERROR, pErData);
         EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
       }
@@ -663,7 +661,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         // Update the EngineRun log data
         // Allow additional update so that is ER is closed, this last second
         // is counted.
-        EngRunUpdateRunData( pErCfg, pErData);
+        EngRunUpdateRunData( pErData);
 
         // If the engine run has stopped, finish the engine run and change states
         // RUNNING -> STOP
@@ -671,7 +669,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
             !TriggerGetState( pErCfg->runTrigID) )
         {
           // Finish the engine run log
-          EngRunWriteRunLog(ER_LOG_STOPPED, pErCfg, pErData);
+          EngRunWriteRunLog(ER_LOG_STOPPED, pErData);
           EngRunReset(pErCfg, pErData);
           pErData->erState = ER_STATE_STOPPED;
         }
@@ -764,7 +762,8 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
  * Notes:        None
  *
  *****************************************************************************/
-static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
+static void EngRunWriteStartLog( ER_REASON reason, const ENGRUN_CFG* pErCfg,
+								                   const ENGRUN_DATA* pErData )
 {
   ENGRUN_STARTLOG* pLog;
 
@@ -804,8 +803,7 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
  * Description:
  *
  *
- * Parameters:   [in] reason
- *               [in] pErCfg
+ * Parameters:   [in] reason for logging
  *               [in] pErData
  *
  * Returns:      None
@@ -813,7 +811,7 @@ static void EngRunWriteStartLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DA
  * Notes:        None
  *
  *****************************************************************************/
-static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
+static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
 {
   INT32   i;
   FLOAT32 oneOverN;
@@ -898,24 +896,20 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_CFG* pErCfg, ENGRUN_DATA
  * Description:  Update the log with the sensor elements for this engine run
  *
  *
- * Parameters:   [in] pErCfg - engine run cfg
- *               [in] pErData - engine run data
+ * Parameters:   [in] pErData - engine run data
+ *
  *
  * Returns:      None
  *
  * Notes:        None
  *
  *****************************************************************************/
-static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
+static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
 {
   UINT8    i;
   FLOAT32  oneOverN;
   SNSR_SUMMARY* pSummary;
 
-  // if the starting time is zero, needs to be initialized
-  // todo DaveB  - this could be a code coverage issue
-  // unless we can transition directly from STOPPED to RUNNING.
-  // Normally startingTime is set on STOPPED->START transition.
   if ( 0 == pErData->startingTime_ms )
   {
     // general Trigger initialization
@@ -934,7 +928,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   {
     pSummary = &pErData->snsrSummary[i];
 
-    // If the sensor is known to be invalid and was valid in the past(initialized)...
+    // If the sensor is known to be invalid but WAS VALID in the past(initialized)...
     // ignore processing for the remainder of this engine run.
     if( !pSummary->bValid && pSummary->bInitialized )
     {
@@ -957,7 +951,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     }
   } // for nTotalSensors
 
-  // TODO: do we want to call CycleUpdateAll here?
+
 }
 
 /******************************************************************************
@@ -973,7 +967,7 @@ static void EngRunUpdateRunData( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
  * Notes:        None
  *
  *****************************************************************************/
-static BOOLEAN EngRunIsError( ENGRUN_CFG* pErCfg)
+static BOOLEAN EngRunIsError( const ENGRUN_CFG* pErCfg)
 {
   BOOLEAN allValid;
 
@@ -1002,9 +996,9 @@ static BOOLEAN EngRunIsError( ENGRUN_CFG* pErCfg)
  *               called with true to maintain the start duration elapsed time.
  *
  *****************************************************************************/
-static void EngRunUpdateStartData( ENGRUN_CFG* pErCfg,
-                                  ENGRUN_DATA* pErData,
-                                  BOOLEAN bUpdateDuration)
+static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
+                                         ENGRUN_DATA* pErData,
+                                         BOOLEAN bUpdateDuration)
 {
   FLOAT32 valueMin;
   FLOAT32 valueMax;
