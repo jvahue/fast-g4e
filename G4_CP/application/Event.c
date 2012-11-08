@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 32 $  $Date: 12-11-07 8:30a $
+ $Revision: 33 $  $Date: 12-11-08 3:03p $
 
 ******************************************************************************/
 
@@ -75,7 +75,12 @@ static EVENT_END_LOG     m_EventEndLog    [MAX_EVENTS];     // Event Log Contain
 static EVENT_CFG         m_EventCfg       [MAX_EVENTS];     // Event Cfg Array
 static EVENT_TABLE_CFG   m_EventTableCfg  [MAX_TABLES];     // Event Table Cfg Array
 
-static UINT32            nEventSeqCounter;
+static UINT32            nEventSeqCounter;                  // Sequence number
+static UINT32            m_EventActiveFlags;                // Event Active Flags
+
+/*Busy/Not Busy event data*/
+static INT32 m_event_tag;
+static void (*m_event_func)(INT32 tag, BOOLEAN is_busy) = NULL;
 
 #include "EventUserTables.c"
 
@@ -167,7 +172,8 @@ void EventsInitialize ( void )
           (const void *)(CfgMgr_RuntimeConfigPtr()->EventConfigs),
           sizeof(m_EventCfg));
 
-   nEventSeqCounter = 0;
+   nEventSeqCounter   = 0;
+   m_EventActiveFlags = 0;
 
    // Loop through the Configured triggers
    for ( i = 0; i < MAX_EVENTS; i++)
@@ -420,6 +426,27 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    return ( nTotal );
 }
 
+/**********************************************************************************************
+ * Function:    EventSetRecStateChangeEvt
+ *
+ * Description: Set the callback fuction to call when the busy/not busy status of the
+ *              for all events
+  *
+ * Parameters:  [in] tag:  Integer value to use when calling "func"
+ *              [in] func: Function to call when busy/not busy status changes
+ *
+ * Returns:      none
+ *
+ * Notes:       Only remembers one event handler.  Subsequent calls overwrite the last
+ *              event handler.
+ *
+ *********************************************************************************************/
+void EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
+{
+  m_event_func = func;
+  m_event_tag  = tag;
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -542,9 +569,12 @@ static
 void EventsUpdateTask ( void *pParam )
 {
    // Local Data
-   UINT32      nEventIndex;
-   EVENT_CFG  *pConfig;
-   EVENT_DATA *pData;
+   UINT32         nEventIndex;
+   EVENT_CFG      *pConfig;
+   EVENT_DATA     *pData;
+   UINT32         activeMask = 0xFFFF;
+   static BOOLEAN is_busy = FALSE;
+   BOOLEAN        bAnyActive;
 
    // If shutdown is signaled,
    // disable all events, and tell Task Mgr to
@@ -576,6 +606,24 @@ void EventsUpdateTask ( void *pParam )
                EventProcess( pConfig, pData );
             }
          }
+      }
+   }
+
+   // Check if any events are active
+   bAnyActive = TestBits( &activeMask, sizeof(activeMask),
+                          &m_EventActiveFlags, sizeof(m_EventActiveFlags),
+                          FALSE );
+
+   // is_busy is a static initialized to FALSE, this logic will
+   // act like a flip-flop and only update the busy/not busy status on
+   // a state change.
+   if ( bAnyActive != is_busy )
+   {
+      is_busy = bAnyActive;
+
+      if ( m_event_func != NULL )
+      {
+         m_event_func( m_event_tag, is_busy );
       }
    }
 }
@@ -694,12 +742,14 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          // considered active because the start criteria for the simple event is
          // met and there is no duration for events that have an event table
          pData->state = EVENT_ACTIVE;
+         SetBit((INT32)pData->eventIndex, &m_EventActiveFlags, sizeof(m_EventActiveFlags));
       }
       // This is a simple event check if we have exceeded the cfg duration
       else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
       {
          // Duration was exceeded the event is now active
          pData->state = EVENT_ACTIVE;
+         SetBit((INT32)pData->eventIndex, &m_EventActiveFlags, sizeof(m_EventActiveFlags));
 
          if ( 0 != EVENT_ACTION_ON_DURATION(pConfig->nAction) )
          {
@@ -815,6 +865,8 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
       EventLogEnd(pConfig, pData);
       // Change event state back to start
       pData->state            = EVENT_START;
+      // Reset Event Active flag
+      ResetBit((INT32)pData->eventIndex, &m_EventActiveFlags, sizeof(m_EventActiveFlags));
       pData->bStarted         = FALSE;
       pData->bTableWasEntered = FALSE;
       // Need to make sure the TH was opened before attempting to close
@@ -1736,6 +1788,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-11-08   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 - Busy Recording Logic
+ * 
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-07   Time: 8:30a
  * Updated in $/software/control processor/code/application

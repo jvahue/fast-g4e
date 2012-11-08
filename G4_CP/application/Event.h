@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 28 $  $Date: 12-11-06 11:12a $
+  $Revision: 29 $  $Date: 12-11-08 3:03p $
 
 ******************************************************************************/
 
@@ -469,17 +469,23 @@ EXPORT void    EventsInitialize        ( void );
 EXPORT void    EventTablesInitialize   ( void );
 EXPORT UINT16  EventGetBinaryHdr       ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  EventTableGetBinaryHdr  ( void *pDest, UINT16 nMaxByteSize );
+EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // EVENT_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-11-08   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 - Busy Recording Logic
  * 
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:12a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 12:51p
  * Updated in $/software/control processor/code/application
