@@ -320,7 +320,7 @@ EXPORT BOOLEAN TriggerIsActive     ( BITARRAY128 * Flags );
 EXPORT BOOLEAN TriggerCompareValues ( FLOAT32 LVal, COMPARISON Compare,
                                       FLOAT32 RVal, FLOAT32 PrevVal );
 EXPORT UINT16  TriggerGetSystemHdr  ( void *pDest, UINT16 nMaxByteSize );
-EXPORT BOOLEAN TriggerGetState( INT32 TrigIdx );
+EXPORT BOOLEAN TriggerGetState     ( TRIGGER_INDEX TrigIdx );
 EXPORT BOOLEAN TriggerValidGetState( TRIGGER_INDEX TrigIdx );
 
 EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );

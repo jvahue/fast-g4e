@@ -344,7 +344,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       // If the button has been pressed(as defined by startTrigger)
       // start an manual trending
 
-      if ( TriggerGetState((INT32)pCfg->startTrigger) )
+      if ( TriggerGetState(pCfg->startTrigger) )
       {
         TrendStartManualTrend(pCfg, pData);
       }
@@ -851,7 +851,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   if ( FALSE == pData->bResetDetected                 &&
        pCfg->resetTrigger != TRIGGER_UNUSED           &&
        TriggerIsConfigured(pCfg->resetTrigger) &&
-       TriggerGetState((INT32)pCfg->resetTrigger))
+       TriggerGetState(pCfg->resetTrigger))
   {
     pData->bResetDetected = TRUE;
 
@@ -872,7 +872,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->lastIntervalCheckMs  = 0;
   }
   else if(pData->bResetDetected &&
-         !TriggerGetState((INT32)pCfg->resetTrigger))
+         !TriggerGetState(pCfg->resetTrigger))
   {
    // If trend-reset was detected and is now clear,
     // clear the flag for next use.

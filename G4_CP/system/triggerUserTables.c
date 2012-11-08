@@ -472,7 +472,7 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 
 {
    // Use the supplied Accessor to return the validity of the indicated trigger.
-   m_triggerValidTemp = TriggerValidGetState(Index);
+   m_triggerValidTemp = TriggerValidGetState((TRIGGER_INDEX)Index);
    *GetPtr = Param.Ptr;  
    return USER_RESULT_OK;
 }

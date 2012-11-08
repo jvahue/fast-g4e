@@ -413,7 +413,7 @@ void ActionTask ( void *pParam )
    pCfg  = &m_ActionCfg;
 
    // Check if we have received an ACK
-   bACK        = TriggerGetState( (INT32)pCfg->aCKTrigger );
+   bACK        = TriggerGetState( pCfg->aCKTrigger );
    // Check the engine state for ANY possible running engine
    engineState = EngRunGetState(ENGRUN_ID_ANY, &nEngRunFlags);
 

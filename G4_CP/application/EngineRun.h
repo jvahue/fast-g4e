@@ -154,8 +154,8 @@ typedef struct
   BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
   FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
   UINT32       nSampleCount;            /* For calculating averages                          */
-  INT16        nRateCounts;             /* Count of cycles until this engine run is executed */
-  INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
+  UINT16       nRateCounts;             /* Count of cycles until this engine run is executed */
+  UINT16       nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;

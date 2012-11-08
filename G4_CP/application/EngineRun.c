@@ -234,7 +234,7 @@ void EngRunInitialize(void)
   // Create EngineRun Task - DT
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"EngineRun Task",_TRUNCATE);
-  TaskInfo.TaskID           = EngRun_Task;
+  TaskInfo.TaskID           = (TASK_INDEX) EngRun_Task;
   TaskInfo.Function         = EngRunTask;
   TaskInfo.Priority         = taskInfo[EngRun_Task].priority;
   TaskInfo.Type             = taskInfo[EngRun_Task].taskType;
@@ -420,14 +420,14 @@ ENGINE_FILE_HDR* EngRunGetFileHeader ( void )
  *****************************************************************************/
 static void EngRunForceEnd( void )
 {
-  ENGRUN_INDEX i;
+  INT32 i;
   ENGRUN_CFG*  pErCfg;
   ENGRUN_DATA* pErData;
 
   // Close out any active cycle
   // and flag the task to stop.
   // Eng
-  for (i = ENGRUN_ID_0; i < MAX_ENGINES; ++i)
+  for (i = 0; i < MAX_ENGINES; ++i)
   {
     pErCfg  = &m_engineRunCfg[i];
     pErData = &m_engineRunData[i];
@@ -542,7 +542,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
   ER_STATE curState;
 
   // Is it time for this EngineRun to run?
-  if (--pErData->nRateCountdown <= 0)
+  if (--pErData->nRateCountdown == 0)
   {
     // Reset the countdown counter for the next engine run.
     pErData->nRateCountdown = pErData->nRateCounts;
@@ -597,10 +597,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // write the engine run start-log and transition to STOPPED state
       if ( EngRunIsError(pErCfg))
       {
-        // Add additional period to close of ER due to ERROR.  Normally
-        // UpdateEngineRunLog() updates erDuration_ms, which is only called on !EngineRunIsError()
-        // todo DaveB - see if this is still needed.
-        pErData->erDuration_ms += pErCfg->erRate;
+        pErData->erDuration_ms += (UINT32)pErCfg->erRate;
 
         // Finish the engine run log
         EngRunWriteStartLog( ER_LOG_ERROR, pErCfg, pErData);
@@ -648,8 +645,9 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       if ( EngRunIsError(pErCfg))
       {
         // Add additional 1 second to close of ER due to ERROR.  Normally
-        // UpdateEngineRunLog() updates ->Duration, which is only called on !EngineRunIsError()
-        pErData->erDuration_ms += pErCfg->erRate;
+        // UpdateEngineRunLog() updates ->Duration, which is only called
+		// on !EngineRunIsError()
+        pErData->erDuration_ms += (UINT32)pErCfg->erRate;
 
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErData);
@@ -739,7 +737,7 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
     pSnsr = &(pErData->snsrSummary[i]);
 
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
-    // todo DaveB is this really necessary ?... it will be updated anyway during EngRunUpdateLog
+    // todo DaveB is this really necessary ? it will be updated anyway during EngRunUpdateLog
     if(pSnsr->bValid)
     {
       pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);

@@ -418,13 +418,13 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
  * Returns:      active/inactive state of the passed trigger.
  *
  *****************************************************************************/
-BOOLEAN TriggerGetState( INT32 trigIdx )
+BOOLEAN TriggerGetState( TRIGGER_INDEX trigIdx )
 {
   BOOLEAN status = FALSE;
 
   if (trigIdx != TRIGGER_UNUSED)
   {
-    status = GetBit(trigIdx, m_triggerFlags ,sizeof(m_triggerFlags));
+    status = GetBit((INT32)trigIdx, m_triggerFlags ,sizeof(m_triggerFlags));
   }
   return status;
 }
