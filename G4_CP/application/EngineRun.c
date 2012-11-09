@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 31 $  $Date: 11/08/12 4:26p $
+      $Revision: 32 $  $Date: 11/09/12 5:16p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -701,7 +701,7 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
 
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
     // todo DaveB is this really necessary ? it will be
-	// updated anyway during EngRunUpdateLog
+	  // updated anyway during EngRunUpdateLog
     if(pSnsr->bValid)
     {
       pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);
@@ -892,7 +892,9 @@ static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
       continue;
     }
 
-    if ( SensorIsValid(pSummary->SensorIndex) )
+    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
+
+    if ( pSummary->bValid )
     {
       pSummary->bInitialized = TRUE;
       SensorUpdateSummaryItem(pSummary);
@@ -997,6 +999,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 11/09/12   Time: 5:16p
+ * Updated in $/software/control processor/code/application
+ * Code review
  *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p

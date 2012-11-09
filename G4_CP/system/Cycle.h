@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 16 $  $Date: 11/08/12 4:28p $
+      $Revision: 17 $  $Date: 11/09/12 5:16p $
 
 ******************************************************************************/
 
@@ -268,6 +268,11 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 11/09/12   Time: 5:16p
+ * Updated in $/software/control processor/code/system
+ * Code Review/ function reduction
  *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
