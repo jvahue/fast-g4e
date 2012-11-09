@@ -1042,7 +1042,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- *
+ * 
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application
