@@ -61,12 +61,10 @@ static ENGINE_FILE_HDR m_EngineInfo;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-static void    EngRunEnableTask ( BOOLEAN bEnable );
 static void    EngRunForceEnd   ( void );
 static void    EngRunReset      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
 
-static void EngRunUpdateAll(void);
 static void EngRunUpdate   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
 static void EngRunStartLog       ( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
@@ -288,24 +286,6 @@ void EngReInitFile(void)
 }
 
 /******************************************************************************
- * Function:     EngRunEnableTask
- *
- * Description:  Function used to enable and disable EngineRun
- *               processing.
- *
- * Parameters:   BOOLEAN bEnable - Enables the engine run task.
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static void EngRunEnableTask ( BOOLEAN bEnable )
-{
-   TmTaskEnable (EngRun_Task, bEnable);
-}
-
-/******************************************************************************
  * Function:     EngRunTask
  *
  * Description:  Monitors transitions for starting and ending engine run.
@@ -319,15 +299,23 @@ static void EngRunEnableTask ( BOOLEAN bEnable )
  *****************************************************************************/
 void EngRunTask(void* pParam)
 {
+  UINT16 i;
+
   if (Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     EngRunForceEnd();
-    EngRunEnableTask(FALSE);
-
+    TmTaskEnable (EngRun_Task, FALSE);
   }
   else
   {
-    EngRunUpdateAll();
+    // EngRunUpdateAll - Normal execution
+    for ( i = 0; i < MAX_ENGINES; i++)
+    {
+      if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
+      {
+        EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
+      }
+    }
   }
 }
 
@@ -495,31 +483,6 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
                                                      sizeof(pErCfg->sensorMap) );
     // Reset cycles & counts for this enginerun
     CycleResetEngineRun(pErData->erIndex);
-  }
-}
-
-/******************************************************************************
- * Function:     EngRunUpdateAll
- *
- * Description:  Calls the update function for each  defined EngineRun
- *
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static void EngRunUpdateAll(void)
-{
-  UINT16 i;
-  for ( i = 0; i < MAX_ENGINES; i++)
-  {
-    if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
-    {
-      EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
-    }
   }
 }
 
@@ -737,8 +700,8 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
     pSnsr = &(pErData->snsrSummary[i]);
 
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
-    // todo DaveB is this really necessary ? it will be updated anyway
-    // during EngRunUpdateLog
+    // todo DaveB is this really necessary ? it will be
+	// updated anyway during EngRunUpdateLog
     if(pSnsr->bValid)
     {
       pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);
@@ -910,13 +873,6 @@ static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
   FLOAT32  oneOverN;
   SNSR_SUMMARY* pSummary;
 
-  if ( 0 == pErData->startingTime_ms )
-  {
-    // general Trigger initialization
-    pErData->startingTime_ms = CM_GetTickCount();
-    pErData->nSampleCount = 0;
-  }
-
   // Update the total run duration
   pErData->erDuration_ms = CM_GetTickCount() - pErData->startingTime_ms;
 
@@ -928,16 +884,15 @@ static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
   {
     pSummary = &pErData->snsrSummary[i];
 
-    // If the sensor is known to be invalid but WAS VALID in the past(initialized)...
-    // ignore processing for the remainder of this engine run.
+    // If the sensor is known to be invalid but WAS VALID in
+    // the past( initialized is TRUE ) then ignore processing for
+    // the remainder of this engine run.
     if( !pSummary->bValid && pSummary->bInitialized )
     {
       continue;
     }
 
-    pSummary->bValid = SensorIsValid(pSummary->SensorIndex);
-
-    if ( pSummary->bValid )
+    if ( SensorIsValid(pSummary->SensorIndex) )
     {
       pSummary->bInitialized = TRUE;
       SensorUpdateSummaryItem(pSummary);
@@ -1042,7 +997,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application

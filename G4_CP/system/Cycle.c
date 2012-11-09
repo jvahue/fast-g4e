@@ -128,6 +128,7 @@ static void    CycleSyncPersistFiles(BOOLEAN bNow);
  *****************************************************************************/
 EXPORT void CycleInitialize(void)
 {
+  UINT16 i;
   // Add user commands for Cycles to the user command tables.
   User_AddRootCmd(&RootCycleMsg);
 
@@ -139,8 +140,14 @@ EXPORT void CycleInitialize(void)
   // Reload the persistent cycle count  info from EEPROM & RTCNVRAM
   CycleInitPersistent();
 
-  // Initialize Engine Runs storage.
-  CycleResetAll();
+  // Initialize/CycleResetAll storage.
+  for (i = 0; i < MAX_CYCLES; i++)
+  {
+    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT)
+    {
+     CycleReset( &m_Cfg[i], &m_Data[i] );
+    }
+  }
 
 }
 /******************************************************************************
@@ -166,31 +173,6 @@ void CycleUpdateAll(ENGRUN_INDEX erIndex)
          m_Cfg[cycIndex].nEngineRunId == erIndex )
     {
       CycleUpdate(&m_Cfg[cycIndex], &m_Data[cycIndex], cycIndex);
-    }
-  }
-}
-
-/******************************************************************************
- * Function:     CycleResetAll
- *
- * Description:  Reset all cycle not configured as type "NONE'
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-void CycleResetAll(void)
-{
-  UINT16 i;
-
-  for (i = 0; i < MAX_CYCLES; i++)
-  {
-    if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT)
-    {
-     CycleReset( &m_Cfg[i], &m_Data[i] );
     }
   }
 }
@@ -1064,7 +1046,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system

@@ -258,7 +258,6 @@ EXPORT void    CycleInitialize       ( void );
 EXPORT void    CycleUpdateAll        ( ENGRUN_INDEX erIndex );
 EXPORT BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
 EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
-EXPORT void    CycleResetAll         ( void );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
@@ -269,7 +268,7 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system
