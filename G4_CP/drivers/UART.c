@@ -30,7 +30,7 @@
               ResultCodes.c (Driver/system call result codes)
 
   VERSION
-  $Revision: 63 $  $Date: 11/06/12 5:41p $
+  $Revision: 64 $  $Date: 12-11-09 2:02p $
 
 ******************************************************************************/
 
@@ -413,7 +413,7 @@ RESULT UART_OpenPort(UART_CONFIG* Config)
     //Register access require double access as this register is PSCMR1/PSCMR2
     //                                                 (Ref 27-5 MCF Reference)
     //First Access to MCF_PSC_MR is PSCMR1n
-    MCF_PSC_MR(port) = ((( (UINT8)Config->Parity )&0x07)<<2) | //This sets PM and PT at same time
+    MCF_PSC_MR(port) = ((( (UINT8)Config->Parity )&0x07)<<2) | // Sets PM and PT at same time
                           MCF_PSC_MR_BC( (UINT8)Config->DataBits ) |
                           MCF_PSC_MR_RXIRQ ;
 
@@ -1302,6 +1302,11 @@ RESULT UART_PBIT(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UART.c $
+ * 
+ * *****************  Version 64  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 2:02p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 63  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 5:41p

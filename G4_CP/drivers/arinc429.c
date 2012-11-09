@@ -8,7 +8,7 @@
     Description:  Contains all functions and data related to the Arinc429.
     
 VERSION
-     $Revision: 105 $  $Date: 8/28/12 1:06p $
+     $Revision: 106 $  $Date: 12-11-09 1:20p $
 
 ******************************************************************************/
 
@@ -231,8 +231,9 @@ static void   Arinc429DrvLogFpgaRegs (ARINC_DRV_PBIT_FAIL_DATA *pDest);
  *                     - Calls Arinc429_
  *              3) Sets FPGA Shadow RAM to Arinc429 startup default
  *
- * Parameters:  pdest - ptr to data store to return PBIT fail data 
- *              psize - ptr to size var to return the size of PBIT fail data
+ * Parameters:  SysLogId - ptr to SYS_APP_ID
+ *              pdata    - ptr to data store to return PBIT fail data 
+ *              psize    - ptr to size var to return the size of PBIT fail data
  *
  * Returns:     DRV_RESULT (DRV_OK) if PBIT successful
  *              DRV_A429_FPGA_BAD_STATE if FPGA indicates PBIT failure 
@@ -538,7 +539,7 @@ BOOLEAN Arinc429DrvRead ( UINT32 *pArinc429Msg, ARINC429_CHAN_ENUM Channel )
  *
  * Description: Returns the current Arinc429 channel status
  *
- * Parameters:  type - Tx or Rx 
+ * Parameters:  Type - Tx or Rx 
  *              Channel - Arinc429 channel to query 
  *
  * Returns:     TRUE if Arinc429 status is Ok
@@ -2585,6 +2586,11 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.c $
+ * 
+ * *****************  Version 106  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:20p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 105  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

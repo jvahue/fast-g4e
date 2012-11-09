@@ -12,7 +12,7 @@
                description.
 
    VERSION
-   $Revision: 28 $  $Date: 12-11-02 1:15p $
+   $Revision: 29 $  $Date: 12-11-09 1:59p $
 
 ******************************************************************************/
 
@@ -84,6 +84,7 @@ typedef struct {
                               Package Exports
 ******************************************************************************/
 #undef EXPORT
+
 #if defined ( TTMR_BODY )
   #define EXPORT
 #else
@@ -112,6 +113,11 @@ EXPORT UINT32           TTMR_Get10msTickCount      (void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TTMR.h $
+ * 
+ * *****************  Version 29  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:59p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 28  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:15p

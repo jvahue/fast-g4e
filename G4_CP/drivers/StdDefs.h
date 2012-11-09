@@ -11,7 +11,7 @@ All Rights Reserved. Proprietary and Confidential.
               firmware.
 
  VERSION
- $Revision: 7 $  $Date: 12-11-02 1:06p $
+ $Revision: 8 $  $Date: 12-11-09 1:55p $
 ******************************************************************************/
 
 
@@ -190,6 +190,11 @@ extern BOOLEAN g_DebugMsgEnable;
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: StdDefs.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 7  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:06p
