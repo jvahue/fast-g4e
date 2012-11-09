@@ -737,7 +737,8 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
     pSnsr = &(pErData->snsrSummary[i]);
 
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
-    // todo DaveB is this really necessary ? it will be updated anyway during EngRunUpdateLog
+    // todo DaveB is this really necessary ? it will be updated anyway
+    // during EngRunUpdateLog
     if(pSnsr->bValid)
     {
       pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);
@@ -792,7 +793,8 @@ static void EngRunWriteStartLog( ER_REASON reason, const ENGRUN_CFG* pErCfg,
                NULL);
 
   // TODO: determine if we should check here if the reason would require a Cycle reset
-  // and perform the cycle reset - this would ensure it is not forgotten - or make cycles a task
+  // and perform the cycle reset - this would ensure it is not forgotten
+  // - or make cycles a task
 }
 
 /******************************************************************************
@@ -1040,7 +1042,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application
