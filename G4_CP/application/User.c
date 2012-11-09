@@ -2982,10 +2982,6 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
  * User: Contractor V&v Date: 11/08/12   Time: 4:27p
  * Updated in $/software/control processor/code/application
  *
- * *****************  Version 105  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:27p
- * Updated in $/software/control processor/code/application
- *
  * *****************  Version 104  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:08p
  * Updated in $/software/control processor/code/application

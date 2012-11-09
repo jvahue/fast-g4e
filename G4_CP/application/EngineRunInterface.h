@@ -73,11 +73,6 @@ typedef enum
  * Updated in $/software/control processor/code/application
  * Code review
  *
- * *****************  Version 11  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:26p
- * Updated in $/software/control processor/code/application
- * Code review
- *
  * *****************  Version 10  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:25p
  * Updated in $/software/control processor/code/application

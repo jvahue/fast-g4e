@@ -336,11 +336,6 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
  * Updated in $/software/control processor/code/system
  * Code review
  *
- * *****************  Version 37  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:28p
- * Updated in $/software/control processor/code/system
- * Code review
- *
  * *****************  Version 36  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:56p
  * Updated in $/software/control processor/code/system

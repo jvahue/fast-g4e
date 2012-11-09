@@ -1070,11 +1070,6 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
  * Updated in $/software/control processor/code/system
  * SCR # 1183
  *
- * *****************  Version 24  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:28p
- * Updated in $/software/control processor/code/system
- * SCR # 1183
- *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 10/23/12   Time: 3:54p
  * Updated in $/software/control processor/code/system

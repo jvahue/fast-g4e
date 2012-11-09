@@ -349,11 +349,6 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
  * Updated in $/software/control processor/code/system
  * SCR # 1183
  *
- * *****************  Version 13  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:28p
- * Updated in $/software/control processor/code/system
- * SCR # 1183
- *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system

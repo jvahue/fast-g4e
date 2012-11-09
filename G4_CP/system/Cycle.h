@@ -275,11 +275,6 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  * Updated in $/software/control processor/code/system
  * SCR # 1183
  *
- * *****************  Version 16  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:28p
- * Updated in $/software/control processor/code/system
- * SCR # 1183
- *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system

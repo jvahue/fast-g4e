@@ -460,11 +460,6 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
  * Updated in $/software/control processor/code/application
  * Code review
  *
- * *****************  Version 19  *****************
- * User: Contractor V&v Date: 11/08/12   Time: 4:26p
- * Updated in $/software/control processor/code/application
- * Code review
- *
  * *****************  Version 18  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 12:57p
  * Updated in $/software/control processor/code/application
