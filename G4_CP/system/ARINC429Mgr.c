@@ -9,14 +9,14 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 52 $  $Date: 12-11-01 6:44p $
+     $Revision: 53 $  $Date: 12-11-09 2:00p $
 
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-
+#include <stdio.h>
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -305,9 +305,9 @@ void Arinc429MgrProcessMsgsTaskShutdown(void);
 void Arinc429MgrInitTasks (void)
 {
    // Local Data
-   UINT16                        Channel;
-   ARINC429_SYS_PBIT_STARTUP_LOG StartupLog;
-   TCB                           TaskInfo;
+   UINT16                        nChannel;
+   ARINC429_SYS_PBIT_STARTUP_LOG m_StartupLog;
+   TCB                           tcbTaskInfo;
 
 
    Arinc429MgrInitialize ( );
@@ -321,52 +321,52 @@ void Arinc429MgrInitTasks (void)
    memset(m_Arinc429BCDInvDigit, FALSE, sizeof(m_Arinc429BCDInvDigit));
 
    // Create Arinc429 Read FIFO Task
-   memset(&TaskInfo, 0, sizeof(TaskInfo));
-   strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"Arinc429 Process Msgs",_TRUNCATE);
-   TaskInfo.TaskID         = Arinc429_Process_Msgs;
-   TaskInfo.Function       = Arinc429MgrProcessMsgsTask;
-   TaskInfo.Priority       = taskInfo[Arinc429_Process_Msgs].priority;
-   TaskInfo.Type           = taskInfo[Arinc429_Process_Msgs].taskType;
-   TaskInfo.modes          = taskInfo[Arinc429_Process_Msgs].modes;
-   TaskInfo.MIFrames       = taskInfo[Arinc429_Process_Msgs].MIFframes;
-   TaskInfo.Rmt.InitialMif = taskInfo[Arinc429_Process_Msgs].InitialMif;
-   TaskInfo.Rmt.MifRate    = taskInfo[Arinc429_Process_Msgs].MIFrate;
-   TaskInfo.Enabled        = TRUE;
-   TaskInfo.Locked         = FALSE;
-   TaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
-   TmTaskCreate (&TaskInfo);
+   memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+   strncpy_safe(tcbTaskInfo.Name,sizeof(tcbTaskInfo.Name),"Arinc429 Process Msgs",_TRUNCATE);
+   tcbTaskInfo.TaskID         = (TASK_INDEX)Arinc429_Process_Msgs;
+   tcbTaskInfo.Function       = Arinc429MgrProcessMsgsTask;
+   tcbTaskInfo.Priority       = taskInfo[Arinc429_Process_Msgs].priority;
+   tcbTaskInfo.Type           = taskInfo[Arinc429_Process_Msgs].taskType;
+   tcbTaskInfo.modes          = taskInfo[Arinc429_Process_Msgs].modes;
+   tcbTaskInfo.MIFrames       = taskInfo[Arinc429_Process_Msgs].MIFframes;
+   tcbTaskInfo.Rmt.InitialMif = taskInfo[Arinc429_Process_Msgs].InitialMif;
+   tcbTaskInfo.Rmt.MifRate    = taskInfo[Arinc429_Process_Msgs].MIFrate;
+   tcbTaskInfo.Enabled        = TRUE;
+   tcbTaskInfo.Locked         = FALSE;
+   tcbTaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
+   TmTaskCreate (&tcbTaskInfo);
 
    // Create Arinc429 BIT Task
-   memset(&TaskInfo, 0, sizeof(TaskInfo));
-   strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"Arinc429 BIT",_TRUNCATE);
-   TaskInfo.TaskID         = Arinc429_BIT;
-   TaskInfo.Function       = Arinc429MgrBITTask;
-   TaskInfo.Priority       = taskInfo[Arinc429_BIT].priority;
-   TaskInfo.Type           = taskInfo[Arinc429_BIT].taskType;
-   TaskInfo.modes          = taskInfo[Arinc429_BIT].modes;
-   TaskInfo.MIFrames       = taskInfo[Arinc429_BIT].MIFframes;
-   TaskInfo.Rmt.InitialMif = taskInfo[Arinc429_BIT].InitialMif;
-   TaskInfo.Rmt.MifRate    = taskInfo[Arinc429_BIT].MIFrate;
-   TaskInfo.Enabled        = TRUE;
-   TaskInfo.Locked         = FALSE;
-   TaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
-   TmTaskCreate (&TaskInfo);
+   memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+   strncpy_safe(tcbTaskInfo.Name,sizeof(tcbTaskInfo.Name),"Arinc429 BIT",_TRUNCATE);
+   tcbTaskInfo.TaskID         = (TASK_INDEX)Arinc429_BIT;
+   tcbTaskInfo.Function       = Arinc429MgrBITTask;
+   tcbTaskInfo.Priority       = taskInfo[Arinc429_BIT].priority;
+   tcbTaskInfo.Type           = taskInfo[Arinc429_BIT].taskType;
+   tcbTaskInfo.modes          = taskInfo[Arinc429_BIT].modes;
+   tcbTaskInfo.MIFrames       = taskInfo[Arinc429_BIT].MIFframes;
+   tcbTaskInfo.Rmt.InitialMif = taskInfo[Arinc429_BIT].InitialMif;
+   tcbTaskInfo.Rmt.MifRate    = taskInfo[Arinc429_BIT].MIFrate;
+   tcbTaskInfo.Enabled        = TRUE;
+   tcbTaskInfo.Locked         = FALSE;
+   tcbTaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
+   TmTaskCreate (&tcbTaskInfo);
 
    // Create Arinc429 Display SW Buffer Task
-   memset(&TaskInfo, 0, sizeof(TaskInfo));
-   strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"Arinc429 Disp SW Buff",_TRUNCATE);
-   TaskInfo.Function       = Arinc429MgrDisplaySWBufferTask;
-   TaskInfo.TaskID         = Arinc429_Disp_SW_Buff;
-   TaskInfo.Priority       = taskInfo[Arinc429_Disp_SW_Buff].priority;
-   TaskInfo.Type           = taskInfo[Arinc429_Disp_SW_Buff].taskType;
-   TaskInfo.modes          = taskInfo[Arinc429_Disp_SW_Buff].modes;
-   TaskInfo.MIFrames       = taskInfo[Arinc429_Disp_SW_Buff].MIFframes;
-   TaskInfo.Rmt.InitialMif = taskInfo[Arinc429_Disp_SW_Buff].InitialMif;
-   TaskInfo.Rmt.MifRate    = taskInfo[Arinc429_Disp_SW_Buff].MIFrate;
-   TaskInfo.Enabled        = TRUE;
-   TaskInfo.Locked         = FALSE;
-   TaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
-   TmTaskCreate (&TaskInfo);
+   memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+   strncpy_safe(tcbTaskInfo.Name,sizeof(tcbTaskInfo.Name),"Arinc429 Disp SW Buff",_TRUNCATE);
+   tcbTaskInfo.Function       = Arinc429MgrDisplaySWBufferTask;
+   tcbTaskInfo.TaskID         = (TASK_INDEX)Arinc429_Disp_SW_Buff;
+   tcbTaskInfo.Priority       = taskInfo[Arinc429_Disp_SW_Buff].priority;
+   tcbTaskInfo.Type           = taskInfo[Arinc429_Disp_SW_Buff].taskType;
+   tcbTaskInfo.modes          = taskInfo[Arinc429_Disp_SW_Buff].modes;
+   tcbTaskInfo.MIFrames       = taskInfo[Arinc429_Disp_SW_Buff].MIFframes;
+   tcbTaskInfo.Rmt.InitialMif = taskInfo[Arinc429_Disp_SW_Buff].InitialMif;
+   tcbTaskInfo.Rmt.MifRate    = taskInfo[Arinc429_Disp_SW_Buff].MIFrate;
+   tcbTaskInfo.Enabled        = TRUE;
+   tcbTaskInfo.Locked         = FALSE;
+   tcbTaskInfo.pParamBlock    = &m_Arinc429MgrBlock;
+   TmTaskCreate (&tcbTaskInfo);
 
    // Always reconfigure the ARINC429 Hardware with current User Arinc Settings
    Arinc429MgrReconfigureHW();
@@ -374,19 +374,19 @@ void Arinc429MgrInitTasks (void)
 
    // Update the status of each Rx Ch at this point
    // Loop thru and set the proper DISABLE state of each Rx Ch where Enable == FALSE
-   for ( Channel = 0; Channel < FPGA_MAX_RX_CHAN; Channel++)
+   for ( nChannel = 0; nChannel < FPGA_MAX_RX_CHAN; nChannel++)
    {
       // Update DISABLE state for Rx Ch where Enable == FALSE
-      if (m_Arinc429Cfg.RxChan[Channel].Enable == FALSE )
+      if (m_Arinc429Cfg.RxChan[nChannel].Enable == FALSE )
       {
-         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429_Initialize() PBIT
-         if (m_Arinc429MgrBlock.Rx[Channel].Status != DRV_OK)
+         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
+         if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
-             m_Arinc429MgrBlock.Rx[Channel].Status = ARINC429_STATUS_DISABLED_FAULTED;
+             m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
          }
          else
          {
-            m_Arinc429MgrBlock.Rx[Channel].Status = ARINC429_STATUS_DISABLED_OK;
+            m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_DISABLED_OK;
          }
       } // End of if Rx Ch is disabled.
       // Rx Ch request to be enabled, determine Status after PBIT
@@ -394,36 +394,36 @@ void Arinc429MgrInitTasks (void)
       //   arinc429.reconfigure() called.
       else
       {
-         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429_Initialize() PBIT
-         if (m_Arinc429MgrBlock.Rx[Channel].Status != DRV_OK)
+         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
+         if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Arinc429 DRV PBIT failed.  Disable this Ch.
-            m_Arinc429MgrBlock.Rx[Channel].Enabled = FALSE;
+            m_Arinc429MgrBlock.Rx[nChannel].Enabled = FALSE;
 
             // Create PBIT Arinc429 Mgr Startup PBIT Log
-            StartupLog.result = SYS_A429_PBIT_FAIL;
-            StartupLog.ch = Channel;
-            Flt_SetStatus(m_Arinc429Cfg.RxChan[Channel].PBITSysCond, SYS_ID_A429_PBIT_DRV_FAIL,
-                          &StartupLog, sizeof(ARINC429_SYS_PBIT_STARTUP_LOG));
+            m_StartupLog.result = SYS_A429_PBIT_FAIL;
+            m_StartupLog.ch = nChannel;
+            Flt_SetStatus(m_Arinc429Cfg.RxChan[nChannel].PBITSysCond, SYS_ID_A429_PBIT_DRV_FAIL,
+                          &m_StartupLog, sizeof(ARINC429_SYS_PBIT_STARTUP_LOG));
          }
       }
    } // End of for Channel loop
 
    // Update the status of each Tx Ch at this point
    // Loop thru and set the proper DISABLE state of each Rx Ch where Enable == FALSE
-   for ( Channel = 0; Channel < FPGA_MAX_TX_CHAN; Channel++)
+   for ( nChannel = 0; nChannel < FPGA_MAX_TX_CHAN; nChannel++)
    {
       // Update DISABLE state for Tx Ch where Enable == FALSE
-      if (m_Arinc429Cfg.TxChan[Channel].Enable == FALSE )
+      if (m_Arinc429Cfg.TxChan[nChannel].Enable == FALSE )
       {
-         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429_Initialize() PBIT
-         if (m_Arinc429MgrBlock.Tx[Channel].Status != DRV_OK)
+         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429MgrInitialize() PBIT
+         if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
-            m_Arinc429MgrBlock.Tx[Channel].Status = ARINC429_STATUS_DISABLED_FAULTED;
+            m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
          }
          else
          {
-            m_Arinc429MgrBlock.Tx[Channel].Status = ARINC429_STATUS_DISABLED_OK;
+            m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_DISABLED_OK;
          }
       } // End of if Tx Ch is disabled.
       // Tx Ch request to be enabled, determine Status after PBIT
@@ -431,13 +431,13 @@ void Arinc429MgrInitTasks (void)
       //   arinc429.reconfigure() called.
       else
       {
-         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429_Initialize() PBIT
-         if (m_Arinc429MgrBlock.Tx[Channel].Status != DRV_OK)
+         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
+         if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Create PBIT Arinc429 Mgr Startup PBIT Log
-            StartupLog.result = SYS_A429_PBIT_FAIL;
-            StartupLog.ch = Channel;
-            LogWriteSystem(SYS_ID_A429_PBIT_DRV_FAIL, LOG_PRIORITY_LOW, &StartupLog,
+            m_StartupLog.result = SYS_A429_PBIT_FAIL;
+            m_StartupLog.ch = nChannel;
+            LogWriteSystem(SYS_ID_A429_PBIT_DRV_FAIL, LOG_PRIORITY_LOW, &m_StartupLog,
                            sizeof(ARINC429_SYS_PBIT_STARTUP_LOG), NULL);
          }
       }
@@ -463,7 +463,7 @@ void Arinc429MgrInitTasks (void)
 void Arinc429MgrInitialize ( void )
 {
    // Local Data
-   UINT8                       Channel;
+   UINT8                       nChannel;
    ARINC429_RAW_RX_BUFFER_PTR  pRxBuffer;
    ARINC429_RAW_RX_BUFFER_PTR  pDebugBuffer;
 
@@ -491,42 +491,42 @@ void Arinc429MgrInitialize ( void )
 
    // Loop through all the Receive Channels and set the Channel's Status to the
    // driver status for that channel
-   for (Channel = 0; Channel < FPGA_MAX_RX_CHAN; Channel++)
+   for (nChannel = 0; nChannel < FPGA_MAX_RX_CHAN; nChannel++)
    {
-      pRxBuffer    = &m_Arinc429RxBuffer[Channel];
-      pDebugBuffer = &m_Arinc429DebugBuffer[Channel];
+      pRxBuffer    = &m_Arinc429RxBuffer[nChannel];
+      pDebugBuffer = &m_Arinc429DebugBuffer[nChannel];
 
-      m_Arinc429RxBuffer[Channel].RecordSize    = sizeof(ARINC429_RECORD);
-      m_Arinc429DebugBuffer[Channel].RecordSize = sizeof(UINT32);
+      m_Arinc429RxBuffer[nChannel].RecordSize    = sizeof(ARINC429_RECORD);
+      m_Arinc429DebugBuffer[nChannel].RecordSize = sizeof(UINT32);
 
-      FIFO_Init( &pRxBuffer->RecordFIFO,    (INT8*)m_Arinc429RxStorage[Channel],
-                 sizeof(m_Arinc429RxStorage[Channel]) );
-      FIFO_Init( &pDebugBuffer->RecordFIFO, (INT8*)m_Arinc429DebugStorage[Channel],
-                 sizeof(m_Arinc429DebugStorage[Channel]) );
+      FIFO_Init( &pRxBuffer->RecordFIFO,    (INT8*)m_Arinc429RxStorage[nChannel],
+                 sizeof(ARINC429_RECORD) );
+      FIFO_Init( &pDebugBuffer->RecordFIFO, (INT8*)m_Arinc429DebugStorage[nChannel],
+                 sizeof(UINT32) );
 
-      if ( ( TRUE == Arinc429DrvStatus_OK ( ARINC429_RCV, Channel ) ) ||
+      if ( ( TRUE == Arinc429DrvStatus_OK ( ARINC429_RCV, nChannel ) ) ||
            ( m_Arinc429Cfg.bIgnoreDrvPBIT == TRUE ) )
       {
-         m_Arinc429MgrBlock.Rx[Channel].Status = ARINC429_STATUS_OK;
+         m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_OK;
       }
       else
       {
-         m_Arinc429MgrBlock.Rx[Channel].Status = ARINC429_STATUS_FAULTED_PBIT;
+         m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_FAULTED_PBIT;
       }
    }
 
    // Loop through all the Transmit Channels and set the Channel's Status to the
    // driver status for that channel
-   for (Channel = 0; Channel < FPGA_MAX_TX_CHAN; Channel++)
+   for (nChannel = 0; nChannel < FPGA_MAX_TX_CHAN; nChannel++)
    {
-      if ( ( TRUE == Arinc429DrvStatus_OK ( ARINC429_XMIT, Channel ) ) ||
+      if ( ( TRUE == Arinc429DrvStatus_OK ( ARINC429_XMIT, nChannel ) ) ||
            ( m_Arinc429Cfg.bIgnoreDrvPBIT == TRUE ) )
       {
-         m_Arinc429MgrBlock.Tx[Channel].Status = ARINC429_STATUS_OK;
+         m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_OK;
       }
       else
       {
-         m_Arinc429MgrBlock.Tx[Channel].Status = ARINC429_STATUS_FAULTED_PBIT;
+         m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_FAULTED_PBIT;
       }
    }
 }
@@ -562,17 +562,17 @@ void Arinc429MgrInitialize ( void )
 void Arinc429MgrProcessMsgsTask(void *pParam)
 {
    // Local Data
-   UINT32                     Arinc429Msg;
-   ARINC429_RECORD            ARINC429Record;
-   UINT8                      Channel;
-   UINT8                      LoopLimit;
+   UINT32                     nArinc429Msg;
+   ARINC429_RECORD            m_ARINC429Record;
+   UINT32                     nChannel;
+   UINT8                      nLoopLimit;
    ARINC429_RX_CFG_PTR        pRxCfgChan;
    ARINC429_CHAN_DATA_PTR     pRxChan;
    ARINC429_SYS_RX_STATUS_PTR pRxStatusChan;
    ARINC429_LABEL_DATA_PTR    pLabelData;
    ARINC_SDI                  sdi;
-   UINT32                     TickCount;
-   TIMESTAMP                  TimeStamp;
+   UINT32                     nTickCount;
+   TIMESTAMP                  timeStamp;
 
    // If shutdown is signaled,
    // perform shutdown activities, then
@@ -580,66 +580,66 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      Arinc429MgrProcessMsgsTaskShutdown();
-     TmTaskEnable(Arinc429_Process_Msgs, FALSE);
+     TmTaskEnable((TASK_INDEX)Arinc429_Process_Msgs, FALSE);
    }
    else // Normal task execution.
    {
 
      // Current MIF Frame tick count. Don't require finer resolution.
-     TickCount = CM_GetTickCount();
-     CM_GetTimeAsTimestamp (&TimeStamp);
+     nTickCount = CM_GetTickCount();
+     CM_GetTimeAsTimestamp (&timeStamp);
 
      // Loop thru all ARINC429 Receive Channels
-     for ( Channel = 0; Channel < ARINC_CHAN_MAX; Channel++)
+     for ( nChannel = 0; nChannel < (UINT32)ARINC_CHAN_MAX; nChannel++)
      {
-       pRxChan = &m_Arinc429RxChannel[Channel];
+       pRxChan = &m_Arinc429RxChannel[nChannel];
 
        // Check that the Channel is enabled and the Driver is OK
-       if ( ( TRUE == m_Arinc429MgrBlock.Rx[Channel].Enabled ) &&
-              ( Arinc429DrvStatus_OK(ARINC429_RCV, Channel) ||
+       if ( ( TRUE == m_Arinc429MgrBlock.Rx[nChannel].Enabled ) &&
+              ( Arinc429DrvStatus_OK(ARINC429_RCV, nChannel) ||
                 (m_Arinc429Cfg.bIgnoreDrvPBIT == TRUE) ) )
        {
          // Record the time sync delta for this channel
-         pRxChan->TimeSyncDelta = (UINT8)((TickCount - pRxChan->SyncStart)/10);
-         pRxCfgChan             = &m_Arinc429Cfg.RxChan[Channel];
+         pRxChan->TimeSyncDelta = (UINT8)((nTickCount - pRxChan->SyncStart)/10);
+         pRxCfgChan             = &m_Arinc429Cfg.RxChan[nChannel];
 
          // Loop until the ARINC429 RX FIFO is empty or the limit is reached
-         for ( LoopLimit = 0;
-               Arinc429DrvRead( &Arinc429Msg, (ARINC429_CHAN_ENUM)Channel ) &&
-                                (LoopLimit < ARINC429_MAX_READS);
-               LoopLimit++ )
+         for ( nLoopLimit = 0;
+               Arinc429DrvRead( &nArinc429Msg, (ARINC429_CHAN_ENUM)nChannel ) &&
+                                (nLoopLimit < ARINC429_MAX_READS);
+               nLoopLimit++ )
          {
-           pRxStatusChan  = &m_Arinc429MgrBlock.Rx[Channel];
+           pRxStatusChan  = &m_Arinc429MgrBlock.Rx[nChannel];
            // Code optimization: Save 5 microseconds per read by not storing
            if ( ( TRUE          == m_Arinc429_Debug.bOutputRawFilteredBuff) &&
                 ( DEBUG_OUT_RAW == m_Arinc429_Debug.OutputType ) )
            {
              // Write all messages received to the Debug Buffer so they can be displayed
-             Arinc429MgrWriteBuffer ( &m_Arinc429DebugBuffer[Channel], &Arinc429Msg,
-                                      sizeof(Arinc429Msg) );
+             Arinc429MgrWriteBuffer ( &m_Arinc429DebugBuffer[nChannel], &nArinc429Msg,
+                                      sizeof(nArinc429Msg) );
            }
            // Update over all Rx Chan Count
            pRxStatusChan->RxCnt++;
            // Store the received message to the Label Data Storage Table
-           pLabelData = Arinc429MgrStoreLabelData ( Arinc429Msg, pRxChan,
-                                                    &sdi, TickCount, TimeStamp );
+           pLabelData = Arinc429MgrStoreLabelData ( nArinc429Msg, pRxChan,
+                                                    &sdi, nTickCount, timeStamp );
            // Check if recording is active for this channel -
            // Is activated through a start snapshot request
            if ( TRUE == pRxChan->bRecordingActive )
            {
              // Apply the configured protocol
              if ( Arinc429MgrApplyProtocol( pRxCfgChan, pRxChan,
-               pLabelData, sdi, &ARINC429Record ) )
+               pLabelData, sdi, &m_ARINC429Record ) )
              {
                // Protocol has decided to keep the message received now
                // check if Label is to be or not to be filtered OUT.
                if ( TRUE == pLabelData->sd[sdi].Accept )
                {
                  // Store the current TimeSyncDelta and write the record to the Buffer
-                 ARINC429Record.DeltaTime = pRxChan->TimeSyncDelta;
-                 Arinc429MgrWriteBuffer ( &m_Arinc429RxBuffer[Channel],
-                                          &ARINC429Record,
-                                          sizeof(ARINC429Record) );
+                 m_ARINC429Record.DeltaTime = pRxChan->TimeSyncDelta;
+                 Arinc429MgrWriteBuffer ( &m_Arinc429RxBuffer[nChannel],
+                                          &m_ARINC429Record,
+                                          sizeof(m_ARINC429Record) );
                }
              } // end protocol applied
            } // end recording active
@@ -650,7 +650,7 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
          {
            // Now check all configured parameters for reduction protocol
            Arinc429MgrCheckParameterLostTimeout ( pRxCfgChan, pRxChan,
-                                                  &m_Arinc429RxBuffer[Channel] );
+                                                  &m_Arinc429RxBuffer[nChannel] );
          }
        }
      }
@@ -889,9 +889,9 @@ void Arinc429MgrBITTask ( void *pParam )
 void Arinc429MgrDisplaySWBufferTask ( void *pParam )
 {
   // Local Data
-   static UINT32 nMIFCnt;  // Since task manager can only be set to 320 msec slowest,
-                          //  will set this task as 250 msec RMT and exe every even
-                          //  nMIFCnt for 2 Hz !
+   static UINT32 nMIFCnt = 0;  // Since task manager can only be set to 320 msec slowest,
+                               //  will set this task as 250 msec RMT and exe every even
+                               //  nMIFCnt for 2 Hz !
 
   if (m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE)
   {
@@ -1148,8 +1148,8 @@ UINT16 Arinc429MgrGetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 UINT16 Arinc429MgrGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   ARINC429_SYS_HDR Arinc429SysHdr[FPGA_MAX_RX_CHAN];
-   UINT16           ChannelIndex;
+   ARINC429_SYS_HDR m_Arinc429SysHdr[FPGA_MAX_RX_CHAN];
+   UINT32           nChannelIndex;
    INT8             *pBuffer;
    UINT16           nRemaining;
    UINT16           nTotal;
@@ -1159,26 +1159,26 @@ UINT16 Arinc429MgrGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    nRemaining = nMaxByteSize;
    nTotal     = 0;
    // Clear the header
-   memset ( Arinc429SysHdr, 0, sizeof(Arinc429SysHdr) );
+   memset ( m_Arinc429SysHdr, 0, sizeof(m_Arinc429SysHdr) );
    // Loop through all the ARINC429 channels
-   for ( ChannelIndex = 0;
-         ((ChannelIndex < FPGA_MAX_RX_CHAN) &&
-          (nRemaining > sizeof (Arinc429SysHdr[ChannelIndex])));
-         ChannelIndex++ )
+   for ( nChannelIndex = 0;
+         ((nChannelIndex < FPGA_MAX_RX_CHAN) &&
+          (nRemaining > sizeof (ARINC429_SYS_HDR)));
+         nChannelIndex++ )
    {
       // Copy the name to the header
-      strncpy_safe( Arinc429SysHdr[ChannelIndex].Name,
-                    sizeof(Arinc429SysHdr[ChannelIndex].Name),
-                    m_Arinc429Cfg.RxChan[ChannelIndex].Name,
+      strncpy_safe( m_Arinc429SysHdr[nChannelIndex].Name,
+                    sizeof(m_Arinc429SysHdr[nChannelIndex].Name),
+                    m_Arinc429Cfg.RxChan[nChannelIndex].Name,
                     _TRUNCATE);
       // Increment the total used and decrement the total remaining
-      nTotal     += sizeof (Arinc429SysHdr[ChannelIndex]);
-      nRemaining -= sizeof (Arinc429SysHdr[ChannelIndex]);
+      nTotal     += sizeof (ARINC429_SYS_HDR);
+      nRemaining -= sizeof (ARINC429_SYS_HDR);
    }
    // Make sure the is something to copy and then copy it to the buffer
    if ( 0 != nTotal )
    {
-      memcpy ( pBuffer, Arinc429SysHdr, nTotal );
+      memcpy ( pBuffer, m_Arinc429SysHdr, nTotal );
    }
    // Return the total number of bytes written to the buffer
    return ( nTotal );
@@ -1320,7 +1320,7 @@ FLOAT32 Arinc429MgrReadWord (UINT16 nIndex, UINT32 *tickCount)
       //   be "bypassed" !
       for (i = 0; ((i < pSensorInfo->TotalTests) && (bWordValid == TRUE)); i++)
       {
-         if ( ((pWordInfo->ValidSSM & (1 << i)) == 0) &&
+         if ( ((pWordInfo->ValidSSM & (1U << i)) == 0) &&
               ((msb & ARINC_SSM_BITS) == FailureCondition[i]) )
          {
             bWordValid = FALSE;
@@ -1331,7 +1331,8 @@ FLOAT32 Arinc429MgrReadWord (UINT16 nIndex, UINT32 *tickCount)
       if ( bWordValid == TRUE )
       {
          svalue = Arinc429MgrParseMsg ( raw, pWordInfo->Format, pWordInfo->WordPos,
-                                        pWordInfo->WordSize, pWordInfo->RxChan,  &bWordValid );
+                                        pWordInfo->WordSize, (UINT32)pWordInfo->RxChan,
+                                        &bWordValid );
          if ( TRUE == bWordValid )
          {
             // We have good value, update TimeSinceLastGoodValue param
@@ -2103,7 +2104,7 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
 #ifdef ARINC429_DEBUG_COMPILE
             /*vcast_dont_instrument_start*/
             // Debug testing
-            sprintf ( GSE_OutLine,
+            snprintf ( GSE_OutLine, sizeof(GSE_OutLine),
             "\r\nArinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d\r\n",
                       raw,
             bcdData,
@@ -2645,39 +2646,39 @@ static void Arinc429MgrCheckPW305AB_MFD_Timeout ( ARINC429_CHAN_DATA_PTR pChanDa
 {
    // Local Data
    MFD_MSG             *pMFD_Msg;
-   UINT16              Line;
-   UINT16              Msg;
-   UINT32              ArincMsg;
-   ARINC429_RECORD     ARINC429Record;
+   UINT16              nLine;
+   UINT16              nMsg;
+   UINT32              nArincMsg;
+   ARINC429_RECORD     m_ARINC429Record;
    MFD_DATA_TABLE_PTR  pMFDTable;
-   UINT32              TickCount;
+   UINT32              nTickCount;
 
    pMFDTable = &pChanData->MFDTable;
-   TickCount = CM_GetTickCount();
+   nTickCount = CM_GetTickCount();
 
-   for ( Line = 0; Line < MFD_MAX_LINE; Line++ )
+   for ( nLine = 0; nLine < MFD_MAX_LINE; nLine++ )
    {
-      if ( TRUE == pMFDTable->Line[Line].bRcvdOnce )
+      if ( TRUE == pMFDTable->Line[nLine].bRcvdOnce )
       {
-         for ( Msg = 0; Msg <= (MFD_306 - MFD_300); Msg++ )
+         for ( nMsg = 0; nMsg <= (UINT16)(MFD_306 - MFD_300); nMsg++ )
          {
-            pMFD_Msg = &pMFDTable->Line[Line].Msg[Msg];
+            pMFD_Msg = &pMFDTable->Line[nLine].Msg[nMsg];
 
             if ( ( TRUE == pMFD_Msg->bRcvd ) &&
-                 ((TickCount - pMFD_Msg->RcvTime) > MFD_LABEL_TIMEOUT) )
+                 ((nTickCount - pMFD_Msg->RcvTime) > MFD_LABEL_TIMEOUT) )
             {
                pMFD_Msg->bRcvd = FALSE;
 
                // Return the last good message with Validity set to FALSE
-               ArincMsg  = pMFD_Msg->Data;
-               ArincMsg &= ~(0x1FC00000);
-               ArincMsg |= (Line << 22);
-               ArincMsg  = ~(ARINC_MSG_VALID_BIT) & ArincMsg;
+               nArincMsg  = pMFD_Msg->Data;
+               nArincMsg &= ~(0x1FC00000);
+               nArincMsg |= (nLine << 22);
+               nArincMsg  = ~(ARINC_MSG_VALID_BIT) & nArincMsg;
 
-               ARINC429Record.ARINC429Msg = ArincMsg;
+               m_ARINC429Record.ARINC429Msg = nArincMsg;
 
-               ARINC429Record.DeltaTime = pChanData->TimeSyncDelta;
-               Arinc429MgrWriteBuffer ( pRxBuffer, &ARINC429Record, sizeof(ARINC429Record) );
+               m_ARINC429Record.DeltaTime = pChanData->TimeSyncDelta;
+               Arinc429MgrWriteBuffer ( pRxBuffer, &m_ARINC429Record, sizeof(m_ARINC429Record) );
             }
          }
       }
@@ -3456,13 +3457,13 @@ void Arinc429MgrDisplaySingleArincChan ( void  )
   UINT16 j;
   UINT16 numActiveChannels;
   UINT16 numRows = 0;
-  UINT16 Cnt;
-  UINT32 StartTime;
-  UINT32 ArincMsg;
+  UINT16 cnt;
+  UINT32 nStartTime;
+  UINT32 nArincMsg;
 
   // Destination buffers for RAW
-  UINT32 RawData[ARINC429_MAX_RECORDS];
-  ARINC429_RECORD RawDataRecords[ARINC429_MAX_RECORDS];
+  UINT32 rawData[ARINC429_MAX_RECORDS];
+  ARINC429_RECORD rawDataRecords[ARINC429_MAX_RECORDS];
 
   // Single ch display factor 21 = 115.2 KBps / 100 msec / 4 chan max @ 75% loading
   #define ARINC429_DEBUG_DISPLAY_SINGLE_CH_MAX  21
@@ -3488,30 +3489,31 @@ void Arinc429MgrDisplaySingleArincChan ( void  )
     // Read from Arinc429 Software Raw Filtered Buffer
     if ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW )
     {
-      Cnt = Arinc429MgrReadBuffer ( RawData, sizeof(RawData), &m_Arinc429DebugBuffer[j] );
+      cnt = Arinc429MgrReadBuffer ( rawData, sizeof(rawData), &m_Arinc429DebugBuffer[j] );
     }
     else
     {
-      Cnt = Arinc429MgrReadBuffer ( RawDataRecords, sizeof(RawDataRecords),
+      cnt = Arinc429MgrReadBuffer ( rawDataRecords, sizeof(rawDataRecords),
                                     &m_Arinc429RxBuffer[j]);
     }
 
     // If Debug Arinc Raw Display Enabled and Cnt != 0 output to GSE
     // label then raw data
     i = 0;
-    if ( ( i != Cnt ) && ( m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE) )
+    if ( ( i != cnt ) && ( m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE) )
     {
-      StartTime = CM_GetTickCount();
-      sprintf ( GSE_OutLine, "(Ch=%d) Tick: %08d ================= \r\n", (j), StartTime );
+      nStartTime = CM_GetTickCount();
+      snprintf ( GSE_OutLine, sizeof(GSE_OutLine),
+                 "(Ch=%d) Tick: %08d ================= \r\n", (j), nStartTime );
       GSE_PutLine( GSE_OutLine );
     }
 
-    while ((i != Cnt) && ( m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE) && ( i < numRows))
+    while ((i != cnt) && ( m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE) && ( i < numRows))
     {
-      ArincMsg = ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW ) ?
-                   RawData[i] : RawDataRecords[i].ARINC429Msg;
+      nArincMsg = ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW ) ?
+                    rawData[i] : rawDataRecords[i].ARINC429Msg;
 
-      Arinc429MgrDisplayFmtedLine ( m_Arinc429_Debug.bOutputRawFilteredFormatted, ArincMsg );
+      Arinc429MgrDisplayFmtedLine ( m_Arinc429_Debug.bOutputRawFilteredFormatted, nArincMsg );
       i++;
     } // End while i loop
   } // End for j Loop
@@ -3536,10 +3538,10 @@ void Arinc429MgrDisplayMultiArincChan ( )
 {
   UINT16 i;
   UINT16 k;
-  UINT32  StartTime;
+  UINT32  nStartTime;
   BOOLEAN bHaveRawData;
   UINT32  nMaxCnt = 0;
-  UINT32  ArincMsg;
+  UINT32  nArincMsg;
 
   for (i = 0; i < ARINC_RX_CHAN_MAX; i++)
   {
@@ -3552,13 +3554,13 @@ void Arinc429MgrDisplayMultiArincChan ( )
     if ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW )
     {
       RawDataCnt[i] = Arinc429MgrReadBuffer ( RawDataArinc[i],
-                                            sizeof(RawDataArinc[i]),
-                                            &m_Arinc429DebugBuffer[i] );
+                                              sizeof(UINT32),
+                                              &m_Arinc429DebugBuffer[i] );
     }
     else
     {
       RawDataCnt[i] = Arinc429MgrReadBuffer ( RawRecords[i],
-                                             sizeof(RawRecords[i]),
+                                             sizeof(ARINC429_RECORD),
                                              &m_Arinc429RxBuffer[i] );
     }
   }
@@ -3579,8 +3581,8 @@ void Arinc429MgrDisplayMultiArincChan ( )
 
   if ((bHaveRawData == TRUE) && ( m_Arinc429_Debug.bOutputRawFilteredBuff == TRUE))
   {
-    StartTime = CM_GetTickCount();
-    sprintf( GSE_OutLine, "\r\nt=%07d ",StartTime);
+    nStartTime = CM_GetTickCount();
+    snprintf( GSE_OutLine, sizeof(GSE_OutLine), "\r\nt=%07d ",nStartTime);
     GSE_PutLine( GSE_OutLine );
 
     i = 0;
@@ -3591,11 +3593,11 @@ void Arinc429MgrDisplayMultiArincChan ( )
       {
         if ( i < RawDataCnt[k] )
         {
-          ArincMsg = ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW ) ?
+          nArincMsg = ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW ) ?
                                         RawDataArinc[k][i] : RawRecords[k][i].ARINC429Msg;
 
           Arinc429MgrDisplayFmtedLine ( m_Arinc429_Debug.bOutputRawFilteredFormatted,
-                                       ArincMsg );
+                                       nArincMsg );
         }
         else
         {
@@ -3673,13 +3675,13 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
     word   =        (( ArincMsg & 0x7FFFFFFFUL) >> 8);
     parity =        (  ArincMsg >> ARINC_MSG_SHIFT_PARITY);
     // Create the output string using the corresponding "Formatted" entry in table
-    sprintf(GSE_OutLine, fmtSpecifiers[baseIndex], label, parity, word );
+    snprintf(GSE_OutLine, sizeof(GSE_OutLine), fmtSpecifiers[baseIndex], label, parity, word );
   }
   else
   {
     // Create the output string using the corresponding "raw" entry in table
     // Offset into fmt-spec array is the base, plus one for "raw"
-    sprintf ( GSE_OutLine, fmtSpecifiers[baseIndex + 1], ArincMsg );
+    snprintf ( GSE_OutLine, sizeof(GSE_OutLine), fmtSpecifiers[baseIndex + 1], ArincMsg );
   }
 
   GSE_PutLine( GSE_OutLine );
@@ -3688,12 +3690,17 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
- * 
+ *
+ * *****************  Version 53  *****************
+ * User: John Omalley Date: 12-11-09   Time: 2:00p
+ * Updated in $/software/control processor/code/system
+ * SCR 1102, 1191, 1194 Code Review Updates
+ *
  * *****************  Version 52  *****************
  * User: Peter Lee    Date: 12-11-01   Time: 6:44p
  * Updated in $/software/control processor/code/system
  * SCR #1194 Add option to ignore A429 Drv PBIT failures when setting up
- * A429 I/F for operation. 
+ * A429 I/F for operation.
  *
  * *****************  Version 51  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 1:46p
