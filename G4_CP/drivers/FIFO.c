@@ -19,7 +19,7 @@
               struct are defined.
               
  VERSION
- $Revision: 16 $  $Date: 12-11-05 12:52p $              
+ $Revision: 17 $  $Date: 12-11-09 1:47p $              
 
 ******************************************************************************/
 
@@ -87,7 +87,7 @@ void FIFO_Init(FIFO* FIFO, INT8* Buf, UINT32 Size)
  *              multiple bytes of data from another memory buffer.
  *
  * Parameters:  [in/out] FIFO: A tFIFO type to store the FIFO state in
- *              [in] Char*:A pointer to a block of chars to add to the fifo
+ *              [in] Data*:A pointer to a block of chars to add to the fifo
  *              [in] Len:  Size of the block to add (size in bytes)
  * Returns:     TRUE: Char was added to the head of the buffer
  *              FALSE: Buffer is full, or not initialized
@@ -256,6 +256,11 @@ void FIFO_Flush(FIFO* FIFO)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FIFO.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:47p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 16  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 12:52p

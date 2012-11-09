@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 31 $  $Date: 12-10-30 5:48p $
+    $Revision: 32 $  $Date: 12-11-09 4:41p $
 
 ******************************************************************************/
 
@@ -71,14 +71,14 @@ typedef struct
 // System Status Update Log structure
 typedef struct
 {
-  SYS_APP_ID LogID;            // Id of the CSC which issued the Sys Status
-  FLT_STATUS StatusReq;        // The status cmd issued in last SetStatus/ClrStatus
-  FLT_STATUS SysStatus;        // The currently active System Status;
-  FLT_STATUS PrevStatus;       // The prior System Status. Could be same as
+  SYS_APP_ID logID;            // Id of the CSC which issued the Sys Status
+  FLT_STATUS statusReq;        // The status cmd issued in last SetStatus/ClrStatus
+  FLT_STATUS sysStatus;        // The currently active System Status;
+  FLT_STATUS prevStatus;       // The prior System Status. Could be same as
                                // StatusReq if StatusReq did not result in status change
-  UINT32     StatusNormalCnt;  // The current count of Normal  statuses(should be zero)
-  UINT32     StatusCautionCnt; // The current count of Caution statuses
-  UINT32     StatusFaultCnt;   // The current count of Fault   statuses
+  UINT32     statusNormalCnt;  // The current count of Normal  statuses(should be zero)
+  UINT32     statusCautionCnt; // The current count of Caution statuses
+  UINT32     statusFaultCnt;   // The current count of Fault   statuses
 }INFO_SYS_STATUS_UPDATE_LOG;
 #pragma pack()
 
@@ -125,7 +125,7 @@ EXPORT void Flt_SetStatus(FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
                           INT32 LogDataSize);
 EXPORT void Flt_ClrStatus(FLT_STATUS Status);
 
-EXPORT FLT_DBG_LEVEL Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel);
+EXPORT void Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel);
 EXPORT FLT_DBG_LEVEL Flt_GetDebugVerbosity( void);
 
 EXPORT void Flt_InitDebugVerbosity( void);
@@ -143,11 +143,16 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
  *
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 12-11-09   Time: 4:41p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
  * *****************  Version 31  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Changed Actions to UINT8
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

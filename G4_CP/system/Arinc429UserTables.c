@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 42 $  $Date: 12-11-01 6:44p $
+     $Revision: 43 $  $Date: 12-11-09 3:51p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -3153,8 +3153,8 @@ USER_MSG_TBL Arinc429RootTblPtr = {"ARINC429", Arinc429Root, NULL, NO_HANDLER_DA
 
 /*****************************************************************************/
 /* Public Functions                                                          */
-/*****************************************************************************/               
-                
+/*****************************************************************************/
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -3563,40 +3563,41 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
                                            const void *SetPtr,
                                            void **GetPtr)
 {
-   CHAR LabelStem[] = "\r\n\r\nARINC429.CFG.";
-   CHAR Label[USER_MAX_MSG_STR_LEN * 3];
+   CHAR sLabelStem[] = "\r\n\r\nARINC429.CFG.";
+   CHAR sLabel[USER_MAX_MSG_STR_LEN * 3];
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR sBranchName[USER_MAX_MSG_STR_LEN] = " ";
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
 
    USER_MSG_TBL*  pCfgTable;
    INT16          channelIdx;
-   INT16          MaxChannel = 0;
+   INT16          nMaxChannel = 0;
 
    pCfgTable = Arinc429CfgTbl;
    while (pCfgTable->MsgStr != NULL && result == USER_RESULT_OK)
    {
       if (strncmp(pCfgTable->MsgStr,"RX", 2) == 0)
       {
-         MaxChannel =  FPGA_MAX_RX_CHAN;
+         nMaxChannel =  FPGA_MAX_RX_CHAN;
       }
       else if(strncmp(pCfgTable->MsgStr,"TX", 2) == 0)
       {
-         MaxChannel =  FPGA_MAX_TX_CHAN;
+         nMaxChannel =  FPGA_MAX_TX_CHAN;
       }
 
       for (channelIdx = 0;
-          channelIdx < MaxChannel && result == USER_RESULT_OK;
+          channelIdx < nMaxChannel && result == USER_RESULT_OK;
           ++channelIdx)
       {
          // Display element info above each set of data.
-         sprintf(Label, "%s%s[%d]", LabelStem, pCfgTable->MsgStr, channelIdx);
+         snprintf(sLabel, sizeof(sLabel), "%s%s[%d]",
+                  sLabelStem, pCfgTable->MsgStr, channelIdx);
 
          result = USER_RESULT_ERROR;
-         if (User_OutputMsgString( Label, FALSE ) )
+         if (User_OutputMsgString( sLabel, FALSE ) )
          {
-           result = User_DisplayConfigTree(BranchName, pCfgTable->pNext, channelIdx,
+           result = User_DisplayConfigTree(sBranchName, pCfgTable->pNext, channelIdx,
                                            0, NULL);
          }
       }
@@ -3611,12 +3612,17 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ *
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 12-11-09   Time: 3:51p
+ * Updated in $/software/control processor/code/system
+ * SCR 1194 - Code Review Updates
  * 
  * *****************  Version 42  *****************
  * User: Peter Lee    Date: 12-11-01   Time: 6:44p
  * Updated in $/software/control processor/code/system
  * SCR #1194 Add option to ignore A429 Drv PBIT failures when setting up
- * A429 I/F for operation. 
+ * A429 I/F for operation.
  *
  * *****************  Version 41  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

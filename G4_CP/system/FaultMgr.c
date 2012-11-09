@@ -8,7 +8,7 @@
 
     Description:
    VERSION
-      $Revision: 54 $  $Date: 12-10-10 12:43p $
+      $Revision: 55 $  $Date: 12-11-09 4:41p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -201,7 +201,7 @@ void Flt_Init(void)
 *
 *****************************************************************************/
 BOOLEAN Flt_InitFltBuf(void)
-{  
+{
   // reset the local working buffer and save it to EEPROM
   memset( faultHistory, 0, sizeof( faultHistory));
 
@@ -229,7 +229,7 @@ BOOLEAN Flt_InitFltBuf(void)
  *              power cycle.
  *
  * Parameters:  [out] Status:  System Status to set
- *                    Returns: FLT_STATUS the previous (i.e. current) 
+ *                    Returns: FLT_STATUS the previous (i.e. current)
  *                    fault system status at time call was issued.
  *
  *              [in] LogID:   ID of the log to write that is associated with
@@ -247,26 +247,26 @@ BOOLEAN Flt_InitFltBuf(void)
 void Flt_SetStatus( FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
                           INT32 LogDataSize)
 {
-   FLT_STATUS prevSystemStatus;
-   BOOLEAN    bLogSysStatus = FALSE;
-  
+  FLT_STATUS prevSystemStatus;
+  BOOLEAN    bLogSysStatus = FALSE;
+
   // If Flt_Init() has not been called, ASSERT !
   ASSERT ( SetFaultInitialized != FALSE );
 
+  prevSystemStatus = Flt_GetSystemStatus();
+
   // Inc request for this system condition
   if ( Status != STA_NORMAL )
-  {    
-    // Save the current value of System Status and 
+  {
+    // Save the current value of System Status and
     // set flag to log a Sys-Status-change after the sys log.
     bLogSysStatus = TRUE;
-    prevSystemStatus = Flt_GetSystemStatus();
-    
+
     // Increment Sys Condition request
     FaultSystemStatusCnt[Status] += 1;
 
     // The FaultSystemStatus always reflect the highest request sys condition
     Flt_UpdateSystemStatus();
-    
   }
 
   //If requested, write the log to System Log
@@ -301,7 +301,7 @@ void Flt_SetStatus( FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
  *****************************************************************************/
 void Flt_ClrStatus(FLT_STATUS Status)
 {
-  
+
   // Dec request for this system condition
   if ( Status != STA_NORMAL )
   {
@@ -309,7 +309,7 @@ void Flt_ClrStatus(FLT_STATUS Status)
     // If Count == 0, then we have more decrement requests then increment requests,
     //   some how we go out of sync !
     ASSERT ( FaultSystemStatusCnt[Status] != 0 );
-    
+
     prevSystemStatus = Flt_GetSystemStatus();
 
     // Dec request for this system condition
@@ -323,7 +323,7 @@ void Flt_ClrStatus(FLT_STATUS Status)
     {
       Flt_LogSysStatus(SYS_ID_NULL_LOG, Status, prevSystemStatus );
     }
-  }  
+  }
 }
 
 /******************************************************************************
@@ -338,14 +338,10 @@ void Flt_ClrStatus(FLT_STATUS Status)
  * Notes:
  *
  *****************************************************************************/
-FLT_DBG_LEVEL Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel)
+void Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel)
 {
-  FLT_DBG_LEVEL prevDebugLevel = DebugLevel;
-
   // set local working copy
   DebugLevel = NewLevel;
-
-  return prevDebugLevel;
 }
 
 /******************************************************************************
@@ -567,26 +563,26 @@ static void Flt_UpdateSystemStatus( void )
  *****************************************************************************/
 static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS prevStatus)
 {
-  INFO_SYS_STATUS_UPDATE_LOG SysStatusLog;
-  TIMESTAMP ts;  
+  INFO_SYS_STATUS_UPDATE_LOG sysStatusLog;
+  TIMESTAMP ts;
 
-  SysStatusLog.LogID      = LogID;
-  SysStatusLog.StatusReq  = Status;
-  SysStatusLog.SysStatus  = Flt_GetSystemStatus();
-  SysStatusLog.PrevStatus = prevStatus;  
-  
+  sysStatusLog.logID      = LogID;
+  sysStatusLog.statusReq  = Status;
+  sysStatusLog.sysStatus  = Flt_GetSystemStatus();
+  sysStatusLog.prevStatus = prevStatus;
+
   // Copy the fault status counts into the log structure.
   // Could've just used the array of counts but wanted to
   // de-couple the log structure from the status counting implementation.
-  SysStatusLog.StatusNormalCnt  = FaultSystemStatusCnt[STA_NORMAL];
-  SysStatusLog.StatusCautionCnt = FaultSystemStatusCnt[STA_CAUTION];
-  SysStatusLog.StatusFaultCnt   = FaultSystemStatusCnt[STA_FAULT];
+  sysStatusLog.statusNormalCnt  = FaultSystemStatusCnt[STA_NORMAL];
+  sysStatusLog.statusCautionCnt = FaultSystemStatusCnt[STA_CAUTION];
+  sysStatusLog.statusFaultCnt   = FaultSystemStatusCnt[STA_FAULT];
 
   CM_GetTimeAsTimestamp(&ts);
   LogWriteSystem( SYS_ID_BOX_INFO_SYS_STATUS_UPDATE, LOG_PRIORITY_LOW,
-                  &SysStatusLog, sizeof(INFO_SYS_STATUS_UPDATE_LOG), &ts );
+                  &sysStatusLog, sizeof(INFO_SYS_STATUS_UPDATE_LOG), &ts );
 
-/*  
+/*
   GSE_DebugStr(NORMAL,TRUE, "Sys Status Logged: S:%d P:%d R:%d Cnt: N:%d C:%d F:%d",
                             SysStatusLog.SysStatus,
                             SysStatusLog.PrevStatus,
@@ -600,12 +596,17 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ *
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 12-11-09   Time: 4:41p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 54  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:43p
  * Updated in $/software/control processor/code/system
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
@@ -625,63 +626,63 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
  * User: John Omalley Date: 12-08-16   Time: 4:15p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Fault Action Processing
- * 
+ *
  * *****************  Version 49  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR #307 Add System Status to Fault / Event / etc logs
- * 
+ *
  * *****************  Version 46  *****************
  * User: John Omalley Date: 9/09/10    Time: 2:12p
  * Updated in $/software/control processor/code/system
  * SCR 855 - Removed unused functions
- * 
+ *
  * *****************  Version 45  *****************
  * User: Peter Lee    Date: 8/30/10    Time: 7:15p
  * Updated in $/software/control processor/code/system
  * SCR #838 Error - Flt_SetStatus() and Flt_ClrStatus() and Interrupt
  * Suceptibility
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:01a
  * Updated in $/software/control processor/code/system
  * SCR #685 - Add USER_GSE flag
- * 
+ *
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:17p
  * Updated in $/software/control processor/code/system
  * SCR #538 SPIManager startup & NV Mgr Issues
- * 
+ *
  * *****************  Version 42  *****************
  * User: Jeff Vahue   Date: 6/29/10    Time: 5:27p
  * Updated in $/software/control processor/code/system
  * SCR# 640 - Allow Normal verbosity debug messages during startup
- * 
+ *
  * *****************  Version 41  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a
  * Updated in $/software/control processor/code/system
  * SCR #662 - Changes based on code review
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jim Mood     Date: 6/11/10    Time: 3:30p
  * Updated in $/software/control processor/code/system
  * SCR 623 Batch configuration implementation updates
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:54p
  * Updated in $/software/control processor/code/system
  * SCR #614 fast.reset=really should initialize files
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:28p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence & Box Config
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:17p
  * Updated in $/software/control processor/code/system

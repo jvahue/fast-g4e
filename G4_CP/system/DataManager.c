@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 82 $  $Date: 12-11-09 10:34a $ 
+      $Revision: 83 $  $Date: 12-11-09 4:10p $ 
 
 ******************************************************************************/
 
@@ -1197,9 +1197,9 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
 {
    // Local Data
    UINT32       i;
-   LOG_SOURCE   TempChannel;
+   LOG_SOURCE   tempChannel;
 
-   TempChannel.nNumber = nChannel;
+   tempChannel.nNumber = nChannel;
 
    // Process packet buffers
    for ( i = 0; i < MAX_DM_BUFFERS; i++)
@@ -1215,7 +1215,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
             // Attempt to store packet in Data Flash
             // Add the checksum's checksum to the checksum for Log Write
             LogWrite ( LOG_TYPE_DATA,
-                       TempChannel,
+                       tempChannel,
                        pDMInfo->ACS_Config.priority,
                        (void*)&pDMInfo->MsgBuf[i].packet,
                        DM_PACKET_SIZE(pDMInfo->MsgBuf[i].packet.size),
@@ -1323,9 +1323,9 @@ void DataMgrInitChannels(void)
   // Local Data
   UINT32 i;
   ACS_CONFIG *pACSConfig;
-  DATATASK   Task;
+  DATATASK   fpTask;
   BOOLEAN    bEnable;
-  UINT32     MIFframes;
+  UINT32     nMIFframes;
   TASK_INDEX taskId;
 
   for (i = 0; i < MAX_ACS_CONFIG; i++)
@@ -1339,22 +1339,22 @@ void DataMgrInitChannels(void)
     at runtime, it will not change DataManager local configuration. */
     if( DataMgrIsPortFFD(pACSConfig) && DataMgrIsFFDInhibtMode( ) )
     {
-   pACSConfig->priority = LOG_PRIORITY_4;
+       pACSConfig->priority = LOG_PRIORITY_4;
     }
 
 
     if ((pACSConfig->mode == ACS_DOWNLOAD) && (pACSConfig->portType != ACS_PORT_NONE))
     {
        // Configure the ACS Download Task
-       Task      = DataMgrDownloadTask;
-       bEnable   = FALSE;
-       MIFframes = 0xFFFFFFFF;
+       fpTask     = DataMgrDownloadTask;
+       bEnable    = FALSE;
+       nMIFframes = 0xFFFFFFFF;
     }
     else
     {
-       Task      = DataMgrTask;
-       bEnable   = TRUE;
-       MIFframes = taskInfo[taskId].MIFframes;
+       fpTask     = DataMgrTask;
+       bEnable    = TRUE;
+       nMIFframes = taskInfo[taskId].MIFframes;
     }
 
     switch (pACSConfig->portType)
@@ -1370,7 +1370,7 @@ void DataMgrInitChannels(void)
                              Arinc429MgrReadFilteredRawSnapshot, // func to read the snapshot
                              Arinc429MgrSyncTime,                // Time Sync Function
                              Arinc429MgrGetFileHdr,
-                             Task, MIFframes,
+                             fpTask, nMIFframes,
                              bEnable );                          // Task Enable
           break;
 
@@ -1381,7 +1381,7 @@ void DataMgrInitChannels(void)
                              QAR_GetFrameSnapShot,        // QAR func to get full frame
                              QAR_SyncTime,                // Time Sync Function
                              QAR_GetFileHdr,
-                             Task, MIFframes,
+                             fpTask, nMIFframes,
                              bEnable );                      // Task Enable
           break;
 
@@ -1392,10 +1392,11 @@ void DataMgrInitChannels(void)
                              UartMgr_ReadBufferSnapshot,  // func to read the snapshot
                              UartMgr_ResetBufferTimeCnt,  // Time Sync Function
                              UartMgr_GetFileHdr,
-                             Task, MIFframes,
+                             fpTask, nMIFframes,
                              bEnable );                      // Task Enable
           break;
 
+       case ACS_PORT_MAX:
        default:
           FATAL ("Unexpected ACS_PORT_TYPE = % d", pACSConfig->portType);
           break;
@@ -1831,11 +1832,16 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
  *  MODIFICATIONS
  *    $History: DataManager.c $
  *
+ * *****************  Version 83  *****************
+ * User: John Omalley Date: 12-11-09   Time: 4:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
  * *****************  Version 82  *****************
  * User: John Omalley Date: 12-11-09   Time: 10:34a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 81  *****************
  * User: Melanie Jutras Date: 12-10-23   Time: 1:08p
  * Updated in $/software/control processor/code/system
