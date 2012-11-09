@@ -71,18 +71,18 @@
 
 
 // Keep this list in sync with enum RPN_ERR
-const CHAR* EvalRetValEnumString[12] =                                                                       
-{                                                                                                            
-  "RPN_ERR_UNKNOWN"                  ,  // place unused.                                                   
-  "RPN_ERR_INDEX_NOT_NUMERIC"        ,  // Unrecognized operand input name                                 
-  "RPN_ERR_INVALID_TOKEN"            ,  // Unrecognized operand input name                                 
-  "RPN_ERR_INDEX_OTRNG"              ,  // Index out of range                                              
-  "RPN_ERR_TOO_MANY_OPRNDS"          ,  // Too many operands in the expression.                            
-  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,  // Operation is invalid on this operand                            
-  "RPN_ERR_CONST_VALUE_OTRG"         ,  // Const value out of range for FLOAT32                            
-  "RPN_ERR_TOO_FEW_STACK_VARS"       ,  // Operation requires more vars on stack than present              
-  "RPN_ERR_INV_OPRND_TYPE"           ,  // One or more operands are invalid for operation                  
-  "RPN_ERR_TOO_MANY_TOKENS_IN_EXPR"  ,  // Too many tokens to fit on stack                                 
+const CHAR* EvalRetValEnumString[12] =
+{
+  "RPN_ERR_UNKNOWN"                  ,  // place unused.
+  "RPN_ERR_INDEX_NOT_NUMERIC"        ,  // Unrecognized operand input name
+  "RPN_ERR_INVALID_TOKEN"            ,  // Unrecognized operand input name
+  "RPN_ERR_INDEX_OTRNG"              ,  // Index out of range
+  "RPN_ERR_TOO_MANY_OPRNDS"          ,  // Too many operands in the expression.
+  "RPN_ERR_OP_REQUIRES_SENSOR_OPRND" ,  // Operation is invalid on this operand
+  "RPN_ERR_CONST_VALUE_OTRG"         ,  // Const value out of range for FLOAT32
+  "RPN_ERR_TOO_FEW_STACK_VARS"       ,  // Operation requires more vars on stack than present
+  "RPN_ERR_INV_OPRND_TYPE"           ,  // One or more operands are invalid for operation
+  "RPN_ERR_TOO_MANY_TOKENS_IN_EXPR"  ,  // Too many tokens to fit on stack
   "RPN_ERR_TOO_MANY_STACK_VARS"      ,  // Too many stack vars were present at end of eval
   "RPN_ERR_PRIOR_SENSR_TABLE_FULL"      // The table storing Prior-sensor values is full.
 };
@@ -132,7 +132,7 @@ static void    EvalSetPrevSensorValue(UINT32 key,
 static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context);
 
 /*****************************************************************************/
-/* Local Functions                                                           */                
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /******************************************************************************
@@ -254,7 +254,7 @@ static INT8 EvalGetValidCnt(const EVAL_RPN_ENTRY* operandA, const EVAL_RPN_ENTRY
 /******************************************************************************
 * Function:      EvalVerifyDataType
 *
-* Description:   Verify that the passed operands types are the expected type 
+* Description:   Verify that the passed operands types are the expected type
 *
 * Parameters:    [in] expectedType - expected data type.
 *                [in] opA          - first operand.
@@ -287,7 +287,7 @@ static BOOLEAN EvalVerifyDataType(DATATYPE expectedType,
 
 
 /*****************************************************************************/
-/* Public  Functions                                                         */                
+/* Public  Functions                                                         */
 /*****************************************************************************/
 
 /******************************************************************************
@@ -364,7 +364,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
   // Setup the context structure
   context.objType    = (UINT8)objType;
   context.objId      = (UINT8)objId;
-  context.tempTblCnt = 0;  
+  context.tempTblCnt = 0;
 
   // Init the results
   result.DataType = DATATYPE_BOOL;
@@ -382,7 +382,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
 
     // The OpCode value is the index into the OpCodeTable for this operation
     // see: EVAL_OPCODE_LIST in EvaluatorInterface.h
-    pOpCodeTbl = &OpCodeTable[cmd->opCode]; 
+    pOpCodeTbl = &OpCodeTable[cmd->opCode];
 
     // Set the current command ptr into the context struct
     // and process it.
@@ -395,7 +395,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
     }
   } // for-loop cmd list
 
-  
+
   // If this expression has added entries to the temp prev-sensor table,
   // merge the temp into the master.
   if(context.tempTblCnt > 0 )
@@ -428,7 +428,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
     RPN_PUSH(result);
 
   }
-  
+
   // Pop the 'final' entry.
   result = RPN_POP;
   *validity = result.Validity;
@@ -507,10 +507,10 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
       if( 0 != OpCodeTable[i].TokenLen  &&
           0 == strncmp(OpCodeTable[i].Token, str, OpCodeTable[i].TokenLen))
       {
-        len = OpCodeTable[i].AddCmd(i, str, expr);        
+        len = OpCodeTable[i].AddCmd(i, str, expr);
         break; // Processed a token, break out of lookup loop
       }
-    }    
+    }
 
     // For-loop ended, check for failure.
     if(len < 0)
@@ -549,7 +549,7 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
   }// while str has tokens.
 
 
-  // If replacement-parse went ok and 
+  // If replacement-parse went ok and
   // the expression is not empty then execute the expression
   // to check for syntactic/logic errors. Validity errors are
   // not important during init, this is to check the grammar of
@@ -563,7 +563,7 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
   if (retval < 0)
   {
     expr->Size = 0;
-    GSE_DebugStr(NORMAL,FALSE,"Expression Parsing failed. retval = %s", 
+    GSE_DebugStr(NORMAL,FALSE,"Expression Parsing failed. retval = %s",
                  EvalGetMsgFromErrCode(retval));
   }
   return retval;
@@ -599,7 +599,7 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
 
   for(i = 0; i < expr->Size; i++)
   {
-    cnt  = 0;   
+    cnt  = 0;
     j = expr->CmdList[i].opCode;
     cnt = OpCodeTable[j].FmtCmd( j, (const EVAL_CMD*) &expr->CmdList[i], pStr);
     pStr += cnt;
@@ -632,7 +632,7 @@ BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
-  
+
 
   rslt.Data = context->cmd->data;
   rslt.DataType = DATATYPE_VALUE;
@@ -645,7 +645,7 @@ BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
 /******************************************************************************
  * Function:      EvalLoadConstFalse
  *
- * Description:   Build a const bool "FALSE" obj and push on stack 
+ * Description:   Build a const bool "FALSE" obj and push on stack
  *
  * Parameters:    [in]
  *
@@ -696,9 +696,9 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
   // function-pointers supporting this opCode.
 
    dataAcc = EvalGetDataAccess(cmd->opCode);
- 
+
    // Should never be true! (Table 'coding' error)
-   // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST   
+   // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST
    ASSERT_MESSAGE(NULL != dataAcc,
                   "Data Access Interface lookup not configured for OpCode: %d",
                   cmd->opCode );
@@ -735,7 +735,7 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
   {
     rslt.Data = FALSE;
   }
-  
+
   RPN_PUSH(rslt);
   return TRUE;
 }
@@ -744,8 +744,8 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
  * Function: EvalLoadFuncCall
  *
  * Description: Invoke the application function indicated by the entry in the DAI
- *              
- *     
+ *
+ *
  * Parameters:    [in]
  *
  *                [out]
@@ -768,7 +768,7 @@ BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
   dataAcc = EvalGetDataAccess(cmd->opCode);
 
   // Should never be true! (Table 'coding' error)
-  // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST   
+  // Every entry tied to this func MUST also have a corr. entry in EVAL_DAI_LIST
   ASSERT_MESSAGE(NULL != dataAcc,
                  "Data Access Interface lookup not configured for OpCode: %d",
                  cmd->opCode );
@@ -779,10 +779,10 @@ BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
                  "Multiple 'Get' entries configured for DataAccessTable[%d] Cmd: [%d][%f]",
                  cmd->opCode, cmd->opCode, cmd->data);
 
-  
+
   // Call the app-supplied function thru the DAI table ptr
   rslt.DataType = (NULL != dataAcc->GetSrcByValue) ? DATATYPE_VALUE : DATATYPE_BOOL;
- 
+
   rslt.Data     = (NULL != dataAcc->GetSrcByValue) ?
                    dataAcc->GetSrcByValue( (INT32) cmd->data) :
                    dataAcc->GetSrcByBool ( (INT32) cmd->data);
@@ -791,7 +791,7 @@ BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
  rslt.Validity = TRUE;
 
   RPN_PUSH(rslt);
-  return TRUE; 
+  return TRUE;
 
 }
 
@@ -823,7 +823,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
-    RPN_STACK_PURGE;    
+    RPN_STACK_PURGE;
   }
   else
   {
@@ -886,7 +886,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure our error msg will be the only thing on stack.
-      RPN_STACK_PURGE;      
+      RPN_STACK_PURGE;
     }
   }
 
@@ -915,7 +915,7 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
   EVAL_RPN_ENTRY oprndPrevious;
   EVAL_RPN_ENTRY rslt;
   UINT32         key;
-  
+
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
@@ -928,32 +928,27 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
   else
   {
     oprndCurrent = RPN_POP;
-    if ( EvalVerifyDataType(DATATYPE_VALUE, &oprndCurrent, NULL) )
-    {
-      // Lookup/add the previous-sensor for this cmd and make an R-side operand
-      oprndPrevious.DataType = DATATYPE_VALUE;
+    ASSERT_MESSAGE(EvalVerifyDataType(DATATYPE_VALUE, &oprndCurrent, NULL),
+    "Not-Previous Sensor value was not a VALUE: DataType: %d, Data: %d, Validity: %d",
+                   oprndCurrent.DataType,
+                   oprndCurrent.Data,
+                   oprndCurrent.Validity)
 
-      // Lookup the previous sensor value for this reference.
-      // Make the lookup key using caller type, the objectId holding this expression, and the
-      // sensor being referenced.
-      key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->data);
+    // Lookup/add the previous-sensor for this cmd and make an R-side operand
+    oprndPrevious.DataType = DATATYPE_VALUE;
 
-      EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
-      rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
-      rslt.DataType = DATATYPE_BOOL;
-      rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
+    // Lookup the previous sensor value for this reference.
+    // Make the lookup key using caller type, the objectId holding this expression, and the
+    // sensor being referenced.
+    key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->data);
 
-      // Store the current sensor value & validity in table for next processing.
-      EvalSetPrevSensorValue( key, context, oprndCurrent.Data ,oprndCurrent.Validity );     
-    }
-    else
-    {
-      // Set RPN response to flag a syntax error
-      rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
-      rslt.DataType = DATATYPE_RPN_PROC_ERR;
-      rslt.Validity = FALSE;
-      RPN_STACK_PURGE;
-    }
+    EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
+    rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
+    rslt.DataType = DATATYPE_BOOL;
+    rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
+
+    // Store the current sensor value & validity in table for next processing.
+    EvalSetPrevSensorValue( key, context, oprndCurrent.Data ,oprndCurrent.Validity );
   }
 
   RPN_PUSH(rslt);
@@ -980,7 +975,7 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprnd;
   EVAL_RPN_ENTRY rslt;
-  
+
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
@@ -988,14 +983,14 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     // Ensure error msg is only thing on the stack
-    RPN_STACK_PURGE;        
+    RPN_STACK_PURGE;
   }
   else
   {
     oprnd = RPN_POP;
     if ( EvalVerifyDataType(DATATYPE_BOOL, &oprnd, NULL) )
     {
-      rslt.Validity = oprnd.Validity;      
+      rslt.Validity = oprnd.Validity;
       rslt.DataType = DATATYPE_BOOL;
       rslt.Data     = rslt.Validity ? (FLOAT32) !(BOOLEAN)oprnd.Data : 0.f;
     }
@@ -1006,7 +1001,7 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure error msg is only thing on the stack
-      RPN_STACK_PURGE;      
+      RPN_STACK_PURGE;
     }
   }
 
@@ -1034,7 +1029,7 @@ BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
-  
+
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
@@ -1089,14 +1084,14 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
   EVAL_RPN_ENTRY rslt;
-  
+
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
     rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
-    RPN_STACK_PURGE;   
+    RPN_STACK_PURGE;
   }
   else
   {
@@ -1214,7 +1209,7 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     // Object is a constant Boolean 'FALSE'
     cmd.opCode = OpCodeTable[tblIdx].OpCode;
     cmd.data   = 0.f;
-        
+
     // Add cmd to expression list
     expr->CmdList[expr->Size++] = cmd;
     expr->OperandCnt++;
@@ -1251,7 +1246,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     retval = RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
-  {    
+  {
     // Get the allowable number of objects for this  OpCode
     switch(OpCodeTable[tblIdx].OpCode)
     {
@@ -1262,7 +1257,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
        break;
 
       //Triggers
-      case OP_GETTRIGVAL: 
+      case OP_GETTRIGVAL:
       case OP_GETTRIGVALID:
         maxObjects = MAX_TRIGGERS;
         break;
@@ -1271,7 +1266,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
         // CANNOT GET HERE
         FATAL("Unrecognized Opcode: %d",OpCodeTable[tblIdx].OpCode );
     }
-    
+
     //                                                          |
     //                                                          V
     // Look to end of this fixed-token for the objIdx (e.g. SVLU127)
@@ -1350,7 +1345,7 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     cmd.opCode = OP_NOT_EQ_PREV;
     cmd.data   = expr->CmdList[expr->Size - 1].data;
     expr->CmdList[expr->Size++] = cmd;
-    retval = OpCodeTable[tblIdx].TokenLen;    
+    retval = OpCodeTable[tblIdx].TokenLen;
   }
   else
   {
@@ -1414,7 +1409,7 @@ INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  *****************************************************************************/
 INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
-{  
+{
   return snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", OpCodeTable[tblIdx].Token);
 }
 
@@ -1441,7 +1436,7 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /******************************************************************************
  * Function: EvalGetPrevSensorValue
  *
- * Description: Get the previous sensor value for the !P command at the passed 
+ * Description: Get the previous sensor value for the !P command at the passed
  *              address.
  *
  * Parameters:    [in] The address-value-key of the !P command
@@ -1451,7 +1446,7 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  * Returns:   The last value or zero if this is the first call( address not in table.
  *
  *
- * Notes:  
+ * Notes:
  *
  *****************************************************************************/
 static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
@@ -1460,7 +1455,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
 {
   INT16 i;
   INT16 index = -1; // Init index to "not found"
-  
+
   // Search thru the general table to see if this
   // sensor is already being managed
   for(i = 0; i < m_masterTblCnt; ++i)
@@ -1471,7 +1466,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
       break;
     }
   }
-  
+
   // If we found the table entry, return values.
   if (-1 != index)
   {
@@ -1482,7 +1477,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
   {
     *fPriorValue = 0.f;
     *bPriorValid = FALSE;
-  }  
+  }
   return ( -1 != index );
 }
 
@@ -1526,20 +1521,20 @@ static void EvalSetPrevSensorValue(UINT32 key,
         break;
       }
     }
-    
+
     // If entry not found, add it.
     if (!status)
     {
       // THIS CAN NEVER BE TRUE because MAX_TEMP_PRIOR_VALUES is defined as
       // the max # of expression tokens PLUS one. Parsing would fail first!
-      
+
       ASSERT_MESSAGE(context->tempTblCnt + 1 < MAX_TEMP_PRIOR_VALUES,
                      "Temporary previous-sensor array is FULL",NULL);
-    
+
       context->tempTbl[context->tempTblCnt].KeyField   = key;
       context->tempTbl[context->tempTblCnt].PriorValue = fValue;
       context->tempTbl[context->tempTblCnt].PriorValid = bValid;
-      ++context->tempTblCnt;       
+      ++context->tempTblCnt;
     }
   }
 }
@@ -1590,10 +1585,10 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
     if ( !bFound && !bTableFull )
     {
       if ( m_masterTblCnt < MAX_PRIOR_VALUES )
-      { 
+      {
         m_masterTbl[m_masterTblCnt].KeyField    = context->tempTbl[idxTempTbl].KeyField;
         m_masterTbl[m_masterTblCnt].PriorValue  = context->tempTbl[idxTempTbl].PriorValue;
-        m_masterTbl[m_masterTblCnt].PriorValid  = context->tempTbl[idxTempTbl].PriorValid;        
+        m_masterTbl[m_masterTblCnt].PriorValid  = context->tempTbl[idxTempTbl].PriorValid;
         ++m_masterTblCnt;
         ++updateCnt;
       }
@@ -1602,89 +1597,89 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
         bTableFull = TRUE;
       }
     }
-   
+
   } // temp processing.
 
   return (updateCnt == context->tempTblCnt);
- 
+
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- * 
+ *
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 10:18a
  * Updated in $/software/control processor/code/drivers
  * SCR #1172 PCLint Suspicious use of & Error
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/31/12    Time: 12:23p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1107 - !P paren position error fix
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1107 - !P Table Full processing
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Issue #24 Eval: Not Equal Previous does not work
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 14  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:32a
  * Updated in $/software/control processor/code/drivers
  * SCR 1107 - Evaluator Bug Fixes
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:28p
  * Updated in $/software/control processor/code/drivers
  * FAST 2 Issue #12
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:21p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Fixed Issue #7
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:12p
  * Updated in $/software/control processor/code/drivers
  * Fixed: Issue #3 eval accepts a 17 token expression
  * Fixed: Issue #4 eval does not end a trigger when a sensor goes invalid
  * Fixed: Issue #7 EVAL OR function and optimized opcode table lookup
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/30/12    Time: 7:29p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Fix evaluator
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 12:11p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 fix check for number of tokens
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:30p
  * Updated in $/software/control processor/code/drivers
- * SCR #1107 FAST 2  Support empty end criteria 
- * 
+ * SCR #1107 FAST 2  Support empty end criteria
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 Add FALSE boolean constant
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:27p
  * Updated in $/software/control processor/code/drivers
