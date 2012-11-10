@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 28 $  $Date: 11/08/12 4:28p $    
+$Revision: 29 $  $Date: 11/10/12 4:48p $    
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -90,7 +90,7 @@ USER_ENUM_TBL TriggerIndexType[]   =
   { "21" , TRIGGER_21  }, { "22" , TRIGGER_22  }, { "23" , TRIGGER_23  },
   { "24" , TRIGGER_24  }, { "25" , TRIGGER_25  }, { "26" , TRIGGER_26  },
   { "27" , TRIGGER_27  }, { "28" , TRIGGER_28  }, { "29" , TRIGGER_29  },
-  { "30" , TRIGGER_30  }, { "31" , TRIGGER_31  }, { "32" , TRIGGER_31  },
+  { "30" , TRIGGER_30  }, { "31" , TRIGGER_31  }, { "32" , TRIGGER_32  },
   { "33" , TRIGGER_33  }, { "34" , TRIGGER_34  }, { "35" , TRIGGER_35  },
   { "36" , TRIGGER_36  }, { "37" , TRIGGER_37  }, { "38" , TRIGGER_38  },
   { "39" , TRIGGER_39  }, { "40" , TRIGGER_40  }, { "41" , TRIGGER_41  },
@@ -480,6 +480,11 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 11/10/12   Time: 4:48p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1107 - nmistype on Trigger32 enum mapping.
  * 
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
