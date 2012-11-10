@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 106 $  $Date: 11/10/12 11:17a $
+   $Revision: 107 $  $Date: 11/10/12 11:53a $
 
 ******************************************************************************/
 
@@ -2783,7 +2783,7 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
   // test errno to see if ERANGE was flagged.
 
-  if (errno != ERANGE && leftOver == NULL)
+  if (errno != ERANGE && *leftOver == '\0')
   {
     sprintf(hexString,"0x%08X", decValue);
     bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, MsgEnumTbl, Min, Max);
@@ -2979,6 +2979,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
  *  MODIFICATIONS
  *    $History: User.c $
  *
+ * *****************  Version 107  *****************
+ * User: Jeff Vahue   Date: 11/10/12   Time: 11:53a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - 128 Bit List parsing fix BB# 66
+ * 
  * *****************  Version 106  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 11:17a
  * Updated in $/software/control processor/code/application
