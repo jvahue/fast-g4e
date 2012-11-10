@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 32 $  $Date: 11/09/12 5:16p $
+      $Revision: 33 $  $Date: 11/09/12 6:34p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -52,6 +52,8 @@ static ENGRUN_RUNLOG   m_engineRunLog[MAX_ENGINES];
 
 static ENGINE_FILE_HDR m_EngineInfo;
 
+static void (*m_event_func)(INT32,BOOLEAN);
+static INT32 m_event_tag;
 
 
 // Include cmd tables and functions here after local dependencies are declared.
@@ -180,6 +182,9 @@ void EngRunInitialize(void)
           CfgMgr_RuntimeConfigPtr()->EngineRunConfigs,
           sizeof(m_engineRunCfg) );
 
+  m_event_tag = 0;
+  m_event_func = NULL;
+
   // Open Engine Identification File
   result =  NV_Open(NV_ENGINE_ID);
   if(SYS_OK == result)
@@ -300,11 +305,18 @@ void EngReInitFile(void)
 void EngRunTask(void* pParam)
 {
   UINT16 i;
+  static BOOLEAN is_active_last = FALSE;
+  BOOLEAN is_active = FALSE;
 
   if (Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     EngRunForceEnd();
     TmTaskEnable (EngRun_Task, FALSE);
+    if(m_event_func != NULL)
+    {
+      m_event_func(m_event_tag,FALSE);
+    }
+    is_active_last = FALSE;
   }
   else
   {
@@ -314,7 +326,21 @@ void EngRunTask(void* pParam)
       if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
       {
         EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
+
+        is_active =   (m_engineRunData[i].erState == ER_STATE_RUNNING) ||
+                      (m_engineRunData[i].erState == ER_STATE_STARTING)   ?
+                      TRUE : is_active;
       }
+    }
+
+    //Update recording/active status to "parent"
+    if(is_active != is_active_last)
+    {
+      if(m_event_func != NULL)
+      {
+        m_event_func(m_event_tag,is_active);
+      }
+      is_active_last = is_active;
     }
   }
 }
@@ -390,9 +416,37 @@ ENGINE_FILE_HDR* EngRunGetFileHeader ( void )
    return &m_EngineInfo;
 }
 
+
+
+/*****************************************************************************
+ * Function:    EngRunSetRecStateChangeEvt
+ *
+ * Description: Set the callback fuction to call when the busy/not busy
+ *              status of the Engine Run module changes
+ *
+ *
+ *
+ * Parameters:  [in] tag:  Integer value to use when calling "func"
+ *              [in] func: Function to call when busy/not busy status changes
+ *
+ * Returns:      none
+ *
+ * Notes:       Only remembers one event handler.  Subsequent calls overwrite
+ *              the last event handler.
+ *
+ *******************************************************************************/
+void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
+{
+  m_event_func = func;
+  m_event_tag  = tag;
+}
+
+
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
+
 
 /******************************************************************************
  * Function:     EngRunForceEnd
@@ -485,6 +539,8 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     CycleResetEngineRun(pErData->erIndex);
   }
 }
+
+
 
 /******************************************************************************
  * Function:     EngRunUpdate
@@ -1000,6 +1056,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 33  *****************
+ * User: Jim Mood     Date: 11/09/12   Time: 6:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 Recording busy status
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:16p
  * Updated in $/software/control processor/code/application
@@ -1148,3 +1209,4 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2  Engine Run
  ***************************************************************************/
+

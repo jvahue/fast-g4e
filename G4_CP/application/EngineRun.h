@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 21 $  $Date: 11/08/12 4:26p $
+      $Revision: 22 $  $Date: 11/09/12 6:34p $
 
 ******************************************************************************/
 
@@ -215,13 +215,19 @@ EXPORT void             EngRunTask            ( void* pParam );
 EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
 EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
-EXPORT void             EngReInitFile        ( void );
+EXPORT void             EngReInitFile         ( void );
+EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // ENGINERUN_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 22  *****************
+ * User: Jim Mood     Date: 11/09/12   Time: 6:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 Recording busy status
  * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p

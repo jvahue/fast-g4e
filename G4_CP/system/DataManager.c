@@ -9,8 +9,8 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 83 $  $Date: 12-11-09 4:10p $ 
-
+      $Revision: 84 $  $Date: 11/09/12 6:50p $ 
+    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -61,6 +61,15 @@ static DATA_MNG_TASK_PARMS    TCBTemp;
 static DATA_MNG_INFO          DMInfoTemp;
 static DM_DOWNLOAD_STATISTICS ACS_StatusTemp;
 static CHAR TempDebugString[512];
+
+//Used to generate events back to "parent" when the record busy/not busy
+//status changes
+static void (*m_event_func)(INT32,BOOLEAN);
+static INT32 m_event_tag;
+
+//For channels 0-7,
+static INT32 m_channel_busy_flags;
+static BOOLEAN m_is_busy_last = FALSE;
 
 // include user command tables here.(After local var have been declared.)
 #include "DataManagerUserTables.c"
@@ -142,6 +151,9 @@ void DataMgrIntialize(void)
    // Initialize Local Data and the user tables
 
    DMRecordEnabled = FALSE;
+   m_event_func = NULL;
+   m_event_tag = 0;
+   m_channel_busy_flags = 0;
    User_AddRootCmd (&RootACSMsg);
    User_AddRootCmd (&DataMngMsg);
 
@@ -239,6 +251,33 @@ BOOLEAN DataMgrIsPortFFD( const ACS_CONFIG *ACS_Config )
   return retval;
 }
 
+
+
+/*****************************************************************************
+ * Function:    DataMgrSetRecStateChangeEvt
+ *
+ * Description: Set the callback fuction to call when the busy/not busy
+ *              status of the Data Manager Recording changes
+ *
+ *
+ *
+ * Parameters:  [in] tag:  Integer value to use when calling "func"
+ *              [in] func: Function to call when busy/not busy status changes
+ *
+ * Returns:      none
+ *
+ * Notes:       Only remembers one event handler.  Subsequent calls overwrite
+ *              the last event handler.
+ *
+ *******************************************************************************/
+void DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
+{
+  m_event_func = func;
+  m_event_tag  = tag;
+}
+
+
+
 /******************************************************************************
  * Function:    DataMgrRecord
  *
@@ -261,6 +300,13 @@ void DataMgrRecord (BOOLEAN bEnable )
    {
       // Kill any downloads in process
       DataMgrStopDownload();
+
+      //Notify event handler on record status change.
+      if((m_event_func != NULL) && !m_is_busy_last)
+      {
+        m_event_func(m_event_tag,TRUE);
+        m_is_busy_last = TRUE;
+      }
    }
 }
 
@@ -355,44 +401,24 @@ UINT16 DataMgrGetHeader (INT8 *pDest, LOG_ACS_FIELD ACS, UINT16 nMaxByteSize )
 
       // Update protocol file hdr first !
       pBuffer = (CHAR *)(pDest + sizeof(DataHdr));  // Move to end of UartMgr File Hdr
-
+   
       if ( (ACS_PORT_NONE != pDMInfo->ACS_Config.portType) && (pDMParam->GetDataHdr != NULL) )
       {
          cnt = pDMParam->GetDataHdr( pBuffer, pDMInfo->ACS_Config.nPortIndex, nMaxByteSize);
       }
 
       // Update Data hdr
-      DataHdr.Version = HDR_VERSION;
+      DataHdr.Version = HDR_VERSION; 
       DataHdr.Type    = pDMInfo->ACS_Config.portType;
-
-      // Copy hdr to destination
-      pBuffer = (CHAR *)pDest;
-      memcpy ( pBuffer, &DataHdr, sizeof(DataHdr) );
-
+  
+      // Copy hdr to destination 
+      pBuffer = (CHAR *)pDest; 
+      memcpy ( pBuffer, &DataHdr, sizeof(DataHdr) ); 
+   
       cnt += sizeof(DataHdr);
    }
 
   return (cnt);
-}
-
-
-
-/******************************************************************************
- * Function:    DataMgrRecGetState  | IMPLEMENTS GetState() INTERFACE to
- *                                  | FAST STATE MGR
- *
- * Description: Returns the recording/!recording state of the data manager ACSs
- *
- * Parameters:  INT32 param  - Not used, included to match FSM call signature
- *
- * Returns:     BOOLEAN - TRUE: Record task is running
- *                        FALSE: Record task is inactive
- *
- * Notes:
- *****************************************************************************/
-BOOLEAN DataMgrRecGetState ( INT32 param )
-{
-  return  !DataMgrRecordFinished();
 }
 
 
@@ -591,19 +617,19 @@ BOOLEAN DataMgrStartDownload( void )
       {
          pDMInfo    = &DataMgrInfo[nChannel];
          pACSConfig = &pDMInfo->ACS_Config;
-
+      
          if (pACSConfig->mode == ACS_DOWNLOAD)
          {
             pDMInfo->DL.bDownloading                           = TRUE;
             StartLog.nChannel  = nChannel;
-            strncpy_safe(StartLog.Model, sizeof(StartLog.Model),
+            strncpy_safe(StartLog.Model, sizeof(StartLog.Model), 
                          pDMInfo->ACS_Config.sModel, _TRUNCATE);
-            strncpy_safe(StartLog.ID,    sizeof(StartLog.ID),
+            strncpy_safe(StartLog.ID,    sizeof(StartLog.ID),    
                          pDMInfo->ACS_Config.sID,    _TRUNCATE);
             StartLog.PortType  = pDMInfo->ACS_Config.portType;
             StartLog.PortIndex = pDMInfo->ACS_Config.nPortIndex;
-
-            LogWriteSystem(APP_DM_DOWNLOAD_STARTED, LOG_PRIORITY_LOW,
+         
+            LogWriteSystem(APP_DM_DOWNLOAD_STARTED, LOG_PRIORITY_LOW, 
                            &StartLog, sizeof(StartLog), NULL);
 
             pStatistics = &pDMInfo->DL.Statistics;
@@ -788,7 +814,7 @@ static void DataMgrTask( void *pParam )
 
    // Empty the SW FIFO and discard the data
    nSize = pDMParam->GetData( DMTempBuffer, pDMInfo->ACS_Config.nPortIndex,
-                              sizeof(DMTempBuffer));
+                              sizeof(DMTempBuffer)); 
 
    // Is the Recording Active?
    if (TRUE == DMRecordEnabled)
@@ -1013,7 +1039,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
                 // Now build the fail log and record the failure
                 nSize = DataMgrBuildFailLog(pDMParam->nChannel, pDMInfo, &FailLog);
 
-                // Set the system status and record failure
+                // Set the system status and record failure          
                 Flt_SetStatus( pDMInfo->ACS_Config.systemCondition,
                                APP_DM_SINGLE_BUFFER_OVERFLOW,
                                &FailLog, nSize);
@@ -1198,6 +1224,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
    // Local Data
    UINT32       i;
    LOG_SOURCE   tempChannel;
+   BOOLEAN      all_idle = TRUE;
 
    tempChannel.nNumber = nChannel;
 
@@ -1207,6 +1234,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
       // Check that current buffer is ready to transmit
       if (DM_BUF_STORE == pDMInfo->MsgBuf[i].Status)
       {
+         all_idle = FALSE;
          // Has the Current buffer been queued for storage yet?
          if (LOG_REQ_NULL == pDMInfo->MsgBuf[i].WrStatus)
          {
@@ -1214,7 +1242,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
             *(pDMInfo->MsgBuf[i].pDL_Status) = DL_WRITE_IN_PROGRESS;
             // Attempt to store packet in Data Flash
             // Add the checksum's checksum to the checksum for Log Write
-            LogWrite ( LOG_TYPE_DATA,
+            LogWrite ( LOG_TYPE_DATA, 
                        tempChannel,
                        pDMInfo->ACS_Config.priority,
                        (void*)&pDMInfo->MsgBuf[i].packet,
@@ -1237,11 +1265,33 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
          }
          else if ( LOG_REQ_FAILED == pDMInfo->MsgBuf[i].WrStatus )
          {
-            *(pDMInfo->MsgBuf[i].pDL_Status) = DL_WRITE_FAIL;
+	         *(pDMInfo->MsgBuf[i].pDL_Status) = DL_WRITE_FAIL;
             pDMInfo->MsgBuf[i].Status        = DM_BUF_EMPTY;
             pDMInfo->MsgBuf[i].TryTime_mS    = 0;
             pDMInfo->MsgBuf[i].WrStatus      = LOG_REQ_NULL;
          }
+      }
+   }
+
+   //After processing channel buffers, check if all were idle or
+   //if one was being processed.
+   if(all_idle)
+   {
+      m_channel_busy_flags &= ~(1 << nChannel);
+   }
+   else
+   {
+      m_channel_busy_flags |= 1 << nChannel;
+   }
+
+   //If the busy status (idle or record enabled) changes, then update
+   //the event handler.
+   if( (m_channel_busy_flags || DMRecordEnabled) != m_is_busy_last )
+   {
+      m_is_busy_last = (m_channel_busy_flags || DMRecordEnabled);
+      if(m_event_func != NULL)
+      {
+        m_event_func(m_event_tag,m_is_busy_last);
       }
    }
 }
@@ -1333,27 +1383,27 @@ void DataMgrInitChannels(void)
     pACSConfig = &(CfgMgr_RuntimeConfigPtr()->ACSConfigs[i]);
     taskId     = (TASK_INDEX)(i + (UINT32)Data_Mgr0);
 
-   /*Override ACS priority for Full Flight Data sources if Full Flight Data mode is enabled
-     Full Flight Data inhibit.  This modifies the priority in the configuration memory before
+	/*Override ACS priority for Full Flight Data sources if Full Flight Data mode is enabled
+	  Full Flight Data inhibit.  This modifies the priority in the configuration memory before
     it is copied to the DataManager local configuration.  If the configuration is changed
     at runtime, it will not change DataManager local configuration. */
     if( DataMgrIsPortFFD(pACSConfig) && DataMgrIsFFDInhibtMode( ) )
     {
-       pACSConfig->priority = LOG_PRIORITY_4;
+   pACSConfig->priority = LOG_PRIORITY_4;
     }
 
-
+	
     if ((pACSConfig->mode == ACS_DOWNLOAD) && (pACSConfig->portType != ACS_PORT_NONE))
     {
        // Configure the ACS Download Task
        fpTask     = DataMgrDownloadTask;
-       bEnable    = FALSE;
+       bEnable   = FALSE;
        nMIFframes = 0xFFFFFFFF;
     }
     else
     {
        fpTask     = DataMgrTask;
-       bEnable    = TRUE;
+       bEnable   = TRUE;
        nMIFframes = taskInfo[taskId].MIFframes;
     }
 
@@ -1427,7 +1477,7 @@ UINT16 DataMgrBuildFailLog( UINT32 Channel, DATA_MNG_INFO *pDMInfo,
    strncpy_safe(pFailLog->Model, sizeof(pFailLog->Model),
      pDMInfo->ACS_Config.sModel,_TRUNCATE);
    strncpy_safe(pFailLog->ID,sizeof(pFailLog->ID),pDMInfo->ACS_Config.sID,_TRUNCATE);
-
+   
    pFailLog->nChannel = Channel;
 
    strncpy_safe(pFailLog->RecordStatus,   sizeof(pFailLog->RecordStatus),
@@ -1513,7 +1563,7 @@ static void DataMgrDownloadTask( void *pParam )
             // Request the next record to download from the interface
             pDMInfo->DL.pDataSrc = DataMgrRequestRecord ( pDMInfo->ACS_Config.portType,
                                                           pDMInfo->ACS_Config.nPortIndex,
-                                                          &RequestStatus, &pDMInfo->DL.nBytes,
+                                                          &RequestStatus, &pDMInfo->DL.nBytes, 
                                                           pMsgBuf->pDL_Status );
             // Did the interface report no records or no more records to download?
             if ( RequestStatus == DL_NO_RECORDS )
@@ -1831,7 +1881,12 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
- *
+ * 
+ * *****************  Version 84  *****************
+ * User: Jim Mood     Date: 11/09/12   Time: 6:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1131 Recording busy status
+ * 
  * *****************  Version 83  *****************
  * User: John Omalley Date: 12-11-09   Time: 4:10p
  * Updated in $/software/control processor/code/system
@@ -1841,7 +1896,7 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
  * User: John Omalley Date: 12-11-09   Time: 10:34a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- *
+ * 
  * *****************  Version 81  *****************
  * User: Melanie Jutras Date: 12-10-23   Time: 1:08p
  * Updated in $/software/control processor/code/system
@@ -2210,4 +2265,4 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
  *
  *
  ***************************************************************************/
- 
+

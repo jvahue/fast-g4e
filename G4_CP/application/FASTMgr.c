@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 113 $  $Date: 12-11-08 3:03p $
+   $Revision: 114 $  $Date: 11/09/12 6:16p $
 
 
 ******************************************************************************/
@@ -35,6 +35,8 @@
 #include "Assert.h"
 #include "Version.h"
 #include "CBitManager.h"
+#include "EngineRun.h"
+#include "DataManager.h"
 
 #ifndef WIN32
 #include "ProcessorInit.h"
@@ -58,8 +60,9 @@
 #define FAST_REC_EVENTS_EVENTS      0x2
 #define FAST_REC_EVENTS_ENG_RUN     0x4
 #define FAST_REC_EVENTS_DATA_MGR    0x8
-#define FAST_REC_EVENTS_LEGACY_REC  0x10
-#define FAST_REC_EVENTS_ETM_LOG     0x20
+#define FAST_REC_EVENTS_ETM_LOG     0x10
+
+
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -305,7 +308,8 @@ void FAST_Init(void)
 
   //Setup events for recording/not recording status change.
   TH_SetRecStateChangeEvt(FAST_REC_EVENTS_TIME_HIST,FAST_OnRecordingChange);
-  //EngRunSetRecStateChangeEvt(FAST_REC_EVENTS_ENG_RUN,FAST_OnRecordingChange);
+  DataMgrSetRecStateChangeEvt(FAST_REC_EVENTS_DATA_MGR,FAST_OnRecordingChange);
+  EngRunSetRecStateChangeEvt(FAST_REC_EVENTS_ENG_RUN,FAST_OnRecordingChange);
   EventSetRecStateChangeEvt(FAST_REC_EVENTS_EVENTS,FAST_OnRecordingChange);
   LogETM_SetRecStateChangeEvt(FAST_REC_EVENTS_ETM_LOG, FAST_OnRecordingChange);
 }
@@ -457,9 +461,8 @@ void FAST_FSMRfRun(BOOLEAN Run, INT32 param)
  *
  * Parameters:  [in] param: not used, just to match FSM call sig.
  *
- * Returns:     BOOLEAN: TRUE: Files are pending round-trip verification
- *                       FALSE: There are no files pending round-trip
- *                              verification
+ * Returns:     BOOLEAN: TRUE: RF Power is on
+ *                       FALSE: RF Power is off
  *
  * Notes:
  *
@@ -467,6 +470,28 @@ void FAST_FSMRfRun(BOOLEAN Run, INT32 param)
 BOOLEAN FAST_FSMRfGetState(INT32 param)
 {
   return FASTStatus.RfGsmEnable;
+}
+
+
+
+/******************************************************************************
+ * Function:    FAST_FSMRecordGetState | IMPLEMENTS GetState() INTERFACE to
+ *                                     | FAST STATE MGR
+ *
+ * Description:  Return the recording/not recording state of the following
+ *
+ *
+ * Parameters:  [in] param: not used, just to match FSM call sig.
+ *
+ * Returns:     BOOLEAN: TRUE:
+ *                       FALSE:
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+BOOLEAN FAST_FSMRecordGetState(INT32 param)
+{
+  return m_IsRecordBusy;
 }
 
 
@@ -588,7 +613,7 @@ void FAST_Task(void* pParam)
           FASTStatus.Recording)
   {
     DataMgrRecord(FALSE);                      //Signal Data Mgr and wait for
-    if(DataMgrRecordFinished())                //acknowledge
+    if(!m_IsRecordBusy)                        //acknowledge
     {
        LogWriteSystem(APP_ID_END_OF_RECORDING, LOG_PRIORITY_LOW, 0, 0, NULL);
        GSE_DebugStr(VERBOSE,TRUE,"FAST: End Record");
@@ -790,7 +815,7 @@ void FAST_UploadCheckTask(void* pParam)
       // Start an auto-download only if the system is not already downloading,
       // not recording, not already uploading and has not tried to auto-download before
       if (!FASTStatus.AutoDownload && !DataMgrDownloadingACS() &&
-          !FASTStatus.Recording    && !UploadMgr_IsUploadInProgress())
+          !m_IsRecordBusy    && !UploadMgr_IsUploadInProgress())
       {
          FASTStatus.AutoDownload = DataMgrStartDownload();
          UploadImmediateAfterDownload = FASTStatus.AutoDownload;
@@ -1062,8 +1087,6 @@ void FAST_AtStartOfRecord(void)
   UploadMgr_SetUploadEnable(FALSE);
   DataMgrRecord(TRUE);                     //Signal Data Mgr
 
-  //New method to signal record busy/not busy:
-  FAST_OnRecordingChange(FAST_REC_EVENTS_LEGACY_REC, TRUE);
 }
 
 /******************************************************************************
@@ -1080,8 +1103,6 @@ void FAST_AtStartOfRecord(void)
  *****************************************************************************/
 void FAST_AtEndOfRecord(void)
 {
-  //New method to signal record busy/not busy:
-  FAST_OnRecordingChange(FAST_REC_EVENTS_LEGACY_REC, FALSE);
 }
 
 /******************************************************************************
@@ -1531,12 +1552,17 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 114  *****************
+ * User: Jim Mood     Date: 11/09/12   Time: 6:16p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 Record busy status
  *
  * *****************  Version 113  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1131 - Busy Recording Logic
- * 
+ *
  * *****************  Version 112  *****************
  * User: John Omalley Date: 12-11-07   Time: 8:35a
  * Updated in $/software/control processor/code/application
