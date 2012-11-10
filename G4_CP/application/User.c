@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 105 $  $Date: 11/08/12 4:27p $
+   $Revision: 106 $  $Date: 11/10/12 11:17a $
 
 ******************************************************************************/
 
@@ -2979,6 +2979,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
  *  MODIFICATIONS
  *    $History: User.c $
  *
+ * *****************  Version 106  *****************
+ * User: Jeff Vahue   Date: 11/10/12   Time: 11:17a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1107 - 128 Bit parsing fix.
+ * 
  * *****************  Version 105  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:27p
  * Updated in $/software/control processor/code/application
