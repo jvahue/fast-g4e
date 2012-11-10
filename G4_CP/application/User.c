@@ -2774,15 +2774,16 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   BOOLEAN bResult;
   UINT32  decValue;
   CHAR    hexString[11]; // "0X" + 8 hex-chars + 1 null
+  CHAR*   leftOver;
 
   // Convert the input string to decimal integer if possible.
-  decValue = strtoul(SetStr, NULL, 10);
+  decValue = strtoul(SetStr, &leftOver, 10);
 
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
   // test errno to see if ERANGE was flagged.
 
-  if (errno != ERANGE)
+  if (errno != ERANGE && leftOver == NULL)
   {
     sprintf(hexString,"0x%08X", decValue);
     bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, MsgEnumTbl, Min, Max);
@@ -2977,7 +2978,7 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 105  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:27p
  * Updated in $/software/control processor/code/application
