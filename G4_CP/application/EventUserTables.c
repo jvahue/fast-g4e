@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 26 $  $Date: 12-10-31 2:01p $
+$Revision: 28 $  $Date: 12-11-07 2:52p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -124,8 +124,8 @@ static USER_MSG_TBL eventCmd [] =
   { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
   { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "ENABLE_HISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_BOOLEAN, USER_RW,   &configEventTemp.bEnableTH,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "POST_HISTORY_S", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_INT32,   USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
+  { "POST_HISTORY_S", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.postTime_s,        0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            LM_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
   { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_EVENT_SENSORS, NULL                },
@@ -566,22 +566,22 @@ static USER_MSG_TBL eventSensrTbl[] =
    { "S13",  eventS13Tbl,  NULL, NO_HANDLER_DATA },
    { "S14",  eventS14Tbl,  NULL, NO_HANDLER_DATA },
    { "S15",  eventS15Tbl,  NULL, NO_HANDLER_DATA },
-   { "S16",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
-   { "S17",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
-   { "S18",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
-   { "S19",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
-   { "S20",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
-   { "S21",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
-   { "S22",  eventS2Tbl,   NULL, NO_HANDLER_DATA },
-   { "S23",  eventS3Tbl,   NULL, NO_HANDLER_DATA },
-   { "S24",  eventS4Tbl,   NULL, NO_HANDLER_DATA },
-   { "S25",  eventS5Tbl,   NULL, NO_HANDLER_DATA },
-   { "S26",  eventS6Tbl,   NULL, NO_HANDLER_DATA },
-   { "S27",  eventS7Tbl,   NULL, NO_HANDLER_DATA },
-   { "S28",  eventS8Tbl,   NULL, NO_HANDLER_DATA },
-   { "S29",  eventS9Tbl,   NULL, NO_HANDLER_DATA },
-   { "S30",  eventS10Tbl,  NULL, NO_HANDLER_DATA },
-   { "S31",  eventS1Tbl,   NULL, NO_HANDLER_DATA },
+   { "S16",  eventS16Tbl,  NULL, NO_HANDLER_DATA },
+   { "S17",  eventS17Tbl,  NULL, NO_HANDLER_DATA },
+   { "S18",  eventS18Tbl,  NULL, NO_HANDLER_DATA },
+   { "S19",  eventS19Tbl,  NULL, NO_HANDLER_DATA },
+   { "S20",  eventS20Tbl,  NULL, NO_HANDLER_DATA },
+   { "S21",  eventS21Tbl,  NULL, NO_HANDLER_DATA },
+   { "S22",  eventS22Tbl,  NULL, NO_HANDLER_DATA },
+   { "S23",  eventS23Tbl,  NULL, NO_HANDLER_DATA },
+   { "S24",  eventS24Tbl,  NULL, NO_HANDLER_DATA },
+   { "S25",  eventS25Tbl,  NULL, NO_HANDLER_DATA },
+   { "S26",  eventS26Tbl,  NULL, NO_HANDLER_DATA },
+   { "S27",  eventS27Tbl,  NULL, NO_HANDLER_DATA },
+   { "S28",  eventS28Tbl,  NULL, NO_HANDLER_DATA },
+   { "S29",  eventS29Tbl,  NULL, NO_HANDLER_DATA },
+   { "S30",  eventS30Tbl,  NULL, NO_HANDLER_DATA },
+   { "S31",  eventS31Tbl,  NULL, NO_HANDLER_DATA },
    { NULL,   NULL,         NULL, NO_HANDLER_DATA }
 };
 
@@ -901,7 +901,7 @@ USER_MSG_TBL rootEventTableMsg = {"EVENTTABLE", eventTableRoot, NULL, NO_HANDLER
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
-								 
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -1143,7 +1143,7 @@ USER_HANDLER_RESULT Event_ShowConfig(USER_DATA_TYPE DataType,
    for (i = 0; i < MAX_EVENTS && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
-      sprintf(sLabel, "%s[%d]", sLabelStem, i);
+      snprintf(sLabel, sizeof(sLabel), "%s[%d]", sLabelStem, i);
 
       result = USER_RESULT_ERROR;
       if ( User_OutputMsgString( sLabel, FALSE ) )
@@ -1199,7 +1199,7 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
    for (i = 0; i < MAX_TABLES && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
-      sprintf(sLabel, "%s[%d]", sLabelStem, i);
+      snprintf(sLabel, sizeof(sLabel), "%s[%d]", sLabelStem, i);
 
       result = USER_RESULT_ERROR;
       if ( User_OutputMsgString( sLabel, FALSE ) )
@@ -1300,12 +1300,22 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- * 
+ *
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-11-07   Time: 2:52p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107
+ *
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 12-11-06   Time: 11:12a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 26  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:01p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format errors
- * 
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 26 $  $Date: 12-10-23 2:07p $
+  $Revision: 30 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -164,8 +164,7 @@ typedef enum
    REGION_E          = 4,
    REGION_F          = 5,
    MAX_TABLE_REGIONS = 6,
-   REGION_NOT_FOUND  = 255,
-
+   REGION_NOT_FOUND  = MAX_TABLE_REGIONS
 } EVENT_REGION;
 
 typedef enum
@@ -220,8 +219,8 @@ typedef struct
    BITARRAY128         sensorMap;                   /* Bit encoded flags of sensors to   */
                                                     /* sample during the event           */
    BOOLEAN             bEnableTH;                   /* Time History Enabled for Event    */
-   INT32               preTime_s;                   /* Amount of pre-time history        */
-   INT32               postTime_s;                  /* Amount of post-time history       */
+   UINT32              preTime_s;                   /* Amount of pre-time history        */
+   UINT32              postTime_s;                  /* Amount of post-time history       */
    LOG_PRIORITY        priority;                    /* Priority to write the event log   */
    EVENT_TABLE_INDEX   eventTableIndex;             /* Related Event Table to process    */
 }EVENT_CFG;
@@ -236,7 +235,7 @@ typedef struct
 /* Event Sensor Summary */
 typedef struct
 {
-   SENSOR_INDEX SensorIndex;
+   SENSOR_INDEX sensorIndex;
    BOOLEAN      bValid;
    TIMESTAMP    timeMinValue;
    FLOAT32      fMinValue;
@@ -265,8 +264,8 @@ typedef struct
    INT8              sName[MAX_EVENT_NAME];         /* the name of the event             */
    INT8              sID  [MAX_EVENT_ID];           /* 4 char cfg id for the event       */
    EVENT_TABLE_INDEX tableIndex;                    /* Index of table being monitored    */
-   INT32             preTime_s;                     /* Amount of history prior to event  */
-   INT32             postTime_s;                    /* Amount of history post event      */
+   UINT32            preTime_s;                     /* Amount of history prior to event  */
+   UINT32            postTime_s;                    /* Amount of history post event      */
 } EVENT_HDR;
 #pragma pack()
 
@@ -411,7 +410,7 @@ typedef struct
    UINT32       seqNumber;
    BOOLEAN      bStarted;                           /* Has the table been entered        */
    UINT32       nStartTime_ms;                      /* When was the table entered        */
-   LINE_CONST   segment[MAX_TABLE_REGIONS][MAX_REGION_SEGMENTS];
+   LINE_CONST   segment[MAX_TABLE_REGIONS+1][MAX_REGION_SEGMENTS];
                                                     /* constants used to calculate the   */
                                                     /* line thresholds                   */
    EVENT_REGION currentRegion;                      /* Current Region the sensor is in   */
@@ -425,7 +424,7 @@ typedef struct
    FLOAT32      fMaxSensorValue;                    /* Max value the sensor reached      */
    UINT32       nMaxSensorElaspedTime_ms;           /* Time the max value was reached    */
    EVENT_REGION maximumCfgRegion;                   /* Maximum configured region         */
-   REGION_STATS regionStats[MAX_TABLE_REGIONS];     /* Stats for each region             */
+   REGION_STATS regionStats[MAX_TABLE_REGIONS+1];   /* Stats for each region             */
    INT8         nActionReqNum;
 } EVENT_TABLE_DATA;
 
@@ -437,7 +436,8 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
                                    Package Exports
 ******************************************************************************/
 #undef EXPORT
-#if defined( EVENT_BODY )
+
+#if defined ( EVENT_BODY )
    #define EXPORT
 #else
    #define EXPORT extern
@@ -446,14 +446,13 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 #if defined ( EVENT_BODY )
    // Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
    USER_ENUM_TBL evt_Region_UserEnumType [] =
-   { { "NONE",             REGION_NOT_FOUND    },
-     { "REGION_A",         REGION_A            },
+   { { "REGION_A",         REGION_A            },
      { "REGION_B",         REGION_B            },
      { "REGION_C",         REGION_C            },
      { "REGION_D",         REGION_D            },
      { "REGION_E",         REGION_E            },
      { "REGION_F",         REGION_F            },
-     { "MAX_REGIONS",      MAX_TABLE_REGIONS   },
+     { "NONE",             REGION_NOT_FOUND    },
      { NULL,          0                        }
    };
 #else
@@ -470,13 +469,33 @@ EXPORT void    EventsInitialize        ( void );
 EXPORT void    EventTablesInitialize   ( void );
 EXPORT UINT16  EventGetBinaryHdr       ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  EventTableGetBinaryHdr  ( void *pDest, UINT16 nMaxByteSize );
-EXPORT BOOLEAN Event_FSMAppBusyGetState( INT32 param );
+EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // EVENT_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ *
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
  * 
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-11-08   Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 - Busy Recording Logic
+ * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-11-06   Time: 11:12a
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ *
+ * *****************  Version 27  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 12:51p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:07p
  * Updated in $/software/control processor/code/application

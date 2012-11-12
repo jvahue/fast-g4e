@@ -11,7 +11,7 @@
          Description:
 
          VERSION
-         $Revision: 29 $  $Date: 12-10-30 5:48p $
+         $Revision: 30 $  $Date: 12-11-09 5:04p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -190,8 +190,8 @@ USER_HANDLER_RESULT Flt_UserMessageRecentAll(USER_DATA_TYPE DataType,
                                              const void *SetPtr,
                                              void **GetPtr)
 {
-   CHAR  HdrStr[USER_MAX_MSG_STR_LEN * 2];
-   static CHAR  ResultBuffer[USER_SINGLE_MSG_MAX_SIZE];
+   CHAR  sHdrStr[USER_MAX_MSG_STR_LEN * 2];
+   static CHAR  sResultBuffer[USER_SINGLE_MSG_MAX_SIZE];
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    CHAR  *pStr;
    UINT8 i;
@@ -202,11 +202,11 @@ USER_HANDLER_RESULT Flt_UserMessageRecentAll(USER_DATA_TYPE DataType,
    for (i = 0; i < FLT_LOG_BUF_ENTRIES; i++)
    {
       // Create Header "fault.recent[i]"
-      sprintf ( HdrStr, "\r\nFAULT.RECENT[%d]\r\n", i);
+      snprintf ( sHdrStr, sizeof(sHdrStr), "\r\nFAULT.RECENT[%d]\r\n", i);
 
       // Append header
-      len = strlen ( HdrStr );
-      memcpy ( (void *) &ResultBuffer[nOffset], HdrStr, len);
+      len = strlen ( sHdrStr );
+      memcpy ( (void *) &sResultBuffer[nOffset], sHdrStr, len);
       nOffset += len;
 
       // Get Entry i data
@@ -214,12 +214,12 @@ USER_HANDLER_RESULT Flt_UserMessageRecentAll(USER_DATA_TYPE DataType,
 
       // Append Entry i data
       len = strlen ( pStr );
-      memcpy ( (void *) &ResultBuffer[nOffset], pStr, len );
+      memcpy ( (void *) &sResultBuffer[nOffset], pStr, len );
       nOffset += len;
    }
 
-   ResultBuffer[nOffset] = NULL;  // Terminate String
-   User_OutputMsgString(ResultBuffer, FALSE);
+   sResultBuffer[nOffset] = NULL;  // Terminate String
+   User_OutputMsgString(sResultBuffer, FALSE);
 
    return result;
 }
@@ -240,10 +240,10 @@ USER_HANDLER_RESULT Flt_UserMessageRecentAll(USER_DATA_TYPE DataType,
 static CHAR *Flt_GetFltBuffEntry ( UINT8 index )
 {
   CHAR *pStr;
-  INT8 i, UsrIdx;
-  TIMESTRUCT Ts;
-  static CHAR  RecentLogStr[256];
-  static CHAR* FltEmptyStr = "Fault entry empty\r\n";
+  INT8 i, usrIdx;
+  TIMESTRUCT ts;
+  static CHAR  sRecentLogStr[256];
+  static CHAR* sFltEmptyStr = "Fault entry empty\r\n";
 
   // faultIndex points to the oldest fault as shown below
   // |2nd newest|newest|oldest|2nd oldest|...
@@ -253,30 +253,30 @@ static CHAR *Flt_GetFltBuffEntry ( UINT8 index )
   // The Fault data is returned in chronological order, with the most recent
   // fault at index 1, and the oldest fault at index FLT_LOG_BUF_ENTRIES.
   // Compute the LOG_BUF index, "i" based on the user manager index "Index".
-  UsrIdx = index + 1;
-  i = (i - UsrIdx) < 0 ? FLT_LOG_BUF_ENTRIES + (i - UsrIdx) : i - UsrIdx;
+  usrIdx = index + 1;
+  i = (i - usrIdx) < 0 ? FLT_LOG_BUF_ENTRIES + (i - usrIdx) : i - usrIdx;
 
   if ( 0 != faultHistory[i].count )
   {
-    CM_ConvertTimeStamptoTimeStruct( &faultHistory[i].Ts, &Ts);
+    CM_ConvertTimeStamptoTimeStruct( &faultHistory[i].Ts, &ts);
 
     // Stringify the Log data
-    snprintf( RecentLogStr, 80, "%s(%x) at %02d:%02d:%02d %02d/%02d/%4d\r\n",
+    snprintf( sRecentLogStr, 80, "%s(%x) at %02d:%02d:%02d %02d/%02d/%4d\r\n",
         SystemLogIDString( faultHistory[i].Id),
         faultHistory[i].Id,
-        Ts.Hour,
-        Ts.Minute,
-        Ts.Second,
-        Ts.Month,
-        Ts.Day,
-        Ts.Year);
+        ts.Hour,
+        ts.Minute,
+        ts.Second,
+        ts.Month,
+        ts.Day,
+        ts.Year);
 
     // Return log data string
-    pStr = RecentLogStr;
+    pStr = sRecentLogStr;
   }
   else
   {
-    pStr = FltEmptyStr;
+    pStr = sFltEmptyStr;
   }
 
   return pStr;
@@ -313,12 +313,12 @@ USER_HANDLER_RESULT Flt_ShowConfig(USER_DATA_TYPE DataType,
                                    const void *SetPtr,
                                    void **GetPtr)
 {
-  const CHAR LabelStem[] = "\r\n\r\nFAULT";
+  const CHAR sLabelStem[] = "\r\n\r\nFAULT";
   USER_HANDLER_RESULT result;
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];
+  CHAR sLabel[USER_MAX_MSG_STR_LEN * 3];
 
   //Top-level name is a single indented space
-  CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+  CHAR sBranchName[USER_MAX_MSG_STR_LEN] = " ";
 
   // Set pointer into my CFG table.
   USER_MSG_TBL*  pCfgTbl = CfgCmd;
@@ -326,12 +326,12 @@ USER_HANDLER_RESULT Flt_ShowConfig(USER_DATA_TYPE DataType,
   result = USER_RESULT_OK;
 
   // Display element info above each set of data.
-  sprintf(Label, "%s", LabelStem);
+  snprintf(sLabel, sizeof(sLabel), "%s", sLabelStem);
 
   result = USER_RESULT_ERROR;
-  if (User_OutputMsgString(Label, FALSE ) )
+  if (User_OutputMsgString(sLabel, FALSE ) )
   {
-    result = User_DisplayConfigTree(BranchName, pCfgTbl, 0, 0, NULL);
+    result = User_DisplayConfigTree(sBranchName, pCfgTbl, 0, 0, NULL);
   }
   return result;
 }
@@ -398,11 +398,16 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
  *
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 12-11-09   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Changed Actions to UINT8
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -12,7 +12,7 @@
  Description:
 
  VERSION
- $Revision: 49 $  $Date: 12-10-27 4:58p $
+ $Revision: 50 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -166,7 +166,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( CMUTIL_BODY )
+#if defined ( CMUTIL_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -202,6 +202,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 50  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 49  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:58p

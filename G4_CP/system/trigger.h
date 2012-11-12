@@ -1,17 +1,17 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
 
     File:        trigger.h
-     
 
-    Description: Function prototypes and defines for the trigger processing. 
+
+    Description: Function prototypes and defines for the trigger processing.
 
   VERSION
-  $Revision: 36 $  $Date: 12-10-23 2:56p $       
+  $Revision: 38 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -27,7 +27,7 @@
 #include "Evaluator.h"
 
 /******************************************************************************
-                             Package Defines                               
+                             Package Defines
 ******************************************************************************/
 #define MAX_TRIG_EXPR_OPRNDS  8
 #define MAX_TRIGGERS         64
@@ -43,7 +43,7 @@
 #define TRIGGER_SENSOR_DEFAULT  SENSOR_UNUSED,             /*SensorIndex */\
                                 TRIGGER_CRITERIA_DEFAULT,  /*Start       */\
                                 TRIGGER_CRITERIA_DEFAULT   /*End         */
-                          
+
 #define TRIGGER_DEFAULT "Unused",           /*&TriggerName[MAX_TRIGGER_NAME]*/\
                         TRIGGER_SENSOR_DEFAULT,\
                         TRIGGER_SENSOR_DEFAULT,\
@@ -55,7 +55,7 @@
                         EVAL_EXPR_CFG_DEFAULT, /*Start Expression*/\
                         EVAL_EXPR_CFG_DEFAULT  /*End Expression*/
 
-                        
+
 
 #define TRIGGER_CONFIG_DEFAULT    TRIGGER_DEFAULT,/*01*/\
                                   TRIGGER_DEFAULT,\
@@ -124,9 +124,9 @@
 
 
 /******************************************************************************
-                             Package Typedefs                              
+                             Package Typedefs
 ******************************************************************************/
-typedef enum 
+typedef enum
 {
    TRIGGER_0   =   0, TRIGGER_1   =   1, TRIGGER_2   =   2, TRIGGER_3   =   3,
    TRIGGER_4   =   4, TRIGGER_5   =   5, TRIGGER_6   =   6, TRIGGER_7   =   7,
@@ -145,9 +145,9 @@ typedef enum
    TRIGGER_56  =  56, TRIGGER_57  =  57, TRIGGER_58  =  58, TRIGGER_59  =  59,
    TRIGGER_60  =  60, TRIGGER_61  =  61, TRIGGER_62  =  62, TRIGGER_63  =  63,
    TRIGGER_UNUSED = 255
-} TRIGGER_INDEX;                 
+} TRIGGER_INDEX;
 
-typedef enum 
+typedef enum
 {
    TR_1HZ            =  1,  /*  1Hz Rate    */
    TR_2HZ            =  2,  /*  2Hz Rate    */
@@ -194,7 +194,7 @@ typedef struct
 {
   SENSOR_INDEX   SensorIndex;
   TRIG_CRITERIA  Start;
-  TRIG_CRITERIA  End;             
+  TRIG_CRITERIA  End;
 } TRIG_SENSOR;
 
 typedef struct
@@ -218,7 +218,7 @@ typedef struct
   BOOLEAN      bInitialized;
   BOOLEAN      bValid;
   FLOAT32      fMinValue;
-  FLOAT32      fMaxValue;  
+  FLOAT32      fMaxValue;
   FLOAT32      fAvgValue;
   FLOAT32      fTotal;
 } TRIG_SNSR_SUMMARY;
@@ -245,7 +245,7 @@ typedef struct
 #pragma pack()
 
 typedef struct
-{ 
+{
   // Run Time Data
   TRIGGER_INDEX      TriggerIndex;
   TRIG_STATE         State;
@@ -267,7 +267,7 @@ typedef struct
   TRIG_END_TYPE      EndType;
 } TRIGGER_DATA;
 
-typedef struct  
+typedef struct
 {
   SENSOR_INDEX  snsrIdx;
   FLOAT32       fValue;
@@ -284,7 +284,7 @@ typedef TRIGGER_CONFIG TRIGGER_CONFIGS[MAX_TRIGGERS];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( TRIGGER_BODY )
+#if defined ( TRIGGER_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -317,13 +317,13 @@ extern USER_ENUM_TBL TriggerIndexType[];
 ******************************************************************************/
 EXPORT void    TriggerInitialize   ( void );
 EXPORT BOOLEAN TriggerIsActive     ( BITARRAY128 * Flags );
-EXPORT BOOLEAN TriggerCompareValues ( FLOAT32 LVal, COMPARISON Compare, 
+EXPORT BOOLEAN TriggerCompareValues ( FLOAT32 LVal, COMPARISON Compare,
                                       FLOAT32 RVal, FLOAT32 PrevVal );
-EXPORT UINT16  TriggerGetSystemHdr  ( void *pDest, UINT16 nMaxByteSize ); 
-EXPORT BOOLEAN TriggerGetState( INT32 TrigIdx );
-EXPORT BOOLEAN TriggerValidGetState( INT32 TrigIdx );
+EXPORT UINT16  TriggerGetSystemHdr  ( void *pDest, UINT16 nMaxByteSize );
+EXPORT BOOLEAN TriggerGetState     ( TRIGGER_INDEX TrigIdx );
+EXPORT BOOLEAN TriggerValidGetState( TRIGGER_INDEX TrigIdx );
 
-EXPORT BOOLEAN TriggerIsConfigured(INT32 trigIdx);
+EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
 
 
 #endif // TRIGGER_H
@@ -331,164 +331,174 @@ EXPORT BOOLEAN TriggerIsConfigured(INT32 trigIdx);
  *  MODIFICATIONS
  *    $History: trigger.h $
  * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * Code review
+ *
  * *****************  Version 36  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:56p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Trigger fix for using SensorArray
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Refactor for common Sensor snsrSummary
- * 
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
  * Updated in $/software/control processor/code/system
  * SCR 1124 - Packed the configuration structures for ARINC429 Mgr,
  * Sensors and Triggers. Suppressed the alignment warnings for those three
  * objects also.
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:28p
  * Updated in $/software/control processor/code/system
  * FAST 2 increase operands 4 to 8
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 6/07/12    Time: 7:15p
  * Updated in $/software/control processor/code/system
- * Change test for TriggerIsConfigured per EngineRun reqd review. 
- * 
+ * Change test for TriggerIsConfigured per EngineRun reqd review.
+ *
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:07p
  * Updated in $/software/control processor/code/system
  * externalize the trigger index table so it can be asscessed by enginerun
  * et al
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 4/23/12    Time: 8:02p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2 Evaluator cleanup
- * 
+ *
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 4/11/12    Time: 5:08p
  * Updated in $/software/control processor/code/system
  * FAST2  Trigger uses Evaluator
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2 Refactoring names
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:52p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Trigger processing
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:57a
  * Updated in $/software/control processor/code/system
  * SCR 575: GSM Enable when engine status is lost.  (Part of changes for
  * the Fast State Machine)
- * 
+ *
  * *****************  Version 23  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #845 Code Review Updates
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 7/29/10    Time: 4:06p
  * Updated in $/software/control processor/code/system
  * SCR# 698 - cleanup
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor3  Date: 7/29/10    Time: 1:31p
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix for code review findings.
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 7/27/10    Time: 2:27p
  * Updated in $/software/control processor/code/system
  * SCR #282 Misc - Shutdown Processing
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 7/20/10    Time: 9:05a
  * Updated in $/software/control processor/code/system
  * SCR 294 - Add system binary header
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 6/18/10    Time: 4:40p
  * Updated in $/software/control processor/code/system
  * SCR# 649 - add NO_COMPARE back in for use in Signal Tests.
- * 
+ *
  * *****************  Version 16  *****************
  * User: John Omalley Date: 6/14/10    Time: 3:32p
  * Updated in $/software/control processor/code/system
  * SCR 546 - Add Sensor Indexes to the Trigger End Log
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor3  Date: 6/10/10    Time: 10:44a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Changes based on Code Review
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 5/03/10    Time: 4:07p
  * Updated in $/software/control processor/code/system
  * SCR 530: Error: Trigger NO_COMPARE infinite logs
  * Removed NO_COMPARE from code.
- * 
+ *
  * *****************  Version 13  *****************
  * User: John Omalley Date: 1/28/10    Time: 9:23a
  * Updated in $/software/control processor/code/system
  * SCR 408
  * * Added minimum, maximum and average for all sensors.
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12/17/09   Time: 5:49p
  * Updated in $/software/control processor/code/system
  * SCR 214
  * Removed Trigger END state because it was not used
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 11/19/09   Time: 2:40p
  * Updated in $/software/control processor/code/system
  * SCR 323 -
  * Removed nStartTime_ms from the trigger logs.
- * 
+ *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 10/26/09   Time: 1:57p
  * Updated in $/software/control processor/code/system
  * SCR 292
  * - Rate Countdown correction
- * 
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 10/22/09   Time: 4:25p
  * Updated in $/software/control processor/code/system
  * SCR 136
  * - Packed Log Structures
- * 
+ *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 10/21/09   Time: 4:14p
  * Updated in $/software/control processor/code/system
  * SCR 311
- * 1. Updated the previous logic to only compare to NOT_EQUALS. 
+ * 1. Updated the previous logic to only compare to NOT_EQUALS.
  * 2. Calculated the rate countdown during initialization and then just
- * reload each time the countdown expires. 
+ * reload each time the countdown expires.
  * 3. Applied a delta to epsilon for floating point number comparisons
- * EQUAL and NOT_EQUAL. 
- * 
+ * EQUAL and NOT_EQUAL.
+ *
  ***************************************************************************/

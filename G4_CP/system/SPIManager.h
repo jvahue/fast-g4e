@@ -2,21 +2,21 @@
 #define SPI_MANAGER_H
 
 /******************************************************************************
-            Copyright (C) 2010-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2010-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         SPIManager.h
-    
+
     Description:  Function prototypes and define for SPI Manager
-    
+
     VERSION
-      $Revision: 11 $  $Date: 8/28/12 1:43p $
-    
+      $Revision: 12 $  $Date: 12-11-12 12:01p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -28,8 +28,8 @@
 ******************************************************************************/
 #undef SPI_DEV
 #define SPI_DEV(Id, Rate, HndlrFunc)
-//                         Rate    Handler               
-//         Id             (mSec)   Function              
+//                         Rate    Handler
+//         Id             (mSec)   Function
 #define SPI_DEV_LIST                                          \
   SPI_DEV(SPI_RTC,          250,  SPIMgr_UpdateRTC),          \
   SPI_DEV(SPI_AC_BUS_VOLT,   10,  SPIMgr_UpdateAnalogDevice), \
@@ -45,7 +45,7 @@
                                  Package Typedefs
 ******************************************************************************/
 
-// enum of the SPI devices 
+// enum of the SPI devices
 #undef  SPI_DEV
 #define SPI_DEV(Id, Rate, HndlrFunc) Id
 typedef enum {
@@ -62,7 +62,7 @@ typedef RESULT (*ADC_FUNC )(FLOAT32* adcValue);
 //SPI info structure
 typedef struct {
   UINT32       rate;
-  SPI_DEV_FUNC HandlerFunc;
+  SPI_DEV_FUNC pHandlerFunc;
 }SPI_MGR_INFO;
 
 //SPI runtime info structure
@@ -70,8 +70,8 @@ typedef struct {
 typedef struct {
   UINT32       rate;        // Rate at which the managed device is updated
   UINT32       counterMs;   // Count in mSecs since the device was last updated.
-  SPI_DEV_FUNC HandlerFunc; // Pointer to SPIManager handler-function for this device.
-  ADC_FUNC     AdcFunc;     // Pointer to ADC_GetXXXX function for this device.
+  SPI_DEV_FUNC pHandlerFunc;// Pointer to SPIManager handler-function for this device.
+  ADC_FUNC     pAdcFunc;    // Pointer to ADC_GetXXXX function for this device.
   FLOAT32      adcValue;    // Current value of the analog device when applicable
   RESULT       adcResult;   // Last result of call to analog device when applicable
 }SPI_RUNTIME_INFO;
@@ -88,7 +88,7 @@ typedef enum
 typedef enum
 {
   OP_STATUS_PENDING,
-  OP_STATUS_IN_PROGRESS  
+  OP_STATUS_IN_PROGRESS
 }OP_STATE;
 
 // I/O operation results
@@ -106,15 +106,15 @@ typedef enum
   DATA_PASSING_PTR    // pass the data stored at the address SPIMGR_ENTRY.pData
 }DATA_PASSING;
 
-typedef struct  
+typedef struct
 {
   OP_TYPE      opType;       // Op type to be if read and writes are handled from single queue
-  OP_STATE     opState;  
+  OP_STATE     opState;
   IO_RESULT*   pResult;      // Pointer to a user-supplied flag to signal the op is compl
-  UINT32       addr;         // address for writing  
+  UINT32       addr;         // address for writing
   DATA_PASSING dataMethod;   // Defines the data-transfer method for this entity, data or pData
   UINT8        data[CQ_ENTRY_BUFFER_SIZE];
-  UINT8*       pData;        // Pointer to data be sent/recvd.  
+  UINT8*       pData;        // Pointer to data be sent/recvd.
   size_t       size;         // size to read/write
 }SPIMGR_ENTRY;
 
@@ -127,8 +127,8 @@ typedef struct
   UINT32 writeCount;
   UINT32 readCount;
   INT16 readFrom;
-  INT16 writeTo;  
-  char name[MAX_CIRCULAR_QUEUE_NAME];
+  INT16 writeTo;
+  CHAR  name[MAX_CIRCULAR_QUEUE_NAME];
 }CIRCULAR_QUEUE;
 
 // SPI Manager error logging structure
@@ -183,65 +183,70 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
 
 
 
-#endif // SPI_MANAGER_H        
+#endif // SPI_MANAGER_H
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.h $
- * 
+ *
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-11-12   Time: 12:01p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * FAST 2 Allow different queue sizes
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor2  Date: 5/26/11    Time: 1:17p
  * Updated in $/software/control processor/code/system
  * SCR #767 Enhancement - BIT for Analog Sensors
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 4:51p
  * Updated in $/software/control processor/code/system
  * SCR #845 Code Review Updates
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 8/17/10    Time: 6:43p
  * Updated in $/software/control processor/code/system
  * SCR #746 CfgMgr - Primary and Backup copies corrupted
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 5/07/10    Time: 4:36p
  * Updated in $/software/control processor/code/system
  * SCR #548 Strings in Logs
- * 
+ *
  * *****************  Version 4  *****************
  * User: Jeff Vahue   Date: 3/15/10    Time: 4:15p
  * Updated in $/software/control processor/code/system
  * LI Battery should only be read at 4Hz not 100Hz
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 7:33p
  * Updated in $/software/control processor/code/system
  * SCR 67 expand direct-to-device mode for all managed devices.
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:41p
  * Updated in $/software/control processor/code/system
  * SCR #67 fix spelling error in funct name
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:27p
  * Created in $/software/control processor/code/system
- * SCR 67 Adding SPIManager task. 
- * 
+ * SCR 67 Adding SPIManager task.
+ *
  *
  *****************************************************************************/

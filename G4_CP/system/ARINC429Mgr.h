@@ -1,21 +1,21 @@
 #ifndef ARINC429MGR_H
 #define ARINC429MGR_H
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    File:        Arinc429Mgr.h      
-    
-    Description: Contains data structures related to the Arinc429 
-    
+    File:        Arinc429Mgr.h
+
+    Description: Contains data structures related to the Arinc429
+
 VERSION
-     $Revision: 13 $  $Date: 12-10-27 4:57p $
-    
+     $Revision: 14 $  $Date: 12-11-01 6:44p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -28,23 +28,23 @@ VERSION
                                  Package Defines
 ******************************************************************************/
 #define ARINC429_MAX_WORDS          0x400   // TBD find actual number.  Should be less
-                                            //   than the number of sensors.  
+                                            //   than the number of sensors.
 #define ARINC429_MAX_PARAMS         256
-#define ARINC429_SSM_FAIL_MSG_SIZE  32      // CBIT SSM failure message size 
+#define ARINC429_SSM_FAIL_MSG_SIZE  32      // CBIT SSM failure message size
 
 #define MAX_CHANNEL_NAME            32
 
-// Arinc429 Raw Rx Software Buffer 
+// Arinc429 Raw Rx Software Buffer
 #define ARINC429_RAW_RX_BUFFER_SIZE 16384
 #define ARINC429_MAX_RECORDS        3200
 
 #define MFD_CYCLE_TIMEOUT           212
 
-#define ARINC429_DSB_TIMEOUT 0 
+#define ARINC429_DSB_TIMEOUT 0
 #define ARINC429_MAX_READS          32      // Max number of words to read per frame
 /******************** ARINC429 Manager GPA and GPB Decodes************************************/
 #define GPA_RX_CHAN(gpa)          ((gpa >>  0) & 0x03)
-#define GPA_WORD_FORMAT(gpa)      ((gpa >>  2) & 0x03)                
+#define GPA_WORD_FORMAT(gpa)      ((gpa >>  2) & 0x03)
 #define GPA_WORD_SIZE(gpa)        ((gpa >>  5) & 0x1F)
 #define GPA_SDI_DEFINITION(gpa)   ((gpa >> 10) & 0x03)
 #define GPA_IGNORE_SDI(gpa)       ((gpa >> 12) & 0x01)
@@ -116,7 +116,7 @@ VERSION
    RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT,\
    RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT, RX_PARAM_DEFAULT,\
    RX_PARAM_DEFAULT
- 
+
 #define ARINC429_RX_DEFAULT(RxStr)\
                                      RxStr, /* Name                 */\
                        ARINC429_SPEED_HIGH, /* Speed - High         */\
@@ -143,21 +143,22 @@ VERSION
                                      ARINC429_RX_DEFAULT("ARINC RX 2"),\
                                      ARINC429_RX_DEFAULT("ARINC RX 3"),\
                                      ARINC429_RX_DEFAULT("ARINC RX 4")
-                                    
-                                            
+
+
 #define ARINC429_TX_DEFAULT(TxStr)   TxStr,                     /* Name */\
                                      ARINC429_SPEED_HIGH,       /* Speed */\
                                      ARINC429_PARITY_ODD,       /* Parity   */\
                                      FALSE,                     /* Enable   */\
                                  ARINC429_TX_DONT_SWAP_LABEL    /* No label bit flip */
-                                     
+
 
 #define ARINC429_TX_ARRAY_DEFAULT    ARINC429_TX_DEFAULT("ARINC TX 1"),\
                                      ARINC429_TX_DEFAULT("ARINC TX 2")
-                              
+
 #define ARINC429_CFG_DEFAULT         ARINC429_RX_ARRAY_DEFAULT,\
-                                     ARINC429_TX_ARRAY_DEFAULT
-                                     
+                                     ARINC429_TX_ARRAY_DEFAULT,\
+                                     TRUE
+
 /********** CONFIG DEFAULTS END *************/
 
 /******************************************************************************
@@ -199,10 +200,10 @@ typedef enum
 } DISC_TYPE;
 
 // Note: This enumeration is used for the FailureCondition Array
-//       and ValidSSM and Arinc429_ErrMsg[] field of the ArincFilter. 
+//       and ValidSSM and Arinc429_ErrMsg[] field of the ArincFilter.
 //       The order is instrumental in the proper execution of failure logic.
 typedef enum {
-  SSM_FAIL_COUNT, 
+  SSM_FAIL_COUNT,
   SSM_NO_COMP_COUNT,
   SSM_TEST_DATA_COUNT,
   SSM_NORMAL,
@@ -210,33 +211,33 @@ typedef enum {
   END_OF_FAIL_COUNT
 } ARINC_FAIL_COUNT;
 
-typedef enum 
+typedef enum
 {
-  ARINC429_RX_PROTOCOL_STREAM, 
+  ARINC429_RX_PROTOCOL_STREAM,
   ARINC429_RX_PROTOCOL_CHANGE_ONLY,
   ARINC429_RX_PROTOCOL_REDUCE,
   ARINC429_RX_PROTOCOL_MAX
-} ARINC429_RX_PROTOCOL; 
+} ARINC429_RX_PROTOCOL;
 
-typedef enum 
+typedef enum
 {
   ARINC429_RX_SUB_NONE               = 0,
-  ARINC429_RX_SUB_PW305AB_MFD_REDUCE = 1, 
+  ARINC429_RX_SUB_PW305AB_MFD_REDUCE = 1,
   ARINC429_RX_SUB_PROTOCOL_MAX
-} ARINC429_RX_SUB_PROTOCOL; 
+} ARINC429_RX_SUB_PROTOCOL;
 
-typedef enum 
+typedef enum
 {
   ARINC429_STATUS_OK = 0,           // Arinc429 Enabled and OK
   ARINC429_STATUS_FAULTED_PBIT,     // Arinc429 Enabled but currently Faulted PBIT
-                                    //    Arinc Processing disabled until power cycle or 
-                                    //    "arinc429.reconfigure". 
+                                    //    Arinc Processing disabled until power cycle or
+                                    //    "arinc429.reconfigure".
   ARINC429_STATUS_FAULTED_CBIT,     // Arinc429 Enabled but currently Faulted CBIT
-                                    //    Arinc Processing active. 
-  ARINC429_STATUS_DISABLED_OK,      // Arinc429 Not Enabled but PBIT OK 
-  ARINC429_STATUS_DISABLED_FAULTED, // Arinc429 Not Enabled but PBIT failed 
+                                    //    Arinc Processing active.
+  ARINC429_STATUS_DISABLED_OK,      // Arinc429 Not Enabled but PBIT OK
+  ARINC429_STATUS_DISABLED_FAULTED, // Arinc429 Not Enabled but PBIT failed
   ARINC429_STATUS_MAX
-} ARINC429_SYSTEM_STATUS; 
+} ARINC429_SYSTEM_STATUS;
 
 typedef enum
 {
@@ -271,7 +272,7 @@ typedef enum
 /* Arinc429 Configuration                                                                    */
 /*********************************************************************************************/
 #pragma pack(1)
-typedef struct 
+typedef struct
 {
    UINT8   Label;
    UINT32  GPA;
@@ -280,45 +281,46 @@ typedef struct
    FLOAT32 Tolerance;
 } ARINC429_RX_PROTOCOL_CFG, *ARINC429_RX_PROTOCOL_CFG_PTR;
 
-typedef struct 
+typedef struct
 {
     CHAR                     Name[MAX_CHANNEL_NAME];    // Configured Name
-    ARINC429_SPEED           Speed;       // 1 = High, 0 = Low.  Should Track FPGA value. 
+    ARINC429_SPEED           Speed;       // 1 = High, 0 = Low.  Should Track FPGA value.
     ARINC429_RX_PROTOCOL     Protocol;    // 0 = ARINC429_RX_PROTOCOL_STREAM
                                           // 1 = ARINC429_RX_PROTOCOL_CHANGE_ONLY
-    ARINC429_RX_SUB_PROTOCOL SubProtocol; 
+    ARINC429_RX_SUB_PROTOCOL SubProtocol;
     ARINC429_RX_PROTOCOL_CFG Parameter[ARINC429_MAX_PARAMS];
-    
-    UINT32                   ChannelStartup_s; // Startup period in seconds  
+
+    UINT32                   ChannelStartup_s; // Startup period in seconds
     UINT32                   ChannelTimeOut_s; // Timeout period in seconds
 
-    FLT_STATUS               ChannelSysCond; 
-    FLT_STATUS               PBITSysCond;  
-    
-    ARINC429_PARITY          Parity;         // 1 = Odd, 0 = Even.  Should Track FPGA value. 
-    ARINC429_RX_SWAP         LabelSwapBits;  // 0 = Swap Arinc Label, 1 = Don't Swap Arinc Label 
-    UINT32                   FilterArray[8]; // Each bit represent labels 0..256 
+    FLT_STATUS               ChannelSysCond;
+    FLT_STATUS               PBITSysCond;
+
+    ARINC429_PARITY          Parity;         // 1 = Odd, 0 = Even.  Should Track FPGA value.
+    ARINC429_RX_SWAP         LabelSwapBits;  // 0 = Swap Arinc Label, 1 = Don't Swap Arinc Label
+    UINT32                   FilterArray[8]; // Each bit represent labels 0..256
                                              //   1 = Allow label (allow label)
                                              //   0 = Disallow label (filter out label)
-                           
-    BOOLEAN                  Enable;  // Enable the Arinc429 Rx Ch.  Default is currently TRUE ! 
-                                      //    Update default to FALSE.                         
-} ARINC429_RX_CFG, *ARINC429_RX_CFG_PTR; 
 
-typedef struct 
+    BOOLEAN                  Enable;  // Enable the Arinc429 Rx Ch.  Default is currently TRUE !
+                                      //    Update default to FALSE.
+} ARINC429_RX_CFG, *ARINC429_RX_CFG_PTR;
+
+typedef struct
 {
-    CHAR             Name[MAX_CHANNEL_NAME];  
-    ARINC429_SPEED   Speed;          // 1 = High, 0 = Low.  Should Track FPGA value. 
-    ARINC429_PARITY  Parity;         // 1 = Odd, 0 = Even.  Should Track FPGA value. 
-    BOOLEAN          Enable;         // 1 = Enable the Arinc429 Tx Ch.  
-    ARINC429_TX_SWAP LabelSwapBits;  // 1 = Label filter bits flipped 
-} ARINC429_TX_CFG, *ARINC429_TX_CFG_PTR; 
+    CHAR             Name[MAX_CHANNEL_NAME];
+    ARINC429_SPEED   Speed;          // 1 = High, 0 = Low.  Should Track FPGA value.
+    ARINC429_PARITY  Parity;         // 1 = Odd, 0 = Even.  Should Track FPGA value.
+    BOOLEAN          Enable;         // 1 = Enable the Arinc429 Tx Ch.
+    ARINC429_TX_SWAP LabelSwapBits;  // 1 = Label filter bits flipped
+} ARINC429_TX_CFG, *ARINC429_TX_CFG_PTR;
 
-typedef struct 
+typedef struct
 {
     ARINC429_RX_CFG RxChan[FPGA_MAX_RX_CHAN];
     ARINC429_TX_CFG TxChan[FPGA_MAX_TX_CHAN];
-} ARINC429_CFG, *ARINC429_CFG_PTR; 
+    BOOLEAN bIgnoreDrvPBIT;
+} ARINC429_CFG, *ARINC429_CFG_PTR;
 #pragma pack()
 /*********************************************************************************************/
 /* Data Reduction                                                                            */
@@ -355,26 +357,26 @@ typedef struct
 /*********************************************************************************************/
 typedef struct
 {
-   UINT8               Label;            
+   UINT8               Label;
    // GPA Data
-   ARINC429_CHAN_ENUM  RxChan;       // Rx Chan 0,1,2 or 3 from FPGA  
+   ARINC429_CHAN_ENUM  RxChan;       // Rx Chan 0,1,2 or 3 from FPGA
    ARINC_FORM          Format;       // Format (BNR, BCD, Discrete)
    UINT8               WordSize;     // Arinc Word Size 1 - 32 bits
-   UINT8               SDBits;       // SDBit definition   
-   BOOLEAN             IgnoreSDI;    // Ignore SDI bits   
+   UINT8               SDBits;       // SDBit definition
+   BOOLEAN             IgnoreSDI;    // Ignore SDI bits
    UINT8               WordPos;      // Arinc Word Start Pos within 32 bit word (Starting from 0)
    DISC_TYPE           DiscType;     // Discrete Type (Standard, BNR, BCD)
    UINT8               ValidSSM;     // Valid SSM for Word
-                                     //   NOTE: Valid SSM is directly related to the 
+                                     //   NOTE: Valid SSM is directly related to the
                                      //         FailureCondition[] array index.
                                      //   (0 = Invalid 1 = Valid)
                                      //   bit 0 = SSM '00'
                                      //   bit 1 = SSM '01'
                                      //   bit 2 = SSM '10'
                                      //   bit 3 = SSM '11'
-   BOOLEAN             SDIAllCall;   // SDI All Call Mode  
+   BOOLEAN             SDIAllCall;   // SDI All Call Mode
    // GPB Data
-   UINT32              DataLossTime; // Data Loss Timeout in milliseconds   
+   UINT32              DataLossTime; // Data Loss Timeout in milliseconds
 } ARINC429_WORD_INFO, *ARINC429_WORD_INFO_PTR;
 
 typedef struct
@@ -425,15 +427,15 @@ typedef struct
    UINT8                ReduceParamCount;
    ARINC429_WORD_INFO   ReduceWordInfo[ARINC429_MAX_PARAMS];
    UINT32               SyncStart;
-   UINT8                TimeSyncDelta;                   // Delta time from sync command 
-                                                         //    (10ms Resolution) 
+   UINT8                TimeSyncDelta;                   // Delta time from sync command
+                                                         //    (10ms Resolution)
 } ARINC429_CHAN_DATA, *ARINC429_CHAN_DATA_PTR;
 
 /*********************************************************************************************/
 /* Data Manager Binary File Header                                                           */
 /*********************************************************************************************/
 #pragma pack(1)
-typedef struct 
+typedef struct
 {
    UINT8   Label;
    UINT32  GPA;
@@ -458,7 +460,7 @@ typedef struct
 
 typedef struct
 {
-   CHAR Name[MAX_CHANNEL_NAME]; 
+   CHAR Name[MAX_CHANNEL_NAME];
 } ARINC429_SYS_HDR;
 
 #pragma pack()
@@ -468,45 +470,45 @@ typedef struct
 /*********************************************************************************************/
 typedef struct
 {
-  BOOLEAN Accept; 
+  BOOLEAN Accept;
 } ARINC429_SENSOR_SDI_DATA, *ARINC429_SENSOR_SDI_DATA_PTR;
 
-typedef struct 
+typedef struct
 {
-   ARINC429_SENSOR_SDI_DATA sd[ARINC429_MAX_SD]; 
+   ARINC429_SENSOR_SDI_DATA sd[ARINC429_MAX_SD];
 } ARINC429_SENSOR_LABEL_FILTER, *ARINC429_SENSOR_LABEL_FILTER_PTR;
 
-// Arinc 429 Sensor Definitions 
-typedef struct 
+// Arinc 429 Sensor Definitions
+typedef struct
 {
    ARINC429_WORD_INFO WordInfo;
    UINT8              TotalTests;   // Total number of tests to run on Words received
-                                    //   related to ValidSSM, ARINC_FAIL_COUNT, and 
+                                    //   related to ValidSSM, ARINC_FAIL_COUNT, and
                                     //   FailureCondition[]
-   // Run Time Variables                             
+   // Run Time Variables
    SINT32      value_prev;   // Stores the last "GOOD" word read from m_ArincLabelData[][]
                              //   If current word indicates bad "SSM", then the "value_prev"
-                             //   will be returned to the calling app. 
-                             // Value "decoded and parsed" to SINT32 
+                             //   will be returned to the calling app.
+                             // Value "decoded and parsed" to SINT32
 
    UINT32      FailCount[END_OF_FAIL_COUNT]; // Array of ARINC Word Fail Counters
    UINT32      FailCountBCD;                 // Special cnt for BCD bad digit processing
-                                             //    (For BCD fmt only). 
+                                             //    (For BCD fmt only).
    UINT32      TimeSinceLastGoodValue;       // Time since last valid data read
-                                             //     Used for Arinc429 BIT Processing 
-   UINT32      TimeSinceLastUpdate;          // Time since last update 
-  
-   BOOLEAN     bFailed;      // Flag to indicate received data has been faulted 
-                             //   due to bad SSM or data loss.  Processing 
-                             //   logic in _SensorTest(). 
-                            
-   UINT32      WordLossCnt;  // Number of times word has been determined to 
+                                             //     Used for Arinc429 BIT Processing
+   UINT32      TimeSinceLastUpdate;          // Time since last update
+
+   BOOLEAN     bFailed;      // Flag to indicate received data has been faulted
+                             //   due to bad SSM or data loss.  Processing
+                             //   logic in _SensorTest().
+
+   UINT32      WordLossCnt;  // Number of times word has been determined to
                              //   have failed. Processing logic in _SensorTest()
 
-   UINT16      nSensor;      // Sensor associated with this Word Parse Info.  
+   UINT16      nSensor;      // Sensor associated with this Word Parse Info.
                              //   set in Arinc429_SensorSetup()
 
-} ARINC429_SENSOR_INFO, *ARINC429_SENSOR_INFO_PTR; 
+} ARINC429_SENSOR_INFO, *ARINC429_SENSOR_INFO_PTR;
 
 /*********************************************************************************************/
 /* RX/TX Buffers                                                                             */
@@ -525,51 +527,51 @@ typedef struct
 } ARINC429_RECORD, *ARINC429_RECORD_PTR;
 #pragma pack()
 
-typedef struct 
+typedef struct
 {
    FIFO    RecordFIFO;
-   UINT32  RecordCnt; 
+   UINT32  RecordCnt;
    BOOLEAN bOverFlow;
    UINT16  RecordSize;
-} ARINC429_RAW_RX_BUFFER, *ARINC429_RAW_RX_BUFFER_PTR; 
+} ARINC429_RAW_RX_BUFFER, *ARINC429_RAW_RX_BUFFER_PTR;
 
 /*********************************************************************************************/
 /* Arinc429 Task Manager Block - Start                                                       */
 /*********************************************************************************************/
-// Arinc429 System Status 
-typedef struct 
+// Arinc429 System Status
+typedef struct
 {
     BOOLEAN  Enabled;             // Indicates if the channel is enabled for processing
-    
+
     UINT32   SwBuffOverFlowCnt;   // Count of times ARINC429_RAW_BUFFER->bOverFlow indicates OF
     UINT32   ParityErrCnt;        // Count of times HW RSR indicates parity error, check 10 msec
     UINT32   FramingErrCnt;       // Count of times HW RSR indicates framing error, check 10 msec
     UINT16   FPGA_Status;
-    
-    BOOLEAN  bChanActive;         // Updated on first channel activity 
-    UINT32   LastActivityTime;    // System clock time of last receive activity     
-    BOOLEAN  bChanTimeOut;        // Chan Time Out     
-    BOOLEAN  bChanStartUpTimeOut; // Chan Startup Up Time Out    
 
-    UINT32   DataLossCnt;         // Count of times Data Loss TimeOut Occurs 
+    BOOLEAN  bChanActive;         // Updated on first channel activity
+    UINT32   LastActivityTime;    // System clock time of last receive activity
+    BOOLEAN  bChanTimeOut;        // Chan Time Out
+    BOOLEAN  bChanStartUpTimeOut; // Chan Startup Up Time Out
+
+    UINT32   DataLossCnt;         // Count of times Data Loss TimeOut Occurs
 
     UINT32   RxCnt;               // Total Rx Data Byte Count since power up.
-    
+
     ARINC429_SYSTEM_STATUS  Status;
 } ARINC429_SYS_RX_STATUS, *ARINC429_SYS_RX_STATUS_PTR;;
 
-typedef struct 
+typedef struct
 {
-    ARINC429_SYSTEM_STATUS  Status;  // Overall Arinc429 Tx[] Driver Status   
-} ARINC429_SYS_TX_STATUS, *ARINC429_SYS_TX_STATUS_PTR; 
+    ARINC429_SYSTEM_STATUS  Status;  // Overall Arinc429 Tx[] Driver Status
+} ARINC429_SYS_TX_STATUS, *ARINC429_SYS_TX_STATUS_PTR;
 
-typedef struct 
+typedef struct
 {
-    ARINC429_SYS_RX_STATUS Rx[FPGA_MAX_RX_CHAN]; 
-    ARINC429_SYS_TX_STATUS Tx[FPGA_MAX_TX_CHAN]; 
-    
-    UINT32 InterruptCnt; 
-} ARINC429_MGR_TASK_PARAMS, *ARINC429_MGR_TASK_PARAMS_PTR; 
+    ARINC429_SYS_RX_STATUS Rx[FPGA_MAX_RX_CHAN];
+    ARINC429_SYS_TX_STATUS Tx[FPGA_MAX_TX_CHAN];
+
+    UINT32 InterruptCnt;
+} ARINC429_MGR_TASK_PARAMS, *ARINC429_MGR_TASK_PARAMS_PTR;
 
 /*********************************************************************************************/
 /* Arinc429 Debug Output                                                                     */
@@ -577,57 +579,57 @@ typedef struct
 typedef struct
 {
   BOOLEAN  bOutputRawFilteredBuff;
-  BOOLEAN  bOutputRawFilteredFormatted; 
-  BOOLEAN  bOutputMultipleArincChan; 
+  BOOLEAN  bOutputRawFilteredFormatted;
+  BOOLEAN  bOutputMultipleArincChan;
   ARINC429_DEBUG_OUT_TYPE OutputType;
-} ARINC429_DEBUG; 
+} ARINC429_DEBUG;
 
 /*********************************************************************************************/
 /* Arinc429 Logs                                                                             */
 /*********************************************************************************************/
 #pragma pack(1)
 
-typedef struct 
+typedef struct
 {
   RESULT result; // SYS_A429_DATA_LOSS_TIMEOUT
                  // SYS_A429_STARTUP_TIMEOUT
-  UINT32 cfg_timeout; 
-  UINT8  ch; 
-} ARINC429_SYS_TIMEOUT_LOG; 
+  UINT32 cfg_timeout;
+  UINT8  ch;
+} ARINC429_SYS_TIMEOUT_LOG;
 
-typedef struct 
+typedef struct
 {
   RESULT result; // SYS_A429_SSM_FAIL
   char FailMsg[ARINC429_SSM_FAIL_MSG_SIZE];
-} ARINC429_SYS_CBIT_SSM_FAIL_LOG; 
+} ARINC429_SYS_CBIT_SSM_FAIL_LOG;
 
-typedef struct 
+typedef struct
 {
   UINT32  a429word;           // full arinc data word
   UINT32  bcdData;            // shifted BCD data
   UINT16  digit;              // out of range BCD digit
-} ARINC429_SYS_BCD_FAIL_LOG; 
+} ARINC429_SYS_BCD_FAIL_LOG;
 
-typedef struct 
+typedef struct
 {
   UINT32 SwBuffOverFlowCnt;    // Count of times ARINC429_RAW_BUFFER->bOverFlow indicates OF
   UINT32 ParityErrCnt;         // Count of times HW RSR indicates parity error, check 10 msec
   UINT32 FramingErrCnt;        // Count of times HW RSR indicates framing error, check 10 msec
-  
-  UINT32 FIFO_HalfFullCnt;     // Count of times HW FIFO indicates half full int 
-  UINT32 FIFO_FullCnt;         // Count of times HW FIFO indicates full int 
-  
-  UINT32 DataLossCnt;          // Count of times Data Loss TimeOut Occurs 
-  
-  // TODO: There should be a deliniation between System and Driver Status
-  ARINC429_SYSTEM_STATUS Status; // Current System Status 
-  
-} ARINC429_CBIT_HEALTH_COUNTS_CH, *ARINC429_CBIT_HEALTH_COUNTS_CH_PTR; 
 
-typedef struct 
+  UINT32 FIFO_HalfFullCnt;     // Count of times HW FIFO indicates half full int
+  UINT32 FIFO_FullCnt;         // Count of times HW FIFO indicates full int
+
+  UINT32 DataLossCnt;          // Count of times Data Loss TimeOut Occurs
+
+  // TODO: There should be a deliniation between System and Driver Status
+  ARINC429_SYSTEM_STATUS Status; // Current System Status
+
+} ARINC429_CBIT_HEALTH_COUNTS_CH, *ARINC429_CBIT_HEALTH_COUNTS_CH_PTR;
+
+typedef struct
 {
   ARINC429_CBIT_HEALTH_COUNTS_CH ch[FPGA_MAX_RX_CHAN];
-} ARINC429_CBIT_HEALTH_COUNTS; 
+} ARINC429_CBIT_HEALTH_COUNTS;
 #pragma pack()
 
 /******************************************************************************
@@ -649,114 +651,120 @@ typedef struct
                              Package Exports Functions
 ******************************************************************************/
 EXPORT void    Arinc429MgrInitialize              ( void );
-EXPORT void    Arinc429MgrInitTasks               ( void ); 
-EXPORT void    Arinc429MgrBITTask                 ( void *pParam ); 
+EXPORT void    Arinc429MgrInitTasks               ( void );
+EXPORT void    Arinc429MgrBITTask                 ( void *pParam );
 EXPORT void    Arinc429MgrProcessMsgsTask         ( void *pParam );
-EXPORT void    Arinc429MgrDisplaySWBufferTask     ( void *pParam ); 
+EXPORT void    Arinc429MgrDisplaySWBufferTask     ( void *pParam );
 
-EXPORT UINT16  Arinc429MgrReadFilteredRaw         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize ); 
+EXPORT UINT16  Arinc429MgrReadFilteredRaw         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
 EXPORT UINT16  Arinc429MgrReadFilteredRawSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
-                                                    BOOLEAN bStartSnap ); 
+                                                    BOOLEAN bStartSnap );
 EXPORT void    Arinc429MgrSyncTime                ( UINT32 chan   );
 EXPORT UINT16  Arinc429MgrGetFileHdr              ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
 EXPORT UINT16  Arinc429MgrGetSystemHdr            ( void *pDest, UINT16 nMaxByteSize );
 EXPORT BOOLEAN Arinc429MgrSensorTest              ( UINT16 nIndex );
-EXPORT BOOLEAN Arinc429MgrInterfaceValid          ( UINT16 nIndex );  
+EXPORT BOOLEAN Arinc429MgrInterfaceValid          ( UINT16 nIndex );
 EXPORT FLOAT32 Arinc429MgrReadWord                ( UINT16 nIndex, UINT32 *tickCount );
 
-EXPORT UINT16  Arinc429MgrSensorSetup             ( UINT32 gpA,   UINT32 gpB, 
+EXPORT UINT16  Arinc429MgrSensorSetup             ( UINT32 gpA,   UINT32 gpB,
                                                     UINT8  label, UINT16 nSensor );
 
 EXPORT void    Arinc429MgrDisableLiveStream       (void);
 
-EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus( void ); 
+EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus( void );
 
 EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthStatus
                                    ( ARINC429_CBIT_HEALTH_COUNTS PrevCount );
-                                   
-EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus ( 
-                                      ARINC429_CBIT_HEALTH_COUNTS CurrCnt, 
-                                      ARINC429_CBIT_HEALTH_COUNTS PrevCnt ); 
 
-#ifdef GENERATE_SYS_LOGS 
-  EXPORT void Arinc429MgrCreateAllInternalLogs ( void ); 
+EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
+                                      ARINC429_CBIT_HEALTH_COUNTS CurrCnt,
+                                      ARINC429_CBIT_HEALTH_COUNTS PrevCnt );
+
+#ifdef GENERATE_SYS_LOGS
+  EXPORT void Arinc429MgrCreateAllInternalLogs ( void );
 #endif
 
-#endif // ARINC429MGR_H               
+#endif // ARINC429MGR_H
 
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
  * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 12-11-01   Time: 6:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1194 Add option to ignore A429 Drv PBIT failures when setting up
+ * A429 I/F for operation. 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:57p
  * Updated in $/software/control processor/code/system
  * SCR #1191 Returns update time of param
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
  * Updated in $/software/control processor/code/system
  * SCR 1124 - Packed the configuration structures for ARINC429 Mgr,
  * Sensors and Triggers. Suppressed the alignment warnings for those three
  * objects also.
- * 
+ *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 6/08/11    Time: 12:28p
  * Updated in $/software/control processor/code/system
  * SCR 1025 - Discrete Most Significant bit drop fix
  * SCR 1040 - Sign Magnitude BNR to 2's complement fix
- * 
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 9/07/10    Time: 12:03p
  * Updated in $/software/control processor/code/system
  * SCR #854 Code Review Updates
- * 
+ *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 7/29/10    Time: 7:51p
  * Updated in $/software/control processor/code/system
  * SCR 754 - Added a FIFO flush after initialization
- * 
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 7/26/10    Time: 6:20p
  * Updated in $/software/control processor/code/system
  * SCR #743 Update TimeOut Processing for val == 0
- * 
+ *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 7/20/10    Time: 7:34p
  * Updated in $/software/control processor/code/system
  * SCR 720 - Fixed Debug Message display problem
- * 
+ *
  * *****************  Version 5  *****************
  * User: John Omalley Date: 7/20/10    Time: 9:04a
  * Updated in $/software/control processor/code/system
  * SCR 294 - Add system binary header
- * 
+ *
  * *****************  Version 4  *****************
  * User: John Omalley Date: 7/08/10    Time: 2:51p
  * Updated in $/software/control processor/code/system
  * SCR 650
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 6/22/10    Time: 6:24p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence and Box Configuration
- * 
+ *
  * *****************  Version 2  *****************
  * User: John Omalley Date: 6/11/10    Time: 5:49p
  * Updated in $/software/control processor/code/system
  * SCR 627 - Fixed default config for scale
- * 
+ *
  * *****************  Version 1  *****************
  * User: John Omalley Date: 6/08/10    Time: 12:19p
  * Created in $/software/control processor/code/system
  * SCR 627 - Updated for LJ60
- * 
+ *
  *
  ***************************************************************************/
-              
+

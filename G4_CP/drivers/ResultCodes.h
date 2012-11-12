@@ -1,7 +1,7 @@
-#ifndef DRV_RESULTCODES_H
-#define DRV_RESULTCODES_H
+#ifndef RESULTCODES_H
+#define RESULTCODES_H
 /******************************************************************************
- *         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
+ *         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
  *              All Rights Reserved. Proprietary and Confidential.
  *
  * File:          ResultCodes.h
@@ -15,25 +15,25 @@
  *                that can be tested to determine the sucess or failure of
  *                a driver operation.  By having a "catch-all" for the results
  *                all driver functions, it can be simpler to impliment
- *                detailed logging of driver error codes without managing 
+ *                detailed logging of driver error codes without managing
  *                different types of error reporting from different drivers
  *
  *  VERSION
- *    $Revision: 58 $  $Date: 8/28/12 1:06p $ 
- *                
+ *    $Revision: 59 $  $Date: 12-11-02 12:48p $
+ *
  *
 ******************************************************************************/
 
 /*****************************************************************************/
-/* Compiler Specific Includes                                               */
+/* Compiler Specific Includes                                                */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Software Specific Includes                                                 */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 
 /******************************************************************************
-                                   Package Defines                             
+                                   Package Defines
 ******************************************************************************/
 #define RESULTCODES_MAX_STR_LEN  64
 
@@ -186,7 +186,7 @@ RESULT_CODE(SYS_UART_F7X_DL_NOT_RECOGNIZED             , 0x002A9000)\
 RESULT_CODE(SYS_UART_PBIT_UART_OPEN_FAIL               , 0x002AF000)
 
 /******************************************************************************
-                                   Package Typedefs                          
+                                   Package Typedefs
 ******************************************************************************/
 
 //Enumerate the result codes here.  ResultCodes.c provides stringification
@@ -198,263 +198,268 @@ typedef enum{
 }RESULT;
 
 /******************************************************************************
-                                   Package Exports                             
+                                   Package Exports
 ******************************************************************************/
 #undef EXPORT
 
-#if defined ( DRV_RESULTCODES_BODY )
+#if defined ( RESULTCODES_BODY )
    #define EXPORT
 #else
    #define EXPORT extern
 #endif
 
 /******************************************************************************
-                          Package Exports Variables                           
+                          Package Exports Variables
 ******************************************************************************/
 
 /******************************************************************************
-                          Package Exports Functions                           
+                          Package Exports Functions
 ******************************************************************************/
 EXPORT const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr);
 
 
-#endif // DRV_RESULTCODES_H 
+#endif // RESULTCODES_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.h $
  * 
+ * *****************  Version 59  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 12:48p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 58  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 57  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:31p
  * Updated in $/software/control processor/code/drivers
  * SCR #515 Enhancement - sys.get.mem.l halts processor when invalid
  * memory is referenced
- * 
+ *
  * *****************  Version 56  *****************
  * User: Contractor2  Date: 5/10/11    Time: 2:42p
  * Updated in $/software/control processor/code/drivers
  * SCR #891 Enhancement: Incomplete FPGA initialization functionality
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jim Mood     Date: 10/26/10   Time: 5:12p
  * Updated in $/software/control processor/code/drivers
  * SCR 958 Result Codes reentrancy
- * 
+ *
  * *****************  Version 54  *****************
  * User: John Omalley Date: 10/25/10   Time: 6:04p
  * Updated in $/software/control processor/code/drivers
  * SCR 961 - Code Review Updates
- * 
+ *
  * *****************  Version 53  *****************
  * User: John Omalley Date: 10/18/10   Time: 5:45p
  * Updated in $/software/control processor/code/drivers
  * SCR 954 - Fixed the Result Codes number duplications and made all
  * others correct based on original design.
- * 
+ *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 10/04/10   Time: 10:49a
  * Updated in $/software/control processor/code/drivers
  * SCR 895 - Removed Dead Code
- * 
+ *
  * *****************  Version 51  *****************
  * User: John Omalley Date: 10/01/10   Time: 5:24p
  * Updated in $/software/control processor/code/drivers
  * SCR 893 - Code Coverage Updates
- * 
+ *
  * *****************  Version 50  *****************
  * User: John Omalley Date: 9/30/10    Time: 1:24p
  * Updated in $/software/control processor/code/drivers
  * SCR 894 - LogManager Code Coverage / Code Review Updates
- * 
+ *
  * *****************  Version 49  *****************
  * User: John Omalley Date: 9/10/10    Time: 10:01a
  * Updated in $/software/control processor/code/drivers
  * SCR 858 - Removed RESULT codes per fault default cases being added
- * 
+ *
  * *****************  Version 48  *****************
  * User: Contractor2  Date: 7/30/10    Time: 6:27p
  * Updated in $/software/control processor/code/drivers
  * SCR #243 Implementation: CBIT of mssim
  * Block MS Interface usage if not ready
- * 
+ *
  * *****************  Version 47  *****************
  * User: John Omalley Date: 7/23/10    Time: 10:14a
  * Updated in $/software/control processor/code/drivers
  * SCR 639 - Added a Mem Erase code
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:31p
  * Updated in $/software/control processor/code/drivers
  * SCR #8 Implementation: External Interrupt Monitors
- * 
+ *
  * *****************  Version 45  *****************
  * User: Peter Lee    Date: 6/17/10    Time: 5:37p
  * Updated in $/software/control processor/code/drivers
  * SCR #635 Create log to indicate "unrecognized" dump list detected.
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor2  Date: 6/14/10    Time: 1:03p
  * Updated in $/software/control processor/code/drivers
  * Function Names must begin with the CSC it belongs with.
- * 
+ *
  * *****************  Version 43  *****************
  * User: Peter Lee    Date: 6/08/10    Time: 5:07p
  * Updated in $/software/control processor/code/drivers
  * SCR #635 Add Uart PBIT result code
- * 
+ *
  * *****************  Version 42  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 6:42p
  * Updated in $/software/control processor/code/drivers
  * SCR #618 F7X and UartMgr Requirements Implementation
- * 
+ *
  * *****************  Version 41  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:56a
  * Updated in $/software/control processor/code/drivers
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/drivers
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:52p
  * Updated in $/software/control processor/code/drivers
  * SCR #67 Interrupted SPI Access Added SPI timeout error code
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 37  *****************
  * User: Peter Lee    Date: 2/01/10    Time: 3:27p
  * Updated in $/software/control processor/code/drivers
  * SCR #432 Add Arinc429 Tx-Rx LoopBack PBIT
- * 
+ *
  * *****************  Version 36  *****************
  * User: Peter Lee    Date: 1/28/10    Time: 9:19a
  * Updated in $/software/control processor/code/drivers
  * SCR #427 ClockMgr.c Issues and SRS-3090
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jeff Vahue   Date: 12/17/09   Time: 12:10p
  * Updated in $/software/control processor/code/drivers
  * SCR# 364 - change INT8 -> CHAR add version info
- * 
+ *
  * *****************  Version 34  *****************
  * User: Peter Lee    Date: 12/16/09   Time: 2:17p
  * Updated in $/software/control processor/code/drivers
  * QAR Req 3110, 3041, 3114 and 3118
- * 
+ *
  * *****************  Version 33  *****************
  * User: Peter Lee    Date: 12/10/09   Time: 9:55a
  * Updated in $/software/control processor/code/drivers
- * SCR #358 Updated Arinc429 Tx Flag Processing 
- * 
+ * SCR #358 Updated Arinc429 Tx Flag Processing
+ *
  * *****************  Version 32  *****************
  * User: Peter Lee    Date: 12/04/09   Time: 5:22p
  * Updated in $/software/control processor/code/drivers
  * SCR #353 FPGA new QARFRAM1 and QARFRAM2 DPRAM FPGA Reg Support
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 3:45p
  * Updated in $/software/control processor/code/drivers
  * Implementing SCR 123  - DIO_ReadPin() returns RESULT
- * 
+ *
  * *****************  Version 30  *****************
  * User: Peter Lee    Date: 10/15/09   Time: 9:59a
  * Updated in $/software/control processor/code/drivers
  * FPGA CBIT Requirements
- * 
+ *
  * *****************  Version 29  *****************
  * User: Peter Lee    Date: 10/05/09   Time: 1:10p
  * Updated in $/software/control processor/code/drivers
- * SCR #287 QAR_SensorTest() records log and debug msg. 
- * 
+ * SCR #287 QAR_SensorTest() records log and debug msg.
+ *
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 9/28/09    Time: 4:19p
  * Updated in $/software/control processor/code/drivers
  * SCR #275 Box Power On Usage Req.   Result code for if box power on
- * usage data can not be retrieved. 
- * 
+ * usage data can not be retrieved.
+ *
  * *****************  Version 27  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #256 Misc Arinc429 PBIT Log Updates
- * 
+ *
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:48p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 8/06/09    Time: 3:47p
  * Updated in $/software/control processor/code/drivers
  * SCR 179
  *    Added missing driver result codes for the flash.
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jim Mood     Date: 2/05/09    Time: 11:26a
  * Updated in $/control processor/code/drivers
  * Added additional result codes for the EEPROM driver and RTC driver
- * 
+ *
  * *****************  Version 23  *****************
  * User: Peter Lee    Date: 2/03/09    Time: 5:18p
  * Updated in $/control processor/code/drivers
  * Updates Arinc429, QAR and FPGA result codes
- * 
+ *
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 1/30/09    Time: 4:43p
  * Updated in $/control processor/code/drivers
- * SCR #131 Arinc429 Updates 
+ * SCR #131 Arinc429 Updates
  * Add SSM Failure Detection to SensorTest()
- * 
+ *
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 1/21/09    Time: 11:26a
  * Updated in $/control processor/code/drivers
- * SCR #131 Add PBIT LFR Test 
- * 
+ * SCR #131 Add PBIT LFR Test
+ *
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 1/20/09    Time: 6:26p
  * Updated in $/control processor/code/drivers
  * SCR #131 Arinc429 Updates
  * Add Startup and Ch Data Loss TimeOut Result code for CBIT
- * 
+ *
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 1/14/09    Time: 5:11p
  * Updated in $/control processor/code/drivers
- * SCR #131 Arinc 429 Updates.  
- * 
+ * SCR #131 Arinc 429 Updates.
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 1/06/09    Time: 2:52p
  * Updated in $/control processor/code/drivers
  * SCR 129 Misc FPGA Updates
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 11/24/08   Time: 2:12p
  * Updated in $/control processor/code/drivers
  * SCR #97 QAR SW Updates
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 10/08/08   Time: 10:40a
  * Updated in $/control processor/code/drivers
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 9/25/08    Time: 11:32a
  * Updated in $/control processor/code/drivers
- * Added result codes for NVMgr.c system module.  Updated comments 
- * 
+ * Added result codes for NVMgr.c system module.  Updated comments
+ *
  * *****************  Version 14  *****************
  * User: John Omalley Date: 6/10/08    Time: 11:15a
  * Updated in $/control processor/code/drivers
  * SCR-0026 - Added Result Codes for Log Verify Deleted
- * 
+ *
  *
  *
  ***************************************************************************/

@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 72 $  $Date: 12-10-27 5:02p $
+    $Revision: 74 $  $Date: 12-11-12 11:36a $
 
 
 ******************************************************************************/
@@ -527,21 +527,21 @@ void NV_Close(NV_FILE_ID FileID)
  ****************************************************************************/
 void NV_Read(NV_FILE_ID FileID, UINT32 Offset, void* Buf, UINT32 Size)
 {
-  NV_RUNTIME_INFO* File;
+  NV_RUNTIME_INFO* file;
 
-  File = &NV_RuntimeInfo[FileID];
+  file = &NV_RuntimeInfo[FileID];
 
   //File Open Check
-  ASSERT_MESSAGE( File->IsOpen == TRUE, "%s: Attempt read on closed file.",
+  ASSERT_MESSAGE( file->IsOpen == TRUE, "%s: Attempt read on closed file.",
     PromFileName[FileID]);
 
   //Boundary Check
-  ASSERT_MESSAGE( (Offset+Size) <= (File->Size-NV_CRC_SIZE),
+  ASSERT_MESSAGE( (Offset+Size) <= (file->Size-NV_CRC_SIZE),
     "%s: read %d bytes beyond EOF",
-    PromFileName[FileID], (File->Size-NV_CRC_SIZE) - (Offset+Size));
+    PromFileName[FileID], (file->Size-NV_CRC_SIZE) - (Offset+Size));
 
   //Copy data back to caller
-  memcpy(Buf, &File->PrimaryDev->ShadowMem[ File->PrimaryOffset+Offset ],
+  memcpy(Buf, &file->PrimaryDev->ShadowMem[ file->PrimaryOffset+Offset ],
          Size);
 
 
@@ -1254,19 +1254,19 @@ INT32  NV_RTCWrite(void* SourceAddr, UINT32 PhysicalOffset, UINT32 Size, IO_RESU
 {
  // const UINT32 PageMask = EEPROM_PAGE_WRITE_SIZE-1;
  // UINT32 NextPageBoundary;
- INT32 Written;
- RESULT WriteResult;
+ INT32 written;
+ RESULT writeResult;
 
   // Written = -1;
-  Written = 0; 
+  written = 0;
 
-  WriteResult = SPIMgr_WriteRTCNvRam(PhysicalOffset,SourceAddr,Size, ioResult);
-  if(DRV_OK == WriteResult)
+  writeResult = SPIMgr_WriteRTCNvRam(PhysicalOffset,SourceAddr,Size, ioResult);
+  if(DRV_OK == writeResult)
   {
-    Written = Size;
+    written = Size;
   }
 
-  return Written;
+  return written;
 }
 
 
@@ -1834,22 +1834,32 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  *  MODIFICATIONS
  *    $History: NVMgr.c $
  *
+ * *****************  Version 74  *****************
+ * User: John Omalley Date: 12-11-12   Time: 11:36a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
+ * *****************  Version 73  *****************
+ * User: John Omalley Date: 12-11-12   Time: 11:05a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107, 1178 - Code Review Updates
+ *
  * *****************  Version 72  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:02p
  * Updated in $/software/control processor/code/system
  * SCR #1178  NV_RTCWrite() Error
- * 
+ *
  * *****************  Version 71  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 10:21a
  * Updated in $/software/control processor/code/system
  * SCR #1172 PCLint Suspicious use of & Error 545.  Eliminated & and added
  * cast in NV_GetFileName().
- * 
+ *
  * *****************  Version 70  *****************
  * User: John Omalley Date: 12-10-16   Time: 2:53p
  * Updated in $/software/control processor/code/system
  * SCR 1172 - Undo fix because it caused a compiler warning
- * 
+ *
  * *****************  Version 69  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:13p
  * Updated in $/software/control processor/code/system

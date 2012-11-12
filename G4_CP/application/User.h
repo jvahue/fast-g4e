@@ -2,21 +2,28 @@
 #define USER_H
 
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    File:         USER.h     
-    
-    Description:
-    
+    File:         User.h
+
+    Description:  Function prototypes and defines for the User handled
+                  messages from the GSE or micro-server.
+
+                  Defines size limits for user message buf, single msg, and
+                  max root cmds.
+
+                  ENUMS for user datatypes are defined here as well as the
+                  defines for user data access (ie. USER_RO)
+
     VERSION
-    $Revision: 44 $  $Date: 12-10-27 5:08p $
-    
+    $Revision: 45 $  $Date: 12-11-01 1:46p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -61,7 +68,7 @@
 #define NO_HANDLER_DATA USER_TYPE_NONE,USER_RW,NULL,-1,-1,0,0,NULL
 
 // Define for performing dumping cfg info to log
-#define DISPLAY_CFG "SHOWCFG"  
+#define DISPLAY_CFG "SHOWCFG"
 
 #define MAX_RECURSIVE_CALLS 6
 
@@ -79,10 +86,10 @@ typedef enum{
    and 32-bit integer.
 */
 typedef union {
-  void* Ptr;  
+  void* Ptr;
   UINT32 Int;
 }USER_MSG_PARAM;
-  
+
 
 /*USER_DATA_TYPE
   Defines what type of data a message is expected to use for "set" and "get"
@@ -92,18 +99,18 @@ typedef union {
   some "action."  These message types usually have a verb in their name, such
   as the message "qar.reconfigure."
 
-  NOTE: The four commented out types are provided, but currently not used.  If  
-  future code makes use of nay of these types grep the code to reenable the  
+  NOTE: The four commented out types are provided, but currently not used.  If
+  future code makes use of nay of these types grep the code to reenable the
   functionality associated with these types.
 */
 typedef enum{
   USER_TYPE_NONE = 0,
   USER_TYPE_UINT8,
   USER_TYPE_UINT16,
-  USER_TYPE_UINT32,  
+  USER_TYPE_UINT32,
   //USER_TYPE_INT8,
   //USER_TYPE_INT16,
-  USER_TYPE_INT32,  
+  USER_TYPE_INT32,
   USER_TYPE_HEX8,
   USER_TYPE_HEX16,
   USER_TYPE_HEX32,
@@ -113,7 +120,7 @@ typedef enum{
   USER_TYPE_STR,
   USER_TYPE_ACT_LIST,  // a list of bits in the action word
   USER_TYPE_SNS_LIST,  // a list of sensor ids
-  USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list  
+  USER_TYPE_128_LIST,  // defines a string containing a BITARRAY128 entry list
   USER_TYPE_FLOAT,
   USER_TYPE_BOOLEAN,
   USER_TYPE_YESNO,
@@ -132,7 +139,7 @@ typedef enum{
   Read: Allow/Disallow reading of a value
   Write: Allow/Disallow writing of a value
 
-  
+
   Bits 2:4 Write Restrictions
   [WRITE ONLY FACTORY][WRITE ONLY PRIVILEGED][WRITE ONLY GSE]
   Write Only Factory:  Allow write to this value only when
@@ -186,7 +193,7 @@ typedef union {
   INT32   Sint;
   UINT32  Uint;
   FLOAT32 Float;
-  FLOAT64 Float64;   
+  FLOAT64 Float64;
 }USER_RANGE;
 
 
@@ -212,16 +219,16 @@ typedef union {
               contained in the [] brackets
   MsgRange:   The Range allowed for the value, this supports signed/unsigned
               integers, string length and floating point.
-  MsgEnumTbl: Pointer to a table to decode ENUM type values.  
+  MsgEnumTbl: Pointer to a table to decode ENUM type values.
 */
 typedef struct MsgTbl {
-  INT8*                   MsgStr; 
-  struct                  MsgTbl *pNext;  
+  INT8*                   MsgStr;
+  struct                  MsgTbl *pNext;
   USER_HANDLER_RESULT     (*MsgHandler)(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
-                                        void **GetPtr);    
+                                        void **GetPtr);
   USER_DATA_TYPE          MsgType;
   UINT32                  MsgAccess;
   USER_MSG_PARAM          MsgParam;
@@ -232,7 +239,7 @@ typedef struct MsgTbl {
   USER_ENUM_TBL*          MsgEnumTbl;
 } USER_MSG_TBL;
 
- 
+
 /******************************************************************************
                                  Package Exports
 ******************************************************************************/
@@ -271,163 +278,168 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
  *  MODIFICATIONS
  *    $History: User.h $
  * 
+ * *****************  Version 45  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 1:46p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 44  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:08p
  * Updated in $/software/control processor/code/application
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 9/17/12    Time: 10:53a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - Add ACT_LIST, clean up msgs
- * 
+ *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:45p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 User SensorArray GSE handling
- * 
+ *
  * *****************  Version 41  *****************
  * User: John Omalley Date: 12-09-11   Time: 2:21p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added HEX8 logic
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:20p
  * Updated in $/software/control processor/code/application
  * SCR #1107 FAST 2 BITARRAY128 input as integer list
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 6/05/12    Time: 6:42p
  * Updated in $/software/control processor/code/application
  * Increased USER_MAX_ROOT_CMDS
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:51p
  * Updated in $/software/control processor/code/application
  * SCR #1107 Trigger processing
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor2  Date: 10/18/10   Time: 2:48p
  * Updated in $/software/control processor/code/application
  * SCR #951 Misc - User type Hex8 is not used and should be
  * removed/commented out
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jim Mood     Date: 10/01/10   Time: 6:35p
  * Updated in $/software/control processor/code/application
  * SCR 818 Code Review Changes, dead code removal
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 7/22/10    Time: 6:49p
  * Updated in $/software/control processor/code/application
  * SCR #643  Add showcfg to UartMgrUserTable and F7XUserTable
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:52p
  * Updated in $/software/control processor/code/application
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 4/22/10    Time: 6:37p
  * Updated in $/software/control processor/code/application
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jeff Vahue   Date: 4/14/10    Time: 6:15p
  * Updated in $/software/control processor/code/application
  * SCR #547 - remove unused User variable types
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:37p
  * Updated in $/software/control processor/code/application
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:29p
  * Updated in $/software/control processor/code/application
  * SCR #248 Parameter Log Change
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:39p
  * Updated in $/software/control processor/code/application
  * SCR #248 Parameter Log Change
- * 
+ *
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:35p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 3/02/10    Time: 11:56a
  * Updated in $/software/control processor/code/application
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jeff Vahue   Date: 2/11/10    Time: 1:38p
  * Updated in $/software/control processor/code/application
  * SCR# 350 - use reentrant strtok (strtok_r).  Fix typos in user.h
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 1/13/10    Time: 4:57p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:35p
  * Updated in $/software/control processor/code/application
  * SCR# 378
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:40p
  * Updated in $/software/control processor/code/application
  * SCR 42
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 12/07/09   Time: 4:21p
  * Updated in $/software/control processor/code/application
  * SCR# 364 - User_AddRootCmd returns void.
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 12/04/09   Time: 2:17p
  * Updated in $/software/control processor/code/application
  * SCR# 363
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 10/28/09   Time: 11:28a
  * Updated in $/software/control processor/code/application
  * Increased buffer size to 8k, accomidates messages that occupy an entire
  * MS<->CP message size.
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jim Mood     Date: 10/08/09   Time: 9:22a
  * Updated in $/software/control processor/code/application
  * SCR #84, #124, #162, #178
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 9/29/09    Time: 4:24p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 1/06/09    Time: 4:56p
  * Updated in $/control processor/code/application
  * SCR# 127 Increased the maximum index value from 99 to 9999
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 10/08/08   Time: 9:25a
  * Updated in $/control processor/code/application
  * Added prototype for User_Init (SCR #87)
- * 
+ *
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 10/07/08   Time: 11:48a
  * Updated in $/control processor/code/application
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 10:53a
  * Updated in $/control processor/code/application
  * SCR #87 Function Prototype
- * 
+ *
  *
  ***************************************************************************/

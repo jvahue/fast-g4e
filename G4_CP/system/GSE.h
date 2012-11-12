@@ -11,7 +11,7 @@
  
  
    VERSION
-    $Revision: 10 $  $Date: 8/28/12 1:43p $
+    $Revision: 11 $  $Date: 12-11-12 4:46p $
     
 ******************************************************************************/
 
@@ -65,7 +65,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( GSE_BODY )
+#if defined ( GSE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -97,6 +97,11 @@ EXPORT void GSE_ToggleDisplayLiveStream(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

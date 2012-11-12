@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 77 $  $Date: 12-10-27 5:04p $     
+      $Revision: 78 $  $Date: 12-11-12 11:36a $
 
 ******************************************************************************/
 
@@ -159,7 +159,7 @@ const CHAR *SensorFilterNames[MAXFILTER+1] =
 void SensorsInitialize( void)
 {
   // Local Data
-  TCB TaskInfo;
+  TCB tcbTaskInfo;
 
   // Add user commands for the sensors to the user command tables
   User_AddRootCmd(&RootSensorMsg);
@@ -183,41 +183,41 @@ void SensorsInitialize( void)
   SensorsConfigure();
 
   // Create Sensor Task - DT
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Sensor Task",_TRUNCATE);
-  TaskInfo.TaskID           = Sensor_Task;
-  TaskInfo.Function         = SensorsUpdateTask;
-  TaskInfo.Priority         = taskInfo[Sensor_Task].priority;
-  TaskInfo.Type             = taskInfo[Sensor_Task].taskType;
-  TaskInfo.modes            = taskInfo[Sensor_Task].modes;
-  TaskInfo.MIFrames         = taskInfo[Sensor_Task].MIFframes;
-  TaskInfo.Enabled          = TRUE;
-  TaskInfo.Locked           = FALSE;
+  memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+  strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Sensor Task",_TRUNCATE);
+  tcbTaskInfo.TaskID           = (TASK_INDEX)Sensor_Task;
+  tcbTaskInfo.Function         = SensorsUpdateTask;
+  tcbTaskInfo.Priority         = taskInfo[Sensor_Task].priority;
+  tcbTaskInfo.Type             = taskInfo[Sensor_Task].taskType;
+  tcbTaskInfo.modes            = taskInfo[Sensor_Task].modes;
+  tcbTaskInfo.MIFrames         = taskInfo[Sensor_Task].MIFframes;
+  tcbTaskInfo.Enabled          = TRUE;
+  tcbTaskInfo.Locked           = FALSE;
 
-  TaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Task].InitialMif;
-  TaskInfo.Rmt.MifRate      = taskInfo[Sensor_Task].MIFrate;
-  TaskInfo.pParamBlock      = NULL;
+  tcbTaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Task].InitialMif;
+  tcbTaskInfo.Rmt.MifRate      = taskInfo[Sensor_Task].MIFrate;
+  tcbTaskInfo.pParamBlock      = NULL;
 
-  TmTaskCreate (&TaskInfo);
+  TmTaskCreate (&tcbTaskInfo);
 
   // Create Sensor Live Data Task - DT
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Sensor Live Data Task",_TRUNCATE);
-  TaskInfo.TaskID           = Sensor_Live_Data_Task;
-  TaskInfo.Function         = SensorsLiveDataTask;
-  TaskInfo.Priority         = taskInfo[Sensor_Live_Data_Task].priority;
-  TaskInfo.Type             = taskInfo[Sensor_Live_Data_Task].taskType;
-  TaskInfo.modes            = taskInfo[Sensor_Live_Data_Task].modes;
-  TaskInfo.MIFrames         = taskInfo[Sensor_Live_Data_Task].MIFframes;
-  TaskInfo.Enabled          = TRUE;
-  TaskInfo.Locked           = FALSE;
+  memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+  strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Sensor Live Data Task",_TRUNCATE);
+  tcbTaskInfo.TaskID           = (TASK_INDEX)Sensor_Live_Data_Task;
+  tcbTaskInfo.Function         = SensorsLiveDataTask;
+  tcbTaskInfo.Priority         = taskInfo[Sensor_Live_Data_Task].priority;
+  tcbTaskInfo.Type             = taskInfo[Sensor_Live_Data_Task].taskType;
+  tcbTaskInfo.modes            = taskInfo[Sensor_Live_Data_Task].modes;
+  tcbTaskInfo.MIFrames         = taskInfo[Sensor_Live_Data_Task].MIFframes;
+  tcbTaskInfo.Enabled          = TRUE;
+  tcbTaskInfo.Locked           = FALSE;
 
-  TaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Live_Data_Task].InitialMif;
-  TaskInfo.Rmt.MifRate      = taskInfo[Sensor_Live_Data_Task].MIFrate;
-  TaskInfo.pParamBlock      = &LiveDataBlock;
+  tcbTaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Live_Data_Task].InitialMif;
+  tcbTaskInfo.Rmt.MifRate      = taskInfo[Sensor_Live_Data_Task].MIFrate;
+  tcbTaskInfo.pParamBlock      = &LiveDataBlock;
 
   LiveDataBlock.StartTime   = 0;
-  TmTaskCreate (&TaskInfo);
+  TmTaskCreate (&tcbTaskInfo);
 
 }
 
@@ -258,7 +258,7 @@ BOOLEAN SensorIsValid( SENSOR_INDEX Sensor )
 BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
 {
   // return if the sensor is used
-  return (BOOLEAN)(m_SensorCfg[Sensor].Type != UNUSED);
+  return (BOOLEAN)(m_SensorCfg[Sensor].type != UNUSED);
 }
 
 /******************************************************************************
@@ -283,7 +283,7 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
  * Function:     SensorGetLastUpdate ( SENSOR_INDEX Sensor )
  *
  * Description:  This function provides a method to return the last rx time of a
- *               sensor. 
+ *               sensor.
  *
  * Parameters:   [in] nSensor - Index of sensor to get value
  *
@@ -318,6 +318,25 @@ FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 }
 
 /******************************************************************************
+ * Function:     SensorGetPreviousValid
+ *
+ * Description:  This function provides a method to read the previous value's
+ *                validity of a sensor.
+ *
+ * Parameters:   [in] nSensor - Index of sensor to get value
+ *
+ * Returns:      [out] BOOLEAN - Validity of the prev sensor value(
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+BOOLEAN SensorGetPreviousValid( SENSOR_INDEX Sensor )
+{
+   // return the previous validity of the sensor
+   return (Sensors[Sensor].bPriorValueValid);
+}
+
+/******************************************************************************
  * Function:     SensorGetSystemHdr
  *
  * Description:  Retrieves the binary system header for the sensor
@@ -334,8 +353,8 @@ FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 UINT16 SensorGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   SENSOR_HDR          SensorHdr[MAX_SENSORS];
-   UINT16              SensorIndex;
+   SENSOR_HDR          sensorHdr[MAX_SENSORS];
+   UINT16              nSensorIndex;
    INT8                *pBuffer;
    UINT16              nRemaining;
    UINT16              nTotal;
@@ -344,21 +363,21 @@ UINT16 SensorGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( SensorHdr, 0, sizeof(SensorHdr) );
+   memset ( sensorHdr, 0, sizeof(sensorHdr) );
 
    // Loop through all the sensors
-   for ( SensorIndex = 0;
-         ((SensorIndex < MAX_SENSORS) && (nRemaining > sizeof (SENSOR_HDR)));
-         SensorIndex++ )
+   for ( nSensorIndex = 0;
+         ((nSensorIndex < MAX_SENSORS) && (nRemaining > sizeof (SENSOR_HDR)));
+         nSensorIndex++ )
    {
       // Copy the name and units
-      strncpy_safe( SensorHdr[SensorIndex].Name,
-                    sizeof(SensorHdr[0].Name),
-                    m_SensorCfg[SensorIndex].SensorName,
+      strncpy_safe( sensorHdr[nSensorIndex].sName,
+                    sizeof(sensorHdr[0].sName),
+                    m_SensorCfg[nSensorIndex].sSensorName,
                     _TRUNCATE);
-      strncpy_safe( SensorHdr[SensorIndex].Units,
-                    sizeof(SensorHdr[0].Units),
-                    m_SensorCfg[SensorIndex].OutputUnits,
+      strncpy_safe( sensorHdr[nSensorIndex].sUnits,
+                    sizeof(sensorHdr[0].sUnits),
+                    m_SensorCfg[nSensorIndex].sOutputUnits,
                     _TRUNCATE);
       // Increment the total used and decrement the amount remaining
       nTotal     += sizeof (SENSOR_HDR);
@@ -366,7 +385,7 @@ UINT16 SensorGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    }
 
    // Copy the Header to the buffer
-   memcpy ( pBuffer, SensorHdr, nTotal );
+   memcpy ( pBuffer, sensorHdr, nTotal );
    // Return the total bytes written
    return ( nTotal );
 }
@@ -402,24 +421,24 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
 
    // Loop through all the sensors
    for ( sensorIndex = 0;
-         ((sensorIndex < MAX_SENSORS) && (nRemaining > sizeof (sensorETMHdr[sensorIndex])));
+         ((sensorIndex < MAX_SENSORS) && (nRemaining > sizeof (SENSOR_ETM_HDR)));
          sensorIndex++ )
    {
       sensorETMHdr[sensorIndex].configured = FALSE;
 
-      if ( UNUSED != m_SensorCfg[sensorIndex].Type )
+      if ( UNUSED != m_SensorCfg[sensorIndex].type )
       {
          sensorETMHdr[sensorIndex].configured = TRUE;
       }
 
       // Copy the name and units
-      strncpy_safe( sensorETMHdr[sensorIndex].sensor.Name,
-                    sizeof(sensorETMHdr[sensorIndex].sensor.Name),
-                    m_SensorCfg[sensorIndex].SensorName,
+      strncpy_safe( sensorETMHdr[sensorIndex].sensor.sName,
+                    sizeof(sensorETMHdr[sensorIndex].sensor.sName),
+                    m_SensorCfg[sensorIndex].sSensorName,
                     _TRUNCATE);
-      strncpy_safe( sensorETMHdr[sensorIndex].sensor.Units,
-                    sizeof(sensorETMHdr[sensorIndex].sensor.Units),
-                    m_SensorCfg[sensorIndex].OutputUnits,
+      strncpy_safe( sensorETMHdr[sensorIndex].sensor.sUnits,
+                    sizeof(sensorETMHdr[sensorIndex].sensor.sUnits),
+                    m_SensorCfg[sensorIndex].sOutputUnits,
                     _TRUNCATE);
       // Increment the total used and decrement the amount remaining
       nTotal     += sizeof (SENSOR_ETM_HDR);
@@ -446,7 +465,7 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
  *****************************************************************************/
 void SensorDisableLiveStream( void )
 {
-  LiveDataDisplay.Type = LD_NONE;
+  LiveDataDisplay.type = LD_NONE;
 }
 
 /******************************************************************************
@@ -486,13 +505,15 @@ void SensorDisableLiveStream( void )
   // For each "ON" bit, initialize the next available SnsrSummary entry.
 
   summaryCnt = 0;
-  for(snsrIdx = SENSOR_0; snsrIdx < MAX_SENSORS && summaryCnt < summarySize; ++snsrIdx)
+  for( snsrIdx = SENSOR_0;
+       snsrIdx < (SENSOR_INDEX)MAX_SENSORS && summaryCnt < summarySize;
+       ++snsrIdx )
   {
-    if ( TRUE == GetBit(snsrIdx, snsrMask, snsrMaskSizeBytes ))
+    if ( TRUE == GetBit((INT32)snsrIdx, snsrMask, snsrMaskSizeBytes ))
     {
       // Only store the first <summarySize> number of sensors.
       // Get the TOTAL COUNT of configured sensors in the mask.
-      
+
       summary[summaryCnt].SensorIndex  = snsrIdx;
       summary[summaryCnt].bInitialized = FALSE;
       summary[summaryCnt].bValid       = FALSE;
@@ -526,20 +547,20 @@ void SensorDisableLiveStream( void )
  *****************************************************************************/
 void SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary)
 {
-  FLOAT32  NewValue = SensorGetValue(pSummary->SensorIndex);
+  FLOAT32  newValue = SensorGetValue(pSummary->SensorIndex);
 
   // Add value to total
-  pSummary->fTotal += NewValue;
+  pSummary->fTotal += newValue;
 
-  if(NewValue < pSummary->fMinValue)
+  if(newValue < pSummary->fMinValue)
   {
-    pSummary->fMinValue = NewValue;
+    pSummary->fMinValue = newValue;
     CM_GetTimeAsTimestamp(&pSummary->timeMinValue);
   }
 
-  if( NewValue > pSummary->fMaxValue )
+  if( newValue > pSummary->fMaxValue )
   {
-    pSummary->fMaxValue = NewValue;
+    pSummary->fMaxValue = newValue;
     CM_GetTimeAsTimestamp(&pSummary->timeMaxValue);
   }
 
@@ -579,7 +600,7 @@ static void SensorsConfigure (void)
       pSensorCfg = &m_SensorCfg[i];
 
       // Configure the sensor interface based on the type
-      switch (pSensorCfg->Type)
+      switch (pSensorCfg->type)
       {
          case UNUSED:
             // Nothing to do, go to next sensor
@@ -588,58 +609,58 @@ static void SensorsConfigure (void)
             // Supply the necessary data to the interface and record the
             // interface index to retrieve the data later.
             Sensors[i].nInterfaceIndex  =
-                            Arinc429MgrSensorSetup(pSensorCfg->GeneralPurposeA,
-                                                 pSensorCfg->GeneralPurposeB,
+                            Arinc429MgrSensorSetup(pSensorCfg->generalPurposeA,
+                                                 pSensorCfg->generalPurposeB,
                                                  pSensorCfg->nInputChannel,
                                                  i);
             // Set the function pointers for the ARINC429 interface
-            Sensors[i].GetSensorData   = Arinc429MgrReadWord;
-            Sensors[i].TestSensor      = Arinc429MgrSensorTest;
-            Sensors[i].InterfaceActive = Arinc429MgrInterfaceValid;
+            Sensors[i].pGetSensorData   = Arinc429MgrReadWord;
+            Sensors[i].pTestSensor      = Arinc429MgrSensorTest;
+            Sensors[i].pInterfaceActive = Arinc429MgrInterfaceValid;
             break;
          case SAMPLE_QAR:
             // Supply the necessary data to the interface and record the
             // interface index to retrieve the data later.
-            Sensors[i].nInterfaceIndex = QAR_SensorSetup (pSensorCfg->GeneralPurposeA,
-                                                          pSensorCfg->GeneralPurposeB,
+            Sensors[i].nInterfaceIndex = QAR_SensorSetup (pSensorCfg->generalPurposeA,
+                                                          pSensorCfg->generalPurposeB,
                                                           i);
             // Set the function pointers for the ARINC717 interface
-            Sensors[i].GetSensorData    = QAR_ReadWord;
-            Sensors[i].TestSensor       = QAR_SensorTest;
-            Sensors[i].InterfaceActive  = QAR_InterfaceValid;
+            Sensors[i].pGetSensorData    = QAR_ReadWord;
+            Sensors[i].pTestSensor       = QAR_SensorTest;
+            Sensors[i].pInterfaceActive  = QAR_InterfaceValid;
             break;
          case SAMPLE_ANALOG:
             // Set the interface index and the function pointers for the ADC
             Sensors[i].nInterfaceIndex  = pSensorCfg->nInputChannel;
-            Sensors[i].GetSensorData    = ADC_GetValue;
-            Sensors[i].TestSensor       = ADC_SensorTest;
-            Sensors[i].InterfaceActive  = SensorNoInterface;
+            Sensors[i].pGetSensorData    = ADC_GetValue;
+            Sensors[i].pTestSensor       = ADC_SensorTest;
+            Sensors[i].pInterfaceActive  = SensorNoInterface;
             break;
          case SAMPLE_DISCRETE:
             // Set the interface index and the function pointers for the Discretes
             Sensors[i].nInterfaceIndex  = pSensorCfg->nInputChannel;
-            Sensors[i].GetSensorData    = DIO_GetValue;
-            Sensors[i].TestSensor       = SensorNoTest;
-            Sensors[i].InterfaceActive  = SensorNoInterface;
+            Sensors[i].pGetSensorData    = DIO_GetValue;
+            Sensors[i].pTestSensor       = SensorNoTest;
+            Sensors[i].pInterfaceActive  = SensorNoInterface;
             break;
          case SAMPLE_UART:
             // Supply the necessary data to the interface and record the
             // interface index to retrieve the data later.
             Sensors[i].nInterfaceIndex  =
-                            UartMgr_SensorSetup(pSensorCfg->GeneralPurposeA,
-                                                pSensorCfg->GeneralPurposeB,
+                            UartMgr_SensorSetup(pSensorCfg->generalPurposeA,
+                                                pSensorCfg->generalPurposeB,
                                                 pSensorCfg->nInputChannel,
                                                 i);
             // Set the function pointers for the UART interface
-            Sensors[i].GetSensorData   = UartMgr_ReadWord;
-            Sensors[i].TestSensor      = UartMgr_SensorTest;
-            Sensors[i].InterfaceActive = UartMgr_InterfaceValid;
+            Sensors[i].pGetSensorData   = UartMgr_ReadWord;
+            Sensors[i].pTestSensor      = UartMgr_SensorTest;
+            Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
          default:
             // FATAL ERROR WITH CONFIGURATION
             // Initialize String
             FATAL("Sensor Config Fail: Sensor %d, Type %d not Valid",
-                                                    i, pSensorCfg->Type);
+                                                    i, pSensorCfg->type);
             break;
       }
    }
@@ -674,7 +695,7 @@ static void SensorsReset (void)
     pSensorConfig = &m_SensorCfg[i];
 
     // Check if the sensor is configured to be used
-    if (pSensorConfig->Type != UNUSED)
+    if (pSensorConfig->type != UNUSED)
     {
       // Reset the sensor's dynamic data
       SensorReset((SENSOR_INDEX)i);
@@ -718,16 +739,16 @@ static void SensorReset( SENSOR_INDEX Sensor)
     }
 
     // Initialize all the sensor storage elements
-    pSensor->SensorIndex      = Sensor;
+    pSensor->nSensorIndex     = Sensor;
     //pSensor->bValueIsValid    = TRUE;   // Valid by default
     pSensor->bValueIsValid    = FALSE;
     pSensor->bWasValidOnce    = FALSE;
     pSensor->fValue           = 0.0F;
     pSensor->fPriorValue      = 0.0F;
-    pSensor->PriorValueValid  = FALSE;  // not yet computed
+    pSensor->bPriorValueValid = FALSE;  // not yet computed
     pSensor->nNextSample      = 0;
     pSensor->nCurrentSamples  = 0;
-    pSensor->nSampleCounts    = (INT16)(MIFs_PER_SECOND / pSensorConfig->SampleRate);
+    pSensor->nSampleCounts    = (INT16)(MIFs_PER_SECOND / pSensorConfig->sampleRate);
     pSensor->nSampleCountdown = (pSensorConfig->nSampleOffset_ms / MIF_PERIOD_mS)+1;
     pSensor->bOutofRange      = FALSE;
     pSensor->bRangeFail       = FALSE;
@@ -743,12 +764,12 @@ static void SensorReset( SENSOR_INDEX Sensor)
     pSensor->nSignalTimeout_ms= 0;
     pSensor->bBITFail         = FALSE;
     pSensor->nInterfaceIndex  = 0;
-    pSensor->GetSensorData    = NULL;
-    pSensor->TestSensor       = NULL;
-    pSensor->InterfaceActive  = NULL;
+    pSensor->pGetSensorData   = NULL;
+    pSensor->pTestSensor      = NULL;
+    pSensor->pInterfaceActive = NULL;
 
     // Initialize any dynamic filter elements
-    SensorInitFilter(&pSensorConfig->FilterCfg, &pSensor->FilterData,
+    SensorInitFilter(&pSensorConfig->filterCfg, &pSensor->filterData,
                      pSensorConfig->nMaximumSamples);
 }
 
@@ -782,7 +803,7 @@ static void SensorsUpdateTask( void *pParam )
       pSensor = Sensors + nSensor;
 
       // Check if the sensor is configured
-      if (UNUSED != pConfig->Type)
+      if (UNUSED != pConfig->type)
       {
          // Countdown the number of samples until next read
          if (--pSensor->nSampleCountdown <= 0)
@@ -816,36 +837,36 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
    FLOAT32  fVal;
    FLOAT32  filterVal;
 
-   ASSERT( NULL != pSensor->GetSensorData );
-   ASSERT( NULL != pSensor->InterfaceActive );
-   ASSERT( NULL != pSensor->TestSensor );
+   ASSERT( NULL != pSensor->pGetSensorData );
+   ASSERT( NULL != pSensor->pInterfaceActive );
+   ASSERT( NULL != pSensor->pTestSensor );
 
    // Make sure the sensors interface is active
-   if ( TRUE == pSensor->InterfaceActive(pSensor->nInterfaceIndex) )
+   if ( TRUE == pSensor->pInterfaceActive(pSensor->nInterfaceIndex) )
    {
       // Preset TickCount to current time.  For bus i/f type, TickCount will be
-      //  updated to actual param rx time.  For others (ANALOG,DISC) it will be 
-      //  this time as param rx time. 
-      pSensor->lastUpdateTick = CM_GetTickCount(); 
-    
+      //  updated to actual param rx time.  For others (ANALOG,DISC) it will be
+      //  this time as param rx time.
+      pSensor->lastUpdateTick = CM_GetTickCount();
+
       // Read the Sensor data from the configured interface
-      fVal      = pSensor->GetSensorData(pSensor->nInterfaceIndex, 
+      fVal      = pSensor->pGetSensorData(pSensor->nInterfaceIndex,
                                          &pSensor->lastUpdateTick);
 
       // Check if calibration is configured for sensor
-      if (pConfig->Calibration.Type != NONE)
+      if (pConfig->calibration.type != NONE)
       {
          // Convert the sensor by the calibration parameters
-         fVal = (fVal * pConfig->Calibration.fParams[LINEAR_SLOPE]) +
-                        pConfig->Calibration.fParams[LINEAR_OFFSET];
+         fVal = (fVal * pConfig->calibration.fParams[LINEAR_SLOPE]) +
+                        pConfig->calibration.fParams[LINEAR_OFFSET];
       }
 
       // Check if conversion is configured for sensor
-      if (pConfig->Conversion.Type != NONE)
+      if (pConfig->conversion.type != NONE)
       {
          // Convert the sensor by the conversion parameters
-         fVal = (fVal * pConfig->Conversion.fParams[LINEAR_SLOPE]) +
-                        pConfig->Conversion.fParams[LINEAR_OFFSET];
+         fVal = (fVal * pConfig->conversion.fParams[LINEAR_SLOPE]) +
+                        pConfig->conversion.fParams[LINEAR_OFFSET];
       }
 
       // Filter the latest sample value based on Cfg
@@ -966,7 +987,7 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
   Status = SENSOR_OK;
 
   // Check if the range test is enabled
-  if ( TRUE == pConfig->RangeTest)
+  if ( TRUE == pConfig->bRangeTest)
   {
      // check for range
      if ((filterVal < pConfig->fMinValue) || (filterVal > pConfig->fMaxValue))
@@ -977,7 +998,7 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
         if (FALSE == pSensor->bOutofRange)
         {
            pSensor->bOutofRange      = TRUE;
-           pSensor->nRangeTimeout_ms = CM_GetTickCount() + pConfig->RangeDuration_ms;
+           pSensor->nRangeTimeout_ms = CM_GetTickCount() + pConfig->nRangeDuration_ms;
         }
 
         // Sensor is out of range, check if it has met its persistent
@@ -1000,7 +1021,7 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
         // If Range Test had failed, reset sysCond
         if ( pSensor->bRangeFail == TRUE )
         {
-          Flt_ClrStatus( pConfig->SystemCondition );
+          Flt_ClrStatus( pConfig->systemCondition );
         }
 
         pSensor->bOutofRange = FALSE;
@@ -1042,7 +1063,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
   Status = SENSOR_OK;
 
   // Check if the rate test is enabled
-  if ( TRUE == pConfig->RateTest)
+  if ( TRUE == pConfig->bRateTest)
   {
      // if the prior value has not been computed, it will be now.
      // Indicate so for next time
@@ -1055,7 +1076,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
      {
         /* compute the slope: slope = (current value - prior value) / interval
          * interval = sample period */
-        slope  = (fVal - pSensor->fRatePrevVal) * pConfig->SampleRate;
+        slope  = (fVal - pSensor->fRatePrevVal) * pConfig->sampleRate;
         pSensor->fRatePrevVal = fVal;
 
         // Store the slope for debugging
@@ -1065,7 +1086,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
         slope = (FLOAT32)fabs(slope);
 
         /* check for rate */
-        if (slope > pConfig->RateThreshold)
+        if (slope > pConfig->fRateThreshold)
         {
            Status = SENSOR_FAILING;
 
@@ -1074,7 +1095,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
            {
               // The Rate has been exceeded record the time and wait for a timeout
               pSensor->bRateExceeded   = TRUE;
-              pSensor->nRateTimeout_ms = CM_GetTickCount() + pConfig->RateDuration_ms;
+              pSensor->nRateTimeout_ms = CM_GetTickCount() + pConfig->nRateDuration_ms;
            }
 
            // Check if the rate has persisted through the configured time
@@ -1100,7 +1121,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
            // If Rate Test had failed, reset sys cond
            if ( pSensor->bRateFail == TRUE )
            {
-                Flt_ClrStatus( pConfig->SystemCondition );
+                Flt_ClrStatus( pConfig->systemCondition );
            }
 
            pSensor->bRateExceeded = FALSE;
@@ -1141,10 +1162,10 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
    Status = SENSOR_OK;
 
    // Check if the signal test is enabled
-   if ( TRUE == pConfig->SignalTest)
+   if ( TRUE == pConfig->bSignalTest)
    {
       // Perform the fault processing and check for fault
-      if (FaultCompareValues(pConfig->SignalTestIndex))
+      if (FaultCompareValues(pConfig->signalTestIndex))
       {
          Status = SENSOR_FAILING;
 
@@ -1153,7 +1174,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
          {
             // At this point the sensor is failing but hasn't failed
             pSensor->bSignalBad        = TRUE;
-            pSensor->nSignalTimeout_ms = CM_GetTickCount() + pConfig->SignalDuration_ms;
+            pSensor->nSignalTimeout_ms = CM_GetTickCount() + pConfig->nSignalDuration_ms;
          }
 
          // Determine if the duration has been met
@@ -1178,7 +1199,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
          // If Signal Test had failed, reset sys cond
          if ( pSensor->bSignalFail == TRUE )
          {
-           Flt_ClrStatus( pConfig->SystemCondition );
+           Flt_ClrStatus( pConfig->systemCondition );
          }
 
          pSensor->bSignalBad  = FALSE;
@@ -1211,13 +1232,13 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
    SENSOR_STATUS Status;
    BOOLEAN       bOK;
 
-   ASSERT( NULL != pSensor->TestSensor );
+   ASSERT( NULL != pSensor->pTestSensor );
 
    // Initialize Local Data
    Status = SENSOR_FAILED;
 
    // Check the Interface Test
-   bOK = pSensor->TestSensor(pSensor->nInterfaceIndex);
+   bOK = pSensor->pTestSensor(pSensor->nInterfaceIndex);
 
    // Is the interface test OK
    if (TRUE == bOK)
@@ -1225,7 +1246,7 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
       // If BIT Test had failed, reset sys cond
       if ( pSensor->bBITFail == TRUE )
       {
-        Flt_ClrStatus( pConfig->SystemCondition );
+        Flt_ClrStatus( pConfig->systemCondition );
       }
 
       // No problem with the interface detected
@@ -1305,21 +1326,21 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
 
    // Build the fault log
    FaultLog.failureType        = type;
-   FaultLog.Index              = pSensor->SensorIndex;
-   strncpy_safe(FaultLog.Name, sizeof(FaultLog.Name), pConfig->SensorName,_TRUNCATE);
+   FaultLog.nIndex             = pSensor->nSensorIndex;
+   strncpy_safe(FaultLog.sName, sizeof(FaultLog.sName), pConfig->sSensorName,_TRUNCATE);
    FaultLog.fCurrentValue      = fVal;
    FaultLog.fValue             = pSensor->fValue;
    FaultLog.fPreviousValue     = pSensor->fPriorValue;
    FaultLog.fRateValue         = pSensor->fRateValue;
    FaultLog.fExpectedMin       = pConfig->fMinValue;
    FaultLog.fExpectedMax       = pConfig->fMaxValue;
-   FaultLog.fExpectedThreshold = pConfig->RateThreshold;
+   FaultLog.fExpectedThreshold = pConfig->fRateThreshold;
    FaultLog.nDuration_ms       = 0;
 
    // Display a debug message about the failure
    memset(Str,0,sizeof(Str));
    sprintf(Str,"Sensor (%d) - %s",
-            pSensor->SensorIndex, SensorFailureNames[type] );
+            pSensor->nSensorIndex, SensorFailureNames[type] );
    GSE_DebugStr(NORMAL,FALSE, Str);
 
    // Determine the correct log ID to store
@@ -1332,11 +1353,11 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
          LogID                 = SYS_ID_SENSOR_SIGNAL_FAIL;
          break;
       case RANGE_FAILURE:
-         FaultLog.nDuration_ms = pConfig->RangeDuration_ms;
+         FaultLog.nDuration_ms = pConfig->nRangeDuration_ms;
          LogID                 = SYS_ID_SENSOR_RANGE_FAIL;
          break;
       case RATE_FAILURE:
-         FaultLog.nDuration_ms = pConfig->RateDuration_ms;
+         FaultLog.nDuration_ms = pConfig->nRateDuration_ms;
          LogID                 = SYS_ID_SENSOR_RATE_FAIL;
          break;
       case NO_FAILURE:
@@ -1348,7 +1369,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    }
 
    // Store the fault log data
-   Flt_SetStatus(pConfig->SystemCondition, LogID, &FaultLog, sizeof(FaultLog));
+   Flt_SetStatus(pConfig->systemCondition, LogID, &FaultLog, sizeof(FaultLog));
 }
 
 /******************************************************************************
@@ -1381,36 +1402,36 @@ static void SensorInitFilter(FILTER_CONFIG *pFilterCfg, FILTER_DATA *pFilterData
     nFloat = (FLOAT32)nMaximumSamples;
 
     // Check what type of filter
-    switch(pFilterCfg->Type)
+    switch(pFilterCfg->type)
     {
     case FILTERNONE:
         break;
 
     case EXPO_AVERAGE:
-        pFilterData->K = 2.0f /(1.0f + nFloat);
+        pFilterData->fK = 2.0f /(1.0f + nFloat);
         break;
 
     case SPIKEREJECTION:
-        pFilterData->K = 2.0f / (1.0f + nFloat);
+        pFilterData->fK = 2.0f / (1.0f + nFloat);
         pFilterData->fullScaleInv = 1.0f/pFilterCfg->fFullScale;
         pFilterData->maxPercent = (FLOAT32)pFilterCfg->nMaxPct/100.0f;
         pFilterData->spikePercent = (FLOAT32)pFilterCfg->nSpikeRejectPct/100.0f;
         break;
 
     case MAXREJECT:
-        pFilterData->K = 2.0f / (1.0f + nFloat);
+        pFilterData->fK = 2.0f / (1.0f + nFloat);
         break;
 
     case SLOPEFILTER:
         /* compute the K constant */
-        pFilterData->K = 0.0;
+        pFilterData->fK = 0.0;
 
         for (i = 0.0f; i < nFloat; i = i+1.0f)
         {
             temp = (i - ((nFloat - 1.0f) * 0.5f));
-            pFilterData->K += temp * temp;
+            pFilterData->fK += temp * temp;
         }
-        pFilterData->K = 1.0f/pFilterData->K;
+        pFilterData->fK = 1.0f/pFilterData->fK;
 
         /* compute (n-1)/2 */
         pFilterData->nMinusOneOverTwo = ((nFloat - 1.0f) * 0.5f);
@@ -1418,7 +1439,7 @@ static void SensorInitFilter(FILTER_CONFIG *pFilterCfg, FILTER_DATA *pFilterData
 
     default:
         // FATAL ERROR WITH FILTER TYPE
-        FATAL("Sensor Filter Init Fail: Type = %d", pFilterCfg->Type);
+        FATAL("Sensor Filter Init Fail: Type = %d", pFilterCfg->type);
         break;
     }
 }
@@ -1484,18 +1505,18 @@ static BOOLEAN SensorManageSamples (SENSOR_CONFIG *pConfig, SENSOR *pSensor, FLO
 static FLOAT32 SensorApplyFilter ( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSensor)
 {
    // Run the appropriate filter on the sensor
-   switch (pConfig->FilterCfg.Type)
+   switch (pConfig->filterCfg.type)
    {
       case FILTERNONE:
          break;
       case EXPO_AVERAGE:
-         fVal = SensorExponential( fVal, &pSensor->FilterData);
+         fVal = SensorExponential( fVal, &pSensor->filterData);
          break;
       case SPIKEREJECTION:
-         fVal = SensorSpikeReject(fVal, &pConfig->FilterCfg, &pSensor->FilterData);
+         fVal = SensorSpikeReject(fVal, &pConfig->filterCfg, &pSensor->filterData);
          break;
       case MAXREJECT:
-         fVal = SensorMaxReject(fVal, &pConfig->FilterCfg, &pSensor->FilterData);
+         fVal = SensorMaxReject(fVal, &pConfig->filterCfg, &pSensor->filterData);
          break;
       case SLOPEFILTER:
          fVal = SensorSlope ( fVal, pConfig, pSensor);
@@ -1503,9 +1524,9 @@ static FLOAT32 SensorApplyFilter ( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR 
       default:
          // FATAL ERROR WITH FILTER TYPE
          FATAL("Invalid Sensor Filter Type: %s(%d) - FilterType(%d)",
-                 pConfig->SensorName,
-                 pSensor->SensorIndex,
-                 pConfig->FilterCfg.Type);
+                 pConfig->sSensorName,
+                 pSensor->nSensorIndex,
+                 pConfig->filterCfg.type);
          break;
    }
 
@@ -1568,7 +1589,7 @@ static void SensorPersistCounter( BOOLEAN set, BOOLEAN reset,
 static FLOAT32 SensorExponential (FLOAT32 fVal, FILTER_DATA *pFilterData)
 {
     pFilterData->fLastAvgValue +=
-        (pFilterData->K * ( fVal - pFilterData->fLastAvgValue));
+        (pFilterData->fK * ( fVal - pFilterData->fLastAvgValue));
     return pFilterData->fLastAvgValue;
 }
 
@@ -1619,7 +1640,7 @@ static FLOAT32 SensorSpikeReject(FLOAT32 fVal,
 
     // do a simple average
     pFilterData->fLastAvgValue = pFilterData->fLastAvgValue +
-        (pFilterData->fLastValidValue - pFilterData->fLastAvgValue) * pFilterData->K;
+        (pFilterData->fLastValidValue - pFilterData->fLastAvgValue) * pFilterData->fK;
 
     return pFilterData->fLastAvgValue;
 }
@@ -1659,7 +1680,7 @@ static FLOAT32 SensorMaxReject(FLOAT32 sample,
     useValue = valid ? sample : pFilterData->fLastValidValue;
 
     pFilterData->fLastAvgValue = pFilterData->fLastAvgValue +
-        ((useValue - pFilterData->fLastAvgValue) * pFilterData->K);
+        ((useValue - pFilterData->fLastAvgValue) * pFilterData->fK);
 
     return pFilterData->fLastAvgValue;
 }
@@ -1760,7 +1781,7 @@ static FLOAT32 SensorSlope( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSenso
    {
        UINT8 ix;
        UINT8 nSamples = pConfig->nMaximumSamples;
-       FILTER_DATA*   pFilterData = &pSensor->FilterData;
+       FILTER_DATA*   pFilterData = &pSensor->filterData;
 
        for (i = 0; i < nSamples; i++)
        {
@@ -1769,7 +1790,7 @@ static FLOAT32 SensorSlope( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSenso
           returnSlope += (iFloat - pFilterData->nMinusOneOverTwo) *
                          pSensor->fSamples[ix];
        }
-       returnSlope *= pFilterData->K;
+       returnSlope *= pFilterData->fK;
        /*
         * return the new slope value
         * The slope is in units/tick.  To convert to seconds, we
@@ -1782,7 +1803,7 @@ static FLOAT32 SensorSlope( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSenso
        //returnSlope *= TTMR_TASK_FRAMES_PER_SECOND;
        //returnSlope  = returnSlope / (TTMR_TASK_FRAMES_PER_SECOND / pConfig->SampleRate);
        // TBD - I think this can be reduced to the following
-       returnSlope *= pConfig->SampleRate;
+       returnSlope *= pConfig->sampleRate;
    }
    else
    {
@@ -1814,11 +1835,11 @@ static void SensorsLiveDataTask( void *pParam )
    pTCB   = (SENSOR_LD_PARMS *)pParam;
 
    // Is live data enabled?
-   if (LD_NONE != LiveDataDisplay.Type)
+   if (LD_NONE != LiveDataDisplay.type)
    {
       // Make sure the rate is not too fast and fix if it is
-      nRate = LiveDataDisplay.Rate_ms < SENSOR_LD_MAX_RATE ?
-              SENSOR_LD_MAX_RATE : LiveDataDisplay.Rate_ms;
+      nRate = LiveDataDisplay.nRate_ms < SENSOR_LD_MAX_RATE ?
+              SENSOR_LD_MAX_RATE : LiveDataDisplay.nRate_ms;
 
       // Check if end of period has been reached
       if ((CM_GetTickCount() - pTCB->StartTime) >= nRate)
@@ -1909,27 +1930,32 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
- * 
+ *
+ * *****************  Version 78  *****************
+ * User: John Omalley Date: 12-11-12   Time: 11:36a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 77  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR #1191 Returns update time of param
- * 
+ *
  * *****************  Version 76  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:42p
  * Updated in $/software/control processor/code/system
  * SCR #1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 75  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Init max sensor to -FLT_MAX
- * 
+ *
  * *****************  Version 74  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:24p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Fix AutoTrends
- * 
+ *
  * *****************  Version 73  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:48p
  * Updated in $/software/control processor/code/system
@@ -1939,7 +1965,7 @@ static void SensorDumpASCIILiveData(void)
  * User: John Omalley Date: 12-09-11   Time: 2:13p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header
- * 
+ *
  * *****************  Version 71  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

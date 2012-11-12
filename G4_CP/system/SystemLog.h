@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 106 $  $Date: 12-10-27 5:04p $
+      $Revision: 108 $  $Date: 12-11-12 1:11p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -56,17 +56,19 @@ SYS_LOG_ID(APP_ID_EVENT_STARTED                     ,0xB000 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_ENDED                       ,0xB001 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
-SYS_LOG_ID(APP_ID_TIMEHISTORY                       ,0xB200 ,0)\
 SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
 \
 SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
 \
-SYS_LOG_ID(APP_ID_CREEP_PBIT                        ,0xB400 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_PBIT_CFG_CRC                ,0xB400 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_PBIT_EE_APP                 ,0xB401 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_PBIT_CRC_CHANGED            ,0xB402 ,0)\
 SYS_LOG_ID(APP_ID_CREEP_SUMMARY                     ,0xB480 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_FAULT                       ,0xB481 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB482, 0)\
+SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_ER               ,0xB481 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_RESET            ,0xB482 ,0)\
+SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB483, 0)\
 \
 SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
@@ -322,8 +324,8 @@ typedef struct
 
 typedef struct
 {
-  SYS_LOG_HEADER Hdr;
-  UINT8          Data[SYSTEM_LOG_DATA_SIZE];
+  SYS_LOG_HEADER hdr;
+  UINT8          data[SYSTEM_LOG_DATA_SIZE];
 } SYS_LOG_PAYLOAD;
 
 /******************************************************************************
@@ -356,16 +358,26 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  *  MODIFICATIONS
  *    $History: SystemLog.h $
  *
+ * *****************  Version 108  *****************
+ * User: John Omalley Date: 12-11-12   Time: 1:11p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
+ * *****************  Version 107  *****************
+ * User: Peter Lee    Date: 12-11-05   Time: 9:51a
+ * Updated in $/software/control processor/code/system
+ * SCR #1190 Creep Proccessing.  Fault Logs.
+ *
  * *****************  Version 106  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 105  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:20p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Combined the two trend start logs
- * 
+ *
  * *****************  Version 104  *****************
  * User: John Omalley Date: 12-10-18   Time: 1:56p
  * Updated in $/software/control processor/code/system

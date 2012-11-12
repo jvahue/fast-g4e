@@ -11,7 +11,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 50 $  $Date: 12-10-27 5:09p $    
+      $Revision: 51 $  $Date: 12-11-06 4:00p $    
     
 ******************************************************************************/
 
@@ -99,6 +99,10 @@ typedef enum
 {
    QAR_BIPOLAR_RETURN_ZERO = QCR_FORMAT_BIP_VAL,
    QAR_HARVARD_BIPHASE     = QCR_FORMAT_HBP_VAL
+   
+   // Warning - target type for this enum may be as small as UINT16.
+   // Do not make enum larger than 65535. (SCR #1196)
+   
 }QAR_FORMAT_CONTROL;
 
 typedef enum
@@ -108,6 +112,10 @@ typedef enum
    QAR_256_WORDS  = QCR_BYTES_SF_256WORDS_VAL,
    QAR_512_WORDS  = QCR_BYTES_SF_512WORDS_VAL,
    QAR_1024_WORDS = QCR_BYTES_SF_1024WORDS_VAL
+   
+   // Warning - target type for this enum may be as small as UINT16.
+   // Do not make enum larger than 65535. (SCR #1196)
+  
 } QAR_NUM_WORDS_CONTROL;
 
 typedef enum
@@ -135,6 +143,10 @@ typedef enum
    QAR_SF3    = 2,
    QAR_SF4    = 3,
    QAR_SF_MAX = 4
+   
+   // Warning - target type for this enum may be as small as SINT16.
+   // Do not make enum larger than 32767. (SCR #1196)
+
 } QAR_SF;
 
 typedef enum
@@ -494,6 +506,12 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 51  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 4:00p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 Added warning comment to enum definitions to avoid making
+ * enum too large.
  * 
  * *****************  Version 50  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:09p

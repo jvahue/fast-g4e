@@ -1,14 +1,15 @@
 #ifndef VALIDATE_H
 #define	VALIDATE_H
 /******************************************************************************
-Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
-All Rights Reserved. Proprietary and Confidential.
+          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+                All Rights Reserved. Proprietary and Confidential.
 
-File:       Validate.h
+    File:       Validate.h
 
-Description:
-VERSION
-$Revision: 3 $  $Date: 8/28/12 12:43p $
+    Description: Generated code for Password Authentication
+
+    VERSION
+    $Revision: 4 $  $Date: 12-11-01 2:19p $
 ******************************************************************************/
 /*< Generated code - Password Authentication block  start>*/
   const UINT8 key[] =
@@ -19,11 +20,11 @@ $Revision: 3 $  $Date: 8/28/12 12:43p $
     0x85, 0x9C, 0x32, 0x4E, 0x99, 0xBA, 0x28, 0x57,
   };
 
-  // Encrypted factory password and offset for: "offwf" 
+  // Encrypted factory password and offset for: "offwf"
   const UINT8 fact[] = {0x42, 0x22, 0x3A, 0x8F, 0x6F};
   const UINT8 factoryKeyOffset = 3;
 
-  // Encrypted privileged password and offset for: "oflgs" 
+  // Encrypted privileged password and offset for: "oflgs"
   const UINT8 priv[] = {0x33, 0x9E, 0x65, 0xBC, 0xCB};
   const UINT8 privilegedKeyOffset = 5;
 
@@ -32,54 +33,59 @@ $Revision: 3 $  $Date: 8/28/12 12:43p $
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
- 
+
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 
 /******************************************************************************
-Package Defines                               
+Package Defines
 ******************************************************************************/
 
 /******************************************************************************
-                                 Package Typedefs                              
+                                 Package Typedefs
 ******************************************************************************/
 
 /******************************************************************************
-                                 Package Exports                               
+                                 Package Exports
 ******************************************************************************/
-#undef EXPORT                                                                  
+#undef EXPORT
 
-#if defined ( VALIDATE_BODY )                                                  
-#define EXPORT                                                                 
-#else                                                                          
-#define EXPORT extern                                                          
-#endif                                                                         
+#if defined ( VALIDATE_BODY )
+#define EXPORT
+#else
+#define EXPORT extern
+#endif
 
 /******************************************************************************
-                             Package Exports Variables                         
+                             Package Exports Variables
 ******************************************************************************/
 
 /******************************************************************************
-                             Package Exports Functions                         
-******************************************************************************/  
+                             Package Exports Functions
+******************************************************************************/
 
 #endif // VALIDATE_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: validate.h $
  * 
+ * *****************  Version 4  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 2:19p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 4/30/10    Time: 6:06p
  * Updated in $/software/control processor/code/application
  * Changed passwords. See validate.h for clear text values
  *
- * 
+ *
  ***************************************************************************/
 
 

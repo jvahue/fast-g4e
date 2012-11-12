@@ -1,28 +1,28 @@
-#define DRV_ADC_BODY
+#define ADC_BODY
 
 /******************************************************************************
-            Copyright (C) 2007 - 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007 - 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
- 
+
   File:        Adc.c
- 
+
   Description: Driver for the LT1595 ADC, connected by the SPI bus
-               This 12-bit single channel 4-input ADC is assumed to have 
+               This 12-bit single channel 4-input ADC is assumed to have
                the following signals tied to its 4-input MUX
- 
+
                Mux Select  Channel                       Scale
-               0           A/C Bus Voltage               
+               0           A/C Bus Voltage
                1           Internal Li battery voltage   1V/V
-               2           A/C Battery Voltage           
+               2           A/C Battery Voltage
                3           FAST mainboard temperature    10mV/ *C .750V @ 25*C
 
   Requires:    DIO.h - Controlling the Li battery switch
                SPI.h - Accessing the SPI bus to read the converter
- 
+
   VERSION
-      $Revision: 30 $  $Date: 12-10-31 1:10p $ 
-     
- 
+      $Revision: 32 $  $Date: 12-11-05 2:10p $
+
+
 ******************************************************************************/
 
 
@@ -60,25 +60,25 @@
 /* Local Typedefs                                                            */
 /*****************************************************************************/
 typedef struct {
-  FLOAT32 adcValue; 
-  RESULT  adcResult; 
-} ADC_DATA; 
+  FLOAT32 adcValue;
+  RESULT  adcResult;
+} ADC_DATA;
 
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
 
 
-const REG_SETTING ADC_Registers[] = 
+const REG_SETTING ADC_Registers[] =
 {
   //Set FEC1L7 port to GPIO output.
-  // SET_CHECK_MASK_OR(MCF_GPIO_PDDR_FEC1L, MCF_GPIO_PDDR_FEC1L_PDDR_FEC1L7, bInitOk); 
-  {(void *) &MCF_GPIO_PDDR_FEC1L, MCF_GPIO_PDDR_FEC1L_PDDR_FEC1L7, sizeof(UINT8), 0x0, 
+  // SET_CHECK_MASK_OR(MCF_GPIO_PDDR_FEC1L, MCF_GPIO_PDDR_FEC1L_PDDR_FEC1L7, bInitOk);
+  {(void *) &MCF_GPIO_PDDR_FEC1L, MCF_GPIO_PDDR_FEC1L_PDDR_FEC1L7, sizeof(UINT8), 0x0,
             REG_SET_MASK_OR, TRUE, RFA_FORCE_UPDATE}
 
 };
 
-static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX]; 
+static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX];
 
 
 /*****************************************************************************/
@@ -99,49 +99,49 @@ static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX];
  *              the switch for applying the Li backup battery voltage to
  *              channel 2 of the ADC.
  *
- * Parameters:  SysLogId - Ptr to return System Log ID into 
- *              pdata - Ptr to buffer to return system log data 
+ * Parameters:  SysLogId - Ptr to return System Log ID into
+ *              pdata - Ptr to buffer to return system log data
  *              psize - Ptr to return size (bytes) of system log data
  *
  * Returns:     Driver operation result: DRV_OK  : Conversion success
  *                                       !DRV_OK : See ResultCodes.h
- * Notes:       
+ * Notes:
  *****************************************************************************/
 RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
-  BOOLEAN bInitOk; 
-  ADC_DRV_PBIT_LOG  *pdest; 
-  UINT16 i; 
+  BOOLEAN bInitOk;
+  ADC_DRV_PBIT_LOG  *pdest;
+  UINT32 i;
 
-  
+
   pdest = (ADC_DRV_PBIT_LOG *) pdata;
-  memset ( pdest, 0, sizeof(ADC_DRV_PBIT_LOG) ); 
-  pdest->result = DRV_OK; 
-  
-  *psize = sizeof(ADC_DRV_PBIT_LOG); 
-  
-  
-  // Initialize the ADC Registers 
-  bInitOk = TRUE; 
-  for (i=0;i<(sizeof(ADC_Registers)/sizeof(REG_SETTING));i++) 
+  memset ( pdest, 0, sizeof(ADC_DRV_PBIT_LOG) );
+  pdest->result = DRV_OK;
+
+  *psize = sizeof(ADC_DRV_PBIT_LOG);
+
+
+  // Initialize the ADC Registers
+  bInitOk = TRUE;
+  for (i=0;i<(sizeof(ADC_Registers)/sizeof(REG_SETTING));i++)
   {
-    bInitOk &= RegSet( (REG_SETTING_PTR) &ADC_Registers[i] ); 
+    bInitOk &= RegSet( (REG_SETTING_PTR) &ADC_Registers[i] );
   }
 
-  if ( TRUE != STPU( bInitOk, eTpAdc3807)) 
+  if ( TRUE != STPU( bInitOk, eTpAdc3807))
   {
-    pdest->result = DRV_ADC_PBIT_REG_INIT_FAIL; 
-    *SysLogId = DRV_ID_ADC_PBIT_RET_INIT_FAIL; 
+    pdest->result = DRV_ADC_PBIT_REG_INIT_FAIL;
+    *SysLogId = DRV_ID_ADC_PBIT_RET_INIT_FAIL;
   }
-  
+
   //Turn Li backup battery switch off
   LI_BATT_OFF;
-  
-  // Init module variables 
+
+  // Init module variables
   for (i=0;i<ADC_CHAN_MAX;i++)
   {
-    m_ADC_ChanData[i].adcValue = 0.0f; 
-    m_ADC_ChanData[i].adcResult = DRV_OK; 
+    m_ADC_ChanData[i].adcValue = 0.0f;
+    m_ADC_ChanData[i].adcResult = DRV_OK;
   }
 
   return pdest->result;
@@ -157,24 +157,24 @@ RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  * Returns:     Driver operation result: DRV_OK  : Conversion success
  *                                       !DRV_OK : See ResultCodes.h
  *
- * Notes:       Wrapper function for values managed by SpiManager 
+ * Notes:       Wrapper function for values managed by SpiManager
  *
  *****************************************************************************/
 RESULT ADC_GetACBusVoltage(FLOAT32 *ACBusVoltage)
-{  
-  FLOAT32         currVal; 
-  
+{
+  FLOAT32         currVal;
+
   *ACBusVoltage = m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcValue; // Get previous good value
-  m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult = SPIMgr_GetACBusVoltage((FLOAT32 *) &currVal); 
+  m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult = SPIMgr_GetACBusVoltage((FLOAT32 *) &currVal);
 
-  if ( m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult == DRV_OK ) 
+  if ( m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult == DRV_OK )
   {
-    m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcValue = currVal; // Update current val if good 
-    *ACBusVoltage = currVal; 
+    m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcValue = currVal; // Update current val if good
+    *ACBusVoltage = currVal;
   }
-  // Knowlogic will like this one, no ELSE !! 
+  // Knowlogic will like this one, no ELSE !!
 
-  return m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult;  
+  return m_ADC_ChanData[ADC_CHAN_AC_BUS_V].adcResult;
 }
 
 
@@ -192,27 +192,27 @@ RESULT ADC_GetACBusVoltage(FLOAT32 *ACBusVoltage)
  *
  *****************************************************************************/
 RESULT ADC_GetACBattVoltage (FLOAT32* ACBattVoltage)
-{  
-  FLOAT32         currVal; 
-  
+{
+  FLOAT32         currVal;
+
   *ACBattVoltage = m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcValue; // Get previous good value
-  m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult = SPIMgr_GetACBattVoltage((FLOAT32 *) &currVal); 
+  m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult = SPIMgr_GetACBattVoltage((FLOAT32 *) &currVal);
 
-  if ( m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult == DRV_OK ) 
+  if ( m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult == DRV_OK )
   {
-    m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcValue = currVal; // Update current val if good 
-    *ACBattVoltage = currVal; 
+    m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcValue = currVal; // Update current val if good
+    *ACBattVoltage = currVal;
   }
-  // Knowlogic will like this one, no ELSE !! 
+  // Knowlogic will like this one, no ELSE !!
 
-  return m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult;  
+  return m_ADC_ChanData[ADC_CHAN_AC_BATT_V].adcResult;
 }
 
 
 /******************************************************************************
  * Function:    ADC_GetLiBattVoltage
  *
- * Description: Wrapper function for returning the lithium battery voltage 
+ * Description: Wrapper function for returning the lithium battery voltage
  *              channel and convert A/D result into a floating point value in voltage units
  *
  * Parameters:  [out] *Voltage : Lithium battery voltage
@@ -224,19 +224,19 @@ RESULT ADC_GetACBattVoltage (FLOAT32* ACBattVoltage)
  *****************************************************************************/
 RESULT ADC_GetLiBattVoltage(FLOAT32* Voltage)
 {
-  FLOAT32         currVal; 
-  
+  FLOAT32         currVal;
+
   *Voltage = m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcValue; // Get previous good value
-  m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult = SPIMgr_GetLiBattVoltage((FLOAT32 *) &currVal); 
+  m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult = SPIMgr_GetLiBattVoltage((FLOAT32 *) &currVal);
 
-  if ( m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult == DRV_OK ) 
+  if ( m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult == DRV_OK )
   {
-    m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcValue = currVal; // Update current val if good 
-    *Voltage = currVal; 
+    m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcValue = currVal; // Update current val if good
+    *Voltage = currVal;
   }
-  // Knowlogic will like this one, no ELSE !! 
+  // Knowlogic will like this one, no ELSE !!
 
-  return m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult;  
+  return m_ADC_ChanData[ADC_CHAN_LI_BATT_V].adcResult;
 
 }
 
@@ -257,19 +257,19 @@ RESULT ADC_GetLiBattVoltage(FLOAT32* Voltage)
  *****************************************************************************/
 RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 {
-  FLOAT32         currVal; 
-  
+  FLOAT32         currVal;
+
   *Temp = m_ADC_ChanData[ADC_CHAN_TEMP].adcValue; // Get previous good value
-  m_ADC_ChanData[ADC_CHAN_TEMP].adcResult = SPIMgr_GetBoardTemp((FLOAT32 *) &currVal); 
+  m_ADC_ChanData[ADC_CHAN_TEMP].adcResult = SPIMgr_GetBoardTemp((FLOAT32 *) &currVal);
 
-  if ( m_ADC_ChanData[ADC_CHAN_TEMP].adcResult == DRV_OK ) 
+  if ( m_ADC_ChanData[ADC_CHAN_TEMP].adcResult == DRV_OK )
   {
-    m_ADC_ChanData[ADC_CHAN_TEMP].adcValue = currVal; // Update current val if good 
-    *Temp = currVal; 
+    m_ADC_ChanData[ADC_CHAN_TEMP].adcValue = currVal; // Update current val if good
+    *Temp = currVal;
   }
-  // Knowlogic will like this one, no ELSE !! 
+  // Knowlogic will like this one, no ELSE !!
 
-  return m_ADC_ChanData[ADC_CHAN_TEMP].adcResult;  
+  return m_ADC_ChanData[ADC_CHAN_TEMP].adcResult;
 }
 
 
@@ -283,7 +283,7 @@ RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 * Returns:     Driver operation result: DRV_OK  : Conversion success
 *                                       !DRV_OK : See ResultCodes.h
 *
-* Notes:       DO NOT CALL DIRECTLY, Call ADC_GetACBusVoltage 
+* Notes:       DO NOT CALL DIRECTLY, Call ADC_GetACBusVoltage
 *
 *****************************************************************************/
 RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
@@ -294,7 +294,7 @@ RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
   result = ADC_ReadRaw( ADC_CHAN_AC_BUS_V, &ADReading);
 
   *ACBusVoltage = (ADReading * ADC_V_PER_BIT * ADC_BUS_V_PER_V);
-  *ACBusVoltage = (*ACBusVoltage > MIN_OFF_VOLTAGE) ? 
+  *ACBusVoltage = (*ACBusVoltage > MIN_OFF_VOLTAGE) ?
                    *ACBusVoltage + ADC_BUS_V_TRANSITOR_DROP : 0;
 
   return result;
@@ -325,7 +325,7 @@ RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
   TempVoltage = ADReading * ADC_V_PER_BIT * ADC_BATT_V_PER_V;
 
   // Voltage Formula Provided by Hardware Engineering Group
-  *ACBattVoltage = (BATT_CAL_FACTOR1 * (TempVoltage * TempVoltage)) + 
+  *ACBattVoltage = (BATT_CAL_FACTOR1 * (TempVoltage * TempVoltage)) +
                    (BATT_CAL_FACTOR2 * TempVoltage);
   return result;
 }
@@ -375,7 +375,7 @@ RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
   UINT16 ADReading;
   RESULT result = DRV_OK;
 
-  result = ADC_ReadRaw(ADC_CHAN_TEMP,&ADReading);       
+  result = ADC_ReadRaw(ADC_CHAN_TEMP,&ADReading);
 
   *Temp = (ADReading * ADC_V_PER_BIT * ADC_TEMP_DEG_PER_V) - ADC_TEMP_DEG_OFFSET;
 
@@ -406,15 +406,15 @@ RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
  *              2.The routine handles the switch to connect/disconnect the
  *                lithium battery to/from mux channel 1 of the A/D. The A/D
  *                communication overhead (writing 4 bits) provides a delay
- *                of approximately 12us between turning on the switch to 
- *                when the mux switches to channel 1.  This assumes a 320kHz 
+ *                of approximately 12us between turning on the switch to
+ *                when the mux switches to channel 1.  This assumes a 320kHz
  *                SPI clock.
  ******************************************************************************/
 RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
 {
  UINT8  MuxSelect;
  RESULT result = DRV_OK;
- 
+
   if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel, turn on Li
   {                                             //battery switch if necessary
     LI_BATT_ON;
@@ -432,7 +432,7 @@ RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
 
   if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel and turn
   {                                             //the Li switch back off if necessary
-    LI_BATT_OFF;    
+    LI_BATT_OFF;
   }
 
   return result;
@@ -443,21 +443,21 @@ RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
 /******************************************************************************
  * Function:     ADC_SensorTest
  *
- * Description:  Determines if sensor data is valid.  
+ * Description:  Determines if sensor data is valid.
  *
  * Parameters:   nIndex - index of ADC channel
  *
  * Returns:      FALSE - If word data invalid
- *               TRUE  - If word data valid 
+ *               TRUE  - If word data valid
  *
  * Notes:        none
  *
  *****************************************************************************/
 BOOLEAN ADC_SensorTest (UINT16 nIndex)
 {
-  BOOLEAN   bValid; 
+  BOOLEAN   bValid;
   UINT32    spiId;
-      
+
   switch (nIndex)
   {
   case ADC_CHAN_AC_BUS_V:
@@ -468,7 +468,7 @@ BOOLEAN ADC_SensorTest (UINT16 nIndex)
     break;
   case ADC_CHAN_AC_BATT_V:
     spiId = SPI_AC_BAT_VOLT;
-    break;      
+    break;
   case ADC_CHAN_TEMP:
     spiId = SPI_BOARD_TEMP;
     break;
@@ -486,21 +486,21 @@ BOOLEAN ADC_SensorTest (UINT16 nIndex)
 /******************************************************************************
  * Function:    ADC_GetValue
  *
- * Description: This function is used by the sensor object to read the 
+ * Description: This function is used by the sensor object to read the
  *              different channels of the internal ADC.
  *
  * Parameters:  [in]  nIndex - ADC channel to read. See enum ADC_CHANNEL
- *              [in]  *null - Not used.  Add to support common interface. 
+ *              [in]  *null - Not used.  Add to support common interface.
  *
  * Returns:     fValue - float Value of the discrete
  *
- * Notes:       
+ * Notes:
  *****************************************************************************/
 FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 {
    // Local Data
    FLOAT32 fValue;
-      
+
    switch (nIndex)
    {
       case ADC_CHAN_AC_BUS_V:
@@ -511,7 +511,7 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
          break;
       case ADC_CHAN_AC_BATT_V:
          ADC_GetACBattVoltage (&fValue);
-         break;      
+         break;
       case ADC_CHAN_TEMP:
          ADC_GetBoardTemp (&fValue);
          break;
@@ -519,157 +519,168 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
          FATAL("Unrecognized ADC channel param = %d", nIndex);
          break;
    }
-   
-   return (fValue);   
+
+   return (fValue);
 }
 
 /*****************************************************************************/
-/* Local Functions                                                           */ 
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
  * 
+ * *****************  Version 32  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 2:10p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1196 PCLint 641 Warning copying enum into a uint16 could cause a
+ * problem.  Modified target variable to be a uint32.
+ * 
+ * *****************  Version 31  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 2:44p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 30  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 1:10p
  * Updated in $/software/control processor/code/drivers
  * SCR # 1142 File format errors
- * 
+ *
  * *****************  Version 29  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:08p
  * Updated in $/software/control processor/code/drivers
  * SCR #1191 Returns update time of param
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 10/11/11   Time: 2:10p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1077 - ADC CBIT Test
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 5/26/11    Time: 1:17p
  * Updated in $/software/control processor/code/drivers
  * SCR #767 Enhancement - BIT for Analog Sensors
- * 
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 10/25/10   Time: 6:03p
  * Updated in $/software/control processor/code/drivers
  * SCR 961 - Code Review Updates
- * 
+ *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 10/19/10   Time: 4:40p
  * Updated in $/software/control processor/code/drivers
  * SCR 653 - ADC Bus and Battery Formula Updates
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 10/15/10   Time: 4:21p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage this needed a STPU vs a TPU
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 10/14/10   Time: 2:39p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage
  * Added testpoints.h
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 10/14/10   Time: 2:26p
  * Updated in $/software/control processor/code/drivers
  * SCR# 848 - Code Coverage
- * 
+ *
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 9/28/10    Time: 1:56p
  * Updated in $/software/control processor/code/drivers
  * SCR #892 Code Review Updates
- * 
+ *
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 8/04/10    Time: 11:32a
  * Updated in $/software/control processor/code/drivers
  * SCR #653 More accurate BATT Volt Reading
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/drivers
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 7/28/10    Time: 5:36p
  * Updated in $/software/control processor/code/drivers
  * SCR #699 Return prev ADC value if ADC read fails rather than value off
- * the "stack". 
- * 
+ * the "stack".
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:40p
  * Updated in $/software/control processor/code/drivers
  * SCR #67 fix funct call and spelling error
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:46p
  * Updated in $/software/control processor/code/drivers
  * SCR #67 Interrupted SPI Access (Multiple / Nested SPI Access)
  * SCR #475 Delay 50uSecs before reading LiBat voltage
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:02p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 11:09a
  * Updated in $/software/control processor/code/drivers
  * SCR# 404 - PC-Lint cleanup, formatting
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 12:40p
  * Updated in $/software/control processor/code/drivers
  * Typos in comments, remove an empty else.
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:20p
  * Updated in $/software/control processor/code/drivers
  * SCR 371 and 377
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 3:15p
  * Updated in $/software/control processor/code/drivers
  * Fix for SCR 172
- * 
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 10/26/09   Time: 5:28p
  * Updated in $/software/control processor/code/drivers
- * SCR #315 CBIT and SEU Processing 
- * 
+ * SCR #315 CBIT and SEU Processing
+ *
  * *****************  Version 8  *****************
  * User: John Omalley Date: 10/01/09   Time: 4:31p
  * Updated in $/software/control processor/code/drivers
  * Added Function for analog sensors.
- * 
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:05p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- * 
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:21p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- * 
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 6/29/09    Time: 11:58a
  * Updated in $/software/control processor/code/drivers
- * SCR #204 Misc Code Review Updates. 
- * 
+ * SCR #204 Misc Code Review Updates.
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 10/08/08   Time: 11:51a
  * Updated in $/control processor/code/drivers
  * Updates required for PM
- * 
+ *
  *
  *****************************************************************************/
- 
+
 

@@ -7,10 +7,10 @@
 
     File:         FASTStateMgr.h
 
-    Description:  
+    Description:
 
     VERSION
-    $Revision: 7 $  $Date: 8/28/12 12:43p $
+    $Revision: 8 $  $Date: 12-11-01 1:15p $
 
 ******************************************************************************/
 
@@ -80,18 +80,18 @@
 typedef void    TASK_RUN(BOOLEAN run,INT32 param);
 typedef BOOLEAN GET_STATE(INT32 param);
 
-//--Information for the Transition Criteria and Tasks defined in the system 
+//--Information for the Transition Criteria and Tasks defined in the system
 //  (see StateManagerInterfaces.h)
 typedef struct{
   CHAR       Name[FSM_TC_INPUT_STR_LEN +1];//4-char name of the Transition Criteria Input
-  BOOLEAN    IsNumerated;  //Indicates part of the 4-char Name string is reserved 
+  BOOLEAN    IsNumerated;  //Indicates part of the 4-char Name string is reserved
                            //numerating multiple instances of this TC
   GET_STATE* GetState;     //function that returns the active/inactive status
 }FSM_TC_INPUT;
 
 typedef struct{
   CHAR       Name[FSM_TASK_STR_LEN +1]; //4 (or 7-char) name of the Task
-  BOOLEAN    IsNumerated;  //Indicates 3 extra characters in the string name are reserved 
+  BOOLEAN    IsNumerated;  //Indicates 3 extra characters in the string name are reserved
                            //to for enumerating multiple instances of this task.
   INT32      MaxNum;       //Maximum number of instances for the task.
   TASK_RUN*  Run;          //Function that signals this task to run or stop
@@ -138,7 +138,7 @@ typedef struct{
 }FSM_STATE;
 
 typedef struct{
-  BYTE      CurState;           
+  BYTE      CurState;
   BYTE      NextState;
   BYTE      IsLogged;
   BYTE      size;
@@ -149,22 +149,24 @@ typedef struct{
   FSM_STATE States[FSM_NUM_OF_STATES];
   FSM_TC    TCs[FSM_NUM_OF_TC];
   BOOLEAN   Enabled;
-  UINT16    CRC;  
+  UINT16    CRC;
 }FSM_CONFIG;
 
 //Task state changed log.
 typedef struct{
-  CHAR      current[FSM_STATE_NAME_STR_LEN+1];  //string for the current state
-  CHAR      next[FSM_STATE_NAME_STR_LEN+1];     //string for the next state
-  UINT32    duration_ms;                        //duration current ran for
-  BYTE      TC;                                 //Index of the TC that caused the switch
-  CHAR      tc_inputs[FSM_NUM_OF_INPUTS_PER_TC]; //String indicating the state of the TC inputs when it evaluated to TRUE.
+  CHAR      current[FSM_STATE_NAME_STR_LEN+1];   //String for the current state
+  CHAR      next[FSM_STATE_NAME_STR_LEN+1];      //String for the next state
+  UINT32    duration_ms;                         //Duration current ran for
+  BYTE      TC;                                  //Index of the TC that caused the switch
+  CHAR      tc_inputs[FSM_NUM_OF_INPUTS_PER_TC]; //String indicating
+                                                 //  the state of the TC inputs
+                                                 //  when it evaluated to TRUE.
 }FSM_STATE_CHANGE_LOG;
 
 //CRC Mismatch log
 typedef struct{
-  UINT16 ExpectedCRC;                     //The expected CRC value in the configuration.
-  UINT16 CalculatedCRC;                   //The CRC calculated by the FSM on the actual configuration data. 
+  UINT16 ExpectedCRC;      //The expected CRC value in the configuration.
+  UINT16 CalculatedCRC;    //The CRC calculated by the FSM on the actual configuration data.
 }FSM_CRC_MISMATCH_LOG;
 
 #pragma pack()
@@ -199,37 +201,42 @@ EXPORT BOOLEAN FSM_GetStateFALSE(INT32 param);
  *  MODIFICATIONS
  *    $History: FASTStateMgr.h $
  * 
+ * *****************  Version 8  *****************
+ * User: Melanie Jutras Date: 12-11-01   Time: 1:15p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 7  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 9/23/11    Time: 8:02p
  * Updated in $/software/control processor/code/application
  * SCR 575 Modfix for the list of running task not being reliable in the
  * fsm.status user command.
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jim Mood     Date: 8/25/11    Time: 6:07p
  * Updated in $/software/control processor/code/application
  * SCR 575 Modfix
- * 
+ *
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 8/22/11    Time: 6:24p
  * Updated in $/software/control processor/code/application
  * SCR 575 Modfixes
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 8/22/11    Time: 12:35p
  * Updated in $/software/control processor/code/application
  * SCR #575 Add Showcfg to FastStateMgr
- * 
+ *
  * *****************  Version 2  *****************
  * User: Jim Mood     Date: 7/26/11    Time: 3:05p
  * Updated in $/software/control processor/code/application
  * SCR 575 updates
- * 
+ *
  * *****************  Version 1  *****************
  * User: Jim Mood     Date: 7/20/11    Time: 10:03a
  * Created in $/software/control processor/code/application

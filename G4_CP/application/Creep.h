@@ -8,15 +8,15 @@
     File:        Creep.h
 
     Description: Contains data structures related to the Creep Processing
-    
+
     VERSION
-      $Revision: 1 $  $Date: 12-10-27 5:09p $     
+      $Revision: 3 $  $Date: 12-11-10 4:37p $
 
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 
 /*****************************************************************************/
@@ -38,16 +38,16 @@
 #define CREEP_MAX_COLS 10
 #define CREEP_MAX_NAME 32
 
-#define CREEP_MAX_OBJ 2  
-#define CREEP_MAX_TBL 2 
+#define CREEP_MAX_OBJ 2
+#define CREEP_MAX_TBL 2
 #define CREEP_TABLE_UNUSED 255
 
-#define CREEP_MAX_SENSOR_VAL 100   // Worst case, 
+#define CREEP_MAX_SENSOR_VAL 100   // Worst case,
 
 #define CREEP_SENSOR_RATE_MINIMUM  1000  // 1 msec tick * 1000 = 1 second (HZ)
 
 #define CREEP_SENSOR_RATE_BUFF_SIZE 20
-#define CREEP_SENSOR_RATE_TOL       2   // Basically 20 msec 
+#define CREEP_SENSOR_RATE_TOL       2   // Basically 20 msec
 
 #define CREEP_TASK_EXE_TIME  10  // 10 msec between Creep Task exe
 
@@ -86,34 +86,34 @@
 
 #define CREEP_DEFAULT_140A_PER_HOUR  \
 \
-200000	  ,200000	    ,200000	    ,200000	    ,250000	    ,250000	    ,300000	    ,350000	    ,400000	    ,450000    ,   /*10 Row 0 Val*/\
-200000	  ,200000	    ,250000	    ,250000	    ,300000	    ,350000	    ,400000	    ,450000	    ,500000	    ,600000    ,   /*10 Row 1 Val*/\
-200000	  ,250000	    ,250000	    ,300000	    ,300000	    ,350000	    ,400000	    ,500000	    ,550000	    ,650000    ,   /*10 Row 2 Val*/\
-250000	  ,300000	    ,300000	    ,350000	    ,400000	    ,450000	    ,500000	    ,600000	    ,650000	    ,750000    ,   /*10 Row 3 Val*/\
-300000	  ,350000	    ,400000	    ,450000	    ,500000	    ,550000	    ,650000	    ,800000	    ,850000	    ,1000000   ,   /*10 Row 4 Val*/\
-400000	  ,500000	    ,550000	    ,600000	    ,650000	    ,750000	    ,850000	    ,1050000	  ,1150000    ,1350000   ,   /*10 Row 5 Val*/\
-600000	  ,650000	    ,750000	    ,800000	    ,950000	    ,1050000	  ,1250000	  ,1500000	  ,1650000    ,1900000   ,   /*10 Row 6 Val*/\
-750000	  ,850000	    ,950000	    ,1050000	  ,1150000	  ,1350000	  ,1550000	  ,1850000	  ,2050000    ,2350000   ,   /*10 Row 7 Val*/\
-1000000	  ,1150000	  ,1300000	  ,1400000	  ,1550000	  ,1800000	  ,2050000	  ,2500000	  ,2750000    ,3150000   ,   /*10 Row 8 Val*/\
-1500000	  ,1750000	  ,1950000	  ,2100000	  ,2350000	  ,2700000	  ,3100000	  ,3750000	  ,4200000    ,4800000   ,   /*10 Row 9 Val*/\
-2300000	  ,2650000	  ,2950000	  ,3150000	  ,3500000	  ,4000000	  ,4600000	  ,5600000	  ,6200000    ,7100000   ,   /*10 Row10 Val*/\
-3150000	  ,3600000	  ,4000000	  ,4400000	  ,4900000	  ,5650000	  ,6500000	  ,7850000	  ,8750000    ,10000000  ,   /*10 Row11 Val*/\
-4450000	  ,5150000	  ,5750000	  ,6300000	  ,7050000	  ,8100000	  ,9300000	  ,11250000	  ,12500000	  ,14250000  ,   /*10 Row12 Val*/\
-7850000	  ,9050000	  ,10150000	  ,11050000	  ,12300000	  ,14150000	  ,16150000	  ,19500000	  ,21450000	  ,24050000  ,   /*10 Row13 Val*/\
-12800000	,14650000	  ,16350000	  ,17750000	  ,19750000	  ,22350000	  ,25300000	  ,29950000	  ,32900000	  ,37000000  ,   /*10 Row14 Val*/\
-19000000	,21700000	  ,24100000	  ,26050000	  ,28850000	  ,32750000	  ,37100000	  ,44050000	  ,48500000	  ,54650000  ,   /*10 Row15 Val*/\
-29000000	,33200000	  ,36950000	  ,40000000	  ,44100000	  ,49750000	  ,56050000	  ,66100000	  ,72500000	  ,81300000  ,   /*10 Row16 Val*/\
-70400000	,79200000	  ,86950000	  ,93200000	  ,102150000	,114350000	,127850000	,149100000	,162600000  ,180950000 ,   /*10 Row17 Val*/\
-102400000	,115250000	,126550000	,135650000	,148700000	,166550000	,186250000	,218800000	,240350000  ,270000000 ,   /*10 Row18 Val*/\
-169050000	,190400000	,209650000	,225600000	,248600000	,280250000	,315450000	,371250000	,407250000  ,458000000 ,   /*10 Row19 Val*/\
+200000    ,200000     ,200000     ,200000     ,250000     ,250000     ,300000     ,350000     ,400000     ,450000    ,   /*10 Row 0 Val*/\
+200000    ,200000     ,250000     ,250000     ,300000     ,350000     ,400000     ,450000     ,500000     ,600000    ,   /*10 Row 1 Val*/\
+200000    ,250000     ,250000     ,300000     ,300000     ,350000     ,400000     ,500000     ,550000     ,650000    ,   /*10 Row 2 Val*/\
+250000    ,300000     ,300000     ,350000     ,400000     ,450000     ,500000     ,600000     ,650000     ,750000    ,   /*10 Row 3 Val*/\
+300000    ,350000     ,400000     ,450000     ,500000     ,550000     ,650000     ,800000     ,850000     ,1000000   ,   /*10 Row 4 Val*/\
+400000    ,500000     ,550000     ,600000     ,650000     ,750000     ,850000     ,1050000    ,1150000    ,1350000   ,   /*10 Row 5 Val*/\
+600000    ,650000     ,750000     ,800000     ,950000     ,1050000    ,1250000    ,1500000    ,1650000    ,1900000   ,   /*10 Row 6 Val*/\
+750000    ,850000     ,950000     ,1050000    ,1150000    ,1350000    ,1550000    ,1850000    ,2050000    ,2350000   ,   /*10 Row 7 Val*/\
+1000000   ,1150000    ,1300000    ,1400000    ,1550000    ,1800000    ,2050000    ,2500000    ,2750000    ,3150000   ,   /*10 Row 8 Val*/\
+1500000   ,1750000    ,1950000    ,2100000    ,2350000    ,2700000    ,3100000    ,3750000    ,4200000    ,4800000   ,   /*10 Row 9 Val*/\
+2300000   ,2650000    ,2950000    ,3150000    ,3500000    ,4000000    ,4600000    ,5600000    ,6200000    ,7100000   ,   /*10 Row10 Val*/\
+3150000   ,3600000    ,4000000    ,4400000    ,4900000    ,5650000    ,6500000    ,7850000    ,8750000    ,10000000  ,   /*10 Row11 Val*/\
+4450000   ,5150000    ,5750000    ,6300000    ,7050000    ,8100000    ,9300000    ,11250000   ,12500000   ,14250000  ,   /*10 Row12 Val*/\
+7850000   ,9050000    ,10150000   ,11050000   ,12300000   ,14150000   ,16150000   ,19500000   ,21450000   ,24050000  ,   /*10 Row13 Val*/\
+12800000  ,14650000   ,16350000   ,17750000   ,19750000   ,22350000   ,25300000   ,29950000   ,32900000   ,37000000  ,   /*10 Row14 Val*/\
+19000000  ,21700000   ,24100000   ,26050000   ,28850000   ,32750000   ,37100000   ,44050000   ,48500000   ,54650000  ,   /*10 Row15 Val*/\
+29000000  ,33200000   ,36950000   ,40000000   ,44100000   ,49750000   ,56050000   ,66100000   ,72500000   ,81300000  ,   /*10 Row16 Val*/\
+70400000  ,79200000   ,86950000   ,93200000   ,102150000  ,114350000  ,127850000  ,149100000  ,162600000  ,180950000 ,   /*10 Row17 Val*/\
+102400000 ,115250000  ,126550000  ,135650000  ,148700000  ,166550000  ,186250000  ,218800000  ,240350000  ,270000000 ,   /*10 Row18 Val*/\
+169050000 ,190400000  ,209650000  ,225600000  ,248600000  ,280250000  ,315450000  ,371250000  ,407250000  ,458000000 ,   /*10 Row19 Val*/\
                              \
                              742.1561083, 746.8094249, 749.1360831, 753.7893997, 760.7693745, /* Row Value 0 -  4*/\
                              767.7493494, 774.7293242, 779.3826408, 786.3626156, 795.7255363, /* Row Value 5 -  9*/\
                              805.118765,  812.1636866, 819.2086081, 830.9501441, 842.729649,  /* Row Value10 - 14*/\
                              852.2033202, 861.6769915, 882.9927518, 894.8348409, 905.000000,  /* Row Value15 - 19*/\
                              \
-                             35800,	36300,	36700,	37000,	37400,	 /* Col Value 0 - 4*/\
-                             37900,	38400,	39100,	39500,	40000,   /* Col Value 5 - 9*/\
+                             35800, 36300,  36700,  37000,  37400,   /* Col Value 0 - 4*/\
+                             37900, 38400,  39100,  39500,  40000,   /* Col Value 5 - 9*/\
                              \
                              "Default Table Name"          /* Table Name */
 
@@ -147,16 +147,16 @@
                              805.118765,  812.1636866, 819.2086081, 830.9501441, 842.729649,  /* Row Value10 - 14*/\
                              852.2033202, 861.6769915, 882.9927518, 894.8348409, 905.000000,  /* Row Value15 - 19*/\
                              \
-                             35800,	36300,	36700,	37000,	37400,	 /* Col Value 0 - 4*/\
-                             37900,	38400,	39100,	39500,	40000,   /* Col Value 5 - 9*/\
+                             35800, 36300,  36700,  37000,  37400,   /* Col Value 0 - 4*/\
+                             37900, 38400,  39100,  39500,  40000,   /* Col Value 5 - 9*/\
                              \
                              "Default Table Name"          /* Table Name */
 
 
 
 #define CREEP_DEFAULT_OBJ0 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Col Sensor */\
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
@@ -164,8 +164,8 @@
                             "Unused Creep Object 0"
 
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Col Sensor */\
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
@@ -184,7 +184,7 @@
 
 
 #define CREEP_DEFAULT_CRC16   0xd1b6
-                           
+
 #define CREEP_DEFAULT_CFG  STA_NORMAL,  /* PBITSysCond */\
                            STA_NORMAL,  /* CBITSysCond */\
                            FALSE,       /* bEnabled */\
@@ -197,7 +197,7 @@
                            10000,               /* 10 sec Sensor Start Timeout */\
                            12,                  /* Base Units Creep Damage Counts 1E-12*/\
                            50,                  /* Max SensorLoss Log Recording */\
-                           CREEP_DEFAULT_CRC16  /* CRC16, TBD add actual val for default */
+                           CREEP_DEFAULT_CRC16  /* CRC16, add actual val for default */
 
 
 /******************************************************************************
@@ -215,84 +215,89 @@ typedef enum
   CREEP_100HZ       = 100  /* 100Hz Rate */
 } CREEP_RATE;
 
-typedef enum 
+typedef enum
 {
   CREEP_STATUS_OK = 0,         // Creep Status is OK
-  CREEP_STATUS_FAULTED_PBIT,   // Creep PBIT Faulted.  Creep processing disabled. 
-  // CREEP_STATUS_FAULTED_CBIT,   // Creep CBIT Faulted.  Current Sensor Failure. 
+  CREEP_STATUS_FAULTED_PBIT,   // Creep PBIT Faulted.  Creep processing disabled.
+  // CREEP_STATUS_FAULTED_CBIT,   // Creep CBIT Faulted.  Current Sensor Failure.
   CREEP_STATUS_OK_DISABLED,    // Creep Status is OK, but processing cfg to be dsb
-  CREEP_STATUS_MAX  
-} CREEP_STATUS_ENUM; 
+  CREEP_STATUS_MAX
+} CREEP_STATUS_ENUM;
 
-typedef enum 
+typedef enum
 {
-  CREEP_STATE_IDLE = 0, 
-  CREEP_STATE_ENGRUN, 
-  CREEP_STATE_FAULT_ER, 
-  CREEP_STATE_FAULT_IDLE, 
+  CREEP_STATE_IDLE = 0,
+  CREEP_STATE_ENGRUN,
+  CREEP_STATE_FAULT_ER,
+  CREEP_STATE_FAULT_IDLE,
   CREEP_STATE_MAX
-} CREEP_STATE_ENUM; 
+} CREEP_STATE_ENUM;
 
+
+// NOTE:  This enum list is also used as index into CREEP_PBIT_TYPE_TO_SYSLOG_ID[]
 typedef enum {
-  PBIT_OK, 
-  PBIT_FAIL_CFG_CRC,       // Creep Cfg CRC failed 
-  PBIT_FAIL_CRC_MISMATCH,  // Creep Cfg CRC != EE APP DATA, creep cfg changed ? 
-  PBIT_FAIL_EE_APP_DATA,   // Creep EE APP DATA restore failed. 
-  PBIT_FAIL_MAX            //    could be default creep restored as well. 
+  PBIT_OK,
+  PBIT_FAIL_CFG_CRC,       // Creep Cfg CRC failed
+  PBIT_FAIL_CRC_MISMATCH,  // Creep Cfg CRC != EE APP DATA, creep cfg changed ?
+  PBIT_FAIL_EE_APP_DATA,   // Creep EE APP DATA restore failed.
+  PBIT_FAIL_MAX            //    could be default creep restored as well.
 } PBIT_FAIL_TYPE;
 
+
+// NOTE:  This enum list is also used as index into CREEP_CBIT_TYPE_TO_SYSLOG_ID[]
 typedef enum {
-  CREEP_FAULT_TYPE_RESET,        // Creep processing interrupted by reset
+  CREEP_CBIT_OK,
   CREEP_FAULT_TYPE_SENSOR_LOSS,  // Creep processing interrupted by sensor loss
+  CREEP_FAULT_TYPE_RESET,        // Creep processing interrupted by reset
   CREEP_FAULT_TYPE_MAX
 } CREEP_FAULT_TYPE;
 
 
 
 
-// The Configuration needs to be "packed" due to being CRC protected.  Don't 
+// The Configuration needs to be "packed" due to being CRC protected.  Don't
 //   want random data in pad bytes to affect CRC calc.
-#pragma pack(1)  
+#pragma pack(1)
 typedef struct {
   FLOAT64 dCount[CREEP_MAX_ROWS][CREEP_MAX_COLS];  // "Damage/Sec" Count
-  FLOAT64 RowVal[CREEP_MAX_ROWS];                // Row Sensor Values (i.e. ITT)
-  FLOAT64 ColVal[CREEP_MAX_COLS];                // Col Sensor Values (i.e. Np)
-  CHAR name[CREEP_MAX_NAME]; 
-} CREEP_TBL, *CREEP_TBL_PTR; 
+  FLOAT64 rowVal[CREEP_MAX_ROWS];                // Row Sensor Values (i.e. ITT)
+  FLOAT64 colVal[CREEP_MAX_COLS];                // Col Sensor Values (i.e. Np)
+  CHAR name[CREEP_MAX_NAME];
+} CREEP_TBL, *CREEP_TBL_PTR;
 
 typedef struct {
-  CHAR name[CREEP_MAX_NAME]; 
-  UINT16 Id;           // ID of sensor used for Row, Col 
+  CHAR name[CREEP_MAX_NAME];
+  UINT16 id;           // ID of sensor used for Row, Col
   FLOAT32 slope;       //  Slope conversion (if used) to convert Sensor
   FLOAT32 offset;      //  Offset conversion (if used) to convert Sensor
   UINT16 sampleCnt;    //  Expected sample count missed (at rate specified)
-  UINT16 sampleRate_ms;//      before indicating sensor failure. 
-} CREEP_SENSOR, *CREEP_SENSOR_PTR; 
+  UINT16 sampleRate_ms;//      before indicating sensor failure.
+} CREEP_SENSOR, *CREEP_SENSOR_PTR;
 
 typedef struct {
-  CREEP_SENSOR SensorRow;  // Creep Sensor Row Definition 
-  CREEP_SENSOR SensorCol;  // Creep Sensor Col Definition 
-  UINT16 EngId;            // Engine Run Id to assoc with this CREEP object
-  UINT16 CreepTblId;       // Creep Table to use for calculating creep for this obj 
-  UINT16 CPUOffset_ms;     // CPU Offset for calculating CREEP Interval 
-  CREEP_RATE IntervalRate;    // Creep interval exe frame/rate 
-  CHAR name[CREEP_MAX_NAME];  // Descriptive name for debug purposes 
-} CREEP_OBJECT, *CREEP_OBJECT_PTR; 
-// NOTE: For CESNA CARAVAN App, two creep obj will be defined. One for Ct and 
+  CREEP_SENSOR sensorRow;  // Creep Sensor Row Definition
+  CREEP_SENSOR sensorCol;  // Creep Sensor Col Definition
+  UINT16 engId;            // Engine Run Id to assoc with this CREEP object
+  UINT16 creepTblId;       // Creep Table to use for calculating creep for this obj
+  UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
+  CREEP_RATE intervalRate;    // Creep interval exe frame/rate
+  CHAR name[CREEP_MAX_NAME];  // Descriptive name for debug purposes
+} CREEP_OBJECT, *CREEP_OBJECT_PTR;
+// NOTE: For CESNA CARAVAN App, two creep obj will be defined. One for Ct and
 //       one for Pt Blade creep monitoring.
 
 typedef struct {
-  FLT_STATUS PBITSysCond;   // PBIT Sys Cond when PBIT fails
-  FLT_STATUS CBITSysCond;   // CBIT Sys Cond when CBIT fails
+  FLT_STATUS sysCondPBIT;   // PBIT Sys Cond when PBIT fails
+  FLT_STATUS sysCondCBIT;   // CBIT Sys Cond when CBIT fails
   BOOLEAN    bEnabled;      // Enable/Dsb of Creep processing. Consistent w/other objects
-  UINT8      pads[3];       // creepTbl as to be 4 byte ALIGNED for code to work / Not ASSERT 
+  UINT8      pads[3];       // creepTbl as to be 4 byte ALIGNED for code to work / Not ASSERT
   CREEP_TBL    creepTbl[CREEP_MAX_TBL];  // Creep Tables
-  CREEP_OBJECT creepObj[CREEP_MAX_OBJ];  // Creep Object Definitions 
-  UINT32     sensorStartTime_ms;   // Sensor Startup timeout, before declaring sensor failure 
+  CREEP_OBJECT creepObj[CREEP_MAX_OBJ];  // Creep Object Definitions
+  UINT32     sensorStartTime_ms;   // Sensor Startup timeout, before declaring sensor failure
   UINT16     baseUnits;     // Base units of damage counts in tables (def 1E12)
-  UINT16     maxSensorLossRec;   // Limits the # of max SensorLossDetected log recording 
+  UINT16     maxSensorLossRec;   // Limits the # of max SensorLossDetected log recording
   UINT16     crc16;         // CRC 16 of the data in CREEP_CFG, except for crc16 itself
-} CREEP_CFG, *CREEP_CFG_PTR; 
+} CREEP_CFG, *CREEP_CFG_PTR;
 #pragma pack()
 
 
@@ -300,44 +305,46 @@ typedef struct {
 typedef struct {
   FLOAT64 creepLastMissionCnt;   // Last Mission Cnt
   FLOAT64 creepAccumCnt;     // Acc Creep Cnt since last reset
-  FLOAT64 creepMissionCnt;  // Current Creep Cnt (Mission) 
-  FLOAT64 creepAccumCntTrashed;  // Acc Creep Cnt Thrown away due to fault 
-  UINT32 sensorFailures;   // Acc Total Sensor Failures since last reset (when creep 
-                           //    was INACTIVE).  Do not know if this is a CREEP FAILURE. 
-  UINT32 creepFailures;    // Acc Toatl Creep Failures since last reset (when creep 
-                           //    was ACTIVE only). 
-} CREEP_DATA, *CREEP_DATA_PTR; 
+  FLOAT64 creepMissionCnt;  // Current Creep Cnt (Mission)
+  FLOAT64 creepAccumCntTrashed;  // Acc Creep Cnt Thrown away due to fault
+  UINT32 sensorFailures;   // Acc Total Sensor Failures since last reset (when creep
+                           //    was INACTIVE).  Do not know if this is a CREEP FAILURE.
+  UINT32 creepFailures;    // Acc Toatl Creep Failures since last reset (when creep
+                           //    was ACTIVE only).
+} CREEP_DATA, *CREEP_DATA_PTR;
 
 
 typedef struct {
-  CREEP_DATA data[CREEP_MAX_OBJ]; 
-  // BOOLEAN bInUse;  // Flag to indicate if CREEP is in use.  
-  UINT16 crc16;       // Copy of crc 16 in the cfg.  Use to determine if cfg has changed. 
-} CREEP_APP_DATA, *CREEP_APP_DATA_PTR; 
- 
+  CREEP_DATA data[CREEP_MAX_OBJ];
+  // BOOLEAN bInUse;  // Flag to indicate if CREEP is in use.
+  UINT16 crc16;       // Copy of crc 16 in the cfg.  Use to determine if cfg has changed.
+} CREEP_APP_DATA, *CREEP_APP_DATA_PTR;
+
 typedef struct {
-  FLOAT64 AccumCnt;
-  FLOAT64 AccumCntTrashed; 
-  FLOAT64 LastMissionCnt; 
-} CREEP_DATA_PERCENT, *CREEP_DATA_PERCENT_PTR; 
+  FLOAT64 accumCnt;
+  FLOAT64 accumCntTrashed;
+  FLOAT64 lastMissionCnt;
+} CREEP_DATA_PERCENT, *CREEP_DATA_PERCENT_PTR;
 
 typedef struct {
   FLOAT64 val[CREEP_MAX_SENSOR_VAL];   // Buffer of Sensor Values read
   UINT32 lastUpdate;                   // Time (in Tick) of last updated sensor value
-  UINT16 cnt;                          // Cnt of #Sensor Values in buffer 
+  UINT16 cnt;                          // Cnt of #Sensor Values in buffer
   BOOLEAN bFailed;           // Sensor is current failed (data loss time exceeded)
-  
-  FLOAT32 rateTime;          // Estimated input rate of sensor 
+
+  FLOAT32 rateTime;          // Estimated input rate of sensor
   UINT32 rateTimeBuff[CREEP_SENSOR_RATE_BUFF_SIZE];  // Buff of sensor update time
                                                      //   used to determine sensor rate
-  UINT16 rateIndex;          // Index into rateTimeBuff[] 
+  UINT16 rateIndex;          // Index into rateTimeBuff[]
   UINT32 timeout_ms;         // Timeout of sensor as determined by cfg and input rate
-                             //    to declare sensor failure. 
+                             //    to declare sensor failure.
+  FLOAT64 peakVal;    // Last peak value use
+  FLOAT64 currVal;    // Current value
 } CREEP_SENSOR_DATA, *CREEP_SENSOR_DATA_PTR;
 
 
 typedef struct {
-  CREEP_SENSOR_DATA row;  // Row Sensor Data Values 
+  CREEP_SENSOR_DATA row;  // Row Sensor Data Values
   CREEP_SENSOR_DATA col;  // Col Sensor Data Values
   BOOLEAN bFailed;        // TRUE if either the Row or Col sensor has failed
 } CREEP_SENSOR_VAL, *CREEP_SENSOR_VAL_PTR;
@@ -346,121 +353,123 @@ typedef struct {
 
 
 typedef struct   // Note: CPU Offset is implemented as count dn in other mods thus
-{                //       will implement the same. 
-  INT16 nRateCountDown; 
+{                //       will implement the same.
+  INT16 nRateCountDown;
   INT16 nRateCounts;
-} CREEP_INTERVAL, *CREEP_INTERVAL_PTR; 
+} CREEP_INTERVAL, *CREEP_INTERVAL_PTR;
 
 
-typedef struct { 
-  CREEP_STATUS_ENUM status; // _OK, _FAULT_PBIT, _DSB, 
-  CREEP_STATE_ENUM state;   // IDLE, ENGRUN, FAULT_ER, FAULT_IDLE 
-  INT16 nRateCountDown;     // CPU offset for 1 second 
+typedef struct {
+  CREEP_STATUS_ENUM status; // _OK, _FAULT_PBIT, _DSB,
+  CREEP_STATE_ENUM state;   // IDLE, ENGRUN, FAULT_ER, FAULT_IDLE
+  INT16 nRateCountDown;     // CPU offset for 1 second
   CREEP_DATA data;
-  CREEP_DATA_PERCENT data_percent; 
+  CREEP_DATA_PERCENT data_percent;
   BOOLEAN bCntInterrupted;  // Internal flag used to indicate Cnt Interrupted
                             //   during prev operation
   UINT32 erTime_ms;         // Last ER Elapse Time in msec
-  CREEP_INTERVAL interval;  // Creep Interval Setting 
+  CREEP_INTERVAL interval;  // Creep Interval Setting
 } CREEP_STATUS, *CREEP_STATUS_PTR;
 
 
 typedef struct {
-  FLOAT64 creepMissionCnt[CREEP_MAX_OBJ]; 
-} CREEP_APP_DATA_RTC, *CREEP_APP_DATA_RTC_PTR; 
+  FLOAT64 creepMissionCnt[CREEP_MAX_OBJ];
+} CREEP_APP_DATA_RTC, *CREEP_APP_DATA_RTC_PTR;
 
 
 #pragma pack(1)
 typedef struct {
-  CREEP_DATA data; 
-  
-  UINT16 rowInRate;          // Input rate determined for row sensor
-  UINT16 colInRate;          // Input rate determined for col sensor
-} CREEP_DIAG, *CREEP_DIAG_PTR; 
+  CREEP_DATA data;
+
+  FLOAT32 rowInRate;          // Input rate determined for row sensor
+  FLOAT32 colInRate;          // Input rate determined for col sensor
+} CREEP_DIAG, *CREEP_DIAG_PTR;
 
 typedef struct {
   UINT16 index;              // Echo of Index of Creep Object
-//UINT8  pad[2];             // Pad to align log to UINT32 
-  
-  FLOAT64 AccumCntPcnt;      // Accumulated count in percent (0% - 200%)
-  FLOAT64 AccumCnt;          // Accumulated count (E-12 units) 
-  
+//UINT8  pad[2];             // Pad to align log to UINT32
+
+  FLOAT64 accumCntPcnt;      // Accumulated count in percent (0% - 200%)
+  FLOAT64 accumCnt;          // Accumulated count (E-12 units)
+
   FLOAT64 lastMissionCntPcnt;    // Last Mission count in percent (0% - 200%)
   FLOAT64 lastMissionCnt;        // Last Mission count (E-12 units)
-  
+
   CREEP_DIAG diag;   // Diagnostics data
-} CREEP_SUMMARY_LOG, *CREEP_SUMMARY_LOG_PTR; 
+} CREEP_SUMMARY_LOG, *CREEP_SUMMARY_LOG_PTR;
 
 typedef struct {
-  UINT32 index;      // Index of creep object (i.e. CT or PT blade) 
-  
+  UINT32 index;      // Index of creep object (i.e. CT or PT blade)
+
   CREEP_FAULT_TYPE type;    // _RESET, _SENSOR_LOSS
   FLOAT64 missionCnt;       // Current mission count to be thrown away
   FLOAT64 creepAccumCntTrashed;  // Accum creep cnt thrown away from other Creep Failures
-  UINT32 creepFailures;          // Accum creep faults since last reset 
-  BOOLEAN bRowSensorFailed;      // Failed state of row sensor 
-  BOOLEAN bColSensorFailed;      // Failed state of col sensor 
-//UINT8   pad[2];                // Pad to align to UINT32 
-  
-  FLOAT64 AccumCntPcnt;      // Accumulated count in percent (0% - 200%)
-  FLOAT64 AccumCnt;          // Accumulated count (E-12 units) 
-  
+  UINT32 creepFailures;          // Accum creep faults since last reset
+  BOOLEAN bRowSensorFailed;      // Failed state of row sensor
+  BOOLEAN bColSensorFailed;      // Failed state of col sensor
+//UINT8   pad[2];                // Pad to align to UINT32
+
+  FLOAT64 accumCntPcnt;      // Accumulated count in percent (0% - 200%)
+  FLOAT64 accumCnt;          // Accumulated count (E-12 units)
+
   FLOAT64 lastMissionCntPcnt;    // Last Mission count in percent (0% - 200%)
   FLOAT64 lastMissionCnt;        // Last Mission count (E-12 units)
-} CREEP_FAULT_OBJ, *CREEP_FAULT_OBJ_PTR; 
+} CREEP_FAULT_OBJ, *CREEP_FAULT_OBJ_PTR;
 
 typedef struct {
-  CREEP_FAULT_OBJ obj[CREEP_MAX_OBJ]; 
-} CREEP_FAULT_LOG_SUMMARY, *CREEP_FAULT_LOG_SUMMARY_PTR; 
+  CREEP_FAULT_OBJ obj[CREEP_MAX_OBJ];
+} CREEP_FAULT_LOG_SUMMARY, *CREEP_FAULT_LOG_SUMMARY_PTR;
 
 
 typedef struct {
-  UINT32 index;   // Index of creep object (i.e. CT or PT blade) 
-  BOOLEAN bRowSensorFailed;  // Failed state of row sensor   
+  UINT32 index;   // Index of creep object (i.e. CT or PT blade)
+  BOOLEAN bRowSensorFailed;  // Failed state of row sensor
   BOOLEAN bColSensorFailed;  // Failed state of col sensor
-} CREEP_SENSOR_FAIL_LOG, CREEP_SENSOR_FAIL_LOG_PTR; 
+} CREEP_SENSOR_FAIL_LOG, CREEP_SENSOR_FAIL_LOG_PTR;
 
 typedef struct {
   PBIT_FAIL_TYPE type;  // _CFG_CRC_BAD, _CRC_MISMATCH, EE_APP_DATA
   UINT16 expCRC;  // CRC stored in CFG
-  UINT16 calcCRC; // Calc CRC when CFG_BAD, or CRC in EE APP when _MISMATCH 
-  CREEP_SUMMARY_LOG data[CREEP_MAX_OBJ]; 
-} CREEP_PBIT_LOG, *CREEP_PBIT_LOG_PTR; 
+  UINT16 calcCRC; // Calc CRC when CFG_BAD, or CRC in EE APP when _MISMATCH
+  CREEP_SUMMARY_LOG data[CREEP_MAX_OBJ];
+} CREEP_PBIT_LOG, *CREEP_PBIT_LOG_PTR;
 #pragma pack()
 
 
 #pragma pack(1)
 typedef struct {
-  CHAR name[CREEP_MAX_NAME];   // Creep Object Name 
+  CHAR name[CREEP_MAX_NAME];   // Creep Object Name
   UINT16 rowSensorId;          // Creep Object Row Sensor Id
   UINT16 colSensorId;          // Creep Object Col Sensor Id
-} CREEP_OBJ_BINHDR, *CREEP_OBJ_BINHDR_PTR; 
+} CREEP_OBJ_BINHDR, *CREEP_OBJ_BINHDR_PTR;
 
 typedef struct {
-  CREEP_OBJ_BINHDR CreepObj[CREEP_MAX_OBJ];   // Info on each Creep Obj
-  UINT16 crc16;                               // CRC echo to id Creep Cfg Setup
-} CREEP_BINHDR, *CREEP_BINHDR_PTR; 
+  BOOLEAN bEnabled;                           // Creep Enb/Dsb
+  UINT16 crc16;                               // CRC of Creep Cfg
+  UINT16 baseUnits;                           // baseUnits from Creep Cfg
+  CREEP_OBJ_BINHDR creepObj[CREEP_MAX_OBJ];   // Info on each Creep Obj
+} CREEP_BINHDR, *CREEP_BINHDR_PTR;
 #pragma pack()
 
 
 typedef struct {
-  UINT16 exp_crc;           // 
+  UINT16 exp_crc;           //
   UINT16 nSensorFailedCnt;  // # Sensor Failed Cnt Logged
-  UINT16 nCreepFailBuffCnt; // # Creep history buff entry 
-} CREEP_DEBUG, *CREEP_DEBUG_PTR; 
+  UINT16 nCreepFailBuffCnt; // # Creep history buff entry
+} CREEP_DEBUG, *CREEP_DEBUG_PTR;
 
 
 typedef struct {
-  SYS_APP_ID Id;   
-  TIMESTAMP Ts; 
-} CREEP_FAULT_BUFFER, *CREEP_FAULT_BUFFER_PTR; 
+  SYS_APP_ID id;
+  TIMESTAMP ts;
+} CREEP_FAULT_BUFFER, *CREEP_FAULT_BUFFER_PTR;
 
 #define CREEP_HISTORY_MAX 10
 
 typedef struct {
-  UINT16 cnt; 
-  CREEP_FAULT_BUFFER buff[CREEP_HISTORY_MAX]; 
-} CREEP_FAULT_HISTORY; 
+  UINT16 cnt;
+  CREEP_FAULT_BUFFER buff[CREEP_HISTORY_MAX];
+} CREEP_FAULT_HISTORY;
 
 
 /******************************************************************************
@@ -483,31 +492,43 @@ typedef struct {
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT void Creep_Initialize ( BOOLEAN degradedMode ); 
+EXPORT void Creep_Initialize ( BOOLEAN degradedMode );
 
-EXPORT CREEP_STATUS_PTR Creep_GetStatus (UINT8 index); 
-EXPORT CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index); 
-EXPORT CREEP_CFG_PTR Creep_GetCfg (void); 
-EXPORT BOOLEAN Creep_FileInit ( void ); 
-EXPORT UINT16 Creep_GetBinaryHdr ( void *pDest, UINT16 nMaxByteSize ); 
-EXPORT CREEP_DEBUG_PTR Creep_GetDebug (void); 
+EXPORT CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
+EXPORT CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index);
+EXPORT CREEP_CFG_PTR Creep_GetCfg (void);
+EXPORT BOOLEAN Creep_FileInit ( void );
+EXPORT UINT16 Creep_GetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
+EXPORT CREEP_DEBUG_PTR Creep_GetDebug (void);
+EXPORT void Creep_UpdateCreepXAppData (UINT16 index_obj);
 
-EXPORT BOOLEAN Creep_FaultFileInit(void); 
+EXPORT BOOLEAN Creep_FaultFileInit(void);
 
 
 
-#endif // CREEP_H               
+#endif // CREEP_H
 
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.h $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 12-11-10   Time: 4:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ *
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 12-11-02   Time: 6:14p
+ * Updated in $/software/control processor/code/application
+ * SCR #1190 Additional Items to complete
+ * Code Review Tool Updates
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:09p
  * Created in $/software/control processor/code/application
  * SCR #1190 Creep Requirements
- * 
+ *
  *
  *****************************************************************************/
 

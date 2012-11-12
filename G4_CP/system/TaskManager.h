@@ -10,7 +10,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 63 $  $Date: 12-10-27 5:04p $  
+     $Revision: 65 $  $Date: 12-11-12 4:46p $  
 ******************************************************************************/
 
 
@@ -55,7 +55,7 @@
 
 #define TASK_NAME_SIZE 25
 
-#define MODE_MASK(x) (1 << x)
+#define MODE_MASK(x) (1U << x)
 
 /******************************************************************************
                               Package Typedefs
@@ -214,11 +214,11 @@ typedef struct
     UINT32          InitialMif;
     INT32           MifRate;          // 0 indicates don't schedule event driven,      
                                       // Negative indicates schedule N after completion
-    UINT32          NextMif;
-    UINT32          StartExeTime;     //RMT execution start time.
-    UINT32          SumExeTime;       //Sum of execution time on interruption 
-    UINT32          OverrunCount;
-    UINT32          InterruptedCount; // count of MIF interruptions
+    UINT32          nextMif;
+    UINT32          startExeTime;     //RMT execution start time.
+    UINT32          sumExeTime;       //Sum of execution time on interruption 
+    UINT32          overrunCount;
+    UINT32          interruptedCount; // count of MIF interruptions
 } RMT_ATTRIBUTE;
 
 typedef struct
@@ -230,39 +230,39 @@ typedef struct
     TASK_TYPE       Type;
     UINT32          MIFrames;
     SYSTEM_MODE     modes;               // use with the MODE_MASK macro 
-    TASK_STATE      State;
+    TASK_STATE      state;
     BOOLEAN         Enabled;
     BOOLEAN         Locked;
     void*           pParamBlock;
     INT32           timingPulse;         // DOUT (LSS0-3) to pulse when task active (-1 off)
     RMT_ATTRIBUTE   Rmt;
-    UINT32          LastExecutionTime;
-    UINT32          MinExecutionTime;
-    UINT32          MaxExecutionTime;
-    UINT32          TotExecutionTime;    // Both used for computing the 
-    UINT32          TotExecutionTimeCnt; // average execution time
-    UINT32          MaxExecutionMif;
-    UINT32          ExecutionCount;
+    UINT32          lastExecutionTime;
+    UINT32          minExecutionTime;
+    UINT32          maxExecutionTime;
+    UINT32          totExecutionTime;    // Both used for computing the 
+    UINT32          totExecutionTimeCnt; // average execution time
+    UINT32          maxExecutionMif;
+    UINT32          executionCount;
 } TCB;
 
 // Task manager Data / Control Structure
 typedef struct
 {
-  UINT32    Mif;         // MIF with worst case duty cycle ...
+  UINT32    mif;         // MIF with worst case duty cycle ...
                          // MUST be UINT32 as this tells us when this happened
-  UINT32    Max;         // Worst case duty cycle %
-  UINT32    CumExecTime; // Cumulative duty cycle execution time
+  UINT32    max;         // Worst case duty cycle %
+  UINT32    cumExecTime; // Cumulative duty cycle execution time
                          // in usec for the current MIF
-  UINT32    Cur;         // Current duty cycle %
+  UINT32    cur;         // Current duty cycle %
 } DUTY_CYCLE;
 
 // Task Manager Data / Control Structure
 typedef struct
 {
-  UINT32    CumExecTime;            // Cumulative duty cycle execution time
-  UINT32    Cur;                    // Current execution time
-  UINT32    Min;                    // Min execution time
-  UINT32    Max;                    // Max execution time
+  UINT32    cumExecTime;            // Cumulative duty cycle execution time
+  UINT32    cur;                    // Current execution time
+  UINT32    min;                    // Min execution time
+  UINT32    max;                    // Max execution time
   UINT32    exeCount;               // number of times this MIF has executed
 } MIF_DUTY_CYCLE;
 
@@ -273,12 +273,12 @@ typedef struct
                                                      // -1 = No tasks created
     UINT16         nDtTasks;                         // Number of Deterministic Tasks
     UINT16         nRmtTasks;                        // Number of Rate Monotonic tasks
-    TCB*           TaskList[MAX_TASKS];              // List of TCBs for ALL DT+RMT tasks 
-    TCB*           DtTasks[MAX_MIF+1][MAX_DT_TASKS]; // List of DT tasks by MIF, priority 
+    TCB*           pTaskList[MAX_TASKS];             // List of TCBs for ALL DT+RMT tasks 
+    TCB*           pDtTasks[MAX_MIF+1][MAX_DT_TASKS];// List of DT tasks by MIF, priority 
                                                      //    sorted
-    TCB*           RmtTasks[MAX_RMT_TASKS];          // List of RMT task priority sorted
+    TCB*           pRmtTasks[MAX_RMT_TASKS];         // List of RMT task priority sorted
     BOOLEAN        bDtTaskInProgress;                // TRUE if DT Tasks are being dispatched
-    TASK_INDEX     DtTaskInProgressID;               // ID of the DT task in progress
+    TASK_INDEX     nDtTaskInProgressID;              // ID of the DT task in progress
     UINT8          nDtOverRuns;                      // Number of consecutive times a DT task
                                                      // has overrun the end of the MIF  
     UINT16         nDtRecover;                       // # of DT overruns seen
@@ -287,14 +287,14 @@ typedef struct
     BOOLEAN        bInitialized;                     // TRUE when all TM task scheduling has 
                                                      // been completed
     BOOLEAN        bStarted;                         // TRUE when the TM has been started
-    UINT8          CurrentMIF;                       // Current MIF [0 - MAX_MIF]
+    UINT8          currentMIF;                       // Current MIF [0 - MAX_MIF]
     SYS_MODE_IDS   systemMode;                       // The current system mode
-    UINT16         NextRmt;                          // Index into Rmt Task list of next
+    UINT16         nNextRmt;                          // Index into Rmt Task list of next
                                                      // RMT task to execute
-    DUTY_CYCLE     DutyCycle;                        // MIF duty cycle info
+    DUTY_CYCLE     dutyCycle;                        // MIF duty cycle info
     MIF_DUTY_CYCLE mifDc[MAX_MIF+1];                 // MIF duty cycle info
-    UINT32         MifPeriod;                        // Measured MIF period in uSec
-    UINT32         MifCount;      
+    UINT32         nMifPeriod;                       // Measured MIF period in uSec
+    UINT32         nMifCount;      
 } TM_DATA;
 
 #pragma pack(1)
@@ -302,7 +302,7 @@ typedef struct
 typedef struct 
 {
   UINT8 count;
-  UINT8 MIF;                            // MIF that over ran
+  UINT8 nMIF;                           // MIF that over ran
   TASK_INDEX activeTask;                // MIF that over ran
   CHAR  activeTaskName[TASK_NAME_SIZE]; // Task Active right now 
 } DT_OVERRUN_LOG;
@@ -322,7 +322,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( TASK_MANAGER_BODY )
+#if defined ( TASK_MANAGER_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -385,6 +385,16 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 65  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 64  *****************
+ * User: John Omalley Date: 12-11-12   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1099 - Code Review Updates
  * 
  * *****************  Version 63  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:04p

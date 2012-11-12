@@ -11,7 +11,7 @@
     Notes: 
   
     VERSION
-      $Revision: 8 $  $Date: 8/28/12 1:43p $     
+      $Revision: 9 $  $Date: 12-11-12 4:46p $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -111,7 +111,7 @@ typedef FAULT_CONFIG FAULT_CONFIGS[MAX_FAULTS];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( FAULT_BODY )
+#if defined ( FAULT_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -150,6 +150,11 @@ EXPORT BOOLEAN FaultCompareValues ( FAULT_INDEX Fault );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

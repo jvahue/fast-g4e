@@ -9,7 +9,7 @@
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 83 $  $Date: 8/28/12 1:43p $    
+      $Revision: 84 $  $Date: 12-11-12 2:09p $    
 ******************************************************************************/
 
 
@@ -994,7 +994,7 @@ static void MonitorSetTaskPulse(CHAR* Token3, CHAR* Token4)
 
         dout   = atoi( Token4);
 
-        if ( (TaskId >= MAX_TASKS) || (Tm.TaskList[TaskId] == NULL) )
+        if ( (TaskId >= MAX_TASKS) || (Tm.pTaskList[TaskId] == NULL) )
         {
             MonitorInvalidCommand( "Invalid Task Id");
         }
@@ -1004,7 +1004,7 @@ static void MonitorSetTaskPulse(CHAR* Token3, CHAR* Token4)
         }
         else 
         {
-            Tm.TaskList[TaskId]->timingPulse = dout;
+            Tm.pTaskList[TaskId]->timingPulse = dout;
         }
     }
     else if (strcmp (Token3, "reset") == 0)
@@ -1013,9 +1013,9 @@ static void MonitorSetTaskPulse(CHAR* Token3, CHAR* Token4)
         mifPulse = -1;
         for (i = 0; i < MAX_TASKS; ++i)
         {
-          if ( Tm.TaskList[i] != NULL)
+          if ( Tm.pTaskList[i] != NULL)
           {
-            Tm.TaskList[i]->timingPulse = -1;
+            Tm.pTaskList[i]->timingPulse = -1;
           }
         }
     }
@@ -1126,24 +1126,24 @@ static void MonitorGetTm (void)
   GSE_PutLine(Str);
   sprintf(Str,"Current System Mode = %d\r\n", Tm.systemMode);
   GSE_PutLine(Str);
-  sprintf(Str,"Current MIF         = %d\r\n", Tm.CurrentMIF);
+  sprintf(Str,"Current MIF         = %d\r\n", Tm.currentMIF);
   GSE_PutLine(Str);
-  sprintf(Str,"Total MIF           = %d\r\n", Tm.MifCount);
+  sprintf(Str,"Total MIF           = %d\r\n", Tm.nMifCount);
                                GSE_PutLine(Str);
   sprintf(Str,"Max Duty Cycle %%    = %.2f%%\r\n",
-         (FLOAT32)Tm.DutyCycle.Max/TM_DUTY_CYCLE_TO_PCT);
+         (FLOAT32)Tm.dutyCycle.max/TM_DUTY_CYCLE_TO_PCT);
   GSE_PutLine(Str);
-  sprintf(Str,"Max Duty Cycle MIF  = %d\r\n", Tm.DutyCycle.Mif);
+  sprintf(Str,"Max Duty Cycle MIF  = %d\r\n", Tm.dutyCycle.mif);
   GSE_PutLine(Str);
   sprintf(Str,"Cur Duty Cycle %%    = %.2f%%\r\n",
-         (FLOAT32)Tm.DutyCycle.Cur/TM_DUTY_CYCLE_TO_PCT);
+         (FLOAT32)Tm.dutyCycle.cur/TM_DUTY_CYCLE_TO_PCT);
   GSE_PutLine(Str);
   sprintf(Str,"Cur MIF Time = %d\r\n",
-                                                    Tm.DutyCycle.CumExecTime);
+                                                    Tm.dutyCycle.cumExecTime);
   GSE_PutLine(Str);
 
   GSE_PutLine ("\r\n");
-  sprintf(Str,"MIF period (uSec)   = %d\r\n", Tm.MifPeriod);
+  sprintf(Str,"MIF period (uSec)   = %d\r\n", Tm.nMifPeriod);
   GSE_PutLine(Str);
   sprintf(Str,"MIFs per cycle      = %d\r\n", MAX_MIF+1);
   GSE_PutLine(Str);
@@ -1155,12 +1155,12 @@ static void MonitorGetTm (void)
   for ( i = 0; i < MAX_MIF+1; ++i)
   {
       memcpy( &dc, &Tm.mifDc[i], sizeof( dc));
-      avgDc = (FLOAT32)((FLOAT32)(dc.CumExecTime/TTMR_HS_TICKS_PER_uS)/(FLOAT32)dc.exeCount);
+      avgDc = (FLOAT32)((FLOAT32)(dc.cumExecTime/TTMR_HS_TICKS_PER_uS)/(FLOAT32)dc.exeCount);
       sprintf( Str, "MIF%02d:  %8d %8d %8d %8.1f\r\n", 
           i, 
-          dc.Min/TTMR_HS_TICKS_PER_uS, 
-          dc.Max/TTMR_HS_TICKS_PER_uS, 
-          dc.Cur/TTMR_HS_TICKS_PER_uS, 
+          dc.min/TTMR_HS_TICKS_PER_uS, 
+          dc.max/TTMR_HS_TICKS_PER_uS, 
+          dc.cur/TTMR_HS_TICKS_PER_uS, 
           avgDc);
       GSE_PutLine(Str);
   }
@@ -1185,13 +1185,13 @@ static void MonitorGetTask (TASK_INDEX TaskId)
   INT8    Str[ARRAY_128];
   UINT32  avgExecTime = 0;
 
-  if ((TaskId < 0) || (TaskId >= MAX_TASKS) || (Tm.TaskList[TaskId] == NULL))
+  if ((TaskId < 0) || (TaskId >= MAX_TASKS) || (Tm.pTaskList[TaskId] == NULL))
   {
     MonitorInvalidCommand("Invalid Task Id");
   }
   else
   {
-    pTask = Tm.TaskList[TaskId];
+    pTask = Tm.pTaskList[TaskId];
     GSE_PutLine(NEW_LINE);
     //           0123456789_12345678
     sprintf(Str,"Name              = %s\r\n", pTask->Name);
@@ -1206,7 +1206,7 @@ static void MonitorGetTask (TASK_INDEX TaskId)
     GSE_PutLine(Str);
     sprintf(Str,"Function Address  = 0x%08X\r\n", pTask->Function);
     GSE_PutLine(Str);
-    sprintf(Str,"State             = %s\r\n",TASK_STATES[pTask->State]);
+    sprintf(Str,"State             = %s\r\n",TASK_STATES[pTask->state]);
     GSE_PutLine(Str);
     sprintf(Str,"Enabled           = %s\r\n",YES_NO[pTask->Enabled]);
     GSE_PutLine(Str);
@@ -1228,34 +1228,34 @@ static void MonitorGetTask (TASK_INDEX TaskId)
       GSE_PutLine(Str);
       sprintf(Str,"RMT MIF Rate      = %d\r\n", pTask->Rmt.MifRate);
       GSE_PutLine(Str);
-      sprintf(Str,"RMT Overrun Cnt   = %d\r\n",pTask->Rmt.OverrunCount);
+      sprintf(Str,"RMT Overrun Cnt   = %d\r\n",pTask->Rmt.overrunCount);
       GSE_PutLine(Str);
-      sprintf(Str,"RMT Interrupt Cnt = %d\r\n",pTask->Rmt.InterruptedCount);
+      sprintf(Str,"RMT Interrupt Cnt = %d\r\n",pTask->Rmt.interruptedCount);
       GSE_PutLine(Str);
-      sprintf(Str,"RMT Next Run      = %d @MIF: %d\r\n", pTask->Rmt.NextMif, Tm.MifCount);
+      sprintf(Str,"RMT Next Run      = %d @MIF: %d\r\n", pTask->Rmt.nextMif, Tm.nMifCount);
       GSE_PutLine(Str);
     }
     //           0123456789_12345678
     sprintf(Str,"Pulse On          = %d\r\n", pTask->timingPulse);
     GSE_PutLine(Str);
-    sprintf(Str,"Last Exec Time    = %d\r\n", pTask->LastExecutionTime);
+    sprintf(Str,"Last Exec Time    = %d\r\n", pTask->lastExecutionTime);
     GSE_PutLine(Str);
-    sprintf(Str,"Min Exec Time     = %d\r\n", pTask->MinExecutionTime);
+    sprintf(Str,"Min Exec Time     = %d\r\n", pTask->minExecutionTime);
     GSE_PutLine(Str);
-    sprintf(Str,"Max Exec Time     = %d\r\n", pTask->MaxExecutionTime);
+    sprintf(Str,"Max Exec Time     = %d\r\n", pTask->maxExecutionTime);
     GSE_PutLine(Str);
     // has task been run once?
-    if (pTask->TotExecutionTimeCnt > 0)
+    if (pTask->totExecutionTimeCnt > 0)
     {
-      avgExecTime = pTask->TotExecutionTime / pTask->TotExecutionTimeCnt;
+      avgExecTime = pTask->totExecutionTime / pTask->totExecutionTimeCnt;
     }
     sprintf(Str,"Avg Exec Time     = %d\r\n", avgExecTime);
     GSE_PutLine(Str);
-    sprintf(Str,"Total Exec Time   = %d\r\n",pTask->TotExecutionTime);
+    sprintf(Str,"Total Exec Time   = %d\r\n",pTask->totExecutionTime);
     GSE_PutLine(Str);
-    sprintf(Str,"Max Exec Mif      = %d\r\n", pTask->MaxExecutionMif);
+    sprintf(Str,"Max Exec Mif      = %d\r\n", pTask->maxExecutionMif);
     GSE_PutLine(Str);
-    sprintf(Str,"Execution Count   = %d\r\n", pTask->ExecutionCount);
+    sprintf(Str,"Execution Count   = %d\r\n", pTask->executionCount);
     GSE_PutLine(Str);
   }
 }
@@ -1282,7 +1282,7 @@ static void MonitorGetTaskList (void)
 
   for (i = 0; i < MAX_TASKS; ++i)
   {
-    pTask = Tm.TaskList[i];
+    pTask = Tm.pTaskList[i];
     if ( pTask != NULL )
     {
       sprintf(Str,"Task %d = %s\r\n", pTask->TaskID, pTask->Name);
@@ -1323,28 +1323,28 @@ static void MonitorGetTaskTiming (void)
 
   for (i = 0; i < MAX_TASKS; ++i)
   {
-    pTask = Tm.TaskList[i];
+    pTask = Tm.pTaskList[i];
     if ( pTask != NULL )
     {
       UINT32  avgExecTime = 0;
 
       // has task been run once?
-      if (pTask->TotExecutionTimeCnt > 0)
+      if (pTask->totExecutionTimeCnt > 0)
       {
-          avgExecTime = pTask->TotExecutionTime / pTask->TotExecutionTimeCnt;
+          avgExecTime = pTask->totExecutionTime / pTask->totExecutionTimeCnt;
       }
 
       if (pTask->Type == RMT)
       {
-          OverrunCount = pTask->Rmt.OverrunCount;
+          OverrunCount = pTask->Rmt.overrunCount;
           sprintf(Str,"%2i: %-25s : %6i %6i %6i %6i %6i %8i\r\n",
                        pTask->TaskID,
                        pTask->Name,
-                       pTask->ExecutionCount,
-                       pTask->MinExecutionTime,
-                       pTask->MaxExecutionTime,
+                       pTask->executionCount,
+                       pTask->minExecutionTime,
+                       pTask->maxExecutionTime,
                        avgExecTime,
-                       pTask->LastExecutionTime,
+                       pTask->lastExecutionTime,
                        OverrunCount);
       }
       else
@@ -1352,11 +1352,11 @@ static void MonitorGetTaskTiming (void)
           sprintf(Str,"%2i: %-25s : %6i %6i %6i %6i %6i\r\n",
                        pTask->TaskID,
                        pTask->Name,
-                       pTask->ExecutionCount,
-                       pTask->MinExecutionTime,
-                       pTask->MaxExecutionTime,
+                       pTask->executionCount,
+                       pTask->minExecutionTime,
+                       pTask->maxExecutionTime,
                        avgExecTime,
-                       pTask->LastExecutionTime);
+                       pTask->lastExecutionTime);
       }
       GSE_PutLine(Str);
     }
@@ -1548,7 +1548,7 @@ static void MonitorSetTaskEnable (CHAR* Token[])
   }
 
   TaskId = (TASK_INDEX)atoi( Token[TOK3]);
-  if ( (TaskId >= 0) && (TaskId < MAX_TASK) && (Tm.TaskList[TaskId] != NULL) )
+  if ( (TaskId >= 0) && (TaskId < MAX_TASK) && (Tm.pTaskList[TaskId] != NULL) )
   {
     TmTaskEnable ( TaskId, State );
   }
@@ -1848,6 +1848,11 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
+ * 
+ * *****************  Version 84  *****************
+ * User: John Omalley Date: 12-11-12   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1099 - Code Review Updates
  * 
  * *****************  Version 83  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

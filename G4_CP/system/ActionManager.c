@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 14 $  $Date: 12-10-30 5:48p $
+ $Revision: 16 $  $Date: 11/08/12 4:28p $
 
 ******************************************************************************/
 
@@ -85,7 +85,7 @@ void ActionsInitialize ( void )
 {
    // Local Data
    TCB tTaskInfo;
-   UINT16   i;
+   UINT8 i;
 
    // Add Event Action to the User Manager
    User_AddRootCmd(&rootActionMsg);
@@ -104,7 +104,8 @@ void ActionsInitialize ( void )
       m_ActionData.nLSS_Priority[i] = ACTION_NONE;
 
       // Initialize the LSS Outputs - If Active low then init LSS to a 1
-      if ( (m_ActionCfg.activeState & (1 << i)) == 0 )
+      //if ( (m_ActionCfg.activeState & (1 << i)) == 0 )
+      if ( BIT( m_ActionCfg.activeState, i) == 0 )
       {
          ActionSetOutput ( i, DIO_SetHigh );
       }
@@ -344,20 +345,20 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
    ACTION_FLAGS *pFlags;
    UINT8         nActionIndex;
    BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
-   BOOLEAN       ACK;
+   BOOLEAN       bACK;
 
-   ACK = FALSE;
+   bACK = FALSE;
    pData = &m_ActionData;
 
    if (( TRUE == pData->persist.bLatch ) && ( ON == pData->persist.bState ))
    {
-      ACK = TRUE;
+      bACK = TRUE;
    }
    else
    {
       // Loop through all the Actions
       for (  nActionIndex = 0;
-           ((nActionIndex < MAX_ACTION_DEFINES) && (ACK == FALSE));
+           ((nActionIndex < MAX_ACTION_DEFINES) && (bACK == FALSE));
              nActionIndex++ )
       {
          pFlags = &pData->action[nActionIndex];
@@ -370,13 +371,13 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
             if ( TRUE == TestBits( pFlags->flagACK, sizeof(pFlags->flagACK),
                                    pFlags->flagActive, sizeof(pFlags->flagActive), FALSE))
             {
-               ACK = TRUE;
+               bACK = TRUE;
             }
          }
       }
    }
 
-   return ACK;
+   return bACK;
 }
 
 /*****************************************************************************/
@@ -412,7 +413,7 @@ void ActionTask ( void *pParam )
    pCfg  = &m_ActionCfg;
 
    // Check if we have received an ACK
-   bACK        = TriggerGetState( (INT32)pCfg->aCKTrigger );
+   bACK        = TriggerGetState( pCfg->aCKTrigger );
    // Check the engine state for ANY possible running engine
    engineState = EngRunGetState(ENGRUN_ID_ANY, &nEngRunFlags);
 
@@ -968,6 +969,16 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
  *  MODIFICATIONS
  *    $History: ActionManager.c $
  * 
+ * *****************  Version 16  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * Code Review
+ *
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-11-06   Time: 11:13a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 14  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system

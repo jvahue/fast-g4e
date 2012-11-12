@@ -1,6 +1,6 @@
 #define TRIGGER_BODY
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        trigger.c
@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 76 $  $Date: 12-10-23 2:54p $
+  $Revision: 77 $  $Date: 11/08/12 4:28p $
 
 ******************************************************************************/
 
@@ -130,9 +130,9 @@ static TRIG_END_TYPE TriggerCheckEndLegacy  ( TRIGGER_CONFIG *pTrigCfg,
 void TriggerInitialize(void)
 {
   // Local Data
-  UINT32           i;
+  UINT32          i;
   UINT8           tsi;
-  
+
   TRIGGER_CONFIG  *pTrigCfg;
   TRIGGER_DATA    *pTrigData;
   TCB             TaskInfo;
@@ -198,7 +198,7 @@ void TriggerInitialize(void)
 
 
     // If this is a legacy configuration. Check which sensors are used
-    // by this trigger config the sensor map as though it was configured by the user    
+    // by this trigger config the sensor map as though it was configured by the user
     if(pTrigData->bLegacyConfig)
     {
       for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
@@ -209,7 +209,7 @@ void TriggerInitialize(void)
           SetBit( pTrigCfg->TrigSensor[tsi].SensorIndex,
                   pTrigData->sensorMap,
                   sizeof(pTrigData->sensorMap) );
-        }        
+        }
       }
 
       // Setup the sensor summary array based on whatever was set in the SensorMap above.
@@ -224,7 +224,7 @@ void TriggerInitialize(void)
     // There should always be a configuration by the time we get here
     // (legacy, expression, expression-from-legacy) unless nothing was defined.
 
-    if(TriggerIsConfigured(i))
+    if(TriggerIsConfigured((TRIGGER_INDEX)i))
     {
       // Trigger has a valid sensor configuration
       // put the trigger in the start state
@@ -418,19 +418,19 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
  * Returns:      active/inactive state of the passed trigger.
  *
  *****************************************************************************/
-BOOLEAN TriggerGetState( INT32 trigIdx )
+BOOLEAN TriggerGetState( TRIGGER_INDEX trigIdx )
 {
   BOOLEAN status = FALSE;
 
   if (trigIdx != TRIGGER_UNUSED)
   {
-    status = GetBit(trigIdx, m_triggerFlags ,sizeof(m_triggerFlags));
+    status = GetBit((INT32)trigIdx, m_triggerFlags ,sizeof(m_triggerFlags));
   }
   return status;
 }
 
 /******************************************************************************
- * Function:     TriggerValidGetState 
+ * Function:     TriggerValidGetState
 *
  * Description:  Returns trigger valid/invalid state.
 *
@@ -439,7 +439,7 @@ BOOLEAN TriggerGetState( INT32 trigIdx )
  * Returns:      active/inactive state of the passed trigger.
 *
 *****************************************************************************/
-BOOLEAN TriggerValidGetState( INT32 trigIdx ) 
+BOOLEAN TriggerValidGetState( TRIGGER_INDEX trigIdx )
 {
   BOOLEAN status = FALSE;
 
@@ -603,7 +603,7 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 
             // Reset trigger flag
             ResetBit(pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
-            
+
             // Set the validity based on EndType
             if( pTrigData->EndType == TRIG_SENSOR_INVALID )
             {
@@ -669,7 +669,7 @@ static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigDa
 
   // Set validity of 'this' trigger.
   // This supports self-referencing triggers to recover if a referenced sensor
-  // is marked as failed from a prior run and may have healed. 
+  // is marked as failed from a prior run and may have healed.
   SetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
 
   // Call the configured Trigger-start check rule.
@@ -736,7 +736,7 @@ static BOOLEAN TriggerCheckDuration (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTr
       }
       GSE_DebugStr(NORMAL,TRUE,"Trigger Start (%d) %s ", pTrigData->TriggerIndex,
                    pTrigCfg->TriggerName );
-    }      
+    }
   }
   return bDurationMet;
 }
@@ -845,7 +845,7 @@ static
 void TriggerReset( TRIGGER_DATA *pTrigData)
 {
    // Local Data
-     
+
    // Reinit the trigger data
    pTrigData->State         = TRIG_START;
    pTrigData->nStartTime_ms = 0;
@@ -856,7 +856,7 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
    pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
                                                       MAX_TRIG_SENSORS,
                                                       pTrigData->sensorMap,
-                                                      sizeof (pTrigData->sensorMap) );   
+                                                      sizeof (pTrigData->sensorMap) );
 }
 
 /******************************************************************************
@@ -976,7 +976,7 @@ void TriggerLogUpdate( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
     if ( (SensorIsUsed(pSummary->SensorIndex)) )
     {
       pSummary->bValid = SensorIsValid (pSummary->SensorIndex);
-      
+
       // Update the summary data for the trigger
       pLog->Sensor[i].SensorIndex   = pSummary->SensorIndex;
       pLog->Sensor[i].fTotal        = pSummary->fTotal;
@@ -1041,7 +1041,7 @@ void TriggersEnd( void)
             sizeof(TRIGGER_LOG),
             NULL);
         }
-        
+
       }
     }
   }
@@ -1216,7 +1216,7 @@ TRIG_END_TYPE TriggerCheckEndLegacy(TRIGGER_CONFIG *pTrigCfg,
 *               incrementally up to location '3' without gaps.
 *
 *****************************************************************************/
-BOOLEAN TriggerIsConfigured(INT32 trigIdx)
+EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
 {
    return( 0 != m_TriggerCfg[trigIdx].StartExpr.Size );
 }
@@ -1339,7 +1339,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 
     // Finished making an expression string for this criteria.
     // Send it to the evaluator for encoding and a proof-run.
-    StrToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx, 
+    StrToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx,
                                        exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
     if ( StrToBinResult >= 0)
     {
@@ -1371,45 +1371,50 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  *  MODIFICATIONS
  *    $History: trigger.c $
  * 
+ * *****************  Version 77  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * Code Review
+ *
  * *****************  Version 76  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:54p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 75  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:35p
  * Updated in $/software/control processor/code/system
  * SCR #1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 74  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:36p
  * Updated in $/software/control processor/code/system
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 72  *****************
  * User: Jeff Vahue   Date: 9/15/12    Time: 7:12p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 71  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Trigger fix for using SensorArray
- * 
+ *
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 3:08p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 !P Processing
- * 
+ *
  * *****************  Version 69  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 68  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:31p
  * Updated in $/software/control processor/code/system
  * FAST 2 Issue #15 legacy conversion
- * 
+ *
  * *****************  Version 67  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:22p
  * Updated in $/software/control processor/code/system
@@ -1716,4 +1721,4 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  *
  *
  ***************************************************************************/
- 
+

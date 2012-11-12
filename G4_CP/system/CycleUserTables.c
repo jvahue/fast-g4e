@@ -1,14 +1,14 @@
 #define CYCLE_USERTABLE_BODY
 /******************************************************************************
-Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
 All Rights Reserved. Proprietary and Confidential.
 
 File:          CycleUserTables.c
 
-Description: 
+Description:
 
 VERSION
-$Revision: 12 $  $Date: 10/12/12 6:29p $ 
+$Revision: 13 $  $Date: 11/08/12 4:28p $
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -17,7 +17,7 @@ $Revision: 12 $  $Date: 10/12/12 6:29p $
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -37,7 +37,9 @@ $Revision: 12 $  $Date: 10/12/12 6:29p $
 /*****************************************************************************/
 
 static CYCLE_CFG   m_CfgTemp;     // Temp buffer for config data
-static CYCLE_DATA  m_DataTemp;    // Temp buffer for runtime data 
+
+static CYCLE_DATA  m_DataTemp;    // Temp buffer for runtime data
+
 static CYCLE_ENTRY m_persistTemp; // Temp buffer for persisted counts info.
 
 /*****************************************************************************/
@@ -89,6 +91,7 @@ static USER_MSG_TBL CycleStatusCmd [] =
   /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                     IndexRange         DataLimit   EnumTbl*/
   {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.cycleActive,      0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   {"CYCLE_LAST_TIME", NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleLastTime_ms, 0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
+  {"COUNT",           NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.currentCount,     0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
@@ -108,14 +111,14 @@ static USER_MSG_TBL CyclePCountsCmd[] =
 {
   /*Str        Next Tbl Ptr   Handler Func  Data Type         Access    Parameter                 IndexRange          DataLimit         EnumTbl*/
   {"COUNT",    NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT32, USER_RW,  &m_persistTemp.count.n,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },
-  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RO,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },  
+  {"CHECKID",  NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT16, USER_RO,  &m_persistTemp.checkID,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },
   { NULL,        NULL,          NULL,       NO_HANDLER_DATA}
 };
 
 
 static USER_MSG_TBL CycleCmd [] =
 {
-  /*Str             Next Tbl Ptr      Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/                        
+  /*Str             Next Tbl Ptr      Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/
   {"CFG",           CycleCfgCmd,      NULL,             NO_HANDLER_DATA,                                                                                },
   {"STATUS",        CycleStatusCmd,   NULL,             NO_HANDLER_DATA,                                                                                },
   {"PERSIST",       CyclePCountsCmd,  NULL,             NO_HANDLER_DATA,                                                                                },
@@ -202,11 +205,11 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
                                 UINT32 Index,
                                 const void *SetPtr,
                                 void **GetPtr)
-{  
+{
   USER_HANDLER_RESULT result;
- 
+
   result = USER_RESULT_ERROR;
-  
+
   memcpy(&m_persistTemp, &m_CountsEEProm.data[Index], sizeof(m_persistTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
@@ -222,8 +225,8 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
     }
     else
     {
-      GSE_DebugStr(NORMAL, TRUE, "Cycle cannot be reset while cycle is active\n"); 
-    } 
+      GSE_DebugStr(NORMAL, TRUE, "Cycle cannot be reset while cycle is active\n");
+    }
   }
   return result;
 }
@@ -238,7 +241,7 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
  * Parameters:   See user.h command handler prototype
  *
  * Returns:      USER_RESULT_OK:    Processed successfully
- *               USER_RESULT_ERROR: Error processing command. 
+ *               USER_RESULT_ERROR: Error processing command.
  *
  * Notes:        none
  *
@@ -249,8 +252,8 @@ USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
                                   const void *SetPtr,
                                   void **GetPtr)
 {
- USER_HANDLER_RESULT result = USER_RESULT_OK; 
- 
+ USER_HANDLER_RESULT result = USER_RESULT_OK;
+
   memcpy(&m_CfgTemp,
          &CfgMgr_ConfigPtr()->CycleConfigs[Index],
          sizeof(m_CfgTemp));
@@ -264,21 +267,21 @@ USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
            &m_CfgTemp,
            sizeof(m_CfgTemp));
 
-    // Persist the CfgMgr's updated copy back to EEPROM.       
+    // Persist the CfgMgr's updated copy back to EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
       &CfgMgr_ConfigPtr()->CycleConfigs[Index],
       sizeof(m_CfgTemp));
   }
-  return result;  
+  return result;
 }
 
 /******************************************************************************
  * Function:    EngRunShowConfig
  *
  * Description:  Handles User Manager requests to retrieve the configuration
- *               settings.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               settings.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -292,9 +295,9 @@ USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
 
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
- * Notes:        
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
@@ -302,8 +305,8 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
                                        const void *SetPtr,
                                        void **GetPtr)
 {
-  USER_HANDLER_RESULT result;   
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];   
+  USER_HANDLER_RESULT result;
+  CHAR Label[USER_MAX_MSG_STR_LEN * 3];
 
   //Top-level name is a single indented space
   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
@@ -311,7 +314,7 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
   USER_MSG_TBL*  pCfgTable;
   INT16 cycIdx;
 
-  result = USER_RESULT_OK;   
+  result = USER_RESULT_OK;
 
   // Loop for each cycle.
   for (cycIdx = 0; cycIdx < MAX_CYCLES && result == USER_RESULT_OK; ++cycIdx)
@@ -321,19 +324,19 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
     result = USER_RESULT_ERROR;
     if (User_OutputMsgString( Label, FALSE ) )
     {
-      pCfgTable = CycleCfgCmd; // Re-set the pointer to beginning of CFG table       
+      pCfgTable = CycleCfgCmd; // Re-set the pointer to beginning of CFG table
 
       // User_DisplayConfigTree will invoke itself recursively to display all fields.
       result = User_DisplayConfigTree(BranchName, pCfgTable, cycIdx, 0, NULL);
-    }     
-  } 
+    }
+  }
   return result;
 }
 
 
 
 /*****************************************************************************/
-/* Local Functions                                                           */ 
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 
@@ -341,60 +344,65 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
  * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * SCR # 1183
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system
  * FAST 2 Review Findings
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:24p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #   FAST 2 add end NULL entry to cyle type table
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:29p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Fixed bug in persist count writing
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:26p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 GSE fix
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 7/11/12    Time: 4:35p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2  Added missing cfg type to table
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:16p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 2:41p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Rename rename cmd table
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 5/24/12    Time: 3:05p
  * Updated in $/software/control processor/code/system
  * FAST2 Refactoring
- * 
+ *
  * *****************  Version 2  *****************
  * User: John Omalley Date: 12-05-22   Time: 2:17p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Check in for Dave
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:40p
  * Created in $/software/control processor/code/system

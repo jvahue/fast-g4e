@@ -6,10 +6,10 @@
     File:       SPIManager.c
 
     Description: System level SPI Manager functions which centralizes access
-                 to all SPI devices to the application 
-    
+                 to all SPI devices to the application
+
     VERSION
-      $Revision: 28 $  $Date: 12-10-19 1:53p $     
+      $Revision: 29 $  $Date: 12-11-12 12:01p $
 
 ******************************************************************************/
 
@@ -37,7 +37,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define SPI_MANAGER_RATE_MS  10 
+#define SPI_MANAGER_RATE_MS  10
 #define SPI_TO_LOGS ((SYS_ID_SPIMGR_BOARD_TEMP_READ_FAIL-SYS_ID_SPIMGR_EEPROM_WRITE_FAIL)+1)
 
 
@@ -70,11 +70,11 @@ void SPIMgr_SetupDataPassing(DATA_PASSING method, SPIMGR_ENTRY* entry,
 void SPIMgr_LogError(SYS_APP_ID Dev, RESULT result, UINT32 Address);
 
 // Queue Mgmt functions
-void    SPIMgr_CircQueue_SetName(CIRCULAR_QUEUE* cq, CHAR* aName, UINT8 size );
+void    SPIMgr_CircQueue_SetName(CIRCULAR_QUEUE* cq, const CHAR* aName, UINT8 size );
 BOOLEAN SPIMgr_CircQueue_Add    (CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntry);
 void    SPIMgr_CircQueue_Remove (CIRCULAR_QUEUE* cq, SPIMGR_ENTRY* data );
 
-INT16   SPIMgr_CircQueue_GetHead( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head );
+void    SPIMgr_CircQueue_GetHead( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head );
 INT16   SPIMgr_CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index );
 void    SPIMgr_CircQueue_Reset  ( CIRCULAR_QUEUE* cq );
 
@@ -82,9 +82,9 @@ void    SPIMgr_CircQueue_Reset  ( CIRCULAR_QUEUE* cq );
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-// DefaultIoResultAddress is a default variable for callers not providing a 
+// DefaultIoResultAddress is a default variable for callers not providing a
 // IO_RESULT* var. (i.e. a valid "bit-bucket")
-// It is assigned by SPIManager as needed so code does not have to always 
+// It is assigned by SPIManager as needed so code does not have to always
 // check-for-null.
 static IO_RESULT DefaultIoResultAddress;
 
@@ -120,66 +120,66 @@ BOOLEAN m_spiErrorRecorded[SPI_TO_LOGS];
 /******************************************************************************
  * Function:     SPIMgr_Initialize
  *
- * Description:  Initializes SPI Manager Processing 
+ * Description:  Initializes SPI Manager Processing
  *
  * Parameters:   None
  *
  * Returns:      None
  *
- * Notes:        
- *  
+ * Notes:
+ *
  *
  *****************************************************************************/
 void SPIMgr_Initialize (void)
 {
-  TCB TaskInfo;
-  INT16 i;
-  
+  TCB    tcbTaskInfo;
+  UINT32 i;
+
   // Creates the SPI Manager Task
-  memset( (void*)&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"SPI Manager",_TRUNCATE);
-  TaskInfo.TaskID         = SPI_Manager;
-  TaskInfo.Function       = SPIMgr_Task;
-  TaskInfo.Priority       = taskInfo[SPI_Manager].priority;
-  TaskInfo.Type           = taskInfo[SPI_Manager].taskType;
-  TaskInfo.modes          = taskInfo[SPI_Manager].modes;
-  TaskInfo.MIFrames       = taskInfo[SPI_Manager].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[SPI_Manager].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[SPI_Manager].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset( (void*)&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+  strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"SPI Manager",_TRUNCATE);
+  tcbTaskInfo.TaskID         = (TASK_INDEX)SPI_Manager;
+  tcbTaskInfo.Function       = SPIMgr_Task;
+  tcbTaskInfo.Priority       = taskInfo[SPI_Manager].priority;
+  tcbTaskInfo.Type           = taskInfo[SPI_Manager].taskType;
+  tcbTaskInfo.modes          = taskInfo[SPI_Manager].modes;
+  tcbTaskInfo.MIFrames       = taskInfo[SPI_Manager].MIFframes;
+  tcbTaskInfo.Rmt.InitialMif = taskInfo[SPI_Manager].InitialMif;
+  tcbTaskInfo.Rmt.MifRate    = taskInfo[SPI_Manager].MIFrate;
+  tcbTaskInfo.Enabled        = TRUE;
+  tcbTaskInfo.Locked         = FALSE;
+  tcbTaskInfo.pParamBlock    = NULL;
+  TmTaskCreate (&tcbTaskInfo);
 
   // Setup runtime structure
-  for(i = 0; i < SPI_MAX_DEV; ++i)
+  for(i = 0; i < (UINT32)SPI_MAX_DEV; ++i)
   {
-    //Copy file size from the file table. 
+    //Copy file size from the file table.
     SPI_RuntimeInfo[i].rate    = SPI_DevInfo[i].rate;
     SPI_RuntimeInfo[i].counterMs = 0;
-    SPI_RuntimeInfo[i].HandlerFunc = SPI_DevInfo[i].HandlerFunc;
+    SPI_RuntimeInfo[i].pHandlerFunc = SPI_DevInfo[i].pHandlerFunc;
 
     // ----- fields below are used solely for storing/serving-up ADC values.
     SPI_RuntimeInfo[i].adcValue    = 0.0f;
     SPI_RuntimeInfo[i].adcResult   = DRV_OK;
-    
+
     // Init function pointer to the applicable ADC_ReadXXX analog functions.
     switch (i)
     {
       case SPI_AC_BUS_VOLT:
-        SPI_RuntimeInfo[i].AdcFunc = ADC_ReadACBusVoltage;        
+        SPI_RuntimeInfo[i].pAdcFunc = ADC_ReadACBusVoltage;
         break;
-      
+
       case SPI_AC_BAT_VOLT:
-        SPI_RuntimeInfo[i].AdcFunc = ADC_ReadACBattVoltage;
+        SPI_RuntimeInfo[i].pAdcFunc = ADC_ReadACBattVoltage;
         break;
-      
+
       case SPI_LIT_BAT_VOLT:
-        SPI_RuntimeInfo[i].AdcFunc = ADC_ReadLiBattVoltage;
+        SPI_RuntimeInfo[i].pAdcFunc = ADC_ReadLiBattVoltage;
         break;
-      
+
       case SPI_BOARD_TEMP:
-        SPI_RuntimeInfo[i].AdcFunc = ADC_ReadBoardTemp;
+        SPI_RuntimeInfo[i].pAdcFunc = ADC_ReadBoardTemp;
         break;
 
       // For non-analog devices, no ADC function used.
@@ -187,11 +187,11 @@ void SPIMgr_Initialize (void)
       case SPI_EEPROM:
       case SPI_RTC_NVRAM:
       default:
-        SPI_RuntimeInfo[i].AdcFunc = NULL;
+        SPI_RuntimeInfo[i].pAdcFunc = NULL;
         break;
     }
   }
-  
+
   // init the SPI timeout error recorded flags
   for ( i = 0; i < SPI_TO_LOGS; i++)
   {
@@ -210,7 +210,7 @@ void SPIMgr_Initialize (void)
   SPIMgr_CircQueue_SetName(&CQ_RtcOutput, "RTC-Time-Q",     RTC_QUEUE_SIZE);
 
   SPIMgr_CircQueue_Reset  (&CQ_RtcNvRamOutput);
-  SPIMgr_CircQueue_SetName(&CQ_RtcNvRamOutput, "RTC-RAM-Q", RTCNVRAM_QUEUE_SIZE); 
+  SPIMgr_CircQueue_SetName(&CQ_RtcNvRamOutput, "RTC-RAM-Q", RTCNVRAM_QUEUE_SIZE);
 
   // Do an initial read of time so we can correctly service requests-for-time before
   // this task becomes scheduled.
@@ -232,11 +232,11 @@ void SPIMgr_Initialize (void)
 *               instead of queues. If this function is invoked during Initialization
 *               it has no effect as the SpiManager starts-up with queuing disabled.
 *               If called during run time, it allows shutdown activities to be
-*               performed directly to NVRAM 
+*               performed directly to NVRAM
 *****************************************************************************/
 void SPIMgr_SetModeDirectToDevice(void)
 {
-  m_bDirectToDev = TRUE;  
+  m_bDirectToDev = TRUE;
 }
 
 /******************************************************************************
@@ -244,19 +244,19 @@ void SPIMgr_SetModeDirectToDevice(void)
  *
  * Description:  SPI task function
  *
- * Parameters:   [in] pParam pointer to a void containing parameter block for 
- *                    this task 
+ * Parameters:   [in] pParam pointer to a void containing parameter block for
+ *                    this task
  * Returns:      None
  *
- * Notes:        
+ * Notes:
  *
  *****************************************************************************/
 void SPIMgr_Task(void *pParam )
-{ 
+{
   INT16 i;
   SPI_RUNTIME_INFO* SpiDev;
-  
-  
+
+
   if (!m_bTaskStarted)
   {
     // Enable queuing on startup.
@@ -274,16 +274,16 @@ void SPIMgr_Task(void *pParam )
     // Perform processing for this device
     // by calling the appropriate SPI_DEV_FUNC
     // The device id param is only used by SPIMgr_UpdateAnalogDevice
-    
+
     if(SpiDev->counterMs >= SpiDev->rate)
-    {      
-      SpiDev->HandlerFunc( (SPIMGR_DEV_ID)i );
+    {
+      SpiDev->pHandlerFunc( (SPIMGR_DEV_ID)i );
       SpiDev->counterMs = 0;
     }
 
     // go to the next device
     ++SpiDev;
-  }  
+  }
 }
 
 /*****************************************************************************/
@@ -299,9 +299,9 @@ void SPIMgr_Task(void *pParam )
 *
 * Returns:     void
 *
-* Notes:       
+* Notes:
 *  1) CM_SYS_CLOCK should be initialized before exec this func.  _UpdateRTC
-*     is called periodically during normal operation. CM_SYS_CLOCK should 
+*     is called periodically during normal operation. CM_SYS_CLOCK should
 *     be initialized at this point. (SCR #699 Item #2)
 *
 *****************************************************************************/
@@ -322,7 +322,7 @@ void SPIMgr_UpdateRTC(SPIMGR_DEV_ID Dev)
   // RTC returns values immediately so there is no need to enter
   // a waiting state.
   while (pEntry != NULL && !m_bDirectToDev)
-  {    
+  {
     // RTC should always pass by value.
     ASSERT(pEntry->dataMethod == DATA_PASSING_VALUE);
 
@@ -337,7 +337,7 @@ void SPIMgr_UpdateRTC(SPIMGR_DEV_ID Dev)
 
     *pEntry->pResult = IO_RESULT_READY;
 
-#ifdef DEBUG_SPIMGR_TASK      
+#ifdef DEBUG_SPIMGR_TASK
 /*vcast_dont_instrument_start*/
       GSE_DebugStr(NORMAL, TRUE, "RTC WRITE COMPLETED: %d", pEntry->addr, *pEntry->pResult);
 /*vcast_dont_instrument_end*/
@@ -355,13 +355,13 @@ void SPIMgr_UpdateRTC(SPIMGR_DEV_ID Dev)
   if(DRV_SPI_TIMEOUT == m_resultGetRTC)
   {
     SPIMgr_LogError(SYS_ID_SPIMGR_RTC_READ_FAIL, m_resultGetRTC, NULL);
-    
-    // Set the m_rtcTimeStruct to current CM_SYS_CLOCK on failure rather 
-    //   then leave it to 1/1/1997 00:00:00 
-    // Note: During init CM_GetSystemClock() will return val from RTC, but if 
+
+    // Set the m_rtcTimeStruct to current CM_SYS_CLOCK on failure rather
+    //   then leave it to 1/1/1997 00:00:00
+    // Note: During init CM_GetSystemClock() will return val from RTC, but if
     //   RTC is data is 'bad' 1/1/1997 will be returned, otherwise CM_SYS_CLOCK
-    //   will be returned. 
-    CM_GetSystemClock( (TIMESTRUCT *) &m_rtcTimeStruct ); 
+    //   will be returned.
+    CM_GetSystemClock( (TIMESTRUCT *) &m_rtcTimeStruct );
   }
 }
 
@@ -379,9 +379,9 @@ void SPIMgr_UpdateRTC(SPIMGR_DEV_ID Dev)
 *****************************************************************************/
 void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
 {
-  UINT32 TempVar;
-  SPIMGR_ENTRY* pEntry  = (SPIMGR_ENTRY*)&TempVar;
-  SPIMGR_ENTRY  Entry;
+  UINT32 tempVar;
+  SPIMGR_ENTRY* pEntry  = (SPIMGR_ENTRY*)&tempVar;
+  SPIMGR_ENTRY  entry;
   RESULT result;
   void*  ptr;
 
@@ -392,13 +392,13 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
 
   // Handle the top/head entry if any.
   while (pEntry != NULL && !m_bDirectToDev)
-  {    
+  {
     // Set the write pointer local data or pointer-to-data as defined.
     ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?
                              (void*) pEntry->pData :
                              (void*) pEntry->data;
 
-    result = RTC_WriteNVRam(pEntry->addr, ptr, pEntry->size);
+    result = RTC_WriteNVRam((UINT8)pEntry->addr, ptr, pEntry->size);
     if(DRV_SPI_TIMEOUT == result)
     {
       SPIMgr_LogError(SYS_ID_SPIMGR_RTC_NVRAM_WRITE_FAIL, result, NULL);
@@ -407,11 +407,11 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
     pEntry->opState = OP_STATUS_IN_PROGRESS;
     *pEntry->pResult = IO_RESULT_READY;
 
-    SPIMgr_CircQueue_Remove(&CQ_RtcNvRamOutput, &Entry );
+    SPIMgr_CircQueue_Remove(&CQ_RtcNvRamOutput, &entry );
 
 #ifdef DEBUG_SPIMGR_TASK
 /*vcast_dont_instrument_start*/
-    GSE_DebugStr(NORMAL, TRUE, "RTC NvRam WRITE COMPLETED: %d", Entry.addr, *Entry.pResult);
+    GSE_DebugStr(NORMAL, TRUE, "RTC NvRam WRITE COMPLETED: %d", entry.addr, *entry.pResult);
 /*vcast_dont_instrument_end*/
 #endif
 
@@ -428,7 +428,7 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
  * Description: Function used to update a local copy of the
  *              value for the passed device.
  *
- * Parameters:  SPIMGR_DEV_ID analog device to be read  
+ * Parameters:  SPIMGR_DEV_ID analog device to be read
  *
  * Returns:     void
  *
@@ -436,11 +436,11 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
  *
  *****************************************************************************/
 void SPIMgr_UpdateAnalogDevice(SPIMGR_DEV_ID Dev)
-{ 
+{
   SYS_APP_ID appId;
   // Get the current value and result for the analog
   SPI_RuntimeInfo[Dev].adcResult =
-       SPI_RuntimeInfo[Dev].AdcFunc(&SPI_RuntimeInfo[Dev].adcValue);
+       SPI_RuntimeInfo[Dev].pAdcFunc(&SPI_RuntimeInfo[Dev].adcValue);
 
   if(DRV_SPI_TIMEOUT == SPI_RuntimeInfo[Dev].adcResult)
   {
@@ -482,40 +482,40 @@ void SPIMgr_UpdateAnalogDevice(SPIMGR_DEV_ID Dev)
  *****************************************************************************/
 void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
 {
-  UINT32 TempVar;
-  SPIMGR_ENTRY* pEntry = (SPIMGR_ENTRY*)&TempVar;
-  SPIMGR_ENTRY  Entry;
-  BOOLEAN IsWriteInProgress;
-  BOOLEAN Done = FALSE;
+  UINT32 tempVar;
+  SPIMGR_ENTRY* pEntry = (SPIMGR_ENTRY*)&tempVar;
+  SPIMGR_ENTRY  entry;
+  BOOLEAN bIsWriteInProgress;
+  BOOLEAN bDone = FALSE;
   SPI_DEVS device;
   RESULT   result;
   BOOLEAN  timeOutDetected = FALSE;
   void* ptr;
-    
+
   // Check output queue for pending EEPROM writes
 
   // Get (peek) at the head(oldest) entry
   SPIMgr_CircQueue_GetHead(&CQ_EEPromOutput, &pEntry);
 
   // Handle the top/head entry as long as not done and not in -direct-to-device mode.
-  while (pEntry != NULL && !Done && !m_bDirectToDev)
+  while (pEntry != NULL && !bDone && !m_bDirectToDev)
   {
-    result = EEPROM_GetDeviceId(pEntry->addr, &device);    
+    result = EEPROM_GetDeviceId(pEntry->addr, &device);
 
     if (result != DRV_OK)
     {
       // EEPROM failure, signal caller, remove entry
       //EEPromDetected = FALSE;
       *(pEntry->pResult) = IO_RESULT_READY;
-      SPIMgr_CircQueue_Remove(&CQ_EEPromOutput, &Entry );
+      SPIMgr_CircQueue_Remove(&CQ_EEPromOutput, &entry );
     }
     else
     {
       // Determine if write is in progress.
       // NOTE: If the call to check write-in-progress times-out,
       // the value of IsWriteInProgress is unchanged.
-      result = EEPROM_IsWriteInProgress(device, &IsWriteInProgress);
-      
+      result = EEPROM_IsWriteInProgress(device, &bIsWriteInProgress);
+
       // Set/clear timeOutDetected flag.
       timeOutDetected = (DRV_SPI_TIMEOUT == result) ? TRUE : FALSE;
 
@@ -523,15 +523,15 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
       {
         case OP_STATUS_PENDING:
           // The item at the head of the of the queue is waiting to write.
-          
+
           // If the call to check for write-in-progress completed ok AND
-          // there is no write in progress, Write the block.         
-          if( !timeOutDetected) 
-          {            
-            if ( !IsWriteInProgress )
+          // there is no write in progress, Write the block.
+          if( !timeOutDetected)
+          {
+            if ( !bIsWriteInProgress )
             {
               // Set the write pointer to local-databuffer or pointer-to-data as defined.
-              ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?              
+              ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?
                                         (void*) pEntry->pData :
                                         (void*) pEntry->data;
               // Write the block to memory.
@@ -559,22 +559,22 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
             else
             {
               // The SPI bus busy (how?), we can't do anything so leave and check again next time
-              Done = TRUE;
+              bDone = TRUE;
             }
-          }          
+          }
           break;
 
         case OP_STATUS_IN_PROGRESS:
           if(!timeOutDetected)
           {
-            if( !IsWriteInProgress )
+            if( !bIsWriteInProgress )
             {
               // Write completed.
               #ifdef DEBUG_SPIMGR_TASK
               /*vcast_dont_instrument_start*/
-                ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?              
+                ptr = (pEntry->dataMethod == DATA_PASSING_PTR) ?
                                           (void*) pEntry->pData :
-                                          (void*)&(pEntry->data);              
+                                          (void*)&(pEntry->data);
                 GSE_DebugStr(NORMAL,TRUE,"0x%08X -> 0x%08X, COMPLETED: %d, Requester: %s (%s)",
                                         ptr, pEntry->addr, *pEntry->pResult,
                                         pEntry->pResult == &DefaultIoResultAddress ?
@@ -587,7 +587,7 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
               *(pEntry->pResult) = IO_RESULT_READY;
 
               // Delete top of queue.
-              SPIMgr_CircQueue_Remove(&CQ_EEPromOutput, &Entry );
+              SPIMgr_CircQueue_Remove(&CQ_EEPromOutput, &entry );
 
               // Get the next entry off the queue(if any) and loop again
               SPIMgr_CircQueue_GetHead(&CQ_EEPromOutput, &pEntry);
@@ -596,14 +596,14 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
             {
               // Write is in progress...
               // Break out and check it in the next frame.
-              Done = TRUE;
+              bDone = TRUE;
             }
           }
           break;
 
         default:
           FATAL("Unknown OP_STATE: %d", pEntry->opState);
-          break;        
+          break;
       } //switch opState
 
       if (timeOutDetected)
@@ -616,7 +616,7 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
         SPIMgr_CircQueue_GetHead(&CQ_EEPromOutput, &pEntry);
       }
     }
-  }  // while queue not empty and not  
+  }  // while queue not empty and not
 }
 
 
@@ -629,15 +629,15 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
  * Parameters:  [in][out] Ts: Pointer to a TIMESTRUCT for returning the current
  *                            "buffered" value of the RTC.
  *
- * Returns:     DRV_OK 
+ * Returns:     DRV_OK
  *
- * Notes:       All application should use this function instead 
- *              of calling RTC_GetTime directly.    
+ * Notes:       All application should use this function instead
+ *              of calling RTC_GetTime directly.
  *
  *****************************************************************************/
 RESULT SPIMgr_GetTime(TIMESTRUCT *Ts)
-{  
- 
+{
+
   // If using direct-read mode get time from RTC, otherwise return the time
   // from or DT update storage.
   if (m_bDirectToDev)
@@ -660,13 +660,13 @@ RESULT SPIMgr_GetTime(TIMESTRUCT *Ts)
 *              performs the actual write using SPIMgr_UpdateEEPROM.
 *
 * Parameters:  [in]     Ts:        Time data to copy to RTC device
-*              [in/out] ioResult:  Pointer to caller's IORESULT value to 
+*              [in/out] ioResult:  Pointer to caller's IORESULT value to
 *                                  communicate write outcome.
 *
 * Returns:     DRV_OK:                   Data sent to RTC
 *              !DRV_OK:                  See ResultCodes.h
 *
-* Notes:       
+* Notes:
 *
 ****************************************************************************/
 RESULT SPIMgr_SetRTC(TIMESTRUCT *Ts, IO_RESULT* ioResult)
@@ -674,7 +674,7 @@ RESULT SPIMgr_SetRTC(TIMESTRUCT *Ts, IO_RESULT* ioResult)
   SPIMGR_ENTRY entry;
   RESULT result;
 
-    
+
   if (m_bDirectToDev)
   {
     // If queuing disabled as during startup or if an application has
@@ -692,19 +692,19 @@ RESULT SPIMgr_SetRTC(TIMESTRUCT *Ts, IO_RESULT* ioResult)
   }
   else
   {
-    // Attempt to en-queue msg onto circular queue.  
+    // Attempt to en-queue msg onto circular queue.
     entry.opType   = OP_TYPE_WRITE;
     entry.opState  = OP_STATUS_PENDING;
     entry.addr     = NULL;
     entry.pResult  = (ioResult != NULL) ? ioResult : &DefaultIoResultAddress;
     *entry.pResult = IO_RESULT_PENDING;
 
-    SPIMgr_SetupDataPassing( DATA_PASSING_VALUE, &entry, Ts, sizeof(TIMESTRUCT) );    
+    SPIMgr_SetupDataPassing( DATA_PASSING_VALUE, &entry, Ts, sizeof(TIMESTRUCT) );
 
     // Write the entry to the circular queue.
     // If queue is full, tell the caller "a write is in progress" so write-count
     // will be zero, and caller will retry.
-    result = ( SPIMgr_CircQueue_Add(&CQ_RtcOutput, &entry) ) ? 
+    result = ( SPIMgr_CircQueue_Add(&CQ_RtcOutput, &entry) ) ?
                DRV_OK : DRV_RTC_ERR_CANNOT_SET_TIME;
   }
   return result;
@@ -721,18 +721,18 @@ RESULT SPIMgr_SetRTC(TIMESTRUCT *Ts, IO_RESULT* ioResult)
  * Parameters:  [in] Addr: Starting byte address to read the data from
  *                    EEPROM ON CS3 is from address 0x00000000 to EEPROM_SIZE
  *                    EEPROM ON CS5 is from address 0x10000000 to
- *                                 0x10000000+EEPROM_SIZE 
+ *                                 0x10000000+EEPROM_SIZE
  *              [in] Buf:      Buffer to store the outgoing bytes
  *                             (must be at least "Size" elements)
  *              [in] Size:     Number of bytes to get
- *         [in/out] ioResult:  Pointer to caller's IORESULT value to communicate write 
+ *         [in/out] ioResult:  Pointer to caller's IORESULT value to communicate write
  *                             outcome.
  *
  * Returns:     DRV_OK:                   Data sent to EEPROM
  *              DRV_EEPROM_NOT_DETECTED:  The EEPROM device was not detected
  *                                        at startup
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
@@ -748,8 +748,8 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
     // If not enabled, write directly to device
     result = EEPROM_GetDeviceId(DestAddr, &device);
     if(result == DRV_OK)
-    {    
-      result = EEPROM_IsWriteInProgress(device, &IsWriteInProgress);      
+    {
+      result = EEPROM_IsWriteInProgress(device, &IsWriteInProgress);
       if(result == DRV_OK)
       {
         if (!IsWriteInProgress)
@@ -759,8 +759,8 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
         else
         {
           result = DRV_EEPROM_ERR_WRITE_IN_PROGRESS;
-        }        
-      }    
+        }
+      }
 
       // If an EEPROM call timed-out, log it.
       if(DRV_SPI_TIMEOUT == result)
@@ -776,7 +776,7 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
     entry.opState  = OP_STATUS_PENDING;
     entry.pResult  = (ioResult != NULL) ? ioResult : &DefaultIoResultAddress;
     entry.addr     = DestAddr;
-    SPIMgr_SetupDataPassing( DATA_PASSING_PTR, &entry, Buf, Size );   
+    SPIMgr_SetupDataPassing( DATA_PASSING_PTR, &entry, Buf, Size );
 
     // If queue is full, tell the caller "a write is in progress" so write-count
     // will be zero, and caller will wait.
@@ -791,12 +791,12 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
 /*****************************************************************************
  * Function:    SPIMgr_ReadBlock (EEPROM)
  *
- * Description: Reads data from the EEPROM.  
+ * Description: Reads data from the EEPROM.
  *
  * Parameters:  [in]  Addr: Starting byte address to read the data from
  *                    EEPROM ON CS3 is from address 0x00000000 to EEPROM_SIZE
  *                    EEPROM ON CS5 is from address 0x10000000 to
- *                                 0x10000000+EEPROM_SIZE 
+ *                                 0x10000000+EEPROM_SIZE
  *              [out] Buf:      Buffer to store the received bytes
  *                        (must be at least "Size" elements)
  *              [in]  Size:     Number of bytes to get
@@ -804,7 +804,7 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
  * Returns:     DRV_OK:   Data sent to EEPROM
  *              !DRV_OK:  See ResultCodes.h
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 RESULT SPIMgr_ReadBlock (UINT32 PhysicalOffset, void* Buf, UINT32 Size)
@@ -812,11 +812,11 @@ RESULT SPIMgr_ReadBlock (UINT32 PhysicalOffset, void* Buf, UINT32 Size)
   RESULT result;
 
   /*
-  SPIMGR_ENTRY entry; 
+  SPIMGR_ENTRY entry;
 
   // Set up SPIMGR_ENTRY to add operation onto circular queue.
   entry.opType   = OP_TYPE_READ;
-  entry.opStatus = OP_STATUS_WAITING;  
+  entry.opStatus = OP_STATUS_WAITING;
   entry.addr     = DestAddr;
   entry.size     = Size;
   memcpy(entry.data, 0, Size);
@@ -824,9 +824,9 @@ RESULT SPIMgr_ReadBlock (UINT32 PhysicalOffset, void* Buf, UINT32 Size)
   // If queue is full, tell the caller "a write is in progress" so write-count
   // will be zero, and caller will wait.
 
-  //  result = ( CircQueue_Add(&CQ_EEPromInput, &entry, opStatus) ) 
+  //  result = ( CircQueue_Add(&CQ_EEPromInput, &entry, opStatus) )
   //    ? DRV_OK : DRV_EEPROM_ERR_WRITE_IN_PROGRESS;
-  
+
   */
 
   result = EEPROM_ReadBlock(PhysicalOffset, Buf, Size);
@@ -843,19 +843,19 @@ RESULT SPIMgr_ReadBlock (UINT32 PhysicalOffset, void* Buf, UINT32 Size)
 *
 * Description: Write a block of data to the RTC NVRAM.
 *
-* Parameters:  [in] DestAddr:  Destination address (0-255) to write in in the 
+* Parameters:  [in] DestAddr:  Destination address (0-255) to write in in the
 *                              RTC
 *              [in] Buf:       Buffer containing the data to write.
 *              [in] Size:      Number of bytes to write
 *              [out] ioResult: Location to store the operation result
 *
 * Returns:     DRV_OK:         Data queued
-*              !DRV_OK:        See ResultCodes.h     
+*              !DRV_OK:        See ResultCodes.h
 *
-* Notes:       
+* Notes:
 *
 ****************************************************************************/
-RESULT SPIMgr_WriteRTCNvRam(UINT32 DestAddr,void* Buf,size_t Size, 
+RESULT SPIMgr_WriteRTCNvRam(UINT32 DestAddr,void* Buf,size_t Size,
                             IO_RESULT* ioResult)
 {
   SPIMGR_ENTRY entry;
@@ -878,7 +878,7 @@ RESULT SPIMgr_WriteRTCNvRam(UINT32 DestAddr,void* Buf,size_t Size,
     entry.pResult  = (ioResult != NULL) ? ioResult : &DefaultIoResultAddress;
     entry.addr     = DestAddr;
 
-    SPIMgr_SetupDataPassing( DATA_PASSING_VALUE, &entry, Buf, Size );    
+    SPIMgr_SetupDataPassing( DATA_PASSING_VALUE, &entry, Buf, Size );
 
     // If queue is full, tell the caller "a write is in progress" so write-count
     // will be zero, and caller will wait.
@@ -993,10 +993,10 @@ RESULT SPIMgr_GetBoardTemp(FLOAT32* Temp)
 *              [in] Pointer to the SPIMGR_ENTRY being configured.
 *              [in] Pointer to the buffer to be referenced or copied based
 *                   on DATA_PASSING method
-*              [in] size in bytes to be written/read. 
+*              [in] size in bytes to be written/read.
 * Returns:     void
 *
-* Notes:      
+* Notes:
 *
 ****************************************************************************/
 void SPIMgr_SetupDataPassing(DATA_PASSING method, SPIMGR_ENTRY* entry,
@@ -1019,18 +1019,18 @@ void SPIMgr_SetupDataPassing(DATA_PASSING method, SPIMGR_ENTRY* entry,
     default:
       FATAL("Data Passing Method not valid: %d", method);
       break;
-  } 
+  }
 }
 
 /*****************************************************************************
 * Function:    SPIMgr_LogSPIError
 *
-* Description: Write a system log entry for a SPI error.  
+* Description: Write a system log entry for a SPI error.
 *              Only record one per power-on.
 *
 * Parameters:  [in] appId   - The SYS_APP_ID for the error. See x5A00 range in SystemLog.h
-*              [in] result  - The RESULT code returned by the SPI driver.  
-*              [in] address - address being written if applicable. Otherwise NULL              
+*              [in] result  - The RESULT code returned by the SPI driver.
+*              [in] address - address being written if applicable. Otherwise NULL
 *
 * Returns:     void
 *
@@ -1045,10 +1045,10 @@ void SPIMgr_LogError(SYS_APP_ID appId, RESULT result, UINT32 address)
   {
     "EEPROM_WRITE_FAIL",
     "EEPROM_READ_FAIL",
-    "RTC_WRITE_FAIL",       
+    "RTC_WRITE_FAIL",
     "RTC_READ_FAIL",
     "RTC_NVRAM_WRITE_FAIL",
-    "BUS_VOLT_READ_FAIL",   
+    "BUS_VOLT_READ_FAIL",
     "BAT_VOLT_READ_FAIL",
     "LITBAT_VOLT_READ_FAIL",
     "BOARD_TEMP_READ_FAIL"
@@ -1069,7 +1069,7 @@ void SPIMgr_LogError(SYS_APP_ID appId, RESULT result, UINT32 address)
 /*****************************************************************************
 * Function:    SPIMgr_CircQueue_SetName
 *
-* Description: Sets the queue name field. 
+* Description: Sets the queue name field.
 *
 * Parameters:  cq - the queue to update
 *              aName - the ptr to name string to update to
@@ -1079,7 +1079,7 @@ void SPIMgr_LogError(SYS_APP_ID appId, RESULT result, UINT32 address)
 * Notes:       none
 *
 ****************************************************************************/
-void SPIMgr_CircQueue_SetName( CIRCULAR_QUEUE* cq, CHAR* aName, UINT8 size)
+void SPIMgr_CircQueue_SetName( CIRCULAR_QUEUE* cq, const CHAR* aName, UINT8 size)
 {
   strncpy_safe(cq->name,sizeof(cq->name),aName,_TRUNCATE);
 
@@ -1094,19 +1094,19 @@ void SPIMgr_CircQueue_SetName( CIRCULAR_QUEUE* cq, CHAR* aName, UINT8 size)
 /*****************************************************************************
 * Function:    SPIMgr_CircQueue_Remove
 *
-* Description: "Pops" the oldest entry from referenced queue and returns the 
+* Description: "Pops" the oldest entry from referenced queue and returns the
 *              data in  the provided entry pointer.
 * Parameters:  [in]         The queue to be popped.
-*              [in]/[out]   Address of the Entry structure into which the 
+*              [in]/[out]   Address of the Entry structure into which the
 *                           contents of the entry will be copied.
 * Returns:     None
 *
-* Notes:       
+* Notes:
 *
 ****************************************************************************/
 void SPIMgr_CircQueue_Remove( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY* data )
 {
-  
+
 #ifdef DEBUG_CIRCULAR_QUEUE
 /*vcast_dont_instrument_start*/
   CHAR debugMsg[64];
@@ -1123,15 +1123,15 @@ void SPIMgr_CircQueue_Remove( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY* data )
     GSE_DebugStr(NORMAL, TRUE, debugMsg);
 /*vcast_dont_instrument_end*/
 #endif
-    
+
     ++cq->readCount;
 
     if ( ++cq->readFrom >= cq->queueSize)
     {
       cq->readFrom = 0;
     }
-  }      
-    
+  }
+
 #ifdef DEBUG_CIRCULAR_QUEUE
 /*vcast_dont_instrument_start*/
     if(cq->writeCount == cq->readCount)
@@ -1141,13 +1141,13 @@ void SPIMgr_CircQueue_Remove( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY* data )
     }
 /*vcast_dont_instrument_end*/
 #endif
-  
+
 }
 
 /*****************************************************************************
 * Function:    SPIMgr_CircQueue_Add
 *
-* Description: Accepts a pointer to a SPIMGR_QUEUE and adds it to the indicated 
+* Description: Accepts a pointer to a SPIMGR_QUEUE and adds it to the indicated
 *              CIRCULAR buffer.
 *              This function writes an i/o entry to a circular queue.
 *              The write to EEPROM is performed by using SPIMgr_UpdateEEPROM.
@@ -1166,14 +1166,14 @@ BOOLEAN SPIMgr_CircQueue_Add(CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntry)
 {
 
   //CHAR debugMsg[64];
-  INT16 depth;  
-  BOOLEAN result = TRUE; 
-  
-  depth = cq->writeCount - cq->readCount;  
+  INT16 depth;
+  BOOLEAN result = TRUE;
+
+  depth = cq->writeCount - cq->readCount;
 
   // Write to the queue if room
   if (depth < cq->queueSize)
-  {    
+  {
     // Add the entry to the circular queue.
     // Signal the caller that the result is pending.
     *(newEntry->pResult) = IO_RESULT_PENDING;
@@ -1181,11 +1181,11 @@ BOOLEAN SPIMgr_CircQueue_Add(CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntry)
     // COPY the data into the queue.
     cq->buffer[cq->writeTo] = *newEntry;
 
-#ifdef DEBUG_CIRCULAR_QUEUE    
+#ifdef DEBUG_CIRCULAR_QUEUE
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL, TRUE, "%s - Added Entry %d",cq->name, cq->writeTo);
 /*vcast_dont_instrument_end*/
-#endif    
+#endif
     ++cq->writeCount;
     // On last entry, wraparound.
     if (++cq->writeTo >= cq->queueSize)
@@ -1196,7 +1196,7 @@ BOOLEAN SPIMgr_CircQueue_Add(CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntry)
   else
   {
     result = FALSE;
-#ifdef DEBUG_CIRCULAR_QUEUE    
+#ifdef DEBUG_CIRCULAR_QUEUE
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL, TRUE, "%s -  QUEUE IS FULL",cq->name);
 /*vcast_dont_instrument_end*/
@@ -1211,7 +1211,7 @@ BOOLEAN SPIMgr_CircQueue_Add(CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntry)
 *
 * Description: Resets a queue to empty, unamed status.
 *
-* Parameters:  cq - queue to reset 
+* Parameters:  cq - queue to reset
 *
 * Returns:     none
 *
@@ -1238,221 +1238,183 @@ void SPIMgr_CircQueue_Reset(CIRCULAR_QUEUE* cq)
 * Function:    SPIMgr_CircQueue_GetHead()
 *
 * Description: Returns a pointer to the top of the pass queue.
-*              
+*
 * Parameters:  [in] cq pointer to the queue
 *              [in] pointer to receive a pointer to the current top-of-queue
 *
-* Returns:     Integer index of the next item in list. This value can be passed to
-*              CircQueue_GetNext() to act as an iterator.
+* Returns:     None
 *
 * Notes:
 *
 ****************************************************************************/
-INT16 SPIMgr_CircQueue_GetHead(CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head )
+void SPIMgr_CircQueue_GetHead(CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head )
 {
-  INT16 index;
-
   // if queue has entries to be read return pointer and the index of next.
   if (cq->writeCount > cq->readCount)
   {
     *head =  &cq->buffer[cq->readFrom];
-    index = cq->readFrom < cq->queueSize -1 ? cq->readFrom + 1 : 0;   
   }
   else
   {
     *head = NULL;
-    index = -1;    
   }
-  return index;  
 }
-
-/*****************************************************************************
-* Function:    CircQueue_GetNext()
-*
-* Description: Returns the next entry in the queue.
-*              
-* Parameters:
-*
-* Returns:
-*
-*
-*
-* Notes:
-*
-****************************************************************************/
-/*
-INT16 CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index )
-{ 
-  INT16 nextIndex = -1;
-
-  // Check that we have not wrapped around
-  if (index != cq->readFrom)
-  {
-    *entry = &cq->buffer[index];
-    if( ++nextIndex >= CQ_MAX_ENTRIES )
-    {
-      nextIndex = 0;
-    }
-  }
-  else
-  {
-    *entry     = NULL;
-    nextIndex = -1;
-  }
-  return index;
-}
-*/
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
- * 
+ *
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-11-12   Time: 12:01p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 28  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:53p
  * Updated in $/software/control processor/code/system
  * SCR #1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 2:00p
  * Updated in $/software/control processor/code/system
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 7/18/12    Time: 6:27p
  * Updated in $/software/control processor/code/system
  * FAST 2 Allow different queue sizes
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor2  Date: 6/29/11    Time: 1:07p
  * Updated in $/software/control processor/code/system
  * SCR #767 Enhancement - BIT for Analog Sensors
  * Corrected function header comments
- * 
+ *
  * *****************  Version 23  *****************
  * User: Contractor2  Date: 5/26/11    Time: 1:17p
  * Updated in $/software/control processor/code/system
  * SCR #767 Enhancement - BIT for Analog Sensors
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 10/18/10   Time: 1:46p
  * Updated in $/software/control processor/code/system
  * SCR #946 Misc - Wrong SysLog in SPIMgr_UpdateRTC
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jim Mood     Date: 9/29/10    Time: 11:51a
  * Updated in $/software/control processor/code/system
  * SCR 889 Modfix.  While closing this SCR, noticed multiple function
  * header commments were incomplete or did not match the function they
  * were associated with.
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 9/23/10    Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR# 889 - Remove dead code
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 9/10/10    Time: 4:47p
  * Updated in $/software/control processor/code/system
  * SCR# 866 - SPI Timeouts cause DT overruns
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 4:41p
  * Updated in $/software/control processor/code/system
  * SCR #845 Code Review Updates
- * 
+ *
  * *****************  Version 17  *****************
  * User: John Omalley Date: 7/30/10    Time: 11:58a
  * Updated in $/software/control processor/code/system
  * SCR 730 - Changed LogWriteSystem to Flt_SetStatus
- * 
+ *
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 7/29/10    Time: 9:26a
  * Updated in $/software/control processor/code/system
- * SCR #699 Processing when RTC_ReadTime() returns fail.  
- * 
+ * SCR #699 Processing when RTC_ReadTime() returns fail.
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 7/20/10    Time: 3:50p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Forgot to set flag indicating the SPI error had been
  * recorded already.
- * 
+ *
  * *****************  Version 14  *****************
  * User: Jeff Vahue   Date: 7/17/10    Time: 5:46p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Add TestPoints for code coverage.
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 6/16/10    Time: 6:11p
  * Updated in $/software/control processor/code/system
  * SCR #623 Implement NV_IsEEPromWriteComplete
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 5/07/10    Time: 4:36p
  * Updated in $/software/control processor/code/system
  * SCR #548 Strings in Logs
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:52p
  * Updated in $/software/control processor/code/system
  * SCR #572 - vcast changes
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #378  SCR #492
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 3/15/10    Time: 4:14p
  * Updated in $/software/control processor/code/system
  * SCR# 481 - VectorCast comments, optimize SPIMgr_Task
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 4  *****************
  * User: Jeff Vahue   Date: 3/11/10    Time: 11:05a
  * Updated in $/software/control processor/code/system
  * SCR# 481 - add Comments to inhibit VectorCast Coverage statements when
  * instrumenting code
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 7:33p
  * Updated in $/software/control processor/code/system
  * SCR 67 expand direct-to-device mode for all managed devices.
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:41p
  * Updated in $/software/control processor/code/system
  * SCR #67 fix spelling error in funct name
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 3:27p
  * Created in $/software/control processor/code/system
- * SCR 67 Adding SPIManager task. 
- * 
- * 
+ * SCR 67 Adding SPIManager task.
+ *
+ *
  *
  *****************************************************************************/
 

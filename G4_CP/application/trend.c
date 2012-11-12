@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 13 $  $Date: 10/30/12 4:01p $
+ $Revision: 14 $  $Date: 11/08/12 4:26p $
 
 ******************************************************************************/
 
@@ -344,7 +344,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       // If the button has been pressed(as defined by startTrigger)
       // start an manual trending
 
-      if ( TriggerGetState((INT32)pCfg->startTrigger) )
+      if ( TriggerGetState(pCfg->startTrigger) )
       {
         TrendStartManualTrend(pCfg, pData);
       }
@@ -849,9 +849,9 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // will be cleared by the trigger becoming inactive or
   // the next engine-run starting.
   if ( FALSE == pData->bResetDetected                 &&
-        pCfg->resetTrigger != TRIGGER_UNUSED           &&
-       TriggerIsConfigured((INT32)pCfg->resetTrigger) &&
-       TriggerGetState((INT32)pCfg->resetTrigger))
+       pCfg->resetTrigger != TRIGGER_UNUSED           &&
+       TriggerIsConfigured(pCfg->resetTrigger) &&
+       TriggerGetState(pCfg->resetTrigger))
   {
     pData->bResetDetected = TRUE;
 
@@ -872,7 +872,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->lastIntervalCheckMs  = 0;
   }
   else if(pData->bResetDetected &&
-         !TriggerGetState((INT32)pCfg->resetTrigger))
+         !TriggerGetState(pCfg->resetTrigger))
   {
    // If trend-reset was detected and is now clear,
     // clear the flag for next use.
@@ -1009,6 +1009,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:26p
+ * Updated in $/software/control processor/code/application
+ * Code Review changes
  *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 10/30/12   Time: 4:01p
@@ -1018,7 +1023,7 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
  * User: John Omalley Date: 12-10-23   Time: 3:04p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:19p
  * Updated in $/software/control processor/code/application
