@@ -11,7 +11,7 @@
   Description: GSE Communications port processing defines.
  
   VERSION
-      $Revision: 16 $  $Date: 8/28/12 1:43p $    
+      $Revision: 17 $  $Date: 12-11-12 4:46p $    
  
 ******************************************************************************/
 
@@ -47,7 +47,7 @@ typedef BOOLEAN (*MSG_HANDLER_CALLBACK)(INT8* MsgStr);
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( MONITOR_BODY )
+#if defined ( MONITOR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -71,6 +71,11 @@ EXPORT void       MonitorSetMsgCallback(MSG_HANDLER_CALLBACK MsgHandler);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

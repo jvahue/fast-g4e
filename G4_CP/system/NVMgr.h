@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 62 $  $Date: 12-10-27 5:01p $
+    $Revision: 63 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -353,7 +353,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( SYS_NVMGR_BODY )
+#if defined ( SYS_NVMGR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -397,6 +397,11 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 63  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 62  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:01p

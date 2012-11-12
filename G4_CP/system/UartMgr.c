@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 43 $  $Date: 12-10-27 5:05p $     
+      $Revision: 44 $  $Date: 12-11-12 2:58p $     
 
 ******************************************************************************/
 
@@ -149,17 +149,17 @@ static UART_CONFIG UartDrvDefaultCfg =
  *****************************************************************************/
 void UartMgr_Initialize (void)
 {
-  TCB    TaskInfo;
+  TCB    tcbTaskInfo;
   UINT8  i,k; 
   RESULT result; 
   UARTMGR_CFG_PTR pUartMgrCfg; 
   UARTMGR_PORT_CFG_PTR pUartMgrPortCfg; 
   UARTMGR_STATUS_PTR pUartMgrStatus; 
-  UART_CONFIG UartCfg; 
+  UART_CONFIG uartCfg; 
   
   UARTMGR_WORD_INFO_PTR pWordInfo; 
   
-  UART_SYS_PBIT_STARTUP_LOG StartupLog; 
+  UART_SYS_PBIT_STARTUP_LOG startupLog; 
   
   BOOLEAN bAtLeastOneEnabled; 
 
@@ -168,15 +168,15 @@ void UartMgr_Initialize (void)
   
   
   // Initialize all local variables 
-  memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * UART_NUM_OF_UARTS); 
-  memset (m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * UARTMGR_MAX_PARAM_WORD );
-  memset (m_UartMgr_Data, 0, sizeof(UARTMGR_PARAM_DATA) * UARTMGR_MAX_PARAM_WORD );
-  memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * UART_NUM_OF_UARTS ); 
-  memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * UART_NUM_OF_UARTS); 
-  memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * UART_NUM_OF_UARTS); 
+  memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * (UINT8)UART_NUM_OF_UARTS); 
+  memset (m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * (UINT8)UARTMGR_MAX_PARAM_WORD );
+  memset (m_UartMgr_Data, 0, sizeof(UARTMGR_PARAM_DATA) * (UINT8)UARTMGR_MAX_PARAM_WORD );
+  memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * (UINT8)UART_NUM_OF_UARTS ); 
+  memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * (UINT8)UART_NUM_OF_UARTS); 
+  memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * (UINT8)UART_NUM_OF_UARTS); 
 
   // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
-  for (k = 0; k < UART_NUM_OF_UARTS; k++) 
+  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++) 
   {
     for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++) 
     {
@@ -189,7 +189,7 @@ void UartMgr_Initialize (void)
   }
 
   // UartMgr_WordInfo.nIndex to UARTMGR_WORD_INDEX_NOT_FOUND
-  for (k = 0; k < UART_NUM_OF_UARTS; k++)
+  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
   {
     pWordInfo = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[k][0]; 
     for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
@@ -215,7 +215,7 @@ void UartMgr_Initialize (void)
   // Open and initialize each UART Port.  Exclude UART[0] GSE port !
   result = SYS_OK; 
   bAtLeastOneEnabled = FALSE; 
-  for (i = 1; i < UART_NUM_OF_UARTS; i++) 
+  for (i = 1; i < (UINT8)UART_NUM_OF_UARTS; i++) 
   {
     pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[i]; 
     pUartMgrCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[i];
@@ -227,23 +227,23 @@ void UartMgr_Initialize (void)
       bAtLeastOneEnabled = TRUE; 
     
       // Update the protocol for current status 
-      pUartMgrStatus->Protocol = pUartMgrCfg->Protocol; 
+      pUartMgrStatus->protocol = pUartMgrCfg->protocol; 
     
       // Cfg Port 
       pUartMgrPortCfg = (UARTMGR_PORT_CFG_PTR) &pUartMgrCfg->Port; 
-      UartCfg = UartDrvDefaultCfg;    // Set the defaults; 
-      UartCfg.Port = i; 
-      UartCfg.BPS = pUartMgrPortCfg->BPS; 
-      UartCfg.DataBits = pUartMgrPortCfg->DataBits; 
-      UartCfg.StopBits = pUartMgrPortCfg->StopBits; 
-      UartCfg.Parity = pUartMgrPortCfg->Parity; 
-      UartCfg.Duplex = pUartMgrPortCfg->Duplex; 
-      UartCfg.RxFIFO = NULL;
-      UartCfg.TxFIFO = NULL; 
+      uartCfg = UartDrvDefaultCfg;    // Set the defaults; 
+      uartCfg.Port = i; 
+      uartCfg.BPS = pUartMgrPortCfg->nBPS; 
+      uartCfg.DataBits = pUartMgrPortCfg->dataBits; 
+      uartCfg.StopBits = pUartMgrPortCfg->stopBits; 
+      uartCfg.Parity = pUartMgrPortCfg->parity; 
+      uartCfg.Duplex = pUartMgrPortCfg->duplex; 
+      uartCfg.RxFIFO = NULL;
+      uartCfg.TxFIFO = NULL; 
       
       // Init UartMgrBlock[] struct       
       UartMgrBlock[i].nChannel = i; 
-      switch ( pUartMgrCfg->Protocol )
+      switch ( pUartMgrCfg->protocol )
       {
         case UARTMGR_PROTOCOL_F7X_N_PARAM: 
           UartMgrBlock[i].exec_protocol = F7XProtocol_Handler; 
@@ -255,42 +255,43 @@ void UartMgr_Initialize (void)
           UartMgrBlock[i].exec_protocol = EMU150Protocol_Handler; 
           UartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr; 
           UartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl; 
-          EMU150Protocol_SetBaseUartCfg(i, UartCfg); 
+          EMU150Protocol_SetBaseUartCfg(i, uartCfg); 
           break;
           
         case UARTMGR_PROTOCOL_NONE:
+	    case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through 
           //break;
         default:
           FATAL ("Unexpected UARTMGR_PROTOCOL = %d, UART Channel = %d",
-                    pUartMgrCfg->Protocol, i);
+                    pUartMgrCfg->protocol, i);
           break;
       }
       
       // Open Uart Port 
-      result = UART_OpenPort( &UartCfg ); 
+      result = UART_OpenPort( &uartCfg ); 
       
       if ( result == SYS_OK ) 
       {
         // If cfg and port ok, Initialize Uart Task 
-        memset(&TaskInfo, 0, sizeof(TaskInfo)); 
+        memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
         // strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Uart Mgr",_TRUNCATE);
-        sprintf(TaskInfo.Name,"Uart Mgr %d", i);
-        TaskInfo.TaskID      = UART_Mgr0 + i; 
-        TaskInfo.Function    = UartMgr_Task; 
-        TaskInfo.Priority    = taskInfo[UART_Mgr0 + i].priority; 
-        TaskInfo.Type        = taskInfo[UART_Mgr0 + i].taskType; 
-        TaskInfo.modes       = taskInfo[UART_Mgr0 + i].modes; 
-        TaskInfo.Enabled     = TRUE; 
-        TaskInfo.Locked      = FALSE; 
-        TaskInfo.MIFrames    = taskInfo[UART_Mgr0 + i].MIFframes;
+        snprintf(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Uart Mgr %d", i);
+        tcbTaskInfo.TaskID      = (TASK_INDEX)((UINT8)UART_Mgr0 + i); 
+        tcbTaskInfo.Function    = UartMgr_Task; 
+        tcbTaskInfo.Priority    = taskInfo[(UINT8)UART_Mgr0 + i].priority; 
+        tcbTaskInfo.Type        = taskInfo[(UINT8)UART_Mgr0 + i].taskType; 
+        tcbTaskInfo.modes       = taskInfo[(UINT8)UART_Mgr0 + i].modes; 
+        tcbTaskInfo.Enabled     = TRUE; 
+        tcbTaskInfo.Locked      = FALSE; 
+        tcbTaskInfo.MIFrames    = taskInfo[(UINT8)UART_Mgr0 + i].MIFframes;
         
         // Store my TaskID in the param block
         // so the shared UartMgr_Task function can disambiguate when needed.
-        UartMgrBlock[i].TaskID = TaskInfo.TaskID;
+        UartMgrBlock[i].taskID = tcbTaskInfo.TaskID;
 
-        TaskInfo.pParamBlock = (void *) &UartMgrBlock[i]; 
-        TmTaskCreate ( &TaskInfo ); 
+        tcbTaskInfo.pParamBlock = (void *) &UartMgrBlock[i]; 
+        TmTaskCreate ( &tcbTaskInfo ); 
         
         pUartMgrStatus->status = UARTMGR_STATUS_OK; 
       }
@@ -310,16 +311,16 @@ void UartMgr_Initialize (void)
     if ( result != SYS_OK )
     {
       // Update log data 
-      StartupLog.result = SYS_UART_PBIT_UART_OPEN_FAIL; 
-      StartupLog.ch = i; 
+      startupLog.result = SYS_UART_PBIT_UART_OPEN_FAIL; 
+      startupLog.ch = i; 
       
       // Set Fault Status 
-      Flt_SetStatus(pUartMgrCfg->PBITSysCond, SYS_ID_UART_PBIT_FAIL, 
-                    &StartupLog, sizeof(UART_SYS_PBIT_STARTUP_LOG));
+      Flt_SetStatus(pUartMgrCfg->sysCondPBIT, SYS_ID_UART_PBIT_FAIL, 
+                    &startupLog, sizeof(UART_SYS_PBIT_STARTUP_LOG));
     } 
     
     // Update internal variables 
-      UartMgr_ClearDownloadState(i); 
+    UartMgr_ClearDownloadState(i); 
     
   } // End for loop 
   
@@ -327,38 +328,38 @@ void UartMgr_Initialize (void)
   // Enable UartMgr BIT Task if any Uart is enabled 
   if ( bAtLeastOneEnabled == TRUE ) 
   {
-    memset(&TaskInfo, 0, sizeof(TaskInfo)); 
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Uart Mgr BIT",_TRUNCATE);
-    TaskInfo.TaskID      = Uart_BIT; 
-    TaskInfo.Function    = UartMgr_BITTask; 
-    TaskInfo.Priority    = taskInfo[Uart_BIT].priority; 
-    TaskInfo.Type        = taskInfo[Uart_BIT].taskType; 
-    TaskInfo.modes       = taskInfo[Uart_BIT].modes; 
-    TaskInfo.MIFrames    = taskInfo[Uart_BIT].MIFframes;
-    TaskInfo.Rmt.InitialMif = taskInfo[Uart_BIT].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[Uart_BIT].MIFrate;
-    TaskInfo.Enabled     = TRUE; 
-    TaskInfo.Locked      = FALSE; 
+    memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
+    strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Uart Mgr BIT",_TRUNCATE);
+    tcbTaskInfo.TaskID      = (TASK_INDEX)Uart_BIT; 
+    tcbTaskInfo.Function    = UartMgr_BITTask; 
+    tcbTaskInfo.Priority    = taskInfo[Uart_BIT].priority; 
+    tcbTaskInfo.Type        = taskInfo[Uart_BIT].taskType; 
+    tcbTaskInfo.modes       = taskInfo[Uart_BIT].modes; 
+    tcbTaskInfo.MIFrames    = taskInfo[Uart_BIT].MIFframes;
+    tcbTaskInfo.Rmt.InitialMif = taskInfo[Uart_BIT].InitialMif;
+    tcbTaskInfo.Rmt.MifRate    = taskInfo[Uart_BIT].MIFrate;
+    tcbTaskInfo.Enabled     = TRUE; 
+    tcbTaskInfo.Locked      = FALSE; 
     
-    TaskInfo.pParamBlock = (void *) &UartMgrBITBlock; 
-    TmTaskCreate ( &TaskInfo ); 
+    tcbTaskInfo.pParamBlock = (void *) &UartMgrBITBlock; 
+    TmTaskCreate ( &tcbTaskInfo ); 
     
     // Enable UartMgr Display Task
-    memset(&TaskInfo, 0, sizeof(TaskInfo)); 
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Uart Mgr Debug Disp",_TRUNCATE);
-    TaskInfo.TaskID      = Uart_Disp_Debug; 
-    TaskInfo.Function    = UartMgrDispDebug_Task; 
-    TaskInfo.Priority    = taskInfo[Uart_Disp_Debug].priority; 
-    TaskInfo.Type        = taskInfo[Uart_Disp_Debug].taskType; 
-    TaskInfo.modes       = taskInfo[Uart_Disp_Debug].modes; 
-    TaskInfo.MIFrames    = taskInfo[Uart_Disp_Debug].MIFframes;
-    TaskInfo.Rmt.InitialMif = taskInfo[Uart_Disp_Debug].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[Uart_Disp_Debug].MIFrate;
-    TaskInfo.Enabled     = TRUE; 
-    TaskInfo.Locked      = FALSE; 
+    memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
+    strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Uart Mgr Debug Disp",_TRUNCATE);
+    tcbTaskInfo.TaskID      = (TASK_INDEX)Uart_Disp_Debug; 
+    tcbTaskInfo.Function    = UartMgrDispDebug_Task; 
+    tcbTaskInfo.Priority    = taskInfo[Uart_Disp_Debug].priority; 
+    tcbTaskInfo.Type        = taskInfo[Uart_Disp_Debug].taskType; 
+    tcbTaskInfo.modes       = taskInfo[Uart_Disp_Debug].modes; 
+    tcbTaskInfo.MIFrames    = taskInfo[Uart_Disp_Debug].MIFframes;
+    tcbTaskInfo.Rmt.InitialMif = taskInfo[Uart_Disp_Debug].InitialMif;
+    tcbTaskInfo.Rmt.MifRate    = taskInfo[Uart_Disp_Debug].MIFrate;
+    tcbTaskInfo.Enabled     = TRUE; 
+    tcbTaskInfo.Locked      = FALSE; 
     
-    TaskInfo.pParamBlock = (void *) &UartMgrDispDebugBlock; 
-    TmTaskCreate ( &TaskInfo ); 
+    tcbTaskInfo.pParamBlock = (void *) &UartMgrDispDebugBlock; 
+    TmTaskCreate ( &tcbTaskInfo ); 
   }
   
   // For UART[0] force to GSE default conditions 
@@ -367,7 +368,7 @@ void UartMgr_Initialize (void)
   // Initialize Uart Mgr Debug 
   memset ( &m_UartMgr_Debug, 0x00, sizeof(UARTMGR_DEBUG) );
   m_UartMgr_Debug.bDebug = FALSE; 
-  m_UartMgr_Debug.Ch = 1; 
+  m_UartMgr_Debug.ch = 1; 
   m_UartMgr_Debug.num_bytes = 20; 
   
 }
@@ -441,7 +442,7 @@ static void UartMgr_Task (void *pParam)
   if ( Tm.systemMode == SYS_SHUTDOWN_ID )
   {
     UART_ClosePort( (UINT8)pUartMgrBlock->nChannel);
-    TmTaskEnable  ( pUartMgrBlock->TaskID, FALSE);
+    TmTaskEnable  ( pUartMgrBlock->taskID, FALSE);
   }
   else  // Normal task execution.
   {
@@ -459,7 +460,7 @@ static void UartMgr_Task (void *pParam)
     }    
     
     // Update ByteCnt Status 
-    pUartMgrStatus->PortByteCnt += cnt; 
+    pUartMgrStatus->portByteCnt += cnt; 
 
     // Call Serial Protocol Handler 
     bNewChanData = pUartMgrBlock->exec_protocol( (UINT8 *) m_UartMgr_RawBuffer[nChannel],
@@ -477,7 +478,7 @@ static void UartMgr_Task (void *pParam)
       //    to other I/F
       if ( pUartMgrStatus->bChanActive == FALSE )
       {
-        sprintf (GSE_OutLine,
+        snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                  "\r\nUartMgr Task: Valid Uart Data Present Detected (Ch=%d)\r\n \0", 
                  nChannel);
         GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
@@ -487,7 +488,7 @@ static void UartMgr_Task (void *pParam)
              (pUartMgrStatus->bChannelTimeOut == TRUE) )
         {
           pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[nChannel]; 
-          Flt_ClrStatus ( pUartCfg->ChannelSysCond ); 
+          Flt_ClrStatus ( pUartCfg->channelSysCond ); 
         }
 
         pUartMgrStatus->bChanActive = TRUE; 
@@ -495,7 +496,7 @@ static void UartMgr_Task (void *pParam)
         pUartMgrStatus->bChannelTimeOut = FALSE; 
 
       }
-      pUartMgrStatus->TimeChanActive = CM_GetTickCount(); 
+      pUartMgrStatus->timeChanActive = CM_GetTickCount(); 
     }
 
     // Perform Param Data Loss calculation, here.  Might have to perform
@@ -516,14 +517,14 @@ static void UartMgr_Task (void *pParam)
     // For debug display of raw input data 
     if ( m_UartMgr_Debug.bDebug == TRUE ) 
     {
-      if ( ( m_UartMgr_Debug.Ch == nChannel ) && (cnt > 0) )
+      if ( ( m_UartMgr_Debug.ch == nChannel ) && (cnt > 0) )
       {
-        m_UartMgr_Debug.Cnt += UartMgr_CopyRollBuff (
-                        &m_UartMgr_Debug.Data[0], 
+        m_UartMgr_Debug.cnt += UartMgr_CopyRollBuff (
+                        &m_UartMgr_Debug.data[0], 
                         (UINT8 *) m_UartMgr_RawBuffer[nChannel], 
                         cnt, 
-                        &m_UartMgr_Debug.WriteOffset, 
-                        &m_UartMgr_Debug.ReadOffset, 
+                        &m_UartMgr_Debug.writeOffset, 
+                        &m_UartMgr_Debug.readOffset, 
                          m_UartMgr_Debug.num_bytes ); 
       }
     }
@@ -571,10 +572,10 @@ void UartMgr_BITTask ( void *pParam )
       
       // Read UART DRV error counts 
       uartBIT_status = UART_BITStatus( (UINT8)i ); 
-      pUartMgrStatus->PortFramingErrCnt = uartBIT_status.FramingErrCnt; 
-      pUartMgrStatus->PortParityErrCnt = uartBIT_status.ParityErrCnt;
-      pUartMgrStatus->PortTxOverFlowErrCnt = uartBIT_status.TxOverflowErrCnt; 
-      pUartMgrStatus->PortRxOverFlowErrCnt = uartBIT_status.RxOverflowErrCnt; 
+      pUartMgrStatus->portFramingErrCnt = uartBIT_status.FramingErrCnt; 
+      pUartMgrStatus->portParityErrCnt = uartBIT_status.ParityErrCnt;
+      pUartMgrStatus->portTxOverFlowErrCnt = uartBIT_status.TxOverflowErrCnt; 
+      pUartMgrStatus->portRxOverFlowErrCnt = uartBIT_status.RxOverflowErrCnt; 
       
       // In the future could add logic that if too many error counts, could 
       //    consider this ch as "bad".  
@@ -707,7 +708,7 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
   UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr; 
   
   UINT16 ch; 
-  UINT16 index; 
+  UINT16 wIndex; 
   FLOAT32 fval; 
   
   UINT16 val; 
@@ -718,9 +719,9 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
 
   // Get channel for this sensor and Index into Word Info Data 
   ch = (nIndex >> 8) & 0x7; 
-  index = (nIndex & 0xFF); 
+  wIndex = (nIndex & 0xFF); 
   
-  word_info_ptr = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[ch][index]; 
+  word_info_ptr = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[ch][wIndex]; 
   *tickCount = 0;   
   
   if ( word_info_ptr->nIndex != UARTMGR_WORD_INDEX_NOT_FOUND )
@@ -750,7 +751,8 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
         fval = (FLOAT32) val; 
         break; 
       
-      default:
+    case UART_DATA_TYPE_MAX:  
+	default:
         FATAL ("Unexpected UART_DATA_TYPE = %d", word_info_ptr->type);
         break; 
     }
@@ -808,7 +810,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
   //       Believe it should be ASSERT during cfg setup, but we are fairly inconsistent 
   //       everywhere, add here just as "fall back".  Not level A/B, all conditions need 
   //       not to be checked !!! 
-  if ( ((pUartMgrStatus->TimeChanActive != 0) || (pUartMgrStatus->bChanActive == TRUE)) && 
+  if ( ((pUartMgrStatus->timeChanActive != 0) || (pUartMgrStatus->bChanActive == TRUE)) && 
         (pWordInfo->id != UARTMGR_WORD_INDEX_NOT_FOUND) )
   {
     bValid = TRUE; 
@@ -830,7 +832,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
         GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
        
         WordTimeoutLog.result = SYS_UART_DATA_LOSS_TIMEOUT; 
-        sprintf( WordTimeoutLog.FailMsg, "Xcptn: Word Timeout (ch = %d, S = %d)", 
+        sprintf( WordTimeoutLog.sFailMsg, "Xcptn: Word Timeout (ch = %d, S = %d)", 
                  ch, pWordInfo->nSensor ); 
        
         // Log CBIT Here only on transition from data rx to no data rx 
@@ -919,37 +921,37 @@ UINT16 UartMgr_ReadBuffer ( void *pDest, UINT32 chan, UINT16 nMaxByteSize)
    
   pUartStoreData = (UARTMGR_STORE_BUFF_PTR) &m_UartMgr_StoreBuffer[chan]; 
   
-  cnt = (pUartStoreData->Cnt > nMaxByteSize) ? nMaxByteSize : (UINT16)pUartStoreData->Cnt; 
+  cnt = (pUartStoreData->cnt > nMaxByteSize) ? nMaxByteSize : (UINT16)pUartStoreData->cnt; 
 
   if (cnt > 0) 
   {
-    bytesToEnd = (UINT16)(UARTMGR_RAW_RX_BUFFER_SIZE - pUartStoreData->ReadOffset); 
+    bytesToEnd = (UINT16)(UARTMGR_RAW_RX_BUFFER_SIZE - pUartStoreData->readOffset); 
     if (cnt > bytesToEnd) 
     {
       // Split into two memcopies 
       memcpy( (UINT8 *)pBytes,
-        (UINT8 *)&pUartStoreData->Data[pUartStoreData->ReadOffset], bytesToEnd );
+        (UINT8 *)&pUartStoreData->data[pUartStoreData->readOffset], bytesToEnd );
       bytesAtStart = cnt - bytesToEnd; 
-      pUartStoreData->ReadOffset = 0; // Wrap Case
+      pUartStoreData->readOffset = 0; // Wrap Case
       
       memcpy( (UINT8 *)(pBytes + bytesToEnd),
-        (UINT8 *)&pUartStoreData->Data[pUartStoreData->ReadOffset], bytesAtStart );
-      pUartStoreData->ReadOffset += bytesAtStart; // Advance pointer to next byte to read
+        (UINT8 *)&pUartStoreData->data[pUartStoreData->readOffset], bytesAtStart );
+      pUartStoreData->readOffset += bytesAtStart; // Advance pointer to next byte to read
     }
     else 
     {
       // Single mem copy 
       memcpy ( (UINT8 *) pBytes,
-        (UINT8 *) &pUartStoreData->Data[pUartStoreData->ReadOffset], cnt);
+        (UINT8 *) &pUartStoreData->data[pUartStoreData->readOffset], cnt);
 
-      pUartStoreData->ReadOffset += cnt;
+      pUartStoreData->readOffset += cnt;
 
-      pUartStoreData->ReadOffset =(pUartStoreData->ReadOffset>=UARTMGR_RAW_RX_BUFFER_SIZE) ?
-          0 : pUartStoreData->ReadOffset;
+      pUartStoreData->readOffset =(pUartStoreData->readOffset>=UARTMGR_RAW_RX_BUFFER_SIZE) ?
+          0 : pUartStoreData->readOffset;
     }
   
     // Note: cnt will always be <= pUartStoreData->Cnt
-    pUartStoreData->Cnt -= cnt;                    
+    pUartStoreData->cnt -= cnt;                    
     
   } // if cnt > 0  
 
@@ -1021,7 +1023,7 @@ UINT16 UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSiz
     {
       // Return current data reduced value 
       storeData.ts = runtime_data_ptr->rxTS; 
-      storeData.ParamId = (UINT8)runtime_data_ptr->id; 
+      storeData.paramId = (UINT8)runtime_data_ptr->id; 
       storeData.bValidity = runtime_data_ptr->bValid; 
 
       reduction_data_ptr->EngVal = UartMgr_ConvertToEngUnits ( runtime_data_ptr ); 
@@ -1033,7 +1035,7 @@ UINT16 UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSiz
         // Call Init Data Reduction for Begin Snapshot, for any data that has been received ! 
         DataReductionInit ( reduction_data_ptr ); 
         // Conversion at this point not needed, first point !
-        storeData.ParamVal = runtime_data_ptr->val_raw;  
+        storeData.paramVal = runtime_data_ptr->val_raw;  
         
         if (runtime_data_ptr->bValid == TRUE) 
         {
@@ -1051,7 +1053,7 @@ UINT16 UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSiz
         DataReductionGetCurrentValue ( reduction_data_ptr ); 
         
         sval = (SINT16) ( reduction_data_ptr->EngVal / runtime_data_ptr->scale_lsb ); 
-        storeData.ParamVal = *(UINT16 *) &sval; 
+        storeData.paramVal = *(UINT16 *) &sval; 
       }
       
       bDestBuffNotFull = FALSE; // Constant update here prevents use of "else" case below. 
@@ -1109,7 +1111,7 @@ void UartMgr_ResetBufferTimeCnt ( UINT32 chan )
   UARTMGR_STATUS_PTR pUartMgrStatus;
   
   pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[chan]; 
-  pUartMgrStatus->TimeCntReset = CM_GetTickCount() / MIF_PERIOD_mS; 
+  pUartMgrStatus->timeCntReset = CM_GetTickCount() / MIF_PERIOD_mS; 
 }
 
 
@@ -1153,8 +1155,8 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
   pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[chan]; 
   fileHdr.size = cnt + sizeof(UARTMGR_FILE_HDR); 
   fileHdr.ch = (UINT8)chan; 
-  strncpy ( (char *) fileHdr.Name, pUartCfg->Name, UART_CFG_NAME_SIZE ); 
-  fileHdr.protocol = pUartCfg->Protocol; 
+  strncpy ( (char *) fileHdr.sName, pUartCfg->sName, UART_CFG_NAME_SIZE ); 
+  fileHdr.protocol = pUartCfg->protocol; 
   
   // Copy Uart file hdr to destination 
   memcpy ( pDest, (UINT8 *) &fileHdr, sizeof(UARTMGR_FILE_HDR) ); 
@@ -1180,8 +1182,8 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 UINT16 UartMgr_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   UART_SYS_HDR UartSysHdr[UART_NUM_OF_UARTS];
-   UINT16       ChannelIndex;
+   UART_SYS_HDR uartSysHdr[UART_NUM_OF_UARTS];
+   UINT16       nChannelIndex;
    INT8         *pBuffer;
    UINT16       nRemaining;
    UINT16       nTotal;
@@ -1190,26 +1192,26 @@ UINT16 UartMgr_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( UartSysHdr, 0, sizeof(UartSysHdr) );
+   memset ( uartSysHdr, 0, sizeof(uartSysHdr) );
    // Loop through all the channels
-   for ( ChannelIndex = 1; 
-         ((ChannelIndex < UART_NUM_OF_UARTS) && 
-          (nRemaining > sizeof (UartSysHdr[ChannelIndex]))); 
-         ChannelIndex++ )
+   for ( nChannelIndex = 1; 
+         ((nChannelIndex < (UINT16)UART_NUM_OF_UARTS) && 
+          (nRemaining > sizeof (UART_SYS_HDR))); 
+         nChannelIndex++ )
    {
       // Copy the UART Name to the header
-      strncpy_safe( UartSysHdr[ChannelIndex-1].Name, 
-                    sizeof(UartSysHdr[ChannelIndex-1].Name), 
-                    m_UartMgrCfg[ChannelIndex].Name,
+      strncpy_safe( uartSysHdr[nChannelIndex-1].sName, 
+                    sizeof(uartSysHdr[nChannelIndex-1].sName), 
+                    m_UartMgrCfg[nChannelIndex].sName,
                     _TRUNCATE);
       // Increment the total used and decrement the remaining
-      nTotal     += sizeof (UartSysHdr[ChannelIndex-1]);
-      nRemaining -= sizeof (UartSysHdr[ChannelIndex-1]);
+      nTotal     += sizeof (UART_SYS_HDR);
+      nRemaining -= sizeof (UART_SYS_HDR);
    }
    // Make sure there is something to write and then copy to buffer
    if ( 0 != nTotal )
    {
-      memcpy ( pBuffer, UartSysHdr, nTotal );
+      memcpy ( pBuffer, uartSysHdr, nTotal );
    }
    // return the total bytes written to the buffer
    return ( nTotal );
@@ -1324,13 +1326,13 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
           *pSize = *pUartMgrDownload->pSize;  // Return size of packet to DM
           // pUartMgrDownload->pData;         // Return ptr to buffer to packet to DM
           
-          pUartMgrDownload->state = UARTMGR_DOWNLOAD_REC_STORE_INPROGRESS; 
+          pUartMgrDownload->state = UARTMGR_DOWNLOAD_REC_STR_INPROGR; 
           pUartMgrDownload->bNewRec = FALSE; 
         }
       }
       break; 
       
-    case UARTMGR_DOWNLOAD_REC_STORE_INPROGRESS:
+    case UARTMGR_DOWNLOAD_REC_STR_INPROGR:
       *pStatus = DL_IN_PROGRESS; // Immediately Say InProgress 
       if ( *pDL_WrStatus != DL_WRITE_IN_PROGRESS ) 
       {
@@ -1441,27 +1443,28 @@ void UartMgrDispDebug_Task ( void *pParam )
   UINT16 i;
 
   
-  if ( (m_UartMgr_Debug.bDebug == TRUE ) && (m_UartMgr_Debug.Cnt != 0) )
+  if ( (m_UartMgr_Debug.bDebug == TRUE ) && (m_UartMgr_Debug.cnt != 0) )
   {
-    sprintf( (char *) Str, "Last %d bytes: \r\n", m_UartMgr_Debug.num_bytes );
+    snprintf( (char *) Str, sizeof(Str), "Last %d bytes: \r\n", m_UartMgr_Debug.num_bytes );
     GSE_PutLine( (const char *) Str ); 
 
     // Output up to .num_bytes or .cnt -> 0 in if below. 
     for ( i = 0; i < m_UartMgr_Debug.num_bytes; i++ ) 
     {
       // Output one char per line 
-      sprintf( (char *) Str, "%02x ", m_UartMgr_Debug.Data[m_UartMgr_Debug.ReadOffset++] );
+      snprintf( (char *) Str, sizeof(Str), 
+				"%02x ", m_UartMgr_Debug.data[m_UartMgr_Debug.readOffset++] );
       GSE_PutLine( (const char *) Str ); 
 
       // Check for Wrap 
-      if (m_UartMgr_Debug.ReadOffset >= m_UartMgr_Debug.num_bytes) 
+      if (m_UartMgr_Debug.readOffset >= m_UartMgr_Debug.num_bytes) 
       {
-        m_UartMgr_Debug.ReadOffset = 0; 
+        m_UartMgr_Debug.readOffset = 0; 
       }
 
       // Dec count 
-      m_UartMgr_Debug.Cnt--; 
-      if ( m_UartMgr_Debug.Cnt == 0) 
+      m_UartMgr_Debug.cnt--; 
+      if ( m_UartMgr_Debug.cnt == 0) 
       {
         break; // Exit
       }
@@ -1528,18 +1531,18 @@ BOOLEAN UartMgr_DetermineChanLoss (UINT16 ch)
   pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[ch]; 
   
   // Determine if performing startup or data lost timeout calculation 
-  if ( pUartMgrStatus->TimeChanActive != 0 ) 
+  if ( pUartMgrStatus->timeChanActive != 0 ) 
   {
-    nTimeOut = pUartMgrCfg->ChannelTimeOut_s; 
+    nTimeOut = pUartMgrCfg->channelTimeOut_s; 
     pTimeOutFlag = (BOOLEAN *) &pUartMgrStatus->bChannelTimeOut; 
   }
   else 
   {
-    nTimeOut = pUartMgrCfg->ChannelStartup_s; 
+    nTimeOut = pUartMgrCfg->channelStartup_s; 
     pTimeOutFlag = (BOOLEAN *) &pUartMgrStatus->bChannelStartupTimeOut; 
   }
   
-  if ( ((CM_GetTickCount() - pUartMgrStatus->TimeChanActive) > 
+  if ( ((CM_GetTickCount() - pUartMgrStatus->timeChanActive) > 
         (nTimeOut * MILLISECONDS_PER_SECOND)) && (nTimeOut != UART_DSB_TIMEOUT) )
   {
     // We have a timeout !
@@ -1563,7 +1566,7 @@ BOOLEAN UartMgr_DetermineChanLoss (UINT16 ch)
       }
       
       // Increment data loss counter ! 
-      pUartMgrStatus->DataLossCnt++; 
+      pUartMgrStatus->dataLossCnt++; 
       
       // Ch is now inactive ! 
       pUartMgrStatus->bChanActive = FALSE; 
@@ -1668,12 +1671,12 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
   switch (resultType)
   {
     case SYS_UART_STARTUP_TIMEOUT: 
-      timeoutLog.cfg_timeout = pUartCfg->ChannelStartup_s;
+      timeoutLog.cfg_timeout = pUartCfg->channelStartup_s;
       sysId = SYS_ID_UART_CBIT_STARTUP_FAIL; 
       break;
       
     case SYS_UART_DATA_LOSS_TIMEOUT:
-      timeoutLog.cfg_timeout = pUartCfg->ChannelTimeOut_s; 
+      timeoutLog.cfg_timeout = pUartCfg->channelTimeOut_s; 
       sysId = SYS_ID_UART_CBIT_DATA_LOSS_FAIL; 
       break; 
       
@@ -1683,7 +1686,7 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
       break;
   } // End switch (resultType)
   
-  Flt_SetStatus(pUartCfg->ChannelSysCond, sysId, &timeoutLog, sizeof(timeoutLog)); 
+  Flt_SetStatus(pUartCfg->channelSysCond, sysId, &timeoutLog, sizeof(timeoutLog)); 
   
 }
 
@@ -1780,28 +1783,28 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
          //           UartMgr_Task sample time changes) be tick from current frame, 
          //       For invalid, we want current frame time !
          rxTime = rxTime / MIF_PERIOD_mS;
-         storeData.TimeDelta = (rxTime > pUartMgrStatus->TimeCntReset) ?
-                               (UINT8)(rxTime - pUartMgrStatus->TimeCntReset) : 
+         storeData.timeDelta = (rxTime > pUartMgrStatus->timeCntReset) ?
+                               (UINT8)(rxTime - pUartMgrStatus->timeCntReset) : 
                                (UINT8)(UARTMGR_TIMEDELTA_OUTOFSEQUENCE); 
          
-         storeData.ParamId = (UINT8)runtime_data_ptr->id; 
+         storeData.paramId = (UINT8)runtime_data_ptr->id; 
          
          sval = (SINT16) (data_red_ptr->EngVal / runtime_data_ptr->scale_lsb);
-         storeData.ParamVal = *(UINT16 *) &sval; 
+         storeData.paramVal = *(UINT16 *) &sval; 
       
          storeData.bValidity = runtime_data_ptr->bValid; 
 
          pUartStoreData = (UARTMGR_STORE_BUFF_PTR) &m_UartMgr_StoreBuffer[ch]; 
 
-         cnt = UartMgr_CopyRollBuff ( (UINT8 *) &pUartStoreData->Data[0],
+         cnt = UartMgr_CopyRollBuff ( (UINT8 *) &pUartStoreData->data[0],
                             (UINT8 *) &storeData, 
                             sizeof(UARTMGR_STORE_DATA), 
-                            (UINT32 *) &pUartStoreData->WriteOffset, 
-                            (UINT32 *) &pUartStoreData->ReadOffset,
+                            (UINT32 *) &pUartStoreData->writeOffset, 
+                            (UINT32 *) &pUartStoreData->readOffset,
                             UARTMGR_RAW_RX_BUFFER_SIZE ); 
 
                             
-          pUartStoreData->Cnt += cnt; 
+          pUartStoreData->cnt += cnt; 
           
        } // End of record param 
        
@@ -1954,6 +1957,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 12-11-12   Time: 2:58p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107, 1191 - Code Review Updates
  * 
  * *****************  Version 43  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:05p

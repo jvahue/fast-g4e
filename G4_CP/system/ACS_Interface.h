@@ -9,7 +9,7 @@
     Description: All data elements required for an ACS are defined here.
 
     VERSION
-      $Revision: 5 $  $Date: 12-11-09 10:34a $     
+      $Revision: 6 $  $Date: 12-11-12 4:30p $     
 
 ******************************************************************************/
 
@@ -113,7 +113,7 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( ACS_INTERFACE_BODY )
+#if defined ( ACS_INTERFACE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -133,6 +133,11 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $
  *
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:30p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 12-11-09   Time: 10:34a
  * Updated in $/software/control processor/code/system

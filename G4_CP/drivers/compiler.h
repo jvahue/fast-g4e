@@ -11,7 +11,7 @@
   Note:
 
   VERSION
-      $Revision: 4 $  $Date: 12-11-09 2:10p $
+      $Revision: 5 $  $Date: 12-11-12 4:46p $ 
 
 ******************************************************************************/
 
@@ -37,7 +37,7 @@
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( MSCPINTERFACE_BODY )
+#if defined ( COMPILER_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -57,6 +57,11 @@
  *  MODIFICATIONS
  *    $History: compiler.h $
  *
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1142 - Formatting Error
+ * 
  * *****************  Version 4  *****************
  * User: Melanie Jutras Date: 12-11-09   Time: 2:10p
  * Updated in $/software/control processor/code/drivers

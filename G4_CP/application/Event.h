@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 29 $  $Date: 12-11-08 3:03p $
+  $Revision: 30 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -437,7 +437,7 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( EVENT_BODY )
+#if defined ( EVENT_BODY )
    #define EXPORT
 #else
    #define EXPORT extern
@@ -476,6 +476,11 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
  *  MODIFICATIONS
  *    $History: Event.h $
  *
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
+ * 
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application

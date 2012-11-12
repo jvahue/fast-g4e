@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 38 $  $Date: 12-11-12 11:36a $
+      $Revision: 39 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -520,7 +520,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( SENSOR_BODY )
+#if defined ( SENSOR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -557,6 +557,11 @@ EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
  *  MODIFICATIONS
  *    $History: sensor.h $
  *
+ * *****************  Version 39  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
+ * 
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

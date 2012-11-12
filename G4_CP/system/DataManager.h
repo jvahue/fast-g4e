@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 40 $  $Date: 11/09/12 6:37p $
+      $Revision: 41 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -206,7 +206,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( DATA_MNG_BODY )
+#if defined ( DATA_MNG_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -239,6 +239,11 @@ EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLE
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 41  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 40  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:37p

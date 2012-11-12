@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 11 $  $Date: 12-10-30 5:48p $
+  $Revision: 12 $  $Date: 12-11-12 4:30p $
 
 ******************************************************************************/
 
@@ -183,7 +183,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( ACTION_BODY )
+#if defined ( ACTION_BODY )
 #define EXPORT
 #else
 #define EXPORT extern
@@ -206,6 +206,11 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:30p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p

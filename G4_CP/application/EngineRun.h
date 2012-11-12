@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 22 $  $Date: 11/09/12 6:34p $
+      $Revision: 24 $  $Date: 12-11-12 4:48p $
 
 ******************************************************************************/
 
@@ -182,7 +182,7 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( ENGINERUN_BODY )
+#if defined ( ENGINERUN_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -194,7 +194,7 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 extern USER_ENUM_TBL EngRunIdEnum[];
 
-#if defined( ENGINERUN_BODY )
+#if defined ( ENGINERUN_BODY )
 USER_ENUM_TBL EngineRunStateEnum[] =
 {
   { "STOPPED",  ER_STATE_STOPPED  },
@@ -223,6 +223,16 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:48p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 22  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:34p

@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 104 $  $Date: 12-11-12 9:48a $
+      $Revision: 105 $  $Date: 12-11-12 1:11p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2678,17 +2678,17 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
      sysLog.logType                = logType;
      sysLog.source                 = logID;
      sysLog.priority               = priority;
-     sysLog.payload.Hdr.ts         = ts;
-     sysLog.payload.Hdr.nID        = (UINT16)logID;
-     sysLog.payload.Hdr.nSize      = nSize;
+     sysLog.payload.hdr.ts         = ts;
+     sysLog.payload.hdr.nID        = (UINT16)logID;
+     sysLog.payload.hdr.nSize      = nSize;
 
      if (nSize > 0)
      {
-        memcpy (&sysLog.payload.Data[0], pData, nSize);
+        memcpy (&sysLog.payload.data[0], pData, nSize);
      }
 
-     sysLog.payload.Hdr.nChecksum  = ChecksumBuffer(&sysLog.payload,
-                                            nSize + sizeof(sysLog.payload.Hdr),
+     sysLog.payload.hdr.nChecksum  = ChecksumBuffer(&sysLog.payload,
+                                            nSize + sizeof(sysLog.payload.hdr),
                                             0xFFFFFFFF);
      bSlotFound = FALSE;
 
@@ -2705,10 +2705,10 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
                     source,
                     systemTable[i].priority,
                     &systemTable[i].payload,
-                    systemTable[i].payload.Hdr.nSize +
-                      sizeof(systemTable[i].payload.Hdr),
-                    (sysLog.payload.Hdr.nChecksum +
-                     ChecksumBuffer(&sysLog.payload.Hdr.nChecksum,
+                    systemTable[i].payload.hdr.nSize +
+                      sizeof(systemTable[i].payload.hdr),
+                    (sysLog.payload.hdr.nChecksum +
+                     ChecksumBuffer(&sysLog.payload.hdr.nChecksum,
                      sizeof(UINT32), LOG_CHKSUM_BLANK)),
                     &systemTable[i].wrStatus);
 
@@ -2817,6 +2817,11 @@ void LogUpdateWritePendingStatuses( void )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  *
+ * *****************  Version 105  *****************
+ * User: John Omalley Date: 12-11-12   Time: 1:11p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
  * *****************  Version 104  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system

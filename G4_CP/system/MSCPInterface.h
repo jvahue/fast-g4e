@@ -21,7 +21,7 @@
                  FILE IS UNDER THE VERSION CONTROL OF THE CONTROL PROCESSOR
 
       VERSION
-      $Revision: 45 $  $Date: 12-11-12 10:39a $    
+      $Revision: 46 $  $Date: 12-11-12 4:46p $    
 
  ******************************************************************************/
 
@@ -891,7 +891,7 @@ typedef struct{
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( MSCPINTERFACE_BODY )
+#if defined ( MSCPINTERFACE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -911,6 +911,11 @@ typedef struct{
  *  MODIFICATIONS
  *    $History: MSCPInterface.h $
  *
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
+ * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:39a
  * Updated in $/software/control processor/code/system

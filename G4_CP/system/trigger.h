@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing.
 
   VERSION
-  $Revision: 37 $  $Date: 11/08/12 4:28p $
+  $Revision: 38 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -284,7 +284,7 @@ typedef TRIGGER_CONFIG TRIGGER_CONFIGS[MAX_TRIGGERS];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( TRIGGER_BODY )
+#if defined ( TRIGGER_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -330,6 +330,11 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
+ * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p

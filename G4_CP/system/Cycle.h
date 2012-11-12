@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 17 $  $Date: 11/09/12 5:16p $
+      $Revision: 18 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -225,7 +225,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( CYCLE_BODY )
+#if defined ( CYCLE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -268,6 +268,11 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:16p

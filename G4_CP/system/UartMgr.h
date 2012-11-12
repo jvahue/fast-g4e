@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 12 $  $Date: 12-10-27 5:05p $     
+      $Revision: 13 $  $Date: 12-11-12 2:58p $     
 
 ******************************************************************************/
 
@@ -99,21 +99,21 @@ typedef enum
 
 typedef struct 
 {
-  UART_CFG_BPS    BPS;
-  UART_CFG_DB     DataBits;
-  UART_CFG_SB     StopBits;
-  UART_CFG_PARITY Parity;
-  UART_CFG_DUPLEX Duplex; 
+  UART_CFG_BPS    nBPS;
+  UART_CFG_DB     dataBits;
+  UART_CFG_SB     stopBits;
+  UART_CFG_PARITY parity;
+  UART_CFG_DUPLEX duplex; 
 } UARTMGR_PORT_CFG, *UARTMGR_PORT_CFG_PTR;
 
 typedef struct 
 {
-  CHAR              Name[UART_CFG_NAME_SIZE];
-  UARTMGR_PROTOCOLS Protocol; 
-  UINT32            ChannelStartup_s; 
-  UINT32            ChannelTimeOut_s; 
-  FLT_STATUS        ChannelSysCond; 
-  FLT_STATUS        PBITSysCond;  
+  CHAR              sName[UART_CFG_NAME_SIZE];
+  UARTMGR_PROTOCOLS protocol; 
+  UINT32            channelStartup_s; 
+  UINT32            channelTimeOut_s; 
+  FLT_STATUS        channelSysCond; 
+  FLT_STATUS        sysCondPBIT;  
   BOOLEAN           bEnabled;
   UARTMGR_PORT_CFG  Port; 
 } UARTMGR_CFG, *UARTMGR_CFG_PTR; 
@@ -140,8 +140,8 @@ typedef struct
   BOOLEAN bReInit;  // On transition from invalid to valid data should 
                     //   Reinit data reduction. 
   
-  UINT16  DataRed_val; 
-  UINT16  DataRed_TimeDelta; 
+  UINT16  dataRed_val; 
+  UINT16  dataRed_TimeDelta; 
   
   UINT32  cfgTimeOut;   
   
@@ -177,22 +177,22 @@ typedef struct
 {
   UARTMGR_SYSTEM_STATUS status; 
   BOOLEAN               bChanActive;    // Ch is active with valid "packet" data
-  UINT32                TimeChanActive; // Tick Time when Ch became active
-  UINT32                DataLossCnt;    // Count of time Ch Sync (ref protocol) 
+  UINT32                timeChanActive; // Tick Time when Ch became active
+  UINT32                dataLossCnt;    // Count of time Ch Sync (ref protocol) 
                                         //    has been lost
                                         
   BOOLEAN               bChannelStartupTimeOut;  // Flag to indicate channel startup timeout 
   BOOLEAN               bChannelTimeOut;         // Flag to indicate channel loss timeout 
                                         
-  UINT32                PortByteCnt;    // Count of bytes Rx from physical port 
-  UINT32                PortFramingErrCnt; 
-  UINT32                PortParityErrCnt; 
-  UINT32                PortTxOverFlowErrCnt; 
-  UINT32                PortRxOverFlowErrCnt; 
-  UARTMGR_PROTOCOLS     Protocol; 
+  UINT32                portByteCnt;    // Count of bytes Rx from physical port 
+  UINT32                portFramingErrCnt; 
+  UINT32                portParityErrCnt; 
+  UINT32                portTxOverFlowErrCnt; 
+  UINT32                portRxOverFlowErrCnt; 
+  UARTMGR_PROTOCOLS     protocol; 
   
   BOOLEAN               bRecordingActive; 
-  UINT32                TimeCntReset; 
+  UINT32                timeCntReset; 
      
                         // param ->rxTime is in CPU ticks.  TimeCntReset sub from ->rxTime 
                         //    to create the "timedelta" for the data to be stored by the 
@@ -210,17 +210,17 @@ typedef struct
 #pragma pack(1)                                             
 typedef struct 
 {
-  UINT8  TimeDelta; 
-  UINT8  ParamId; 
-  UINT16 ParamVal; 
+  UINT8  timeDelta; 
+  UINT8  paramId; 
+  UINT16 paramVal; 
   BOOLEAN bValidity; 
 } UARTMGR_STORE_DATA, *UARTMGR_STORE_DATA_PTR; 
 
 typedef struct 
 {
   TIMESTAMP  ts; 
-  UINT8  ParamId; 
-  UINT16 ParamVal; 
+  UINT8  paramId; 
+  UINT16 paramVal; 
   BOOLEAN bValidity; 
 } UARTMGR_STORE_SNAP_DATA, *UARTMGR_STORE_SNAP_DATA_PTR; 
 #pragma pack()
@@ -228,10 +228,10 @@ typedef struct
 
 typedef struct 
 {
-  UINT8  Data[UARTMGR_RAW_RX_BUFFER_SIZE];  // 3840 char * 5 (sizeof _STORE_DATA)
-  UINT32 ReadOffset; 
-  UINT32 WriteOffset;
-  UINT32 Cnt; 
+  UINT8  data[UARTMGR_RAW_RX_BUFFER_SIZE];  // 3840 char * 5 (sizeof _STORE_DATA)
+  UINT32 readOffset; 
+  UINT32 writeOffset;
+  UINT32 cnt; 
   BOOLEAN bOverFlow;  
 } UARTMGR_STORE_BUFF, *UARTMGR_STORE_BUFF_PTR; 
 
@@ -272,7 +272,7 @@ typedef struct
 
 typedef struct
 {
-  TASK_INDEX TaskID;    // Task ID for UartMgr_Task from TM
+  TASK_INDEX taskID;    // Task ID for UartMgr_Task from TM
   UINT16     nChannel;  // UART channel index
   PROTOCOL_HNDL exec_protocol; 
   PROTOCOL_FILE_HDR get_protocol_fileHdr;
@@ -281,7 +281,7 @@ typedef struct
 
 typedef struct 
 {
-  TASK_INDEX TaskID; // Task ID for UartMgr_BITTask from TM
+  TASK_INDEX taskID; // Task ID for UartMgr_BITTask from TM
 } UARTMGR_BIT_TASK_PARAMS, *UARTMGR_BIT_TASK_PARAMS_PTR;
 
 
@@ -300,7 +300,7 @@ typedef struct
 typedef struct 
 {
   RESULT result; // 0x002A1000, SYS_UART_DATA_LOSS_TIMEOUT
-  CHAR FailMsg[UART_WORD_TIMEOUT_FAIL_MSG_SIZE];
+  CHAR sFailMsg[UART_WORD_TIMEOUT_FAIL_MSG_SIZE];
 } SYS_UART_CBIT_FAIL_WORD_TIMEOUT_LOG; 
 
 typedef struct 
@@ -319,13 +319,13 @@ typedef struct
 {
   UINT16 size;     // Size of UART Hdr + Protocol Hdr, including "size" field. 
   UINT8  ch;       // Uart Ch
-  CHAR   Name[UART_CFG_NAME_SIZE];  // Uart Ch Name
+  CHAR   sName[UART_CFG_NAME_SIZE];  // Uart Ch Name
   UARTMGR_PROTOCOLS protocol;  // Uart Ch Protocol selection 
 } UARTMGR_FILE_HDR, *UARTMGR_FILE_HDR_PTR; 
 
 typedef struct
 {
-   CHAR Name[UART_CFG_NAME_SIZE]; 
+   CHAR sName[UART_CFG_NAME_SIZE]; 
 } UART_SYS_HDR;
 #pragma pack()
 
@@ -337,7 +337,7 @@ typedef enum
 {
   UARTMGR_DOWNLOAD_IDLE,
   UARTMGR_DOWNLOAD_GET_REC,
-  UARTMGR_DOWNLOAD_REC_STORE_INPROGRESS,
+  UARTMGR_DOWNLOAD_REC_STR_INPROGR,
   UARTMGR_DOWNLOAD_MAX
 } UARTMGR_DOWNLOAD_STATE; 
 
@@ -371,19 +371,19 @@ typedef struct
 typedef struct
 {
   BOOLEAN bDebug;   // Enable debug display 
-  UINT16 Ch;        // Channel to debug - default is firt UART (not GSE) 
+  UINT16 ch;        // Channel to debug - default is firt UART (not GSE) 
   UINT16 num_bytes; // Number of bytes to display every iteration. 
   
-  UINT8 Data[UARTMGR_DEBUG_BUFFER_SIZE]; 
-  UINT32 ReadOffset;
-  UINT32 WriteOffset;
-  UINT32 Cnt; 
+  UINT8 data[UARTMGR_DEBUG_BUFFER_SIZE]; 
+  UINT32 readOffset;
+  UINT32 writeOffset;
+  UINT32 cnt; 
   
 } UARTMGR_DEBUG, *UARTMGR_DEBUG_PTR; 
 
 typedef struct
 {
-    TASK_INDEX      MgrTaskID;
+    TASK_INDEX      mgrTaskID;
 } UARTMGR_DISP_DEBUG_TASK_PARMS;
 
 
@@ -449,6 +449,11 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 12-11-12   Time: 2:58p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107, 1191 - Code Review Updates
  * 
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:05p
