@@ -386,7 +386,7 @@ UINT32 DataFlashMemory::ProcessCommand( UINT32 addr)
         {CFI_DEVICE_INTERFACE_MSB,                    0},
         {CFI_BYTES_PER_BUFFERED_WRITE_LSB,            ULV(6)},      // 0x2A
         {CFI_BYTES_PER_BUFFERED_WRITE_MSB,            0},
-        {CFI_NUMBER_OF_ERASE_BLOCK_REGIONS,           ULV(1)},
+        {CFI_NUM_ERASE_BLOCK_REGIONS,                 ULV(1)},
 
         {CFI_EBR_START+CFI_EBR_NUMBER_OF_SECTORS_LSB, ULV(0xFF)},           // 0x2D
         {CFI_EBR_START+CFI_EBR_NUMBER_OF_SECTORS_MSB, ULV(3)},

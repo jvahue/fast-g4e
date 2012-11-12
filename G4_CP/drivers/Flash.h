@@ -9,7 +9,7 @@
     Description: Flash Memory Driver functions.
     
     VERSION
-    $Revision: 16 $  $Date: 8/28/12 1:06p $       
+    $Revision: 18 $  $Date: 12-11-06 1:37p $       
     
 ******************************************************************************/
 
@@ -124,7 +124,7 @@ typedef UINT32 BYTECOUNT;                             // Byte count type def
 #define CFI_BYTES_PER_BUFFERED_WRITE_LSB  0x002A      // Bytes per Buffered
                                                       // write Offset - LSB
 #define CFI_BYTES_PER_BUFFERED_WRITE_MSB  0x002B      // Offset - MSB
-#define CFI_NUMBER_OF_ERASE_BLOCK_REGIONS 0x002C      // Number of Erase Block
+#define CFI_NUM_ERASE_BLOCK_REGIONS       0x002C      // Number of Erase Block
                                                       // Regions Offset
                                                       // bits 7-0 = x = # of
                                                       // Erase block regions
@@ -199,6 +199,10 @@ typedef enum
    FCS_SST_PAGE_WRITE       = 258,    // SST Page Write Command Set
    FCS_INTEL_PERFORMANCE    = 512,    // Intel Performance Code Command Set
    FCS_INTEL_DATA           = 528     // Intel Data Command Set
+   
+   // Warning - target type for this enum may be as small as a UINT16.
+   // Do not make enum any larger than UINT16 maximum. (SCR #1196)
+   
 } FLASH_CMD_SET;
 
 // From the JEDEC Standard - CFI Device Geometry
@@ -431,6 +435,11 @@ EXPORT BOOLEAN             FlashCheckSameSector ( FLASHADDR nFirstOffset,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Flash.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Melanie Jutras Date: 12-11-06   Time: 1:37p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format error - name of define too long
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

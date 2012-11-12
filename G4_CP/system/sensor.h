@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 37 $  $Date: 12-10-27 5:04p $  
+      $Revision: 39 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -359,14 +359,14 @@ typedef struct
 // Definition of a conversion configuration
 typedef struct
 {
-    CONVERSIONTYPE  Type;                       /* Type of conversion     */
+    CONVERSIONTYPE  type;                       /* Type of conversion     */
     FLOAT32         fParams[MAX_CONV_PARAMS];   /* Specific to conversion */
 } CONVERSION;
 
 // Definition of a filter configuration
 typedef struct
 {
-  FILTERTYPE      Type;              /* Type of conversion                      */
+  FILTERTYPE      type;              /* Type of conversion                      */
   FLOAT32         fFullScale;        /* Spike Rejection 100% value              */
   UINT8           nSpikeRejectPct;   /* percent to use for reject test 10 = 10% */
   UINT8           nMaxRejectCount;   /* maximum consecutive rejects             */
@@ -379,49 +379,48 @@ typedef struct
 // Definition of a sensor configuration.
 typedef struct
 {
-    SAMPLETYPE        Type;                             /* Type of samples to be taken */
-    CHAR              SensorName[MAX_SENSORNAME];       /* "Engine RPM", etc. */
-    CHAR              OutputUnits[MAX_SENSORUNITS];     /* Units after conversion
-                                                         *   (ie - "RPM", "Deg. C", etc.) */
-    UINT8             nInputChannel;                /* Input channel, specific to type of
-                                                     * sensor (ie - which analog channel)*/
-                                                        /* "Engine RPM", etc. */
-    UINT8             nMaximumSamples;              /* Maximum Number of Samples to take */
+    SAMPLETYPE        type;                          /* Type of samples to be taken */
+    CHAR              sSensorName[MAX_SENSORNAME];   /* "Engine RPM", etc. */
+    CHAR              sOutputUnits[MAX_SENSORUNITS]; /* Units after conversion
+                                                      *   (ie - "RPM", "Deg. C", etc.) */
+    UINT8             nInputChannel;                 /* Input channel, specific to type of
+                                                      * sensor (ie - which analog channel)*/
+                                                     /* "Engine RPM", etc. */
+    UINT8             nMaximumSamples;               /* Maximum Number of Samples to take */
 
-    SENSOR_SAMPLERATE SampleRate;                   /* Rate to sample (1,2,5,10,20,50Hz) */
-    UINT16            nSampleOffset_ms;             /* Offset to start sampling in mS    */
+    SENSOR_SAMPLERATE sampleRate;                    /* Rate to sample (1,2,5,10,20,50Hz) */
+    UINT16            nSampleOffset_ms;              /* Offset to start sampling in mS    */
 
-    CONVERSION        Calibration;                      /* Calibration calculation */
-    CONVERSION        Conversion;                       /* Conversion to perform */
-    FILTER_CONFIG     FilterCfg;                    /* Filter Configuration              */
+    CONVERSION        calibration;                   /* Calibration calculation */
+    CONVERSION        conversion;                    /* Conversion to perform */
+    FILTER_CONFIG     filterCfg;                     /* Filter Configuration              */
 
-    FLT_STATUS        SystemCondition;              /* System condition state on BIT Fail*/
-    BOOLEAN           bSelfHeal;                    /* Can the sensor heal itself        */
+    FLT_STATUS        systemCondition;               /* System condition state on BIT Fail*/
+    BOOLEAN           bSelfHeal;                     /* Can the sensor heal itself        */
 
-    BOOLEAN           RangeTest;                        /* Is there a range test */
-    UINT16            RangeDuration_ms;             /* Number of milliseconds to wait    */
-    FLOAT32           fMinValue;                        /* Min value for proper operation */
-    FLOAT32           fMaxValue;                        /* Max value for proper operation */
+    BOOLEAN           bRangeTest;                    /* Is there a range test */
+    UINT16            nRangeDuration_ms;             /* Number of milliseconds to wait    */
+    FLOAT32           fMinValue;                     /* Min value for proper operation */
+    FLOAT32           fMaxValue;                     /* Max value for proper operation */
 
-    BOOLEAN           RateTest;                     /* Is there a rate test              */
-    FLOAT32           RateThreshold;                /* Rate to be exceeded               */
-    UINT16            RateDuration_ms;              /* Number of milliseconds to wait    */
+    BOOLEAN           bRateTest;                     /* Is there a rate test              */
+    FLOAT32           fRateThreshold;                /* Rate to be exceeded               */
+    UINT16            nRateDuration_ms;              /* Number of milliseconds to wait    */
 
-    BOOLEAN           SignalTest;                   /* Is there a signal test            */
-    FAULT_INDEX       SignalTestIndex;              /* Which fault to use                */
-    UINT16            SignalDuration_ms;            /* Number of milliseconds to wait    */
+    BOOLEAN           bSignalTest;                   /* Is there a signal test            */
+    FAULT_INDEX       signalTestIndex;               /* Which fault to use                */
+    UINT16            nSignalDuration_ms;            /* Number of milliseconds to wait    */
 
-    BOOLEAN           bInspectInclude;              /* TRUE if value should be outputted */
-
-    UINT32            GeneralPurposeA;                  /* General Purpose Field A */
-    UINT32            GeneralPurposeB;                  /* General Purpose Field B */
+    BOOLEAN           bInspectInclude;               /* TRUE if value should be outputted */
+    UINT32            generalPurposeA;               /* General Purpose Field A */
+    UINT32            generalPurposeB;               /* General Purpose Field B */
 } SENSOR_CONFIG;
 
 // Sensor Live Data Configuration
 typedef struct
 {
-   SENSOR_LD_ENUM Type;       /* Type of live data output, ASCII or BINARY */
-   UINT32         Rate_ms;    /* Rate in milliseconds to output live data */
+   SENSOR_LD_ENUM type;       /* type of live data output, ASCII or BINARY */
+   UINT32         nRate_ms;    /* Rate in milliseconds to output live data */
 }SENSOR_LD_CONFIG;
 #pragma pack()
 //A type for an array of the maximum number of sensors
@@ -435,7 +434,7 @@ typedef struct
   FLOAT32         fLastValidValue;   /* for spike rejection algorithm                    */
   FLOAT32         fLastAvgValue;     /* for Exponential and MaxReject                    */
   UINT8           nRejectCount;      /* Number of rejects detected (Spike & Max Reject)  */
-  FLOAT32         K;                 /* K constant for the filter computation            */
+  FLOAT32         fK;                 /* fK constant for the filter computation            */
   /* for slope filter only ***************************************************************/
   FLOAT32         nMinusOneOverTwo;  /* term in slope computation                        */
   /* For spike rejection filter only *****************************************************/
@@ -451,13 +450,13 @@ typedef struct
 // Storage Container definition for Sensor Data
 typedef struct
 {
-    SENSOR_INDEX      SensorIndex;                  /* Index of Sensor                   */
+    SENSOR_INDEX      nSensorIndex;                 /* Index of Sensor                   */
     BOOLEAN           bValueIsValid;                /* TRUE if value checks out OK       */
     BOOLEAN           bWasValidOnce;                /* Sensor was Valid at least once    */
     FLOAT32           fValue;                       /* Filtered/converted value          */
     FLOAT32           fPriorValue;                  /* previous value (for rate test)    */
     UINT32            lastUpdateTick;               /* Last update tick time of sensor   */
-    BOOLEAN           PriorValueValid;              /* TRUE if prior value calculated    */
+    BOOLEAN           bPriorValueValid;             /* TRUE if prior value calculated    */
     INT16             nSampleCounts;                /* Number of cycles between sample   */
     INT16             nSampleCountdown;             /* Countdown until next sample       */
     UINT8             nNextSample;                  /* Array index for next sample       */
@@ -477,10 +476,10 @@ typedef struct
     UINT32            nSignalTimeout_ms;            /* Duration that must be met to fail */
     BOOLEAN           bBITFail;                     /* Sensor has a BIT failure          */
     UINT16            nInterfaceIndex;              /* Interface index to data           */
-    FILTER_DATA       FilterData;                   /* Realtime Dynamic Filter Data      */
-    GET_SENSOR        GetSensorData;                /* Pointer to function to get data   */
-    RUN_TEST          TestSensor;                   /* Ptr to func that tests the sensor */
-    INTERFACE_ACTIVE  InterfaceActive;              /* Ptr to func that tests activity   */
+    FILTER_DATA       filterData;                   /* Realtime Dynamic Filter Data      */
+    GET_SENSOR        pGetSensorData;               /* Pointer to function to get data   */
+    RUN_TEST          pTestSensor;                  /* Ptr to func that tests the sensor */
+    INTERFACE_ACTIVE  pInterfaceActive;             /* Ptr to func that tests activity   */
 }
 SENSOR;
 
@@ -489,8 +488,8 @@ SENSOR;
 typedef struct
 {
     SENSORFAILURE failureType; /* what kind of sensor failure occurred */
-    SENSOR_INDEX  Index;               /* Index of sensor that failed         */
-    INT8          Name[MAX_SENSORNAME]; /* Name of the sensor that failed      */
+    SENSOR_INDEX  nIndex;               /* Index of sensor that failed         */
+    INT8          sName[MAX_SENSORNAME];/* Name of the sensor that failed      */
     FLOAT32       fCurrentValue;        /* Current Value of sensor             */
     FLOAT32       fValue;               /* Valid Value being reported          */
     FLOAT32       fPreviousValue;       /* Previous Valid Value of sensor      */
@@ -503,8 +502,8 @@ typedef struct
 
 typedef struct
 {
-   CHAR Name[MAX_SENSORNAME];
-   CHAR Units[MAX_SENSORUNITS];
+   CHAR sName[MAX_SENSORNAME];
+   CHAR sUnits[MAX_SENSORUNITS];
 } SENSOR_HDR;
 
 typedef struct
@@ -521,7 +520,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( SENSOR_BODY )
+#if defined ( SENSOR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -557,12 +556,22 @@ EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ *
+ * *****************  Version 39  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 12-11-12   Time: 11:36a
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 37  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR #1191 Returns update time of param
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:48p
  * Updated in $/software/control processor/code/system
@@ -572,7 +581,7 @@ EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
  * User: John Omalley Date: 12-09-11   Time: 2:13p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

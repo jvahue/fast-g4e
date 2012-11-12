@@ -9,7 +9,7 @@
     Description:
     
     VERSION
-    $Revision: 11 $  $Date: 8/28/12 1:43p $
+    $Revision: 12 $  $Date: 12-11-12 4:46p $
     
 ******************************************************************************/
 
@@ -78,7 +78,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( BOXMGR_BODY )
+#if defined ( BOXMGR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -111,6 +111,11 @@ EXPORT void Box_PowerOn_UpdateElapsedUsage( BOOLEAN bPadForTruncation,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Box.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

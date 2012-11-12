@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 70 $  $Date: 12-10-27 4:58p $
+    $Revision: 71 $  $Date: 12-11-09 4:01p $
 
 ******************************************************************************/
 
@@ -395,62 +395,61 @@ UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
 UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   UINT16 Remaining;
-   UINT16 Total;
+   UINT16 nRemaining;
+   UINT16 nTotal;
    INT8   *pBuffer;
-   UINT32 Version;
+   UINT32 nVersion;
 
    // Initialize Local Data
-   Version   = ETM_HDR_VERSION;
-   Remaining = nMaxByteSize;
-   pBuffer   = pDest;
-   Total     = sizeof(Version);
+   nVersion   = ETM_HDR_VERSION;
+   nRemaining = nMaxByteSize;
+   pBuffer    = pDest;
+   nTotal     = sizeof(nVersion);
 
    // First Copy the version to the header
-   memcpy ( pBuffer, &Version, Total );
+   memcpy ( pBuffer, &nVersion, nTotal );
 
    // Increment the buffer and decrement the amount of space left
-   pBuffer   += Total;
-   Remaining -= Total;
+   pBuffer    += nTotal;
+   nRemaining -= nTotal;
 
    // Get Sensor Hdr
-   Total      = SensorGetETMHdr ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = SensorGetETMHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Trigger Hdr
-   Total      = TriggerGetSystemHdr ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = TriggerGetSystemHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Event Header
-   Total      = EventGetBinaryHdr ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = EventGetBinaryHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Event Table
-   Total      = EventTableGetBinaryHdr ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = EventTableGetBinaryHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Engine Run
-   Total      = EngRunGetBinaryHeader ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = EngRunGetBinaryHeader ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Cycle
-   Total      = CycleGetBinaryHeader ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = CycleGetBinaryHeader ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Trend
-   Total      = TrendGetBinaryHdr ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = TrendGetBinaryHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get TimeHistory
-   Total      = TH_GetBinaryHeader ( pBuffer, Remaining );
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = TH_GetBinaryHeader ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
+   pBuffer    += nTotal;
    // Get Creep
-   Total      = Creep_GetBinaryHdr ( pBuffer, Remaining ); 
-   Remaining -= Total;
-   pBuffer   += Total;
+   nTotal      = Creep_GetBinaryHdr ( pBuffer, nRemaining );
+   nRemaining -= nTotal;
    // Calculate and return the total number of bytes
-   return (nMaxByteSize - Remaining);
+   return (nMaxByteSize - nRemaining);
 }
 
 /******************************************************************************
@@ -717,12 +716,17 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ *
+ * *****************  Version 71  *****************
+ * User: John Omalley Date: 12-11-09   Time: 4:01p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 and 1190 Code Review Updates
  * 
  * *****************  Version 70  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:58p
  * Updated in $/software/control processor/code/system
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:49p
  * Updated in $/software/control processor/code/system
@@ -737,7 +741,7 @@ void CfgMgr_GenerateDebugLogs(void)
  * User: John Omalley Date: 12-09-11   Time: 2:05p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Get Binary ETM Header
- * 
+ *
  * *****************  Version 66  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

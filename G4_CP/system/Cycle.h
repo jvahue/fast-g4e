@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 15 $  $Date: 10/12/12 6:29p $
+      $Revision: 18 $  $Date: 12-11-12 4:46p $
 
 ******************************************************************************/
 
@@ -178,8 +178,9 @@ typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
 +----------------------------------------------------------------------------------------*/
 typedef struct
 {
-  BOOLEAN cycleActive;    /* The cycle is active */
+  BOOLEAN cycleActive;      /* The cycle is active */
   UINT32  cycleLastTime_ms; /* Timestamp in ms that the cycle became active */
+  UINT32  currentCount;     /* The current working count during this cycle active state */
 }CYCLE_DATA, *CYCLE_DATA_PTR;
 
 #pragma pack(1)
@@ -224,7 +225,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( CYCLE_BODY )
+#if defined ( CYCLE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -257,10 +258,10 @@ EXPORT void    CycleInitialize       ( void );
 EXPORT void    CycleUpdateAll        ( ENGRUN_INDEX erIndex );
 EXPORT BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
 EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
-EXPORT void    CycleResetAll         ( void );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
+EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
 
 #endif // CYCLE_H
 
@@ -268,21 +269,36 @@ EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
  *  MODIFICATIONS
  *    $History: Cycle.h $
  * 
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 11/09/12   Time: 5:16p
+ * Updated in $/software/control processor/code/system
+ * Code Review/ function reduction
+ *
+ * *****************  Version 16  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * SCR # 1183
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 10/12/12   Time: 6:29p
  * Updated in $/software/control processor/code/system
  * FAST 2 Review Findings
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:24p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 12-09-19   Time: 3:23p
  * Updated in $/software/control processor/code/system
- * SCR #1107 FAST 2 Coding standard 
- * 
+ * SCR #1107 FAST 2 Coding standard
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:53p
  * Updated in $/software/control processor/code/system
@@ -292,7 +308,7 @@ EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
  * User: John Omalley Date: 12-09-11   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 20 $  $Date: 12-10-31 2:16p $
+      $Revision: 24 $  $Date: 12-11-12 4:48p $
 
 ******************************************************************************/
 
@@ -33,6 +33,7 @@
 ******************************************************************************/
 #define MAX_ENGINERUN_NAME  32
 #define MAX_ENGINE_ID       16
+#define MAX_ER_STATE         3
 
 #define ENGINE_DEFAULT_SERIAL_NUMBER "000000"
 #define ENGINE_DEFAULT_SERVICE_PLAN  "NONE"
@@ -54,7 +55,7 @@
                            ENGRUN_DEFAULT,\
                            ENGRUN_DEFAULT /* EngineRun[MAX_ENGINES] */
 
-#define ENGINERUN_UNUSED   255                           
+#define ENGINERUN_UNUSED   255
 
 /******************************************************************************
                                Package Typedefs
@@ -75,8 +76,7 @@ typedef enum
   /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
-  ER_STATE_RUNNING,     /* Engine running for this engine run  */
-  MAX_ER_STATE
+  ER_STATE_RUNNING,     /* Engine running for this engine run  */  
 } ER_STATE;
 
 
@@ -114,7 +114,7 @@ typedef struct
   TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
   UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
   UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
-  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */ 
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
   UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts */
 } ENGRUN_RUNLOG;
 
@@ -154,11 +154,10 @@ typedef struct
   BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
   FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
   UINT32       nSampleCount;            /* For calculating averages                          */
-  INT16        nRateCounts;             /* Count of cycles until this engine run is executed */
-  INT16        nRateCountdown;          /* Number cycles remaining until next execution.     */
+  UINT16       nRateCounts;             /* Count of cycles until this engine run is executed */
+  UINT16       nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
   SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS];/* Collection of Sensor summaries             */
-  UINT32       cycleCounts[MAX_CYCLES];   /* Array of cycle counts */
 } ENGRUN_DATA, *ENGRUN_DATA_PTR;
 
 /* Configuration */
@@ -183,7 +182,7 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( ENGINERUN_BODY )
+#if defined ( ENGINERUN_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -195,7 +194,7 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 ******************************************************************************/
 extern USER_ENUM_TBL EngRunIdEnum[];
 
-#if defined( ENGINERUN_BODY )
+#if defined ( ENGINERUN_BODY )
 USER_ENUM_TBL EngineRunStateEnum[] =
 {
   { "STOPPED",  ER_STATE_STOPPED  },
@@ -214,10 +213,10 @@ EXPORT USER_ENUM_TBL EngineRunStateEnum[];
 EXPORT void             EngRunInitialize(void);
 EXPORT void             EngRunTask            ( void* pParam );
 EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
-EXPORT ENGRUN_RUNLOG*   EngRunGetPtrToLog     ( ENGRUN_INDEX engId );
 EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
-EXPORT void             Eng_ReInitFile        ( void );
+EXPORT void             EngReInitFile         ( void );
+EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // ENGINERUN_H
 
@@ -225,21 +224,41 @@ EXPORT void             Eng_ReInitFile        ( void );
  *  MODIFICATIONS
  *    $History: EngineRun.h $
  * 
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:48p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1142 - Formatting Error
+ * 
+ * *****************  Version 22  *****************
+ * User: Jim Mood     Date: 11/09/12   Time: 6:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1131 Recording busy status
+ * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 11/08/12   Time: 4:26p
+ * Updated in $/software/control processor/code/application
+ * Code review
+ *
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:16p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Error
- * 
+ *
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 2:09p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File format error
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 5:07p
  * Updated in $/software/control processor/code/application
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:17p
  * Updated in $/software/control processor/code/application
@@ -250,7 +269,7 @@ EXPORT void             Eng_ReInitFile        ( void );
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Added Engine Identification Fields to software and file
  * header
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:02p
  * Updated in $/software/control processor/code/application

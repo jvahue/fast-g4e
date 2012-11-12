@@ -87,7 +87,7 @@ typedef struct {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( SYS_MSINTERFACE_BODY )
+#if defined ( SYS_MSINTERFACE_BODY )
   #define EXPORT
 #else
   #define EXPORT extern

@@ -1,11 +1,11 @@
 #define BUSTO_BODY
 
 /******************************************************************************
-Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.                 
-               All Rights Reserved.  Proprietary and Confidential.
+           Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+              All Rights Reserved. Proprietary and Confidential.
 
 
- File:        BusTO.c         
+ File:        BusTO.c
 
  Description: Bus TimeOut handler.  This unit provides a handler for the
               XL Arbiter Bus Timeout. A memory address that does not acknowledge
@@ -14,9 +14,9 @@ Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
               the slowest device on the bus. This allows debug info to be recorded
               before allowing a watchdog reset of the system.
 
-              
+
   VERSION
-  $Revision: 4 $  $Date: 8/28/12 1:06p $
+  $Revision: 5 $  $Date: 12-11-02 3:04p $
 
 ******************************************************************************/
 
@@ -76,36 +76,36 @@ const CHAR* AccessType[] =
   "Unknown"
 };
 
-const REG_SETTING BTO_Registers[] = 
+const REG_SETTING BTO_Registers[] =
 {
   // Setup XL Bus Arbiter
   // Configure for Address/Data Tenure Time-out
   // Disable Pipeline
   // Interrupt on Address/Data Timeout enabled
   // Note: Data Timeout must be slightly longer than address timeout
-  
-  // SET_AND_CHECK ( MCF_XARB_ADRTO,  MCF_XARB_ADRTO_ADRTO(BTO_TIME), bInitOk ); 
+
+  // SET_AND_CHECK ( MCF_XARB_ADRTO,  MCF_XARB_ADRTO_ADRTO(BTO_TIME), bInitOk );
   {(void *) &MCF_XARB_ADRTO, MCF_XARB_ADRTO_ADRTO(BTO_TIME), sizeof(UINT32), 0x00,
             REG_SET, TRUE, RFA_FORCE_UPDATE},
 
-  // SET_AND_CHECK ( MCF_XARB_ADRTO,  MCF_XARB_ADRTO_ADRTO(55000), bInitOk ); 
+  // SET_AND_CHECK ( MCF_XARB_ADRTO,  MCF_XARB_ADRTO_ADRTO(55000), bInitOk );
   {(void *) &MCF_XARB_DATTO, MCF_XARB_DATTO_DATTO((BTO_TIME + (BTO_TIME / 10))),
             sizeof(UINT32), 0x00, REG_SET, TRUE, RFA_FORCE_UPDATE},
 
   // SET_AND_CHECK ( MCF_XARB_CFG,
   //               (MCF_XARB_CFG_PLDIS | MCF_XARB_CFG_AT | MCF_XARB_CFG_DT), bInitOk);
   {(void *) &MCF_XARB_CFG, (MCF_XARB_CFG_PLDIS | MCF_XARB_CFG_AT | MCF_XARB_CFG_DT),
-            sizeof(UINT32), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE}, 
+            sizeof(UINT32), 0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
 
-  // SET_AND_CHECK ( MCF_XARB_IMR, MCF_XARB_IMR_ATE | MCF_XARB_IMR_DTE, bInitOk ); 
+  // SET_AND_CHECK ( MCF_XARB_IMR, MCF_XARB_IMR_ATE | MCF_XARB_IMR_DTE, bInitOk );
   {(void *) &MCF_XARB_IMR, (MCF_XARB_IMR_ATE | MCF_XARB_IMR_DTE), sizeof(UINT32),
             0x0, REG_SET, TRUE, RFA_FORCE_UPDATE},
 
-  // SET_AND_CHECK(MCF_INTC_ICR47, MCF_INTC_ICRn_IL(0x6), bInitOk); 
+  // SET_AND_CHECK(MCF_INTC_ICR47, MCF_INTC_ICRn_IL(0x6), bInitOk);
   {(void *) &MCF_INTC_ICR47, MCF_INTC_ICRn_IL(0x6), sizeof(UINT8), 0x0, REG_SET,
-            TRUE, RFA_FORCE_UPDATE}, 
-  
-  // SET_CHECK_MASK_AND(MCF_INTC_IMRH, MCF_INTC_IMRH_INT_MASK47, bInitOk); 
+            TRUE, RFA_FORCE_UPDATE},
+
+  // SET_CHECK_MASK_AND(MCF_INTC_IMRH, MCF_INTC_IMRH_INT_MASK47, bInitOk);
   {(void *) &MCF_INTC_IMRH, MCF_INTC_IMRH_INT_MASK47, sizeof(UINT32), 0x0,
             REG_SET_MASK_AND, TRUE, RFA_FORCE_UPDATE}
 };
@@ -125,38 +125,38 @@ const REG_SETTING BTO_Registers[] =
  *
  * Description: Initial setup for the Bus Timeout Interrupt.
  *
- * Parameters:  SysLogId - Ptr to return System Log ID into 
- *              pdata -    Ptr to buffer to return system log data 
+ * Parameters:  SysLogId - Ptr to return System Log ID into
+ *              pdata -    Ptr to buffer to return system log data
  *              psize -    Ptr to return size (bytes) of system log data
  *
- * Returns:     RESULT: DRV_OK = Success OR 
+ * Returns:     RESULT: DRV_OK = Success OR
  *                      DRV_BTO_REG_INIT_FAIL
- *              
+ *
  * Notes:       none
  ****************************************************************************/
-RESULT BTO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize) 
+RESULT BTO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
-  UINT8 i; 
-  BOOLEAN bInitOk; 
-  BTO_DRV_PBIT_LOG *pdest; 
- 
-  pdest = (BTO_DRV_PBIT_LOG *) pdata; 
-  memset ( pdest, 0, sizeof(BTO_DRV_PBIT_LOG) ); 
-  pdest->result = DRV_OK; 
-  
-  *psize = sizeof(BTO_DRV_PBIT_LOG);  
-  
-  // Initialize the BTO Registers  
-  bInitOk = TRUE; 
-  for (i = 0; i < (sizeof(BTO_Registers) / sizeof(REG_SETTING)); ++i) 
+  UINT8 i;
+  BOOLEAN bInitOk;
+  BTO_DRV_PBIT_LOG *pdest;
+
+  pdest = (BTO_DRV_PBIT_LOG *) pdata;
+  memset ( pdest, 0, sizeof(BTO_DRV_PBIT_LOG) );
+  pdest->result = DRV_OK;
+
+  *psize = sizeof(BTO_DRV_PBIT_LOG);
+
+  // Initialize the BTO Registers
+  bInitOk = TRUE;
+  for (i = 0; i < (sizeof(BTO_Registers) / sizeof(REG_SETTING)); ++i)
   {
-    bInitOk &= RegSet( (REG_SETTING_PTR) &BTO_Registers[i] ); 
+    bInitOk &= RegSet( (REG_SETTING_PTR) &BTO_Registers[i] );
   }
-  
-  if (TRUE != STPU( bInitOk, eTpBto3947)) 
+
+  if (TRUE != STPU( bInitOk, eTpBto3947))
   {
-    pdest->result = DRV_BTO_REG_INIT_FAIL; 
-    *SysLogId = DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL; 
+    pdest->result = DRV_BTO_REG_INIT_FAIL;
+    *SysLogId = DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL;
   }
 
   return pdest->result;
@@ -170,15 +170,15 @@ RESULT BTO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *              Reads data from XARB registers and formats into error message.
  *              Called from exception.s, which also output the error message.
  *
- * Parameters:  pcAddr - PC address at point of exception   
+ * Parameters:  pcAddr - PC address at point of exception
  *
  * Returns:     pointer to error message buffer
- *              
+ *
  * Notes:
  *
  ****************************************************************************/
 INT8* BTO_Handler(void)
-{  
+{
   UINT32 failAddr;
   UINT32 failSize;
   UINT32 failType;
@@ -244,7 +244,7 @@ void BTO_WriteToEE(void)
 {
   TIMESTRUCT Ts;
   static BOOLEAN reentered = FALSE;
- 
+
   __DIR(); // Interrupt level not needed, task will be disabled.
   if(!reentered)
   {
@@ -252,7 +252,7 @@ void BTO_WriteToEE(void)
     //Print out assert msg
     RTC_GetTime(&Ts);
 
-    snprintf( ExOutputBuf, ASSERT_MAX_LOG_SIZE, 
+    snprintf( ExOutputBuf, ASSERT_MAX_LOG_SIZE,
       "%04d/%02d/%02d %02d:%02d:%02d \r\n%s%s\r\n",
       Ts.Year, Ts.Month, Ts.Day, Ts.Hour, Ts.Minute, Ts.Second,
       msgBuf, ReOutputBuf);
@@ -271,29 +271,34 @@ void BTO_WriteToEE(void)
  *  MODIFICATIONS
  *    $History: BusTO.c $
  * 
+ * *****************  Version 5  *****************
+ * User: Melanie Jutras Date: 12-11-02   Time: 3:04p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ *
  * *****************  Version 4  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 10/17/11   Time: 7:45p
  * Updated in $/software/control processor/code/drivers
  * Fix tp reference
- * 
+ *
  * *****************  Version 2  *****************
  * User: Contractor2  Date: 6/29/11    Time: 11:33a
  * Updated in $/software/control processor/code/drivers
  * SCR #515 Enhancement: sys.get.mem.l halts processor when invalid memory
  * is referenced
  * Add pipeline diable cfg bit to initialization
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor2  Date: 6/27/11    Time: 1:42p
  * Created in $/software/control processor/code/drivers
  * SCR #515 Enhancement - sys.get.mem.l halts processor when invalid
  * memory is referenced
- * 
+ *
  *
  ***************************************************************************/
  

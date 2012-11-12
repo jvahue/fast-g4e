@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for UartMgr 
 
     VERSION
-    $Revision: 11 $  $Date: 8/28/12 1:43p $
+    $Revision: 13 $  $Date: 12-11-12 3:04p $
     
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -150,11 +150,11 @@ USER_MSG_TBL UartMgrStatusTbl[] =
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
           
   {"TIME_CHAN_ACTIVE",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.TimeChanActive, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.timeChanActive, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
           
   {"SYNC_LOSS_CNT",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.DataLossCnt, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.dataLossCnt, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"CHANNEL_TIMEOUT",NO_NEXT_TABLE,UartMgrMsg_Status, 
@@ -166,19 +166,19 @@ USER_MSG_TBL UartMgrStatusTbl[] =
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
          
   {"PORT_BYTE_CNT",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.PortByteCnt, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.portByteCnt, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"PORT_FRAMING_ERR_CNT",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.PortFramingErrCnt, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.portFramingErrCnt, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"PORT_PARITY_ERR_CNT",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.PortParityErrCnt, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.portParityErrCnt, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"PORT_RX_OVERFLOW_CNT",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.PortRxOverFlowErrCnt, 
+          USER_TYPE_UINT32,USER_RO,(void *) &UartMgrStatusTemp.portRxOverFlowErrCnt, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
           
   {"RECORDING",NO_NEXT_TABLE,UartMgrMsg_Status, 
@@ -186,7 +186,7 @@ USER_MSG_TBL UartMgrStatusTbl[] =
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"PROTOCOL",NO_NEXT_TABLE,UartMgrMsg_Status, 
-          USER_TYPE_ENUM,USER_RO,(void *) &UartMgrStatusTemp.Protocol,
+          USER_TYPE_ENUM,USER_RO,(void *) &UartMgrStatusTemp.protocol,
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrProtocolStrs},
 
   {"STATUS",NO_NEXT_TABLE,UartMgrMsg_Status, 
@@ -200,23 +200,23 @@ USER_MSG_TBL UartMgrStatusTbl[] =
 USER_MSG_TBL UartMgrPortCfgTbl[] = 
 {
   {"BPS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.BPS, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.nBPS, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrBPSStrs},
           
   {"DATABITS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.DataBits, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.dataBits, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsDBStrs},
           
   {"STOPBITS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.StopBits, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.stopBits, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrSBStrs},
 
   {"PARITY",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.Parity, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.parity, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsParityStrs},
           
   {"DUPLEX",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.Duplex, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.duplex, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsDuplexStrs},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -227,27 +227,27 @@ USER_MSG_TBL UartMgrPortCfgTbl[] =
 USER_MSG_TBL UartMgrCfgTbl[] = 
 {
   {"NAME",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_STR,USER_RW,(void *) &UartMgrCfgTemp.Name, 
+          USER_TYPE_STR,USER_RW,(void *) &UartMgrCfgTemp.sName, 
           1,UART_NUM_OF_UARTS-1,STR_LIMIT_UART_MGR,NULL},
           
   {"PROTOCOL",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Protocol, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.protocol, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrProtocolStrs},
 
   {"CHANNELSTARTUP_S",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_UINT32,USER_RW,(void *) &UartMgrCfgTemp.ChannelStartup_s, 
+          USER_TYPE_UINT32,USER_RW,(void *) &UartMgrCfgTemp.channelStartup_s, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"CHANNELTIMEOUT_S",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_UINT32,USER_RW,(void *) &UartMgrCfgTemp.ChannelTimeOut_s, 
+          USER_TYPE_UINT32,USER_RW,(void *) &UartMgrCfgTemp.channelTimeOut_s, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
 
   {"CHANNELSYSCOND",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.ChannelSysCond, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.channelSysCond, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,Flt_UserEnumStatus},
 
   {"PBITSysCond",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.PBITSysCond, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.sysCondPBIT, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,Flt_UserEnumStatus},
           
   {"ENABLE",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
@@ -269,7 +269,7 @@ USER_MSG_TBL UartMgrDebugTbl[] =
           -1,-1,NO_LIMIT,NULL},
 
   {"CHANNEL",NO_NEXT_TABLE,UartMgrMsg_Debug, 
-          USER_TYPE_UINT16,(USER_RW|USER_GSE),(void *) &UartMgrDebugTemp.Ch, 
+          USER_TYPE_UINT16,(USER_RW|USER_GSE),(void *) &UartMgrDebugTemp.ch, 
           -1,-1,1,3,NULL},
           
   {"BYTES",NO_NEXT_TABLE,UartMgrMsg_Debug, 
@@ -494,10 +494,10 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
                                           void **GetPtr)
 {
   USER_HANDLER_RESULT result;   
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];   
+  CHAR label[USER_MAX_MSG_STR_LEN * 3];   
 
   //Top-level name is a single indented space
-  CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+  CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
 
   USER_MSG_TBL*  pCfgTable;
   INT16 idx;
@@ -508,14 +508,14 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
   for (idx = 0; idx < UART_NUM_OF_UARTS && result == USER_RESULT_OK; ++idx)
   {
     // Display sensor id info above each set of data.
-    sprintf(Label, "\r\n\r\nUART[%d].CFG", idx);
+    snprintf(label, sizeof(label), "\r\n\r\nUART[%d].CFG", idx);
     result = USER_RESULT_ERROR;
-    if (User_OutputMsgString( Label, FALSE ) )
+    if (User_OutputMsgString( label, FALSE ) )
     {
       pCfgTable = UartMgrCfgTbl;  // Re-set the pointer to beginning of CFG table       
 
       // User_DisplayConfigTree will invoke itself recursively to display all fields.
-      result = User_DisplayConfigTree(BranchName, pCfgTable, idx, 0, NULL);
+      result = User_DisplayConfigTree(branchName, pCfgTable, idx, 0, NULL);
     }     
   } 
   return result;
@@ -524,6 +524,16 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 12-11-12   Time: 3:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-11-12   Time: 2:58p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107, 1191 - Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

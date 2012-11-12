@@ -19,7 +19,7 @@
               struct are defined.
               
  VERSION
- $Revision: 15 $  $Date: 8/28/12 1:06p $              
+ $Revision: 17 $  $Date: 12-11-09 1:47p $              
 
 ******************************************************************************/
 
@@ -81,93 +81,13 @@ void FIFO_Init(FIFO* FIFO, INT8* Buf, UINT32 Size)
 
 
 /*****************************************************************************
- * Function:    FIFO_Push
- * Description: Add a single char at the head of the FIFO buffer.
- * Parameters:  FIFO: A tFIFO type to store the FIFO state in
- *              Char*:  A pointer to the char to push into the buffer
- * Returns:     TRUE: Char was added to the head of the buffer
- *              FALSE: Buffer is full, or not initialized
- * Notes:
- ***************************************************************************
-BOOLEAN FIFO_Push(FIFO* FIFO, const INT8* Data)
-{
-  BOOLEAN result = FALSE;
-
-  //Test if the Head/Tail pointers are initialized
-  ASSERT((FIFO->Tail != NULL) && (FIFO->Head != NULL));
-
-  //Test for free room in the buffer.
-  //If the Head is before the tail OR if the head is at the end of the buffer
-  //AND the tail is at the beginning, the buffer is full.
-  //Otherwise, push the byte on at the tail
-  if(FIFO->Cnt == FIFO->Size ) 
-  {    
-    result = FALSE;
-  }
-  else 
-  {
-    //Add the char, check for wrap-around and return TRUE
-    *FIFO->Head++ = *Data;
-    FIFO->Cnt++;
-    FIFO->CmpltCnt++;    
-    if (FIFO->Head >= FIFO->Buf+FIFO->Size) 
-    {
-      FIFO->Head = FIFO->Buf;
-    }
-    result = TRUE;
-  }
- 
-  return(result);
-}*/
-
-
-/*****************************************************************************
- * Function:    FIFO_Pop
- * Description: Remove a single charcter from the tail of the FIFO
- * Parameters:  FIFO: A tFIFO type to store the FIFO state in
- *              Char*:  A pointer to a charcter location to return the data to
- * Returns:     TRUE: Char was removed from the FIFO and is pointed to by *Data
- *              FALSE: Buffer is empty, or uninitialized.
- * Notes:
- ***************************************************************************
-BOOLEAN FIFO_Pop(FIFO* FIFO, INT8* Data)
-{
-  BOOLEAN result = FALSE;
-
-  //Test if the Head/Tail pointers are initialized
-  ASSERT((FIFO->Tail != NULL) && (FIFO->Head != NULL));
-
-  //Check if the FIFO is empty
-  if(FIFO->CmpltCnt == 0) 
-  {
-    result = FALSE;
-  }
-
-  //If there is data, return the byte, incement the tail and check for wrap-around
-  else 
-  {
-    *Data = *FIFO->Tail++;
-    FIFO->Cnt--;
-    FIFO->CmpltCnt--;
-    if (FIFO->Tail >= FIFO->Buf+FIFO->Size ) 
-    {
-      FIFO->Tail = FIFO->Buf;
-    }
-    result = TRUE;
-  }
-  return(result);
-}
-*/
-
-
-/*****************************************************************************
  * Function:    FIFO_PushBlock
  * Description: Add a block of data to the FIFO.  This method is simmilar
  *              to FIFO_Push, but it is much more efficient when adding
  *              multiple bytes of data from another memory buffer.
  *
  * Parameters:  [in/out] FIFO: A tFIFO type to store the FIFO state in
- *              [in] Char*:A pointer to a block of chars to add to the fifo
+ *              [in] Data*:A pointer to a block of chars to add to the fifo
  *              [in] Len:  Size of the block to add (size in bytes)
  * Returns:     TRUE: Char was added to the head of the buffer
  *              FALSE: Buffer is full, or not initialized
@@ -336,6 +256,17 @@ void FIFO_Flush(FIFO* FIFO)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FIFO.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:47p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error
+ * 
+ * *****************  Version 16  *****************
+ * User: Melanie Jutras Date: 12-11-05   Time: 12:52p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 Removed dead code that was also causing formatting errors to
+ * be reported by the code review tool.
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

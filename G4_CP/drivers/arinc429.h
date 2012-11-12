@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429 
     
 VERSION
-     $Revision: 51 $  $Date: 8/28/12 1:06p $
+     $Revision: 52 $  $Date: 12-11-09 1:20p $
     
 ******************************************************************************/
 
@@ -351,7 +351,8 @@ EXPORT void    Arinc429DrvFlushHWFIFO     ( void );
 EXPORT BOOLEAN Arinc429DrvRead            ( UINT32 *pArinc429Msg, ARINC429_CHAN_ENUM Channel );
 EXPORT void    Arinc429DrvReconfigure     ( void );
 EXPORT void    Arinc429DrvSetIMR1_2       ( void );
-EXPORT void    Arinc429DrvCfgLFR          ( UINT8 SdiMask, UINT8 Channel, UINT8 Label, BOOLEAN bNow );
+EXPORT void    Arinc429DrvCfgLFR          ( UINT8 SdiMask, UINT8 Channel, 
+		                                    UINT8 Label, BOOLEAN bNow );
 EXPORT void    Arinc429DrvCfgRxChan       ( ARINC429_SPEED Speed, ARINC429_PARITY Parity,
                                             ARINC429_RX_SWAP SwapBits, BOOLEAN Enable, 
                                             UINT8 Channel );
@@ -371,6 +372,11 @@ EXPORT ARINC429_DRV_TX_STATUS_PTR Arinc429DrvTxGetCounts (UINT8 Channel);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.h $
+ * 
+ * *****************  Version 52  *****************
+ * User: Melanie Jutras Date: 12-11-09   Time: 1:20p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 51  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

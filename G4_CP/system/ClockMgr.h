@@ -11,7 +11,7 @@
                system. 
  
   VERSION
-      $Revision: 20 $  $Date: 8/28/12 1:43p $ 
+      $Revision: 21 $  $Date: 12-11-12 4:46p $ 
  
 ******************************************************************************/
 
@@ -93,7 +93,7 @@ typedef enum {
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( SYS_CLOCKMGR_BODY )
+#if defined ( SYS_CLOCKMGR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -133,6 +133,11 @@ EXPORT void      CM_CompareSystemToMsClockDrift(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
