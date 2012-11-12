@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 2 $  $Date: 12-11-02 6:14p $
+    $Revision: 3 $  $Date: 12-11-10 4:37p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -119,13 +119,13 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index );
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static CREEP_STATUS CreepStatusTemp;
-static CREEP_CFG CreepCfgTemp;
-static CREEP_TBL CreepCfgTblTemp;
-static CREEP_OBJECT CreepCfgObjTemp;
-static CREEP_SENSOR CreepCfgObjSenTemp;
-static CREEP_DEBUG CreepDebugTemp;
-static CREEP_SENSOR_VAL CreepSensorTemp;
+static CREEP_STATUS creepStatusTemp;
+static CREEP_CFG creepCfgTemp;
+static CREEP_TBL creepCfgTblTemp;
+static CREEP_OBJECT creepCfgObjTemp;
+static CREEP_SENSOR creepCfgObjSenTemp;
+static CREEP_DEBUG creepDebugTemp;
+static CREEP_SENSOR_VAL creepSensorTemp;
 
 // Debug Timing
 UINT32 startHSTick, endHSTick, diffHSTick;
@@ -134,7 +134,7 @@ UINT32 startHSTick, endHSTick, diffHSTick;
 /*****************************************************************************/
 /* Local Constants                                                           */
 /*****************************************************************************/
-USER_ENUM_TBL CreepStatusStrs[] =
+USER_ENUM_TBL creepStatusStrs[] =
 {
   {"OK",          CREEP_STATUS_OK},
   {"FAULT_PBIT",  CREEP_STATUS_FAULTED_PBIT},
@@ -142,7 +142,7 @@ USER_ENUM_TBL CreepStatusStrs[] =
   { NULL,          0}
 };
 
-USER_ENUM_TBL CreepStateStrs[] =
+USER_ENUM_TBL creepStateStrs[] =
 {
   {"IDLE",         CREEP_STATE_IDLE},
   {"ACTIVE_ER",    CREEP_STATE_ENGRUN},
@@ -151,7 +151,7 @@ USER_ENUM_TBL CreepStateStrs[] =
   { NULL,           0}
 };
 
-USER_ENUM_TBL CreepRateTypes[] =
+USER_ENUM_TBL creepRateTypes[] =
 {
   { "1HZ"    , CREEP_1HZ    },
   { "2HZ"    , CREEP_2HZ    },
@@ -166,103 +166,103 @@ USER_ENUM_TBL CreepRateTypes[] =
 
 
 // Level 2
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned
-USER_MSG_TBL CreepTableTbl[] =
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+USER_MSG_TBL creepTableTbl[] =
 {
   {"NAME", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_STR,  USER_RW,
-                  (void *) &CreepCfgTblTemp.name,  0, CREEP_MAX_TBL-1, 0, CREEP_MAX_NAME, NULL},
+               (void *) &creepCfgTblTemp.name,  0, CREEP_MAX_TBL-1, 0, CREEP_MAX_NAME, NULL},
 
 // Row Values
   {"ROW_VAL0", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[0],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[0],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL1", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[1],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[1],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL2", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[2],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[2],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL3", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[3],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[3],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL4", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[4],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[4],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL5", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[5],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[5],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL6", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[6],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[6],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL7", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[7],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[7],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL8", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[8],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[8],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL9", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[9],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[9],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL10", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[10],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[10],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL11", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[11],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[11],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL12", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[12],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[12],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL13", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[13],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[13],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL14", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[14],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[14],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL15", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[15],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[15],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL16", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[16],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[16],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL17", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[17],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[17],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL18", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[18],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[18],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"ROW_VAL19", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.RowVal[19],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.rowVal[19],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
 // Column Values
   {"COL_VAL0", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[0],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[0],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL1", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[1],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[1],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL2", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[2],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[2],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL3", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[3],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[3],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL4", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[4],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[4],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL5", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[5],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[5],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL6", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[6],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[6],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL7", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[7],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[7],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL8", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[8],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[8],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
   {"COL_VAL9", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
-               (void *) &CreepCfgTblTemp.ColVal[9],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
+               (void *) &creepCfgTblTemp.colVal[9],  0, CREEP_MAX_TBL-1, NO_LIMIT, NULL},
 
 // Damage Count Values
   {"DCOUNT_R0",   NO_NEXT_TABLE, CreepMsg_DCount, USER_TYPE_STR,  USER_RW,
@@ -327,167 +327,167 @@ USER_MSG_TBL CreepTableTbl[] =
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned.
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
 
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned
-USER_MSG_TBL CreepObjectSenRowTbl[] =
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+USER_MSG_TBL creepObjectSenRowTbl[] =
 {
-  {"NAME",      NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_STR,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.name,    0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
+  {"NAME",    NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_STR,  USER_RW,
+             (void *) &creepCfgObjSenTemp.name,  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
   {"ID",      NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_UINT16,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.Id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"SLOPE",   NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_FLOAT,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"OFFSET",  NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_FLOAT,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.offset, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjSenTemp.offset, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"SAMPLECNT",  NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_UINT16,  USER_RW,
-                 (void *) &CreepCfgObjSenTemp.sampleCnt,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjSenTemp.sampleCnt,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"SAMPLERATE_MS", NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_UINT16,  USER_RW,
-                    (void *) &CreepCfgObjSenTemp.sampleRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjSenTemp.sampleRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned.
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
 
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned
-USER_MSG_TBL CreepObjectSenColTbl[] =
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+USER_MSG_TBL creepObjectSenColTbl[] =
 {
-  {"NAME",      NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_STR,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.name,    0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
+  {"NAME",   NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_STR,  USER_RW,
+             (void *) &creepCfgObjSenTemp.name,  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
-  {"ID",      NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.Id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"ID",     NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
+             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
-  {"SLOPE",   NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_FLOAT,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"SLOPE",  NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_FLOAT,  USER_RW,
+             (void *) &creepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
-  {"OFFSET",  NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_FLOAT,  USER_RW,
-              (void *) &CreepCfgObjSenTemp.offset, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"OFFSET", NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_FLOAT,  USER_RW,
+             (void *) &creepCfgObjSenTemp.offset, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
-  {"SAMPLECNT",  NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
-                 (void *) &CreepCfgObjSenTemp.sampleCnt,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"SAMPLECNT", NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
+             (void *) &creepCfgObjSenTemp.sampleCnt,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"SAMPLERATE_MS", NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
-                    (void *) &CreepCfgObjSenTemp.sampleRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepCfgObjSenTemp.sampleRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned.
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
 
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned
-USER_MSG_TBL CreepObjectTbl[] =
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+USER_MSG_TBL creepObjectTbl[] =
 {
   {"NAME",    NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_STR, USER_RW,
-              (void *) &CreepCfgObjTemp.name,  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
+              (void *) &creepCfgObjTemp.name,  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
 
   {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
-              (void *) &CreepCfgObjTemp.EngId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"TBL_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
-              (void *) &CreepCfgObjTemp.CreepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjTemp.creepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"RATEOFFSET_MS", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
-              (void *) &CreepCfgObjTemp.CPUOffset_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+              (void *) &creepCfgObjTemp.cpuOffset_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"RATE_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
-              (void *) &CreepCfgObjTemp.IntervalRate, 0, CREEP_MAX_OBJ-1, NO_LIMIT, CreepRateTypes},
+        (void *) &creepCfgObjTemp.intervalRate, 0, CREEP_MAX_OBJ-1, NO_LIMIT, creepRateTypes},
 
-  {"SensorRow", CreepObjectSenRowTbl, NULL,  NO_HANDLER_DATA},
+  {"SensorRow", creepObjectSenRowTbl, NULL,  NO_HANDLER_DATA},
 
-  {"SensorCol", CreepObjectSenColTbl, NULL,  NO_HANDLER_DATA},
+  {"SensorCol", creepObjectSenColTbl, NULL,  NO_HANDLER_DATA},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned.
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
 
-USER_MSG_TBL CreepSensorTbl[] =
+USER_MSG_TBL creepSensorTbl[] =
 {
   {"ROW_FAULTED",   NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_BOOLEAN,  USER_RO,
-                  (void *) &CreepSensorTemp.row.bFailed,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.row.bFailed,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"ROW_RATE_MS",   NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT,  USER_RO,
-                    (void *) &CreepSensorTemp.row.rateTime,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.row.rateTime,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"ROW_TIMEOUT_MS", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_UINT32,  USER_RO,
-                    (void *) &CreepSensorTemp.row.timeout_ms,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.row.timeout_ms,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"ROW_CURR_VAL", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT64,  USER_RO,
-                    (void *) &CreepSensorTemp.row.currVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.row.currVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"ROW_PEAK_VAL", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT64,  USER_RO,
-                    (void *) &CreepSensorTemp.row.peakVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.row.peakVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
 
   {"COL_FAULTED",   NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_BOOLEAN,  USER_RO,
-                  (void *) &CreepSensorTemp.col.bFailed,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.col.bFailed,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"COL_RATE_MS",   NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT,  USER_RO,
-                    (void *) &CreepSensorTemp.col.rateTime,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.col.rateTime,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"COL_TIMEOUT_MS", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_UINT32,  USER_RO,
-                    (void *) &CreepSensorTemp.col.timeout_ms,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.col.timeout_ms,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"COL_CURR_VAL", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT64,  USER_RO,
-                    (void *) &CreepSensorTemp.col.currVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.col.currVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"COL_PEAK_VAL", NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_FLOAT64,  USER_RO,
-                    (void *) &CreepSensorTemp.col.peakVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepSensorTemp.col.peakVal,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
 
-USER_MSG_TBL CreepCntTbl[] =
+USER_MSG_TBL creepCntTbl[] =
 {
   {"MISSION",     NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data.creepMissionCnt,   0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.creepMissionCnt,   0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"ACCUM",       NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data.creepAccumCnt,   0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.creepAccumCnt,   0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"ACCUM_REJECT",NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data.creepAccumCntTrashed,  0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.creepAccumCntTrashed,  0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"L_MISSION",   NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data.creepLastMissionCnt, 0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.creepLastMissionCnt, 0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"SENSOR_FAILURES",  NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_UINT32,  USER_RW,
-                  (void *) &CreepStatusTemp.data.sensorFailures,   0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.sensorFailures,   0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"CREEP_FAILURES",  NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_UINT32,  USER_RW,
-                  (void *) &CreepStatusTemp.data.creepFailures,      0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data.creepFailures,      0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
 
-USER_MSG_TBL CreepValTbl[] =
+USER_MSG_TBL creepValTbl[] =
 {
   {"ACCUM_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data_percent.AccumCnt,       0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data_percent.accumCnt,       0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"ACCUM_REJECT_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RW,
-                  (void *) &CreepStatusTemp.data_percent.AccumCntTrashed, 0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data_percent.accumCntTrashed, 0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {"LAST_MISSION_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RO,
-                  (void *) &CreepStatusTemp.data_percent.LastMissionCnt, 0, CREEP_MAX_OBJ-1,
+                  (void *) &creepStatusTemp.data_percent.lastMissionCnt, 0, CREEP_MAX_OBJ-1,
                   NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -496,70 +496,70 @@ USER_MSG_TBL CreepValTbl[] =
 
 // Level 1
 
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned
-USER_MSG_TBL CreepCfgTbl[] =
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+USER_MSG_TBL creepCfgTbl[] =
 {
   {"PBITSYSCOND", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_ENUM,  USER_RW,
-                (void *) &CreepCfgTemp.PBITSysCond,   -1,   -1,   NO_LIMIT, Flt_UserEnumStatus},
+                (void *) &creepCfgTemp.sysCondCBIT,   -1,   -1, NO_LIMIT, Flt_UserEnumStatus},
 
   {"CBITSYSCOND", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_ENUM,  USER_RW,
-                (void *) &CreepCfgTemp.CBITSysCond,   -1,   -1,   NO_LIMIT, Flt_UserEnumStatus},
+                (void *) &creepCfgTemp.sysCondCBIT,   -1,   -1, NO_LIMIT, Flt_UserEnumStatus},
 
   {"ENABLED", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_BOOLEAN,  USER_RW,
-                (void *) &CreepCfgTemp.bEnabled,      -1,   -1,   NO_LIMIT, NULL},
+                (void *) &creepCfgTemp.bEnabled,      -1,   -1, NO_LIMIT, NULL},
 
-  {"TABLE",  CreepTableTbl,  NULL,  NO_HANDLER_DATA},
+  {"TABLE",  creepTableTbl,  NULL,  NO_HANDLER_DATA},
 
-  {"OBJECT", CreepObjectTbl, NULL,  NO_HANDLER_DATA},
+  {"OBJECT", creepObjectTbl, NULL,  NO_HANDLER_DATA},
 
   {"BASEUNITS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
-               (void *) &CreepCfgTemp.baseUnits,      -1,   -1,   NO_LIMIT, NULL},
+               (void *) &creepCfgTemp.baseUnits,      -1,   -1,   NO_LIMIT, NULL},
 
   {"SENSOR_START_MS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT32,  USER_RW,
-                      (void *) &CreepCfgTemp.sensorStartTime_ms,  -1,   -1,   NO_LIMIT, NULL},
+                      (void *) &creepCfgTemp.sensorStartTime_ms,  -1,   -1,   NO_LIMIT, NULL},
 
   {"CRC", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_HEX16,  USER_RW,
-                (void *) &CreepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
+                (void *) &creepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere to ensure if not aligned.
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
 
-USER_MSG_TBL CreepStatusTbl[] =
+USER_MSG_TBL creepStatusTbl[] =
 {
-  {"FAULT",     NO_NEXT_TABLE, CreepMsg_Status, USER_TYPE_ENUM,  USER_RO,
-                (void *) &CreepStatusTemp.status,    0, CREEP_MAX_OBJ-1, NO_LIMIT, CreepStatusStrs},
+  {"FAULT",  NO_NEXT_TABLE, CreepMsg_Status, USER_TYPE_ENUM,  USER_RO,
+            (void *) &creepStatusTemp.status,  0, CREEP_MAX_OBJ-1, NO_LIMIT, creepStatusStrs},
 
-  {"STATE",     NO_NEXT_TABLE, CreepMsg_Status,  USER_TYPE_ENUM,  USER_RO,
-                (void *) &CreepStatusTemp.state,     0, CREEP_MAX_OBJ-1, NO_LIMIT, CreepStateStrs},
+  {"STATE",  NO_NEXT_TABLE, CreepMsg_Status,  USER_TYPE_ENUM,  USER_RO,
+             (void *) &creepStatusTemp.state,  0, CREEP_MAX_OBJ-1, NO_LIMIT, creepStateStrs},
 
   {"ER_TIME_ms",  NO_NEXT_TABLE, CreepMsg_Status,  USER_TYPE_UINT32,  USER_RO,
-                  (void *) &CreepStatusTemp.erTime_ms,     0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+             (void *) &creepStatusTemp.erTime_ms,  0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
-  {"SENSOR",    CreepSensorTbl,  NULL,  NO_HANDLER_DATA},
+  {"SENSOR",  creepSensorTbl,  NULL,  NO_HANDLER_DATA},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-USER_MSG_TBL CreepPersistTbl[] =
+USER_MSG_TBL creepPersistTbl[] =
 {
-  {"CNT",     CreepCntTbl,     NULL,  NO_HANDLER_DATA},
-  {"PCNT",    CreepValTbl,     NULL,  NO_HANDLER_DATA},
+  {"CNT",     creepCntTbl,     NULL,  NO_HANDLER_DATA},
+  {"PCNT",    creepValTbl,     NULL,  NO_HANDLER_DATA},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
 
-USER_MSG_TBL CreepDebugTbl[] =
+USER_MSG_TBL creepDebugTbl[] =
 {
   {"EXP_CRC", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_HEX16,  USER_RW,
-                  (void *) &CreepDebugTemp.exp_crc, -1,  -1, NO_LIMIT, NULL},
+                  (void *) &creepDebugTemp.exp_crc, -1,  -1, NO_LIMIT, NULL},
 
   {"SENSOR_LOG_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RW,
-                  (void *) &CreepDebugTemp.nSensorFailedCnt, -1,  -1, NO_LIMIT, NULL},
+                  (void *) &creepDebugTemp.nSensorFailedCnt, -1,  -1, NO_LIMIT, NULL},
 
   {"CREEP_HISTORY_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RW,
-                  (void *) &CreepDebugTemp.nCreepFailBuffCnt, -1,  -1, NO_LIMIT, NULL},
+                  (void *) &creepDebugTemp.nCreepFailBuffCnt, -1,  -1, NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -568,14 +568,14 @@ USER_MSG_TBL CreepDebugTbl[] =
 
 // Root Level
 
-USER_MSG_TBL CreepRoot[] =
+USER_MSG_TBL creepRoot[] =
 {
-  {"STATUS",  CreepStatusTbl,  NULL,  NO_HANDLER_DATA},
-  {"CFG",     CreepCfgTbl,     NULL,  NO_HANDLER_DATA},
+  {"STATUS",  creepStatusTbl,  NULL,  NO_HANDLER_DATA},
+  {"CFG",     creepCfgTbl,     NULL,  NO_HANDLER_DATA},
 //{"CNT",     CreepCntTbl,     NULL,  NO_HANDLER_DATA},
 //{"VALUE",   CreepValTbl,     NULL,  NO_HANDLER_DATA},
-  {"PERSIST", CreepPersistTbl, NULL,  NO_HANDLER_DATA},
-  {"DEBUG",   CreepDebugTbl,   NULL,  NO_HANDLER_DATA},
+  {"PERSIST", creepPersistTbl, NULL,  NO_HANDLER_DATA},
+  {"DEBUG",   creepDebugTbl,   NULL,  NO_HANDLER_DATA},
 
   {"CLEAR",      NO_NEXT_TABLE,  CreepMsg_Clear,                USER_TYPE_STR,
                  USER_WO,               NULL,   -1, -1, NO_LIMIT,   NULL},
@@ -586,7 +586,7 @@ USER_MSG_TBL CreepRoot[] =
 };
 
 
-USER_MSG_TBL CreepRootTblPtr = {"CREEP",CreepRoot,NULL,NO_HANDLER_DATA};
+USER_MSG_TBL creepRootTblPtr = {"CREEP",creepRoot,NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
@@ -640,7 +640,7 @@ USER_HANDLER_RESULT CreepMsg_Status(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepStatusTemp = *Creep_GetStatus(Index);
+  creepStatusTemp = *Creep_GetStatus(Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -684,7 +684,7 @@ USER_HANDLER_RESULT CreepMsg_Sensor(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepSensorTemp = *Creep_GetSensor(Index);
+  creepSensorTemp = *Creep_GetSensor(Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -728,34 +728,34 @@ USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepStatusTemp = *Creep_GetStatus(Index);
+  creepStatusTemp = *Creep_GetStatus(Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
   // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
   // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime version)
   //       is then copied to AppData.  Executing this cmd during creep processing will/could
-  //       force early update of App Data. If Fault deteced, then some cnt would have been committed
-  //       to App Data. Normally when creep fault detected, the cnt for that current flight is
-  //       "thrown" away.
+  //       force early update of App Data. If Fault deteced, then some cnt would have been 
+  //       committed to App Data. Normally when creep fault detected, the cnt for that 
+  //       current flight is "thrown" away.
   if (SetPtr != NULL && USER_RESULT_OK == result)
   {
     // Update Status counts only
-    Creep_GetStatus(Index)->data = CreepStatusTemp.data;
+    Creep_GetStatus(Index)->data = creepStatusTemp.data;
 
     // Update EEPROM APP Data
     Creep_UpdateCreepXAppData(Index);
 
     // Update the Data Percent here.  Normally Data precent update in init(), and @ end of ER.
     //    But if the cnt values are updated, should update % here
-    Creep_GetStatus(Index)->data_percent.AccumCnt = CreepStatusTemp.data.creepAccumCnt
+    Creep_GetStatus(Index)->data_percent.accumCnt = creepStatusTemp.data.creepAccumCnt
                                                     / m_Creep_100_pcnt;
 
-    Creep_GetStatus(Index)->data_percent.AccumCntTrashed =
-                          CreepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
+    Creep_GetStatus(Index)->data_percent.accumCntTrashed =
+                          creepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
 
-    Creep_GetStatus(Index)->data_percent.LastMissionCnt =
-                          CreepStatusTemp.data.creepLastMissionCnt / m_Creep_100_pcnt;
+    Creep_GetStatus(Index)->data_percent.lastMissionCnt =
+                          creepStatusTemp.data.creepLastMissionCnt / m_Creep_100_pcnt;
   }
 
   return result;
@@ -795,13 +795,13 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
                                  void **GetPtr)
 {
   USER_HANDLER_RESULT result ;
-  CREEP_DATA_PERCENT CreepPercentPrev;
+  CREEP_DATA_PERCENT creepPercentPrev;
 
 
   result = USER_RESULT_OK;
 
-  CreepStatusTemp = *Creep_GetStatus(Index);
-  CreepPercentPrev = CreepStatusTemp.data_percent;
+  creepStatusTemp = *Creep_GetStatus(Index);
+  creepPercentPrev = creepStatusTemp.data_percent;
 
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
@@ -809,40 +809,41 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
   // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
   // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime version)
   //       is then copied to AppData.  Executing this cmd during creep processing will/could
-  //       force early update of App Data. If Fault deteced, then some cnt would have been committed
-  //       to App Data. Normally when creep fault detected, the cnt for that current flight is
-  //       "thrown" away.
+  //       force early update of App Data. If Fault deteced, then some cnt would have been 
+  //       committed to App Data. Normally when creep fault detected, the cnt for that current 
+  //       flight is "thrown" away.
   if (SetPtr != NULL && USER_RESULT_OK == result)
   {
-    // Need to convert data_percent to count values, only of the data_percent val that has changed
-    if ( fabs (CreepPercentPrev.AccumCnt - CreepStatusTemp.data_percent.AccumCnt) >=
+    // Need to convert data_percent to count values, only of the data_percent val that 
+    //   has changed
+    if ( fabs (creepPercentPrev.accumCnt - creepStatusTemp.data_percent.accumCnt) >=
          DBL_EPSILON )
     {
       // Update associated counts here
-      CreepStatusTemp.data.creepAccumCnt = CreepStatusTemp.data_percent.AccumCnt
+      creepStatusTemp.data.creepAccumCnt = creepStatusTemp.data_percent.accumCnt
                                            * m_Creep_100_pcnt;
 
       // Recompute percentage.  Note: this value might be different than the val entered due
       //    to error assoc with DOUBLE representation of real numbers.
-      Creep_GetStatus(Index)->data_percent.AccumCnt = CreepStatusTemp.data.creepAccumCnt /
+      Creep_GetStatus(Index)->data_percent.accumCnt = creepStatusTemp.data.creepAccumCnt /
                                                          m_Creep_100_pcnt;
     }
 
-    if ( fabs (CreepPercentPrev.AccumCntTrashed - CreepStatusTemp.data_percent.AccumCntTrashed) >=
-         DBL_EPSILON )
+    if ( fabs (creepPercentPrev.accumCntTrashed - 
+               creepStatusTemp.data_percent.accumCntTrashed) >= DBL_EPSILON )
     {
       // Update associated counts here
-      CreepStatusTemp.data.creepAccumCntTrashed = CreepStatusTemp.data_percent.AccumCntTrashed
+      creepStatusTemp.data.creepAccumCntTrashed = creepStatusTemp.data_percent.accumCntTrashed
                                                   * m_Creep_100_pcnt;
 
       // Recompute percentage.  Note: this value might be different than the val entered due
       //    to error assoc with DOUBLE representation of real numbers.
-      Creep_GetStatus(Index)->data_percent.AccumCntTrashed =
-               CreepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
+      Creep_GetStatus(Index)->data_percent.accumCntTrashed =
+               creepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
     }
 
     // Update Status counts only
-    Creep_GetStatus(Index)->data = CreepStatusTemp.data;
+    Creep_GetStatus(Index)->data = creepStatusTemp.data;
 
     // Update EEPROM APP Data
     Creep_UpdateCreepXAppData(Index);
@@ -891,7 +892,7 @@ USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepCfgTemp = *Creep_GetCfg();
+  creepCfgTemp = *Creep_GetCfg();
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -905,7 +906,7 @@ USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
- * Function:    CreepMsg_Cfg
+ * Function:    CreepMsg_Table
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
@@ -941,14 +942,14 @@ USER_HANDLER_RESULT CreepMsg_Table(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepCfgTemp = *Creep_GetCfg();
-  CreepCfgTblTemp = *(CREEP_TBL_PTR) &(CreepCfgTemp.creepTbl[Index]);
+  creepCfgTemp = *Creep_GetCfg();
+  creepCfgTblTemp = *(CREEP_TBL_PTR) &(creepCfgTemp.creepTbl[Index]);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *(CREEP_TBL_PTR) &(CreepCfgTemp.creepTbl[Index]) = CreepCfgTblTemp;
+    *(CREEP_TBL_PTR) &(creepCfgTemp.creepTbl[Index]) = creepCfgTblTemp;
     CreepMsg_UpdateCfg();
   }
 
@@ -993,14 +994,14 @@ USER_HANDLER_RESULT CreepMsg_Object(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepCfgTemp = *Creep_GetCfg();
-  CreepCfgObjTemp = *(CREEP_OBJECT_PTR) &(CreepCfgTemp.creepObj[Index]);
+  creepCfgTemp = *Creep_GetCfg();
+  creepCfgObjTemp = *(CREEP_OBJECT_PTR) &(creepCfgTemp.creepObj[Index]);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *(CREEP_OBJECT_PTR) &(CreepCfgTemp.creepObj[Index]) = CreepCfgObjTemp;
+    *(CREEP_OBJECT_PTR) &(creepCfgTemp.creepObj[Index]) = creepCfgObjTemp;
     CreepMsg_UpdateCfg();
   }
 
@@ -1045,14 +1046,14 @@ USER_HANDLER_RESULT CreepMsg_ObjRow(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepCfgTemp = *Creep_GetCfg();
-  CreepCfgObjSenTemp = *(CREEP_SENSOR_PTR) &(CreepCfgTemp.creepObj[Index].SensorRow);
+  creepCfgTemp = *Creep_GetCfg();
+  creepCfgObjSenTemp = *(CREEP_SENSOR_PTR) &(creepCfgTemp.creepObj[Index].sensorRow);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *(CREEP_SENSOR_PTR) &(CreepCfgTemp.creepObj[Index].SensorRow) = CreepCfgObjSenTemp;
+    *(CREEP_SENSOR_PTR) &(creepCfgTemp.creepObj[Index].sensorRow) = creepCfgObjSenTemp;
     CreepMsg_UpdateCfg();
   }
 
@@ -1097,14 +1098,14 @@ USER_HANDLER_RESULT CreepMsg_ObjCol(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepCfgTemp = *Creep_GetCfg();
-  CreepCfgObjSenTemp = *(CREEP_SENSOR_PTR) &(CreepCfgTemp.creepObj[Index].SensorCol);
+  creepCfgTemp = *Creep_GetCfg();
+  creepCfgObjSenTemp = *(CREEP_SENSOR_PTR) &(creepCfgTemp.creepObj[Index].sensorCol);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *(CREEP_SENSOR_PTR) &(CreepCfgTemp.creepObj[Index].SensorCol) = CreepCfgObjSenTemp;
+    *(CREEP_SENSOR_PTR) &(creepCfgTemp.creepObj[Index].sensorCol) = creepCfgObjSenTemp;
     CreepMsg_UpdateCfg();
   }
 
@@ -1155,25 +1156,25 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
     result = USER_RESULT_OK;
     GSE_DebugStr(NORMAL,TRUE, "All Creep Data Cleared");
 
-    memset ( (void *) &CreepStatusTemp.data, 0, sizeof(CREEP_DATA) );
+    memset ( (void *) &creepStatusTemp.data, 0, sizeof(CREEP_DATA) );
 
     // Clear all Creep Object EEPROM APP Data
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
-      Creep_GetStatus(i)->data = CreepStatusTemp.data;
+      Creep_GetStatus(i)->data = creepStatusTemp.data;
       Creep_UpdateCreepXAppData(i);    // Commit to EE APP
       // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
-      // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime version)
-      //       is then copied to AppData.  Executing this cmd during creep processing will/could
-      //       force early update of App Data. If Fault deteced, then some cnt would have been committed
-      //       to App Data. Normally when creep fault detected, the cnt for that current flight is
-      //       "thrown" away.
+      // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime ver)
+      //      is then copied to AppData. Executing this cmd during creep processing will/could
+      //      force early update of App Data. If Fault deteced, then some cnt would have been 
+      //      committed to App Data. Normally when creep fault detected, the cnt for that 
+      //      current flight is "thrown" away.
 
-      // Update the Data Percent here.  Normally Data precent update in init(), and @ end of ER.
+      // Update the Data Percent.  Normally Data precent update in init(), and @ end of ER.
       //    But if the cnt values are updated, should update % here
-      Creep_GetStatus(i)->data_percent.AccumCnt = 0;
-      Creep_GetStatus(i)->data_percent.AccumCntTrashed = 0;
-      Creep_GetStatus(i)->data_percent.LastMissionCnt = 0;
+      Creep_GetStatus(i)->data_percent.accumCnt = 0;
+      Creep_GetStatus(i)->data_percent.accumCntTrashed = 0;
+      Creep_GetStatus(i)->data_percent.lastMissionCnt = 0;
     }
 
     Creep_FaultFileInit();  // Clear Creep Fault Recent buffer
@@ -1191,15 +1192,15 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
       // Get Current values
-      CreepStatusTemp.data = Creep_GetStatus(i)->data;
+      creepStatusTemp.data = Creep_GetStatus(i)->data;
 
       // Update diagnostic counts only
-      CreepStatusTemp.data.creepAccumCntTrashed = 0;
-      CreepStatusTemp.data.sensorFailures = 0;
-      CreepStatusTemp.data.creepFailures = 0;
+      creepStatusTemp.data.creepAccumCntTrashed = 0;
+      creepStatusTemp.data.sensorFailures = 0;
+      creepStatusTemp.data.creepFailures = 0;
 
       // Update modified values
-      Creep_GetStatus(i)->data = CreepStatusTemp.data;
+      Creep_GetStatus(i)->data = creepStatusTemp.data;
       Creep_UpdateCreepXAppData(i);  // Commit to EE APP
     }
 
@@ -1246,16 +1247,16 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result;
   UINT16 i;
-  char *strCount[CREEP_MAX_COLS];  // There should be exactly 10 counts
-  char *ptr;
-  char msg[CREEP_MAX_STR_LEN];
-  static char msg_out[CREEP_MAX_STR_LEN];
+  CHAR *strCount[CREEP_MAX_COLS];  // There should be exactly 10 counts
+  CHAR *ptr;
+  CHAR msg[CREEP_MAX_STR_LEN];
+  static CHAR msg_out[CREEP_MAX_STR_LEN];
 
 
   result = USER_RESULT_ERROR;
 
-  CreepCfgTemp = *Creep_GetCfg();
-  CreepCfgTblTemp = *(CREEP_TBL_PTR) &(CreepCfgTemp.creepTbl[Index]);
+  creepCfgTemp = *Creep_GetCfg();
+  creepCfgTblTemp = *(CREEP_TBL_PTR) &(creepCfgTemp.creepTbl[Index]);
 
   if(SetPtr != NULL)
   {
@@ -1281,7 +1282,7 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
         if (ptr == strCount[i])
         {
           // Convert the string to double
-          CreepCfgTblTemp.dCount[Param.Int][i] = strtod ( (const char* )
+          creepCfgTblTemp.dCount[Param.Int][i] = strtod ( (const char* )
                            strCount[i], &ptr );
           // Note: ptr point to NULL between values ("," removed by strtok()),
           //       move ptr by one.
@@ -1301,11 +1302,11 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
         result = USER_RESULT_OK;
 
         // Update Creep Cfg.  Update damage count fields only.
-#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() to ensure if not aligned
-        memcpy ( (void *) &(CreepCfgTemp.creepTbl[Index].dCount[Param.Int][0]),
-                 (void *) &CreepCfgTblTemp.dCount[Param.Int][0], sizeof(FLOAT64) *
+#pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() if not aligned
+        memcpy ( (void *) &(creepCfgTemp.creepTbl[Index].dCount[Param.Int][0]),
+                 (void *) &creepCfgTblTemp.dCount[Param.Int][0], sizeof(FLOAT64) *
                   CREEP_MAX_COLS );
-#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() to ensure if not aligned
+#pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() if not aligned
         CreepMsg_UpdateCfg();
       }
       // else result will remain USER_RESULT_ERROR
@@ -1324,11 +1325,11 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
     msg_out[0] = NULL;
     for (i=0;i<(CREEP_MAX_COLS-1);i++)
     {
-      snprintf(msg,CREEP_MAX_STR_LEN,"%0.0lf,", CreepCfgTblTemp.dCount[Param.Int][i]);
+      snprintf(msg,CREEP_MAX_STR_LEN,"%0.0lf,", creepCfgTblTemp.dCount[Param.Int][i]);
       strcat (msg_out, (const char *) msg);
     }
     // No ',' at the end
-    snprintf(msg,CREEP_MAX_STR_LEN,"%0.0lf", CreepCfgTblTemp.dCount[Param.Int][i]);
+    snprintf(msg,CREEP_MAX_STR_LEN,"%0.0lf", creepCfgTblTemp.dCount[Param.Int][i]);
     strcat (msg_out, (const char *) msg);
 
     *GetPtr = msg_out;
@@ -1381,17 +1382,18 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
                                                   void **GetPtr)
 {
   UINT8 i;
-  static CHAR ResultBuffer[USER_SINGLE_MSG_MAX_SIZE];
+  static CHAR resultBuffer[USER_SINGLE_MSG_MAX_SIZE];
   USER_HANDLER_RESULT result = USER_RESULT_OK;
   CHAR *pStr;
   UINT32 nOffset, len;
 
 
-  pStr = (CHAR *) &ResultBuffer[0];
+  pStr = (CHAR *) &resultBuffer[0];
 
   // Output # of faults in buffer
-  sprintf ( ResultBuffer, "\r\nCreep Faults = %d\r\n", m_creepHistory.cnt );
-  len = strlen ( ResultBuffer );
+  snprintf ( resultBuffer, USER_SINGLE_MSG_MAX_SIZE, "\r\nCreep Faults = %d\r\n",
+             m_creepHistory.cnt );
+  len = strlen ( resultBuffer );
   nOffset = len;
 
   for (i=0;i<CREEP_HISTORY_MAX;i++)
@@ -1399,12 +1401,12 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
     pStr = Creep_GetHistoryBuffEntry(i);
     len = strlen (pStr);
 
-    memcpy ( (void *) &ResultBuffer[nOffset], pStr, len );
+    memcpy ( (void *) &resultBuffer[nOffset], pStr, len );
     nOffset += len;
   }
 
-  ResultBuffer[nOffset] = NULL;
-  User_OutputMsgString(ResultBuffer, FALSE);
+  resultBuffer[nOffset] = NULL;
+  User_OutputMsgString(resultBuffer, FALSE);
 
   return result;
 }
@@ -1446,7 +1448,7 @@ USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  CreepDebugTemp = *Creep_GetDebug();
+  creepDebugTemp = *Creep_GetDebug();
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -1467,9 +1469,9 @@ USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
 *****************************************************************************/
 void CreepMsg_UpdateCfg ( void )
 {
-  *Creep_GetCfg() = CreepCfgTemp;     // Update current cfg to new setting
+  *Creep_GetCfg() = creepCfgTemp;     // Update current cfg to new setting
 
-  memcpy(&CfgMgr_ConfigPtr()->CreepConfig, &CreepCfgTemp,
+  memcpy(&CfgMgr_ConfigPtr()->CreepConfig, &creepCfgTemp,
          sizeof(CREEP_CFG));         // Update EEPROM cfg version
 
   //Store the modified temporary structure in the EEPROM.
@@ -1483,7 +1485,7 @@ void CreepMsg_UpdateCfg ( void )
 *
 * Description:  Returns the selected Fault Entry from the non-volatile memory
 *
-* Parameters:   [in] Index:     Index parameter selecting specified entry
+* Parameters:   [in] index:     Index parameter selecting specified entry
 *
 * Returns:      [out] ptr to RecentLogStr[] containing decoded entry
 *
@@ -1493,33 +1495,33 @@ void CreepMsg_UpdateCfg ( void )
 static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
 {
   CHAR *pStr;
-  TIMESTRUCT Ts;
-  static CHAR  RecentLogStr[256];
+  TIMESTRUCT ts;
+  static CHAR  recentLogStr[256];
 
 
   if ( index < m_creepHistory.cnt )
   {
-    CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.buff[index].Ts, &Ts);
+    CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.buff[index].ts, &ts);
 
     // Stringify the Log data
-    snprintf( RecentLogStr, 80, "%02d:%s(%x) at %02d:%02d:%02d %02d/%02d/%4d\r\n",
+    snprintf( recentLogStr, 80, "%02d:%s(%x) at %02d:%02d:%02d %02d/%02d/%4d\r\n",
         index+1,
-        SystemLogIDString( m_creepHistory.buff[index].Id),
-        m_creepHistory.buff[index].Id,
-        Ts.Hour,
-        Ts.Minute,
-        Ts.Second,
-        Ts.Month,
-        Ts.Day,
-        Ts.Year);
+        SystemLogIDString( m_creepHistory.buff[index].id),
+        m_creepHistory.buff[index].id,
+        ts.Hour,
+        ts.Minute,
+        ts.Second,
+        ts.Month,
+        ts.Day,
+        ts.Year);
 
     // Return log data string
-    pStr = RecentLogStr;
+    pStr = recentLogStr;
   }
   else
   {
-    snprintf( RecentLogStr, 80, "%02d:Fault entry empty\r\n", index );
-    pStr = RecentLogStr;
+    snprintf( recentLogStr, 80, "%02d:Fault entry empty\r\n", index );
+    pStr = recentLogStr;
   }
 
   return pStr;
@@ -1530,6 +1532,11 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 12-11-10   Time: 4:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 12-11-02   Time: 6:14p
  * Updated in $/software/control processor/code/application

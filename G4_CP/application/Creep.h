@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 2 $  $Date: 12-11-02 6:14p $
+      $Revision: 3 $  $Date: 12-11-10 4:37p $
 
 ******************************************************************************/
 
@@ -155,8 +155,8 @@
 
 
 #define CREEP_DEFAULT_OBJ0 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Col Sensor */\
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
@@ -164,8 +164,8 @@
                             "Unused Creep Object 0"
 
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,      0,         0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Col Sensor */\
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
@@ -197,7 +197,7 @@
                            10000,               /* 10 sec Sensor Start Timeout */\
                            12,                  /* Base Units Creep Damage Counts 1E-12*/\
                            50,                  /* Max SensorLoss Log Recording */\
-                           CREEP_DEFAULT_CRC16  /* CRC16, TBD add actual val for default */
+                           CREEP_DEFAULT_CRC16  /* CRC16, add actual val for default */
 
 
 /******************************************************************************
@@ -260,14 +260,14 @@ typedef enum {
 #pragma pack(1)
 typedef struct {
   FLOAT64 dCount[CREEP_MAX_ROWS][CREEP_MAX_COLS];  // "Damage/Sec" Count
-  FLOAT64 RowVal[CREEP_MAX_ROWS];                // Row Sensor Values (i.e. ITT)
-  FLOAT64 ColVal[CREEP_MAX_COLS];                // Col Sensor Values (i.e. Np)
+  FLOAT64 rowVal[CREEP_MAX_ROWS];                // Row Sensor Values (i.e. ITT)
+  FLOAT64 colVal[CREEP_MAX_COLS];                // Col Sensor Values (i.e. Np)
   CHAR name[CREEP_MAX_NAME];
 } CREEP_TBL, *CREEP_TBL_PTR;
 
 typedef struct {
   CHAR name[CREEP_MAX_NAME];
-  UINT16 Id;           // ID of sensor used for Row, Col
+  UINT16 id;           // ID of sensor used for Row, Col
   FLOAT32 slope;       //  Slope conversion (if used) to convert Sensor
   FLOAT32 offset;      //  Offset conversion (if used) to convert Sensor
   UINT16 sampleCnt;    //  Expected sample count missed (at rate specified)
@@ -275,20 +275,20 @@ typedef struct {
 } CREEP_SENSOR, *CREEP_SENSOR_PTR;
 
 typedef struct {
-  CREEP_SENSOR SensorRow;  // Creep Sensor Row Definition
-  CREEP_SENSOR SensorCol;  // Creep Sensor Col Definition
-  UINT16 EngId;            // Engine Run Id to assoc with this CREEP object
-  UINT16 CreepTblId;       // Creep Table to use for calculating creep for this obj
-  UINT16 CPUOffset_ms;     // CPU Offset for calculating CREEP Interval
-  CREEP_RATE IntervalRate;    // Creep interval exe frame/rate
+  CREEP_SENSOR sensorRow;  // Creep Sensor Row Definition
+  CREEP_SENSOR sensorCol;  // Creep Sensor Col Definition
+  UINT16 engId;            // Engine Run Id to assoc with this CREEP object
+  UINT16 creepTblId;       // Creep Table to use for calculating creep for this obj
+  UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
+  CREEP_RATE intervalRate;    // Creep interval exe frame/rate
   CHAR name[CREEP_MAX_NAME];  // Descriptive name for debug purposes
 } CREEP_OBJECT, *CREEP_OBJECT_PTR;
 // NOTE: For CESNA CARAVAN App, two creep obj will be defined. One for Ct and
 //       one for Pt Blade creep monitoring.
 
 typedef struct {
-  FLT_STATUS PBITSysCond;   // PBIT Sys Cond when PBIT fails
-  FLT_STATUS CBITSysCond;   // CBIT Sys Cond when CBIT fails
+  FLT_STATUS sysCondPBIT;   // PBIT Sys Cond when PBIT fails
+  FLT_STATUS sysCondCBIT;   // CBIT Sys Cond when CBIT fails
   BOOLEAN    bEnabled;      // Enable/Dsb of Creep processing. Consistent w/other objects
   UINT8      pads[3];       // creepTbl as to be 4 byte ALIGNED for code to work / Not ASSERT
   CREEP_TBL    creepTbl[CREEP_MAX_TBL];  // Creep Tables
@@ -321,9 +321,9 @@ typedef struct {
 } CREEP_APP_DATA, *CREEP_APP_DATA_PTR;
 
 typedef struct {
-  FLOAT64 AccumCnt;
-  FLOAT64 AccumCntTrashed;
-  FLOAT64 LastMissionCnt;
+  FLOAT64 accumCnt;
+  FLOAT64 accumCntTrashed;
+  FLOAT64 lastMissionCnt;
 } CREEP_DATA_PERCENT, *CREEP_DATA_PERCENT_PTR;
 
 typedef struct {
@@ -389,8 +389,8 @@ typedef struct {
   UINT16 index;              // Echo of Index of Creep Object
 //UINT8  pad[2];             // Pad to align log to UINT32
 
-  FLOAT64 AccumCntPcnt;      // Accumulated count in percent (0% - 200%)
-  FLOAT64 AccumCnt;          // Accumulated count (E-12 units)
+  FLOAT64 accumCntPcnt;      // Accumulated count in percent (0% - 200%)
+  FLOAT64 accumCnt;          // Accumulated count (E-12 units)
 
   FLOAT64 lastMissionCntPcnt;    // Last Mission count in percent (0% - 200%)
   FLOAT64 lastMissionCnt;        // Last Mission count (E-12 units)
@@ -409,8 +409,8 @@ typedef struct {
   BOOLEAN bColSensorFailed;      // Failed state of col sensor
 //UINT8   pad[2];                // Pad to align to UINT32
 
-  FLOAT64 AccumCntPcnt;      // Accumulated count in percent (0% - 200%)
-  FLOAT64 AccumCnt;          // Accumulated count (E-12 units)
+  FLOAT64 accumCntPcnt;      // Accumulated count in percent (0% - 200%)
+  FLOAT64 accumCnt;          // Accumulated count (E-12 units)
 
   FLOAT64 lastMissionCntPcnt;    // Last Mission count in percent (0% - 200%)
   FLOAT64 lastMissionCnt;        // Last Mission count (E-12 units)
@@ -447,7 +447,7 @@ typedef struct {
   BOOLEAN bEnabled;                           // Creep Enb/Dsb
   UINT16 crc16;                               // CRC of Creep Cfg
   UINT16 baseUnits;                           // baseUnits from Creep Cfg
-  CREEP_OBJ_BINHDR CreepObj[CREEP_MAX_OBJ];   // Info on each Creep Obj
+  CREEP_OBJ_BINHDR creepObj[CREEP_MAX_OBJ];   // Info on each Creep Obj
 } CREEP_BINHDR, *CREEP_BINHDR_PTR;
 #pragma pack()
 
@@ -460,8 +460,8 @@ typedef struct {
 
 
 typedef struct {
-  SYS_APP_ID Id;
-  TIMESTAMP Ts;
+  SYS_APP_ID id;
+  TIMESTAMP ts;
 } CREEP_FAULT_BUFFER, *CREEP_FAULT_BUFFER_PTR;
 
 #define CREEP_HISTORY_MAX 10
@@ -500,6 +500,7 @@ EXPORT CREEP_CFG_PTR Creep_GetCfg (void);
 EXPORT BOOLEAN Creep_FileInit ( void );
 EXPORT UINT16 Creep_GetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 EXPORT CREEP_DEBUG_PTR Creep_GetDebug (void);
+EXPORT void Creep_UpdateCreepXAppData (UINT16 index_obj);
 
 EXPORT BOOLEAN Creep_FaultFileInit(void);
 
@@ -512,6 +513,11 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  *  MODIFICATIONS
  *    $History: Creep.h $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 12-11-10   Time: 4:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 12-11-02   Time: 6:14p
  * Updated in $/software/control processor/code/application
