@@ -17,7 +17,7 @@
                  not operate after 49.7 days of continous operation.
 
     VERSION
-    $Revision: 11 $  $Date: 11/06/12 11:49a $
+    $Revision: 12 $  $Date: 12-11-12 9:49a $
 
 ******************************************************************************/
 
@@ -697,7 +697,7 @@ static void TH_WriteRecToLog(TH_RECORD_CTL_BLK *start_blk,INT32 blk_write_cnt,
 #pragma ghs endnowarning
   }
   //Write logs
-  source.ID = APP_ID_TIMEHISTORY_ETM_LOG;
+  source.id = APP_ID_TIMEHISTORY_ETM_LOG;
   LogWrite(LOG_TYPE_ETM,
            source,
            TH_LOG_PRIORITY,
@@ -893,6 +893,11 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
+ *
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-11-12   Time: 9:49a
+ * Updated in $/software/control processor/code/application
+ * SCR 1105, 1107, 1131, 1154 - Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:49a

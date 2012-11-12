@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 52 $  $Date: 12-11-08 3:03p $
+    $Revision: 53 $  $Date: 12-11-12 9:48a $
 
 ******************************************************************************/
 
@@ -186,8 +186,8 @@ typedef enum
 
 typedef union
 {
-  LOG_ACS_FIELD ACS;
-  SYS_APP_ID    ID;
+  LOG_ACS_FIELD acs;
+  SYS_APP_ID    id;
   UINT32        nNumber;
 } LOG_SOURCE;
 
@@ -206,32 +206,32 @@ typedef struct
 {
    UINT32 nStartOffset;
    UINT32 *pFoundOffset;
-   LOG_ERASE_TYPE Type;
+   LOG_ERASE_TYPE type;
 } LOG_ERASE_DATA;
 
 typedef struct
 {
-   LOG_HEADER Hdr;
+   LOG_HEADER hdr;
    UINT32     *pData;
    UINT32     nSize;
 } LOG_WRITE_DATA;
 
 typedef struct
 {
-  LOG_REQ_TYPE    ReqType;
+  LOG_REQ_TYPE    reqType;
   LOG_REQ_STATUS  *pStatus;
   union
   {
-     LOG_ERASE_DATA     Erase;
-     LOG_WRITE_DATA     Write;
-  }Request;
+     LOG_ERASE_DATA     erase;
+     LOG_WRITE_DATA     write;
+  }request;
 } LOG_REQUEST;
 
 typedef struct
 {
-  UINT32 Head;
-  UINT32 Tail;
-  LOG_REQUEST Buffer[LOG_QUEUE_SIZE];
+  UINT32 head;
+  UINT32 tail;
+  LOG_REQUEST buffer[LOG_QUEUE_SIZE];
 } LOG_REQ_QUEUE;
 
 typedef struct
@@ -255,7 +255,7 @@ typedef struct
 
 typedef struct
 {
-  LOG_ERROR_CNTS Counts;
+  LOG_ERROR_CNTS counts;
   BOOLEAN bReadAccessFail;
   BOOLEAN bWriteAccessFail;
   BOOLEAN bEraseAccessFail;
@@ -263,10 +263,10 @@ typedef struct
 
 typedef struct
 {
-   BOOLEAN InProgress;
+   BOOLEAN inProgress;
    BOOLEAN bChipErase;
-   UINT32  SavedStartOffset;
-   UINT32  SavedSize;
+   UINT32  savedStartOffset;
+   UINT32  savedSize;
 } LOG_EEPROM_CONFIG;
 
 typedef struct
@@ -281,19 +281,19 @@ typedef struct
 
 typedef struct
 {
-    LOG_MNG_STATE State;
-    LOG_REQUEST   CurrentEntry;
-    UINT32        FaultCount;
+    LOG_MNG_STATE state;
+    LOG_REQUEST   currentEntry;
+    UINT32        faultCount;
     // Array of indexes into the the SystemTable which contains an outstanding
     // write pending/in-progress for the corresponding LOG_REGISTER_TYPE.
     // A value of LOG_INDEX_NOT_SET means the associated log type is not active.
-    UINT32       LogWritePending[LOG_REGISTER_END];
+    UINT32       logWritePending[LOG_REGISTER_END];
 
 } LOG_MNG_TASK_PARMS;
 
 typedef struct
 {
-    LOG_HEADER      HdrCriteria;
+    LOG_HEADER      hdrCriteria;
     UINT32          nStartOffset;
     UINT32          nEndOffset;
     UINT32          nRdOffset;
@@ -305,24 +305,24 @@ typedef struct
     UINT32          nOffset;
     UINT32          nRdOffset;
     UINT32          nSize;
-    LOG_ERASE_TYPE  Type;
-    LOG_ERASE_STATE State;
+    LOG_ERASE_TYPE  type;
+    LOG_ERASE_STATE state;
     UINT32          *pFound;
     BOOLEAN         bVerifyStarted;
     BOOLEAN         bUpdatingStatusFile;
     BOOLEAN         bDone;
-    RESULT          Result;
+    RESULT          result;
 } LOG_CMD_ERASE_PARMS;
 
 typedef struct
 {
-    LOG_REQ_STATUS  ErStatus;
-    UINT32          Found;
+    LOG_REQ_STATUS  erStatus;
+    UINT32          found;
 } LOG_MON_ERASE_PARMS;
 
 typedef struct
 {
-   TASK_INDEX TaskID;
+   TASK_INDEX taskID;
    BOOLEAN bDeleteVerified;
    LOG_MNG_TASK_PARMS **pTaskParams;
 } LOG_BCKGRD_ERASE_PARMS;
@@ -337,22 +337,22 @@ typedef struct
 // Log Manager Fail Logs
 typedef struct
 {
-   RESULT         Result;
-   UINT32         Offset;
+   RESULT         result;
+   UINT32         offset;
 } LOG_READ_FAIL_LOG;
 
 typedef struct
 {
-   RESULT         Result;
-   LOG_ERASE_DATA EraseData;
+   RESULT         result;
+   LOG_ERASE_DATA eraseData;
 } LOG_ERASE_FAIL_LOG;
 #pragma pack()
 
 typedef struct
 {
-   BOOLEAN Enable;
-   UINT16  Delay_S;
-   UINT32  StartTime_ms;
+   BOOLEAN enable;
+   UINT16  delay_S;
+   UINT32  startTime_ms;
 } LOG_PAUSE_WRITE;
 /******************************************************************************
                                  Package Exports
@@ -434,6 +434,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ *
+ * *****************  Version 53  *****************
+ * User: John Omalley Date: 12-11-12   Time: 9:48a
+ * Updated in $/software/control processor/code/system
+ * SCR 1105, 1107, 1131, 1154 - Code Review Updates
  *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p

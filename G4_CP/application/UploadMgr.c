@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 162 $  $Date: 12-11-09 10:32a $
+   $Revision: 163 $  $Date: 12-11-12 9:49a $
 
 ******************************************************************************/
 
@@ -691,7 +691,7 @@ BOOLEAN UploadMgr_InitFileVfyTbl(void)
   VfyRow.State      = VFY_STA_DELETED;
   VfyRow.LogDeleted = FALSE;
   VfyRow.Type       = LOG_TYPE_DONT_CARE;
-  VfyRow.Source.ACS = ACS_DONT_CARE;
+  VfyRow.Source.acs = ACS_DONT_CARE;
   VfyRow.Priority   = LOG_PRIORITY_DONT_CARE;
 
   //First, write the table.  Then, once that is valid, write the magic number
@@ -1482,7 +1482,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
         else
         {
           snprintf(Task->FN, sizeof(Task->FN), "FAST-%s-%s-%d.dtu",
-            DataMgrGetACSDataSet(UploadOrderTbl[Task->UploadOrderIdx].ACS.ACS).sID,
+            DataMgrGetACSDataSet(UploadOrderTbl[Task->UploadOrderIdx].ACS.acs).sID,
             BoxStr, Timestamp.Timestamp);
         }
         //Start a File Verification Entry in the Verification Table. Once the
@@ -1792,7 +1792,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         Task->State = LOG_COLLECTION_STARTFILE;
         GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC NEXTFILE NextUpload=%s",
-          DataMgrGetACSDataSet(UploadOrderTbl[Task->UploadOrderIdx].ACS.ACS).sID);
+          DataMgrGetACSDataSet(UploadOrderTbl[Task->UploadOrderIdx].ACS.acs).sID);
       }
       else
       {
@@ -2473,7 +2473,7 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
   {
 
     //Now look for the next end of flight log
-    source.ID = APP_ID_END_OF_FLIGHT;
+    source.id = APP_ID_END_OF_FLIGHT;
     result = LogFindNextRecord(LOG_DONT_CARE,
                                LOG_TYPE_SYSTEM,
                                source,
@@ -2599,26 +2599,26 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
 
   //INT8 ACS model id
   strncpy_safe(FileHeader->AcsModel,sizeof(FileHeader->AcsModel),
-              &(DataMgrGetACSDataSet(ACS.ACS).sModel[0]),_TRUNCATE);
+              &(DataMgrGetACSDataSet(ACS.acs).sModel[0]),_TRUNCATE);
 
   //INT8  ACS version information
   strncpy_safe(FileHeader->AcsVerId,sizeof(FileHeader->AcsVerId),
-               &(DataMgrGetACSDataSet(ACS.ACS).sID[0]),_TRUNCATE);
+               &(DataMgrGetACSDataSet(ACS.acs).sID[0]),_TRUNCATE);
 
   //UINT16 which ACS is connected.  see ACS_SOURCE
   FileHeader->AcsSource = (UINT16)ACS.nNumber;
 
   //INT8 ACS model id
   strncpy_safe(FileHeader->AcsModel,sizeof(FileHeader->AcsModel),
-              &(DataMgrGetACSDataSet(ACS.ACS).sModel[0]),_TRUNCATE);
+              &(DataMgrGetACSDataSet(ACS.acs).sModel[0]),_TRUNCATE);
   //INT8  ACS version information
   strncpy_safe(FileHeader->AcsVerId,sizeof(FileHeader->AcsVerId),
-              &(DataMgrGetACSDataSet(ACS.ACS).sID[0]),_TRUNCATE);
+              &(DataMgrGetACSDataSet(ACS.acs).sID[0]),_TRUNCATE);
   // Port Type
-  FileHeader->PortType = (UINT8)DataMgrGetACSDataSet(ACS.ACS).portType;
+  FileHeader->PortType = (UINT8)DataMgrGetACSDataSet(ACS.acs).portType;
 
   // Port Index
-  FileHeader->PortIndex = (UINT8)DataMgrGetACSDataSet(ACS.ACS).nPortIndex;
+  FileHeader->PortIndex = (UINT8)DataMgrGetACSDataSet(ACS.acs).nPortIndex;
 
   //Config Status
   AC_GetConfigStatus(FileHeader->ConfigStatus);
@@ -2683,7 +2683,7 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
   }
   else // Get the Binary Data Header
   {
-     pBinSubHdr->SizeUsed = DataMgrGetHeader(pBinSubHdr->Buf, ACS.ACS,
+     pBinSubHdr->SizeUsed = DataMgrGetHeader(pBinSubHdr->Buf, ACS.acs,
                                               sizeof(pBinSubHdr->Buf));
 
   }
@@ -3474,11 +3474,16 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  *
+ * *****************  Version 163  *****************
+ * User: John Omalley Date: 12-11-12   Time: 9:49a
+ * Updated in $/software/control processor/code/application
+ * SCR 1105, 1107, 1131, 1154 - Code Review Updates
+ * 
  * *****************  Version 162  *****************
  * User: John Omalley Date: 12-11-09   Time: 10:32a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 161  *****************
  * User: Melanie Jutras Date: 12-10-31   Time: 12:01p
  * Updated in $/software/control processor/code/application
