@@ -194,7 +194,7 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogUserTables.c $
- *
+ * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system

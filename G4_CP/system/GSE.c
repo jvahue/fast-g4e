@@ -1,7 +1,7 @@
 #define GSE_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
  File:        GSE.c
@@ -10,7 +10,7 @@
               inits UART 0 to to the configuration specified in GSE.h  Functions
               for reading and writing lines to and from the terminal are
               provided.
-
+              
  VERSION
      $Revision: 24 $  $Date: 12-11-12 8:14a $
 
@@ -62,7 +62,7 @@ GSE_GET_LINE_BUFFER GSE_GetLineBuf;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
+static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime, 
                               const CHAR* str, va_list args);
 
 /*****************************************************************************/
@@ -70,14 +70,14 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*****************************************************************************/
 
 /*****************************************************************************
- * Function:    GSE_Init
+ * Function:    GSE_Init    
  *
  * Description: Setup UART channel 0 as the GSE port.  The default configuration
  *              for this port is
  *              115,200 bits per second, 8 data bits, 1 stop bit and no parity.
  *
- * Parameters:  SysLogId - Ptr to return System Log ID into
- *              pdata -    Ptr to buffer to return system log data
+ * Parameters:  SysLogId - Ptr to return System Log ID into 
+ *              pdata -    Ptr to buffer to return system log data 
  *              psize -    Ptr to return size of system log data
  *
  * Returns:     RESULT
@@ -85,21 +85,21 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UART_CONFIG config;
-  static INT8 TxBuf[GSE_TX_BUFFER_SIZE];
-
-  GSE_DRV_PBIT_LOG  *pdest;
+  static INT8 TxBuf[GSE_TX_BUFFER_SIZE]; 
+ 
+  GSE_DRV_PBIT_LOG  *pdest; 
 
   pdest = (GSE_DRV_PBIT_LOG *) pdata;
-  memset ( pdest, 0, sizeof(GSE_DRV_PBIT_LOG) );
-  pdest->result = DRV_OK;
-
-  *psize = sizeof(GSE_DRV_PBIT_LOG);
-
-
+  memset ( pdest, 0, sizeof(GSE_DRV_PBIT_LOG) ); 
+  pdest->result = DRV_OK; 
+  
+  *psize = sizeof(GSE_DRV_PBIT_LOG); 
+  
+ 
   FIFO_Init(&TxFIFO,TxBuf,GSE_TX_BUFFER_SIZE);
 
   // Init the Live Data Stream display state to enabled.
-
+  
   //Configure and open UART channel 0
   memset(&config,0,sizeof(config));
 
@@ -115,12 +115,12 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   //Init the get line buffer to zero chars
   GSE_GetLineBuf.Cnt = 0;
-
+  
   pdest->result = UART_OpenPort(&config);
-
-  // Note: If ->result == DRV_OK, then this value is ignored.
-  *SysLogId = SYS_ID_GSE_PBIT_REG_INIT_FAIL;
-
+  
+  // Note: If ->result == DRV_OK, then this value is ignored. 
+  *SysLogId = SYS_ID_GSE_PBIT_REG_INIT_FAIL;  
+  
   return pdest->result;
 }
 
@@ -129,15 +129,15 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  * Function:    GSE_PutLineBlocked
  *
  * Description: Prints a null-terminated string out the GSE port. Strings can
- *              be no longer than GSE_TX_BUFFER_SIZE chars. If specified by the
+ *              be no longer than GSE_TX_BUFFER_SIZE chars. If specified by the 
  *              bBlocked param, the function will wait for sufficient room in FIFO queue
  *              before writing to the UART.
  *
  *              For longer data, use the UART functions directly
  *
  * Parameters:  [in] Str:      String to print out the GSE port
- *              [in] bBlock:   Block/wait for room in FIFO Queue before
- *                             issuing transmit.
+ *              [in] bBlock:   Block/wait for room in FIFO Queue before 
+ *                             issuing transmit. 
  *
  * Returns:     DRV_OK: String written successfully
  *              DRV_GSE_PUT_LINE_TOO_LONG: No null terminator found within 8192
@@ -153,7 +153,7 @@ RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
 #ifdef GHS_SIMULATOR_RUN
 /*vcast_dont_instrument_start*/
   printf(Str);
-  return DRV_OK;
+  return DRV_OK;  
 /*vcast_dont_instrument_end*/
 #else
   //Find the null terminator
@@ -167,7 +167,7 @@ RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
   //queue for our msg size.
   WaitStart = CM_GetTickCount();
   while( bBlock && FIFO_FreeBytes(&TxFIFO) < i )
-  {
+  {     
     // Waiting for room in text buffer FIFO...
     // Timeout after GSE_TX_BUFFER_AVAIL_WAIT_MS period.
     if ( (CM_GetTickCount() - WaitStart) > GSE_TX_BUFFER_AVAIL_WAIT_MS )
@@ -192,15 +192,15 @@ RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
 *
 *              For longer data, use the UART functions directly
 *
-* Parameters:  [in] Str: String to print out the GSE port*
+* Parameters:  [in] Str: String to print out the GSE port*              
 *
 * Returns:     none
-*
+* 
 ****************************************************************************/
 void GSE_PutLine(const INT8* Str)
 {
-  // Make standard-call to PutLineBlocked.
-  // Don't request transmit blocking pending fifo space.
+  // Make standard-call to PutLineBlocked. 
+  // Don't request transmit blocking pending fifo space. 
   GSE_PutLineBlocked(Str, FALSE);
 }
 
@@ -219,13 +219,13 @@ void GSE_PutLine(const INT8* Str)
  *              to the position of the removed character.  If there are no
  *              characters in the buffer preceding the \b, the string after \b
  *              is moved to the zeroth position in the buffer.
- *
+ *              
  *              Caller's Str buffer needs to be at least
  *              GSE_GET_LINE_BUFFER_SIZE
- *
+ *             
  *
  * Parameters:  [out] Str: A string buffer to copy the received line into
- *
+ *              
  * Returns:     DRV_OK = Read successfully, does not imply CR was found though
  *              DRV_GSE_GET_LINE_TOO_LONG = Line was too long before CR was
  *                                          detected
@@ -236,8 +236,8 @@ RESULT GSE_GetLine(INT8* Str)
   INT32 i;
   RESULT result = DRV_OK;
   UINT16 BytesReturned = 0;
-
-  Str[0] = '\0';
+ 
+  Str[0] = '\0'; 
 
 #ifdef GHS_SIMULATOR_RUN
 /*vcast_dont_instrument_start*/
@@ -262,10 +262,10 @@ RESULT GSE_GetLine(INT8* Str)
     i = GSE_GetLineBuf.Cnt;
     GSE_GetLineBuf.Cnt += BytesReturned;
     GSE_GetLineBuf.Buf[GSE_GetLineBuf.Cnt] = '\0';
-
+    
     while(GSE_GetLineBuf.Buf[i] != '\0')
     {
-      //Remove one char for every backspace char found
+      //Remove one char for every backspace char found    
       if(GSE_GetLineBuf.Buf[i] == '\b')
       {
         i = MAX(i-1,0);
@@ -274,7 +274,7 @@ RESULT GSE_GetLine(INT8* Str)
         //Ensure this unsigned quantity never underflows
         GSE_GetLineBuf.Cnt = GSE_GetLineBuf.Cnt > 1 ? GSE_GetLineBuf.Cnt-2 : 0;
       }
-      else if((GSE_GetLineBuf.Buf[i] == '\r')||(GSE_GetLineBuf.Buf[i] == '\n')
+      else if((GSE_GetLineBuf.Buf[i] == '\r')||(GSE_GetLineBuf.Buf[i] == '\n') 
                || (GSE_GetLineBuf.Buf[i] == ESC_CHAR ))
       {
         GSE_GetLineBuf.Buf[i+1] = '\0';
@@ -285,7 +285,7 @@ RESULT GSE_GetLine(INT8* Str)
       else
       {
         i++;
-      }
+      }    
     }
 
     if( GSE_GetLineBuf.Cnt == GSE_GET_LINE_BUFFER_SIZE)
@@ -305,18 +305,18 @@ RESULT GSE_GetLine(INT8* Str)
  *              value is the char, or error code
  *
  * Parameters:  none
- *
+ *              
  * Returns:     0 to 255: Character read from GSE
  *              -1:       No char to read
  *              -2:       Receive error (parity or framing)
- *
+ *              
  ****************************************************************************/
 INT16 GSE_getc(void)
 {
   INT16 result = -2;
   INT8  buf;
   UINT16 BytesReturned = 0;
-
+ 
   //Get data from the GSE port
   if( DRV_OK == UART_Receive( GSE_UART_PORT,
                               &buf,
@@ -344,10 +344,10 @@ INT16 GSE_getc(void)
  *
  * Parameters:  [in] buf: Pointer to buffer location
  *              [in] size: Size, number of bytes to write from "buf"
- *
+ *              
  * Returns:     TRUE :       Success
  *              FALSE:       size != size sent by UART
- *
+ *              
  ****************************************************************************/
 BOOLEAN GSE_write(const void *buf, UINT16 size)
 {
@@ -361,7 +361,7 @@ BOOLEAN GSE_write(const void *buf, UINT16 size)
       result = TRUE;
     }
   }
-
+  
   return TPU( result, eTpGseWrite);
 }
 
@@ -374,10 +374,10 @@ BOOLEAN GSE_write(const void *buf, UINT16 size)
  *
  * Parameters:  [in] buf: Pointer to buffer location
  *              [in] size: Size, number of bytes to write from "buf"
- *
+ *              
  * Returns:     > 0:       Success, number of bytes read
  *              -1 :       Error returned by UART_Receive
- *
+ *              
  ****************************************************************************/
 INT16 GSE_read(void *buf, UINT16 size)
 {
@@ -388,7 +388,7 @@ INT16 GSE_read(void *buf, UINT16 size)
   {
     result = size_read;
   }
-
+  
   return (INT16)TPU( result, eTpGseRead);
 }
 
@@ -408,9 +408,9 @@ INT16 GSE_read(void *buf, UINT16 size)
 *
 ****************************************************************************/
 void GSE_ToggleDisplayLiveStream(void)
-{
+{ 
   // Disable the volatile-state flags for all controlled types
-
+  
   // Disable livedata output stream
   SensorDisableLiveStream();
 
@@ -435,8 +435,8 @@ void GSE_ToggleDisplayLiveStream(void)
 * Function:    GSE_DebugStr
 *
 * Description: Print a debug string, up to 80 characters to the GSE console.
-*              Function provides printf-like functionality, with a variable
-*              length argument list.  The str format is the same as the printf
+*              Function provides printf-like functionality, with a variable 
+*              length argument list.  The str format is the same as the printf 
 *              functions.
 *
 *              The caller is responsible for ensuring the resulting
@@ -451,7 +451,7 @@ void GSE_ToggleDisplayLiveStream(void)
 *                             than the DbgLevel parameter
 *              [in] Timestamp: TRUE: Print a timestamp before the message
 *                              FALSE: Omit the timestamp
-*              [in] str:      Formatted string to print to the console.
+*              [in] str:      Formatted string to print to the console.  
 *              [in] ...:      Variable number of arguments for any "%" tokens
 *                             in the string.
 *
@@ -459,10 +459,10 @@ void GSE_ToggleDisplayLiveStream(void)
 *              If the flag is set, the routine will attempt to print an
 *              error message on subsequent calls to the GSE_DebugStr routine.
 *
-* Notes:
+* Notes:       
 *
 *****************************************************************************/
-void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
+void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp, 
                    const CHAR* str, ...)
 {
   //Check the current debug level, print the debug message if the message level
@@ -478,15 +478,15 @@ void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
 /*****************************************************************************
 * Function:    GSE_StatusStr
 *
-* Description: Simplified version of GSE_DebugStr.  Prints out a string to the
-*              GSE port as it is passed in without appending newlines or date
+* Description: Simplified version of GSE_DebugStr.  Prints out a string to the 
+*              GSE port as it is passed in without appending newlines or date 
 *              stamps.  GSE driver failures are ignored.
 *
 * Parameters:  [in] DbgLevel: Debug level to print the string out at.  The
 *                             string will only print to the console if the
 *                             current debug level is set equal to or higher
 *                             than the DbgLevel parameter
-*              [in] str:      Formatted string to print to the console.
+*              [in] str:      Formatted string to print to the console.  
 *              [in] ...:      Variable number of arguments for any "%" tokens
 *                             in the string.
 *
@@ -517,7 +517,7 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 *
 * Parameters:  [in] newLine : does the caller want a new line
 *              [in] showTime: does the caller want to display time
-*              [in] str:      Formatted string to print to the console.
+*              [in] str:      Formatted string to print to the console.  
 *              [in] args:     Variable number of arguments for any "%" tokens
 *                             in the string.
 *
@@ -527,7 +527,7 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 *              to be less than NORMAL.
 *
 *****************************************************************************/
-static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
+static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime, 
                               const CHAR* str, va_list args)
 {
     CHAR buf[1024];
@@ -541,7 +541,7 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
     if( showTime)
     {
       CM_GetSystemClock( &dateTime );
-      snprintf(buf,sizeof(buf),"[%02d:%02d:%02d.%03d] ",
+      snprintf(buf,sizeof(buf),"[%02d:%02d:%02d.%03d] ", 
         dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.MilliSecond);
       GSE_PutLine(buf);
     }
@@ -555,7 +555,7 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
- *
+ * 
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-11-12   Time: 8:14a
  * Updated in $/software/control processor/code/system
@@ -565,183 +565,183 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- *
+ * 
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 8/15/12    Time: 3:38p
  * Updated in $/software/control processor/code/system
  * SCR# 1152 - increase GSE debug buffer size
- *
+ * 
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 7:00p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - need a INT not an UINT
- *
+ * 
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 6:28p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 4:19p
  * Updated in $/software/control processor/code/system
  * SCR# 925 - forgot the include file
- *
+ * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 10/07/10   Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- *
+ * 
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 9/30/10    Time: 10:53p
  * Updated in $/software/control processor/code/system
- * SCR# 910 - WTF
- *
+ * SCR# 910 - WTF 
+ * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 9/30/10    Time: 10:20p
  * Updated in $/software/control processor/code/system
  * SCR# 910 - could not find strnlen replaced it with the old code
- *
+ * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 9/30/10    Time: 10:03p
  * Updated in $/software/control processor/code/system
  * SCR# 910 - Cleanup - remove else oops
- *
+ * 
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 7:54p
  * Updated in $/software/control processor/code/system
  * SCR 910 Code Coverage Changes
- *
+ * 
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 9/03/10    Time: 8:22p
  * Updated in $/software/control processor/code/system
  * SCR# 853 - UART Int Monitor
- *
+ * 
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 8/31/10    Time: 2:38p
  * Updated in $/software/control processor/code/system
  * SCR #840 Code Review Updates
- *
+ * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 7/29/10    Time: 8:06p
  * Updated in $/software/control processor/code/system
  * SCR #698 Code Review Updates
- *
+ * 
  * *****************  Version 10  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- *
+ * 
  * *****************  Version 9  *****************
  * User: Contractor2  Date: 7/13/10    Time: 2:30p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence & Box Config
  * Turn off debug strings on ESC
- *
+ * 
  * *****************  Version 8  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #8 Implementation: External Interrupt Monitors
- *
+ * 
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/22/10    Time: 6:25p
  * Updated in $/software/control processor/code/system
  * SCR #485 Escape Sequence and Box Configuration
- *
+ * 
  * *****************  Version 6  *****************
  * User: Contractor2  Date: 6/07/10    Time: 1:29p
  * Updated in $/software/control processor/code/system
  * SCR #486 Livedata enhancement
- *
+ * 
  * *****************  Version 5  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:57a
  * Updated in $/software/control processor/code/system
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- *
+ * 
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:10p
  * Updated in $/software/control processor/code/system
- * SCR #317 Implement safe strncpy SCR #451 Live Data terminated
- *
+ * SCR #317 Implement safe strncpy SCR #451 Live Data terminated 
+ * 
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 4/06/10    Time: 3:45p
  * Updated in $/software/control processor/code/system
  * SCR #526 - increase max GSE Tx buffer size
- *
+ * 
  * *****************  Version 2  *****************
  * User: Jeff Vahue   Date: 3/24/10    Time: 4:13p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - reversed parameter call in GSE_DebugStr to GSE_vDebugOutput
- *
+ * 
  * *****************  Version 1  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:35p
  * Created in $/software/control processor/code/system
  * SCR# 496 - Move GSE files from driver to system
- *
+ * 
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:29p
  * Updated in $/software/control processor/code/drivers
  * SCR #493 Code Review compliance
- *
+ * 
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/drivers
  * SCR# 483 - Function Names
- *
+ * 
  * *****************  Version 23  *****************
  * User: Contractor2  Date: 3/02/10    Time: 12:22p
  * Updated in $/software/control processor/code/drivers
  * SCR# 472 - Fix file/function header
- *
+ * 
  * *****************  Version 22  *****************
  * User: Jim Mood     Date: 2/24/10    Time: 10:49a
  * Updated in $/software/control processor/code/drivers
- *
+ * 
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 12:57p
  * Updated in $/software/control processor/code/drivers
  * SCR# 455 - remove LINT issues
- *
+ * 
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:34p
  * Updated in $/software/control processor/code/drivers
  * SCR# 378
- *
+ * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:42p
  * Updated in $/software/control processor/code/drivers
  * SCR 42
- *
+ * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 12/07/09   Time: 4:23p
  * Updated in $/software/control processor/code/drivers
  * SCR# 364 - typos ifdef
- *
+ * 
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 3:25p
  * Updated in $/software/control processor/code/drivers
  * Implementing SCR 196
- *
+ * 
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 11/17/09   Time: 4:10p
  * Updated in $/software/control processor/code/drivers
  * SCR #283-item 16 GSE Max Length magic number.  Also, added get char and
  * write binary fuctions for the binary log file transfer process
- *
+ * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 9/15/09    Time: 6:03p
  * Updated in $/software/control processor/code/drivers
  * SCR #94, #95 PBIT returns log structure to Init Mgr
- *
+ * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 9/14/09    Time: 3:48p
  * Updated in $/software/control processor/code/drivers
  * SCR #94 Updated Init for SET_CHECK() and return ERR CODE Struct
- *
+ * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 12:03p
  * Updated in $/control processor/code/drivers
  * SCR #87 Function Prototype
- *
+ * 
  *
  ***************************************************************************/

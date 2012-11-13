@@ -556,7 +556,7 @@ EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
- *
+ * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system

@@ -129,7 +129,7 @@ static void    EvalSetPrevSensorValue(UINT32 key,
                                       EVAL_EXE_CONTEXT* context,
                                       FLOAT32 fValue,
                                       BOOLEAN bValid);
-static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context);
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -909,7 +909,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalIsNotEqualPrev( EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
@@ -1134,12 +1134,11 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
  *
  * Description:
  *
- * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
+ *
+ * Returns:
  *
  * Notes:
  *
@@ -1155,7 +1154,7 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Have we reached limit count for operands?
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
+    retval = RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1173,7 +1172,7 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     }
     else
     {
-      retval = (INT32) RPN_ERR_CONST_VALUE_OTRG;
+      retval = RPN_ERR_CONST_VALUE_OTRG;
     }
   }
   return retval;
@@ -1184,13 +1183,11 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description: Add a "load const bool FALSE" to the cmd list.
  *
- * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
  *
+ * Returns:
  *
  * Notes: This cmd is used to represent a NO_COMPARE conditions which
  *        to False
@@ -1205,7 +1202,7 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Have we reached limit count for operands?
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
+    retval = RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1227,13 +1224,11 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]  tblIdx - table index
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
  *
+ * Returns:
  *
  * Notes:
  *
@@ -1248,7 +1243,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
+    retval = RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1298,12 +1293,11 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
+ *
+ * Returns:
  *
  * Notes:
  *
@@ -1328,13 +1322,11 @@ INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- ** Parameters:    [in]  tblIdx - table index 
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
  *
+ * Returns:
  *
  * Notes:
  *
@@ -1348,16 +1340,16 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Check the previous operation in list..
   // Verify that it is a sensor-load cmd and get idx-value stored
   // in Data so '!P' can make a call to load prev value at exe time.
-  if ( (UINT8)OP_GETSNRVAL == expr->CmdList[expr->Size - 1].opCode)
+  if ( OP_GETSNRVAL == expr->CmdList[expr->Size - 1].opCode)
   {
-    cmd.opCode = (UINT8)OP_NOT_EQ_PREV;
+    cmd.opCode = OP_NOT_EQ_PREV;
     cmd.data   = expr->CmdList[expr->Size - 1].data;
     expr->CmdList[expr->Size++] = cmd;
     retval = OpCodeTable[tblIdx].TokenLen;
   }
   else
   {
-    retval = (INT32) RPN_ERR_OP_REQUIRES_SENSOR_OPRND;
+    retval = RPN_ERR_OP_REQUIRES_SENSOR_OPRND;
   }
   return retval;
 }
@@ -1367,13 +1359,11 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]  tblIdx - table index 
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
  *
+ * Returns:
  *
  * Notes:
  *
@@ -1390,12 +1380,10 @@ INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description:
  *
- ** Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
+ * Returns:
  *
  * Notes:
  *
@@ -1411,12 +1399,10 @@ INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description: Return the token string from the opcode table for this tblIdx.
  *
- * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
+ * Returns:
  *
  * Notes:
  *
@@ -1432,12 +1418,11 @@ INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description:
  *
- * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
- *                [out] expr   - pointer to expression obj to be updated.
+ * Parameters:    [in]
  *
- * Returns:       value < 0    - processing error code.
- *                value >= 0   - the length of the string processed.
+ *                [out]
+ *
+ * Returns:
  *
  * Notes:
  *
@@ -1454,10 +1439,9 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  * Description: Get the previous sensor value for the !P command at the passed
  *              address.
  *
- * Parameters:    [in]     The lookup-key of the !P command
- *                [in/out] pointer to value to return
- *                [in/out] pointer to the validity to return
+ * Parameters:    [in] The address-value-key of the !P command
  *
+ *                [out] None
  *
  * Returns:   The last value or zero if this is the first call( address not in table.
  *
@@ -1470,7 +1454,7 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
                                       BOOLEAN* bPriorValid)
 {
   INT16 i;
-  INT16 idx = -1; // Init index to "not found"
+  INT16 index = -1; // Init index to "not found"
 
   // Search thru the general table to see if this
   // sensor is already being managed
@@ -1478,23 +1462,23 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
   {
     if (m_masterTbl[i].KeyField == key)
     {
-      idx = i;
+      index = i;
       break;
     }
   }
 
   // If we found the table entry, return values.
-  if (-1 != idx)
+  if (-1 != index)
   {
-    *fPriorValue = m_masterTbl[idx].PriorValue;
-    *bPriorValid = m_masterTbl[idx].PriorValid;
+    *fPriorValue = m_masterTbl[index].PriorValue;
+    *bPriorValid = m_masterTbl[index].PriorValid;
   }
   else
   {
     *fPriorValue = 0.f;
     *bPriorValid = FALSE;
   }
-  return ( -1 != idx );
+  return ( -1 != index );
 }
 
 
@@ -1505,14 +1489,11 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
  *              cmd in the temporary table. ( This table's contents will be merged
  *              into the m_masterTbl at the end of processing for this expression.
  *
- * Parameters:    [in] key     - search key for this prev sensor value.
- *                [in] context - to be updated.
- *                [in] fValue  - value to be store
- *                [in] bValid  - valid state of the value.
+ * Parameters:    [in]
  *
  *                [out]
  *
- * Returns:       None.
+ * Returns:
  *
  * Notes:
  *
@@ -1527,7 +1508,7 @@ static void EvalSetPrevSensorValue(UINT32 key,
   UINT32 objType = EVAL_GET_TYPE(key);
   BOOLEAN status = FALSE;
 
-  if ( (EVAL_CALLER_TYPE)objType > EVAL_CALLER_TYPE_PARSE && (EVAL_CALLER_TYPE)objType < MAX_EVAL_CALLER_TYPE)
+  if (objType > EVAL_CALLER_TYPE_PARSE && objType < MAX_EVAL_CALLER_TYPE)
   {
     // Lookup entry in temp table and update it.
     for(i = 0; i < context->tempTblCnt; ++i)
@@ -1565,17 +1546,17 @@ static void EvalSetPrevSensorValue(UINT32 key,
  *              cmd in the temporary table. ( This table's contents will be merged
  *              into the m_masterTbl at the end of processing for this expression.
  *
- * Parameters:    [in] execution context
+ * Parameters:    [in]
  *
  *                [out]
  *
- * Returns:       Boolean indicating whether the master and context tables
+ * Returns:
  *
  * Notes:
  *
  *
  *****************************************************************************/
-static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 {
   INT16 idxTempTbl;
   INT16 idxMastTbl;
@@ -1592,8 +1573,8 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
     {
       if (context->tempTbl[idxTempTbl].KeyField == m_masterTbl[idxMastTbl].KeyField)
       {
-        //m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
-        //m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
+        m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
+        m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
         ++updateCnt;
         bFound = TRUE;
         break;
@@ -1626,7 +1607,7 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- *
+ * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:35p
  * Updated in $/software/control processor/code/drivers

@@ -225,7 +225,7 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
  * User: John Omalley Date: 12-10-18   Time: 1:56p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Design Review Updates
- *
+ * 
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

@@ -893,7 +893,7 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
 /**********************************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
- *
+ * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:49a
  * Updated in $/software/control processor/code/application

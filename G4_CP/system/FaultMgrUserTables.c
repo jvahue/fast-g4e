@@ -23,11 +23,11 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Defines                                                             */
+/* Local Defines                                                             */ 
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Typedefs                                                            */
+/* Local Typedefs                                                            */  
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -391,13 +391,13 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 }
 
 /*****************************************************************************/
-/* Local Functions                                                           */
+/* Local Functions                                                           */  
 /*****************************************************************************/
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
- *
+ * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-09   Time: 5:04p
  * Updated in $/software/control processor/code/system
@@ -407,7 +407,7 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Changed Actions to UINT8
- *
+ * 
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

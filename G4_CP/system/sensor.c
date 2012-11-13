@@ -1930,7 +1930,7 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
- *
+ * 
  * *****************  Version 78  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

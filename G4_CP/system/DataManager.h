@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 41 $  $Date: 12-11-12 4:46p $
+      $Revision: 42 $  $Date: 12-11-13 11:10a $
 
 ******************************************************************************/
 
@@ -98,20 +98,20 @@ typedef struct
    UINT32    nSize;
    UINT32    nStart_ms;
    UINT32    nDuration_ms;
-   TIMESTAMP RequestTime;
-   TIMESTAMP FoundTime;
+   TIMESTAMP requestTime;
+   TIMESTAMP foundTime;
 } DATA_MNG_DOWNLOAD_RECORD_STATS;
 
 #pragma pack(1)
 typedef struct
 {
-   CHAR   Model[MAX_ACS_NAME];
-   CHAR   ID[MAX_ACS_NAME];
+   CHAR   model[MAX_ACS_NAME];
+   CHAR   id[MAX_ACS_NAME];
    UINT32 nChannel;
-   CHAR   RecordStatus[MAX_LOG_STR_LG];
-   CHAR   CurrentBuffer[MAX_LOG_STR_SM];
-   CHAR   BufferStatus[MAX_LOG_STR_SM];
-   CHAR   WriteStatus[MAX_LOG_STR_LG];
+   CHAR   recordStatus[MAX_LOG_STR_LG];
+   CHAR   currentBuffer[MAX_LOG_STR_SM];
+   CHAR   bufferStatus[MAX_LOG_STR_SM];
+   CHAR   writeStatus[MAX_LOG_STR_LG];
 } DM_FAIL_DATA;
 
 typedef struct
@@ -119,23 +119,23 @@ typedef struct
    UINT32                         nChannel;
    UINT32                         nRcvd;
    UINT32                         nTotalBytes;
-   TIMESTAMP                      StartTime;
-   TIMESTAMP                      EndTime;
+   TIMESTAMP                      startTime;
+   TIMESTAMP                      endTime;
    UINT32                         nStart_ms;
    UINT32                         nDuration_ms;
-   DATA_MNG_DOWNLOAD_RECORD_STATS LargestRecord;
-   DATA_MNG_DOWNLOAD_RECORD_STATS SmallestRecord;
-   DATA_MNG_DOWNLOAD_RECORD_STATS LongestRequest;
-   DATA_MNG_DOWNLOAD_RECORD_STATS ShortestRequest;
+   DATA_MNG_DOWNLOAD_RECORD_STATS largestRecord;
+   DATA_MNG_DOWNLOAD_RECORD_STATS smallestRecord;
+   DATA_MNG_DOWNLOAD_RECORD_STATS longestRequest;
+   DATA_MNG_DOWNLOAD_RECORD_STATS shortestRequest;
 } DM_DOWNLOAD_STATISTICS;
 
 typedef struct
 {
    UINT32        nChannel;
-   CHAR          Model[MAX_ACS_NAME];
-   CHAR          ID[MAX_ACS_NAME];
-   ACS_PORT_TYPE PortType;
-   UINT8         PortIndex;
+   CHAR          model[MAX_ACS_NAME];
+   CHAR          id[MAX_ACS_NAME];
+   ACS_PORT_TYPE portType;
+   UINT8         portIndex;
 } DM_DOWNLOAD_START_LOG;
 #pragma pack()
 
@@ -155,11 +155,11 @@ typedef struct
 typedef struct
 {
    DM_PACKET           packet;
-   DATA_MNG_BUF_STATUS Status;
-   UINT16              Index;
-   TIMESTAMP           PacketTs;
-   UINT32              TryTime_mS;
-   LOG_REQ_STATUS      WrStatus;
+   DATA_MNG_BUF_STATUS status;
+   UINT16              index;
+   TIMESTAMP           packetTs;
+   UINT32              tryTime_mS;
+   LOG_REQ_STATUS      wrStatus;
    DL_WRITE_STATUS     *pDL_Status;
 } DATA_MNG_BUFFER;
 
@@ -167,38 +167,38 @@ typedef struct
 {
    BOOLEAN                bDownloading;
    BOOLEAN                bDownloadStop;
-   DL_STATE               State;
+   DL_STATE               state;
    UINT8                  *pDataSrc;
    UINT32                 nBytes;
-   DM_DOWNLOAD_STATISTICS Statistics;
+   DM_DOWNLOAD_STATISTICS statistics;
 } DATA_MNG_DOWNLOAD_STATUS;
 
 typedef struct
 {
-   ACS_CONFIG               ACS_Config;
-   DATA_MNG_RECORD          RecordStatus;
-   UINT32                   StartTime_mS;
-   UINT32                   CurrTime_mS;
-   UINT32                   NextTime_mS;
+   ACS_CONFIG               acs_Config;
+   DATA_MNG_RECORD          recordStatus;
+   UINT32                   nStartTime_mS;
+   UINT32                   nCurrTime_mS;
+   UINT32                   nNextTime_mS;
    BOOLEAN                  bBufferOverflow;
-   UINT16                   CurrentBuffer;
-   DATA_MNG_BUFFER          MsgBuf[MAX_DM_BUFFERS];
-   DATA_MNG_DOWNLOAD_STATUS DL;
+   UINT16                   nCurrentBuffer;
+   DATA_MNG_BUFFER          msgBuf[MAX_DM_BUFFERS];
+   DATA_MNG_DOWNLOAD_STATUS dl;
 }DATA_MNG_INFO;
 
 typedef struct
 {
    UINT16          nChannel;
-   GET_DATA        GetData;
-   GET_SNAP        GetSnapShot;
-   DO_SYNC         DoSync;
-   GET_HDR         GetDataHdr;
+   GET_DATA        pGetData;
+   GET_SNAP        pGetSnapShot;
+   DO_SYNC         pDoSync;
+   GET_HDR         pGetDataHdr;
 } DATA_MNG_TASK_PARMS;
 
 typedef struct
 {
-   UINT32        Version;
-   ACS_PORT_TYPE Type;
+   UINT32        version;
+   ACS_PORT_TYPE type;
 } DATA_MNG_HDR;
 
 /******************************************************************************
@@ -239,6 +239,11 @@ EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLE
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 42  *****************
+ * User: John Omalley Date: 12-11-13   Time: 11:10a
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Code Review Formatting Issues
  * 
  * *****************  Version 41  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

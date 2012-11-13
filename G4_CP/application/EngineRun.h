@@ -76,7 +76,7 @@ typedef enum
   /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
-  ER_STATE_RUNNING,     /* Engine running for this engine run  */  
+  ER_STATE_RUNNING,     /* Engine running for this engine run  */
 } ER_STATE;
 
 
@@ -232,7 +232,7 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
  * User: Jim Mood     Date: 11/09/12   Time: 6:34p
  * Updated in $/software/control processor/code/application
  * SCR 1131 Recording busy status
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application

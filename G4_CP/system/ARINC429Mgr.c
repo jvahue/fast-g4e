@@ -3690,7 +3690,7 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
- *
+ * 
  * *****************  Version 54  *****************
  * User: John Omalley Date: 12-11-12   Time: 7:19p
  * Updated in $/software/control processor/code/system
