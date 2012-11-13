@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 16 $  $Date: 11/08/12 4:28p $
+ $Revision: 17 $  $Date: 12-11-12 6:26p $
 
 ******************************************************************************/
 
@@ -247,7 +247,16 @@ void ActionInitPersist ( void )
  * Returns:      INT8 - ID for the requested action
  *
  * Notes:        This function returns an ID when called with nReqNum = -1
- *               The ID can then be used to deactivate the action.
+ *               The ID can then be used to deactivate the action. 
+ *               Action IDs should be requested once per object because we are 
+ *               limited to 128 IDs. 
+ *               Currently using:
+ *                  Events          32
+ *                  Event Tables     8
+ *                  Trends           5
+ *                  Fault Mgr        1
+ *                                 ---
+ *                  Total           46
  *
  *****************************************************************************/
 INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
@@ -968,6 +977,11 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 12-11-12   Time: 6:26p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
  * 
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p

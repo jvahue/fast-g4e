@@ -25,7 +25,7 @@
 #include "alt_basic.h"
 #include "EvaluatorInterface.h"
 /******************************************************************************
-                      Package Defines                               
+                      Package Defines
 ******************************************************************************/
 //  Each expression must also accommodate X operators per input.
 //  Defined as 2, each operand can have 1 unary ! and two operands have one binary & or |
@@ -72,7 +72,7 @@
 
 
 /******************************************************************************
-                             Package Typedefs                              
+                             Package Typedefs
 ******************************************************************************/
 
 
@@ -106,23 +106,23 @@ typedef enum
 }DATATYPE;
 
 // Note: Keep this enum in sync with EvalRetValEnumString[]
-typedef enum                                                                                      
-{                                                                                                 
-  RPN_ERR_UNKNOWN                  =  0,  // place unused.                                        
-  RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index                      
-  RPN_ERR_INVALID_TOKEN            = -2,  // Unrecognized operand input name                      
-  RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range                                   
-  RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.                 
-  RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand                 
-  RPN_ERR_CONST_VALUE_OTRG         = -6,  // Const value out of range for FLOAT32                 
-  RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present   
-  RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation       
-  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack                      
+typedef enum
+{
+  RPN_ERR_UNKNOWN                  =  0,  // place unused.
+  RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index
+  RPN_ERR_INVALID_TOKEN            = -2,  // Unrecognized operand input name
+  RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range
+  RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.
+  RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand
+  RPN_ERR_CONST_VALUE_OTRG         = -6,  // Const value out of range for FLOAT32
+  RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present
+  RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation
+  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack
   RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval
   RPN_ERR_NOT_PREV_TABLE_FULL      = -11, // The table storing Prior-sensor values is full.
-  //-----                                                                                         
-  RPN_ERR_MAX                      = -12                                                          
-}RPN_ERR;    
+  //-----
+  RPN_ERR_MAX                      = -12
+}RPN_ERR;
 
 typedef enum
 {
@@ -167,7 +167,7 @@ typedef struct
 // 0x0000FF00 - Object ID 00-255
 // 0x00FF0000 - Object Type 0- Trigger, 1- Event, etc
 
-typedef struct  
+typedef struct
 {
   UINT32  KeyField; // Lookup key - GUID for use of this sensor in a given object(Trig, Event)
   FLOAT32 PriorValue;// The previous stored value of this sensor.
@@ -176,7 +176,7 @@ typedef struct
 
 // Structure used during expression execution to
 // define context
-typedef struct  
+typedef struct
 {
   const EVAL_CMD*    cmd;      // Pointer to currently executing cmd in Expression.
   UINT8              objType;  // Object type of current caller.
@@ -212,7 +212,7 @@ typedef struct
   GET_BOOL_FUNC*  IsSrcConfigured;  // Return is input source configured?
   GET_VALUE_FUNC* GetSrcByValue;    // Return source input data as FP number.
   GET_BOOL_FUNC*  GetSrcByBool;     // Return source input data as boolean.
-  GET_BOOL_FUNC*  GetSrcValidity;   // Return source validity 
+  GET_BOOL_FUNC*  GetSrcValidity;   // Return source validity
 }EVAL_DATAACCESS;
 
 /******************************************************************************
@@ -282,57 +282,57 @@ INT16 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
- * 
+ *
  * *****************  Version 15  *****************
  * User: Melanie Jutras Date: 12-11-07   Time: 1:09p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 File Format Errors
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
  * Updated in $/software/control processor/code/drivers
  * SCR# 1107 - !P Table Full processing
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Issue #24 Eval: Not Equal Previous does not work
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:32a
  * Updated in $/software/control processor/code/drivers
  * SCR 1107 - Evaluator Bug Fixes
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 8/22/12    Time: 5:29p
  * Updated in $/software/control processor/code/drivers
  * FAST 2 Issue #14 Coverage: Use assert vs. if/then/else
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:22p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Issue # 20 Eval operand names like FSM
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 Add FALSE boolean constant
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:27p
  * Updated in $/software/control processor/code/drivers
  * FAST 2 Add accessor for running engs
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 4/27/12    Time: 4:03p
  * Updated in $/software/control processor/code/drivers
