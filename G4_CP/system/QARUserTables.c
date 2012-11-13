@@ -8,7 +8,7 @@
     Description: User commands definition for QAR Manager
 
     VERSION
-    $Revision: 38 $  $Date: 8/28/12 1:43p $
+    $Revision: 39 $  $Date: 12-11-13 2:42p $
     
 ******************************************************************************/
 #ifndef QAR_MANAGER_BODY
@@ -274,6 +274,10 @@ static USER_MSG_TBL QarRootTblPtr = {"QAR",QarRoot,NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
 /******************************************************************************
@@ -385,12 +389,12 @@ USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
  *              Retreives the latest state values from the QAR driver and
  *              returns the specific state value to the user module
  *              
- * Parameters:  [in/out] Data
- *                       [in] TableData.MsgParam indicates what state member
+ * Parameters:  [in/out] DataType
+ *              [in]  Param - TableData.MsgParam indicates what state member
  *                                               to get
- *                            Index            
- *                            SetPtr           
- *                       [out]TableData.GetPtr Writes the state GetPtr to 
+ *                    Index            
+ *                    SetPtr           
+ *              [out] GetPtr - TableData.GetPtr Writes the state GetPtr to 
  *                                             reference the State member
  *                                             requested
  *
@@ -416,12 +420,12 @@ USER_HANDLER_RESULT QARMsg_State(USER_DATA_TYPE DataType,
  *
  * Description: 
  *              
- * Parameters:  [in/out] Data
- *                       [in] TableData.MsgParam indicates what state member
+ * Parameters:  [in/out] DataType
+ *              [in]  Param - TableData.MsgParam indicates what state member
  *                                               to get
- *                            Index     
- *                            SetPtr    
- *                       [out]TableData.GetPtr Writes the state GetPtr to 
+ *                    Index     
+ *                    SetPtr    
+ *              [out] GetPtr - TableData.GetPtr Writes the state GetPtr to 
  *                                             reference the State member
  *                                             requested
  *
@@ -455,11 +459,11 @@ USER_HANDLER_RESULT QARMsg_State_SubFrameOk(USER_DATA_TYPE DataType,
  *              returns the result the user module, or it sets the cfg member
  *              value if the SetPtr in the Data parameter is not null.
  *              
- * Parameters:  [in/out] Data
- *                       [in] TableData.MsgParam indicates what register to get
- *                            Index     
- *                       [in] SetPtr indicates if this is a "set" or "get"
- *                       [out]TableData.GetPtr Writes the register value to the
+ * Parameters:  [in/out] DataType
+ *              [in]  Param - TableData.MsgParam indicates what register to get
+ *                    Index     
+ *              [in]  SetPtr - indicates if this is a "set" or "get"
+ *              [out] GetPtr - TableData.GetPtr Writes the register value to the
  *                                             integer pointed to by User.c
  *
  * Returns:     USER_RESULT_OK:    Processed sucessfully
@@ -504,11 +508,11 @@ USER_HANDLER_RESULT QARMsg_Cfg(USER_DATA_TYPE DataType,
  *              returns the result the user module, or it sets the cfg member
  *              value if the SetPtr in the Data parameter is not null.
  *              
- * Parameters:  [in/out] Data
- *                       [in] TableData.MsgParam indicates what register to get
- *                       [in] Index indicates which barker code to get 0-3
- *                       [in] SetPtr indicates if this is a "set" or "get"
- *                       [out]TableData.GetPtr Writes the register value to the
+ * Parameters:  [in/out] DataType
+ *              [in]  Param - TableData.MsgParam indicates what register to get
+ *              [in]  Index - indicates which barker code to get 0-3
+ *              [in]  SetPtr - indicates if this is a "set" or "get"
+ *              [out] GetPtr - TableData.GetPtr Writes the register value to the
  *                                             integer pointed to by User.c
  *
  * Returns:     USER_RESULT_OK:    Processed sucessfully
@@ -669,6 +673,11 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: QARUserTables.c $
+ * 
+ * *****************  Version 39  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:42p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 38  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 27 $  $Date: 9/14/12 4:06p $
+   $Revision: 28 $  $Date: 11/13/12 4:18p $
     
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -133,6 +133,7 @@ static USER_MSG_TBL StatusFlagsCmd [] =
   { "ON_GROUND",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &FASTStatus.OnGround,       -1,-1,       NO_LIMIT,   NULL },
   { "RF_GSM",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &FASTStatus.RfGsmEnable,    -1,-1,       NO_LIMIT,   NULL },
   { "WLAN_POWER",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &FASTStatus.WlanPowerEnable,-1,-1,       NO_LIMIT,   NULL },
+  { "BUSY_FLAGS",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_HEX32,   USER_RO,    &m_RecordBusyFlags,         -1,-1,       NO_LIMIT,   NULL },
   { NULL,          NULL,            NULL,                 NO_HANDLER_DATA}
 };
 
@@ -497,6 +498,11 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
  * 
+ * *****************  Version 28  *****************
+ * User: Jim Mood     Date: 11/13/12   Time: 4:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1131
+ *
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:06p
  * Updated in $/software/control processor/code/application

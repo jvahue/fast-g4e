@@ -5,10 +5,12 @@
 
     File:        UartMgrUserTables.c
     
-    Description: Routines to support the user commands for UartMgr 
+    Description: Routines to support the user commands for UartMgr
+
+    Note:
 
     VERSION
-    $Revision: 13 $  $Date: 12-11-12 3:04p $
+    $Revision: 15 $  $Date: 12-11-13 5:46p $
     
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -21,7 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -30,9 +31,8 @@
 #include "stddefs.h"
 #include "CfgManager.h"
 
-
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 #define STR_LIMIT_UART_MGR 0,32
 
@@ -41,6 +41,14 @@
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static UARTMGR_STATUS UartMgrStatusTemp; 
+static UARTMGR_CFG UartMgrCfgTemp; 
+
+static UARTMGR_DEBUG UartMgrDebugTemp; 
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -73,15 +81,6 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static UARTMGR_STATUS UartMgrStatusTemp; 
-static UARTMGR_CFG UartMgrCfgTemp; 
-
-static UARTMGR_DEBUG UartMgrDebugTemp; 
-
-
-/********************************/
-/* Local Str Defintions Tables  */
-/********************************/
 USER_ENUM_TBL UartMgrProtocolStrs[] =
 {
   {"NONE",        UARTMGR_PROTOCOL_NONE},
@@ -140,9 +139,9 @@ USER_ENUM_TBL UartMgrsDuplexStrs[] =
 };
 
 
-/*****************************************/
-/* User Table Defintions                 */
-/*****************************************/
+//--------------------------------------------
+// User Table Defintions              
+//--------------------------------------------
 USER_MSG_TBL UartMgrStatusTbl[] = 
 {
   {"CHAN_ACTIVE",NO_NEXT_TABLE,UartMgrMsg_Status, 
@@ -200,23 +199,23 @@ USER_MSG_TBL UartMgrStatusTbl[] =
 USER_MSG_TBL UartMgrPortCfgTbl[] = 
 {
   {"BPS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.nBPS, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.port.nBPS, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrBPSStrs},
           
   {"DATABITS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.dataBits, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.port.dataBits, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsDBStrs},
           
   {"STOPBITS",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.stopBits, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.port.stopBits, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrSBStrs},
 
   {"PARITY",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.parity, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.port.parity, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsParityStrs},
           
   {"DUPLEX",NO_NEXT_TABLE,UartMgrMsg_Cfg, 
-          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.Port.duplex, 
+          USER_TYPE_ENUM,USER_RW,(void *) &UartMgrCfgTemp.port.duplex, 
           1,UART_NUM_OF_UARTS-1,NO_LIMIT,UartMgrsDuplexStrs},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -300,6 +299,10 @@ USER_MSG_TBL UartMgrRoot[] =
 
 
 USER_MSG_TBL UartMgrRootTblPtr = {"UART",UartMgrRoot,NULL,NO_HANDLER_DATA};
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 
 /*****************************************************************************/
@@ -410,7 +413,7 @@ USER_HANDLER_RESULT UartMgrMsg_Cfg(USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
- * Function:    UartMgrMsg_Cfg 
+ * Function:    UartMgrMsg_Debug 
  *
  * Description: Called by the User.c module from the reference to this function
  *              in the user message tables above.
@@ -524,6 +527,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 12-11-12   Time: 3:04p

@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 19 $  $Date: 12-10-19 1:23p $     
+      $Revision: 20 $  $Date: 12-11-13 1:37p $     
 
 ******************************************************************************/
 
@@ -736,7 +736,7 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
  *
  * Description: Utility function to request current F7XProtocol[index] status
  *
- * Parameters:  Index - Uart Port Index 
+ * Parameters:  index - Uart Port Index 
  *
  * Returns:     Ptr to F7X Status data 
  *
@@ -754,7 +754,7 @@ F7X_STATUS_PTR F7XProtocol_GetStatus (UINT8 index)
  *
  * Description: Utility function to request current F7XProtocol[index] Cfg
  *
- * Parameters:  Index - Uart Port Index 
+ * Parameters:  index - Uart Port Index 
  *
  * Returns:     Ptr to F7X Cfg data
  *
@@ -1945,6 +1945,8 @@ void F7XProtocol_RestoreAppData( void )
  * Returns:      BOOLEAN TRUE  The file reset was successful.
  *                       FALSE The file reset failed.
  *
+ * Notes:        None
+ *
  *****************************************************************************/
 BOOLEAN F7XProtocol_FileInit(void)
 {
@@ -1990,6 +1992,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:37p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 1:23p

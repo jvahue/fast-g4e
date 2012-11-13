@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 74 $  $Date: 12-11-12 11:36a $
+    $Revision: 75 $  $Date: 12-11-13 5:46p $
 
 
 ******************************************************************************/
@@ -148,13 +148,15 @@ static IO_RESULT NV_DEV_LIST;
 //          NV_DevInfo[] allocation and initialization
 #undef NV_DEV
 #define NV_DEV(Id,Size,SectorSize,Offset,SectorTimeoutMs,reset,Read,Write)\
-{Size,SectorSize,Offset,SectorTimeoutMs,reset,Id##_Shadow, Id##_sectorIoResult, Id##_RefCount, &Id##_DevSem, Write, Read}
+  {Size,SectorSize,Offset,SectorTimeoutMs,reset,Id##_Shadow, Id##_sectorIoResult,\
+  Id##_RefCount, &Id##_DevSem, Write, Read}
 static const NV_DEV_INFO  NV_DevInfo[NV_MAX_DEV]  = {NV_DEV_LIST};
 
 
 //          NV_FileInfo[] allocation and initialization
 #undef NV_FILE
-#define NV_FILE(Id, Name, Primary, Backup, CSum, ResetFlag, Size) {Size, Primary, Backup, CSum, ResetFlag}
+#define NV_FILE(Id, Name, Primary, Backup, CSum, ResetFlag, Size)\
+  {Size, Primary, Backup, CSum, ResetFlag}
 static const NV_FILE_INFO NV_FileInfo[NV_MAX_FILE] = {NV_FILE_LIST};
 
 
@@ -310,7 +312,7 @@ void NV_Init(void)
  *              The file verification checks the 16-bit CRC of each file,
  *              and if both files are valid an identical
  *
- * Parameters:  NV_FILE_ID: File ID of the file to open
+ * Parameters:  NV_FILE_ID FileID: File ID of the file to open
  *
  * Returns:     SYS_OK: File opened successfully
  *              SYS_NV_FILE_OPEN_ERR: Could not open a valid copy of the file.
@@ -488,7 +490,7 @@ RESULT NV_Open(NV_FILE_ID FileID)
 *
 * Description: Close sets the open flag to false
 *
-* Parameters:  NV_FILE_ID: File ID of the file to open
+* Parameters:  NV_FILE_ID FileID: ID of the file to open
 *
 * Returns:     none
 *
@@ -831,62 +833,6 @@ RESULT NV_WriteNow(NV_FILE_ID FileID, UINT32 Offset, void* Data, UINT32 Size)
   return result;
 }
 
-/******************************************************************************
-* Function:    NV_WriteState
-*
-* Description:
-*
-* Parameters:  [in] FileID: ID of the file to write
-*              [in] Offset: Offset, in bytes, to write the block to from the
-*                           start if the file*
-*              [in] Size:   Size of the data block to write
-*
-* Returns:     SYS_OK:              Write successful, data has been copied
-*                                   to the shadow.
-*              SYS_NV_WRITE_PENDING Write operation is pending.
-* Notes:
-*
-*****************************************************************************/
-/*
-RESULT NV_WriteState(NV_FILE_ID FileID, UINT32 Offset, UINT32 Size)
-{
-  NV_RUNTIME_INFO* File;
-  INT32 SectorsWritten, FirstSector,i,j;
-  RESULT result = SYS_OK;
-
-  //Check dirty bits in the primary file
-  FirstSector = (File->PrimaryOffset + Offset) / File->PrimaryDev->SectorSize;
-  SectorsWritten = 1 +
-    ((File->PrimaryOffset + Offset + Size) / File->PrimaryDev->SectorSize) -
-    ((File->PrimaryOffset + Offset) / File->PrimaryDev->SectorSize);
-
-  DirtyBitByteOffset = FirstSector / 8;
-
-  //Turn the Bit Offset into a bit mask.
-  j = BitToBitMask(FirstSector % 8);
-
-  //Search for set dirty bits in the section read by the caller
-  for( i = 0; i < SectorsWritten; i++)
-  {
-    if(File->PrimaryDev->DirtyBits[DirtyBitByteOffset] & j)
-    {
-      //If a set dirty bit is found, set a flag and exit the search loop
-      result = SYS_NV_WRITE_PENDING;
-      break;
-    }
-    j = j << 1;
-
-    //Increment to the next byte on once the last bit has been tested
-    if(j == 256)
-    {
-      DirtyBitByteOffset++;
-      j = 1;
-    }
-  }
-  return result;
-}
-*/
-
 /*****************************************************************************
 * Function:    NV_Erase
 *
@@ -895,7 +841,7 @@ RESULT NV_WriteState(NV_FILE_ID FileID, UINT32 Offset, UINT32 Size)
 *              The file verification checks the 16-bit CRC of each file,
 *              and if both files are valid an identical
 *
-* Parameters:  NV_FILE_ID: File ID of the file to erase
+* Parameters:  NV_FILE_ID FileID: ID of the file to erase
 *
 * Returns:     none
 *
@@ -1012,91 +958,6 @@ void NV_ResetConfig(void)
 }
 
 /******************************************************************************
- * Function:    NV_ReadDev
- *
- * Description: Low-level raw read of data from an NV storage device.
- *              ONLY TO BE USED FOR DEBUG AND TESTING
- *
- * Parameters:  [in] DevID: ID of the file to write
- *              [out]Data:  Pointer to a buffer to receive the data to.
- *              [in] Offset:Location to start read
- *              [in] Size:  Number of bytes to read
- *
- * Returns:     SYS_OK:                   Erase successful
- *              SYS_NV_READ_DRIVER_FAIL: Erase fail
- * Notes:
- *
- *****************************************************************************/
-/*
-RESULT NV_ReadDev(NV_DEVS_ID DevID, void* Data, UINT32 Offset, UINT32 Size)
-{
- INT32  TotalRead = 0,SizeRead = 0;
- RESULT result = SYS_OK;
-
-  //Read data from external device.
-  for(TotalRead = 0;TotalRead < Size;)
-  {
-    SizeRead = NV_DevInfo[DevID].Read(Data,
-        NV_DevInfo[DevID].Offset+Offset+TotalRead,
-        Size-TotalRead);
-
-    //If write fatal error
-    if(-1 == SizeRead)
-    {
-      result = SYS_NV_WRITE_DRIVER_FAIL;
-      break;
-    }
-    TotalRead += SizeRead;
-  }
-  return result;
-}
-*/
-
-
-/******************************************************************************
- * Function:    NV_WriteDev
- *
- * Description: Low-level raw read of write from an NV storage device.
- *              ONLY TO BE USED FOR DEBUG AND TESTING
- *
- * Parameters:  [in] DevID: ID of the file to write
- *              [out]Data:  Pointer to a buffer to receive the data to.
- *              [in] Offset:Location to start read
- *              [in] Size:  Number of bytes to read
- *
- * Returns:     SYS_OK:                   Erase successful
- *              SYS_NV_READ_DRIVER_FAIL: Erase fail
- * Notes:
- *
- *****************************************************************************/
- /*
-RESULT NV_WriteDev(NV_DEVS_ID DevID, void* Data, UINT32 Offset, UINT32 Size)
-{
- INT32  TotalWritten = 0,SizeWritten = 0;
- RESULT result = SYS_OK;
-
-  //Read data from external device.
-  for(TotalWritten = 0;TotalWritten < Size;)
-  {
-    SizeWritten = NV_DevInfo[DevID].Write(Data,
-        NV_DevInfo[DevID].Offset+Offset+TotalWritten,
-        Size-TotalWritten);
-
-    //If write fatal error
-    if(-1 == SizeWritten)
-    {
-      result = SYS_NV_WRITE_DRIVER_FAIL;
-      break;
-    }
-    TotalWritten += SizeWritten;
-  }
-  return result;
-}
-*/
-
-
-
-/******************************************************************************
  * Function:    NV_EERead
  *
  * Description: Device read function.  See NVMGR_DEV_READ_FUNC typedef.
@@ -1104,7 +965,7 @@ RESULT NV_WriteDev(NV_DEVS_ID DevID, void* Data, UINT32 Offset, UINT32 Size)
  *              See the NV_READ_FUNC typedef for functional description.
  *
  * Parameters:  [in] DestAddr: Pointer to a block to receive the read data
- *              [in] PhyOffset:  Offset to start read from within this device
+ *              [in] PhysicalOffset:  Offset to start read from within this device
  *              [in} Size:       Requested number of bytes to read
  *
  * Returns:     >= 0: Size read
@@ -1143,7 +1004,7 @@ INT32 NV_EERead(void* DestAddr, UINT32 PhysicalOffset, UINT32 Size)
  *
  *
  * Parameters:  [in] SourceAddr: Pointer to the block to be written
- *              [in] PhyOffset:  Offset to write within this device
+ *              [in] PhysicalOffset:  Offset to write within this device
  *              [in] Size:       Requested number of bytes to write
  *              [in] ioResult:   Pointer to a enum passed by caller to
  *                               signal the completion status of the write.
@@ -1202,7 +1063,7 @@ INT32 NV_EEWrite(void* SourceAddr, UINT32 PhysicalOffset, UINT32 Size, IO_RESULT
  *              See the NV_READ_FUNC typedef for functional description.
  *
  * Parameters:  [in] DestAddr: Pointer to a block to receive the read data
- *              [in] PhyOffset:  Offset to start read from within this device
+ *              [in] PhysicalOffset:  Offset to start read from within this device
  *              [in} Size:       Requested number of bytes to read
  *
  * Returns:     >= 0: Size read
@@ -1239,7 +1100,7 @@ INT32 NV_RTCRead(void* DestAddr, UINT32 PhysicalOffset, UINT32 Size)
  *
  *
  * Parameters:  [in] SourceAddr: Pointer to the block to be written
- *              [in] PhyOffset:  Offset to write within this device
+ *              [in] PhysicalOffset:  Offset to write within this device
  *              [in} Size:       Requested number of bytes to write
  *              [in] ioResult:   Pointer to a enum passed by caller to
  *                               signal the completion status of the write.
@@ -1277,11 +1138,13 @@ INT32  NV_RTCWrite(void* SourceAddr, UINT32 PhysicalOffset, UINT32 Size, IO_RESU
  *              indicator.
  *
  *
- * Parameters:  [in] file number::
+ * Parameters:  [in] fileNum:
  *
  *
  * Returns:     pointer to the file name or NULL if the passed file # is
  *              out of range.
+ *
+ * Notes:
  *
  *****************************************************************************/
 NV_FILENAME* NV_GetFileName(NV_FILE_ID fileNum)
@@ -1301,13 +1164,15 @@ NV_FILENAME* NV_GetFileName(NV_FILE_ID fileNum)
  *              indicator.
  *
  *
- * Parameters:  [in] file number:
+ * Parameters:  [in] fileNum:
  *
  *
  * Returns:     String pointer to the file name or NULL if the passed file # is
  *              out of range.
  *
- *****************************************************************************/
+ * Notes:
+ *
+*****************************************************************************/
 INT32 NV_GetFileCRC(NV_FILE_ID fileNum)
 {
    INT32 Crc = 0x0000;
@@ -1323,7 +1188,7 @@ INT32 NV_GetFileCRC(NV_FILE_ID fileNum)
  *
  * Description:
  *
- * Parameters:  [in] FileID: ID of the file to to check for pending write
+ * Parameters:  [in] fileNum: ID of the file to to check for pending write
  *                           operations.
  *              [in] Offset: Offset, in bytes marking the starting point to
  *                            check for pending Writes
@@ -1833,7 +1698,12 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.c $
- * 
+ *
+ * *****************  Version 75  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 74  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 13 $  $Date: 12-11-12 2:58p $     
+      $Revision: 14 $  $Date: 12-11-13 5:46p $     
 
 ******************************************************************************/
 
@@ -115,7 +115,7 @@ typedef struct
   FLT_STATUS        channelSysCond; 
   FLT_STATUS        sysCondPBIT;  
   BOOLEAN           bEnabled;
-  UARTMGR_PORT_CFG  Port; 
+  UARTMGR_PORT_CFG  port; 
 } UARTMGR_CFG, *UARTMGR_CFG_PTR; 
 
 //A type for an array of the maximum number of uarts
@@ -449,6 +449,11 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:58p

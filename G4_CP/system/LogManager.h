@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 53 $  $Date: 12-11-12 9:48a $
+    $Revision: 54 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -370,7 +370,7 @@ typedef struct
 ******************************************************************************/
 #if defined ( LOGMNG_BODY )
 // Note: Updates to LOG_PRIORITY has dependency to LM_UserEnumPriority[]
-EXPORT USER_ENUM_TBL LM_UserEnumPriority[] =
+EXPORT USER_ENUM_TBL lm_UserEnumPriority[] =
 { { "1",   LOG_PRIORITY_1      },
   { "2",   LOG_PRIORITY_2      },
   { "3",   LOG_PRIORITY_3      },
@@ -378,7 +378,7 @@ EXPORT USER_ENUM_TBL LM_UserEnumPriority[] =
   { NULL,     0                      }
 };
 #else
-EXPORT USER_ENUM_TBL LM_UserEnumPriority[];
+EXPORT USER_ENUM_TBL lm_UserEnumPriority[];
 #endif
 
 /******************************************************************************
@@ -434,7 +434,12 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
- * 
+ *
+ * *****************  Version 54  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 53  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system

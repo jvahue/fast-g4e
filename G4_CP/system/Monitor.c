@@ -9,7 +9,7 @@
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 84 $  $Date: 12-11-12 2:09p $    
+      $Revision: 85 $  $Date: 12-11-13 2:15p $    
 ******************************************************************************/
 
 
@@ -875,6 +875,8 @@ static void MonitorSetMem (CHAR* valueType, CHAR* address, CHAR* value, CHAR* fp
  *
  * Returns:     TRUE when written, FALSE otherwise
  *
+ * Notes:       None
+ *
  ****************************************************************************/
 static BOOLEAN MonitorMemoryWrite( CHAR* address, UINT8 size, UINT32 value)
 {
@@ -1172,7 +1174,7 @@ static void MonitorGetTm (void)
  *
  * Description: Get the TCB information of the specified Task
  *
- * Parameters:  TASK_INDEX Task Id
+ * Parameters:  TASK_INDEX TaskId
  *
  * Returns:     void
  *
@@ -1493,7 +1495,7 @@ static void MonitorInvalidCommand( char* msg)
 *
 * Description: Set the task mode.
 *
-* Parameters:  modeId
+* Parameters:  Token - mode
 *
 * Returns:     void
 *
@@ -1529,7 +1531,7 @@ static void MonitorSetTaskMode(CHAR* Token[])
  *
  * Description: Enable / disable an unlocked task.
  *
- * Parameters:  [ ON | OFF ]
+ * Parameters:  Token - [ ON | OFF ]
  *
  * Returns:     void
  *
@@ -1615,8 +1617,8 @@ static void MonitorDumpMem(CHAR* Token[] )
  * Description: Read data from a location in EEPROM OR RTC NVRAM
  *
  * Parameters:  [in] dataType character representing the type of data.
- *              [in] pointer to a "virtual" address which is mapped to
- *                   a physical address in EEPROM or RTC RAM
+ *              [in] pVirtualAddress pointer to a "virtual" address which is 
+ *                   mapped to a physical address in EEPROM or RTC RAM 
  *
  * Returns:     Pointer to the data returned from EEPROM/RTC-RAM
  *
@@ -1848,6 +1850,11 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
+ * 
+ * *****************  Version 85  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:09p

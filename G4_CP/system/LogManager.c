@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 105 $  $Date: 12-11-12 1:11p $
+      $Revision: 106 $  $Date: 12-11-13 5:46p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -499,8 +499,8 @@ void LogPreInit(void)
  * Description: The LogPauseRequests function will stop the Log Manager from
  *              processing any write requests.
  *
- * Parameters:  BOOLEAN Enable - Enables and Disables the pause
- *              UINT16  Delay  - Number of seconds to pause
+ * Parameters:  BOOLEAN Enable   - Enables and Disables the pause
+ *              UINT16  Delay_S  - Number of seconds to pause
  *
  * Returns:     None
  *
@@ -971,8 +971,8 @@ void LogMarkState (LOG_STATE State, LOG_TYPE Type,
  *
  * Description:   The LogWriteSystem function is the wrapper writing system logs.
  *
- * Parameters:    SYS_APP_ID    LogID     - System Log ID to write
- *                LOG_PRIORITY  Priority  - Priority of the Log
+ * Parameters:    SYS_APP_ID    logID     - System Log ID to write
+ *                LOG_PRIORITY  priority  - Priority of the Log
  *                void          *pData    - Pointer to the data location
  *                UINT32        nSize     - Size of the data to write
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
@@ -996,8 +996,8 @@ void LogWriteSystem (SYS_APP_ID logID, LOG_PRIORITY priority,
  *                the caller so they can independently track the write status
  *                of the system log.
  *
- * Parameters:    SYS_APP_ID    LogID     - System Log ID to write
- *                LOG_PRIORITY  Priority  - Priority of the Log
+ * Parameters:    SYS_APP_ID    logID     - System Log ID to write
+ *                LOG_PRIORITY  priority  - Priority of the Log
  *                void          *pData    - Pointer to the data location
  *                UINT32        nSize     - Size of the data to write
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
@@ -1021,8 +1021,8 @@ UINT32 LogWriteSystemEx ( SYS_APP_ID logID, LOG_PRIORITY priority,
  *
  * Description:   The Log Write ETM function is the wrapper for writing ETM Logs.
  *
- * Parameters:    SYS_APP_ID    LogID     - System Log ID to write
- *                LOG_PRIORITY  Priority  - Priority of the Log
+ * Parameters:    SYS_APP_ID    logID     - System Log ID to write
+ *                LOG_PRIORITY  priority  - Priority of the Log
  *                void          *pData    - Pointer to the data location
  *                UINT32        nSize     - Size of the data to write
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
@@ -1136,9 +1136,9 @@ LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus ( void )
  * Description: Calc the difference in CBIT Health Counts to support PWEH SEU
  *              (Used to support determining SEU cnt during data capture)
  *
- * Parameters:  PrevCnt - Initial count value
+ * Parameters:  PrevCount - Initial count value
  *
- * Returns:     PrevCnt
+ * Returns:     diffCount
  *
  * Notes:       Corrupt count only set on restart, so no need for diff calculation
  *              Normally would return Diff in CBIT_HEALTH_COUNTS from (Current - PrevCnt)
@@ -1208,6 +1208,8 @@ LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS CurrC
  *                    LOG_INDEX_NOT_SET == LogMngBlock.LogWritePending[regType]
  *              FALSE:(In prog)
  *                    0 <= LogMngBlock.LogWritePending[regType] < SYSTEM_TABLE_MAX_SIZE
+ *
+ * Notes:
  *
  ****************************************************************************/
 BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
@@ -2233,7 +2235,7 @@ void LogCheckEraseInProgress ( void )
  *              initialization and will search the memory for the next
  *              free location in memory
  *
- * Parameters:  UINT32 nOffset  - Offset to start searching from
+ * Parameters:  UINT32 pOffset  - Offset to start searching from
  *              RESULT *Result  - Storage location to return any errors
  *
  * Returns:     BOOLEAN bValidFound - [TRUE - if at least one log was found,
@@ -2499,7 +2501,7 @@ BOOLEAN LogHdrFilterMatch(LOG_HEADER Hdr, LOG_STATE State, LOG_TYPE Type,
  *              that all the logs in the flash have been marked for
  *              deletion.
  *
- * Parameters:  UINT32 nStartOffset  - location to start the search
+ * Parameters:  UINT32 pRdOffset     - location to start the search
  *              UINT32 nEndOffset    - location to end the search
  *              UINT32 *pFound       - Storage location to store the offset
  *                                     of any log that has not been marked
@@ -2631,12 +2633,12 @@ LOG_QUEUE_STATUS LogQueueGet(LOG_REQUEST *Entry)
  *                allows the calling functions to continue operating instead
  *                of monitoring the status of the log write.
  *
- * Parameters:    SYS_APP_ID    LogID     - System Log ID to write
- *                LOG_PRIORITY  Priority  - Priority of the Log
+ * Parameters:    SYS_APP_ID    logID     - System Log ID to write
+ *                LOG_PRIORITY  priority  - Priority of the Log
  *                void          *pData    - Pointer to the data location
  *                UINT32        nSize     - Size of the data to write
  *                TIMESTAMP     *pTs      - Timestamp to use if passed in
- *                LOG_TYPE      LogType   - Type of log to write (ETM or SYSTEM)
+ *                LOG_TYPE      logType   - Type of log to write (ETM or SYSTEM)
  *
  * Returns:       UINT32 index value in SystemTable where the log is stored.
  *                This can be used by caller to track the commit-status
@@ -2744,7 +2746,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
 }
 
 /*****************************************************************************
- * Function:    LogRegisterEofIndex
+ * Function:    LogRegisterIndex
  *
  * Description: Function called by a logger to register the passed SystemTable
  *              index containing the location of an end of flight log.
@@ -2759,10 +2761,10 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
  *
  * Returns:     None
  *
- * NOTE:        The idx param to monitor is returned by a previous call to
- *              LogWriteSystem.
- *              After calling this function. Callers can check on the status of the
- *              write by calling LogIsEofWriteComplete()
+ * Notes:        The idx param to monitor is returned by a previous call to
+ *               LogWriteSystem.
+ *               After calling this function. Callers can check on the status of the
+ *               write by calling LogIsEofWriteComplete()
  *
  ****************************************************************************/
 void LogRegisterIndex ( LOG_REGISTER_TYPE regType, UINT32 SystemTableIndex)
@@ -2770,7 +2772,8 @@ void LogRegisterIndex ( LOG_REGISTER_TYPE regType, UINT32 SystemTableIndex)
   ASSERT( SystemTableIndex < SYSTEM_TABLE_MAX_SIZE);
 
   LogMngBlock.logWritePending[regType] = SystemTableIndex;
-  GSE_DebugStr(NORMAL,TRUE,"LogMgr: Log Type: %d registered SystemTable index registered: %u",SystemTableIndex);
+  GSE_DebugStr(NORMAL,TRUE,"LogMgr: Log Type: %d registered SystemTable index registered: %u",
+               SystemTableIndex);
 }
 
 
@@ -2787,7 +2790,9 @@ void LogRegisterIndex ( LOG_REGISTER_TYPE regType, UINT32 SystemTableIndex)
  *
  * Returns:     None
  *
- ****************************************************************************/
+ * Notes:
+ *
+****************************************************************************/
 static
 void LogUpdateWritePendingStatuses( void )
 {
@@ -2816,7 +2821,12 @@ void LogUpdateWritePendingStatuses( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
- * 
+ *
+ * *****************  Version 106  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 105  *****************
  * User: John Omalley Date: 12-11-12   Time: 1:11p
  * Updated in $/software/control processor/code/system

@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 59 $  $Date: 12-11-12 10:57a $
+      $Revision: 60 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -131,7 +131,7 @@ void MSSC_Init(void)
 
   // Register flag indicating file transfering MS -> GRND.
   m_MsFileXfer = FALSE;
-  PmRegisterAppBusyFlag(PM_MS_FILE_XFR_BUSY, &m_MsFileXfer);
+  PmRegisterAppBusyFlag((BUSY_INDEX)PM_MS_FILE_XFR_BUSY, &m_MsFileXfer);
 
   memset(&m_GetMSInfoRsp,0,sizeof(m_GetMSInfoRsp));
 
@@ -157,7 +157,7 @@ void MSSC_Init(void)
 
 
 /******************************************************************************
- * Function:    MSSC_SetOnGround()
+ * Function:    MSSC_SetIsOnGround()
  *
  * Description: Call to set the system status, on ground or in air.  This value
  *              is transmitted to the MSSIM application on the micro-server as
@@ -545,10 +545,9 @@ MSSC_MSSIM_STATUS MSSC_GetMsStatus(void)
  *
  * Description:  Accessor function to return the configured system condition
  *
- * Parameters:   MSSC_SYSCOND_TEST_TYPE enum of the requested system condition
- *               type
+ * Parameters:   MSSC_SYSCOND_TEST_TYPE testType - requested system condition
  *
- * Returns:      MSSC_MSSIM_STATUS
+ * Returns:      FLT_STATUS
  *
  * Notes:
  *
@@ -859,7 +858,8 @@ void MSSC_MSICallback_ShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
        2. append the final string segment after the last /n
           at the loop exit*/
     m_MSShellRsp.Str[0] = '\0';
-    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this, extra char sometimes appears on ms.cmd rsp
+    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this, 
+                               //      extra char sometimes appears on ms.cmd rsp
     while(NULL != (str_end = strchr(str_start,'\n')))
     {
       *str_end = '\0';   //NULL terminate segment
@@ -914,7 +914,8 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
         //MSSIM version less than 2.1.0 or decode
         else
         {
-          strncpy_safe(log.sMssimVer, sizeof(log.sMssimVer), m_GetMSInfoRsp.MssimVer,_TRUNCATE);
+          strncpy_safe(log.sMssimVer, sizeof(log.sMssimVer), 
+                       m_GetMSInfoRsp.MssimVer,_TRUNCATE);
           Flt_SetStatus(m_CBITSysCond,SYS_ID_MS_VERSION_MISMATCH, &log,
                         sizeof(MSSC_MS_VERSION_ERR_LOG));
           m_MssimVersionError = TRUE;
@@ -1029,7 +1030,12 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
- * 
+ *
+ * *****************  Version 60  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a
  * Updated in $/software/control processor/code/system
