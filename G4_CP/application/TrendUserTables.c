@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 11 $  $Date: 11/12/12 6:39p $
+$Revision: 10 $  $Date: 12-10-30 5:48p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -186,7 +186,7 @@ static USER_MSG_TBL TrendStatus [] =
 {
   /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
    { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,         0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
-   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
+   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   EngineRunStateEnum},
    { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
@@ -365,11 +365,6 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
- * 
- * *****************  Version 11  *****************
- * User: Contractor V&v Date: 11/12/12   Time: 6:39p
- * Updated in $/software/control processor/code/application
- * Code Review
  *
  * *****************  Version 10  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p

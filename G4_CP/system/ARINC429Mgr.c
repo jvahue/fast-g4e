@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 54 $  $Date: 12-11-12 7:19p $
+     $Revision: 53 $  $Date: 12-11-09 2:00p $
 
 ******************************************************************************/
 
@@ -202,7 +202,7 @@ static SINT32 Arinc429MgrParseMsg                     ( UINT32 Arinc429Msg,
 static SINT32 Arinc429MgrParseBCD                     ( UINT32 raw,  UINT32  Chan,
                                                         UINT8  Size, BOOLEAN *pWordValid );
 // Debug Display
-void Arinc429MgrDispSingleArincChan                   ( void );
+void Arinc429MgrDisplaySingleArincChan                ( void );
 
 void Arinc429MgrDisplayMultiArincChan                 ( void );
 
@@ -225,8 +225,8 @@ static BOOLEAN Arinc429MgrProcessPW305ABEngineMFD      ( MFD_DATA_TABLE_PTR   pM
                                                          UINT32               *pArincMsg,
                                                          UINT8                Label );
 
-static void    Arinc429MgrChkPW305AB_MFDTimeout        ( ARINC429_CHAN_DATA_PTR pChanData,
-                                                        ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
+static void    Arinc429MgrCheckPW305AB_MFD_Timeout   ( ARINC429_CHAN_DATA_PTR pChanData,
+                                                       ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
 
 static ARINC429_LABEL_DATA_PTR Arinc429MgrStoreLabelData ( UINT32 Arinc429Msg,
                                                            ARINC429_CHAN_DATA_PTR  pChanData,
@@ -899,7 +899,7 @@ void Arinc429MgrDisplaySWBufferTask ( void *pParam )
     {
       if ( m_Arinc429_Debug.bOutputMultipleArincChan == FALSE )
       {
-        Arinc429MgrDispSingleArincChan();
+        Arinc429MgrDisplaySingleArincChan();
       }
       else
       {
@@ -2624,12 +2624,12 @@ static void Arinc429MgrCheckParameterLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
 
    if ( ARINC429_RX_SUB_PW305AB_MFD_REDUCE == pCfg->SubProtocol)
    {
-      Arinc429MgrChkPW305AB_MFDTimeout(pChanData, pRxBuffer);
+      Arinc429MgrCheckPW305AB_MFD_Timeout(pChanData, pRxBuffer);
    }
 }
 
 /******************************************************************************
- * Function:     Arinc429MgrChkPW305AB_MFDTimeout
+ * Function:     Arinc429MgrCheckPW305AB_MFD_Timeout
  *
  * Description:  Checks the absence or timeout condition of MFD word
  *
@@ -2641,8 +2641,8 @@ static void Arinc429MgrCheckParameterLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
  * Notes:        none
  *
  *****************************************************************************/
-static void Arinc429MgrChkPW305AB_MFDTimeout ( ARINC429_CHAN_DATA_PTR pChanData,
-                                               ARINC429_RAW_RX_BUFFER_PTR pRxBuffer )
+static void Arinc429MgrCheckPW305AB_MFD_Timeout ( ARINC429_CHAN_DATA_PTR pChanData,
+                                                  ARINC429_RAW_RX_BUFFER_PTR pRxBuffer )
 {
    // Local Data
    MFD_MSG             *pMFD_Msg;
@@ -2678,7 +2678,7 @@ static void Arinc429MgrChkPW305AB_MFDTimeout ( ARINC429_CHAN_DATA_PTR pChanData,
                m_ARINC429Record.ARINC429Msg = nArincMsg;
 
                m_ARINC429Record.DeltaTime = pChanData->TimeSyncDelta;
-               Arinc429MgrWriteBuffer (pRxBuffer, &m_ARINC429Record, sizeof(m_ARINC429Record));
+               Arinc429MgrWriteBuffer ( pRxBuffer, &m_ARINC429Record, sizeof(m_ARINC429Record) );
             }
          }
       }
@@ -3437,7 +3437,7 @@ void Arinc429MgrDisableLiveStream(void)
 }
 
 /******************************************************************************
- * Function:    Arinc429MgrDispSingleArincChan
+ * Function:    Arinc429MgrDisplaySingleArincChan
  *
  * Description: Debug routine to print single raw Arinc Rx data to the GSE port
  *
@@ -3451,7 +3451,7 @@ void Arinc429MgrDisableLiveStream(void)
  *
  *
  *****************************************************************************/
-void Arinc429MgrDispSingleArincChan ( void  )
+void Arinc429MgrDisplaySingleArincChan ( void  )
 {
   UINT16 i;
   UINT16 j;
@@ -3690,11 +3690,6 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
- *
- * *****************  Version 54  *****************
- * User: John Omalley Date: 12-11-12   Time: 7:19p
- * Updated in $/software/control processor/code/system
- * SCR 1102, 1191, 1194 Code Review Updates
  *
  * *****************  Version 53  *****************
  * User: John Omalley Date: 12-11-09   Time: 2:00p

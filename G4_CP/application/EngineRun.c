@@ -9,15 +9,17 @@
     Description:
 
    VERSION
-      $Revision: 34 $  $Date: 11/12/12 6:39p $
+      $Revision: 33 $  $Date: 11/09/12 6:34p $
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
+#include <stdlib.h>
 #include <float.h>
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 
 
 /*****************************************************************************/
@@ -68,13 +70,9 @@ static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
 static void EngRunUpdate   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
 static void EngRunStartLog       ( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
-static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
-								   ENGRUN_DATA* pErData,
-								   BOOLEAN bUpdateDuration);
+static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration);
 
-static void EngRunWriteStartLog ( ER_REASON reason,
-								  const ENGRUN_CFG* pErCfg,
-								  const ENGRUN_DATA* pErData );
+static void EngRunWriteStartLog ( ER_REASON reason, const ENGRUN_CFG* pErCfg, const ENGRUN_DATA* pErData );
 
 static void EngRunUpdateRunData ( ENGRUN_DATA* pErData );
 static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_DATA* pErData );
@@ -107,7 +105,7 @@ static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_DATA* pErData );
  *****************************************************************************/
 ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
 {
-  UINT8 i;
+  UINT16 i;
   UINT8 runMask  = 0x00;  // bit map of started/running EngineRuns.
   ER_STATE state = ER_STATE_STOPPED;
   BOOLEAN  bRunning  = FALSE;
@@ -167,7 +165,7 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
  *****************************************************************************/
 void EngRunInitialize(void)
 {
-  TCB taskBlock;
+  TCB TaskInfo;
   UINT16 i;
   ENGRUN_CFG*  pErCfg;
   ENGRUN_DATA* pErData;
@@ -237,21 +235,21 @@ void EngRunInitialize(void)
   }
 
   // Create EngineRun Task - DT
-  memset(&taskBlock, 0, sizeof(taskBlock));
-  strncpy_safe(taskBlock.Name, sizeof(taskBlock.Name),"EngineRun Task",_TRUNCATE);
-  taskBlock.TaskID           = (TASK_INDEX) EngRun_Task;
-  taskBlock.Function         = EngRunTask;
-  taskBlock.Priority         = taskInfo[EngRun_Task].priority;
-  taskBlock.Type             = taskInfo[EngRun_Task].taskType;
-  taskBlock.modes            = taskInfo[EngRun_Task].modes;
-  taskBlock.MIFrames         = taskInfo[EngRun_Task].MIFframes;
-  taskBlock.Enabled          = TRUE;
-  taskBlock.Locked           = FALSE;
+  memset(&TaskInfo, 0, sizeof(TaskInfo));
+  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"EngineRun Task",_TRUNCATE);
+  TaskInfo.TaskID           = (TASK_INDEX) EngRun_Task;
+  TaskInfo.Function         = EngRunTask;
+  TaskInfo.Priority         = taskInfo[EngRun_Task].priority;
+  TaskInfo.Type             = taskInfo[EngRun_Task].taskType;
+  TaskInfo.modes            = taskInfo[EngRun_Task].modes;
+  TaskInfo.MIFrames         = taskInfo[EngRun_Task].MIFframes;
+  TaskInfo.Enabled          = TRUE;
+  TaskInfo.Locked           = FALSE;
 
-  taskBlock.Rmt.InitialMif   = taskInfo[EngRun_Task].InitialMif;
-  taskBlock.Rmt.MifRate      = taskInfo[EngRun_Task].MIFrate;
-  taskBlock.pParamBlock      = NULL;
-  TmTaskCreate (&taskBlock);
+  TaskInfo.Rmt.InitialMif   = taskInfo[EngRun_Task].InitialMif;
+  TaskInfo.Rmt.MifRate      = taskInfo[EngRun_Task].MIFrate;
+  TaskInfo.pParamBlock      = NULL;
+  TmTaskCreate (&TaskInfo);
 }
 
 /******************************************************************************
@@ -712,8 +710,8 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     {
       GSE_DebugStr ( NORMAL, TRUE, "EngineRun(%d) %s -> %s ",
                      pErData->erIndex,
-                     engineRunStateEnum[curState].Str,
-                     engineRunStateEnum[pErData->erState].Str);
+                     EngineRunStateEnum[curState].Str,
+                     EngineRunStateEnum[pErData->erState].Str);
     }
   }
 }
@@ -1058,11 +1056,6 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
- * *****************  Version 34  *****************
- * User: Contractor V&v Date: 11/12/12   Time: 6:39p
- * Updated in $/software/control processor/code/application
- * Code Review
- *
  * *****************  Version 33  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:34p
  * Updated in $/software/control processor/code/application
