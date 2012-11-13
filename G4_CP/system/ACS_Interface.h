@@ -1,21 +1,21 @@
 #ifndef ACS_INTERFACE_H
 #define ACS_INTERFACE_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        ACS_Interface.h
-
+    
     Description: All data elements required for an ACS are defined here.
-
+    
     VERSION
       $Revision: 6 $  $Date: 12-11-12 4:30p $     
-
+    
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/
+/*****************************************************************************/    
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -33,7 +33,7 @@
                               1000,           /* Packet Size in Ms  */\
                               STA_NORMAL,     /* System Condition   */\
                               ACS_RECORD      /* ACS Mode           */
-
+                              
 //Default configuration for the sensors
 #define ACS_CONFIGS_DEFAULT    {ACS_CONFIG_DEFAULT},\
                                {ACS_CONFIG_DEFAULT},\
@@ -132,7 +132,7 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $
- *
+ * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:30p
  * Updated in $/software/control processor/code/system
@@ -147,25 +147,25 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- *
+ * 
  * *****************  Version 3  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- *
+ * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 10/26/11   Time: 6:44p
  * Updated in $/software/control processor/code/system
  * SCR 1097 - Dead Code Update
- *
+ * 
  * *****************  Version 1  *****************
  * User: John Omalley Date: 4/11/11    Time: 10:28a
  * Created in $/software/control processor/code/system
  * SCR 1029 - EMU Download
- *
+ * 
  *
  ***************************************************************************/
-
+ 
 
 
 

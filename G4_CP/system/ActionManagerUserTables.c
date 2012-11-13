@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 8 $  $Date: 12-11-06 11:13a $
+$Revision: 9 $  $Date: 12-11-12 6:47p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -30,6 +30,14 @@ $Revision: 8 $  $Date: 12-11-06 11:13a $
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static ACTION_CFG    configActionTemp; // Action temp Storage
+static ACTION_OUTPUT configOutputTemp;
+static ACTION_DATA   stateActionTemp;  // Action State Temp Storage
+static ACTION_FLAGS  stateActionFlagsTemp;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -67,14 +75,10 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
                                        UINT32 Index,
                                        const void *SetPtr,
                                        void **GetPtr);
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static ACTION_CFG    configActionTemp; // Action temp Storage
-static ACTION_OUTPUT configOutputTemp;
-static ACTION_DATA   stateActionTemp;  // Action State Temp Storage
-static ACTION_FLAGS  stateActionFlagsTemp;
-
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
 static USER_MSG_TBL actionOutCmd [] =
@@ -128,6 +132,10 @@ static
 USER_MSG_TBL    rootActionMsg = {"ACTION", actionRoot, NULL, NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -416,7 +424,12 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
- *
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-11-12   Time: 6:47p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
+ * 
  * *****************  Version 8  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:13a
  * Updated in $/software/control processor/code/system

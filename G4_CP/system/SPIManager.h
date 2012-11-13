@@ -187,7 +187,7 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.h $
- *
+ * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 12:01p
  * Updated in $/software/control processor/code/system

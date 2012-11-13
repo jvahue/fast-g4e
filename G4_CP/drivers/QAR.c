@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 98 $  $Date: 12-11-06 4:00p $
+      $Revision: 99 $  $Date: 12-11-13 11:38a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1713,35 +1713,6 @@ BOOLEAN QAR_InterfaceValid (UINT16 nIndex)
 
 
 /******************************************************************************
- * Function:     QAR_DisableAnyStreamingDebugOuput
- *
- * Description:  Disables current debug output of Raw QAR data to GSE port
- *
- * Parameters:   None.
- *
- * Returns:      None.
- *
- * Notes:        None.
- *
- *****************************************************************************/
-/*
-void QAR_DisableAnyStreamingDebugOuput ( void )
-{
-  QAR_CONFIGURATION_PTR pQARCfg;
-
-  QARCfg.Output = QAR_GSE_NONE;
-
-  pQARCfg = &CfgMgr_ConfigPtr()->QARConfig;
-  pQARCfg->Output = QAR_GSE_NONE;
-
-  CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
-                         &pQARCfg->Output,
-                         sizeof(QAR_OUTPUT_TYPE));
-
-}
-*/
-
-/******************************************************************************
  * Function:     QARwrite
  *
  * Description:  Write to FPGA QAR Registers
@@ -2310,6 +2281,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 99  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 11:38a
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1142 File Format Error - Dead Code
  * 
  * *****************  Version 98  *****************
  * User: Melanie Jutras Date: 12-11-06   Time: 4:00p

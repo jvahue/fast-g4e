@@ -169,7 +169,7 @@ EXPORT void               MSSC_GetMsPwVer(CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.h $
- *
+ * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a
  * Updated in $/software/control processor/code/system

@@ -566,7 +566,7 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
- *
+ * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

@@ -936,7 +936,7 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
- *
+ * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:14a
  * Updated in $/software/control processor/code/system

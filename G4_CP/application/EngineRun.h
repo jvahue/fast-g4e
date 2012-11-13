@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 24 $  $Date: 12-11-12 4:48p $
+      $Revision: 25 $  $Date: 11/12/12 6:39p $
 
 ******************************************************************************/
 
@@ -76,7 +76,7 @@ typedef enum
   /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
-  ER_STATE_RUNNING,     /* Engine running for this engine run  */  
+  ER_STATE_RUNNING,     /* Engine running for this engine run  */
 } ER_STATE;
 
 
@@ -178,7 +178,7 @@ ENGRUN_CFG, *ENGRUN_CFG_PTR;
 typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 
 /******************************************************************************
-                               Package Exports
+                             Package Exports                             
 ******************************************************************************/
 #undef EXPORT
 
@@ -188,14 +188,13 @@ typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
   #define EXPORT extern
 #endif
 
-
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
-extern USER_ENUM_TBL EngRunIdEnum[];
+extern USER_ENUM_TBL engRunIdEnum[];
 
 #if defined ( ENGINERUN_BODY )
-USER_ENUM_TBL EngineRunStateEnum[] =
+USER_ENUM_TBL engineRunStateEnum[] =
 {
   { "STOPPED",  ER_STATE_STOPPED  },
   { "STARTING", ER_STATE_STARTING },
@@ -203,7 +202,7 @@ USER_ENUM_TBL EngineRunStateEnum[] =
   { NULL, 0 }
 };
 #else
-EXPORT USER_ENUM_TBL EngineRunStateEnum[];
+  EXPORT USER_ENUM_TBL engineRunStateEnum[];
 #endif
 
 /******************************************************************************
@@ -224,21 +223,16 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
  *  MODIFICATIONS
  *    $History: EngineRun.h $
  * 
- * *****************  Version 24  *****************
- * User: John Omalley Date: 12-11-12   Time: 4:48p
+ * *****************  Version 25  *****************
+ * User: Contractor V&v Date: 11/12/12   Time: 6:39p
  * Updated in $/software/control processor/code/application
- * SCR 1142 - Formatting Error
- * 
- * *****************  Version 23  *****************
- * User: John Omalley Date: 12-11-12   Time: 4:46p
- * Updated in $/software/control processor/code/application
- * SCR 1142 - Formatting Error
- * 
+ * Code Review
+ *
  * *****************  Version 22  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:34p
  * Updated in $/software/control processor/code/application
  * SCR 1131 Recording busy status
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application

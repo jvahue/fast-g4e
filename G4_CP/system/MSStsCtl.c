@@ -1029,7 +1029,7 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
- *
+ * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a
  * Updated in $/software/control processor/code/system

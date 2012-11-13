@@ -174,8 +174,8 @@ NV_FILE(NV_LOG_COUNTS,     "Log Error Counts",     DEV_RTC_PRI,  DEV_NONE,     C
 NV_FILE(NV_UART_EMU150,    "Uart EMU150 Data",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, EMU150_FileInit         ,   (6 KB)),\
 NV_FILE(NV_PCYCLE_CNTS_EE, "P-Cycle Counts EE",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_PCYCLE_CNTS_RTC,"P-Cycle Counts RTC",   DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,     196), \
-NV_FILE(NV_ACT_STATUS_RTC, "Action Status RTC",    DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,       8),\
-NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256),\
+NV_FILE(NV_ACT_STATUS_RTC, "Action Status RTC",    DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,       8), \
+NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_ENGINE_ID,      "Engine Identification",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_CREEP_DATA,     "Creep Data",           DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  Creep_FileInit          ,     256), \
 NV_FILE(NV_CREEP_CNTS_RTC, "Creep Cnts RTC",       DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      20), \
