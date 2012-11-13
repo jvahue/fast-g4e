@@ -10,7 +10,7 @@
   Description: 
   
   VERSION
-      $Revision: 20 $  $Date: 8/28/12 1:43p $ 
+      $Revision: 21 $  $Date: 12-11-12 4:46p $ 
  
 ******************************************************************************/
 
@@ -115,6 +115,11 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12-11-12   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Formatting Error
  * 
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 12 $  $Date: 12-11-12 4:30p $
+  $Revision: 13 $  $Date: 12-11-12 6:26p $
 
 ******************************************************************************/
 
@@ -154,7 +154,6 @@ typedef struct
    BOOLEAN        bNVStored;
    ACTION_PERSIST persist;                           /* State of the persistent data        */
    UINT16         nLSS_Priority[MAX_OUTPUT_LSS];     /* Priority Storage for each LSS       */
-   // TBD: Need to think about this counter... this will only allow 128 Unique Action requests
    INT8           nRequestCounter;                   /* Request Counter for generating IDs  */
    BOOLEAN        bInitialized;                      /* Ready to Accept Requests            */
 } ACTION_DATA;
@@ -206,6 +205,11 @@ EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 12-11-12   Time: 6:26p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Update
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:30p
