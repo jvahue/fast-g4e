@@ -8,7 +8,7 @@
     Description: Power Management Status and Control User Commands.
     
     VERSION
-      $Revision: 27 $  $Date: 8/28/12 1:43p $
+      $Revision: 28 $  $Date: 12-11-13 2:31p $
     
 ******************************************************************************/
 #ifndef POWERMANAGER_BODY
@@ -112,6 +112,10 @@ static USER_MSG_TBL PowerManagerRoot[] =
 static USER_MSG_TBL PowerManagerTblPtr = {"PM",PowerManagerRoot,NULL,NO_HANDLER_DATA};
  
 
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -322,6 +326,11 @@ USER_HANDLER_RESULT PMMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManagerUserTables.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

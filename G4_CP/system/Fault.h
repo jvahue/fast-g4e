@@ -11,7 +11,7 @@
     Notes: 
   
     VERSION
-      $Revision: 9 $  $Date: 12-11-12 4:46p $     
+      $Revision: 10 $  $Date: 12-11-13 1:48p $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -146,10 +146,15 @@ EXPORT void    FaultInitialize    ( void );
 EXPORT BOOLEAN FaultCompareValues ( FAULT_INDEX Fault );
 
 
-#endif  // FAULT_H 
+#endif // FAULT_H 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 9  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

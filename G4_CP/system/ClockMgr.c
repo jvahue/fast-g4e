@@ -17,7 +17,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 45 $  $Date: 8/28/12 1:43p $
+     $Revision: 46 $  $Date: 12-11-13 1:11p $
 
 ******************************************************************************/
 
@@ -529,7 +529,7 @@ void CM_GetTimeAsTimestamp (TIMESTAMP* TimeStamp)
 
 
 /*****************************************************************************
- * Function:    CM_ConvertTimeStampToTimeStruct
+ * Function:    CM_ConvertTimeStamptoTimeStruct
  *
  * Description: Convert a TIMESTAMP type packed word into a TIMESTRUCT
  *
@@ -552,33 +552,6 @@ void CM_ConvertTimeStamptoTimeStruct(const TIMESTAMP* Tp, TIMESTRUCT* Ts)
   Ts->Year = (UINT16) ( ((Tp->Timestamp >> 21) / 24) + BASE_YEAR);
 }
 
-
-
-/*****************************************************************************
- * Function:    CM_ConvertTimeStructToTimeStamp 
- *
- * Description: Convert a TIMESTRUCT type packed word into a TIMESTAMP
- *
- * Parameters:  [in] pTp: Pointer to a TIMESTRUCT structure to convert
- *              [out] Ts: Pointer to a TIMESTAMP location to receive the
- *                        converted data
- * Returns:     void
- *
- * Notes:       garbage-in-garbage-out
- *
- ****************************************************************************/
-/* 
-void CM_ConvertTimeStructToTimeStamp(const TIMESTRUCT* Ts, TIMESTAMP* Tp)
-{
-  Tp->Timestamp =   ((UINT32) ((Ts->Second & 0x3F)))       +
-                    ((UINT32) ((Ts->Minute & 0x3F)) << 6)  +
-                    ((UINT32) ((Ts->Month  & 0x0F)) << 12) +
-                    ((UINT32) ((Ts->Day    & 0x1F)) << 16) +
-                    ((UINT32) ((Ts->Year - BASE_YEAR) * 24 +
-                                Ts->Hour) << 21);
-  Tp->MSecond   =   0;  // No MSEC in Time Struct
-}
-*/
 
 
 /*****************************************************************************
@@ -932,34 +905,6 @@ USER_HANDLER_RESULT CMMsg_CreateLogs(USER_DATA_TYPE DataType,
 
 
 /*****************************************************************************
- * Function:     CM_ConvertSecToTimeStamp
- *
- * Description:  Converts the sec (from BASE_YEAR) back to TIMESTAMP fmt 
- *
- * Parameters:   UINT32 sec
- *
- * Returns:      TIMESTAMP conversion for sec
- *
- * Notes:       
- *
- ****************************************************************************/
-/* 
-TIMESTAMP CM_ConvertSecToTimeStamp( UINT32 sec )
-{
-  TIMESTAMP ts; 
-  
-  // Convert seconds to number of days 
-  
-  // How do we handle leap years ?  Use calculation of 365.242199 days / yr
-  
-  // Round to INT will give 
-
-  return ts;   
-    
-}
-*/
-
-/*****************************************************************************
  * Function:    CM_CompareSystemToMsClockDrift
  *
  * Description: Used to check clock drift between Control Processor and MicroServer. 
@@ -1095,7 +1040,7 @@ void CM_CBit(void* pParam)
  *
  * Description: Sync the FASST internal system clock(s) to the Remote Time Source
  *
- * Parameters:  TIMESTRUCT - Remote Time Source
+ * Parameters:  TIMESTRUCT cm_time_struct - Remote Time Source
  *
  * Returns:     none
  *
@@ -1213,6 +1158,11 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:11p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

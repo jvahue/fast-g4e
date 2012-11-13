@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 61 $  $Date: 8/28/12 1:43p $
+   $Revision: 62 $  $Date: 12-11-13 2:31p $
 
     
 ******************************************************************************/
@@ -572,7 +572,8 @@ void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func )
  *  
  * Description:  Register an application busy flag for the associated variable 
  *
- * Parameters:   pPtr = Ptr to application variable 
+ * Parameters:   index - BUSY_INDEX
+ *               pAppBusyFlag - BOOLEAN
  *
  * Returns:      none
  *  
@@ -597,7 +598,9 @@ void PmRegisterAppBusyFlag(BUSY_INDEX index, BOOLEAN *pAppBusyFlag )
  *                     FALSE Set the application flag not busy
  *              param = ignored, included to match FSM call sig.
  *
- * Notes:
+ * Returns:     None
+ *
+ * Notes:       None
  *
  *****************************************************************************/
 void PmFSMAppBusyRun(BOOLEAN Run, INT32 param)
@@ -616,7 +619,7 @@ void PmFSMAppBusyRun(BOOLEAN Run, INT32 param)
  *
  * Parameters:  param = ignored.  Included to match FSM call sig.
  *                      
- * Returns:     
+ * Returns:     BOOLEAN - m_FSMAppBusy
  *
  * Notes:
  *
@@ -657,6 +660,8 @@ void PmSet_PowerOnTime( TIMESTAMP *pPtr )
  *
  * Returns:      BOOLEAN TRUE  The file reset was successful.
  *                       FALSE The file reset failed.
+ *
+ * Notes:        None
  *
  *****************************************************************************/
 BOOLEAN PmFileInit(void)
@@ -1253,6 +1258,11 @@ void PmSet_Cfg (POWERMANAGER_CFG *Cfg)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 61  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

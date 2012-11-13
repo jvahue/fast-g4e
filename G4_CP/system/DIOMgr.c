@@ -11,7 +11,7 @@
                   
 
    VERSION
-   $Revision: 16 $  $Date: 8/28/12 1:43p $
+   $Revision: 17 $  $Date: 12-11-13 1:21p $
 
     
 ******************************************************************************/
@@ -96,7 +96,7 @@ void DIOMgr_Init(void)
 * Description: Calls Dio function to read all Discrete input ports and debounce
 *              the value of the individual DIN bits.
 *
-* Parameters:  None
+* Parameters:  pParam
 *
 * Returns:     None
 *
@@ -124,6 +124,8 @@ void DIOMgr_UpdateDiscreteInputs (void* pParam)
  *                        FALSE: Turn off Discrete Output
  *              [in] param: 0-4 is the valid range.  Values outside the range
  *                          are ignored and no action is taken
+ *
+ * Returns:     None
  *
  * Notes:       Selected Discrete Outs by Param:
  *              Param       Pin
@@ -197,6 +199,11 @@ BOOLEAN DIOMgr_FSMGetStateDIO(INT32 param)
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: DIOMgr.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
