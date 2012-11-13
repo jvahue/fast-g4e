@@ -17,7 +17,7 @@
     Notes:       
                  
   VERSION
-    $Revision: 43 $  $Date: 12-10-10 1:05p $                 
+    $Revision: 44 $  $Date: 12-11-13 2:09p $                 
                  
 ******************************************************************************/
 
@@ -411,7 +411,7 @@ RESULT MemStatusErase (MEM_BLOCK_TYPE nBlock, UINT32 nOffset,
  *
  * Parameters:   UINT32 nBlock        - Memory block to perform read in
  *               UINT32 *nBlockOffset - Offset into the block
- *               UINT32 *pData        - pointer to storage location
+ *               UINT32 *pBuf         - pointer to storage location
  *               UINT32 nSize         - Size in bytes of data to read
  *               RESULT *ResultCode   - Storage location for any result code
  *
@@ -488,7 +488,7 @@ BOOLEAN MemRead (MEM_BLOCK_TYPE nBlock, UINT32 *nBlockOffset,
  *
  * Parameters:   UINT32 nBlock        - Memory block to perform write in
  *               UINT32 *nBlockOffset - Offset into the block
- *               UINT32 *pData        - pointer to the data to write
+ *               UINT32 *pBuf         - pointer to the data to write
  *               UINT32 nSize         - Size in bytes of data to write
  *               RESULT *ResultCode   - Storage location for any result code
  *               BOOLEAN bDirectWrite - TRUE = One 4 byte location
@@ -988,33 +988,6 @@ void MemEraseTask (void* pPBlock)
 /* Local Functions                                                           */
 /*****************************************************************************/
       
-/******************************************************************************
- * Function:     MemStateNotBusy
- *              
- * Description:  The MemStateNotBusy function is the initial default state
- *               when no flash operations are being performed. 
- *
- * Parameters:   MEM_CMD Cmd             - Memory Commans to perform
- *               UINT32  nBlock          - Index of the block to use
- *               UINT32  *nBlockOffset   - Offset into the block
- *               UINT32  *pData          - Location of buffer
- *               UINT32  nData           - Number of bytes to operate on
- *               RESULT  *ResultCode     - Storage Location for Result Code
- * 
- * Returns:      BOOLEAN bOK      - Operation was performed [ TRUE, FALSE ]
- *
- * Notes: 
- *
- *****************************************************************************/
-//static
-//BOOLEAN MemStateNotBusy (MEM_CMD Cmd,   MEM_BLOCK_TYPE nBlock, UINT32 *nBlockOffset,
-//                         UINT32* pData, UINT32 nData,  RESULT *ResultCode )        
-//{
-   // We should never try and do anything in this state because
-   // the memory actions will update the state before entering them
-//   return FALSE;
-//}
-
 /******************************************************************************
  * Function:    MemStateProgram
  *
@@ -1584,6 +1557,11 @@ void MemClearTask (void* pPBlock)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format and Dead Code
  * 
  * *****************  Version 43  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:05p

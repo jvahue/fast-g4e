@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 18 $  $Date: 8/28/12 1:43p $     
+      $Revision: 19 $  $Date: 12-11-13 1:32p $     
 
 ******************************************************************************/
 
@@ -687,7 +687,8 @@ void EMU150Protocol_SetBaseUartCfg ( UINT16 ch, UART_CONFIG UartCfg )
  * Description: Initializes / synchronizes local control and flags to the calling 
  *              App
  *
- * Parameters:  bStartDownload - ptr to flag to begin download process
+ * Parameters:  port
+*               bStartDownload - ptr to flag to begin download process
  *              bDownloadCompleted - ptr to flag to indicate download completed
  *              bWriteInProgress - ptr to flag to indicate FLASH write in progress
  *              bWriteOk - ptr to flag to indicate FLASH write successful
@@ -1108,7 +1109,8 @@ void EMU150_NextState( void )
  * Description: Clearing / resetting of some local variables before transition 
  *              to next cmd state 
  *
- * Parameters:  None 
+ * Parameters:  EMU150_CMD_STATES state
+ *              BOOLEAN bClrRetries
  *
  * Returns:     None
  *
@@ -1151,11 +1153,12 @@ void EMU150_NextCmdState( EMU150_CMD_STATES state, BOOLEAN bClrRetries )
 /******************************************************************************
  * Function:    EMU150_CreateTxPacket
  *
- * Description: cnt - current count of the number of bytes to be transmitted 
+ * Description: Create Transmit Packet 
+ 
+ *
+ * Parameters:  cnt - current count of the number of bytes to be transmitted 
  *              data - ptr to data to be transmitted 
  *              timeout - timeout for this transmission message 
- *
- * Parameters:  None 
  *
  * Returns:     None
  *
@@ -1942,7 +1945,7 @@ void EMU150_RestoreAppData (void)
  *
  * Description: Calculate checksum (long word sum then 2's complement)
  *
- * Parameters:  data - ptr to long word data buffer to appy checksum calc
+ * Parameters:  data_ptr - ptr to long word data buffer to appy checksum calc
  *              nLongWords - number of long words (4 bytes) in the buffer 
  *
  * Returns:     None
@@ -2070,6 +2073,11 @@ BOOLEAN EMU150_FileInit(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

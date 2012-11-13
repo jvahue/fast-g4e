@@ -8,7 +8,7 @@
     Description: Prepares for system shutdown and waits for Watchdog Restart
 
    VERSION
-      $Revision: 10 $  $Date: 8/28/12 1:43p $    
+      $Revision: 11 $  $Date: 12-11-13 3:27p $    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -60,7 +60,7 @@ extern void ReportCoverage(void);
  * Description: Disables interrupts and waits for the Watchdog Timer to
  *              reboot the system
  *
- * Parameters:  None
+ * Parameters:  isNormalShutdown - BOOLEAN
  *              
  * Returns:     Does not return
  *
@@ -137,6 +137,11 @@ void WatchdogReboot(BOOLEAN isNormalShutdown)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: WatchDog.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 3:27p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

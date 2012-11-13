@@ -14,7 +14,7 @@
     Notes: 
   
     VERSION
-      $Revision: 17 $  $Date: 12-10-19 10:55a $     
+      $Revision: 18 $  $Date: 12-11-13 1:43p $     
   
 ******************************************************************************/
 /*****************************************************************************/
@@ -30,7 +30,7 @@
 #include "user.h"
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -129,7 +129,7 @@ BOOLEAN FaultCompareValues( FAULT_INDEX Fault )
  * Description: This function determines if all sensor states are as specified
  *              by the fault.
  *               
- * Parameters:  pFault (i): pointer to the fault being processed 
+ * Parameters:  pFaultCfg (i): pointer to the fault being processed 
  *
  * Returns:     TRUE if sensor states are consistent with their criteria, 
  *              FALSE otherwise 
@@ -182,7 +182,7 @@ static BOOLEAN FaultCheckSensorStates( FAULT_CONFIG *pFaultCfg )
  * Description: This function determines if all sensor triggers are as 
  *              specified by the fault.
  *               
- * Parameters:  pFault (i): pointer to the fault being processed 
+ * Parameters:  pFaultCfg (i): pointer to the fault being processed 
  *
  * Returns:     TRUE if sensor states are consistent with their criteria, 
  *              FALSE otherwise 
@@ -238,6 +238,11 @@ static BOOLEAN FaultCheckSensorTriggers( FAULT_CONFIG *pFaultCfg)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Fault.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:43p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 17  *****************
  * User: Melanie Jutras Date: 12-10-19   Time: 10:55a

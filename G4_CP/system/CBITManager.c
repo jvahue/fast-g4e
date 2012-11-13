@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
     
     VERSION
-      $Revision: 56 $  $Date: 12-10-10 12:38p $     
+      $Revision: 57 $  $Date: 12-11-13 12:40p $     
 
 ******************************************************************************/
 
@@ -304,6 +304,8 @@ void CBITMgr_PWEHSEU_Initialize (void)
 * Returns:      BOOLEAN TRUE  The file reset was successful.
 *                       FALSE The file reset failed.
 *
+* Notes:        none
+*
 *****************************************************************************/
 BOOLEAN CBITMgr_PWEHSEU_FileInit(void)
 {
@@ -326,7 +328,7 @@ BOOLEAN CBITMgr_PWEHSEU_FileInit(void)
  *
  * Description:  Updates state of the inflight bool
  *
- * Parameters:   inflight TRUE  - in flight
+ * Parameters:   inFlight TRUE  - in flight
  *                        FALSE - on ground
  * Returns:      none
  *
@@ -1350,6 +1352,11 @@ void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 12:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Formatting
  * 
  * *****************  Version 56  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:38p
