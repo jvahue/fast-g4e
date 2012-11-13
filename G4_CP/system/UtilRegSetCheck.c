@@ -10,7 +10,7 @@
           verify the register value. 
           
     VERSION
-      $Revision: 19 $  $Date: 12-10-10 1:32p $
+      $Revision: 20 $  $Date: 12-11-13 3:27p $
     
 ******************************************************************************/
 
@@ -106,7 +106,7 @@ void RegSetCheck_Init( void )
  *
  * Description: Sets the Register passed in
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     TRUE  - If Set of Register SUCCESS 
  *              FALSE - If Set of Register FAILS
@@ -149,7 +149,7 @@ BOOLEAN RegSet ( REG_SETTING_PTR pRegData )
  *
  * Description: Adds the Reg info to the Check Tbl 
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     TRUE  - If Set of Register SUCCESS 
  *              FALSE - If Set of Register FAILS
@@ -441,37 +441,6 @@ BOOLEAN RegSetOrUpdate ( void *ptrReg, UINT32 value, UINT16 size, UINT32 enumReg
 
 
 /*****************************************************************************
- * Function:    RegSetDynamicObj 
- *
- * Description: Adds Reg entry for dynamic type objects (i.e. DIO, etc) 
- *              where the value are stored in external variables.  
- *              Also initially sets / checks the register.  
- *
- * Parameters:  *ptrReg
- *              mask
- *              size 
- *              enumReg
- *              *Addr1
- *              *Addr2
-  *
- * Returns:     
- *
- * Notes:       
- *  1) Defaults RFA_FORCE_UPDATE for failed action always
- *
- ****************************************************************************/
-/* 
-BOOLEAN RegSetDynamicObj ( void *ptrReg, UINT32 value, UINT16 size, UINT32 enumReg, 
-                                 void *Addr1,  void *Addr2 ) 
-{
-  
-} 
-*/
- 
- 
-
-
-/*****************************************************************************
  * Function:    GetRegCheckNumReg
  *
  * Description: Return the number of Registers to check in SystemRegTbl[]
@@ -499,7 +468,7 @@ UINT16 GetRegCheckNumReg ( void )
  *
  * Description: Sets the Register based on its size 
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     TRUE if set was successful 
  *              FALSE if set was not successful 
@@ -543,7 +512,7 @@ static BOOLEAN RegSetUintX ( REG_SETTING_PTR pRegData )
  *
  * Description: Sets the 8 bit Register passed in
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     BOOLEAN bInitOk - TRUE on success
  *                                FALSE on failure
@@ -601,7 +570,7 @@ static BOOLEAN RegSetUint8 ( REG_SETTING_PTR pRegData )
  *
  * Description: Sets the 16 bit Register passed in
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     BOOLEAN bInitOk - TRUE on success
  *                                FALSE on failure
@@ -647,7 +616,7 @@ static BOOLEAN RegSetUint16 ( REG_SETTING_PTR pRegData )
  *
  * Description: Sets the 32 bit Register passed in
  *
- * Parameters:  ptr to register data object to set 
+ * Parameters:  pRegData - ptr to register data object to set 
  *
  * Returns:     BOOLEAN bInitOk - TRUE on success
  *                                FALSE on failure
@@ -707,7 +676,8 @@ static BOOLEAN RegSetUint32 ( REG_SETTING_PTR pRegData )
  * Description: Checks the 8 bit Register passed against SystemRegTbl[], 
  *              SystemRegTblShadow[] and HW Reg
  *
- * Parameters:  ptr to register data object to check
+ * Parameters:  pRegData - ptr to register data object to check
+ *              bUpdate - BOOLEAN
  *
  * Returns:     bCheckOk - TRUE if OK 
  *
@@ -788,7 +758,8 @@ static BOOLEAN RegCheckUint8 ( REG_SETTING_PTR pRegData, BOOLEAN bUpdate )
  * Description: Checks the 16 bit Register passed against SystemRegTbl[], 
  *              SystemRegTblShadow[] and HW Reg
  *
- * Parameters:  ptr to register data object to check
+ * Parameters:  pRegData - ptr to register data object to check
+ *              bUpdate - BOOLEAN
  *
  * Returns:     bCheckOk - TRUE if OK 
  *
@@ -871,7 +842,8 @@ static BOOLEAN RegCheckUint16 ( REG_SETTING_PTR pRegData, BOOLEAN bUpdate )
  * Description: Checks the 32 bit Register passed against SystemRegTbl[], 
  *              SystemRegTblShadow[] and HW Reg
  *
- * Parameters:  ptr to register data object to check
+ * Parameters:  pRegData - ptr to register data object to check
+ *              bUpdate - BOOLEAN
  *
  * Returns:     bCheckOk - TRUE if OK 
  *
@@ -1047,6 +1019,11 @@ static BOOLEAN RegCheckUint32 ( REG_SETTING_PTR pRegData, BOOLEAN bUpdate )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UtilRegSetCheck.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 3:27p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 1:32p

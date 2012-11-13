@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 44 $  $Date: 12-11-12 2:58p $     
+      $Revision: 45 $  $Date: 12-11-13 5:46p $     
 
 ******************************************************************************/
 
@@ -230,7 +230,7 @@ void UartMgr_Initialize (void)
       pUartMgrStatus->protocol = pUartMgrCfg->protocol; 
     
       // Cfg Port 
-      pUartMgrPortCfg = (UARTMGR_PORT_CFG_PTR) &pUartMgrCfg->Port; 
+      pUartMgrPortCfg = (UARTMGR_PORT_CFG_PTR) &pUartMgrCfg->port; 
       uartCfg = UartDrvDefaultCfg;    // Set the defaults; 
       uartCfg.Port = i; 
       uartCfg.BPS = pUartMgrPortCfg->nBPS; 
@@ -259,7 +259,7 @@ void UartMgr_Initialize (void)
           break;
           
         case UARTMGR_PROTOCOL_NONE:
-	    case UARTMGR_PROTOCOL_MAX:
+        case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through 
           //break;
         default:
@@ -379,7 +379,7 @@ void UartMgr_Initialize (void)
  *
  * Description: Utility function to request current UartMgr[index] status
  *
- * Parameters:  Index - Uart Port Index 
+ * Parameters:  index - Uart Port Index 
  *
  * Returns:     UARTMGR_STATUS_PTR to m_UartMgrStatus[index]
  *
@@ -397,7 +397,7 @@ UARTMGR_STATUS_PTR UartMgr_GetStatus (UINT8 index)
  *
  * Description: Utility function to request current UartMgr[index] Cfg
  *
- * Parameters:  Index - Uart Port Index 
+ * Parameters:  index - Uart Port Index 
  *
  * Returns:     UARTMGR_CFG_PTR to m_UartMgrCfg[index]
  *
@@ -539,7 +539,7 @@ static void UartMgr_Task (void *pParam)
  *
  * Description:  Performs the background CBIT Testing of the UART interfaces
  *
- * Parameters:   none 
+ * Parameters:   pParam 
  *
  * Returns:      none
  *
@@ -752,7 +752,7 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
         break; 
       
     case UART_DATA_TYPE_MAX:  
-	default:
+    default:
         FATAL ("Unexpected UART_DATA_TYPE = %d", word_info_ptr->type);
         break; 
     }
@@ -1166,7 +1166,7 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 }
 
 /******************************************************************************
- * Function:     UartMgrGetSystemHdr
+ * Function:     UartMgr_GetSystemHdr
  *
  * Description:  Retrieves the binary system header for the UART 
  *               configuration. 
@@ -1821,11 +1821,11 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
  
  
 /******************************************************************************
- * Function:     UartMgr_CopyBuff
+ * Function:     UartMgr_CopyRollBuff
  *
  * Description:  Copy src data to specified m_UartStoreData[] structure. 
  *
- * Parameters:   dest_ptr - destination buffer
+ * Parameters:   start_dest_ptr - destination buffer
  *               src_ptr  - source pointer 
  *               size     - number of bytes to move 
  *               *wr_cnt  - ptr to write counter to update
@@ -1931,6 +1931,15 @@ FLOAT32 UartMgr_ConvertToEngUnits ( UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr )
  * Description:  Function to handle UART protocols that don't download.
  *
  * Parameters:   Not Used function FATALS
+ *               UINT8 port, 
+ *               BOOLEAN *bStartDownload, 
+ *               BOOLEAN *bDownloadCompleted,
+ *               BOOLEAN *bWriteInProgress,
+ *               BOOLEAN *bWriteOk, 
+ *               BOOLEAN *bHalt, 
+ *               BOOLEAN *bNewRec,
+ *               UINT32  **pSize,
+ *               UINT8   **pData
  *
  * Returns:      none
  *
@@ -1957,6 +1966,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:58p

@@ -30,7 +30,7 @@ VERSION
 
 
 /*****************************************************************************/
-/* Local Defines                                                             */
+/* Local Defines                                                            */
 /*****************************************************************************/
 #define STR_LIMIT_429 0,32
 
@@ -3678,7 +3678,7 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
- * 
+ *
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
  * Updated in $/software/control processor/code/system

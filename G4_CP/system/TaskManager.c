@@ -7,29 +7,24 @@
     File:       TaskManager.c
 
    Description: Executive Task Manager functions
-
+   
+   Name                       Description
+   ------------------------   --------------------------------------------------
+   TmInitializeTaskManager    Initialize the Task Manager's status & control
+                              data
+   TmStartTaskManager         Start the Task Manager, PIT and Idle Task
+   TmTaskCreate               Create a new DT or RMT task
+   TmInitializeTaskDispatcher Initialize the DT & RMT task lists per MIF
+   TmDispatchDtTasks          Schedule & dispatch DT tasks per MIF
+   TmScheduleRmtTasks         Schedule RMT tasks per MIF
+   TmDispatchRmtTasks         Dispatch RMT tasks per MIF
+   TmTaskEnable               Enable / disable  a task to be scheduled
+   TmScheduleTask             Force a specific RMT task for dispatch ASAP
+  
  VERSION
-      $Revision: 64 $  $Date: 12-11-12 2:09p $
+      $Revision: 65 $  $Date: 12-11-13 5:46p $
 
-******************************************************************************
-
- ******************************************************************************
- * Functions:
- *
- * Name                     Description
- * ------------------------ --------------------------------------------------
- * TmInitializeTaskManager    Initialize the Task Manager's status & control
- *                          data
- * TmStartTaskManager       Start the Task Manager, PIT and Idle Task
- * TmTaskCreate             Create a new DT or RMT task
- * TmInitializeTaskDispatcher Initialize the DT & RMT task lists per MIF
- * TmDispatchDtTasks        Schedule & dispatch DT tasks per MIF
- * TmScheduleRmtTasks       Schedule RMT tasks per MIF
- * TmDispatchRmtTasks       Dispatch RMT tasks per MIF
- * TmTaskEnable             Enable / disable  a task to be scheduled
- * TmScheduleTask           Force a specific RMT task for dispatch ASAP
- *
- *******************************************************************************/
+******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -38,7 +33,7 @@
 #include <string.h>
 
 /*****************************************************************************/
-/* Software Specific Includes                                               */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_basic.h"
 #include "assert.h"
@@ -53,12 +48,12 @@
 #include "TestPoints.h"
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 #define PULSE(x,s) if (x>=0 && x <=3) {DIO_SetPin((DIO_OUTPUT)x, s);}
 
 /*****************************************************************************/
-/* Local Typedefs                                                           */
+/* Local Typedefs                                                            */
 /*****************************************************************************/
 #pragma pack(1)
 typedef struct rmtOverrunTag {
@@ -68,7 +63,7 @@ typedef struct rmtOverrunTag {
 #pragma pack()
 
 /*****************************************************************************/
-/* Local Variables                                                          */
+/* Local Variables                                                           */
 /*****************************************************************************/
 static TCB TcbArray[MAX_TASKS]; //TCBs to allocate from in TaskCreate()
 
@@ -80,11 +75,11 @@ static SYS_MODE_IDS pendingSystemMode; // pending system mode, next MIF
 static BOOLEAN systemModeTransitions[SYS_MAX_MODE_ID][SYS_MAX_MODE_ID];
 
 /*****************************************************************************/
-/* Local Function Prototypes                                                */
+/* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Public Functions                                                         */
+/* Public Functions                                                          */
 /*****************************************************************************/
 
 
@@ -453,7 +448,7 @@ void TmTick (UINT32 LastIntLvl)
                 if ( Tm.pRmtTasks[rmt]->state == TASK_ACTIVE)
                 {
                     Tm.pRmtTasks[rmt]->Rmt.sumExeTime +=
-                      (MifStartTime - Tm.pRmtTasks[rmt]->Rmt.startExeTime)/TTMR_HS_TICKS_PER_uS;
+                     (MifStartTime - Tm.pRmtTasks[rmt]->Rmt.startExeTime)/TTMR_HS_TICKS_PER_uS;
                     ++Tm.pRmtTasks[rmt]->Rmt.interruptedCount;
                 }
             }
@@ -607,7 +602,8 @@ void TmDispatchDtTasks (void)
     {
       Tm.mifDc[Tm.currentMIF].cumExecTime += Tm.mifDc[Tm.currentMIF].cur;
       ++Tm.mifDc[Tm.currentMIF].exeCount;
-     // GSE_DebugStr(NORMAL,TRUE,"MIF: %d Cur: %d Cum Time: %d", Tm.CurrentMIF, Tm.mifDc[Tm.CurrentMIF].Cur, Tm.mifDc[Tm.CurrentMIF].CumExecTime);
+     // GSE_DebugStr(NORMAL,TRUE,"MIF: %d Cur: %d Cum Time: %d", Tm.CurrentMIF, 
+     // Tm.mifDc[Tm.CurrentMIF].Cur, Tm.mifDc[Tm.CurrentMIF].CumExecTime);
     }
 
 
@@ -938,7 +934,7 @@ TM_HEALTH_COUNTS Tm_GetTMHealthStatus (void)
 }
 
 /*****************************************************************************
- * Function:    Tm_CalcDiffInTMHealthStatus
+ * Function:    Tm_CalcDiffTMHealthStatus
  *
  * Description:  Calculate the difference in TM Health Counts to for PWEH SEU
  *               (Used to support determining SEU count during data capture)
@@ -966,7 +962,7 @@ TM_HEALTH_COUNTS Tm_CalcDiffTMHealthStatus (TM_HEALTH_COUNTS PrevCnt)
 
 
 /******************************************************************************
- * Function:     TM_AddPrevTMHealthStatus
+ * Function:     Tm_AddPrevTMHealthStatus
  *
  * Description:  Add TM Health Counts to support PWEH SEU
  *               (Used to support determining SEU count during data capture)
@@ -1030,6 +1026,11 @@ TASK_INDEX TmGetTaskId(char* name)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ *
+ * *****************  Version 65  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 64  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:09p

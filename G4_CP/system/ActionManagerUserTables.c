@@ -424,7 +424,7 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
- * 
+ *
  * *****************  Version 10  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 12:10p
  * Updated in $/software/control processor/code/system

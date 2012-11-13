@@ -1,4 +1,4 @@
-
+#define MSSC_USERTABLE_BODY
 /******************************************************************************
          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 23 $  $Date: 12-11-12 10:57a $
+    $Revision: 24 $  $Date: 12-11-13 5:46p $
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -31,9 +31,12 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Function Prototypes                                                 */
+/* Local Variables                                                           */
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
 USER_HANDLER_RESULT MSSC_GsmCfgMsg(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -167,12 +170,26 @@ USER_MSG_TBL MsRoot   = {"MS", MsMsgs, NULL, NO_HANDLER_DATA};
 /* Public Functions                                                          */
 /*****************************************************************************/
 
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
+
+
 /******************************************************************************
 * Function:    MSSC_GsmCfgMsg
 *
 * Description: User Manager callback for GSM configuration commands
 *
-* Parameters:  See User.h
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific param to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
 *
 * Returns:     USER_RESULT_OK: Configuration set successfully
 *              USER_RESULT_ERROR: Configuration error
@@ -215,8 +232,16 @@ USER_HANDLER_RESULT MSSC_GsmCfgMsg(USER_DATA_TYPE DataType,
  * Description: User Manager callback sending Linux shell commands to the
  *              Micro-Server, and receiving the output of the commands
  *
- * Parameters:  See User.h
- *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                                for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific param to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set *
  * Returns:     USER_RESULT_OK: Configuration set successfully
  *              USER_RESULT_ERROR: Configuration error
  *
@@ -268,13 +293,12 @@ USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
 *               [in] Index:     Index parameter is used to reference the
-*                               specific sensor to change.  Range is validated
+*                               specific param to change.  Range is validated
 *                               by the user manager
 *               [in] SetPtr:    For write commands, a pointer to the data to
 *                               write to the configuration.
 *               [out] GetPtr:   For read commands, UserCfg function will set
 *                               this to the location of the data requested.
-
 *
 * Returns:     USER_RESULT_OK:    Processed successfully
 *              USER_RESULT_ERROR: Error processing command.
@@ -319,7 +343,17 @@ USER_HANDLER_RESULT MSSC_ShowConfig(USER_DATA_TYPE DataType,
 *              generic accessor to read the GSM signal strength (see table
 *              above)
 *
-* Parameters:  See User.h
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific param to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
 *
 * Returns:     USER_RESULT_OK: Configuration set successfully
 *              USER_RESULT_ERROR: Configuration error
@@ -347,7 +381,17 @@ USER_HANDLER_RESULT MSSC_RefreshMSInfo(USER_DATA_TYPE DataType,
 *
 * Description: User Manager callback for general MSSC configuration commands
 *
-* Parameters:  See User.h
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific param to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
 *
 * Returns:     USER_RESULT_OK: Configuration set successfully
 *              USER_RESULT_ERROR: Configuration error
@@ -389,11 +433,17 @@ USER_HANDLER_RESULT MSSC_CfgMsg(USER_DATA_TYPE DataType,
  *
  * Description: Get the Micro-Server time and date.
  *
- * Parameters:  USER_DATA_TYPE DataType
- *              USER_MSG_PARAM Param
- *              UINT32 Index
- *              const void *SetPtr
- *              void **GetPtr
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific param to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
  *
  * Returns:     USER_HANDLER_RESULT
  *
@@ -430,13 +480,14 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
   return UserResult;
 }
 
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
-
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
+ *
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a

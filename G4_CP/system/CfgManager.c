@@ -128,7 +128,7 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
  * Description:
  *
  * Parameters:   degradedMode - TRUE -  degraded mode, use the DefaultNvMgrConfig for
- *                              FALSE - use the normal NVCfgMgr file.
+ *                          FALSE - use the normal NVCfgMgr file.
  *
  * Returns:      RESULT
  *
@@ -739,7 +739,7 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
- * 
+ *
  * *****************  Version 72  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
  * Updated in $/software/control processor/code/system

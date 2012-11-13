@@ -1,6 +1,5 @@
 #ifndef TASK_MANAGER_H
 #define TASK_MANAGER_H
-
 /******************************************************************************
          Copyright (C) 2003-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
@@ -10,20 +9,15 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 65 $  $Date: 12-11-12 4:46p $  
+     $Revision: 66 $  $Date: 12-11-13 5:46p $  
 ******************************************************************************/
 
-
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
 
 /*****************************************************************************/
-/* Compiler Specific Includes                                               */
-/*****************************************************************************/
-// None
-
-
-
-/*****************************************************************************/
-/* Software Specific Includes                                               */
+/* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "TTMR.h"
 
@@ -145,8 +139,8 @@ TASK_ENTRY(Monitor_Task,               253,      RMT,  SYS_MODE_GP1, 0x00000000,
 TASK_ENTRY(CRC_CBIT_Task,              254,      RMT,  SYS_MODE_GP1, 0x00000000,   500,       S2M(10*60)  )\
 TASK_ENTRY(Ram_CBIT_Task,              255,      RMT,  SYS_MODE_GP1, 0x00000000,  1000,       S2M(10*60)  )
 
-//*Negative RMT rates for self-scheduled tasks indicates the number of frames after the current frame 
-// the task will run again.
+//*Negative RMT rates for self-scheduled tasks indicates the number of frames after the 
+// current frame the task will run again.
 
 typedef enum { 
   TASK_LIST
@@ -189,7 +183,7 @@ typedef enum {
   SYS_MODE_DEGRADED = MODE_MASK(SYS_DEGRADED_ID),
 #ifdef STE_TP
   SYS_MODE_TEST     = MODE_MASK(SYS_TEST_ID),
-  SYS_MODE_GP0      = ( SYS_MODE_NORMAL | SYS_MODE_DEGRADED | SYS_MODE_SHUTDOWN | SYS_MODE_TEST),
+  SYS_MODE_GP0    = ( SYS_MODE_NORMAL | SYS_MODE_DEGRADED | SYS_MODE_SHUTDOWN | SYS_MODE_TEST),
   SYS_MODE_GP1      = ( SYS_MODE_NORMAL | SYS_MODE_DEGRADED | SYS_MODE_TEST),
 #else
   SYS_MODE_GP0      = ( SYS_MODE_NORMAL | SYS_MODE_DEGRADED | SYS_MODE_SHUTDOWN ),
@@ -347,7 +341,8 @@ extern const TaskInformation taskInfo[MAX_TASK];
 #if defined( TASK_MANAGER_BODY )
 
 #undef  TASK_ENTRY
-#define TASK_ENTRY(Name,Pri,Type,Modes,DTrate,RMToffset,RMTrate) {Pri,Type,Modes,DTrate,RMToffset,RMTrate },
+#define TASK_ENTRY(Name,Pri,Type,Modes,DTrate,RMToffset,RMTrate)\
+  {Pri,Type,Modes,DTrate,RMToffset,RMTrate },
 
 const TaskInformation taskInfo[MAX_TASK] = {TASK_LIST};
 
@@ -385,6 +380,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 66  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
