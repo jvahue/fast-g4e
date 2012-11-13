@@ -99,7 +99,7 @@ const EVAL_OPCODE_TBL_ENTRY OpCodeTable[EVAL_OPCODE_MAX] = {EVAL_OPCODE_LIST};
 #undef DAI
 #define DAI(OpCode, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc) \
            {OpCode, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc}
-const EVAL_DATAACCESS DataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
+const EVAL_DATAACCESS dataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
 
 // Evaluation rpn stack used at runtime
 EVAL_RPN_ENTRY rpn_stack[EVAL_EXPR_BIN_LEN];
@@ -122,14 +122,14 @@ static INT8    EvalGetValidCnt     ( const EVAL_RPN_ENTRY* operandA,
 static BOOLEAN EvalVerifyDataType  ( DATATYPE expectedType, const EVAL_RPN_ENTRY* opA,
                                      const EVAL_RPN_ENTRY* opB);
 
-static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
+static void    EvalGetPrevSensorValue(UINT32 key,
                                       FLOAT32* fPriorValue,
                                       BOOLEAN* bPriorValid);
 static void    EvalSetPrevSensorValue(UINT32 key,
                                       EVAL_EXE_CONTEXT* context,
                                       FLOAT32 fValue,
                                       BOOLEAN bValid);
-static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context);
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -140,11 +140,12 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context);
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in] OpCode - the command who data-access function is to
+ *                              returned.
  *
- *                [out]
  *
- * Returns:
+ * Returns: A pointer to the function to be used to retrieve the data for the
+ *          the passed OpCode.
  *
  * Notes:
  *
@@ -158,11 +159,11 @@ static const EVAL_DATAACCESS* EvalGetDataAccess(BYTE  OpCode)
 
   // Search until found or end-of-table
 
-  for(i = 0; !bFound  && i < EVAL_DAI_MAX; ++i)
+  for(i = 0; !bFound  && i < (INT32) EVAL_DAI_MAX; ++i)
   {
-    if( OpCode == DataAccessTable[i].OpCode)
+    if( OpCode == dataAccessTable[i].OpCode)
     {
-      pDataAcc = (const EVAL_DATAACCESS*) &DataAccessTable[i];
+      pDataAcc = (const EVAL_DATAACCESS*) &dataAccessTable[i];
       bFound = TRUE;
     }
   }
@@ -174,11 +175,11 @@ static const EVAL_DATAACCESS* EvalGetDataAccess(BYTE  OpCode)
  *
  * Description:
  *
- * Parameters:    [in]
- *
+ * Parameters:    [in] str:      string containing object index
+ *                [in] maxIndex: max value limit expected for object index
  *                [out]
  *
- * Returns:
+ * Returns:       The integer value of the object index.
  *
  * Notes:
  *
@@ -188,7 +189,7 @@ static const EVAL_DATAACCESS* EvalGetDataAccess(BYTE  OpCode)
 static INT32 EvalParseObjectIndex( const CHAR* str, INT32 maxIndex)
 {
   INT32  temp_int;
-  UINT32 len;
+  INT32 len;
   INT32  retVal;
   CHAR*  end;
 
@@ -197,7 +198,7 @@ static INT32 EvalParseObjectIndex( const CHAR* str, INT32 maxIndex)
 
   if ( !isdigit(*str) )
   {
-    retVal = RPN_ERR_INDEX_NOT_NUMERIC;
+    retVal = (INT32) RPN_ERR_INDEX_NOT_NUMERIC;
   }
   else
   {
@@ -223,14 +224,14 @@ static INT32 EvalParseObjectIndex( const CHAR* str, INT32 maxIndex)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in] operandA: Pointer to the RPN entry containing 1st operand.
+ *                [in] operandB: Pointer to the RPN entry containing 2nd operand.
+
  *
- *                [out]
+ * Returns:      The number of valid operands passed.
  *
- * Returns:
- *
- * Notes:
- *
+ * Notes:        This function is used to pre-establish whether the input(s) to be
+ *               evaluated are valid. operandB can be optional.
  *
  *****************************************************************************/
 static INT8 EvalGetValidCnt(const EVAL_RPN_ENTRY* operandA, const EVAL_RPN_ENTRY* operandB)
@@ -295,12 +296,12 @@ static BOOLEAN EvalVerifyDataType(DATATYPE expectedType,
  *
  * Description:
  *
- * Parameters:    [in]
- *
+ * Parameters:    [in] errNum: The evaluator error number from RPN_ERR to be
+ *                             converted into descriptive string.
  *                [out]
  *
- * Returns:
- *
+ * Returns:   pointer to a string constant containing the descriptive msg
+ *            (see EvalRetValEnumString array)
  * Notes:
  *
  *
@@ -309,7 +310,8 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
 {
   // Check index range.
   // Invert the negative errNum into the positive index into the string table.
-  INT32 i = (errNum < RPN_ERR_MAX || errNum >= RPN_ERR_UNKNOWN) ? RPN_ERR_UNKNOWN : -errNum;
+  INT32 i = (errNum < (INT32)RPN_ERR_MAX || errNum >= (INT32) RPN_ERR_UNKNOWN)
+			 ? (INT32) RPN_ERR_UNKNOWN : -errNum;
   return EvalRetValEnumString[i];
 }
 
@@ -327,20 +329,15 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
  *              caller should assert.
  *
  *
- * Parameters:  [in] evalType: enum indicating the type of evaluation to perform. *
- *              [in] expr:     The expression object to be parsed.
- *               [in/out]      The EVAL_RESP_INFO structure containing context-sensitive
- *                             user request/response data to be passed from the user to the
- *                             user callback function thru the evaluator function.
- *
- *                                  input states in the same order as
- *                                  TC expression. TRUE populates with a "1"
- *                                  FALSE populates with an "0"
+ * Parameters:  [in]     objType:  enum indicating the caller-type/context to perform.
+ *              [in]       objId:  the index of the object indicated by objType.
+ *              [in/out]    expr:  The expression object to be parsed.
+ *              [in/out]validity:  The validity of the resulting expression based
+ *                                 on the validity rules of the data sources.
  *
  * Returns:     0: Expression evaluates to FALSE
  *              1: Expression evaluates to TRUE
- *             -1: Insufficient values for number of operators in expression
- *             -2: Too many values for number of operators in expression
+ *            < 0: see RPN_ERR in Evaluator.h for list of error codes.
  *
  * Notes:
  *
@@ -404,13 +401,16 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
     if ( !EvalUpdatePrevSensorList(&context) )
     {
       RPN_STACK_PURGE;
-      result.Data     = RPN_ERR_NOT_PREV_TABLE_FULL;
+      result.Data     = (INT32) RPN_ERR_NOT_PREV_TABLE_FULL;
       result.DataType = DATATYPE_RPN_PROC_ERR;
       result.Validity = FALSE;
       RPN_PUSH(result);
       if (!fullTableReported)
       {
-        GSE_DebugStr(NORMAL, TRUE, "Expression Runtime Error. %s", EvalGetMsgFromErrCode(RPN_ERR_NOT_PREV_TABLE_FULL));
+        GSE_DebugStr(NORMAL,
+					 TRUE,
+					 "Expression Runtime Error. %s",
+					 EvalGetMsgFromErrCode( (INT32) RPN_ERR_NOT_PREV_TABLE_FULL));
         fullTableReported = TRUE;
       }
     }
@@ -422,7 +422,7 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
   if (RPN_STACK_CNT > 1)
   {
     RPN_STACK_PURGE;
-    result.Data     = RPN_ERR_TOO_MANY_STACK_VARS;
+    result.Data     = (INT32) RPN_ERR_TOO_MANY_STACK_VARS;
     result.DataType = DATATYPE_RPN_PROC_ERR;
     result.Validity = FALSE;
     RPN_PUSH(result);
@@ -438,28 +438,20 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
 /******************************************************************************
  * Function:    EvalExprStrToBin
  *
- * Description: Convert a evaluation expression from string
- *              form (i.e that with 4-char names and !,&,| operators) to a
- *              binary form used at runtime.
+ * Description: Convert a evaluation expression from RPN string
+ *              form to a binary form for use at runtime.
  *
- * todo DaveB update this
- * Parameters:  [in] str:      String of transition criteria to convert with the
- *                             form of "[6-char TC][Operator][6-char TC]....."
- *              [in/out] expr: Ptr to structure to hold the converted rpn string and
- *                              meta-data needed during runtime to evaluate the expression
- *              [in]     type: Type of object (e.g. TRIGGER  EVENT, etc)
- *              [in]    index: Obj index ( e.g. Trigger[0],  Event[1])
+ * Parameters:  [in]     objType:  enum indicating the caller-type/context to perform.
+ *              [in]       objID:  the index of the object indicated by objType.
+ *              [in]         str:  The expression string to be converted.
+ *              [in/out]    expr:  The expression object to be parsed.
+ *              [in] maxOperands:  The max operands to be allowed in the binary
+ *                                 expression.
  *
- *              [in] maxOperands: The maximum allowable operands to be allowed for this
- *                                type.
- *              [in] pGetFunc:    Pointer to the callback function to be used at runtime
- *                                to evaluate the validity of the operands in expression.
- *
- * Returns:
- *              EVAL_RETVAL_TRUE                   1
- *              EVAL_RETVAL_FALSE                  0
+ * Returns:     0: Expression evaluates to FALSE
+ *              1: Expression evaluates to TRUE
+ *            < 0: see RPN_ERR in Evaluator.h for list of error codes.
  *              --------------------------------------------------------------------
- *
  * Notes:
  *
  *****************************************************************************/
@@ -495,14 +487,14 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
     // break out of while-loop
     if(expr->Size >= EVAL_EXPR_BIN_LEN)
     {
-      retval = RPN_ERR_TOO_MANY_TOKENS_IN_EXPR;
+      retval = (INT32) RPN_ERR_TOO_MANY_TOKENS_IN_EXPR;
       break;
     }
 
     len = 0;
     // If the token matches a token in table, call the associated
     // function to add a command to the expression's cmd-list.
-    for ( i = 0; i < EVAL_OPCODE_MAX; ++i )
+    for ( i = 0; i < (INT16) EVAL_OPCODE_MAX; ++i )
     {
       if( 0 != OpCodeTable[i].TokenLen  &&
           0 == strncmp(OpCodeTable[i].Token, str, OpCodeTable[i].TokenLen))
@@ -525,7 +517,7 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
     // constant float value?
     if ( 0 == len )
     {
-      len = EvalAddConst(OP_CONST_VAL, str, expr );
+      len = EvalAddConst( (INT16) OP_CONST_VAL, str, expr );
       // Negative result indicates that it WAS a constant float
       // but it was a bad value.
       if ( len < 0 )
@@ -539,7 +531,7 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
     // stop parsing.
     if(0 == len)
     {
-      retval = RPN_ERR_INVALID_TOKEN;
+      retval = (INT32) RPN_ERR_INVALID_TOKEN;
       break;
     }
     else // Token has been encoded into list... increment to next.
@@ -589,17 +581,17 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
  *****************************************************************************/
 void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
 {
-  INT32   i;
-  INT32   j;
+  INT16   i;
+  INT16   j;
   INT32   cnt;
   CHAR*   pStr = str;
 
   //Clear str
   *str = '\0';
 
+
   for(i = 0; i < expr->Size; i++)
   {
-    cnt  = 0;
     j = expr->CmdList[i].opCode;
     cnt = OpCodeTable[j].FmtCmd( j, (const EVAL_CMD*) &expr->CmdList[i], pStr);
     pStr += cnt;
@@ -616,13 +608,14 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
 /******************************************************************************
  * Function:      EvalLoadConstValue
  *
- * Description:
+ * Description:   Add the indicated constant value in the context cmd and push
+ *                it on the command stack
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
@@ -647,17 +640,17 @@ BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
  *
  * Description:   Build a const bool "FALSE" obj and push on stack
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadConstFalse(EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalLoadConstFalse( EVAL_EXE_CONTEXT* context)
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
@@ -674,19 +667,20 @@ BOOLEAN EvalLoadConstFalse(EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function:      EvalLoadInputSrc
  *
- * Description:
+ * Description:   Load the value or boolean state from the indicated source
+ *                and push in on the command stack.
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
@@ -723,7 +717,7 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
                   dataAcc->GetSrcByValue( (INT32) cmd->data) :
                   dataAcc->GetSrcByBool ( (INT32) cmd->data);
 
-    rslt.Validity = dataAcc->GetSrcValidity( (SENSOR_INDEX)cmd->data);
+    rslt.Validity = dataAcc->GetSrcValidity( (INT32)cmd->data);
   }
   else // The indicated data source is not configured.
   {
@@ -743,20 +737,21 @@ BOOLEAN EvalLoadInputSrc(EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function: EvalLoadFuncCall
  *
- * Description: Invoke the application function indicated by the entry in the DAI
+ * Description:   Loads the result from the indicated function call and pushes
+ *                it on the command stack.
  *
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalLoadFuncCall ( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
@@ -798,19 +793,21 @@ BOOLEAN EvalLoadFuncCall (EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function: EvalCompareOperands
  *
- * Description:
+ * Description:   Compare the previous two values from the command stack,
+ *                verify that they are the correct type and push the result
+ *                back on the stack.
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalCompareOperands( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
@@ -820,7 +817,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
-    rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
+    rslt.Data     = (INT32) RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     RPN_STACK_PURGE;
@@ -882,7 +879,7 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
     else
     {
       // Set RPN response to flag a syntax error
-      rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
+      rslt.Data     = (INT32) RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure our error msg will be the only thing on stack.
@@ -897,19 +894,20 @@ BOOLEAN EvalCompareOperands(EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function: EvalIsNotEqualPrev
  *
- * Description:
+ * Description:   Test that the current value of the indicated sensor is not
+ *                equal to the previous value
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalIsNotEqualPrev( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
@@ -919,10 +917,12 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
-    rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
+    rslt.Data     = (INT32) RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
-    // Ensure error msg is only thing on the stack
+
+    // Ensure error msg will be the only
+    // thing on the stack(push is performed at end of func.)
     RPN_STACK_PURGE;
   }
   else
@@ -943,6 +943,7 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
     key = EVAL_MAKE_LOOKUP_KEY( context->objType, context->objId, (UINT8)context->cmd->data);
 
     EvalGetPrevSensorValue( key, &oprndPrevious.Data, &oprndPrevious.Validity);
+
     rslt.Data = (FLOAT32)(fabs( (oprndCurrent.Data - oprndPrevious.Data)) >= FLT_EPSILON );
     rslt.DataType = DATATYPE_BOOL;
     rslt.Validity = ( EvalGetValidCnt(&oprndCurrent, &oprndPrevious ) == 2 );
@@ -959,19 +960,19 @@ BOOLEAN EvalIsNotEqualPrev(EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function: EvalPerformNot
  *
- * Description:
+ * Description:   Perform a unary negation on the last entry in the command stack.
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
+BOOLEAN EvalPerformNot( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprnd;
   EVAL_RPN_ENTRY rslt;
@@ -979,7 +980,7 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
   // Need one operand off stack
   if(RPN_STACK_CNT < 1)
   {
-    rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
+    rslt.Data     = (INT32)RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     // Ensure error msg is only thing on the stack
@@ -997,7 +998,7 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
     else
     {
       // Set RPN response to flag a syntax error
-      rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
+      rslt.Data     = (INT32)RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure error msg is only thing on the stack
@@ -1012,13 +1013,13 @@ BOOLEAN EvalPerformNot(EVAL_EXE_CONTEXT* context)
 /******************************************************************************
  * Function: EvalPerformAnd
  *
- * Description:
+ * Description:   Perform a logical AND on the last 2-entries in the command stack.
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
@@ -1033,7 +1034,7 @@ BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
-    rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
+    rslt.Data     = (INT32)RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     // Ensure error msg is only thing on the stack
@@ -1053,7 +1054,7 @@ BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
     else
     {
       // Set RPN response to flag a syntax error
-      rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
+      rslt.Data     = (INT32) RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure error msg is only thing on the stack
@@ -1067,13 +1068,13 @@ BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
 /******************************************************************************
  * Function: EvalPerformOr
  *
- * Description:
+ * Description:   Perform a logical OR on the last 2-entries in the command stack.
  *
- * Parameters:    [in]
+ * Parameters:    [in] Pointer to the expression context/cmd stack
  *
- *                [out]
+ *                [out] none
  *
- * Returns:
+ * Returns:       TRUE if operation was successful, otherwise FALSE
  *
  * Notes:
  *
@@ -1088,7 +1089,7 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
   // Need two operands off stack
   if(RPN_STACK_CNT < 2)
   {
-    rslt.Data     = RPN_ERR_TOO_FEW_STACK_VARS;
+    rslt.Data     = (INT32) RPN_ERR_TOO_FEW_STACK_VARS;
     rslt.DataType = DATATYPE_RPN_PROC_ERR;
     rslt.Validity = FALSE;
     RPN_STACK_PURGE;
@@ -1116,7 +1117,7 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
     else
     {
       // Set RPN response to flag a syntax error
-      rslt.Data     = RPN_ERR_INV_OPRND_TYPE;
+      rslt.Data     = (INT32)RPN_ERR_INV_OPRND_TYPE;
       rslt.DataType = DATATYPE_RPN_PROC_ERR;
       rslt.Validity = FALSE;
       // Ensure error msg is only thing on the stack
@@ -1134,11 +1135,12 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index ( not used in this function)
+ *                [in]  str    - pointer  to the string containing the const.
+ *                [out] expr   - pointer to expression obj to be updated.
  *
- *                [out]
- *
- * Returns:
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
  * Notes:
  *
@@ -1154,7 +1156,7 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Have we reached limit count for operands?
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = RPN_ERR_TOO_MANY_OPRNDS;
+    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1172,7 +1174,7 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     }
     else
     {
-      retval = RPN_ERR_CONST_VALUE_OTRG;
+      retval = (INT32) RPN_ERR_CONST_VALUE_OTRG;
     }
   }
   return retval;
@@ -1183,11 +1185,13 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description: Add a "load const bool FALSE" to the cmd list.
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index ( not used in this function)
+ *                [in]  str    - pointer  to the string containing the const.
+ *                [out] expr   - pointer to expression obj to be updated.
  *
- *                [out]
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
- * Returns:
  *
  * Notes: This cmd is used to represent a NO_COMPARE conditions which
  *        to False
@@ -1202,7 +1206,7 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Have we reached limit count for operands?
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = RPN_ERR_TOO_MANY_OPRNDS;
+    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1224,11 +1228,13 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index
+ *                [in]  str    - pointer  to the string containing the const.
+ *                [out] expr   - pointer to expression obj to be updated.
  *
- *                [out]
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
- * Returns:
  *
  * Notes:
  *
@@ -1243,7 +1249,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 
   if(expr->OperandCnt == expr->MaxOperands)
   {
-    retval = RPN_ERR_TOO_MANY_OPRNDS;
+    retval = (INT32) RPN_ERR_TOO_MANY_OPRNDS;
   }
   else
   {
@@ -1293,11 +1299,12 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index ( not used in this function)
+ *                [in]  str    - pointer  to the string containing the const.
+ *                [out] expr   - pointer to expression obj to be updated.
  *
- *                [out]
- *
- * Returns:
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
  * Notes:
  *
@@ -1322,11 +1329,13 @@ INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]
+ *  Parameters:    [in]  tblIdx - table index
+ *                 [in]  str    - pointer  to the string containing the const.
+ *                 [out] expr   - pointer to expression obj to be updated.
  *
- *                [out]
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
- * Returns:
  *
  * Notes:
  *
@@ -1340,16 +1349,16 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   // Check the previous operation in list..
   // Verify that it is a sensor-load cmd and get idx-value stored
   // in Data so '!P' can make a call to load prev value at exe time.
-  if ( OP_GETSNRVAL == expr->CmdList[expr->Size - 1].opCode)
+  if ( (UINT8)OP_GETSNRVAL == expr->CmdList[expr->Size - 1].opCode)
   {
-    cmd.opCode = OP_NOT_EQ_PREV;
+    cmd.opCode = (UINT8)OP_NOT_EQ_PREV;
     cmd.data   = expr->CmdList[expr->Size - 1].data;
     expr->CmdList[expr->Size++] = cmd;
     retval = OpCodeTable[tblIdx].TokenLen;
   }
   else
   {
-    retval = RPN_ERR_OP_REQUIRES_SENSOR_OPRND;
+    retval = (INT32) RPN_ERR_OP_REQUIRES_SENSOR_OPRND;
   }
   return retval;
 }
@@ -1359,17 +1368,19 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index
+ *                [in]  cmd    - pointer  to the cmd to be coverted to string.
+ *                [out] str   - pointer to string to hold conversion.
  *
- *                [out]
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
- * Returns:
  *
  * Notes:
  *
  *
  *****************************************************************************/
-INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, EVAL_OPRND_LEN + 1, "%s%03d", OpCodeTable[tblIdx].Token,
                                                      (INT32)cmd->data);
@@ -1380,16 +1391,18 @@ INT16 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index
+ *                [in]  cmd    - pointer  to the cmd to be coverted to string.
+ *                [out] str   - pointer to string to hold conversion.
  *
- *                [out]
- * Returns:
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
  * Notes:
  *
  *
  *****************************************************************************/
-INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+INT32 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, MAX_FP_STRING, "%f", cmd->data);
 }
@@ -1399,16 +1412,18 @@ INT16 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description: Return the token string from the opcode table for this tblIdx.
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index ( not used in this function)
+ *                [in]  cmd    - pointer  to the cmd to be formatted as a string.
+ *                [out] str   -  pointer to expression string to be updated.
  *
- *                [out]
- * Returns:
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
  * Notes:
  *
  *
  *****************************************************************************/
-INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+INT32 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", OpCodeTable[tblIdx].Token);
 }
@@ -1418,17 +1433,18 @@ INT16 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in]  tblIdx - table index ( not used in this function)
+ *                [in]  cmd    - pointer  to the command to be coverted.
+ *                [out] expr   - pointer to expression string to be updated.
  *
- *                [out]
- *
- * Returns:
+ * Returns:       value < 0    - processing error code.
+ *                value >= 0   - the length of the string processed.
  *
  * Notes:
  *
  *
  *****************************************************************************/
-INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+INT32 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return  snprintf(str, OpCodeTable[tblIdx].TokenLen + 1, "%s", OpCodeTable[tblIdx].Token);
 }
@@ -1439,22 +1455,23 @@ INT16 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  * Description: Get the previous sensor value for the !P command at the passed
  *              address.
  *
- * Parameters:    [in] The address-value-key of the !P command
+ * Parameters:    [in]     key:         The lookup-key of the !P command
+ *                [in/out] fPriorValue: Pointer to value to return
+ *                [in/out] bPriorValid: pointer to the validity to return
  *
- *                [out] None
  *
- * Returns:   The last value or zero if this is the first call( address not in table.
+ * Returns:   void
  *
  *
  * Notes:
  *
  *****************************************************************************/
-static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
-                                      FLOAT32* fPriorValue,
-                                      BOOLEAN* bPriorValid)
+static void  EvalGetPrevSensorValue(UINT32 key,
+                                    FLOAT32* fPriorValue,
+                                    BOOLEAN* bPriorValid)
 {
   INT16 i;
-  INT16 index = -1; // Init index to "not found"
+  INT16 idx = -1; // Init index to "not found"
 
   // Search thru the general table to see if this
   // sensor is already being managed
@@ -1462,23 +1479,23 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
   {
     if (m_masterTbl[i].KeyField == key)
     {
-      index = i;
+      idx = i;
       break;
     }
   }
 
   // If we found the table entry, return values.
-  if (-1 != index)
+  if (-1 != idx)
   {
-    *fPriorValue = m_masterTbl[index].PriorValue;
-    *bPriorValid = m_masterTbl[index].PriorValid;
+    *fPriorValue = m_masterTbl[idx].PriorValue;
+    *bPriorValid = m_masterTbl[idx].PriorValid;
   }
   else
   {
     *fPriorValue = 0.f;
     *bPriorValid = FALSE;
   }
-  return ( -1 != index );
+
 }
 
 
@@ -1489,11 +1506,14 @@ static BOOLEAN EvalGetPrevSensorValue(UINT32 key,
  *              cmd in the temporary table. ( This table's contents will be merged
  *              into the m_masterTbl at the end of processing for this expression.
  *
- * Parameters:    [in]
+ * Parameters:    [in] key     - search key for this prev sensor value.
+ *                [in] context - to be updated.
+ *                [in] fValue  - value to be store
+ *                [in] bValid  - valid state of the value.
  *
  *                [out]
  *
- * Returns:
+ * Returns:       None.
  *
  * Notes:
  *
@@ -1508,7 +1528,8 @@ static void EvalSetPrevSensorValue(UINT32 key,
   UINT32 objType = EVAL_GET_TYPE(key);
   BOOLEAN status = FALSE;
 
-  if (objType > EVAL_CALLER_TYPE_PARSE && objType < MAX_EVAL_CALLER_TYPE)
+  if ( (EVAL_CALLER_TYPE)objType > EVAL_CALLER_TYPE_PARSE &&
+       (EVAL_CALLER_TYPE)objType < MAX_EVAL_CALLER_TYPE)
   {
     // Lookup entry in temp table and update it.
     for(i = 0; i < context->tempTblCnt; ++i)
@@ -1546,17 +1567,17 @@ static void EvalSetPrevSensorValue(UINT32 key,
  *              cmd in the temporary table. ( This table's contents will be merged
  *              into the m_masterTbl at the end of processing for this expression.
  *
- * Parameters:    [in]
+ * Parameters:    [in] execution context
  *
  *                [out]
  *
- * Returns:
+ * Returns:       Boolean indicating whether the master and context tables
  *
  * Notes:
  *
  *
  *****************************************************************************/
-static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 {
   INT16 idxTempTbl;
   INT16 idxMastTbl;
@@ -1573,8 +1594,8 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
     {
       if (context->tempTbl[idxTempTbl].KeyField == m_masterTbl[idxMastTbl].KeyField)
       {
-        m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
-        m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
+        //m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
+        //m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
         ++updateCnt;
         bFound = TRUE;
         break;
@@ -1607,7 +1628,7 @@ static BOOLEAN EvalUpdatePrevSensorList(EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:35p
  * Updated in $/software/control processor/code/drivers
