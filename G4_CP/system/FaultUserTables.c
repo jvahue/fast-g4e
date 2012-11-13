@@ -11,7 +11,7 @@ Description: The fault processing object is currenlty used to determine the
 
 
 VERSION
-$Revision: 10 $  $Date: 8/28/12 1:43p $ 
+$Revision: 11 $  $Date: 12-11-13 1:53p $ 
 
 ******************************************************************************/
 #ifndef FAULT_BODY
@@ -139,9 +139,9 @@ USER_MSG_TBL RootFaultMsg = {"SIGNAL",FaultRoot,NULL,NO_HANDLER_DATA};
  *                               this to the location of the data requested.
                                  
  *
- * Returns:      
+ * Returns:      USER_HANDLER_RESULT
  *
- * Notes:        
+ * Notes:        None
  *****************************************************************************/
 USER_HANDLER_RESULT Fault_UserCfg(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
@@ -234,6 +234,11 @@ USER_HANDLER_RESULT Fault_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: FaultUserTables.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:53p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

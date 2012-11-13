@@ -8,7 +8,7 @@
     Description:  
     
     VERSION
-    $Revision: 44 $  $Date: 8/28/12 1:43p $
+    $Revision: 45 $  $Date: 12-11-13 12:32p $
    
 ******************************************************************************/
 
@@ -405,7 +405,7 @@ void Box_PowerOn_StartTimeCounting( void )
 
 
 /******************************************************************************
- * Function:    Box__PowerOn_UpdateElapsedUsage
+ * Function:    Box_PowerOn_UpdateElapsedUsage
  *  
  * Description: Updates the elapsed power on usage and stores to non-volatile 
  *              memory 
@@ -503,7 +503,7 @@ void Box_PowerOn_UpdateElapsedUsage ( BOOLEAN bPadForTruncation,
 
 
 /*****************************************************************************/
-/* Local Functions                                                          */
+/* Local Functions                                                           */
 /*****************************************************************************/
 
 /******************************************************************************
@@ -558,6 +558,11 @@ void Box_BackGroundTask ( void *pParam )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Box.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 12:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

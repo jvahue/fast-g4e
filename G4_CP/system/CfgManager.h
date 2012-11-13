@@ -4,15 +4,12 @@
             Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-
-
  File: CfgManager.h
 
-
- Description:
+ Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 50 $  $Date: 12-11-12 4:46p $
+ $Revision: 51 $  $Date: 12-11-13 11:10a $
 
 ******************************************************************************/
 
@@ -155,8 +152,8 @@ typedef struct
 //used.
 typedef struct
 {
-  CFGMGR_NVRAM Cfg;
-  UINT16 CS;
+  CFGMGR_NVRAM cfg;
+  UINT16 cs;
 }CFGMGR_NVRAM_CS;
 
 
@@ -202,6 +199,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 51  *****************
+ * User: John Omalley Date: 12-11-13   Time: 11:10a
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Code Review Formatting Issues
  * 
  * *****************  Version 50  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

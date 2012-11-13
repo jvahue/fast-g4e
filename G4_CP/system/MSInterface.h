@@ -10,7 +10,7 @@
   Description: 
   
   VERSION
-      $Revision: 21 $  $Date: 12-11-12 4:46p $ 
+      $Revision: 22 $  $Date: 12-11-13 2:22p $ 
  
 ******************************************************************************/
 
@@ -116,6 +116,11 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
  *  MODIFICATIONS
  *    $History: MSInterface.h $
  * 
+ * *****************  Version 22  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 2:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
+ * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
@@ -166,7 +171,6 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
  * SCR #87 Function Prototype
  * 
  *
- *************************************************************************/
- 
+ ***************************************************************************/ 
 
 

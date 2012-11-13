@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 71 $  $Date: 12-11-09 4:01p $
+    $Revision: 72 $  $Date: 12-11-13 11:10a $
 
 ******************************************************************************/
 
@@ -28,7 +28,6 @@
 /*****************************************************************************/
 #include "alt_basic.h"
 #include "NVMgr.h"
-#include "Monitor.h"
 #include "utility.h"
 #include "Cfgmanager.h"
 #include "GSE.h"
@@ -128,10 +127,12 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
  *
  * Description:
  *
- * Parameters:   degraded - TRUE -  degraded mode, use the DefaultNvMgrConfig for
- *                          FALSE - use the normal NVCfgMgr file.
+ * Parameters:   degradedMode - TRUE -  degraded mode, use the DefaultNvMgrConfig for
+ *                              FALSE - use the normal NVCfgMgr file.
  *
  * Returns:      RESULT
+ *
+ * Notes:
  *
  *****************************************************************************/
 void CfgMgr_Init( BOOLEAN degradedMode )
@@ -147,7 +148,7 @@ void CfgMgr_Init( BOOLEAN degradedMode )
 
   // Ensure default values are initially in shadow memory /
   // This handles degraded mode and cases where NVRAM cannot be read
-  memcpy(&NVRAMShadow.Cfg, &DefaultNVCfg, sizeof(NVRAMShadow.Cfg));
+  memcpy(&NVRAMShadow.cfg, &DefaultNVCfg, sizeof(NVRAMShadow.cfg));
 
   if ( !degradedMode ) // Performing a normal startup
   {
@@ -230,11 +231,13 @@ void CfgMgr_Init( BOOLEAN degradedMode )
  * Returns:      BOOLEAN TRUE  The file reset was successful.
  *                       FALSE The file reset failed.
  *
+ * Notes:
+ *
  *****************************************************************************/
 BOOLEAN CfgMgr_FileInit(void)
 {
   // Copy Default NV Cfg to Shadow RAM
-  memcpy(&NVRAMShadow.Cfg, &DefaultNVCfg, sizeof(NVRAMShadow.Cfg));
+  memcpy(&NVRAMShadow.cfg, &DefaultNVCfg, sizeof(NVRAMShadow.cfg));
   return CfgMgr_StoreConfig( &NVRAMShadow );
 }
 
@@ -250,6 +253,8 @@ BOOLEAN CfgMgr_FileInit(void)
  *               [in] reason the default config has been loaded see RESET_REASON
  *
  * Returns:      SUCCESS or FAIL
+ *
+ * Notes:
  *
  *****************************************************************************/
 BOOLEAN CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason )
@@ -297,11 +302,11 @@ CFGMGR_NVRAM* CfgMgr_ConfigPtr(void)
 
   if(m_IsInBatchMode)
   {
-    CfgCpy = &m_BatchModeShadow.Cfg;
+    CfgCpy = &m_BatchModeShadow.cfg;
   }
   else
   {
-    CfgCpy = &NVRAMShadow.Cfg;
+    CfgCpy = &NVRAMShadow.cfg;
   }
   return CfgCpy;
 }
@@ -314,16 +319,16 @@ CFGMGR_NVRAM* CfgMgr_ConfigPtr(void)
  *               is intended to be read during runtime.  To use the pointer
  *               to modify configuration data, see ConfigPtr();
  *
+ * Parameters:   None
  *
+ * Returns:      CFGMGR_NVRAM - pointer to NVRAM shadow
  *
- * Parameters:
- *
- * Returns:
+ * Notes:
  *
  *****************************************************************************/
 CFGMGR_NVRAM* CfgMgr_RuntimeConfigPtr(void)
 {
-  return &NVRAMShadow.Cfg;
+  return &NVRAMShadow.cfg;
 }
 
 /******************************************************************************
@@ -335,6 +340,8 @@ CFGMGR_NVRAM* CfgMgr_RuntimeConfigPtr(void)
  *               UINT16 nMaxByteSize - Total number of bytes available
  *
  * Returns:      UINT16 - Total Number of bytes in binary header
+ *
+ * Notes:
  *
  *****************************************************************************/
 UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
@@ -390,6 +397,8 @@ UINT16 CfgMgr_GetSystemBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
  *               UINT16 nMaxByteSize - Total number of bytes available
  *
  * Returns:      UINT16 - Total Number of bytes in binary header
+ *
+ * Notes:
  *
  *****************************************************************************/
 UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
@@ -464,6 +473,8 @@ UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize )
  * Returns:      TRUE: Data read from EEPROM and checksum is valid
  *               FALSE: Data read failed or checksum failed
  *
+ * Notes:
+ *
  *****************************************************************************/
 BOOLEAN CfgMgr_RetrieveConfig( CFGMGR_NVRAM_CS* pInfo )
 {
@@ -480,9 +491,9 @@ BOOLEAN CfgMgr_RetrieveConfig( CFGMGR_NVRAM_CS* pInfo )
 
   NV_Read( NV_CFG_MGR, 0, pInfo, sizeof(*pInfo) );
 
-  ReadChecksum = pInfo->CS;
+  ReadChecksum = pInfo->cs;
   //Get checksum
-  CalcChecksum = CRC16(&pInfo->Cfg,sizeof(pInfo->Cfg));
+  CalcChecksum = CRC16(&pInfo->cfg,sizeof(pInfo->cfg));
 
   return ( CalcChecksum == ReadChecksum );
 }
@@ -499,10 +510,12 @@ BOOLEAN CfgMgr_RetrieveConfig( CFGMGR_NVRAM_CS* pInfo )
  *
  * Returns:      SUCCESS or FAIL
  *
+ * Notes:
+ *
  *****************************************************************************/
 BOOLEAN CfgMgr_StoreConfig( CFGMGR_NVRAM_CS* pInfo )
 {
-  pInfo->CS = CRC16(&pInfo->Cfg,sizeof(pInfo->Cfg));
+  pInfo->cs = CRC16(&pInfo->cfg,sizeof(pInfo->cfg));
 
 #ifdef SIMULATE_CM
 /*vcast_dont_instrument_start*/
@@ -535,11 +548,13 @@ BOOLEAN CfgMgr_StoreConfig( CFGMGR_NVRAM_CS* pInfo )
  *
  * Returns:
  *
+ * Notes:
+ *
  *****************************************************************************/
 void CfgMgr_StartBatchCfg(void)
 {
   //Fill the batch mode shadow with default data
-  memcpy(&m_BatchModeShadow.Cfg,&DefaultNVCfg,sizeof(m_BatchModeShadow.Cfg));
+  memcpy(&m_BatchModeShadow.cfg,&DefaultNVCfg,sizeof(m_BatchModeShadow.cfg));
   //Set flag to direct _StoreCfgItem calls to the BatchMode copy
   m_IsInBatchMode = TRUE;
 }
@@ -561,6 +576,8 @@ void CfgMgr_StartBatchCfg(void)
  * Parameters:   none
  *
  * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 void CfgMgr_CancelBatchCfg(void)
@@ -587,6 +604,8 @@ void CfgMgr_CancelBatchCfg(void)
  *
  * Returns:
  *
+ * Notes:
+ *
  *****************************************************************************/
 void CfgMgr_CommitBatchCfg(void)
 {
@@ -606,6 +625,8 @@ void CfgMgr_CommitBatchCfg(void)
  * Returns:      TRUE: Configuration data is pending write to EEPROM
  *               FALSE: There is no configuration data pending write to EEPROM
  *
+ * Notes:
+ *
  *****************************************************************************/
 BOOLEAN CfgMgr_IsEEWritePending(void)
 {
@@ -623,6 +644,8 @@ BOOLEAN CfgMgr_IsEEWritePending(void)
  *               UINT16  nSize
  *
  * Returns:      BOOLEAN - SUCCESS or FAIL
+ *
+ * Notes:
  *
  *****************************************************************************/
 BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
@@ -664,12 +687,12 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
       memcpy( pDest, pSrc, nSize );
 
       // calculate and update checksum on shadow NVRAM
-      NVRAMShadow.CS = CRC16(&NVRAMShadow.Cfg,sizeof(NVRAMShadow.Cfg));
+      NVRAMShadow.cs = CRC16(&NVRAMShadow.cfg,sizeof(NVRAMShadow.cfg));
 
-      nOffset = ((UINT32)(&NVRAMShadow.CS) - (UINT32)(&NVRAMShadow));
+      nOffset = ((UINT32)(&NVRAMShadow.cs) - (UINT32)(&NVRAMShadow));
 
-      pChkSumSrc = &(NVRAMShadow.CS);
-      nChkSumSize = sizeof(NVRAMShadow.CS);
+      pChkSumSrc = &(NVRAMShadow.cs);
+      nChkSumSize = sizeof(NVRAMShadow.cs);
 
 #ifdef SIMULATE_CM
 /*vcast_dont_instrument_start*/
@@ -716,6 +739,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 72  *****************
+ * User: John Omalley Date: 12-11-13   Time: 11:10a
+ * Updated in $/software/control processor/code/system
+ * SCR 1142 - Code Review Formatting Issues
  *
  * *****************  Version 71  *****************
  * User: John Omalley Date: 12-11-09   Time: 4:01p

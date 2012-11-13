@@ -9,7 +9,7 @@
                  interface 
     
     VERSION
-      $Revision: 36 $  $Date: 8/28/12 1:43p $     
+      $Revision: 37 $  $Date: 12-11-13 1:56p $     
 
 ******************************************************************************/
 
@@ -219,7 +219,7 @@ FPGA_CBIT_HEALTH_COUNTS FPGAMgr_GetCBITHealthStatus ( void )
  * Description:  Calc the difference in CBIT Health Counts to support PWEH SEU
  *               (Used to support determining SEU cnt during data capture) 
  *
- * Parameters:   PrevCnt - Initial count value
+ * Parameters:   PrevCount - Initial count value
  *
  * Returns:      Diff in CBIT_HEALTH_COUNTS from (Current - PrevCnt)
  *
@@ -572,6 +572,11 @@ void FPGAMgr_CBIT_VerifyShadowReg( void  )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FPGAManager.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 1:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 36  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

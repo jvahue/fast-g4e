@@ -6,10 +6,10 @@
 
     File:         Box.h     
     
-    Description:
+    Description: Function prototypes and defines for the box processing.
     
     VERSION
-    $Revision: 12 $  $Date: 12-11-12 4:46p $
+    $Revision: 13 $  $Date: 12-11-13 12:36p $
     
 ******************************************************************************/
 
@@ -111,6 +111,11 @@ EXPORT void Box_PowerOn_UpdateElapsedUsage( BOOLEAN bPadForTruncation,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Box.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Melanie Jutras Date: 12-11-13   Time: 12:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
