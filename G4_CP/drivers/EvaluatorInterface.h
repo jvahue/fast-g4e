@@ -7,7 +7,7 @@
 
     File:         EvaluatorInterface.h
 
-    Description:
+    Description: Evaluator Interface file
 
     VERSION
     $Revision: 11 $  $Date: 12-10-02 1:23p $
@@ -101,37 +101,37 @@ DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EvaluatorInterface.h $
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 12-10-02   Time: 1:23p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Coding standard compliance
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 2:55p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Add Support for Action ACK processing and !P
- * 
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 12-08-28   Time: 8:32a
  * Updated in $/software/control processor/code/drivers
  * SCR 1107 - Evaluator Bug Fixes
- * 
+ *
  * *****************  Version 8  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:22p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 FAST 2 Issue # 20 Eval operand names like FSM
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 6/25/12    Time: 7:12p
  * Updated in $/software/control processor/code/drivers
  * SCR #1107 Add FALSE boolean constant
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/18/12    Time: 4:27p
  * Updated in $/software/control processor/code/drivers
  * FAST 2 add operators
- * 
+ *
  * *****************  Version 5  *****************
  * User: Contractor V&v Date: 5/10/12    Time: 6:50p
  * Updated in $/software/control processor/code/drivers

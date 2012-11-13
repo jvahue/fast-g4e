@@ -847,7 +847,8 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
   pLog = &m_engineRunLog[pErData->erIndex];
 
   oneOverN = (1.0f / (FLOAT32)pErData->nSampleCount);
-  GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
+
+  // GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
 
   // Tell Cycles to finish up for this engine run.
   // This will ensure Cycles has brought its count structure up-to-date.
@@ -1057,7 +1058,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:39p
  * Updated in $/software/control processor/code/application
