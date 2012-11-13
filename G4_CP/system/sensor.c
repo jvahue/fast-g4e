@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 78 $  $Date: 12-11-12 11:36a $
+      $Revision: 79 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -280,12 +280,12 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
 }
 
 /******************************************************************************
- * Function:     SensorGetLastUpdate ( SENSOR_INDEX Sensor )
+ * Function:     SensorGetLastUpdateTime ( SENSOR_INDEX Sensor )
  *
  * Description:  This function provides a method to return the last rx time of a
  *               sensor.
  *
- * Parameters:   [in] nSensor - Index of sensor to get value
+ * Parameters:   [in] Sensor - Index of sensor to get value
  *
  * Returns:      [out] UINT32 - Tick time of last sensor update
  *
@@ -477,7 +477,7 @@ void SensorDisableLiveStream( void )
  *
  * Parameters:   [in/out] summary           - SNSR_SUMMARY array structure to be populated.
  *               [in]     summarySize       - The number of entries in SNSR_SUMMARY[].
- *               [in]     snsrMask          - Array of bits denoting which sensors to add to list.
+ *               [in]     snsrMask          - Array of bits denoting sensors to add to list.
  *               [in]     snsrMaskSizeBytes - Size of snsrMask[] in bytes.
 
  * Returns:      INT32 the number of entries added to the summary array
@@ -488,7 +488,7 @@ void SensorDisableLiveStream( void )
                                  UINT32       snsrMask[], INT32 snsrMaskSizeBytes)
 {
   SENSOR_INDEX snsrIdx;
-  INT16        summaryCnt;
+  UINT16        summaryCnt;
   INT16        i;
   TIMESTAMP    timeStampNow;
 
@@ -895,6 +895,8 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
  *
  * Parameters:   [in] pConfig     - Pointer to the sensor configuration
  *               [in/out] pSensor - Pointer to the dynamic sensor data
+ *               [in] fVal        - Sensor value
+ *               [in] filterVal   - Filter Value
  *
  * Returns:      bOK
  *
@@ -1309,6 +1311,7 @@ static BOOLEAN SensorNoInterface ( UINT16 nIndex )
  *
  * Parameters:   [in] pConfig     - Pointer to the sensor configuration
  *               [in/out] pSensor - Pointer to the dynamic sensor data
+ *               [in] fVal        - Sensor value
  *               [in] type        - Type of sensor failure
  *
  * Returns:      None.
@@ -1382,7 +1385,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
 *                                                  Filter cfg
 *               [out] FILTER_DATA   *pFilterData - Pointer to location to store
 *                                                  filter data
-*               [in]  UINT16 MaximumSamples      - Total number of configured
+*               [in]  UINT16 nMaximumSamples     - Total number of configured
 *                                                  samples for sensor
 * Returns:     None
 *
@@ -1493,7 +1496,8 @@ static BOOLEAN SensorManageSamples (SENSOR_CONFIG *pConfig, SENSOR *pSensor, FLO
  *               the array of stored sensor values. This function only
  *               dispatches the filter algorithms.
  *
- * Parameters:   [in] pConfig     - Pointer to the sensor configuration
+ * Parameters:   [in] fVal - Sensor Value
+ *               [in] pConfig     - Pointer to the sensor configuration
  *               [in/out] pSensor - Pointer to the dynamic sensor data
  *
  * Returns:      FLOAT32 Value    - Sensor value after the filter has been
@@ -1578,8 +1582,8 @@ static void SensorPersistCounter( BOOLEAN set, BOOLEAN reset,
  * Description:  The sensor average function will perform a simple average
  *               on the stored sensor values.
  *
- * Parameters:   [in] pSamples - Pointer to samples to average
- *               [in] nSamples - Total number of samples for sensor
+ * Parameters:   [in] fVal            - Sensor value
+ *               [in/out] pFilterData - pointer to filter data
  *
  * Returns:      FLOAT32 - Average of the samples
  *
@@ -1600,10 +1604,9 @@ static FLOAT32 SensorExponential (FLOAT32 fVal, FILTER_DATA *pFilterData)
  *               in the sensor value until that sensor exceeds the number
  *               of reject counts.
  *
- * Parameters:   [in] fVal      - Pointer to the filter configuration
- *               [in] pSamples        - Pointer to samples to average
- *               [in/out] pFilterData - Pointer to the filter dynamic data
- *               [in] nSamples        - Total number of samples for sensor
+ * Parameters:   [in] fVal            - Value of raw sensor
+ *               [in] pFilterConfig   - Pointer to filter config
+ *               [in/out] pFilterData - pointer to the filter data
  *
  * Returns:      FLOAT32 - Filtered value of the samples
  *
@@ -1753,10 +1756,9 @@ static FLOAT32 SensorMaxReject(FLOAT32 sample,
  *               precompute the constant K, and and only compute
  *               the first term SF.
  *
- * Parameters:   [in] pFilterCfg      - Pointer to the filter configuration
- *               [in/out] pFilterData - Pointer to the filter dynamic data
- *               [in] pSamples        - Pointer to samples to average
- *               [in] nSamples        - Total number of samples for sensor
+ * Parameters:   [in] fVal         - Value of raw sensor
+ *               [in] pConfig      - Pointer to sensor config
+ *               [in/out] pSensor  - pointer to the sensor data
  *
  * Returns:      FLOAT32 - Filtered value of the samples
  *
@@ -1930,6 +1932,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ *
+ * *****************  Version 79  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 78  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a

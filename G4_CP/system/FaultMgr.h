@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 32 $  $Date: 12-11-09 4:41p $
+    $Revision: 33 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -61,9 +61,9 @@ typedef enum {
 
 typedef struct
 {
-  FLT_DBG_LEVEL DebugLevel;
-  FLT_ANUNC_MODE Mode;
-  DIO_OUTPUT    SysCondDioOutPin;
+  FLT_DBG_LEVEL debugLevel;
+  FLT_ANUNC_MODE mode;
+  DIO_OUTPUT    sysCondDioOutPin;
   UINT8         action[STA_MAX];                    /* Action to perform for FAULT/CAUTION */
 } FAULTMGR_CONFIG;
 
@@ -142,6 +142,11 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
+ *
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-09   Time: 4:41p

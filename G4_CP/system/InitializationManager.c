@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 115 $  $Date: 12-11-12 8:23a $
+     $Revision: 116 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -196,7 +196,8 @@ void Im_InitializeControlProcessor(void)
 #ifdef DEGRADE_MODE_DEBUG
    /*vcast_dont_instrument_start*/
    sprintf( assertLogBuf,
-       "\r\n\r\nWd1: 0x%08x Wd2: 0x%08x WdFlag: 0x%08x WdCnt: 0x%08x UnkCnt: 0x%08x PBitCnt: 0x%08x\r\n",
+       "\r\n\r\nWd1: 0x%08x Wd2: 0x%08x WdFlag: 0x%08x "
+       "WdCnt: 0x%08x UnkCnt: 0x%08x PBitCnt: 0x%08x\r\n",
        SRAM_INIT_SAVE, SRAM_INV_SAVE, watchdogFlag,
        ASSERT_COUNT, UNKNOWN_RESTART_COUNT, INIT_RESTART_COUNT);
    GSE_PutLine( assertLogBuf);
@@ -766,6 +767,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ *
+ * *****************  Version 116  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 115  *****************
  * User: John Omalley Date: 12-11-12   Time: 8:23a

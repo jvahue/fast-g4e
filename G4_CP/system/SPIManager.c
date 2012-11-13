@@ -9,7 +9,7 @@
                  to all SPI devices to the application
 
     VERSION
-      $Revision: 29 $  $Date: 12-11-12 12:01p $
+      $Revision: 30 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -45,12 +45,38 @@
 #define RTC_QUEUE_SIZE      2
 #define RTCNVRAM_QUEUE_SIZE 4
 
-//#define DEBUG_CIRCULAR_QUEUE
-//#define DEBUG_SPIMGR_TASK
-
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+
+// DefaultIoResultAddress is a default variable for callers not providing a
+// IO_RESULT* var. (i.e. a valid "bit-bucket")
+// It is assigned by SPIManager as needed so code does not have to always
+// check-for-null.
+static IO_RESULT DefaultIoResultAddress;
+
+static SPI_RUNTIME_INFO SPI_RuntimeInfo[SPI_MAX_DEV];
+
+// SpiManager State Variables
+static BOOLEAN m_bDirectToDev;
+static BOOLEAN m_bTaskStarted;
+//static BOOLEAN EEPromDetected;
+
+// Variable containing the value of Real Time Clock.
+static TIMESTRUCT m_rtcTimeStruct;
+RESULT m_resultGetRTC;
+
+// Circular queues for devices using buffered I/O.
+CIRCULAR_QUEUE CQ_EEPromOutput;
+CIRCULAR_QUEUE CQ_RtcOutput;
+CIRCULAR_QUEUE CQ_RtcNvRamOutput;
+
+// only record SPI timeout error once per POR
+BOOLEAN m_spiErrorRecorded[SPI_TO_LOGS];
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -75,44 +101,12 @@ BOOLEAN SPIMgr_CircQueue_Add    (CIRCULAR_QUEUE* cq, const SPIMGR_ENTRY* newEntr
 void    SPIMgr_CircQueue_Remove (CIRCULAR_QUEUE* cq, SPIMGR_ENTRY* data );
 
 void    SPIMgr_CircQueue_GetHead( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head );
-INT16   SPIMgr_CircQueue_GetNext( CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** entry, UINT16 index );
 void    SPIMgr_CircQueue_Reset  ( CIRCULAR_QUEUE* cq );
-
-/*****************************************************************************/
-/* Local Variables                                                           */
-/*****************************************************************************/
-
-// DefaultIoResultAddress is a default variable for callers not providing a
-// IO_RESULT* var. (i.e. a valid "bit-bucket")
-// It is assigned by SPIManager as needed so code does not have to always
-// check-for-null.
-static IO_RESULT DefaultIoResultAddress;
-
 
 //      SPI_DevInfo[] allocation and initialization
 #undef SPI_DEV
 #define SPI_DEV(Id, Rate, HndlrFunc) {Rate, HndlrFunc}
 static const SPI_MGR_INFO  SPI_DevInfo[SPI_MAX_DEV]  = {SPI_DEV_LIST};
-
-static SPI_RUNTIME_INFO SPI_RuntimeInfo[SPI_MAX_DEV];
-
-// SpiManager State Variables
-static BOOLEAN m_bDirectToDev;
-static BOOLEAN m_bTaskStarted;
-//static BOOLEAN EEPromDetected;
-
-// Variable containing the value of Real Time Clock.
-static TIMESTRUCT m_rtcTimeStruct;
-RESULT m_resultGetRTC;
-
-// Circular queues for devices using buffered I/O.
-CIRCULAR_QUEUE CQ_EEPromOutput;
-CIRCULAR_QUEUE CQ_RtcOutput;
-CIRCULAR_QUEUE CQ_RtcNvRamOutput;
-
-// only record SPI timeout error once per POR
-BOOLEAN m_spiErrorRecorded[SPI_TO_LOGS];
-
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -193,7 +187,7 @@ void SPIMgr_Initialize (void)
   }
 
   // init the SPI timeout error recorded flags
-  for ( i = 0; i < SPI_TO_LOGS; i++)
+  for ( i = 0; i < (UINT32)SPI_TO_LOGS; i++)
   {
     m_spiErrorRecorded[i] = FALSE;
   }
@@ -428,7 +422,7 @@ void SPIMgr_UpdateRTCNVRam(SPIMGR_DEV_ID Dev)
  * Description: Function used to update a local copy of the
  *              value for the passed device.
  *
- * Parameters:  SPIMGR_DEV_ID analog device to be read
+ * Parameters:  SPIMGR_DEV_ID Dev: analog device to be read
  *
  * Returns:     void
  *
@@ -558,7 +552,8 @@ void SPIMgr_UpdateEEProm(SPIMGR_DEV_ID Dev)
             }
             else
             {
-              // The SPI bus busy (how?), we can't do anything so leave and check again next time
+              // The SPI bus busy (how?), 
+              // we can't do anything so leave and check again next time
               bDone = TRUE;
             }
           }
@@ -718,7 +713,7 @@ RESULT SPIMgr_SetRTC(TIMESTRUCT *Ts, IO_RESULT* ioResult)
  *              This function buffers the operation to a circular queue and
  *              performs the actual write using SPIMgr_UpdateEEPROM.
  *
- * Parameters:  [in] Addr: Starting byte address to read the data from
+ * Parameters:  [in] DestAddr: Starting byte address to read the data from
  *                    EEPROM ON CS3 is from address 0x00000000 to EEPROM_SIZE
  *                    EEPROM ON CS5 is from address 0x10000000 to
  *                                 0x10000000+EEPROM_SIZE
@@ -793,7 +788,7 @@ RESULT SPIMgr_WriteEEPROM(UINT32 DestAddr,void* Buf,size_t Size,
  *
  * Description: Reads data from the EEPROM.
  *
- * Parameters:  [in]  Addr: Starting byte address to read the data from
+ * Parameters:  [in]  PhysicalOffset: Starting byte address to read the data from
  *                    EEPROM ON CS3 is from address 0x00000000 to EEPROM_SIZE
  *                    EEPROM ON CS5 is from address 0x10000000 to
  *                                 0x10000000+EEPROM_SIZE
@@ -895,7 +890,7 @@ RESULT SPIMgr_WriteRTCNvRam(UINT32 DestAddr,void* Buf,size_t Size,
 *
 * Description: Returns the current data validity of the selected sensor
 *
-* Parameters:  [in] SPI ADC channel index
+* Parameters:  [in] nIndex: SPI ADC channel index
 *
 * Returns:     TRUE if ACD channel data is valid
 *              FALSE if data is invalid
@@ -951,7 +946,7 @@ RESULT SPIMgr_GetACBattVoltage (FLOAT32* ACBattVoltage)
 *
 * Description: Returns the stored value and result of the LiBattVotlage
 *
-* Parameters:  [out] Pointer to the caller's LiBattVotlage
+* Parameters:  [out] Voltage: Pointer to the caller's LiBattVotlage
 *
 * Returns:     RESULT of the call made from this task.
 *
@@ -990,10 +985,10 @@ RESULT SPIMgr_GetBoardTemp(FLOAT32* Temp)
 *
 *
 * Parameters:  [in] DATA_PASSING method: DATA_PASSING_VALUE, DATA_PASSING_PTR.
-*              [in] Pointer to the SPIMGR_ENTRY being configured.
-*              [in] Pointer to the buffer to be referenced or copied based
+*              [in] entry: Pointer to the SPIMGR_ENTRY being configured.
+*              [in] buffer: Pointer to the buffer to be referenced or copied based
 *                   on DATA_PASSING method
-*              [in] size in bytes to be written/read.
+*              [in] size: in bytes to be written/read.
 * Returns:     void
 *
 * Notes:
@@ -1023,7 +1018,7 @@ void SPIMgr_SetupDataPassing(DATA_PASSING method, SPIMGR_ENTRY* entry,
 }
 
 /*****************************************************************************
-* Function:    SPIMgr_LogSPIError
+* Function:    SPIMgr_LogError
 *
 * Description: Write a system log entry for a SPI error.
 *              Only record one per power-on.
@@ -1073,6 +1068,7 @@ void SPIMgr_LogError(SYS_APP_ID appId, RESULT result, UINT32 address)
 *
 * Parameters:  cq - the queue to update
 *              aName - the ptr to name string to update to
+*              size - size of the queue
 *
 * Returns:     none
 *
@@ -1096,9 +1092,9 @@ void SPIMgr_CircQueue_SetName( CIRCULAR_QUEUE* cq, const CHAR* aName, UINT8 size
 *
 * Description: "Pops" the oldest entry from referenced queue and returns the
 *              data in  the provided entry pointer.
-* Parameters:  [in]         The queue to be popped.
-*              [in]/[out]   Address of the Entry structure into which the
-*                           contents of the entry will be copied.
+* Parameters:  [in] cq:     The queue to be popped.
+*              [in/out] data:  Address of the Entry structure into which the
+*                                contents of the entry will be copied.
 * Returns:     None
 *
 * Notes:
@@ -1239,8 +1235,8 @@ void SPIMgr_CircQueue_Reset(CIRCULAR_QUEUE* cq)
 *
 * Description: Returns a pointer to the top of the pass queue.
 *
-* Parameters:  [in] cq pointer to the queue
-*              [in] pointer to receive a pointer to the current top-of-queue
+* Parameters:  [in] cq: pointer to the queue
+*              [in] head: pointer to receive a pointer to the current top-of-queue
 *
 * Returns:     None
 *
@@ -1263,6 +1259,11 @@ void SPIMgr_CircQueue_GetHead(CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
+ *
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-11-12   Time: 12:01p

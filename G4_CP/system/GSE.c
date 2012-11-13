@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 24 $  $Date: 12-11-12 8:14a $
+     $Revision: 25 $  $Date: 12-11-13 5:46p $
 
 ******************************************************************************/
 
@@ -81,7 +81,10 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
  *              psize -    Ptr to return size of system log data
  *
  * Returns:     RESULT
- ****************************************************************************/
+ * 
+ * Notes:
+ *
+****************************************************************************/
 RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UART_CONFIG config;
@@ -143,7 +146,9 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *              DRV_GSE_PUT_LINE_TOO_LONG: No null terminator found within 8192
  *                                       bytes of the string start.  No data
  *                                       was transmitted
- ****************************************************************************/
+ * Notes:
+ *
+****************************************************************************/
 RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
 {
   UINT16 i = 0;
@@ -196,6 +201,8 @@ RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
 *
 * Returns:     none
 *
+* Notes:
+*
 ****************************************************************************/
 void GSE_PutLine(const INT8* Str)
 {
@@ -230,6 +237,7 @@ void GSE_PutLine(const INT8* Str)
  *              DRV_GSE_GET_LINE_TOO_LONG = Line was too long before CR was
  *                                          detected
  *              Other = See ResultCodes.h
+ * Notes:
  ****************************************************************************/
 RESULT GSE_GetLine(INT8* Str)
 {
@@ -310,7 +318,8 @@ RESULT GSE_GetLine(INT8* Str)
  *              -1:       No char to read
  *              -2:       Receive error (parity or framing)
  *
- ****************************************************************************/
+ * Notes: 
+****************************************************************************/
 INT16 GSE_getc(void)
 {
   INT16 result = -2;
@@ -348,6 +357,8 @@ INT16 GSE_getc(void)
  * Returns:     TRUE :       Success
  *              FALSE:       size != size sent by UART
  *
+ * Notes:
+ *
  ****************************************************************************/
 BOOLEAN GSE_write(const void *buf, UINT16 size)
 {
@@ -377,6 +388,8 @@ BOOLEAN GSE_write(const void *buf, UINT16 size)
  *
  * Returns:     > 0:       Success, number of bytes read
  *              -1 :       Error returned by UART_Receive
+ *
+ * Notes:
  *
  ****************************************************************************/
 INT16 GSE_read(void *buf, UINT16 size)
@@ -555,6 +568,11 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ *
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-11-12   Time: 8:14a

@@ -6,16 +6,17 @@
 
     File:        FaultMgr.c
 
-    Description:
-   VERSION
-      $Revision: 55 $  $Date: 12-11-09 4:41p $
+    Description: Handles the system condition updates, fualt buffering
+                 and the debug verbosity.
+
+    VERSION
+      $Revision: 56 $  $Date: 12-11-13 5:46p $
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
 #include <string.h>
-#include <stdio.h>
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -141,7 +142,7 @@ void Flt_Init(void)
   INT8 i;
 
   //Add the Fault Manager set of commands to User Manager
-  User_AddRootCmd(&FaultMgr_RootMsg);
+  User_AddRootCmd(&faultMgr_RootMsg);
 
   //Open EE fault buffer
   if ( SYS_OK != NV_Open(NV_FAULT_LOG))
@@ -229,16 +230,13 @@ BOOLEAN Flt_InitFltBuf(void)
  *              power cycle.
  *
  * Parameters:  [out] Status:  System Status to set
- *                    Returns: FLT_STATUS the previous (i.e. current)
- *                    fault system status at time call was issued.
  *
  *              [in] LogID:   ID of the log to write that is associated with
  *                            this status change.
  *              [in] LogData: Pointer to a variable size block of data to
  *                            write with the log ID.  Max size is 128 bytes
- *              [in] LogSize: Size of the LogData block, Max is 128 bytes.
- *                            Larger size values will be truncated.
- *
+ *              [in] LogDataSize: Size of the LogData block, Max is 128 bytes.
+ *                                Larger size values will be truncated.
  *  Returns:    void
  *
   * Notes:
@@ -269,9 +267,8 @@ void Flt_SetStatus( FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
     Flt_UpdateSystemStatus();
   }
 
-  //If requested, write the log to System Log
-  //TBD who will be requesting Flt_SetStatus w/o assigning a valid SYS_ID ?
-  //    make this an ASSERT ?
+  // If requested, write the log to System Log
+  // When the configuration is not valid this function called with a NULL LOG ID
   if(LogID != SYS_ID_NULL_LOG)
   {
     TIMESTAMP ts;
@@ -378,7 +375,7 @@ FLT_DBG_LEVEL Flt_GetDebugVerbosity( void)
 *****************************************************************************/
 void Flt_InitDebugVerbosity( void)
 {
-  DebugLevel = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.DebugLevel;
+  DebugLevel = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.debugLevel;
 }
 
 /******************************************************************************
@@ -412,7 +409,7 @@ FLT_STATUS Flt_GetSystemStatus(void)
 *****************************************************************************/
 DIO_OUTPUT Flt_GetSysCondOutputPin(void)
 {
-  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.SysCondDioOutPin;
+  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.sysCondDioOutPin;
 }
 
 /******************************************************************************
@@ -429,7 +426,7 @@ DIO_OUTPUT Flt_GetSysCondOutputPin(void)
 *****************************************************************************/
 FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void )
 {
-  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.Mode;
+  return CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.mode;
 }
 
 /******************************************************************************
@@ -438,7 +435,7 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void )
  * Description: Monitors the state of the system condition and then requests
  *              then configure action.
  *
- * Parameters:  none
+ * Parameters:  [in] sysCond - Condition to drive the current action
  *
  * Returns:     none
  *
@@ -478,7 +475,7 @@ void Flt_UpdateAction ( FLT_STATUS sysCond )
 *              This routine overwrites the oldest fault, replaces it with
 *              the new fault and updates EEPROM.
 *
-* Parameters:  LogId - the new log ID
+* Parameters:  LogID - the new log ID
 *              ts - the timestamp of the log
 *
 * Returns:     None
@@ -527,7 +524,7 @@ void Flt_AddToFaultBuf(SYS_APP_ID LogID, TIMESTAMP ts)
  *****************************************************************************/
 static void Flt_UpdateSystemStatus( void )
 {
-  UINT32 intrLevel;
+  INT32 intrLevel;
 
   intrLevel = __DIR();
   // The FaultSystemStatus always reflect the highest request sys condition
@@ -596,6 +593,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ *
+ * *****************  Version 56  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 55  *****************
  * User: John Omalley Date: 12-11-09   Time: 4:41p

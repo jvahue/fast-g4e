@@ -1,7 +1,4 @@
-#ifndef FAULTMGR_BODY
-#error FaultMgrUserTables.c should only be included by FaultMgr.c
-#endif
-
+#define FAULTMGR_USERTABLE_BODY
 /******************************************************************************
          Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
@@ -11,8 +8,12 @@
          Description:
 
          VERSION
-         $Revision: 30 $  $Date: 12-11-09 5:04p $
+         $Revision: 31 $  $Date: 12-11-13 5:46p $
 ******************************************************************************/
+
+#ifndef FAULTMGR_BODY
+#error FaultMgrUserTables.c should only be included by FaultMgr.c
+#endif
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -33,33 +34,7 @@
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-//Enumeration tables for the User Messages
-USER_ENUM_TBL Flt_UserEnumVerbosityTbl[] =
-{ {"OFF",    DBGOFF},
-  {"NORMAL", NORMAL},
-  {"VERBOSE",VERBOSE},
-  {NULL,0}
-};
-
-USER_ENUM_TBL Flt_SysCondOutPin[] =
-{
-  {"LSS0",     LSS0},
-  {"LSS1",     LSS1},
-  {"LSS2",     LSS2},
-  {"LSS3",     LSS3},
-  {"DISABLED", SYS_COND_OUTPUT_DISABLED},
-  {NULL,0}
-};
-
-USER_ENUM_TBL Flt_AnuncMode[] =
-{
-   {"DIRECT", FLT_ANUNC_DIRECT},
-   {"ACTION", FLT_ANUNC_ACTION},
-   {NULL,0}
-};
-
-static FAULTMGR_CONFIG FaultMgrConfigTemp;
-static FLT_DBG_LEVEL   DebugLevelTemp;
+static FAULTMGR_CONFIG faultMgrConfigTemp;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -91,43 +66,70 @@ USER_HANDLER_RESULT Flt_UserCfg  (USER_DATA_TYPE DataType,
                                   const void *SetPtr,
                                   void **GetPtr);
 
-USER_HANDLER_RESULT Flt_UserDebugLvl(USER_DATA_TYPE DataType,
-                                     USER_MSG_PARAM Param,
-                                     UINT32 Index,
-                                     const void *SetPtr,
-                                     void **GetPtr);
 
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+
+//Enumeration tables for the User Messages
+USER_ENUM_TBL flt_UserEnumVerbosityTbl[] =
+{ {"OFF",    DBGOFF},
+   {"NORMAL", NORMAL},
+   {"VERBOSE",VERBOSE},
+   {NULL,0}
+};
+
+USER_ENUM_TBL flt_SysCondOutPin[] =
+{
+   {"LSS0",     LSS0},
+   {"LSS1",     LSS1},
+   {"LSS2",     LSS2},
+   {"LSS3",     LSS3},
+   {"DISABLED", SYS_COND_OUTPUT_DISABLED},
+   {NULL,0}
+};
+
+USER_ENUM_TBL flt_AnuncMode[] =
+{
+   {"DIRECT", FLT_ANUNC_DIRECT},
+   {"ACTION", FLT_ANUNC_ACTION},
+   {NULL,0}
+};
 
 //User manager message tables
-
-static USER_MSG_TBL CfgCmd [] =
+static USER_MSG_TBL cfgCmd [] =
 {  /*Str                Next Tbl Ptr     Handler Func.    Data Type             Access     Parameter                             IndexRange     DataLimit    EnumTbl*/
-  { "VERBOSITY"       , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.DebugLevel,       -1,-1,         NO_LIMIT,    Flt_UserEnumVerbosityTbl },
-  { "ANUNCIATION",      NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.Mode,             -1,-1,         NO_LIMIT,    Flt_AnuncMode },
-  { "SYS_COND_OUTPUT" , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &FaultMgrConfigTemp.SysCondDioOutPin, -1,-1,         NO_LIMIT,    Flt_SysCondOutPin},
-  { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
-  { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
-  { "FAULT_ACTION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &FaultMgrConfigTemp.action[2],        -1,-1,         NO_LIMIT,    NULL },
+  { "VERBOSITY"       , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.debugLevel,       -1,-1,         NO_LIMIT,    flt_UserEnumVerbosityTbl },
+  { "ANUNCIATION",      NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.mode,             -1,-1,         NO_LIMIT,    flt_AnuncMode },
+  { "SYS_COND_OUTPUT" , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.sysCondDioOutPin, -1,-1,         NO_LIMIT,    flt_SysCondOutPin},
+  { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &faultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
+  { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &faultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
+  { "FAULT_ACTION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &faultMgrConfigTemp.action[2],        -1,-1,         NO_LIMIT,    NULL },
   { NULL              , NULL,            NULL,            NO_HANDLER_DATA }
 };
 
-static USER_MSG_TBL FltCmd [] =
+static USER_MSG_TBL fltCmd [] =
 {   /*Str         Next Tbl Ptr           Handler Func.             Data Type           Access                          Parameter            IndexRange                DataLimit     EnumTbl*/
   { "RECENT",     NO_NEXT_TABLE,         Flt_UserMessage,          USER_TYPE_STR,      USER_RO,                        NULL,                0, FLT_LOG_BUF_ENTRIES-1,  NO_LIMIT,    NULL },
   { "STATUS",     NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     (USER_RW|USER_GSE),             &FaultSystemStatus,  -1,-1,                     NO_LIMIT,    Flt_UserEnumStatus },
-  { "CFG",        CfgCmd,                NULL,                     NO_HANDLER_DATA},
-  { "VERBOSITY",  NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     USER_RW,                        &DebugLevel,         -1, -1,                    NO_LIMIT,    Flt_UserEnumVerbosityTbl },
+  { "CFG",        cfgCmd,                NULL,                     NO_HANDLER_DATA},
+  { "VERBOSITY",  NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     USER_RW,                        &DebugLevel,         -1, -1,                    NO_LIMIT,    flt_UserEnumVerbosityTbl },
   { DISPLAY_CFG,  NO_NEXT_TABLE,         Flt_ShowConfig,           USER_TYPE_ACTION,   (USER_RO|USER_NO_LOG|USER_GSE), NULL,                -1, -1,                    NO_LIMIT,    NULL },
   { "RECENTALL",  NO_NEXT_TABLE,         Flt_UserMessageRecentAll, USER_TYPE_ACTION,   (USER_RO|USER_NO_LOG),          NULL,                -1, -1,                    NO_LIMIT,    NULL},
   { NULL ,        NULL,                  NULL,                     NO_HANDLER_DATA }
 };
 
 
-static USER_MSG_TBL FaultMgr_RootMsg = {"FAULT", FltCmd, NULL, NO_HANDLER_DATA};
+static USER_MSG_TBL faultMgr_RootMsg = {"FAULT", fltCmd, NULL, NO_HANDLER_DATA};
 
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
+
 /******************************************************************************
 * Function:     Flt_UserMessage
 *
@@ -230,7 +232,7 @@ USER_HANDLER_RESULT Flt_UserMessageRecentAll(USER_DATA_TYPE DataType,
 *
 * Description:  Returns the selected Fault Entry from the non-volatile memory
 *
-* Parameters:   [in] Index:     Index parameter selecting specified entry
+* Parameters:   [in] index:     Index parameter selecting specified entry
 *
 * Returns:      [out] ptr to RecentLogStr[] containing decoded entry
 *
@@ -321,7 +323,7 @@ USER_HANDLER_RESULT Flt_ShowConfig(USER_DATA_TYPE DataType,
   CHAR sBranchName[USER_MAX_MSG_STR_LEN] = " ";
 
   // Set pointer into my CFG table.
-  USER_MSG_TBL*  pCfgTbl = CfgCmd;
+  USER_MSG_TBL*  pCfgTbl = cfgCmd;
 
   result = USER_RESULT_OK;
 
@@ -372,31 +374,32 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
   //Load trigger structure into the temporary location based on index param
   //Param.Ptr points to the struct member to be read/written
   //in the temporary location
-  memcpy(&FaultMgrConfigTemp, &CfgMgr_ConfigPtr()->FaultMgrCfg, sizeof(FaultMgrConfigTemp));
+  memcpy(&faultMgrConfigTemp, &CfgMgr_ConfigPtr()->FaultMgrCfg, sizeof(faultMgrConfigTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   if ((SetPtr != NULL) && (USER_RESULT_OK == result))
   {
     // Copy modified local data back to config mgr structure
     memcpy(&CfgMgr_ConfigPtr()->FaultMgrCfg,
-      &FaultMgrConfigTemp, sizeof(FaultMgrConfigTemp));
+      &faultMgrConfigTemp, sizeof(faultMgrConfigTemp));
 
     //Store the modified structure to the EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
-      &CfgMgr_ConfigPtr()->FaultMgrCfg, sizeof(FaultMgrConfigTemp));
+      &CfgMgr_ConfigPtr()->FaultMgrCfg, sizeof(faultMgrConfigTemp));
 
   }
 
   return result;
 }
 
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
-
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ *
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 12-11-13   Time: 5:46p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-09   Time: 5:04p
@@ -551,4 +554,4 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
  * SCR 106
 *
 *
-**************************************************************************/
+***************************************************************************/
