@@ -205,7 +205,7 @@ FLASH_STATUS AmdFujiSCS_GetStatus (FLASHDATA *BaseAddr, FLASHADDR offset,
 
       /* Checking WriteBuffer Abort condition:          */ 
 	  /* only check on the device that has DQ6 toggling */
-      /* check only when doing write buffer operation */
+      /* check only when doing write buffer operation   */
       if (WriteBufferProgramming && ((dq6_toggles >> 5) & status_read_2))
       {
          /* read again to make sure WriteBuffer error is correct */

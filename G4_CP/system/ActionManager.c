@@ -247,7 +247,7 @@ void ActionInitPersist ( void )
  * Returns:      INT8 - ID for the requested action
  *
  * Notes:        This function returns an ID when called with nReqNum = -1
- *               The ID can then be used to deactivate the action. 
+ *               The ID can then be used to deactivate the action.
  *               Action IDs should be requested once per object because we are 
  *               limited to 128 IDs. 
  *               Currently using:

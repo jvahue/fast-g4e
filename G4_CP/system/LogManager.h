@@ -434,7 +434,7 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
- *
+ * 
  * *****************  Version 53  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system

@@ -1263,7 +1263,7 @@ void SPIMgr_CircQueue_GetHead(CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
- *
+ * 
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-11-12   Time: 12:01p
  * Updated in $/software/control processor/code/system

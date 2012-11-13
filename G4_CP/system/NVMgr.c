@@ -1833,7 +1833,7 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.c $
- *
+ * 
  * *****************  Version 74  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

@@ -2816,7 +2816,7 @@ void LogUpdateWritePendingStatuses( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
- *
+ * 
  * *****************  Version 105  *****************
  * User: John Omalley Date: 12-11-12   Time: 1:11p
  * Updated in $/software/control processor/code/system

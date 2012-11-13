@@ -262,7 +262,7 @@ EXPORT RESULT SPI_ReadWord  (SPI_DEVS Device, UINT16* Word, BOOLEAN CS);
 EXPORT RESULT SPI_ReadBlock (SPI_DEVS Device, BYTE* Data,   UINT16 Cnt, BOOLEAN CS);
 
 
-#endif   // SPI_H
+#endif // SPI_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SPI.h $

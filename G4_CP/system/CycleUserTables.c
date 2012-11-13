@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description:
 
 VERSION
-$Revision: 14 $  $Date: 11/12/12 6:40p $
+$Revision: 13 $  $Date: 11/08/12 4:28p $
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -102,7 +102,7 @@ static USER_MSG_TBL CycleCfgCmd[] =
   {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              CycleTypeEnum    },
   {"COUNT",      NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nCount,       0,(MAX_CYCLES-1),   NO_LIMIT,              NULL             },
   {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              TriggerIndexType },
-  {"ENGINERUNID",NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nEngineRunId, 0,(MAX_CYCLES-1),   NO_LIMIT,              engRunIdEnum     },
+  {"ENGINERUNID",NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nEngineRunId, 0,(MAX_CYCLES-1),   NO_LIMIT,              EngRunIdEnum     },
   { NULL,        NULL,          NULL,         NO_HANDLER_DATA}
 };
 
@@ -343,11 +343,6 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
- * 
- * *****************  Version 14  *****************
- * User: Contractor V&v Date: 11/12/12   Time: 6:40p
- * Updated in $/software/control processor/code/system
- * Code Review
  * 
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p

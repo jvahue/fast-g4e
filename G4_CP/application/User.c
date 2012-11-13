@@ -2978,7 +2978,7 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- *
+ * 
  * *****************  Version 107  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 11:53a
  * Updated in $/software/control processor/code/application
