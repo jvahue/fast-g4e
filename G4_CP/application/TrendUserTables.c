@@ -186,7 +186,7 @@ static USER_MSG_TBL TrendStatus [] =
 {
   /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
    { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,         0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
-   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   EngineRunStateEnum},
+   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
    { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
@@ -370,7 +370,7 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Changed Actions to UINT8
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 10/30/12   Time: 4:01p
  * Updated in $/software/control processor/code/application

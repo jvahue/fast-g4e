@@ -1030,7 +1030,7 @@ TASK_INDEX TmGetTaskId(char* name)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
- *
+ * 
  * *****************  Version 64  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:09p
  * Updated in $/software/control processor/code/system

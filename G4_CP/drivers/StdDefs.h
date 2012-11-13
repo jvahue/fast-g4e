@@ -186,7 +186,7 @@ extern BOOLEAN g_DebugMsgEnable;
                               Package Exports Functions
 ******************************************************************************/
 
-#endif    // STDDEFS_H
+#endif // STDDEFS_H
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: StdDefs.h $

@@ -475,7 +475,7 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- *
+ * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/application
@@ -490,7 +490,7 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
  * User: John Omalley Date: 12-11-06   Time: 11:12a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- *
+ * 
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 12:51p
  * Updated in $/software/control processor/code/application

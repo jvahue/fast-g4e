@@ -437,7 +437,7 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
- *
+ * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a
  * Updated in $/software/control processor/code/system
