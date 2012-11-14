@@ -186,15 +186,15 @@ typedef enum{         // How should discrete values be accessed.
 
 //Defines the configuration a single discrete input/output
 typedef struct {
-  CHAR Name[PIN_LABEL_LEN];  //Pin label (for reporting errors, status, etc)
-  DIO_DIRECTION Direction;   //Direction of the bit, input or output
-  BOOLEAN  InitialState;     //For outputs, this is the initial programmed state of the pin
-  DIO_PERIPHERAL Peripheral; //Peripheral (GPIO, TMR, FPGA) that contains pin control register
-  DIO_ACC_METHOD AccessMethod; //Access method(NOT_APPLIC, RAW, FILTERED)
-  volatile UINT8* DataReg;   //Port data register (PODR_X)(output register read/write)
+  CHAR name[PIN_LABEL_LEN];  //Pin label (for reporting errors, status, etc)
+  DIO_DIRECTION direction;   //Direction of the bit, input or output
+  BOOLEAN  bInitialState;     //For outputs, this is the initial programmed state of the pin
+  DIO_PERIPHERAL peripheral; //Peripheral (GPIO, TMR, FPGA) that contains pin control register
+  DIO_ACC_METHOD accessMethod; //Access method(NOT_APPLIC, RAW, FILTERED)
+  volatile UINT8* dataReg;   //Port data register (PODR_X)(output register read/write)
                              //..other registers associated with the port are
                              //inferred PODR address.
-  UINT32 PinMask;            //Bit mask for the bit that is used by this DIO
+  UINT32 pinMask;            //Bit mask for the bit that is used by this DIO
 } DIO_CONFIG;
 
 
@@ -205,9 +205,9 @@ typedef struct               // Fast-lookup structure of port addr and
 } DIO_PORT_DATA;
 
 typedef struct {             // Structure for storing hysteresis info for DIN
-  BOOLEAN FilteredState;     // The official 'debounced' state of the DIO
-  BOOLEAN LastRecvdState;    // The most recently received DIO state from PODR
-  UINT32  TimeStampMs;       // Timestamp in milliseconds when the lastRecvdState changed.
+  BOOLEAN filteredState;     // The official 'debounced' state of the DIO
+  BOOLEAN lastRecvdState;    // The most recently received DIO state from PODR
+  UINT32  timeStampMs;       // Timestamp in milliseconds when the lastRecvdState changed.
   DIO_PORT_DATA* portData;   // Pointer to the DIO_PORT_DATA containing data for this discrete.
 }DIO_DEBOUNCED;
 
@@ -216,8 +216,8 @@ typedef struct {             // Structure for storing hysteresis info for DIN
 #pragma pack(1)
 typedef struct {
   RESULT  result;
-  UINT32  DioOutResults;
-  UINT32  DioInResults;
+  UINT32  dioOutResults;
+  UINT32  dioInResults;
 } DIO_DRV_PBIT_LOG;
 
 typedef struct {

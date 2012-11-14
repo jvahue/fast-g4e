@@ -147,7 +147,7 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
   }
   else // Get the current state of the requested engine run.
   {
-    ASSERT ( idx >= ENGRUN_ID_0 && idx < MAX_ENGINES);
+    ASSERT ( idx >= ENGRUN_ID_0 && idx < (ENGRUN_INDEX)MAX_ENGINES);
     state = m_engineRunData[idx].erState;
   }
   return state;
@@ -223,7 +223,7 @@ void EngRunInitialize(void)
       EngRunReset(pErCfg,pErData);
 
       // Init Task scheduling data
-      pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / pErCfg->erRate);
+      pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / (UINT32)pErCfg->erRate);
       pErData->nRateCountdown = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
 
     }
@@ -313,7 +313,7 @@ void EngRunTask(void* pParam)
   if (Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     EngRunForceEnd();
-    TmTaskEnable (EngRun_Task, FALSE);
+    TmTaskEnable ((TASK_INDEX)EngRun_Task, FALSE);
     if(m_event_func != NULL)
     {
       m_event_func(m_event_tag,FALSE);
@@ -378,7 +378,7 @@ UINT16 EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
 
    // Loop through all the triggers
    for ( engineIndex = 0;
-         ((engineIndex < MAX_ENGINES) && (nRemaining > sizeof (engineHdr[engineIndex])));
+         ((engineIndex < MAX_ENGINES) && (nRemaining > sizeof (ENGRUN_HDR)));
          engineIndex++ )
    {
       // Copy the Engine Run names
@@ -392,8 +392,8 @@ UINT16 EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       engineHdr[engineIndex].stopTrigID  = m_engineRunCfg[engineIndex].stopTrigID;
 
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (engineHdr[engineIndex]);
-      nRemaining -= sizeof (engineHdr[engineIndex]);
+      nTotal     += sizeof (ENGRUN_HDR);
+      nRemaining -= sizeof (ENGRUN_HDR);
    }
    // Copy the Trigger header to the buffer
    memcpy ( pBuffer, engineHdr, nTotal );

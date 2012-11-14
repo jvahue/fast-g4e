@@ -334,7 +334,7 @@ static void Im_Driver_Initialize(void)
   // Set the Power On Time Write After Drv Init has completed.
   //   Note: Expect Drv Initialization and Process.s routines to be < 2 seconds
   //         thus the actual Power On Time shall be approx 2 seconds late.
-  PmSet_PowerOnTime( &ts );
+  PmSetPowerOnTime( &ts );
 
   // Use for Box Power On Time calculations !
   Box_PowerOn_SetStartupTime( ts );

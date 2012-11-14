@@ -15,7 +15,7 @@
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-
+#include <string.h>
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -29,8 +29,6 @@
 #include "gse.h"
 #include "systemlog.h"
 #include "Assert.h"
-
-#include <string.h>
 
 #include "TestPoints.h"
 
@@ -1548,10 +1546,10 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
    }
 
    // Parse the word based on MSB Position and word size
-    // Parse Data Bits before the param (could be param with multiple params embedded).
-    value = ((word << (15 - (pWordInfo->MSBPosition))) & 0x0000FFFFUL);
-    // Parse Data Bits after the param (could be param with multiple params embedded).
-    value = (value >> (16 - pWordInfo->WordSize));
+   // Parse Data Bits before the param (could be param with multiple params embedded).
+   value = ((word << (15 - (pWordInfo->MSBPosition))) & 0x0000FFFFUL);
+   // Parse Data Bits after the param (could be param with multiple params embedded).
+   value = (value >> (16 - pWordInfo->WordSize));
 
    // If Signed value, assume bit 11. NOTE: MSB Position should be bit 11 as well !
    if ( pWordInfo->SignBit )
@@ -2248,29 +2246,29 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 {
   QAR_TIMEOUT_LOG timeoutLog;
   QAR_CONFIGURATION_PTR pQarCfg;
-  SYS_APP_ID sysId;
+  SYS_APP_ID sysId = SYS_ID_QAR_CBIT_STARTUP_FAIL;
 
   pQarCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
 
-  switch (resultType)
+  // Note: Original switch implementation causes enumeration not checked errors
+  //       replaced with if/else for the specific result types being checked
+  if (SYS_QAR_STARTUP_TIMEOUT == resultType)
   {
-    case SYS_QAR_STARTUP_TIMEOUT:
-      timeoutLog.result = resultType;
-      timeoutLog.cfg_timeout = pQarCfg->ChannelStartup_s;
-      sysId = SYS_ID_QAR_CBIT_STARTUP_FAIL;
-      break;
-
-    case SYS_QAR_DATA_LOSS_TIMEOUT:
-      timeoutLog.result = resultType;
-      timeoutLog.cfg_timeout = pQarCfg->ChannelTimeOut_s;
-      sysId = SYS_ID_QAR_CBIT_DATA_LOSS_FAIL;
-      break;
-
-    default:
-      // No such case !
-       FATAL("Unrecognized Sys QAR resultType = %d", resultType);
-      break;
-  } // End switch (resultType)
+     timeoutLog.result = resultType;
+     timeoutLog.cfg_timeout = pQarCfg->ChannelStartup_s;
+     sysId = SYS_ID_QAR_CBIT_STARTUP_FAIL;
+  }
+  else if (SYS_QAR_DATA_LOSS_TIMEOUT == resultType)
+  {
+     timeoutLog.result = resultType;
+     timeoutLog.cfg_timeout = pQarCfg->ChannelTimeOut_s;
+     sysId = SYS_ID_QAR_CBIT_DATA_LOSS_FAIL;
+  }
+  else
+  {
+     // No such case !
+     FATAL("Unrecognized Sys QAR resultType = %d", resultType);
+  } 
 
   Flt_SetStatus(pQarCfg->ChannelSysCond, sysId, &timeoutLog, sizeof(QAR_TIMEOUT_LOG));
 

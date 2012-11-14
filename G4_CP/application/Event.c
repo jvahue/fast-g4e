@@ -172,7 +172,7 @@ void EventsInitialize ( void )
           (const void *)(CfgMgr_RuntimeConfigPtr()->EventConfigs),
           sizeof(m_EventCfg));
 
-   nEventSeqCounter = 0;
+   nEventSeqCounter   = 0;
    m_EventActiveFlags = 0;
 
    // Loop through the Configured triggers
@@ -539,7 +539,8 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
-   for (nRegionIndex = (UINT32)REGION_A; nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
+   for (nRegionIndex = (UINT32)REGION_A; 
+        nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
    {
       pStats = &pTableData->regionStats[nRegionIndex];
 
@@ -569,9 +570,9 @@ static
 void EventsUpdateTask ( void *pParam )
 {
    // Local Data
-   UINT32      nEventIndex;
-   EVENT_CFG  *pConfig;
-   EVENT_DATA *pData;
+   UINT32         nEventIndex;
+   EVENT_CFG      *pConfig;
+   EVENT_DATA     *pData;
    UINT32         activeMask = 0xFFFF;
    static BOOLEAN is_busy = FALSE;
    BOOLEAN        bAnyActive;
@@ -1787,7 +1788,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application
