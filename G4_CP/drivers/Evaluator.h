@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 16 $  $Date: 11/13/12 6:28p $
+  $Revision: 17 $  $Date: 11/14/12 4:01p $
 
 ******************************************************************************/
 
@@ -146,19 +146,19 @@ typedef struct
 
 typedef struct
 {
-  UINT8    Size;          // # bytes used in the Data array for this expression.
-  UINT8    MaxOperands;   // Maximum # of arithmetic compares allowed for this expression.
-  UINT8    OperandCnt;    // Number of operand refs in the list.
-  EVAL_CMD CmdList[EVAL_EXPR_BIN_LEN]; // RPN List of binary commands w/ operands
+  UINT8    size;          // # bytes used in the Data array for this expression.
+  UINT8    maxOperands;   // Maximum # of arithmetic compares allowed for this expression.
+  UINT8    operandCnt;    // Number of operand refs in the list.
+  EVAL_CMD cmdList[EVAL_EXPR_BIN_LEN]; // RPN List of binary commands w/ operands
 }EVAL_EXPR;
 #pragma pack()
 
 
 typedef struct
 {
-  DATATYPE DataType;
-  FLOAT32  Data;
-  BOOLEAN  Validity;
+  DATATYPE dataType;
+  FLOAT32  data;
+  BOOLEAN  validity;
 }EVAL_RPN_ENTRY;
 
 // Entry to handle prior sensor values in expressions
@@ -169,9 +169,9 @@ typedef struct
 
 typedef struct
 {
-  UINT32  KeyField; // Lookup key - GUID for use of this sensor in a given object(Trig, Event)
-  FLOAT32 PriorValue;// The previous stored value of this sensor.
-  BOOLEAN PriorValid;// The validity of the previous stored value.
+  UINT32  keyField; // Lookup key - GUID for use of this sensor in a given object(Trig, Event)
+  FLOAT32 priorValue;// The previous stored value of this sensor.
+  BOOLEAN priorValid;// The validity of the previous stored value.
 }PRIOR_SENSOR_ENTRY;
 
 // Structure used during expression execution to
@@ -193,12 +193,12 @@ typedef BOOLEAN OP_CMD  (EVAL_EXE_CONTEXT* context);
 
 typedef struct
 {
-  BYTE     OpCode;
-  CHAR     Token[EVAL_OPRND_LEN+1];
-  UINT8    TokenLen;
-  ADD_CMD* AddCmd;        // Ptr to function STR -> CMD obj
-  FMT_CMD* FmtCmd;        // Ptr to function CMDobj -> STR
-  OP_CMD*  ExeCmd;        // Ptr to function to execute CMD
+  BYTE     opCode;
+  CHAR     token[EVAL_OPRND_LEN+1];
+  UINT8    tokenLen;
+  ADD_CMD* pfAddCmd;        // Ptr to function STR -> CMD obj
+  FMT_CMD* pfFmtCmd;        // Ptr to function CMDobj -> STR
+  OP_CMD*  pfExeCmd;        // Ptr to function to execute CMD
 }EVAL_OPCODE_TBL_ENTRY;
 
 
@@ -208,11 +208,11 @@ typedef BOOLEAN GET_BOOL_FUNC ( INT32 objIndex );
 
 typedef struct
 {
-  BYTE OpCode;    // Lookup-key from EVAL_OPCODE_TBL_ENTRY
-  GET_BOOL_FUNC*  IsSrcConfigured;  // Return is input source configured?
-  GET_VALUE_FUNC* GetSrcByValue;    // Return source input data as FP number.
-  GET_BOOL_FUNC*  GetSrcByBool;     // Return source input data as boolean.
-  GET_BOOL_FUNC*  GetSrcValidity;   // Return source validity
+  BYTE opCode;    // Lookup-key from EVAL_OPCODE_TBL_ENTRY
+  GET_BOOL_FUNC*  pfIsSrcConfigured;  // Return is input source configured?
+  GET_VALUE_FUNC* pfGetSrcByValue;    // Return source input data as FP number.
+  GET_BOOL_FUNC*  pfGetSrcByBool;     // Return source input data as boolean.
+  GET_BOOL_FUNC*  pfGetSrcValidity;   // Return source validity
 }EVAL_DATAACCESS;
 
 /******************************************************************************
@@ -220,7 +220,7 @@ typedef struct
 ******************************************************************************/
 #undef EXPORT
 
-#if defined( EVALUATOR_BODY )
+#if defined ( EVALUATOR_BODY )
   #define EXPORT
 #else
   #define EXPORT extern
@@ -248,7 +248,7 @@ EXPORT INT32 EvalExeExpression  ( EVAL_CALLER_TYPE objType, INT32 objID,
 EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 
 // Functions listed in the function table not really "exported" but
-// need to be declared because EvaluatorInterface.h will use them.
+// need to be declared as such because EvaluatorInterface.h will use them.
 
 BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
 BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
@@ -282,6 +282,11 @@ INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *  MODIFICATIONS
  *    $History: Evaluator.h $
  * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 4:01p
+ * Updated in $/software/control processor/code/drivers
+ * Code Review check in
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 11/13/12   Time: 6:28p
  * Updated in $/software/control processor/code/drivers

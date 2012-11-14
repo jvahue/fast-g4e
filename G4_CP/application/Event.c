@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 33 $  $Date: 12-11-08 3:03p $
+ $Revision: 34 $  $Date: 11/14/12 4:01p $
 
 ******************************************************************************/
 
@@ -198,7 +198,7 @@ void EventsInitialize ( void )
       //pEventData->bTableWasEntered  = FALSE;
 
       // If the event has a Start and End Expression then it must be configured
-      if ( (0 != pEventCfg->startExpr.Size) && (0 != pEventCfg->endExpr.Size) )
+      if ( (0 != pEventCfg->startExpr.size) && (0 != pEventCfg->endExpr.size) )
       {
          // Reset the events run time data
          EventResetData ( pEventCfg, pEventData );
@@ -595,7 +595,7 @@ void EventsUpdateTask ( void *pParam )
 
          // Make sure the event has been configured to start otherwise there is
          // nothing to do.
-         if ( pConfig->startExpr.Size != 0 )
+         if ( pConfig->startExpr.size != 0 )
          {
             // Countdown the number of samples until next read
             if (--pData->nRateCountdown == 0)
@@ -1787,6 +1787,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 4:01p
+ * Updated in $/software/control processor/code/application
+ * Code Review
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p

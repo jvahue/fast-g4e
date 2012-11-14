@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 77 $  $Date: 11/08/12 4:28p $
+  $Revision: 78 $  $Date: 11/14/12 4:01p $
 
 ******************************************************************************/
 
@@ -186,8 +186,8 @@ void TriggerInitialize(void)
 
     // If start AND end expressions are empty, but a sensor IS defined in the cfg...
     // this is a legacy-style cfg. Create a start and end cfg expression.
-    if( (pTrigCfg->StartExpr.Size == 0 &&
-         pTrigCfg->EndExpr.Size == 0)  &&
+    if( (pTrigCfg->StartExpr.size == 0 &&
+         pTrigCfg->EndExpr.size == 0)  &&
          SENSOR_UNUSED != pTrigCfg->TrigSensor[0].SensorIndex )
     {
       pTrigData->bLegacyConfig = TRUE;
@@ -769,7 +769,7 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
   // then just check to see if start criteria is no longer active.
   // Note: The result is an INT32 where < 0 is error, 0 is false and 1 is true
 
-  if(pTrigCfg->EndExpr.Size > 0)
+  if(pTrigCfg->EndExpr.size > 0)
   {
     result = EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
                                 pTrigData->TriggerIndex,
@@ -1218,7 +1218,7 @@ TRIG_END_TYPE TriggerCheckEndLegacy(TRIGGER_CONFIG *pTrigCfg,
 *****************************************************************************/
 EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
 {
-   return( 0 != m_TriggerCfg[trigIdx].StartExpr.Size );
+   return( 0 != m_TriggerCfg[trigIdx].StartExpr.size );
 }
 
 
@@ -1371,6 +1371,10 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  *  MODIFICATIONS
  *    $History: trigger.c $
  * 
+ * *****************  Version 78  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 4:01p
+ * Updated in $/software/control processor/code/system
+ *
  * *****************  Version 77  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system
