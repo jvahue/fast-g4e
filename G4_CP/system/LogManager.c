@@ -121,6 +121,7 @@ static BOOLEAN        LogVerifyAllDeleted    ( UINT32 *pRdOffset,
 static UINT32         LogManageWrite         ( SYS_APP_ID LogID, LOG_PRIORITY Priority,
                                                void *pData, UINT16 nSize,
                                                const TIMESTAMP *pTs, LOG_TYPE LogType );
+static void           LogEraseStatusWrite    ( LOG_CMD_ERASE_PARMS *pTCB );
 /*****************************************************************************/
 static void             LogQueueInit  ( void );
 static LOG_QUEUE_STATUS LogQueueGet   ( LOG_REQUEST *Entry );
@@ -156,6 +157,7 @@ void LogInitialize (void)
    UINT32            nOffset;
    BOOLEAN           bValidFound;
    UINT32            i;
+   RESULT            resultNV;
 
    // Initialize Local Data
    sysStatus = SYS_OK;
@@ -180,7 +182,9 @@ void LogInitialize (void)
      LogEraseData.bChipErase       = FALSE;
      LogEraseData.savedStartOffset = 0;
      LogEraseData.savedSize        = 0;
-     NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+     resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+     GSE_DebugStr(NORMAL,TRUE, "Log Initialize - Reset NV_LOG_ERASE...%s",
+                  SYS_OK == resultNV ? "SUCCESS":"FAILED");
    }
 
    memset(&LogConfig, 0, sizeof(LogConfig));
@@ -202,7 +206,11 @@ void LogInitialize (void)
    }
    // Now Reset the counts back to "0"
    memset(&LogError,  0, sizeof(LogError ));
-   NV_WriteNow(NV_LOG_COUNTS, 0, &LogError.counts, sizeof(LogError.counts));
+   if ( SYS_OK != NV_WriteNow(NV_LOG_COUNTS, 0, &LogError.counts, sizeof(LogError.counts)))
+   {
+      GSE_DebugStr(NORMAL,TRUE, "Log Initialize - Reset NV_LOG_COUNTS...FAILED");
+   }
+   
    // Set the Fail flags to FALSE
    LogError.bReadAccessFail   = FALSE;
    LogError.bWriteAccessFail  = FALSE;
@@ -1877,24 +1885,7 @@ void LogCmdEraseTask ( void *pParam )
 
       case LOG_ERASE_STATUS_WRITE:
         // Store Current Erase Data to EEPROM
-
-        if (FALSE == pTCB->bUpdatingStatusFile)
-        {
-          // First time here since entering this state? Update Log Erase Status file.
-          pTCB->bUpdatingStatusFile = TRUE;
-          // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
-          LogSaveEraseData (pTCB->nOffset, pTCB->nSize, FALSE, TRUE, FALSE);
-        }
-        else // Update was issued in previous frame.
-        {
-          // Checking if write completed. If so, change to the LOG_ERASE_MEMORY state.
-          if ( SYS_NV_WRITE_PENDING != NV_WriteState(NV_LOG_ERASE, 0, 0) )
-          {
-            //GSE_DebugStr(NORMAL,TRUE,"LogErase Status has been written to EEPROM");
-            pTCB->bUpdatingStatusFile = FALSE;
-            pTCB->state = LOG_ERASE_MEMORY;
-          }
-        }
+        LogEraseStatusWrite (pTCB);
         break;
 
       case LOG_ERASE_MEMORY:
@@ -1976,6 +1967,42 @@ void LogCmdEraseTask ( void *pParam )
       default:
          FATAL("LogCmdEraseTask: Invalid LOG_ERASE_STATE = %d", pTCB->state);
          break;
+   }
+}
+
+/******************************************************************************
+ * Function:    LogEraseStatusWrite
+ *
+ * Description: The LogEraseStatusWrite function manages writing the erase 
+ *              status data to non-volatile memory during normal operation.
+ *
+ * Parameters:  LOG_CMD_ERASE_PARMS *pTCB
+ *
+ * Returns:     None.
+ *
+ * Notes:       Function was created to reduce cyclomatic complexity of
+ *              LogCmdEraseTask
+ *
+ *****************************************************************************/
+static
+void LogEraseStatusWrite (LOG_CMD_ERASE_PARMS *pTCB)
+{
+   if (FALSE == pTCB->bUpdatingStatusFile)
+   {
+      // First time here since entering this state? Update Log Erase Status file.
+      pTCB->bUpdatingStatusFile = TRUE;
+      // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
+      LogSaveEraseData (pTCB->nOffset, pTCB->nSize, FALSE, TRUE, FALSE);
+   }  
+   else // Update was issued in previous frame.
+   {
+      // Checking if write completed. If so, change to the LOG_ERASE_MEMORY state.
+      if ( SYS_NV_WRITE_PENDING != NV_WriteState(NV_LOG_ERASE, 0, 0) )
+      {
+         //GSE_DebugStr(NORMAL,TRUE,"LogErase Status has been written to EEPROM");
+         pTCB->bUpdatingStatusFile = FALSE;
+         pTCB->state = LOG_ERASE_MEMORY;
+      }
    }
 }
 
@@ -2097,7 +2124,7 @@ void LogSystemLogManageTask ( void *pParam )
 /******************************************************************************
  * Function:    LogSaveEraseData
  *
- * Description: The Log Save Erase Data function is used to stored information
+ * Description: The Log Save Erase Data function is used to store information
  *              to the EEPROM when an erase is to be commanded. This information
  *              can then be checked during each power cycle to determine if
  *              there was an erase in progress during power down.
@@ -2118,6 +2145,7 @@ static void LogSaveEraseData (UINT32 nOffset, UINT32 nSize,
 {
    // Local Data
    LOG_EEPROM_CONFIG eraseData;
+   RESULT resultNV;
 
    // Copy parameters to local structure
    eraseData.inProgress       = bInProgress;
@@ -2130,7 +2158,9 @@ static void LogSaveEraseData (UINT32 nOffset, UINT32 nSize,
 
    if (TRUE == bWriteNow)
    {
-      NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+      resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+      GSE_DebugStr(NORMAL,TRUE, "LogSaveEraseData - NV_LOG_ERASE save...%s",
+                   SYS_OK == resultNV ? "SUCCESS":"FAILED");
    }
    else
    {

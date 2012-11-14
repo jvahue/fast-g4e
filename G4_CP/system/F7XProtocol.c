@@ -552,7 +552,8 @@ void F7XProtocol_Initialize ( void )
   
   // Restore User Cfg 
   memcpy(m_F7X_DumplistCfg, CfgMgr_RuntimeConfigPtr()->F7XConfig, sizeof(m_F7X_DumplistCfg));
-  memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), sizeof(m_F7X_ParamListCfg)); 
+  memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), 
+         sizeof(m_F7X_ParamListCfg)); 
   
   // Update runtime var of Param Translation Table 
   // Clear all entries to default 
@@ -947,7 +948,8 @@ void F7XDispDebug_Task ( void *pParam )
             }
             else
             {
-              sprintf( (char *) Str, "%s= %5.3f\r\n", F7X_Param_Names[pCfg->ParamId[i]].name, fval);
+              sprintf( (char *) Str, "%s= %5.3f\r\n", 
+                       F7X_Param_Names[pCfg->ParamId[i]].name, fval);
             }
             
             GSE_PutLine( (const char *) Str ); 
@@ -1193,11 +1195,11 @@ void F7XProtocol_Decoder_NotSynced (UINT16 ch)
   {
 */  
     // Look for the sync characters in the buffer
-    //   End if we have found two full frames / three sync char OR end of buffer has been reached. 
+    // End if we have found two full frames/three sync char OR end of buffer has been reached. 
     while ( (nIndex < F7X_INIT_SYNCWORDS) && (src_ptr < end_ptr) )
     {
        // Current word
-       // word = (*src_ptr << 8) | (*(src_ptr + 1)); // Note: buff is always filled to even addr ! 
+       // word = (*src_ptr << 8)|(*(src_ptr + 1)); //Note: buff is always filled to even addr !
        word = *src_ptr; 
   
        // Compare word to sync words AND if not near end of buffer 
@@ -1231,7 +1233,8 @@ void F7XProtocol_Decoder_NotSynced (UINT16 ch)
              //  Determine if not end of buffer + include addrChksum field on next frame 
              if ( (src_ptr + (frameSize + 4)) < end_ptr ) 
              {
-               // Is it the correct Sync char ? It should be the ALT of 2nd sync char or the 1st sync char
+               // Is it the correct Sync char ? 
+               // It should be the ALT of 2nd sync char or the 1st sync char
                if (*(src_ptr + frameSize) == syncData[0].word) 
                {
                  // Update the 3rd sync char
@@ -1256,7 +1259,7 @@ void F7XProtocol_Decoder_NotSynced (UINT16 ch)
                  else 
                  {
                    // Move src_ptr to end of addrChksum of 3rd sync char 
-                   src_ptr = syncData[nIndex].ptr + 5;                                                
+                   src_ptr = syncData[nIndex].ptr + 5;
                    // Update nIndex to indicate all 3 sync char found 
                    nIndex++; 
                  }
@@ -1286,7 +1289,7 @@ void F7XProtocol_Decoder_NotSynced (UINT16 ch)
              nIndex = 0; 
            }
          }
-         else  // 1st sync char found, update pointer to after 1st sync frame's addrchksum field 
+         else // 1st sync char found, update pointer to after 1st sync frame's addrchksum field 
          {
            src_ptr = syncData[nIndex].ptr + 5;  
            nIndex++;  // Look for next sync char 
@@ -1635,7 +1638,8 @@ BOOLEAN F7XProtocol_DumpListRecognized (UINT16 ch)
       // Record log after the EEPROM has been queued for update. 
       LogWriteSystem (SYS_ID_UART_F7X_NEW_DL_FOUND, LOG_PRIORITY_LOW, &newDLFoundLog, 
                       sizeof(F7X_NEW_DL_FOUND_LOG), NULL);
-      sprintf ( GSE_OutLine, "\r\nF7XProtocol: New Dump List found (new index=%d, old index=%d)\r\n",
+      sprintf ( GSE_OutLine, 
+                "\r\nF7XProtocol: New Dump List found (new index=%d, old index=%d)\r\n",
                 newDLFoundLog.current.index, newDLFoundLog.prev.index ); 
       GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
     }
@@ -1657,13 +1661,15 @@ BOOLEAN F7XProtocol_DumpListRecognized (UINT16 ch)
   // Output debug msg  
   if ( bRecognized == FALSE ) 
   {
-    sprintf( GSE_OutLine, "\r\nF7XProtocol: SYNC Detected, Dump List Not Recognized (Ch = %d)\r\n", 
+    sprintf( GSE_OutLine, 
+             "\r\nF7XProtocol: SYNC Detected, Dump List Not Recognized (Ch = %d)\r\n", 
              ch ); 
   }
   else
   {
     sprintf( GSE_OutLine, 
-             "\r\nF7XProtocol: SYNC Detected, Dump List Recognized (Ch = %d, DumpList Index = %d)\r\n", 
+             "\r\nF7XProtocol: SYNC Detected, Dump List Recognized"
+             "(Ch = %d, DumpList Index = %d)\r\n", 
              ch, pStatus->nIndexCfg ); 
   }
   GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 

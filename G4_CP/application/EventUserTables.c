@@ -31,6 +31,15 @@ $Revision: 29 $  $Date: 12-11-13 4:36p $
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static EVENT_CFG         configEventTemp;       // Event Configuration temp Storage
+static EVENT_TABLE_CFG   configEventTableTemp;  // Event Table temp Storage
+
+static EVENT_DATA        stateEventTemp;        // Event State Temp Storage
+static EVENT_TABLE_DATA  stateEventTableTemp;   // Event Table State Temp Storage
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 //Prototype for the User Manager message handlers, has to go before
@@ -76,15 +85,10 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
                                             UINT32 Index,
                                             const void *SetPtr,
                                             void **GetPtr);
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static EVENT_CFG         configEventTemp;       // Event Configuration temp Storage
-static EVENT_TABLE_CFG   configEventTableTemp;  // Event Table temp Storage
-
-static EVENT_DATA        stateEventTemp;        // Event State Temp Storage
-static EVENT_TABLE_DATA  stateEventTableTemp;   // Event Table State Temp Storage
-
 USER_ENUM_TBL eventTableType[]   =
 {  { "0"  , EVENT_TABLE_0   }, { "1"  ,  EVENT_TABLE_1   }, {  "2"  , EVENT_TABLE_2   },
    { "3"  , EVENT_TABLE_3   }, { "4"  ,  EVENT_TABLE_4   }, {  "5"  , EVENT_TABLE_5   },
