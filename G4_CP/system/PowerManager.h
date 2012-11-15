@@ -278,14 +278,14 @@ EXPORT void PowerFailIsr(void);
 EXPORT void PmInsertAppShutDownNormal( APPSHUTDOWN_FUNC func ); 
 EXPORT void PmInsertAppShutDownQuick( APPSHUTDOWN_FUNC func ); 
 EXPORT void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func ); 
-EXPORT void PmSet_PowerOnTime( TIMESTAMP *pPtr ); 
+EXPORT void PmSetPowerOnTime( TIMESTAMP *pPtr ); 
 EXPORT BOOLEAN PmFileInit(void);
 EXPORT void PmRegisterAppBusyFlag(BUSY_INDEX index, BOOLEAN *pAppBusyFlag ); 
 EXPORT BOOLEAN PmFSMAppBusyGetState(INT32 param);
 EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 
 #ifdef GENERATE_SYS_LOGS
-  EXPORT void Pm_CreateAllInternalLogs ( void );
+  EXPORT void PmCreateAllInternalLogs ( void );
 #endif  
 
 

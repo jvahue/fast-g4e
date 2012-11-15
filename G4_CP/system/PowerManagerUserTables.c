@@ -236,7 +236,7 @@ USER_HANDLER_RESULT PMMsg_Cfg(USER_DATA_TYPE DataType,
        sizeof(PowerManager_CfgTemp));
    }
 
-  PmSet_Cfg(&PowerManager_CfgTemp);
+  PmSetCfg(&PowerManager_CfgTemp);
    
   return result;
 }
@@ -266,7 +266,7 @@ USER_HANDLER_RESULT PMMsg_CreateLogs(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result = USER_RESULT_OK; 
 
-  Pm_CreateAllInternalLogs();
+  PmCreateAllInternalLogs();
   
   return result;
 }

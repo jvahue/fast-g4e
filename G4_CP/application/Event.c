@@ -172,7 +172,7 @@ void EventsInitialize ( void )
           (const void *)(CfgMgr_RuntimeConfigPtr()->EventConfigs),
           sizeof(m_EventCfg));
 
-   nEventSeqCounter = 0;
+   nEventSeqCounter   = 0;
    m_EventActiveFlags = 0;
 
    // Loop through the Configured triggers

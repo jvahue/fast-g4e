@@ -263,10 +263,10 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     //NOTE: The ordering in DIO_OutputPins determine the bit ordering in
     //      PinResultSummary.  See DIO.h
     PinResultSummary |= (SetupPinResult << i);
-    DIO_OutputShadow[i] = DIO_OutputPins[i].InitialState;
+    DIO_OutputShadow[i] = DIO_OutputPins[i].bInitialState;
   }
   // Set Return Structure Here
-  pdest->DioOutResults = PinResultSummary;
+  pdest->dioOutResults = PinResultSummary;
 
 
   //Initialize the discrete inputs. DIO_MAX_INPUTS must be < 32
@@ -286,22 +286,22 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     // If the initialization was successful, set the initial state
     if (SetupPinResult == 0)
     {
-      Dio_FilteredPins[i].TimeStampMs    = CM_GetTickCount();
+      Dio_FilteredPins[i].timeStampMs    = CM_GetTickCount();
 
       // Add this port to the array of PODRs and store the returned ptr.
       // DIO_AddPortToList will only add addresses not already added to list.
-      Dio_FilteredPins[i].portData       = DIO_AddPortToList( DIO_InputPins[i].DataReg );
+      Dio_FilteredPins[i].portData       = DIO_AddPortToList( DIO_InputPins[i].dataReg );
 
       // Read DIN for initial state.
-      DIO_InputPins[i].InitialState      = DIO_ReadPin((DIO_INPUT)i);
-      Dio_FilteredPins[i].FilteredState  = DIO_InputPins[i].InitialState;
-      Dio_FilteredPins[i].LastRecvdState = DIO_InputPins[i].InitialState;
+      DIO_InputPins[i].bInitialState      = DIO_ReadPin((DIO_INPUT)i);
+      Dio_FilteredPins[i].filteredState  = DIO_InputPins[i].bInitialState;
+      Dio_FilteredPins[i].lastRecvdState = DIO_InputPins[i].bInitialState;
     }
   }
   // Set Return Structure Here
-  pdest->DioInResults = PinResultSummary;
+  pdest->dioInResults = PinResultSummary;
 
-  if ( ( pdest->DioInResults != 0) || (pdest->DioOutResults != 0) )
+  if ( ( pdest->dioInResults != 0) || (pdest->dioOutResults != 0) )
   {
      pdest->result = DRV_DIO_REG_INIT_FAIL;
      *SysLogId = DRV_ID_DIO_PBIT_REG_INIT_FAIL;
@@ -347,87 +347,87 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
   bInitOk = TRUE;
   bFailed = FALSE;
 
-  if(DIO_GPIO == PinConfig->Peripheral)
+  if(DIO_GPIO == PinConfig->peripheral)
   {
 
-    ASSERT(  (PinConfig->DataReg == &MCF_GPIO_PODR_FBCTL)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FBCS)     ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_DMA)      ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FEC0H)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FEC0L)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FEC1H)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FEC1L)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_FECI2C)   ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_PCIBG)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_PCIBR)    ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_PSC3PSC2) ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_PSC1PSC0) ||
-             (PinConfig->DataReg == &MCF_GPIO_PODR_DSPI) );
+    ASSERT(  (PinConfig->dataReg == &MCF_GPIO_PODR_FBCTL)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FBCS)     ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_DMA)      ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FEC0H)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FEC0L)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FEC1H)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FEC1L)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_FECI2C)   ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_PCIBG)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_PCIBR)    ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_PSC3PSC2) ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_PSC1PSC0) ||
+             (PinConfig->dataReg == &MCF_GPIO_PODR_DSPI) );
 
 #ifdef WIN32
 /*vcast_dont_instrument_start*/
-  DIO_W((PinConfig->DataReg+DIO_GPIO_PDDR_OFFSET),PinConfig->PinMask,PinConfig->Direction);
-  DIO_W((PinConfig->DataReg+DIO_GPIO_PODR_OFFSET),PinConfig->PinMask,PinConfig->InitialState);
+  DIO_W((PinConfig->dataReg+DIO_GPIO_PDDR_OFFSET),PinConfig->pinMask,PinConfig->direction);
+  DIO_W((PinConfig->dataReg+DIO_GPIO_PODR_OFFSET),PinConfig->pinMask,PinConfig->bInitialState);
 /*vcast_dont_instrument_end*/
 #endif
 
     //Set data output value before setting direction of pin
-    switch(PinConfig->InitialState)
+    switch(PinConfig->bInitialState)
     {
       case ON:
-        SET_CHECK_MASK_OR ( *(PinConfig->DataReg+DIO_GPIO_PODR_OFFSET),
-                            PinConfig->PinMask,
+        SET_CHECK_MASK_OR ( *(PinConfig->dataReg+DIO_GPIO_PODR_OFFSET),
+                            PinConfig->pinMask,
                             bInitOk );
         break;
 
       case OFF:
-        SET_CHECK_MASK_AND ( *(PinConfig->DataReg+DIO_GPIO_PODR_OFFSET),
-                             PinConfig->PinMask,
+        SET_CHECK_MASK_AND ( *(PinConfig->dataReg+DIO_GPIO_PODR_OFFSET),
+                             PinConfig->pinMask,
                              bInitOk );
         break;
 
       default:
-         FATAL("Unsupported InitialState = %d", PinConfig->InitialState);
+         FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
         break;
     }
 
 
     //Set the pin direction
-    switch(PinConfig->Direction)
+    switch(PinConfig->direction)
     {
       case DIO_In:
-        SET_CHECK_MASK_AND ( *(PinConfig->DataReg+DIO_GPIO_PDDR_OFFSET),
-                             PinConfig->PinMask,
+        SET_CHECK_MASK_AND ( *(PinConfig->dataReg+DIO_GPIO_PDDR_OFFSET),
+                             PinConfig->pinMask,
                              bInitOk );
         break;
 
       case DIO_Out:
-        SET_CHECK_MASK_OR ( *(PinConfig->DataReg+DIO_GPIO_PDDR_OFFSET),
-                            PinConfig->PinMask,
+        SET_CHECK_MASK_OR ( *(PinConfig->dataReg+DIO_GPIO_PDDR_OFFSET),
+                            PinConfig->pinMask,
                             bInitOk );
         break;
 
       default:
-         FATAL("Unsupported pin direction = %d", PinConfig->Direction);
+         FATAL("Unsupported pin direction = %d", PinConfig->direction);
          break;
     }
 
-    DIO_InitShadowReg( (void*) PinConfig->DataReg, DIO_GPIO_PDDR_OFFSET, PinConfig->PinMask,
-                       PinConfig->Direction);
+    DIO_InitShadowReg( (void*) PinConfig->dataReg, DIO_GPIO_PDDR_OFFSET, PinConfig->pinMask,
+                       PinConfig->direction);
 
     //  Check the Pin Setup
     //  For Input check Dir Reg Setup only ! (Performed above)
     //  For Output check Dir Reg Setup (Performed above),
     //             PODR (Output Data Reg) and PPDSDR (Output Pin)
-    if (PinConfig->Direction == DIO_Out)
+    if (PinConfig->direction == DIO_Out)
     {
-      switch (PinConfig->InitialState)
+      switch (PinConfig->bInitialState)
       {
         case ON:
-          if ( ((*(PinConfig->DataReg+DIO_GPIO_PODR_OFFSET) & PinConfig->PinMask) !=
-                 PinConfig->PinMask) ||
-               ((*(PinConfig->DataReg+DIO_GPIO_PPDSDR_OFFSET) & PinConfig->PinMask) !=
-                 PinConfig->PinMask) )
+          if ( ((*(PinConfig->dataReg+DIO_GPIO_PODR_OFFSET) & PinConfig->pinMask) !=
+                 PinConfig->pinMask) ||
+               ((*(PinConfig->dataReg+DIO_GPIO_PPDSDR_OFFSET) & PinConfig->pinMask) !=
+                 PinConfig->pinMask) )
           {
             bInitOk = FALSE;
           }
@@ -435,10 +435,10 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
           break;
 
         case OFF:
-          if ( ((*(PinConfig->DataReg+DIO_GPIO_PODR_OFFSET) | ~PinConfig->PinMask) !=
-                 ~PinConfig->PinMask) ||
-               ((*(PinConfig->DataReg+DIO_GPIO_PPDSDR_OFFSET) | ~PinConfig->PinMask) !=
-                 ~PinConfig->PinMask) )
+          if ( ((*(PinConfig->dataReg+DIO_GPIO_PODR_OFFSET) | ~PinConfig->pinMask) !=
+                 ~PinConfig->pinMask) ||
+               ((*(PinConfig->dataReg+DIO_GPIO_PPDSDR_OFFSET) | ~PinConfig->pinMask) !=
+                 ~PinConfig->pinMask) )
           {
             bInitOk = FALSE;
           }
@@ -446,23 +446,23 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
           break;
 
         default:
-          FATAL("Unsupported InitialState = %d", PinConfig->InitialState);
+          FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
           break;
 
       } // End switch (PinConfig->InitialState)
 
-      DIO_InitShadowReg( (void *) PinConfig->DataReg,
+      DIO_InitShadowReg( (void *) PinConfig->dataReg,
                           DIO_GPIO_PODR_OFFSET,
-                          PinConfig->PinMask, SetVal);
-      DIO_InitShadowReg( (void *) PinConfig->DataReg,
+                          PinConfig->pinMask, SetVal);
+      DIO_InitShadowReg( (void *) PinConfig->dataReg,
                           DIO_GPIO_PPDSDR_OFFSET,
-                          PinConfig->PinMask, SetVal);
+                          PinConfig->pinMask, SetVal);
 
     } // End if (PinConfig->Direction == DIO_Out)
 
   } // End of if(DIO_GPIO == PinConfig->Peripheral)
 
-  else if(DIO_TMR2 == PinConfig->Peripheral)
+  else if(DIO_TMR2 == PinConfig->peripheral)
   {
     //If the peripheral is TMR2, this is a "special case" pin that is not
     //under control of the GPIO peripheral, but is a GPIO mode of another
@@ -477,7 +477,7 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
     //SET_AND_CHECK ( MCF_GPT_GMS2,
     //               (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)),
     //                bInitOk );
-    switch (PinConfig->InitialState)
+    switch (PinConfig->bInitialState)
     {
       case ON:
         SetVal = (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI));
@@ -489,7 +489,7 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
         // SetVal = (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_LO));
         // break;
       default:
-        FATAL("Unsupported InitialState = %d", PinConfig->InitialState);
+        FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
         break;
     }
 
@@ -497,11 +497,11 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
     DIO_InitShadowRegGMS2( 0xFFFFFFFFUL, SetVal);
 
   }
-  else if(DIO_FPGA == PinConfig->Peripheral)
+  else if(DIO_FPGA == PinConfig->peripheral)
   {
     //FPGA already has direction hardwired, so just need to set initial value
     //Set data output value
-    switch(PinConfig->InitialState)
+    switch(PinConfig->bInitialState)
     {
       case ON:
         /*TBD: FPGA not init yet, need to figure something out here
@@ -516,15 +516,15 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
         break;
 
       default:
-        FATAL("Unsupported InitialState = %d", PinConfig->InitialState);
+        FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
         break;
     }
     // TODO: SCR 1153 - Temp Hack to mask detection of a FALSE Reg check FAIL
     //       The new input for FFD is breaking the pin mask for the output, this is a temporary
     //       gate to stop that until a fix can be made.
-    if (PinConfig->DataReg == (UINT8*)FPGA_GPIO_0)
+    if (PinConfig->dataReg == (UINT8*)FPGA_GPIO_0)
     {
-       DIO_InitShadowRegFPGA( PinConfig->PinMask, SetVal );
+       DIO_InitShadowRegFPGA( PinConfig->pinMask, SetVal );
     }
 
   }
@@ -572,7 +572,7 @@ void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
 
   intrLevel = __DIR();
   DIO_OutputShadow[Pin] = Op == DIO_SetHigh ? ON : OFF;
-  if(DIO_OutputPins[Pin].Peripheral == DIO_TMR2)
+  if(DIO_OutputPins[Pin].peripheral == DIO_TMR2)
   {
       value = Op == DIO_SetHigh ?
                    (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) :
@@ -585,30 +585,30 @@ void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
       DIO_S( &DioShadowData_GMS2.value2, value);
 
   }
-  else if(DIO_OutputPins[Pin].Peripheral == DIO_GPIO)
+  else if(DIO_OutputPins[Pin].peripheral == DIO_GPIO)
   {
-      DIO_W((DIO_OutputPins[Pin].DataReg+DIO_GPIO_PODR_OFFSET),
-             DIO_OutputPins[Pin].PinMask,
+      DIO_W((DIO_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET),
+             DIO_OutputPins[Pin].pinMask,
              Op);
 
       // Update Shadow copies
       DIO_W((UINT32 *)&DioShadowData_PODR[DioShadowOutputPinReg[Pin]].value1,
-            DIO_OutputPins[Pin].PinMask,
+            DIO_OutputPins[Pin].pinMask,
             Op);
       DIO_W((UINT32 *)&DioShadowData_PODR[DioShadowOutputPinReg[Pin]].value2,
-            DIO_OutputPins[Pin].PinMask,
+            DIO_OutputPins[Pin].pinMask,
             Op);
       DIO_W((UINT32 *)&DioShadowData_PPDSDR[DioShadowOutputPinReg[Pin]].value1,
-            DIO_OutputPins[Pin].PinMask,
+            DIO_OutputPins[Pin].pinMask,
             Op);
       DIO_W((UINT32 *)&DioShadowData_PPDSDR[DioShadowOutputPinReg[Pin]].value2,
-            DIO_OutputPins[Pin].PinMask,
+            DIO_OutputPins[Pin].pinMask,
             Op);
 
   }
-  else if(DIO_OutputPins[Pin].Peripheral == DIO_FPGA)
+  else if(DIO_OutputPins[Pin].peripheral == DIO_FPGA)
   {
-      DIO_W16( (UINT16 *) DIO_OutputPins[Pin].DataReg, DIO_OutputPins[Pin].PinMask, Op);
+      DIO_W16( (UINT16 *) DIO_OutputPins[Pin].dataReg, DIO_OutputPins[Pin].pinMask, Op);
   }
   __RIR(intrLevel);
 
@@ -633,7 +633,7 @@ void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
  ****************************************************************************/
 BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
 {
-  BOOLEAN State;
+  BOOLEAN bState;
   UINT8 value;
   UINT16 value16;
   DIO_ACC_METHOD access;
@@ -641,13 +641,13 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
 
   ASSERT_MESSAGE(Pin < DIO_MAX_INPUTS, "Invalid DIO_INPUT Pin: %d", Pin);
 
-  access = bDebounceActive ? DIO_InputPins[Pin].AccessMethod : DIO_RAW;
+  access = bDebounceActive ? DIO_InputPins[Pin].accessMethod : DIO_RAW;
 
   // Retrieve the bit according to the configured access method
   switch (access)
   {
     case DIO_FILTERED:
-      State = Dio_FilteredPins[Pin].FilteredState;
+      bState = Dio_FilteredPins[Pin].filteredState;
       break;
 
     case DIO_NOT_APPLIC: //DIN discrete access method not set, handle as RAW
@@ -659,25 +659,25 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
       // No break. Deliberate Fall through.
 
     case DIO_RAW:   //Read the value directly off the register and mask the bit
-      if(DIO_InputPins[Pin].Peripheral == DIO_FPGA)
+      if(DIO_InputPins[Pin].peripheral == DIO_FPGA)
       {
         value16 = DIO_R16( (UINT16 *)Dio_FilteredPins[Pin].portData->portAddr );
-        State = ( value16 & DIO_InputPins[Pin].PinMask) ? ON : OFF;
+        bState = ( value16 & DIO_InputPins[Pin].pinMask) ? ON : OFF;
       }
       else
       {
         value = DIO_R( Dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
-        State = ( value & DIO_InputPins[Pin].PinMask) ? ON : OFF;
+        bState = ( value & DIO_InputPins[Pin].pinMask) ? ON : OFF;
       }
       break;
 
     default:
-      FATAL("Invalid AccessMethod: %d", DIO_InputPins[Pin].AccessMethod);
+      FATAL("Invalid AccessMethod: %d", DIO_InputPins[Pin].accessMethod);
       break;
   }
 
 
-  return State;
+  return bState;
 }
 
 /*****************************************************************************
@@ -750,7 +750,7 @@ void DIO_UpdateDiscreteInputs(void)
   // Debounce/filter the state of the pin
   for(Pin = 0; Pin < DIO_MAX_INPUTS; ++Pin)
   {
-    State = Dio_FilteredPins[Pin].portData->value & DIO_InputPins[Pin].PinMask ? ON : OFF;
+    State = Dio_FilteredPins[Pin].portData->value & DIO_InputPins[Pin].pinMask ? ON : OFF;
     // De-bounce/filter the state of this pin
     DIO_DebounceState  ((DIO_INPUT)Pin, State, currentTimeMs);
   }
@@ -1005,7 +1005,7 @@ void DioRegCheck_Init( void )
     // Loop thru and find Reg
     for (j = 0; j < (UINT32)DIO_ENUM_MAX; j++)
     {
-      if ( pDioShadowReg->DioRegAddr == (UINT32) PinConfig->DataReg )
+      if ( pDioShadowReg->DioRegAddr == (UINT32) PinConfig->dataReg )
       {
         DioShadowOutputPinReg[i] = (DIO_ENUM) j;
         break;
@@ -1048,29 +1048,29 @@ static void DIO_DebounceState(DIO_INPUT Pin, BOOLEAN recvdState,
   // Set to true after first call(at runtime)
   bDebounceActive = TRUE;
 
-  if(recvdState != Dio_FilteredPins[Pin].FilteredState)
+  if(recvdState != Dio_FilteredPins[Pin].filteredState)
   {
-    if(recvdState == Dio_FilteredPins[Pin].LastRecvdState)
+    if(recvdState == Dio_FilteredPins[Pin].lastRecvdState)
     {
       // Same value as last sampled.
       // If it has been stable, designate it as the valid state, otherwise wait
-      if(currentTimeMs - Dio_FilteredPins[Pin].TimeStampMs > DEBOUNCE_PERIOD_MS)
+      if(currentTimeMs - Dio_FilteredPins[Pin].timeStampMs > DEBOUNCE_PERIOD_MS)
       {
-        Dio_FilteredPins[Pin].FilteredState = recvdState;
+        Dio_FilteredPins[Pin].filteredState = recvdState;
         GSE_DebugStr(VERBOSE,TRUE,"DIO Input %s, FilteredState Change: %d",
-                                DIO_InputPins[Pin].Name,
-                                Dio_FilteredPins[Pin].FilteredState);
+                                DIO_InputPins[Pin].name,
+                                Dio_FilteredPins[Pin].filteredState);
       }
     }
     else // The state has changed. Store state and time-of-change.
     {
-      Dio_FilteredPins[Pin].LastRecvdState = recvdState;
-      Dio_FilteredPins[Pin].TimeStampMs    = currentTimeMs;
+      Dio_FilteredPins[Pin].lastRecvdState = recvdState;
+      Dio_FilteredPins[Pin].timeStampMs    = currentTimeMs;
     }
   }
   else // no change from filtered value. Update the last received.
   {
-    Dio_FilteredPins[Pin].LastRecvdState = recvdState;
+    Dio_FilteredPins[Pin].lastRecvdState = recvdState;
   }
 }
 
@@ -1168,9 +1168,9 @@ static void DIO_CheckWrapAround( void)
       {
         snprintf(logBuffer, sizeof(logBuffer),
                 "Discrete Wrap Around Mismatch, %s: %d, %s: %d",
-                 DIO_InputPins[logEntry.dinPin].Name,
+                 DIO_InputPins[logEntry.dinPin].name,
                  logEntry.inputWAState,
-                 DIO_OutputPins[logEntry.doutPin].Name,
+                 DIO_OutputPins[logEntry.doutPin].name,
                  logEntry.outputState);
 
         LogWriteSystem(SYS_DIO_DISCRETE_WRAP_FAIL, LOG_PRIORITY_LOW,
