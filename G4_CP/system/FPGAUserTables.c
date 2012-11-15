@@ -8,7 +8,7 @@
     Description: FPGA User command definitions
     
  VERSION
-     $Revision: 20 $  $Date: 12-11-13 2:01p $
+     $Revision: 21 $  $Date: 12-11-15 2:31p $
 
 ******************************************************************************/
 #ifndef FPGA_MANAGER_BODY
@@ -28,8 +28,29 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+typedef enum {
+ FPGA_REG_ISR, 
+ FPGA_REG_IMR1, 
+ FPGA_REG_IMR2, 
+ FPGA_REG_VER, 
+ FPGA_REG_WD_TIME, 
+ FPGA_REG_WD_TIME_INV
+} FPGA_REG_ENUM;
+
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
+
 USER_HANDLER_RESULT FPGAMsg_Status(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
@@ -50,19 +71,6 @@ USER_HANDLER_RESULT FPGAMsg_CreateLogs(USER_DATA_TYPE DataType,
                                        void **GetPtr); 
 #endif                                        
                                         
-/*****************************************************************************/
-/* Local Typedefs                                                            */
-/*****************************************************************************/
-typedef enum {
- FPGA_REG_ISR, 
- FPGA_REG_IMR1, 
- FPGA_REG_IMR2, 
- FPGA_REG_VER, 
- FPGA_REG_WD_TIME, 
- FPGA_REG_WD_TIME_INV
-} FPGA_REG_ENUM;
-
-
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -282,6 +290,11 @@ USER_HANDLER_RESULT FPGAMsg_CreateLogs(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: FPGAUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:01p

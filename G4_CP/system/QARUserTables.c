@@ -8,7 +8,7 @@
     Description: User commands definition for QAR Manager
 
     VERSION
-    $Revision: 39 $  $Date: 12-11-13 2:42p $
+    $Revision: 40 $  $Date: 12-11-15 2:07p $
     
 ******************************************************************************/
 #ifndef QAR_MANAGER_BODY
@@ -29,8 +29,35 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+typedef enum {
+ QAR_REG_TSTP, 
+ QAR_REG_TSTN, 
+ QAR_REG_EN, 
+ QAR_REG_FORMAT, 
+ QAR_REG_NUMWORDS, 
+ QAR_REG_RESYNC, 
+ QAR_REG_BIPP,
+ QAR_REG_BIIN,
+ QAR_REG_SUBFRAME, 
+ QAR_REG_LOSSOFFRAMESYNC, 
+ QAR_REG_FRAMEVALID, 
+ QAR_REG_BARKER, 
+ QAR_REG_BARKER_ERROR, 
+ QAR_REG_DATA_PRESENT
+} QAR_REG_ENUM;
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
 
 USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
@@ -81,26 +108,6 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
                                       UINT32 Index,
                                       const void *SetPtr,
                                       void **GetPtr);
-
-/*****************************************************************************/
-/* Local Typedefs                                                            */
-/*****************************************************************************/
-typedef enum {
- QAR_REG_TSTP, 
- QAR_REG_TSTN, 
- QAR_REG_EN, 
- QAR_REG_FORMAT, 
- QAR_REG_NUMWORDS, 
- QAR_REG_RESYNC, 
- QAR_REG_BIPP,
- QAR_REG_BIIN,
- QAR_REG_SUBFRAME, 
- QAR_REG_LOSSOFFRAMESYNC, 
- QAR_REG_FRAMEVALID, 
- QAR_REG_BARKER, 
- QAR_REG_BARKER_ERROR, 
- QAR_REG_DATA_PRESENT
-} QAR_REG_ENUM;
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -673,6 +680,11 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: QARUserTables.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:07p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 39  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:42p
