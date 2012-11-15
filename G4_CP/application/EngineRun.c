@@ -147,7 +147,7 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
   }
   else // Get the current state of the requested engine run.
   {
-    ASSERT ( idx >= ENGRUN_ID_0 && idx < MAX_ENGINES);
+    ASSERT ( idx >= ENGRUN_ID_0 && idx < (ENGRUN_INDEX)MAX_ENGINES);
     state = m_engineRunData[idx].erState;
   }
   return state;
@@ -223,7 +223,7 @@ void EngRunInitialize(void)
       EngRunReset(pErCfg,pErData);
 
       // Init Task scheduling data
-      pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / pErCfg->erRate);
+      pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / (UINT32)pErCfg->erRate);
       pErData->nRateCountdown = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
 
     }
@@ -313,7 +313,7 @@ void EngRunTask(void* pParam)
   if (Tm.systemMode == SYS_SHUTDOWN_ID)
   {
     EngRunForceEnd();
-    TmTaskEnable (EngRun_Task, FALSE);
+    TmTaskEnable ((TASK_INDEX)EngRun_Task, FALSE);
     if(m_event_func != NULL)
     {
       m_event_func(m_event_tag,FALSE);

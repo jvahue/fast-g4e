@@ -59,7 +59,7 @@
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static PM_INTERNAL_LOG PmInternalLog; 
+static PM_INTERNAL_LOG pmInternalLog; 
 // static BOOLEAN CfgBattery;   // Init Pm.Battery to this variable until callback
                                 // called by PmSetCallBack_AppBusy().
 //static UINT32 BattLatchTime; // Init Pm.battLatchTime to this variable until call
@@ -82,8 +82,10 @@ static BOOLEAN PmCallAppBusInterrupt (void);
 
 static BOOLEAN PmUpdateAppBusyStatus(void);
 
-static void PmSet_Cfg( POWERMANAGER_CFG *Cfg );
+static void PmSetCfg( POWERMANAGER_CFG *Cfg );
 
+static void PmGlitchProcess ( void );
+static void PmBatteryProcess ( void );
 // Test Only !!! 
 /*
 static BOOLEAN testAppShutDownQuick_0( void ); 
@@ -158,14 +160,14 @@ static BOOLEAN testAppShutDownNormal_2( void );
  *****************************************************************************/
 void PmInitializePowerManager(void)
 {
-    TCB        TaskInfo;
+    TCB        tcbTaskInfo;
     UINT32     i; 
     RESULT     result;     // See ResultCodes.h for ADC_() calls  
     TIMESTAMP  ts; 
     
-    PM_LOG_DATA_POWER_FAILURE       PowerFailureData; 
-    PM_LOG_DATA_POWER_OFF           PowerOffData; 
-    PM_LOG_DATA_RESTORE_DATA_FAILED PowerRestoreFailedData; 
+    PM_LOG_DATA_POWER_FAILURE       powerFailureData; 
+    PM_LOG_DATA_POWER_OFF           powerOffData; 
+    PM_LOG_DATA_RESTORE_DATA_FAILED powerRestoreFailedData; 
     
     // Unlatch the battery. 
     // NOTE: Duplicated action. But Ok. 
@@ -217,32 +219,32 @@ void PmInitializePowerManager(void)
     Pm.bLatchToBattery      = FALSE; 
     
     // Create the Power Manager Task 
-    memset(&TaskInfo, 0, sizeof(TaskInfo)); 
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Pm Task",_TRUNCATE);
-    TaskInfo.TaskID         = Pm_Task;
-    TaskInfo.Function       = PmTask;
-    TaskInfo.Priority       = taskInfo[Pm_Task].priority;
-    TaskInfo.Type           = taskInfo[Pm_Task].taskType;
-    TaskInfo.modes          = taskInfo[Pm_Task].modes;
-    TaskInfo.MIFrames       = taskInfo[Pm_Task].MIFframes;  //All 32 MIFframes.Every 10 msec
-    TaskInfo.Rmt.InitialMif = taskInfo[Pm_Task].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[Pm_Task].MIFrate;
-    TaskInfo.Enabled        = TRUE;
-    TaskInfo.Locked         = TRUE;
-    TaskInfo.pParamBlock    = &Pm;
+    memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
+    strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Pm Task",_TRUNCATE);
+    tcbTaskInfo.TaskID         = Pm_Task;
+    tcbTaskInfo.Function       = PmTask;
+    tcbTaskInfo.Priority       = taskInfo[Pm_Task].priority;
+    tcbTaskInfo.Type           = taskInfo[Pm_Task].taskType;
+    tcbTaskInfo.modes          = taskInfo[Pm_Task].modes;
+    tcbTaskInfo.MIFrames       = taskInfo[Pm_Task].MIFframes;  //All 32 MIFframes.Every 10 msec
+    tcbTaskInfo.Rmt.InitialMif = taskInfo[Pm_Task].InitialMif;
+    tcbTaskInfo.Rmt.MifRate    = taskInfo[Pm_Task].MIFrate;
+    tcbTaskInfo.Enabled        = TRUE;
+    tcbTaskInfo.Locked         = TRUE;
+    tcbTaskInfo.pParamBlock    = &Pm;
 
-    TmTaskCreate (&TaskInfo);
+    TmTaskCreate (&tcbTaskInfo);
     
     // Retrieve and set PM_EEPROM data 
     memset ( (char *) &Pm_Eeprom, 0x00, sizeof(PM_EEPROM_DATA) ); 
   
     // Initialize Log 
-    memset ( (char *) &PmInternalLog, 0x00, sizeof(PM_INTERNAL_LOG) ); 
+    memset ( (char *) &pmInternalLog, 0x00, sizeof(PM_INTERNAL_LOG) ); 
     
     // Set local pointers 
-    memset ( (char*) &PowerFailureData, 0x00, sizeof(PM_LOG_DATA_POWER_FAILURE) );
-    memset ( (char*) &PowerOffData, 0x00, sizeof(PM_LOG_DATA_POWER_OFF) );
-    memset ( (char*) &PowerRestoreFailedData,
+    memset ( (char*) &powerFailureData, 0x00, sizeof(PM_LOG_DATA_POWER_FAILURE) );
+    memset ( (char*) &powerOffData, 0x00, sizeof(PM_LOG_DATA_POWER_OFF) );
+    memset ( (char*) &powerRestoreFailedData,
                 0x00, sizeof(PM_LOG_DATA_RESTORE_DATA_FAILED) );
     
     
@@ -262,23 +264,23 @@ void PmInitializePowerManager(void)
       // ASSERT if PmPowerOnTime->Timestamp != 0 !!!  
       // CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
       // Note: Pm.PowerOnTime set during Drv Initialization(). 
-      PmInternalLog.ts = Pm.PowerOnTime;  
+      pmInternalLog.ts = Pm.PowerOnTime;  
       
-      PmInternalLog.Type = SYS_ID_PM_RESTORE_DATA_FAILED; 
-      PmInternalLog.State = PM_NORMAL; 
-      PmInternalLog.bPowerFailure = FALSE; 
+      pmInternalLog.Type = SYS_ID_PM_RESTORE_DATA_FAILED; 
+      pmInternalLog.State = PM_NORMAL; 
+      pmInternalLog.bPowerFailure = FALSE; 
       // Since EEPROM corrupted, can not used saved copy. 
-      PmInternalLog.bBattery = Pm.Battery;    
+      pmInternalLog.bBattery = Pm.Battery;    
       // Save state of NVMgr result code 
-      PowerRestoreFailedData.ResultCode = (UINT32) result; 
+      powerRestoreFailedData.ResultCode = (UINT32) result; 
       // Set Halt Processing Completed Flag to FALSE 
-      PmInternalLog.bHaltCompleted = FALSE; 
+      pmInternalLog.bHaltCompleted = FALSE; 
     }
     else // Pm_Eeprom value Ok ! 
     {
-      PmInternalLog.State = Pm_Eeprom.State; 
-      PmInternalLog.bBattery = Pm_Eeprom.bBattery;   
-      PmInternalLog.bHaltCompleted = Pm_Eeprom.bHaltCompleted; 
+      pmInternalLog.State = Pm_Eeprom.State; 
+      pmInternalLog.bBattery = Pm_Eeprom.bBattery;   
+      pmInternalLog.bHaltCompleted = Pm_Eeprom.bHaltCompleted; 
       
       // Determine last power off condition.  
       if ( (Pm_Eeprom.bPowerFailure == TRUE) || ( Pm_Eeprom.State != PM_HALT ) ) 
@@ -297,14 +299,14 @@ void PmInitializePowerManager(void)
 //    See Pm_Eeprom.State for state where power failure had occurred. 
 //    Note: Power Off time is only approximate in this case.  
 
-        PmInternalLog.Type = SYS_ID_PM_POWER_FAILURE_LOG;       
+        pmInternalLog.Type = SYS_ID_PM_POWER_FAILURE_LOG;       
       
         // Bus Power Failure ! 
-        PmInternalLog.bPowerFailure = TRUE; 
+        pmInternalLog.bPowerFailure = TRUE; 
         
         // PowerOffRequest_Time should be valid as this is set before bPowerFailure 
         //   gets set ! 
-        PmInternalLog.ts = Pm_Eeprom.StateTrans_Time; 
+        pmInternalLog.ts = Pm_Eeprom.StateTrans_Time; 
         
         // Once bPowerFailure set we normally will transition to PM_SHUTDOWN 
         
@@ -314,81 +316,81 @@ void PmInitializePowerManager(void)
         // PM_POWER_OFF_LOG shutdown completes successfully 
 
         // No Bus Power Failure, we have reached PM_HALT thus ShutDown Complete
-        PmInternalLog.Type = SYS_ID_PM_POWER_OFF_LOG; 
+        pmInternalLog.Type = SYS_ID_PM_POWER_OFF_LOG; 
         
         // PowerOffRequest_Time valid 
         // PmInternalLog.ts = Pm_Eeprom.PowerOffRequest_Time; 
-        PmInternalLog.ts = Pm_Eeprom.StateTrans_Time; 
+        pmInternalLog.ts = Pm_Eeprom.StateTrans_Time; 
         
         // Normal Power Off 
-        PmInternalLog.bPowerFailure = FALSE; 
+        pmInternalLog.bPowerFailure = FALSE; 
         
         // Set Power Off Data 
-        PowerOffData.Reserved = 0;
+        powerOffData.Reserved = 0;
         
         // Set Halt Completed Processing Flag 
-        PowerOffData.bHaltCompleted = Pm_Eeprom.bHaltCompleted; 
+        powerOffData.bHaltCompleted = Pm_Eeprom.bHaltCompleted; 
       
       } // End of else ( bPowerFailure == FALSE ) 
       
     } // Else Pm_Eeprom data good
     
     // Call system function to create Power Off Log Here ! 
-    switch ( PmInternalLog.Type ) 
-    { 
-      case SYS_ID_PM_POWER_FAILURE_LOG:  
-        // NOTE: There are two Power Failure types that can occur
-        //   1) System determines there was a power failure and attempt to HALT
-        //      (See if Pm_Eeprom.bPowerFailure == TRUE above) 
-        //   2) System did not determine there was a power failure and 
-        //      system abruptly halts (See else case of 
-        //                             Pm_Eeprom.bPowerFailure == TRUE above)
-      
-        // Determine Power Failure with or with out BATTERY 
-        if ( PmInternalLog.bBattery != TRUE ) 
-        { 
+    // Note: Changed original switch statement to if/else to remove errors
+    //       related to not checking every possible enumerated value!
+    if (SYS_ID_PM_POWER_FAILURE_LOG == pmInternalLog.Type)
+    {
+       // NOTE: There are two Power Failure types that can occur
+       //   1) System determines there was a power failure and attempt to HALT
+       //      (See if Pm_Eeprom.bPowerFailure == TRUE above) 
+       //   2) System did not determine there was a power failure and 
+       //      system abruptly halts (See else case of 
+       //                             Pm_Eeprom.bPowerFailure == TRUE above)
+       
+       // Determine Power Failure with or with out BATTERY 
+       if ( pmInternalLog.bBattery != TRUE ) 
+       { 
           // Power Failure with out BATTERY
-          PmInternalLog.Type = SYS_ID_PM_POWER_FAILURE_NO_BATTERY_LOG; 
-        }
-        PowerFailureData.Id = PmInternalLog.Type; 
-        PowerFailureData.ts = PmInternalLog.ts; 
-        PowerFailureData.State = PmInternalLog.State;
-        PowerFailureData.bHaltCompleted = PmInternalLog.bHaltCompleted; 
-        ts = PowerFailureData.ts; 
-        LogWriteSystem( (SYS_APP_ID) PowerFailureData.Id, LOG_PRIORITY_LOW, 
-                        &PowerFailureData, sizeof(PM_LOG_DATA_POWER_FAILURE), 
-                        &ts ); 
-        break;
-        
-      case SYS_ID_PM_POWER_OFF_LOG:
-        LogWriteSystem(SYS_ID_PM_POWER_OFF_LOG, LOG_PRIORITY_LOW, &PowerOffData, 
-                       sizeof(PM_LOG_DATA_POWER_OFF), &PmInternalLog.ts); 
-        break; 
-      
-      case SYS_ID_PM_RESTORE_DATA_FAILED:
-        LogWriteSystem(SYS_ID_PM_RESTORE_DATA_FAILED, LOG_PRIORITY_LOW, 
-                       &PowerRestoreFailedData,  sizeof(PM_LOG_DATA_RESTORE_DATA_FAILED),
-                       &PmInternalLog.ts); 
-        break; 
-      
-      default:
-        FATAL("Invalid SYS_APP_ID = %d", PmInternalLog.Type);         
-        break;
+          pmInternalLog.Type = SYS_ID_PM_POWER_FAILURE_NO_BATTERY_LOG; 
+       }
+       powerFailureData.Id = pmInternalLog.Type; 
+       powerFailureData.ts = pmInternalLog.ts; 
+       powerFailureData.State = pmInternalLog.State;
+       powerFailureData.bHaltCompleted = pmInternalLog.bHaltCompleted; 
+       ts = powerFailureData.ts; 
+       LogWriteSystem( (SYS_APP_ID) powerFailureData.Id, LOG_PRIORITY_LOW, 
+                       &powerFailureData, sizeof(PM_LOG_DATA_POWER_FAILURE), 
+                       &ts ); 
+    }
+    else if (SYS_ID_PM_POWER_OFF_LOG == pmInternalLog.Type)
+    {
+       LogWriteSystem(SYS_ID_PM_POWER_OFF_LOG, LOG_PRIORITY_LOW, &powerOffData, 
+                      sizeof(PM_LOG_DATA_POWER_OFF), &pmInternalLog.ts); 
+    }
+    else if (SYS_ID_PM_RESTORE_DATA_FAILED == pmInternalLog.Type)
+    {
+       LogWriteSystem(SYS_ID_PM_RESTORE_DATA_FAILED, LOG_PRIORITY_LOW, 
+                      &powerRestoreFailedData,  sizeof(PM_LOG_DATA_RESTORE_DATA_FAILED),
+                      &pmInternalLog.ts); 
+    }
+    else
+    {
+       FATAL("PowerManagerInit: Invalid SYS_APP_ID = %d", pmInternalLog.Type);
     }
 
     // Update new PM_EEPROM_DATA Here
     PmFileInit();
 
     // Create Power On Log New !
-    PmInternalLog.Type = SYS_ID_PM_POWER_ON_LOG; 
+    pmInternalLog.Type = SYS_ID_PM_POWER_ON_LOG; 
     // Force Power On Time to current StateTrans_Time  
-    PmInternalLog.ts = Pm_Eeprom.StateTrans_Time;  
-    PmInternalLog.bPowerFailure = FALSE; 
-    PmInternalLog.State = PM_NORMAL;
-    PmInternalLog.bBattery = Pm_Eeprom.bBattery; 
+    pmInternalLog.ts = Pm_Eeprom.StateTrans_Time;  
+    pmInternalLog.bPowerFailure = FALSE; 
+    pmInternalLog.State = PM_NORMAL;
+    pmInternalLog.bBattery = Pm_Eeprom.bBattery; 
       
     // Create Power On Log Old !
-    LogWriteSystem(SYS_ID_PM_POWER_ON_LOG, LOG_PRIORITY_LOW, 0, 0, &PmInternalLog.ts); 
+    LogWriteSystem(SYS_ID_PM_POWER_ON_LOG, LOG_PRIORITY_LOW, 0, 0, &pmInternalLog.ts); 
 
 
     // Set the PM Initialize complete flag       
@@ -632,7 +634,7 @@ BOOLEAN PmFSMAppBusyGetState(INT32 param)
 
 
 /******************************************************************************
- * Function:     PmSet_PowerOnTime
+ * Function:     PmSetPowerOnTime
  *  
  * Description:  Call back to set the Pm.battLatchTime Ptr.  Points to an 
  *               application variable 
@@ -644,7 +646,7 @@ BOOLEAN PmFSMAppBusyGetState(INT32 param)
  * Notes:        none 
  *
  *****************************************************************************/
-void PmSet_PowerOnTime( TIMESTAMP *pPtr ) 
+void PmSetPowerOnTime( TIMESTAMP *pPtr ) 
 {
   Pm.PowerOnTime = *pPtr; 
 }
@@ -682,7 +684,7 @@ BOOLEAN PmFileInit(void)
 
 
 /******************************************************************************
- * Function:     Pm_CreateAllInternalLogs
+ * Function:     PmCreateAllInternalLogs
  *
  * Description:  Creates all PM internal logs for testing / debug of log 
  *               decode and structure. 
@@ -699,7 +701,7 @@ BOOLEAN PmFileInit(void)
 
 /*vcast_dont_instrument_start*/
 
-void Pm_CreateAllInternalLogs ( void )
+void PmCreateAllInternalLogs ( void )
 {
   // 1 Create SYS_ID_PM_POWER_FAILURE_LOG 
   LogWriteSystem( SYS_ID_PM_POWER_FAILURE_LOG, LOG_PRIORITY_LOW, 
@@ -754,21 +756,16 @@ void Pm_CreateAllInternalLogs ( void )
  *
  * Returns:     void
  *
- * Notes:       None
- *  1) TBD - Need AdcGetAircraftBatteryVoltage() or equivalent function
- *  2) Expect PmTask to setup as a DT Task running at 10 msec (MIF rate)
+ * Notes:       Expect PmTask to setup as a DT Task running at 10 msec (MIF rate)
  *
  *****************************************************************************/
 static
 void PmTask (void* pPBlock)
 {
-    // BOOLEAN bUpdate_Pm_Eeprom; 
-    RESULT  result;     // See ResultCodes.h
-    BOOLEAN bResult;    
-
-    PM_LOG_DATA_FORCE_SHUTDOWN PowerForceShutDownData;    
-
-    // Refresh the application busy status
+   // Local Data
+   BOOLEAN bResult;
+   
+   // Refresh the application busy status
     Pm.AppBusy = PmUpdateAppBusyStatus();
 
     switch (Pm.State)
@@ -778,245 +775,12 @@ void PmTask (void* pPBlock)
         // Wait until Low Power Interrupt Trips to transition to PM_GLITCH 
         break;
 
-
-    case PM_GLITCH:        
-        // On First entry, print debug message and record the transition state 
-        if ( Pm.PmStateTimer == 0 ) 
-        {
-          // SCR #342
-          LATCH_BATTERY;
-        
-          GSE_DebugStr(NORMAL,TRUE,"PM Glitch\r\n");
-
-          // Log SYS_ID_PM_POWER_INTERRUPT_LOG
-          LogWriteSystem(SYS_ID_PM_POWER_INTERRUPT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
-
-          // Need to record the state transition here as the detect of PM_GLITCH is thru ISR
-          //        and we don't wan that extra processing in the ISR.  Put processing here. 
-          Pm_Eeprom.State = Pm.State; // Current State which should be PM_GLITCH 
-          CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
-          // .bPowerFailure should be FALSE at this point, set on init. 
-          // .bBattery init to *App.Battery
-          // .bHaltCompleted should be FALSE at this point, set on init. 
-          NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) ); 
-
-// Test 
-          bResult = PmCallAppBusInterrupt(); 
-// Test                               
-        }
-        
-        if (Pm.LowPwrInt != Pm.LowPwrIntAck)
-        {
-          Pm.LowPwrIntAck = Pm.LowPwrInt;    // set interrupt acknowledged flag
-        }
-
-        // Read Battery and Bus Voltages 
-        result = ADC_GetACBusVoltage (&Pm.BusVoltage);        // Returns 0 if OK 
-        result |= ADC_GetACBattVoltage (&Pm.BatteryVoltage);  // Returns 0 if OK 
-        
-        // only check voltages after first glitch read to ensure valid values
-        if ( ( Pm.PmStateTimer != 0 ) && (result == DRV_OK) && 
-             ( (Pm.BusVoltage > BUS_VOLTAGE_THRESHOLD) && 
-               (Pm.BatteryVoltage > BUS_VOLTAGE_THRESHOLD ) ) )
-        {
-          // Voltages have "de-glitched". Resume normal operation. 
-          // Log SYS_ID_PM_POWER_RECONNECT_LOG
-          LogWriteSystem(SYS_ID_PM_POWER_RECONNECT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
-          GSE_DebugStr(NORMAL,TRUE,"PM Normal\r\n");
-          Pm.State = PM_NORMAL;
-          UNLATCH_BATTERY;   // Might not be necessary, but added for extra safety. 
-        }
-        else // Power Still below minimums
-        {
-          // Assume that ADC_GetVoltage() return Busy (result != 0) does not occur often.
-          // Will handle this case as though < BUS_VOLTAGE_THRESHOLD, even though 
-          // it might not be.  On next read, assume that Busy should go away as this 
-          // condition is not expected to occur often.  
-          // Averaging of the Voltage not performed.
-          if (++Pm.PmStateTimer > PM_GLITCH_TIMER_EXPIRE) 
-          {
-            // "Glitch" period exceeded, bus power has definitely been removed!
-            if (Pm.BatteryVoltage < BUS_VOLTAGE_THRESHOLD)
-            {
-              // Glitch Timer Expires and Batt Volt still bad ! 
-              // Bus Power Failure ! 
-              // Don't need to re-read Batt and Bus Voltages 
-              Pm_Eeprom.bPowerFailure = TRUE; 
-              Pm.State = PM_HALT;
-            } 
-            else 
-            {              
-              // BatteryVoltage > BUS_VOLTAGE_THRESHOLD, but Bus Voltage still
-              // bad which should indicate "master power" switch OFF.
-              // Determine if we should continue or shutdown.
-
-              if ( (( Pm.AppBusy == TRUE ) || ( Pm.bLatchToBattery == TRUE )) && 
-                   ( Pm.Battery == TRUE ) )
-              {
-                // Latch to Battery Operation.  
-                // NOTE: If BatteryVoltage > BUS_VOLTAGE_THRESHOLD, then
-                //       power is good and latch-to-battery (PWR_HOLD)
-                //       is holding up Battery Voltage.
-                LATCH_BATTERY; 
-                Pm.State = PM_BATTERY; 
-                Pm.PmBattDeglitchTimer = 0; 
-              }
-              else 
-              {
-                // At this point we can shut down normally 
-                Pm.State = PM_SHUTDOWN; 
-              }
-            } // End of else BatteryVoltage !< BUS_VOLTAGE_THRESHOLD
-            
-          } // End if (PmGlitchTimer > PM_GLITCH_TIMER_EXPIRE) && (Batt < 10.8)
-          else 
-          {
-            // Still "De-glitching".  Do Nothing. 
-          }
-        } // End Else Power still De-Glitching ! 
-        
-        // If we have changed PM state then update Pm_Eeprom ! 
-        if (Pm.State != PM_GLITCH)  
-        {
-          Pm_Eeprom.State = Pm.State; // New state we are transition to.   
-          CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
-          // .bPowerFailure should have been set in the above code 
-          // .bBattery set to *App.Battery on init 
-          // .bHaltCompleted should be FALSE
-          NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) ); 
-          Pm.PmStateTimer = 0; 
-        } // End if != PM_GLITCH 
+    case PM_GLITCH:
+        PmGlitchProcess();
         break;
 
     case PM_BATTERY:
-        // Continue operation under latched battery power.
-        // Monitor the Bus voltage. If the Bus voltage has been restored,
-        // restore normal operation. 
-        // Also provide logic for 50 msec de-glitch while in BATTERY mode 
-
-        // On First Entry, output debug state transition message         
-        if ( Pm.PmStateTimer == 0 ) 
-        {
-          GSE_DebugStr(NORMAL,TRUE,"PM Battery\r\n");
-        }
-
-        // bUpdate_Pm_Eeprom = FALSE; 
-        // If we experienced another Low Power Interrupt while in BATTERY state 
-        //  provide de-glitch of 50 msec before indicating Power Failure ! 
-        if (Pm.LowPwrInt != Pm.LowPwrIntAck)
-        {
-          Pm.LowPwrIntAck = Pm.LowPwrInt;    // set interrupt acknowledged flag
-
-          if (Pm.PmBattDeglitchTimer == 0)
-          {
-            ++Pm.PmBattDeglitchTimer; 
-            
-            // Log SYS_ID_PM_POWER_INTERRUPT_LOG while in PM_BATTERY 
-            LogWriteSystem(SYS_ID_PM_POWER_INTERRUPT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
-            
-            // Update EEPROM data to update the StateTrans_Time so if the power 
-            // actually fails, StateTrans_Time will be as close to the power fail time ! 
-            // Note: NvMgr has higher priority then LogMgr thus the EEPROM data should be
-            //       updated before the LogWriteSystem() 
-            CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
-            
-            // .state should still be BATTERY and need not be updated. 
-            // .bPowerFailure should have been set in the above code 
-            // Don't need to update .bBattery
-            // .bHaltCompleted should be FALSE 
-            NV_Write(NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
-          }
-        }
-
-        if (Pm.PmBattDeglitchTimer != 0) 
-        {
-          result = ADC_GetACBattVoltage(&Pm.BatteryVoltage);
-          if ( (Pm.BatteryVoltage > BUS_VOLTAGE_THRESHOLD ) &&
-               (result == DRV_OK) )
-          {
-            // Voltage De-Glitched and OK.  Stay in PM_BATTERY
-            Pm.PmBattDeglitchTimer = 0; 
-            // Do not need log to indicate power (while in BATTERY) is ok again.
-            // If not ok then after 50 msec the system will trans to HALT. 
-          }
-          else 
-          {
-            if (++Pm.PmBattDeglitchTimer > PM_GLITCH_TIMER_EXPIRE)
-            {
-              Pm_Eeprom.bPowerFailure = TRUE; 
-              Pm.State = PM_HALT; 
-            }
-          }
-        } // End if Pm.PmBattDeglitchTimer != 0
-        
-        
-        // Has system processing finished ? 
-        // Test Case
-        if ( (Pm.AppBusy == FALSE) && (Pm.bLatchToBattery == FALSE) )
-        { 
-
-          // Application Not Busy anymore.  Transition to Normal shutdown.
-          // If power has been restored since the last time we ran (10ms ago)
-          // .. the system will do a power-cycle with via WD reset
-          Pm.State = PM_SHUTDOWN;
-
-        } // End if AppBusy == FALSE 
-        else // AppBusy still TRUE 
-        {
-          // Check if battLatchTime operation has expires,  force shut down 
-          //  Default is 1 hour of battery latch time.  
-          if (++Pm.PmStateTimer > Pm.battLatchTime )
-          {
-            // Log SYS_ID_PM_FORCED_SHUTDOWN_LOG          
-            PowerForceShutDownData.Reserved = 0; 
-            LogWriteSystem( SYS_ID_PM_FORCED_SHUTDOWN_LOG, LOG_PRIORITY_LOW, 
-                            &PowerForceShutDownData, sizeof(PM_LOG_DATA_FORCE_SHUTDOWN), 
-                            NULL); 
-            GSE_DebugStr(NORMAL,TRUE,"PM Force ShutDown !\r\n");
-            Pm.State = PM_SHUTDOWN; 
-            
-          } // End if PM_BATTERY_2HR_PERIOD expires
-          else // Continue in PM_BATTERY mode 
-          {
-            // Check Bus Voltage to determine if Bus Reconnected. 
-            if ( ( Pm.PmStateTimer % PM_BATTERY_CHECK_BUS_PERIOD) == 0 ) 
-            { 
-              // Check once a second the Bus Volt. 
-              // Not necessary to check at faster rate ! 
-              result = ADC_GetACBusVoltage (&Pm.BusVoltage); 
-              if ( (Pm.BusVoltage > BUS_VOLTAGE_THRESHOLD) &&
-                   (result == DRV_OK) ) 
-              { 
-                Pm.State = PM_NORMAL; 
-              } // End if BUS_VOLTAGE_THRESHOLD exceeded again.  Trans to PM_NORMAL
-            } // End if PM_BATTERY_CHECK_BUS_PERIOD expires
-          } // End else PM_BATTERY_2HR_PERIOD not exceeded yet ! 
-        } // End else AppBusy still TRUE 
-
-        
-        // If we have changed PM state then update Pm_Eeprom 
-        // if ( ( Pm.State != PM_BATTERY ) || (bUpdate_Pm_Eeprom == TRUE) ) 
-        if ( Pm.State != PM_BATTERY ) 
-        {
-          Pm_Eeprom.State = Pm.State;  // New state we are transition to
-          CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
-          // Don't need to update .bBattery should be set on init !
-          // bPowerFailure should be set above 
-          // bHaltCompleted should be FALSE
-          NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
-
-          // Clear State Timer for next state usage.
-          Pm.PmStateTimer = 0; 
-          
-          // If transitions back to PM_NORMAL write Re-Connect log and unlatch from battery 
-          if ( Pm.State == PM_NORMAL ) 
-          {
-            // Log SYS_ID_PM_POWER_RECONNECT_LOG          
-            LogWriteSystem(SYS_ID_PM_POWER_RECONNECT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
-            GSE_DebugStr(NORMAL,TRUE,"PM Normal\r\n");
-            UNLATCH_BATTERY;    
-          }
-        }
+        PmBatteryProcess();
         break;
 
     case PM_SHUTDOWN:
@@ -1066,7 +830,7 @@ void PmTask (void* pPBlock)
         // Don't need to update .bBattery should be set on init !
         // bPowerFailure should be set above 
         Pm_Eeprom.bHaltCompleted = TRUE; 
-        result = NV_WriteNow( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
+        NV_WriteNow( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
         
         // Update Box Power On Usage before shutting Down !                          
         Box_PowerOn_UpdateElapsedUsage ( TRUE, POWERCOUNT_UPDATE_NOW, NV_PWR_ON_CNTS_RTC ); 
@@ -1083,19 +847,297 @@ void PmTask (void* pPBlock)
         break;
 /*vcast_dont_instrument_end*/
 #endif
-
+        //lint -fallthrough
+    case PM_MAX_STATE:
     default:
         FATAL("Invalid PM State(%d)", Pm.State);
         break;
 
     }   // End switch (Pm.State)
-    
-    
+
     return;
 
 }   // End PmTask()
 
+/******************************************************************************
+ * Function:    PmGlitchProcess
+ *  
+ * Description: Handles the glitch processing for the PmTask.
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+void PmGlitchProcess ( void )
+{
+   // Local Data
+   RESULT  result;
+   BOOLEAN bResult;
+   
+   // On First entry, print debug message and record the transition state 
+   if ( Pm.PmStateTimer == 0 ) 
+   {
+      // SCR #342
+      LATCH_BATTERY;
+      
+      GSE_DebugStr(NORMAL,TRUE,"PM Glitch\r\n");
+   
+      // Log SYS_ID_PM_POWER_INTERRUPT_LOG
+      LogWriteSystem(SYS_ID_PM_POWER_INTERRUPT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
+   
+      // Need to record the state transition here as the detect of PM_GLITCH is thru ISR
+      //        and we don't wan that extra processing in the ISR.  Put processing here. 
+      Pm_Eeprom.State = Pm.State; // Current State which should be PM_GLITCH 
+      CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
+      // .bPowerFailure should be FALSE at this point, set on init. 
+      // .bBattery init to *App.Battery
+      // .bHaltCompleted should be FALSE at this point, set on init. 
+      NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) ); 
+   
+// Test 
+      bResult = PmCallAppBusInterrupt(); 
+// Test
+   }
+   
+   if (Pm.LowPwrInt != Pm.LowPwrIntAck)
+   {
+      Pm.LowPwrIntAck = Pm.LowPwrInt;    // set interrupt acknowledged flag
+   }
+   
+   // Read Battery and Bus Voltages 
+   result = ADC_GetACBusVoltage (&Pm.BusVoltage);        // Returns 0 if OK 
+   result |= ADC_GetACBattVoltage (&Pm.BatteryVoltage);  // Returns 0 if OK 
+   
+   // only check voltages after first glitch read to ensure valid values
+   if ( ( Pm.PmStateTimer != 0 ) && (result == DRV_OK) && 
+         ( (Pm.BusVoltage > BUS_VOLTAGE_THRESHOLD) && 
+           (Pm.BatteryVoltage > BUS_VOLTAGE_THRESHOLD ) ) )
+   {
+      // Voltages have "de-glitched". Resume normal operation. 
+      // Log SYS_ID_PM_POWER_RECONNECT_LOG
+      LogWriteSystem(SYS_ID_PM_POWER_RECONNECT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
+      GSE_DebugStr(NORMAL,TRUE,"PM Normal\r\n");
+      Pm.State = PM_NORMAL;
+      UNLATCH_BATTERY;   // Might not be necessary, but added for extra safety. 
+   }
+   else // Power Still below minimums
+   {
+      // Assume that ADC_GetVoltage() return Busy (result != 0) does not occur often.
+      // Will handle this case as though < BUS_VOLTAGE_THRESHOLD, even though 
+      // it might not be.  On next read, assume that Busy should go away as this 
+      // condition is not expected to occur often.  
+      // Averaging of the Voltage not performed.
+      if (++Pm.PmStateTimer > PM_GLITCH_TIMER_EXPIRE) 
+      {
+         // "Glitch" period exceeded, bus power has definitely been removed!
+         if (Pm.BatteryVoltage < BUS_VOLTAGE_THRESHOLD)
+         {
+            // Glitch Timer Expires and Batt Volt still bad ! 
+            // Bus Power Failure ! 
+            // Don't need to re-read Batt and Bus Voltages 
+            Pm_Eeprom.bPowerFailure = TRUE; 
+            Pm.State = PM_HALT;
+         } 
+         else 
+         {              
+            // BatteryVoltage > BUS_VOLTAGE_THRESHOLD, but Bus Voltage still
+            // bad which should indicate "master power" switch OFF.
+            // Determine if we should continue or shutdown.
+   
+            if ( (( Pm.AppBusy == TRUE ) || ( Pm.bLatchToBattery == TRUE )) && 
+                  ( Pm.Battery == TRUE ) )
+            {
+               // Latch to Battery Operation.  
+               // NOTE: If BatteryVoltage > BUS_VOLTAGE_THRESHOLD, then
+               //       power is good and latch-to-battery (PWR_HOLD)
+               //       is holding up Battery Voltage.
+               LATCH_BATTERY; 
+               Pm.State = PM_BATTERY; 
+               Pm.PmBattDeglitchTimer = 0; 
+            }
+            else 
+            {
+               // At this point we can shut down normally 
+               Pm.State = PM_SHUTDOWN; 
+            }
+         } // End of else BatteryVoltage !< BUS_VOLTAGE_THRESHOLD
+         
+      } // End if (PmGlitchTimer > PM_GLITCH_TIMER_EXPIRE) && (Batt < 10.8)
+      else 
+      {
+         // Still "De-glitching".  Do Nothing. 
+      }
+   } // End Else Power still De-Glitching ! 
+   
+   // If we have changed PM state then update Pm_Eeprom ! 
+   if (Pm.State != PM_GLITCH)  
+   {
+      Pm_Eeprom.State = Pm.State; // New state we are transition to.   
+      CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
+      // .bPowerFailure should have been set in the above code 
+      // .bBattery set to *App.Battery on init 
+      // .bHaltCompleted should be FALSE
+      NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) ); 
+      Pm.PmStateTimer = 0; 
+   } // End if != PM_GLITCH 
+}
 
+/******************************************************************************
+ * Function:    PmBatteryProcess
+ *  
+ * Description: Handles the battery processing for the PmTask.
+ *              Continue operation under latched battery power.
+ *              Monitor the Bus voltage. If the Bus voltage has been restored,
+ *              restore normal operation. Also provides logic for 50 msec 
+ *              de-glitch while in BATTERY mode 
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+void PmBatteryProcess ( void )
+{
+   // Local Data
+   PM_LOG_DATA_FORCE_SHUTDOWN powerForceShutDownData;
+   RESULT result;
+   
+   // Continue operation under latched battery power.
+   // Monitor the Bus voltage. If the Bus voltage has been restored,
+   // restore normal operation. 
+   // Also provide logic for 50 msec de-glitch while in BATTERY mode 
+   
+   // On First Entry, output debug state transition message         
+   if ( Pm.PmStateTimer == 0 ) 
+   {
+      GSE_DebugStr(NORMAL,TRUE,"PM Battery\r\n");
+   }
+   
+   // bUpdate_Pm_Eeprom = FALSE; 
+   // If we experienced another Low Power Interrupt while in BATTERY state 
+   //  provide de-glitch of 50 msec before indicating Power Failure ! 
+   if (Pm.LowPwrInt != Pm.LowPwrIntAck)
+   {
+      Pm.LowPwrIntAck = Pm.LowPwrInt;    // set interrupt acknowledged flag
+   
+      if (Pm.PmBattDeglitchTimer == 0)
+      {
+         ++Pm.PmBattDeglitchTimer; 
+         
+         // Log SYS_ID_PM_POWER_INTERRUPT_LOG while in PM_BATTERY 
+         LogWriteSystem(SYS_ID_PM_POWER_INTERRUPT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
+         
+         // Update EEPROM data to update the StateTrans_Time so if the power 
+         // actually fails, StateTrans_Time will be as close to the power fail time ! 
+         // Note: NvMgr has higher priority then LogMgr thus the EEPROM data should be
+         //       updated before the LogWriteSystem() 
+         CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
+         
+         // .state should still be BATTERY and need not be updated. 
+         // .bPowerFailure should have been set in the above code 
+         // Don't need to update .bBattery
+         // .bHaltCompleted should be FALSE 
+         NV_Write(NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
+      }
+   }
+   
+   if (Pm.PmBattDeglitchTimer != 0) 
+   {
+      result = ADC_GetACBattVoltage(&Pm.BatteryVoltage);
+      if ( (Pm.BatteryVoltage > BUS_VOLTAGE_THRESHOLD ) &&
+            (result == DRV_OK) )
+      {
+         // Voltage De-Glitched and OK.  Stay in PM_BATTERY
+         Pm.PmBattDeglitchTimer = 0; 
+         // Do not need log to indicate power (while in BATTERY) is ok again.
+         // If not ok then after 50 msec the system will trans to HALT. 
+      }
+      else 
+      {
+         if (++Pm.PmBattDeglitchTimer > PM_GLITCH_TIMER_EXPIRE)
+         {
+            Pm_Eeprom.bPowerFailure = TRUE; 
+            Pm.State = PM_HALT; 
+         }
+      }
+   } // End if Pm.PmBattDeglitchTimer != 0
+   
+   
+   // Has system processing finished ? 
+   // Test Case
+   if ( (Pm.AppBusy == FALSE) && (Pm.bLatchToBattery == FALSE) )
+   { 
+   
+      // Application Not Busy anymore.  Transition to Normal shutdown.
+      // If power has been restored since the last time we ran (10ms ago)
+      // .. the system will do a power-cycle with via WD reset
+      Pm.State = PM_SHUTDOWN;
+   
+   } // End if AppBusy == FALSE 
+   else // AppBusy still TRUE 
+   {
+      // Check if battLatchTime operation has expires,  force shut down 
+      //  Default is 1 hour of battery latch time.  
+      if (++Pm.PmStateTimer > Pm.battLatchTime )
+      {
+         // Log SYS_ID_PM_FORCED_SHUTDOWN_LOG          
+         powerForceShutDownData.Reserved = 0; 
+         LogWriteSystem( SYS_ID_PM_FORCED_SHUTDOWN_LOG, LOG_PRIORITY_LOW, 
+                         &powerForceShutDownData, sizeof(PM_LOG_DATA_FORCE_SHUTDOWN), 
+                         NULL); 
+         GSE_DebugStr(NORMAL,TRUE,"PM Force ShutDown !\r\n");
+         Pm.State = PM_SHUTDOWN; 
+         
+      } // End if PM_BATTERY_2HR_PERIOD expires
+      else // Continue in PM_BATTERY mode 
+      {
+         // Check Bus Voltage to determine if Bus Reconnected. 
+         if ( ( Pm.PmStateTimer % PM_BATTERY_CHECK_BUS_PERIOD) == 0 ) 
+         { 
+            // Check once a second the Bus Volt. 
+            // Not necessary to check at faster rate ! 
+            result = ADC_GetACBusVoltage (&Pm.BusVoltage); 
+            if ( (Pm.BusVoltage > BUS_VOLTAGE_THRESHOLD) &&
+                  (result == DRV_OK) ) 
+            { 
+               Pm.State = PM_NORMAL; 
+            } // End if BUS_VOLTAGE_THRESHOLD exceeded again.  Trans to PM_NORMAL
+         } // End if PM_BATTERY_CHECK_BUS_PERIOD expires
+      } // End else PM_BATTERY_2HR_PERIOD not exceeded yet ! 
+   } // End else AppBusy still TRUE 
+   
+   
+   // If we have changed PM state then update Pm_Eeprom 
+   // if ( ( Pm.State != PM_BATTERY ) || (bUpdate_Pm_Eeprom == TRUE) ) 
+   if ( Pm.State != PM_BATTERY ) 
+   {
+      Pm_Eeprom.State = Pm.State;  // New state we are transition to
+      CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time ); 
+      // Don't need to update .bBattery should be set on init !
+      // bPowerFailure should be set above 
+      // bHaltCompleted should be FALSE
+      NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
+   
+      // Clear State Timer for next state usage.
+      Pm.PmStateTimer = 0; 
+      
+      // If transitions back to PM_NORMAL write Re-Connect log and unlatch from battery 
+      if ( Pm.State == PM_NORMAL ) 
+      {
+         // Log SYS_ID_PM_POWER_RECONNECT_LOG          
+         LogWriteSystem(SYS_ID_PM_POWER_RECONNECT_LOG, LOG_PRIORITY_LOW, 0, 0, NULL);
+         GSE_DebugStr(NORMAL,TRUE,"PM Normal\r\n");
+         UNLATCH_BATTERY;    
+      }
+   }
+}
 
 /******************************************************************************
  * Function:     PmProcessPowerFailure
@@ -1238,7 +1280,7 @@ BOOLEAN PmCallAppShutDownNormal( void )
 }
 
 /******************************************************************************
- * Function:     PmSet_Cfg 
+ * Function:     PmSetCfg 
  *
  * Description:  Update local power manager configuration data
  *
@@ -1250,7 +1292,7 @@ BOOLEAN PmCallAppShutDownNormal( void )
  *
  *****************************************************************************/
 static
-void PmSet_Cfg (POWERMANAGER_CFG *Cfg)
+void PmSetCfg (POWERMANAGER_CFG *Cfg)
 {
   m_PowerManagerCfg = *Cfg;
 }

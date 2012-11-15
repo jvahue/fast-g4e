@@ -246,12 +246,12 @@ BOOL CG4EDlg::OnInitDialog()
     // Fill the DIN drop downs
     for ( int i = 0; i < DIO_MAX_INPUTS; ++i)
     {
-        m_din.AddString(DIO_InputPins[i].Name);
+        m_din.AddString(DIO_InputPins[i].name);
     }
     m_din.SetCurSel(20);
     for ( int i = 0; i < DIO_MAX_OUTPUTS; ++i)
     {
-        m_dout.AddString(DIO_OutputPins[i].Name);
+        m_dout.AddString(DIO_OutputPins[i].name);
     }
     m_dout.SetCurSel(6);
 

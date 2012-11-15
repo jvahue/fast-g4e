@@ -151,7 +151,7 @@ void DioEmulation::Wraparounds()
 //Used by G4E UI
 void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
 {
-    if(DIO_InputPins[Pin].Peripheral == DIO_TMR2)
+    if(DIO_InputPins[Pin].peripheral == DIO_TMR2)
     {
         UINT32 value = state ? 
             (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) : 
@@ -159,16 +159,16 @@ void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
 
         MCF_GPT_GMS2 = value;
     }
-    else if(DIO_InputPins[Pin].Peripheral == DIO_GPIO)
+    else if(DIO_InputPins[Pin].peripheral == DIO_GPIO)
     {
-        DIO_W((DIO_InputPins[Pin].DataReg+DIO_GPIO_PODR_OFFSET), 
-              DIO_InputPins[Pin].PinMask,
+        DIO_W((DIO_InputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET), 
+              DIO_InputPins[Pin].pinMask,
               state);
     }
-    else if(DIO_InputPins[Pin].Peripheral == DIO_FPGA)
+    else if(DIO_InputPins[Pin].peripheral == DIO_FPGA)
     {
-        DIO_W16( (volatile UINT16*)DIO_InputPins[Pin].DataReg, 
-                 (UINT16)DIO_InputPins[Pin].PinMask, 
+        DIO_W16( (volatile UINT16*)DIO_InputPins[Pin].dataReg, 
+                 (UINT16)DIO_InputPins[Pin].pinMask, 
                  state);
     }
 }
@@ -177,9 +177,9 @@ void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
 //Used by G4E UI
 UINT8 DioEmulation::GetDio( DIO_OUTPUT Pin)
 {
-    if (DIO_OutputPins[Pin].DataReg != NULL)
+    if (DIO_OutputPins[Pin].dataReg != NULL)
     {
-        return (*(DIO_OutputPins[Pin].DataReg+DIO_GPIO_PODR_OFFSET)) & DIO_OutputPins[Pin].PinMask;
+        return (*(DIO_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET)) & DIO_OutputPins[Pin].pinMask;
     }
     else
     {
