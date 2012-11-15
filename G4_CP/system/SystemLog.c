@@ -8,7 +8,7 @@
     Description: 
 
    VERSION
-      $Revision: 9 $  $Date: 8/28/12 1:43p $    
+      $Revision: 10 $  $Date: 12-11-14 7:20p $    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -27,30 +27,28 @@
 #include "Assert.h"
 
 /*****************************************************************************/
-/* Local Typedefs                                                            */
-/*****************************************************************************/
-typedef struct{
-  SYS_APP_ID Id;
-  UINT16     Cnt;
-  CHAR*      Str;
-}SYS_LOG_ID_STRS;
-
-
-/*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
 #undef  SYS_LOG_ID
 //Set the system code macro to stringify the enumerated list and include log count
 #define SYS_LOG_ID(label,value,count) {label,count,#label}, 
 //define a constant for the number of elements in the SystemLogStrings array
-#define NUM_OF_LOG_IDS (sizeof(SystemLogStrings)/sizeof(SYS_LOG_ID_STRS))
+#define NUM_OF_LOG_IDS (sizeof(systemLogStrings)/sizeof(systemLogStrings[0]))
 
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+typedef struct{
+  SYS_APP_ID id;
+  UINT16     cnt;
+  CHAR*      str;
+}SYS_LOG_ID_STRS;
 
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static const SYS_LOG_ID_STRS SystemLogStrings[] = {SYS_LOG_IDS};
-static const CHAR  SystemLogUndefindedID[] = "Undefined System Log ID";
+static const SYS_LOG_ID_STRS systemLogStrings[] = {SYS_LOG_IDS};
+static const CHAR  systemLogUndefindedID[] = "Undefined System Log ID";
 static UINT16 logWriteCounts[NUM_OF_LOG_IDS];
 
 
@@ -79,15 +77,15 @@ static UINT16 logWriteCounts[NUM_OF_LOG_IDS];
  ****************************************************************************/
 const CHAR* SystemLogIDString(SYS_APP_ID LogID)
 {
-  const CHAR* result = SystemLogUndefindedID;
+  const CHAR* result = systemLogUndefindedID;
   UINT32 i;
 
   for(i = 0; i < NUM_OF_LOG_IDS; i++)
   {
-    if(SystemLogStrings[i].Id == LogID)
+    if(systemLogStrings[i].id == LogID)
     {
       //String found, return string pointer
-      result = SystemLogStrings[i].Str; 
+      result = systemLogStrings[i].str; 
       break;
     }
   }
@@ -130,11 +128,11 @@ void SystemLogResetLimitCheck(SYS_APP_ID LogID)
   BOOLEAN bFound = FALSE;
   UINT32 i;
 
-  const SYS_LOG_ID_STRS *pSysLogStr = &SystemLogStrings[0];
+  const SYS_LOG_ID_STRS *pSysLogStr = &systemLogStrings[0];
 
   for(i = 0; !bFound && (i < NUM_OF_LOG_IDS); ++i, ++pSysLogStr)
   {
-    if(pSysLogStr->Id == LogID)
+    if(pSysLogStr->id == LogID)
     {
       //ID found - resest count
       bFound = TRUE;
@@ -162,21 +160,21 @@ BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID)
   BOOLEAN bFound = FALSE;
   UINT32 i;
 
-  const SYS_LOG_ID_STRS *pSysLogStr = &SystemLogStrings[0];
+  const SYS_LOG_ID_STRS *pSysLogStr = &systemLogStrings[0];
 
   for(i = 0; !bFound && (i < NUM_OF_LOG_IDS); ++i, ++pSysLogStr)
   {
-    if(pSysLogStr->Id == LogID)
+    if(pSysLogStr->id == LogID)
     {
       //ID found - check count
       bFound = TRUE;
-      if (pSysLogStr->Cnt == 0)
+      if (pSysLogStr->cnt == 0)
       {
         // count limit is 0 - always write
         result = TRUE;
       }
       else      // check if write limit hit
-      if (logWriteCounts[i] < pSysLogStr->Cnt)
+      if (logWriteCounts[i] < pSysLogStr->cnt)
       {
         result = TRUE;          // allow write
         ++logWriteCounts[i];    // inc write count
@@ -197,6 +195,11 @@ BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

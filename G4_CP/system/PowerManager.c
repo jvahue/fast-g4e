@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 62 $  $Date: 12-11-13 2:31p $
+   $Revision: 63 $  $Date: 12-11-14 7:20p $
 
     
 ******************************************************************************/
@@ -191,14 +191,14 @@ void PmInitializePowerManager(void)
     Pm.Battery = m_PowerManagerCfg.Battery;
 
     // Init the array of ptrs-to-busy flags.
-    for (i = 0; i < PM_MAX_BUSY; ++i)
+    for (i = 0; i < (UINT32)PM_MAX_BUSY; ++i)
     {
       busyArray[i] = NULL;
     }
 
     //Register the FSM app busy flag that is internal to the PM.
     m_FSMAppBusy = FALSE;
-    PmRegisterAppBusyFlag(PM_FSM_BUSY,&m_FSMAppBusy);
+    PmRegisterAppBusyFlag((BUSY_INDEX)PM_FSM_BUSY,&m_FSMAppBusy);
       
 // Test Below     
 
@@ -221,7 +221,7 @@ void PmInitializePowerManager(void)
     // Create the Power Manager Task 
     memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
     strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Pm Task",_TRUNCATE);
-    tcbTaskInfo.TaskID         = Pm_Task;
+    tcbTaskInfo.TaskID         = (TASK_INDEX)Pm_Task;
     tcbTaskInfo.Function       = PmTask;
     tcbTaskInfo.Priority       = taskInfo[Pm_Task].priority;
     tcbTaskInfo.Type           = taskInfo[Pm_Task].taskType;
@@ -353,7 +353,7 @@ void PmInitializePowerManager(void)
           // Power Failure with out BATTERY
           pmInternalLog.Type = SYS_ID_PM_POWER_FAILURE_NO_BATTERY_LOG; 
        }
-       powerFailureData.Id = pmInternalLog.Type; 
+       powerFailureData.Id = (UINT16)pmInternalLog.Type; 
        powerFailureData.ts = pmInternalLog.ts; 
        powerFailureData.State = pmInternalLog.State;
        powerFailureData.bHaltCompleted = pmInternalLog.bHaltCompleted; 
@@ -574,7 +574,7 @@ void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func )
  *  
  * Description:  Register an application busy flag for the associated variable 
  *
- * Parameters:   index - BUSY_INDEX
+ * Parameters:   busyIndex - BUSY_INDEX
  *               pAppBusyFlag - BOOLEAN
  *
  * Returns:      none
@@ -582,10 +582,10 @@ void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func )
  * Notes:        none
  *
  *****************************************************************************/
-void PmRegisterAppBusyFlag(BUSY_INDEX index, BOOLEAN *pAppBusyFlag ) 
+void PmRegisterAppBusyFlag(BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag ) 
 {
-  ASSERT(index < PM_MAX_BUSY);
-  busyArray[index] = pAppBusyFlag;
+  ASSERT(busyIndex < (BUSY_INDEX)PM_MAX_BUSY);
+  busyArray[busyIndex] = pAppBusyFlag;
 }
 
 
@@ -1203,7 +1203,7 @@ BOOLEAN PmUpdateAppBusyStatus(void)
   INT32 i;
 
   // check the de-referenced ptr for each registered entry and accumulate total.
-  for(i = 0; i < PM_MAX_BUSY; ++i)
+  for(i = 0; i < (INT32)PM_MAX_BUSY; ++i)
   {
     busyCount += (busyArray[i] != NULL && *busyArray[i] == TRUE) ? 1 : 0;
   }
@@ -1300,6 +1300,11 @@ void PmSetCfg (POWERMANAGER_CFG *Cfg)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 63  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 62  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:31p
