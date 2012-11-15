@@ -10,7 +10,7 @@
                  in the data flash.
     
 VERSION
-     $Revision: 4 $  $Date: 8/28/12 1:06p $
+     $Revision: 5 $  $Date: 12-11-14 7:11p $
     
 ******************************************************************************/
 
@@ -68,9 +68,9 @@ typedef enum
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT REDUCE_STATUS DataReductionInit   ( REDUCTIONDATASTRUCT *pData );
-EXPORT REDUCE_STATUS DataReduction       ( REDUCTIONDATASTRUCT *pData );
-EXPORT void DataReductionGetCurrentValue ( REDUCTIONDATASTRUCT *pData ); 
+EXPORT void          DataReductionInit            ( REDUCTIONDATASTRUCT *pData );
+EXPORT REDUCE_STATUS DataReduction                ( REDUCTIONDATASTRUCT *pData );
+EXPORT void          DataReductionGetCurrentValue ( REDUCTIONDATASTRUCT *pData ); 
 
 #endif // DATAREDUCTION_H               
 
@@ -78,6 +78,11 @@ EXPORT void DataReductionGetCurrentValue ( REDUCTIONDATASTRUCT *pData );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataReduction.h $
+ * 
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:11p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 4  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

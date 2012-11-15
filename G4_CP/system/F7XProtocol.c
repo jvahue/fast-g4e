@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 20 $  $Date: 12-11-13 1:37p $     
+      $Revision: 21 $  $Date: 12-11-14 7:20p $     
 
 ******************************************************************************/
 
@@ -1998,6 +1998,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 1:37p

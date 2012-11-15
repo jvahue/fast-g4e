@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 45 $  $Date: 12-11-13 5:46p $     
+      $Revision: 46 $  $Date: 12-11-14 7:20p $     
 
 ******************************************************************************/
 
@@ -1668,24 +1668,22 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
   timeoutLog.result = resultType; 
   timeoutLog.ch = (UINT8)ch;
 
-  switch (resultType)
+  if (SYS_UART_STARTUP_TIMEOUT == resultType)
   {
-    case SYS_UART_STARTUP_TIMEOUT: 
-      timeoutLog.cfg_timeout = pUartCfg->channelStartup_s;
-      sysId = SYS_ID_UART_CBIT_STARTUP_FAIL; 
-      break;
-      
-    case SYS_UART_DATA_LOSS_TIMEOUT:
-      timeoutLog.cfg_timeout = pUartCfg->channelTimeOut_s; 
-      sysId = SYS_ID_UART_CBIT_DATA_LOSS_FAIL; 
-      break; 
-      
-    default:
-      // No such case !
-       FATAL("Unrecognized Sys Uart resultType = %d", resultType);
-      break;
-  } // End switch (resultType)
-  
+     timeoutLog.cfg_timeout = pUartCfg->channelStartup_s;
+     sysId = SYS_ID_UART_CBIT_STARTUP_FAIL; 
+  }
+  else if (SYS_UART_DATA_LOSS_TIMEOUT == resultType)
+  {
+     timeoutLog.cfg_timeout = pUartCfg->channelTimeOut_s; 
+     sysId = SYS_ID_UART_CBIT_DATA_LOSS_FAIL; 
+  }
+  else
+  {
+     // No such case !
+     FATAL("Unrecognized Sys Uart resultType = %d", resultType);
+  }
+
   Flt_SetStatus(pUartCfg->channelSysCond, sysId, &timeoutLog, sizeof(timeoutLog)); 
   
 }
@@ -1966,6 +1964,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

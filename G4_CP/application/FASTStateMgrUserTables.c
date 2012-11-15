@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 8 $  $Date: 8/28/12 2:36p $
+   $Revision: 9 $  $Date: 12-11-14 2:01p $
     
 ******************************************************************************/
 #ifndef FASTSTATEMGR_BODY
@@ -29,6 +29,10 @@
 /*****************************************************************************/
 #define MAX_LABEL_CHAR_ARRAY 128
 #define MAX_VALUE_CHAR_ARRAY 32
+
+//            [     Number of tasks defined     ] * [task str len     ] +[NULL]
+#define TOTAL_TASKS_STR_LEN\
+           ((sizeof(m_Tasks)/sizeof(m_Tasks[0]))*(FSM_TASK_STR_LEN+1)) + 1
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -155,7 +159,11 @@ static USER_MSG_TBL FSMRoot[] =
 #pragma ghs endnowarning 
 
 
-//****************************************************************************/
+/*****************************************************************************/
+/* Public Functions                                                          */ 
+/*****************************************************************************/
+
+/*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
 
@@ -541,9 +549,6 @@ USER_HANDLER_RESULT FSM_CfgOther(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-//            [     Number of tasks defined     ] * [task str len     ] +[NULL]
-#define TOTAL_TASKS_STR_LEN\
-           ((sizeof(m_Tasks)/sizeof(m_Tasks[0]))*(FSM_TASK_STR_LEN+1)) + 1
 
 USER_HANDLER_RESULT FSM_GetRunningTasks(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
@@ -812,13 +817,15 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
   return result;
 }
 
-/*****************************************************************************/
-/* Local Functions                                                           */ 
-/*****************************************************************************/
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTStateMgrUserTables.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Melanie Jutras Date: 12-11-14   Time: 2:01p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error - Moved defines
  * 
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 2:36p

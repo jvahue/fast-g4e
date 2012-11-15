@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 116 $  $Date: 12-11-13 5:46p $
+     $Revision: 117 $  $Date: 12-11-14 7:20p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -767,6 +767,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ *
+ * *****************  Version 117  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  *
  * *****************  Version 116  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

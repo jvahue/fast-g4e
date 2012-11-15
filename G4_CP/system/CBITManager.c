@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
     
     VERSION
-      $Revision: 57 $  $Date: 12-11-13 12:40p $     
+      $Revision: 58 $  $Date: 12-11-14 7:20p $     
 
 ******************************************************************************/
 
@@ -154,14 +154,14 @@ static PWEH_SEU_STATE CBITMgr_PWEHSEU_WaitForRec ( void );
 static PWEH_SEU_STATE CBITMgr_PWEHSEU_ResumeRec ( void ); 
 static PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void ); 
 
-static PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetAllCurrentCountValues ( void ); 
-static PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetDiffCountValues (
+static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void ); 
+static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals (
                                                 PWEH_SEU_HEALTH_COUNTS PrevCount); 
-static PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_AddPrevCountValues (
+static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals (
                                                 PWEH_SEU_HEALTH_COUNTS CurrCnt, 
                                                 PWEH_SEU_HEALTH_COUNTS PrevCnt ); 
 
-static void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void ); 
+static void CBITMgrPWEHSEU_UpdateEepromData ( void ); 
 
 static CBIT_HEALTH_COUNTS CBITMgr_AddPrevCBITHealthStatus ( CBIT_HEALTH_COUNTS CurrCnt,
                                                             CBIT_HEALTH_COUNTS PrevCnt );
@@ -407,7 +407,8 @@ static void CBITMgr_Task( void *pParam )
   //    For 80 reg, this will be about 3.125 Hz, satisfying 2 Hz Req SRS-1817
   //    Currently it takes about 20 usec to reg check a single Reg with Branch Cache 
   //    enabled. 
-  RegCheckFailedLog.nFailures = RegCheck( MAX_REG_ENTRIES, (UINT32*)&RegAddrFail, (UINT32*)&enumRegFail );
+  RegCheckFailedLog.nFailures = RegCheck( MAX_REG_ENTRIES, 
+                                          (UINT32*)&RegAddrFail, (UINT32*)&enumRegFail );
   
 #ifdef WIN32
 /*vcast_dont_instrument_start*/
@@ -415,7 +416,8 @@ static void CBITMgr_Task( void *pParam )
 /*vcast_dont_instrument_end*/
 #endif
 
-  if ( ( RegCheckFailedLog.nFailures > 0 ) && (m_CbitMgrStatus.RegCheckCnt < MAX_REG_CHECK_LOGS) )
+  if ( ( RegCheckFailedLog.nFailures > 0 ) && 
+        (m_CbitMgrStatus.RegCheckCnt < MAX_REG_CHECK_LOGS) )
   {
     // Print Debug as indication 
     GSE_DebugStr( NORMAL, TRUE, "CBITMgr_Task: Reg Check Failure (cnt=%d)\r\n", 
@@ -617,7 +619,7 @@ static void CBITMgr_Ram_Task(void* pParam)
       readPattern = 0;
       while ( (pStart < pEnd) && !testFailed)
       {
-         UINT32 intrLevel;
+         INT32 intrLevel;
          register UINT16 dataSave;    // save original data - must be in register
 
          intrLevel = __DIR();         // disable interrupts
@@ -738,6 +740,7 @@ static void CBITMgr_PWEHSEU_Task( void *pParam )
       m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_Rec(); 
       break; 
     
+    case PWEH_SEU_STATE_MAX:
     default:
         FATAL("Unrecognized PWEH_SEU_STATE: %d", m_PWEHSEUStatus.state); 
       break; 
@@ -786,7 +789,7 @@ static BOOLEAN CBITMgr_PWEHSEU_ShutDown( void )
   {
     PwehSeuEepromData.bIntSaveCntCompleted = TRUE; 
 
-    CBITMgr_PWEHSEU_UpdateSeuEepromData(); 
+    CBITMgrPWEHSEU_UpdateEepromData(); 
     
     // Update EEPROM with current run time data 
     NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
@@ -916,13 +919,13 @@ static
  CBIT_HEALTH_COUNTS CBITMgr_AddPrevCBITHealthStatus ( CBIT_HEALTH_COUNTS CurrCnt,
                                                      CBIT_HEALTH_COUNTS PrevCnt )
 {
-  CBIT_HEALTH_COUNTS AddCount;
+  CBIT_HEALTH_COUNTS addCount;
   
-  AddCount.RAMFailCnt = CurrCnt.RAMFailCnt + PrevCnt.RAMFailCnt; 
-  AddCount.ProgramCRCErrCnt = CurrCnt.ProgramCRCErrCnt + PrevCnt.ProgramCRCErrCnt; 
-  AddCount.RegCheckCnt = CurrCnt.RegCheckCnt + PrevCnt.RegCheckCnt; 
+  addCount.RAMFailCnt = CurrCnt.RAMFailCnt + PrevCnt.RAMFailCnt; 
+  addCount.ProgramCRCErrCnt = CurrCnt.ProgramCRCErrCnt + PrevCnt.ProgramCRCErrCnt; 
+  addCount.RegCheckCnt = CurrCnt.RegCheckCnt + PrevCnt.RegCheckCnt; 
 
-  return ( AddCount ); 
+  return ( addCount ); 
 }
 
 /******************************************************************************
@@ -940,16 +943,16 @@ static
  *****************************************************************************/
 static CBIT_HEALTH_COUNTS CBITMgr_CalcDiffCBITHealthStatus ( CBIT_HEALTH_COUNTS PrevCnt )
 {
-  CBIT_HEALTH_COUNTS DiffCount;
+  CBIT_HEALTH_COUNTS diffCount;
   CBIT_HEALTH_COUNTS *pCurrent; 
   
   pCurrent = &CBITHealthCounts; 
   
-  DiffCount.RAMFailCnt = pCurrent->RAMFailCnt - PrevCnt.RAMFailCnt; 
-  DiffCount.ProgramCRCErrCnt = pCurrent->ProgramCRCErrCnt - PrevCnt.ProgramCRCErrCnt; 
-  DiffCount.RegCheckCnt = pCurrent->RegCheckCnt - PrevCnt.RegCheckCnt; 
+  diffCount.RAMFailCnt = pCurrent->RAMFailCnt - PrevCnt.RAMFailCnt; 
+  diffCount.ProgramCRCErrCnt = pCurrent->ProgramCRCErrCnt - PrevCnt.ProgramCRCErrCnt; 
+  diffCount.RegCheckCnt = pCurrent->RegCheckCnt - PrevCnt.RegCheckCnt; 
 
-  return ( DiffCount ); 
+  return ( diffCount ); 
 }
 
 
@@ -1072,7 +1075,7 @@ PWEH_SEU_STATE CBITMgr_PWEHSEU_WaitForRec ( void )
     // Clear Counts.  This process gets current snapshot of all counts 
     //   and will subtract it from the end count to determine 
     // Update current count values PwehSeuCountsAtStartOfRec
-    PwehSeuCountsAtStartOfRec = CBITMgr_PWEHSEU_GetAllCurrentCountValues (); 
+    PwehSeuCountsAtStartOfRec = CBITMgrPWEHSEU_GetAllCurrCntVals (); 
     
     // Update EEPROM data 
     PwehSeuEepromData.bRecInProgress = TRUE;
@@ -1124,7 +1127,7 @@ PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void )
   // if (bSysRecording == FALSE) 
   if ( !InFlight )
   {
-    CBITMgr_PWEHSEU_UpdateSeuEepromData();      
+    CBITMgrPWEHSEU_UpdateEepromData();      
      
     // Log PWEH Count Values 
     LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW,
@@ -1174,7 +1177,7 @@ PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void )
 
 
 /******************************************************************************
- * Function:     CBITMgr_PWEHSEU_GetAllCurrentCountValues
+ * Function:     CBITMgrPWEHSEU_GetAllCurrCntVals
  *
  * Description:  Get current SEU count value from all modules 
  *
@@ -1186,40 +1189,40 @@ PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void )
  * 
  *****************************************************************************/
 static 
-PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetAllCurrentCountValues ( void )
+PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void )
 {
-  PWEH_SEU_HEALTH_COUNTS CountCurrent;
+  PWEH_SEU_HEALTH_COUNTS countCurrent;
 
-  CountCurrent.SEUCounts_Interrupted = FALSE;       // default value
+  countCurrent.SEUCounts_Interrupted = FALSE;       // default value
 
   // CBIT_HEALTH_COUNTS
-  CountCurrent.cbit = CBITMgr_GetCBITHealthStatus(); 
+  countCurrent.cbit = CBITMgr_GetCBITHealthStatus(); 
 
   // FPGA_CBIT_HEALTH_COUNTS
-  CountCurrent.fpga = FPGAMgr_GetCBITHealthStatus(); 
+  countCurrent.fpga = FPGAMgr_GetCBITHealthStatus(); 
   
   // QAR_CBIT_HEALTH_COUNTS
-  CountCurrent.qar = QAR_GetCBITHealthStatus(); 
+  countCurrent.qar = QAR_GetCBITHealthStatus(); 
   
   // ARINC429_CBIT_HEALTH_COUNTS
-  CountCurrent.arinc429 = Arinc429MgrGetCBITHealthStatus(); 
+  countCurrent.arinc429 = Arinc429MgrGetCBITHealthStatus(); 
   
   // Task Manager Health Counts
-  CountCurrent.tm = Tm_GetTMHealthStatus(); 
+  countCurrent.tm = Tm_GetTMHealthStatus(); 
   
   // Reset Health Counts
-  CountCurrent.reset = ResetHealthCounts;
+  countCurrent.reset = ResetHealthCounts;
   
   // Log Data Flash Health Counts
-  CountCurrent.log = LogGetCBITHealthStatus();
+  countCurrent.log = LogGetCBITHealthStatus();
 
-  return ( CountCurrent );
+  return ( countCurrent );
   
 }
 
 
 /******************************************************************************
- * Function:     CBITMgr_PWEHSEU_GetDiffCountValues
+ * Function:     CBITMgrPWEHSEU_GetDiffCntVals
  *
  * Description:  Get the difference from current SEU count value from a previous 
  *               count point 
@@ -1232,42 +1235,42 @@ PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetAllCurrentCountValues ( void )
  * 
  *****************************************************************************/
 static 
-PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetDiffCountValues ( PWEH_SEU_HEALTH_COUNTS PrevCount )
+PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals ( PWEH_SEU_HEALTH_COUNTS PrevCount )
 {
-  PWEH_SEU_HEALTH_COUNTS DiffCount; 
+  PWEH_SEU_HEALTH_COUNTS diffCount; 
 
-  DiffCount.SEUCounts_Interrupted = PrevCount.SEUCounts_Interrupted; 
+  diffCount.SEUCounts_Interrupted = PrevCount.SEUCounts_Interrupted; 
 
   // CBIT_HEALTH_COUNTS
-  DiffCount.cbit = CBITMgr_CalcDiffCBITHealthStatus( PrevCount.cbit ); 
+  diffCount.cbit = CBITMgr_CalcDiffCBITHealthStatus( PrevCount.cbit ); 
 
   // FPGA_CBIT_HEALTH_COUNTS
-  DiffCount.fpga = FPGAMgr_CalcDiffCBITHealthStatus( PrevCount.fpga ); 
+  diffCount.fpga = FPGAMgr_CalcDiffCBITHealthStatus( PrevCount.fpga ); 
   
   // QAR_CBIT_HEALTH_COUNTS
-  DiffCount.qar = QAR_CalcDiffCBITHealthStatus( PrevCount.qar ); 
+  diffCount.qar = QAR_CalcDiffCBITHealthStatus( PrevCount.qar ); 
   
   // ARINC429_CBIT_HEALTH_COUNTS
-  DiffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthStatus( PrevCount.arinc429 ); 
+  diffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthStatus( PrevCount.arinc429 ); 
   
   // Task Manager Health Counts
-  DiffCount.tm = Tm_CalcDiffTMHealthStatus ( PrevCount.tm ); 
+  diffCount.tm = Tm_CalcDiffTMHealthStatus ( PrevCount.tm ); 
   
   // Reset Health Counts 
   // only updated on restart
-  DiffCount.reset.nWatchdogResets = 0;
-  DiffCount.reset.nReset = 0;
+  diffCount.reset.nWatchdogResets = 0;
+  diffCount.reset.nReset = 0;
   
   // Log Data Flash Health Counts
-  DiffCount.log = LogCalcDiffCBITHealthStatus( PrevCount.log );
+  diffCount.log = LogCalcDiffCBITHealthStatus( PrevCount.log );
 
-  return ( DiffCount );
+  return ( diffCount );
   
 }
 
 
 /******************************************************************************
- * Function:     CBITMgr_PWEHSEU_AddPrevCountValues
+ * Function:     CBITMgrPWEHSEU_AddPrevCntVals
  *
  * Description:  Add two different count points
   *
@@ -1280,43 +1283,43 @@ PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_GetDiffCountValues ( PWEH_SEU_HEALTH_COUN
  * 
  *****************************************************************************/
 static 
-PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_AddPrevCountValues ( PWEH_SEU_HEALTH_COUNTS CurrCnt, 
+PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals ( PWEH_SEU_HEALTH_COUNTS CurrCnt, 
                                                             PWEH_SEU_HEALTH_COUNTS PrevCnt )
 {
-  PWEH_SEU_HEALTH_COUNTS AddCount; 
+  PWEH_SEU_HEALTH_COUNTS addCount; 
 
-  AddCount.SEUCounts_Interrupted = CurrCnt.SEUCounts_Interrupted; 
+  addCount.SEUCounts_Interrupted = CurrCnt.SEUCounts_Interrupted; 
 
   // CBIT_HEALTH_COUNTS
-  AddCount.cbit = CBITMgr_AddPrevCBITHealthStatus( CurrCnt.cbit, PrevCnt.cbit ); 
+  addCount.cbit = CBITMgr_AddPrevCBITHealthStatus( CurrCnt.cbit, PrevCnt.cbit ); 
 
   // FPGA_CBIT_HEALTH_COUNTS
-  AddCount.fpga = FPGAMgr_AddPrevCBITHealthStatus( CurrCnt.fpga, PrevCnt.fpga ); 
+  addCount.fpga = FPGAMgr_AddPrevCBITHealthStatus( CurrCnt.fpga, PrevCnt.fpga ); 
   
   // QAR_CBIT_HEALTH_COUNTS
-  AddCount.qar = QAR_AddPrevCBITHealthStatus( CurrCnt.qar, PrevCnt.qar ); 
+  addCount.qar = QAR_AddPrevCBITHealthStatus( CurrCnt.qar, PrevCnt.qar ); 
   
   // ARINC429_CBIT_HEALTH_COUNTS
-  AddCount.arinc429 = Arinc429MgrAddPrevCBITHealthStatus( CurrCnt.arinc429, PrevCnt.arinc429 ); 
+  addCount.arinc429 = Arinc429MgrAddPrevCBITHealthStatus( CurrCnt.arinc429, PrevCnt.arinc429 ); 
   
   // Task Manager Health Counts
-  AddCount.tm = Tm_AddPrevTMHealthStatus( CurrCnt.tm, PrevCnt.tm ); 
+  addCount.tm = Tm_AddPrevTMHealthStatus( CurrCnt.tm, PrevCnt.tm ); 
   
   // Reset Health Counts
-  AddCount.reset.nWatchdogResets =
+  addCount.reset.nWatchdogResets =
     CurrCnt.reset.nWatchdogResets + PrevCnt.reset.nWatchdogResets;
-  AddCount.reset.nReset = CurrCnt.reset.nReset + PrevCnt.reset.nReset;
+  addCount.reset.nReset = CurrCnt.reset.nReset + PrevCnt.reset.nReset;
 
   // Log Data Flash Health Counts
-  AddCount.log = LogAddPrevCBITHealthStatus( CurrCnt.log, PrevCnt.log );
+  addCount.log = LogAddPrevCBITHealthStatus( CurrCnt.log, PrevCnt.log );
 
-  return ( AddCount );
+  return ( addCount );
   
 }
 
 
 /******************************************************************************
- * Function:     CBITMgr_PWEHSEU_UpdateSeuEepromData 
+ * Function:     CBITMgrPWEHSEU_UpdateEepromData 
  *
  * Description:  Updates PwehSeuEepromData with current Run Time Count 
   *
@@ -1328,22 +1331,22 @@ PWEH_SEU_HEALTH_COUNTS CBITMgr_PWEHSEU_AddPrevCountValues ( PWEH_SEU_HEALTH_COUN
  * 
  *****************************************************************************/
 static 
-void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void )
+void CBITMgrPWEHSEU_UpdateEepromData ( void )
 {
-  PWEH_SEU_HEALTH_COUNTS CurrentCount; 
+  PWEH_SEU_HEALTH_COUNTS currentCount; 
 
   // Get current Health Counts (PwehSeuCounts) and subtract from PwehSeuCountsPrevious
-  CurrentCount = CBITMgr_PWEHSEU_GetDiffCountValues(PwehSeuCountsAtStartOfRec); 
+  currentCount = CBITMgrPWEHSEU_GetDiffCntVals(PwehSeuCountsAtStartOfRec); 
   
   // If we were reset/shutdown, add previous (power on) count values to current running total
   if (PwehSeuEepromData.bIntRecInProgress) 
   {
-    PwehSeuEepromData.Counts = CBITMgr_PWEHSEU_AddPrevCountValues( CurrentCount, 
-                                                                   PwehSeuCountsPrevStored );
+    PwehSeuEepromData.Counts = CBITMgrPWEHSEU_AddPrevCntVals( currentCount, 
+                                                              PwehSeuCountsPrevStored );
   }
   else 
   {
-    PwehSeuEepromData.Counts = CurrentCount; 
+    PwehSeuEepromData.Counts = currentCount; 
   }
 }
 
@@ -1352,6 +1355,11 @@ void CBITMgr_PWEHSEU_UpdateSeuEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 57  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 12:40p

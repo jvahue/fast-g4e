@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 36 $  $Date: 11/14/12 12:25p $
+      $Revision: 37 $  $Date: 12-11-14 6:51p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1056,6 +1056,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 12-11-14   Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 12:25p
