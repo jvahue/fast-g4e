@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 63 $  $Date: 12-11-14 7:20p $
+   $Revision: 64 $  $Date: 12-11-15 10:51a $
 
     
 ******************************************************************************/
@@ -78,7 +78,7 @@ static void PmTask( void* pPBlock);
 static void PmProcessPowerFailure (void); 
 
 static BOOLEAN PmCallAppShutDownNormal (void); 
-static BOOLEAN PmCallAppBusInterrupt (void);
+static void    PmCallAppBusInterrupt (void);
 
 static BOOLEAN PmUpdateAppBusyStatus(void);
 
@@ -876,7 +876,6 @@ void PmGlitchProcess ( void )
 {
    // Local Data
    RESULT  result;
-   BOOLEAN bResult;
    
    // On First entry, print debug message and record the transition state 
    if ( Pm.PmStateTimer == 0 ) 
@@ -899,7 +898,7 @@ void PmGlitchProcess ( void )
       NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) ); 
    
 // Test 
-      bResult = PmCallAppBusInterrupt(); 
+      PmCallAppBusInterrupt(); 
 // Test
    }
    
@@ -1220,15 +1219,15 @@ BOOLEAN PmUpdateAppBusyStatus(void)
  *               enough time to perform all ShutDownNormal or ShutDownQuick() 
  *               processing.  
  *
- * Parameters:   none
+ * Parameters:   None
  *
- * Returns:      TRUE if all registered applications processing returns TRUE 
+ * Returns:      None 
  *  
  * Notes:
  *
  *****************************************************************************/
 static 
-BOOLEAN PmCallAppBusInterrupt( void )
+void PmCallAppBusInterrupt( void )
 {
   BOOLEAN bResult;
   UINT32  i;
@@ -1242,8 +1241,6 @@ BOOLEAN PmCallAppBusInterrupt( void )
     func = Pm.AppBusInterrupt[i]; 
     bResult &= func(); 
   }
-  
-  return (bResult); 
 }
 
 
@@ -1300,6 +1297,11 @@ void PmSetCfg (POWERMANAGER_CFG *Cfg)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 64  *****************
+ * User: John Omalley Date: 12-11-15   Time: 10:51a
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 63  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p

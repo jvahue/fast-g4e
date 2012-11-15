@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 100 $  $Date: 12-11-14 7:13p $
+      $Revision: 101 $  $Date: 12-11-15 10:48a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1258,24 +1258,20 @@ QAR_CBIT_HEALTH_COUNTS QAR_GetCBITHealthStatus ( void )
  *****************************************************************************/
 QAR_CBIT_HEALTH_COUNTS QAR_CalcDiffCBITHealthStatus ( QAR_CBIT_HEALTH_COUNTS PrevCount )
 {
-  QAR_CBIT_HEALTH_COUNTS DiffCount;
-  QAR_CBIT_HEALTH_COUNTS *pCurrentCount;
+  QAR_CBIT_HEALTH_COUNTS diffCount;
+  QAR_CBIT_HEALTH_COUNTS currentCount;
 
-  QAR_GetCBITHealthStatus();
+  currentCount = QAR_GetCBITHealthStatus();
 
-  pCurrentCount = &QARCBITHealthStatus;
-
-  DiffCount.SystemStatus = pCurrentCount->SystemStatus;
-  DiffCount.bQAREnable = pCurrentCount->bQAREnable;
-  DiffCount.FrameState = pCurrentCount->FrameState;
-  DiffCount.DataPresentLostCount = pCurrentCount->DataPresentLostCount
+  diffCount.SystemStatus         = currentCount.SystemStatus;
+  diffCount.bQAREnable           = currentCount.bQAREnable;
+  diffCount.FrameState           = currentCount.FrameState;
+  diffCount.DataPresentLostCount = currentCount.DataPresentLostCount 
                                    - PrevCount.DataPresentLostCount;
-  DiffCount.LossOfFrameCount = pCurrentCount->LossOfFrameCount
-                               - PrevCount.LossOfFrameCount;
-  DiffCount.BarkerErrorCount = pCurrentCount->BarkerErrorCount
-                               - PrevCount.BarkerErrorCount;
+  diffCount.LossOfFrameCount     = currentCount.LossOfFrameCount - PrevCount.LossOfFrameCount;
+  diffCount.BarkerErrorCount     = currentCount.BarkerErrorCount - PrevCount.BarkerErrorCount;
 
-   return (DiffCount);
+   return (diffCount);
 }
 
 
@@ -1944,7 +1940,7 @@ void QAR_ResetState (void)
       pState->bSubFrameReceived[i] = FALSE;
 
       // Clear Software SF Buffers
-      memset ( (void *) &QARFrame[i].Word[0], 0x00, sizeof(QAR_SUBFRAME_DATA) );
+      memset ( (void *) &QARFrame[i], 0x00, sizeof(QAR_SUBFRAME_DATA) );
       // NOTE: LastSubFrameUpdateTime cleared !
    }
    pState->PreviousSubFrameOk  = QAR_SF1;    // Start at the beginning !
@@ -2279,6 +2275,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 101  *****************
+ * User: John Omalley Date: 12-11-15   Time: 10:48a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 100  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:13p

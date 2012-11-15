@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 21 $  $Date: 12-11-14 7:20p $     
+      $Revision: 22 $  $Date: 12-11-15 10:49a $     
 
 ******************************************************************************/
 
@@ -1139,7 +1139,7 @@ UINT16 F7XProtocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size, UINT16 ch
  * Returns:     None
  *
  * Notes:       
- *    - TBD add time count to ensure X ms is not expired for early exit ! 
+ *    - function timing is dependent on the number of frame markers 
  *    - Assumes buff passed in starts at offset 0, cnt == even 
  *
  *****************************************************************************/
@@ -1998,6 +1998,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 12-11-15   Time: 10:49a
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Update
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
