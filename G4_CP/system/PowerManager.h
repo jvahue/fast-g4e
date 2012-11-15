@@ -11,7 +11,7 @@
                   the aircraft Bus or Battery power supplies. 
     
     VERSION
-    $Revision: 32 $  $Date: 8/28/12 1:43p $
+    $Revision: 33 $  $Date: 12-11-14 7:20p $
     
 ******************************************************************************/
 
@@ -274,13 +274,13 @@ EXPORT PM_EEPROM_DATA Pm_Eeprom;
                              Package Exports Functions
 ******************************************************************************/
 EXPORT void PmInitializePowerManager(void);
-EXPORT void PowerFailIsr(void);
+EXPORT __interrupt void PowerFailIsr (void);
 EXPORT void PmInsertAppShutDownNormal( APPSHUTDOWN_FUNC func ); 
 EXPORT void PmInsertAppShutDownQuick( APPSHUTDOWN_FUNC func ); 
 EXPORT void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func ); 
 EXPORT void PmSetPowerOnTime( TIMESTAMP *pPtr ); 
 EXPORT BOOLEAN PmFileInit(void);
-EXPORT void PmRegisterAppBusyFlag(BUSY_INDEX index, BOOLEAN *pAppBusyFlag ); 
+EXPORT void PmRegisterAppBusyFlag(BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag ); 
 EXPORT BOOLEAN PmFSMAppBusyGetState(INT32 param);
 EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 
@@ -294,6 +294,11 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.h $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 32  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

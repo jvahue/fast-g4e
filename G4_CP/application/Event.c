@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 34 $  $Date: 11/14/12 4:01p $
+ $Revision: 35 $  $Date: 12-11-14 6:51p $
 
 ******************************************************************************/
 
@@ -1165,7 +1165,7 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    // Loop through all the regions
    for ( nRegIndex = (UINT32)REGION_A;
          (REGION_NOT_FOUND != pTableData->maximumCfgRegion) &&
-         (nRegIndex < (UINT32)pTableData->maximumCfgRegion);
+         (nRegIndex <= (UINT32)pTableData->maximumCfgRegion);
          nRegIndex++ )
    {
       pRegion   = &pTableCfg->region[nRegIndex];
@@ -1787,7 +1787,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
- * 
+ *
+ * *****************  Version 35  *****************
+ * User: John Omalley Date: 12-11-14   Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 4:01p
  * Updated in $/software/control processor/code/application
