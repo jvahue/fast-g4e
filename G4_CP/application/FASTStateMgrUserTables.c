@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands  
 
    VERSION
-   $Revision: 9 $  $Date: 12-11-14 2:01p $
+   $Revision: 10 $  $Date: 12-11-15 2:13p $
     
 ******************************************************************************/
 #ifndef FASTSTATEMGR_BODY
@@ -43,8 +43,15 @@ USER_ENUM_TBL AnEnum[] =
 };
 
 /*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
 
 USER_HANDLER_RESULT FSM_CfgTCStrCmd(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
@@ -821,6 +828,11 @@ USER_HANDLER_RESULT FSM_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTStateMgrUserTables.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 9  *****************
  * User: Melanie Jutras Date: 12-11-14   Time: 2:01p

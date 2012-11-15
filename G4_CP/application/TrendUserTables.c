@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 11 $  $Date: 11/12/12 6:39p $
+$Revision: 12 $  $Date: 12-11-15 2:55p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -23,12 +23,17 @@ $Revision: 11 $  $Date: 11/12/12 6:39p $
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Defines                                                            */
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -365,6 +370,11 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:55p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:39p

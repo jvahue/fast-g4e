@@ -8,7 +8,7 @@
     Description: Power Management Status and Control User Commands.
     
     VERSION
-      $Revision: 29 $  $Date: 12-11-14 7:20p $
+      $Revision: 30 $  $Date: 12-11-15 2:48p $
     
 ******************************************************************************/
 #ifndef POWERMANAGER_BODY
@@ -28,8 +28,20 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
+
 USER_HANDLER_RESULT PMMsg_State(USER_DATA_TYPE DataType,
                                 USER_MSG_PARAM Param,
                                 UINT32 Index,
@@ -56,10 +68,6 @@ USER_HANDLER_RESULT PMMsg_ShowConfig(USER_DATA_TYPE DataType,
                                      const void *SetPtr,
                                      void **GetPtr);
 
-
-/*****************************************************************************/
-/* Local Typedefs                                                            */
-/*****************************************************************************/
 
 
 /*****************************************************************************/
@@ -326,6 +334,11 @@ USER_HANDLER_RESULT PMMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManagerUserTables.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p

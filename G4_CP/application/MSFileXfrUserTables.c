@@ -9,7 +9,7 @@
                  the CP GSE port.
 
     VERSION
-    $Revision: 15 $  $Date: 8/28/12 12:43p $   
+    $Revision: 16 $  $Date: 12-11-15 2:24p $   
     
 ******************************************************************************/
 
@@ -34,8 +34,16 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
+
 USER_HANDLER_RESULT MSFX_GetListUserCmd(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -272,6 +280,11 @@ USER_HANDLER_RESULT MSFX_GetStsUserCmd(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfrUserTables.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:24p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p

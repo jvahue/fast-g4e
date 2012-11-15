@@ -8,7 +8,7 @@
     Description:  CBIT (Continous Built In Test) Mananger GSE commands
     
     VERSION
-      $Revision: 12 $  $Date: 8/28/12 1:43p $
+      $Revision: 13 $  $Date: 12-11-15 2:59p $
     
 ******************************************************************************/
 #ifndef CBIT_MANAGER_BODY
@@ -38,8 +38,15 @@
 /*****************************************************************************/
 
 /*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+// See Local Variables below Function Prototypes Section
+
+/*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+//Prototypes for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
 
 #ifdef GENERATE_SYS_LOGS 
 USER_HANDLER_RESULT CbitMgrMsg_CreateLogs(USER_DATA_TYPE DataType,
@@ -141,6 +148,11 @@ USER_HANDLER_RESULT CbitMgrMsg_CreateLogs(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManagerUserTable.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Melanie Jutras Date: 12-11-15   Time: 2:59p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Errors
  * 
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
