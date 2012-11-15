@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 54 $  $Date: 12-11-12 7:19p $
+     $Revision: 55 $  $Date: 12-11-14 7:20p $
 
 ******************************************************************************/
 
@@ -2333,7 +2333,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
    ARINC429_CONV_DATA_PTR         pConvData;
    ARINC429_SDI_DATA_PTR          pSdiData;
    ARINC429_WORD_INFO_PTR         pWordInfo;
-   REDUCE_STATUS                  Status;
+   REDUCE_STATUS                  status;
 
    bSave     = FALSE;
 
@@ -2347,7 +2347,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
 
    // Check if special processing
    if ( (pCfg->SubProtocol == ARINC429_RX_SUB_PW305AB_MFD_REDUCE) &&
-        ((pLabelData->label >= MFD_300) && (pLabelData->label <= MFD_306)) )
+        ((pLabelData->label >= (UINT8)MFD_300) && (pLabelData->label <= (UINT8)MFD_306)) )
    {
       if ( Arinc429MgrProcessPW305ABEngineMFD ( &pChanData->MFDTable,
                                                 &pSdiData->CurrentMsg,
@@ -2368,7 +2368,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
             // Convert Message to EngValue
             sValue = Arinc429MgrParseMsg ( pSdiData->CurrentMsg, pWordInfo->Format,
                                            pWordInfo->WordPos,   pWordInfo->WordSize,
-                                           pWordInfo->RxChan,    &bWordValid );
+                                           (UINT32)pWordInfo->RxChan,    &bWordValid );
 
             pProtocol->ReduceData.Time   = pSdiData->RxTime;
 
@@ -2377,7 +2377,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
               pProtocol->bValid = FALSE;
               // Get the current value of the parameter
               DataReductionGetCurrentValue(&pProtocol->ReduceData);
-              Status = RS_KEEP;
+              status = RS_KEEP;
             }
             else
             {
@@ -2386,17 +2386,18 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
               // Check if the Data is Initialized
               if ( FALSE == pProtocol->bInitialized )
               {
-                 Status                  = DataReductionInit(&pProtocol->ReduceData);
+                 status = RS_KEEP;
+                 DataReductionInit(&pProtocol->ReduceData);
                  pProtocol->bInitialized = TRUE;
               }
               else
               {
-                 Status = DataReduction (&pProtocol->ReduceData);
+                 status = DataReduction (&pProtocol->ReduceData);
               }
             }
 
             // Check if the value should be kept
-            if (Status == RS_KEEP)
+            if (status == RS_KEEP)
             {
                // Convert the value back to an ARINC429 Message
                bSave   = TRUE;
@@ -2406,7 +2407,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                                               pConvData->Scale,
                                               pWordInfo->WordSize,
                                               pWordInfo->WordPos,
-                                              pWordInfo->Format,
+                                              (UINT32)pWordInfo->Format,
                                               pSdiData->CurrentMsg,
                                               pProtocol->bValid );
                // Store it in the Data Record
@@ -2433,11 +2434,13 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                                                   pProtocol->TotalTests,
                                                   SSMFailLog.FailMsg );
 
-                  sprintf(TempStr, " Ch = %d L = %o"NL, pWordInfo->RxChan, pWordInfo->Label);
+                  snprintf(TempStr, sizeof(TempStr),
+                           " Ch = %d L = %o"NL, pWordInfo->RxChan, pWordInfo->Label);
                   strcat(SSMFailLog.FailMsg, TempStr);
 
                   // Debug testing
-                  sprintf (GSE_OutLine, "\r\nArinc429_ParameterTest: %s\r\n",
+                  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                            "\r\nArinc429_ParameterTest: %s\r\n",
                            SSMFailLog.FailMsg);
                   GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                   /*vcast_dont_instrument_end*/
@@ -3690,6 +3693,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 54  *****************
  * User: John Omalley Date: 12-11-12   Time: 7:19p

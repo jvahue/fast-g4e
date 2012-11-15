@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 35 $  $Date: 11/13/12 6:27p $
+      $Revision: 37 $  $Date: 12-11-14 6:51p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -107,8 +107,8 @@ static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_DATA* pErData );
  *****************************************************************************/
 ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
 {
-  UINT8 i;
-  UINT8 runMask  = 0x00;  // bit map of started/running EngineRuns.
+  UINT32   i;
+  UINT32   runMask;  // bit map of started/running EngineRuns.
   ER_STATE state = ER_STATE_STOPPED;
   BOOLEAN  bRunning  = FALSE;
   BOOLEAN  bStarting = FALSE;
@@ -117,20 +117,20 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
   // it in the provided location.
   if ( ENGRUN_ID_ANY == idx )
   {
-    runMask = 0x00;
+    runMask = 0;
 
     for (i = 0; i < MAX_ENGINES; ++i)
     {
       if (ER_STATE_RUNNING == m_engineRunData[i].erState)
       {
         // Set the bit in the flag
-        runMask |= 1 << i;
+        runMask |= 1u << i;
         bRunning = TRUE;
       }
       else if (ER_STATE_STARTING == m_engineRunData[i].erState)
       {
         // Set the bit in the flag
-        runMask |= 1 << i;
+        runMask |= 1u << i;
         bStarting = TRUE;
       }
     }
@@ -142,7 +142,7 @@ ER_STATE EngRunGetState(ENGRUN_INDEX idx, UINT8* engRunFlags)
     // If the caller has passed a field to return the list, fill it.
     if(NULL != engRunFlags)
     {
-      *engRunFlags = runMask;
+      *engRunFlags = (UINT8)(runMask & 0x000000FF);
     }
   }
   else // Get the current state of the requested engine run.
@@ -758,8 +758,6 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
     pSnsr = &(pErData->snsrSummary[i]);
 
     pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
-    // todo DaveB is this really necessary ? it will be
-	  // updated anyway during EngRunUpdateLog
     if(pSnsr->bValid)
     {
       pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);
@@ -1059,6 +1057,16 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 12-11-14   Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 12:25p
+ * Updated in $/software/control processor/code/application
+ * Code Review corrected loss of precision warning
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 11/13/12   Time: 6:27p
  * Updated in $/software/control processor/code/application

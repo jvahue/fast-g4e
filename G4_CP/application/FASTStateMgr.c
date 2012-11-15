@@ -12,7 +12,7 @@
 
      
    VERSION
-   $Revision: 18 $  $Date: 8/29/12 12:50p $
+   $Revision: 19 $  $Date: 12-11-14 2:00p $
 
 ******************************************************************************/
 
@@ -43,6 +43,9 @@
 #define IS_TASKS_EQUAL(A,Ai,B,Bi) ( (A->RunTasks[Ai] == B->RunTasks[Bi])  && \
 (!m_Tasks[A->RunTasks[Ai]].IsNumerated || (A->RunTasks[Ai+1] == B->RunTasks[Bi+1])) )
 
+#define RPN_PUSH(num) (rpn_stack[rpn_stack_pos++] = (num))
+#define RPN_POP       (rpn_stack[--rpn_stack_pos])
+#define RPN_STACK_CNT (rpn_stack_pos)
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -489,9 +492,6 @@ void FSM_StartNextStateTasks(const FSM_STATE* current, const FSM_STATE* next)
  * Notes:
  *
  *****************************************************************************/
-#define RPN_PUSH(num) (rpn_stack[rpn_stack_pos++] = (num))
-#define RPN_POP       (rpn_stack[--rpn_stack_pos])
-#define RPN_STACK_CNT (rpn_stack_pos)
 INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
 {
   //Okay to skip init, this routine is not called with an empty
@@ -927,6 +927,11 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Melanie Jutras Date: 12-11-14   Time: 2:00p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error - Moved defines
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 12:50p

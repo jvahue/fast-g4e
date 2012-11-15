@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 33 $  $Date: 12-11-08 3:03p $
+ $Revision: 35 $  $Date: 12-11-14 6:51p $
 
 ******************************************************************************/
 
@@ -198,7 +198,7 @@ void EventsInitialize ( void )
       //pEventData->bTableWasEntered  = FALSE;
 
       // If the event has a Start and End Expression then it must be configured
-      if ( (0 != pEventCfg->startExpr.Size) && (0 != pEventCfg->endExpr.Size) )
+      if ( (0 != pEventCfg->startExpr.size) && (0 != pEventCfg->endExpr.size) )
       {
          // Reset the events run time data
          EventResetData ( pEventCfg, pEventData );
@@ -596,7 +596,7 @@ void EventsUpdateTask ( void *pParam )
 
          // Make sure the event has been configured to start otherwise there is
          // nothing to do.
-         if ( pConfig->startExpr.Size != 0 )
+         if ( pConfig->startExpr.size != 0 )
          {
             // Countdown the number of samples until next read
             if (--pData->nRateCountdown == 0)
@@ -1166,7 +1166,7 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
    // Loop through all the regions
    for ( nRegIndex = (UINT32)REGION_A;
          (REGION_NOT_FOUND != pTableData->maximumCfgRegion) &&
-         (nRegIndex < (UINT32)pTableData->maximumCfgRegion);
+         (nRegIndex <= (UINT32)pTableData->maximumCfgRegion);
          nRegIndex++ )
    {
       pRegion   = &pTableCfg->region[nRegIndex];
@@ -1789,6 +1789,16 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *  MODIFICATIONS
  *    $History: Event.c $
  *
+ * *****************  Version 35  *****************
+ * User: John Omalley Date: 12-11-14   Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
+ *
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 4:01p
+ * Updated in $/software/control processor/code/application
+ * Code Review
+ * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application

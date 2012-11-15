@@ -9,7 +9,7 @@
     Description: Generated code for Password Authentication
 
     VERSION
-    $Revision: 4 $  $Date: 12-11-01 2:19p $
+    $Revision: 5 $  $Date: 12-11-14 2:00p $
 ******************************************************************************/
 /*< Generated code - Password Authentication block  start>*/
   const UINT8 key[] =
@@ -69,6 +69,11 @@ Package Defines
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: validate.h $
+ * 
+ * *****************  Version 5  *****************
+ * User: Melanie Jutras Date: 12-11-14   Time: 2:00p
+ * Updated in $/software/control processor/code/application
+ * SCR #1142 File Format Error
  * 
  * *****************  Version 4  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 2:19p

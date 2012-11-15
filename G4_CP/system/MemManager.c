@@ -17,7 +17,7 @@
     Notes:       
                  
   VERSION
-    $Revision: 44 $  $Date: 12-11-13 2:09p $                 
+    $Revision: 45 $  $Date: 12-11-14 7:20p $                 
                  
 ******************************************************************************/
 
@@ -826,7 +826,8 @@ RESULT MemChipErase (void)
 
       nMinutes = UTIL_MinuteTimerDisplay (FALSE);
 
-      if ( STPUI( nMinutes, eTpChipErase, 500) > ((Timeout_mS/MILLISECONDS_PER_SECOND)/SECONDS_PER_MINUTE))
+      if ( STPUI( nMinutes, eTpChipErase, 500) > 
+            ((Timeout_mS/MILLISECONDS_PER_SECOND)/SECONDS_PER_MINUTE))
       {
          GSE_DebugStr(NORMAL,TRUE, "MemChipErase: Erase Timeout");
          Result = SYS_MEM_ERASE_TIMEOUT;
@@ -1557,6 +1558,11 @@ void MemClearTask (void* pPBlock)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: MemManager.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 44  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:09p

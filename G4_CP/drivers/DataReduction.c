@@ -11,7 +11,7 @@
                   by linear curve fitting.
     
 VERSION
-     $Revision: 8 $  $Date: 8/28/12 1:06p $
+     $Revision: 9 $  $Date: 12-11-14 7:10p $
 
 ******************************************************************************/
 
@@ -57,33 +57,22 @@ VERSION
  *
  * Parameters:  REDUCTIONDATASTRUCT *pData [in/out]
  *
- * Returns:     REDUCE_STATUS - RS_KEEP,
- *                              RS_DELETE,
- *                              RS_ERROR
+ * Returns:     None
  *
- * Notes:       Will Always return RS_KEEP
- *              pData->EngVal must be initialized with the engineering value
+ * Notes:       pData->EngVal must be initialized with the engineering value
  *              pData->Time must be initialized with the time since power up
  *              pData->Tol must be initialized with the tolerance value
  *
  
  *****************************************************************************/
-REDUCE_STATUS DataReductionInit(REDUCTIONDATASTRUCT *pData)
+void DataReductionInit(REDUCTIONDATASTRUCT *pData)
 {
-   // Local Data
-   REDUCE_STATUS Status;
-   
-   // Initialize Local Data
-   Status       = RS_KEEP;
-   
    pData->b1    = pData->EngVal + pData->Tol;
    pData->b2    = pData->EngVal - pData->Tol;
    pData->m1    = 0;
    pData->m2    = 0;
    pData->T0    = pData->Time;
    pData->T_Old = pData->Time;
-   
-   return Status;
 }
 
 
@@ -232,6 +221,11 @@ void DataReductionGetCurrentValue (REDUCTIONDATASTRUCT *pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataReduction.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:10p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1076 - Code Review Update
  * 
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

@@ -8,7 +8,7 @@
     Description: Power Management Status and Control User Commands.
     
     VERSION
-      $Revision: 28 $  $Date: 12-11-13 2:31p $
+      $Revision: 29 $  $Date: 12-11-14 7:20p $
     
 ******************************************************************************/
 #ifndef POWERMANAGER_BODY
@@ -326,6 +326,11 @@ USER_HANDLER_RESULT PMMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManagerUserTables.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 12-11-14   Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1076 - Code Review Updates
  * 
  * *****************  Version 28  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:31p
