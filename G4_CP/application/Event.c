@@ -539,7 +539,8 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
-   for (nRegionIndex = (UINT32)REGION_A; nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
+   for (nRegionIndex = (UINT32)REGION_A; 
+        nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
    {
       pStats = &pTableData->regionStats[nRegionIndex];
 
