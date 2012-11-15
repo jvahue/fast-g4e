@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 78 $  $Date: 11/14/12 4:01p $
+  $Revision: 80 $  $Date: 11/14/12 8:03p $
 
 ******************************************************************************/
 
@@ -57,6 +57,8 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
+#define MAX_COND_STRING 30
+#define MATCH_ANY       FALSE
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -87,35 +89,27 @@ static TRIGGER_CONFIG     m_TriggerCfg[MAX_TRIGGERS];  // Trigger Cfg Array
 /*****************************************************************************/
 static void    TriggerUpdateTask    ( void *pParam);
 static void    TriggerProcess       ( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
-static BOOLEAN TriggerCheckStart    (TRIGGER_CONFIG *pTrigCfg,
-                                     TRIGGER_DATA *pTrigData,
+static BOOLEAN TriggerCheckStart    (const TRIGGER_CONFIG *pTrigCfg,
+                                     const TRIGGER_DATA *pTrigData,
                                      BOOLEAN *IsValid);
 static BOOLEAN TriggerCheckDuration ( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
-static TRIG_END_TYPE TriggerCheckEnd( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
+static TRIG_END_TYPE TriggerCheckEnd( const TRIGGER_CONFIG *pTrigCfg,
+									                    const TRIGGER_DATA *pTrigData );
 static void    TriggerLogEnd        ( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
 static void    TriggerReset         ( TRIGGER_DATA *pTrigData );
-static void    TriggerUpdateData    ( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
-static void    TriggerLogUpdate     ( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData );
+static void TriggerUpdateData       ( TRIGGER_DATA *pTrigData );
+
 static void    TriggersEnd          ( void );
-static void    TriggerEnableTask    ( BOOLEAN bEnable );
+static void    TriggerLogUpdate     ( TRIGGER_DATA *pTrigData);
 
 static void TriggerConvertLegacyCfg(INT32 trigIdx);
-#if 0
-static BOOLEAN TriggerCheckStartLegacy( TRIGGER_CONFIG *pTrigCfg,
-                                        TRIGGER_DATA *pTrigData,
-                                        BOOLEAN *IsValid );
-
-static TRIG_END_TYPE TriggerCheckEndLegacy  ( TRIGGER_CONFIG *pTrigCfg,
-                                              TRIGGER_DATA *pTrigData );
-#endif
-
 
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
 
 /******************************************************************************
- * Function:     TriggersInitialize
+ * Function:     TriggerInitialize
  *
  * Description:  Initializes the Trigger Data Structures and creates the
  *               Task for configured triggers.
@@ -130,12 +124,12 @@ static TRIG_END_TYPE TriggerCheckEndLegacy  ( TRIGGER_CONFIG *pTrigCfg,
 void TriggerInitialize(void)
 {
   // Local Data
-  UINT32          i;
+  INT32          i;
   UINT8           tsi;
 
   TRIGGER_CONFIG  *pTrigCfg;
   TRIGGER_DATA    *pTrigData;
-  TCB             TaskInfo;
+  TCB             tcb;
 
   // Add Trigger Tables to the User Manager
   User_AddRootCmd(&RootTriggerMsg);
@@ -169,7 +163,7 @@ void TriggerInitialize(void)
     pTrigData->nDuration_ms      = 0;
     pTrigData->nSampleCount      = 0;   /* For calculating averages */
     pTrigData->nRateCounts       = (UINT16)(MIFs_PER_SECOND / pTrigCfg->Rate);
-    pTrigData->nRateCountdown    = (UINT16)((pTrigCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
+    pTrigData->nRateCountdown    = (INT16)((pTrigCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pTrigData->bStartCompareFail = FALSE;
     pTrigData->bEndCompareFail   = FALSE;
     pTrigData->bLegacyConfig     = FALSE;
@@ -206,7 +200,7 @@ void TriggerInitialize(void)
         if ( SENSOR_UNUSED != pTrigCfg->TrigSensor[tsi].SensorIndex )
         {
           // Flag this sensor for tracking during trigger-active
-          SetBit( pTrigCfg->TrigSensor[tsi].SensorIndex,
+          SetBit( (INT32)pTrigCfg->TrigSensor[tsi].SensorIndex,
                   pTrigData->sensorMap,
                   sizeof(pTrigData->sensorMap) );
         }
@@ -233,26 +227,26 @@ void TriggerInitialize(void)
   }
 
   // Create Trigger Task - DT
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Trigger Task",_TRUNCATE);
-  TaskInfo.TaskID          = Trigger_Task;
-  TaskInfo.Function        = TriggerUpdateTask;
-  TaskInfo.Priority        = taskInfo[Trigger_Task].priority;
-  TaskInfo.Type            = taskInfo[Trigger_Task].taskType;
-  TaskInfo.modes           = taskInfo[Trigger_Task].modes;
-  TaskInfo.MIFrames        = taskInfo[Trigger_Task].MIFframes;
-  TaskInfo.Enabled         = TRUE;
-  TaskInfo.Locked          = FALSE;
-  TaskInfo.Rmt.InitialMif  = taskInfo[Trigger_Task].InitialMif;
-  TaskInfo.Rmt.MifRate     = taskInfo[Trigger_Task].MIFrate;
-  TaskInfo.pParamBlock     = NULL;
+  memset(&tcb, 0, sizeof(tcb));
+  strncpy_safe(tcb.Name, sizeof(tcb.Name),"Trigger Task",_TRUNCATE);
+  tcb.TaskID          = (TASK_INDEX) Trigger_Task;
+  tcb.Function        = TriggerUpdateTask;
+  tcb.Priority        = taskInfo[Trigger_Task].priority;
+  tcb.Type            = taskInfo[Trigger_Task].taskType;
+  tcb.modes           = taskInfo[Trigger_Task].modes;
+  tcb.MIFrames        = taskInfo[Trigger_Task].MIFframes;
+  tcb.Enabled         = TRUE;
+  tcb.Locked          = FALSE;
+  tcb.Rmt.InitialMif  = taskInfo[Trigger_Task].InitialMif;
+  tcb.Rmt.MifRate     = taskInfo[Trigger_Task].MIFrate;
+  tcb.pParamBlock     = NULL;
 
-  TmTaskCreate (&TaskInfo);
+  TmTaskCreate (&tcb);
 }
 
 
 /******************************************************************************
- * Function:     Trigger_IsActive
+ * Function:     TriggerIsActive
  *
  * Description:  The Trigger Is Active function will compared a passed in
  *               test-mask against the trigger flags and return a TRUE if any of the bits
@@ -266,7 +260,6 @@ void TriggerInitialize(void)
  * Notes:        None;
  *
  *****************************************************************************/
-#define MATCH_ANY  FALSE
 BOOLEAN TriggerIsActive (BITARRAY128* Flags)
 {
   // Local Data
@@ -363,8 +356,8 @@ BOOLEAN TriggerCompareValues (FLOAT32 LVal, COMPARISON Compare,
 UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   TRIGGER_HDR TriggerHdr[MAX_TRIGGERS];
-   UINT16      TriggerIndex;
+   TRIGGER_HDR triggerHdr[MAX_TRIGGERS];
+   UINT16      triggerIndex;
    INT8        *pBuffer;
    UINT16      nRemaining;
    UINT16      nTotal;
@@ -373,49 +366,50 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( TriggerHdr, 0, sizeof(TriggerHdr) );
+   memset ( triggerHdr, 0, sizeof(triggerHdr) );
 
    // Loop through all the triggers
-   for ( TriggerIndex = 0;
-         ((TriggerIndex < MAX_TRIGGERS) && (nRemaining > sizeof (TriggerHdr[TriggerIndex])));
-         TriggerIndex++ )
+   for ( triggerIndex = 0;
+         ((triggerIndex < MAX_TRIGGERS) && (nRemaining > sizeof (TRIGGER_HDR)));
+         triggerIndex++ )
    {
       // Copy the trigger names
-      strncpy_safe( TriggerHdr[TriggerIndex].Name,
-                    sizeof(TriggerHdr[TriggerIndex].Name),
-                    m_TriggerCfg[TriggerIndex].TriggerName,
+      strncpy_safe( triggerHdr[triggerIndex].Name,
+                    sizeof(triggerHdr[triggerIndex].Name),
+                    m_TriggerCfg[triggerIndex].TriggerName,
                     _TRUNCATE);
       // Copy the sensor indexes
-      TriggerHdr[TriggerIndex].SensorIndexA =
-         m_TriggerCfg[TriggerIndex].TrigSensor[0].SensorIndex;
-      TriggerHdr[TriggerIndex].SensorIndexB =
-         m_TriggerCfg[TriggerIndex].TrigSensor[1].SensorIndex;
-      TriggerHdr[TriggerIndex].SensorIndexC =
-         m_TriggerCfg[TriggerIndex].TrigSensor[2].SensorIndex;
-      TriggerHdr[TriggerIndex].SensorIndexD =
-         m_TriggerCfg[TriggerIndex].TrigSensor[3].SensorIndex;
+      triggerHdr[triggerIndex].SensorIndexA =
+         m_TriggerCfg[triggerIndex].TrigSensor[0].SensorIndex;
+      triggerHdr[triggerIndex].SensorIndexB =
+         m_TriggerCfg[triggerIndex].TrigSensor[1].SensorIndex;
+      triggerHdr[triggerIndex].SensorIndexC =
+         m_TriggerCfg[triggerIndex].TrigSensor[2].SensorIndex;
+      triggerHdr[triggerIndex].SensorIndexD =
+         m_TriggerCfg[triggerIndex].TrigSensor[3].SensorIndex;
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (TriggerHdr[TriggerIndex]);
-      nRemaining -= sizeof (TriggerHdr[TriggerIndex]);
+      nTotal     += sizeof (TRIGGER_HDR);
+      nRemaining -= sizeof (TRIGGER_HDR);
    }
    // Copy the Trigger header to the buffer
-   memcpy ( pBuffer, TriggerHdr, nTotal );
+   memcpy ( pBuffer, triggerHdr, nTotal );
    // Return the total number of bytes written
    return ( nTotal );
 }
 
 /******************************************************************************
- * Function:     TriggerGetState | IMPLEMENTS GetState INTERFACE to
- *                               | FAST STATE MGR
+ * Function:     TriggerGetState
  *
  * Description:  Returns trigger active/inactive state.  Function call signature
  *               satisfies the GetState interface to FastStateMgr module.
  *
- * Parameters:   [in] Index of the Trigger [0..63]
+ * Parameters:   [in] trigIdx: Index of the Trigger [0..63]
  *                    if the trigger is invalid , it returns inactive.
  *                    Out of range parameter will always return inactive.
  *
  * Returns:      active/inactive state of the passed trigger.
+ *
+ * Notes:        None.
  *
  *****************************************************************************/
 BOOLEAN TriggerGetState( TRIGGER_INDEX trigIdx )
@@ -431,21 +425,23 @@ BOOLEAN TriggerGetState( TRIGGER_INDEX trigIdx )
 
 /******************************************************************************
  * Function:     TriggerValidGetState
-*
+ *
  * Description:  Returns trigger valid/invalid state.
-*
- * Parameters:   [in] Index of the Trigger[0..63]
-*
+ *
+ * Parameters:   [in] trigIdx of the Trigger[0..63]
+ *
  * Returns:      active/inactive state of the passed trigger.
-*
-*****************************************************************************/
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
 BOOLEAN TriggerValidGetState( TRIGGER_INDEX trigIdx )
 {
   BOOLEAN status = FALSE;
 
   if (trigIdx != TRIGGER_UNUSED)
   {
-    status =  GetBit(trigIdx, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+    status =  GetBit((INT32)trigIdx, m_triggerValidFlags, sizeof(m_triggerValidFlags));
   }
   return status;
 }
@@ -453,25 +449,6 @@ BOOLEAN TriggerValidGetState( TRIGGER_INDEX trigIdx )
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
-
-/******************************************************************************
- * Function:     TriggerEnableTask
- *
- * Description:  Function used to enable and disable trigger
- *               processing.
- *
- * Parameters:   BOOLEAN bEnable - Enables the trigger task
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-static
-void TriggerEnableTask ( BOOLEAN bEnable )
-{
-   TmTaskEnable (Trigger_Task, bEnable);
-}
 
 /******************************************************************************
  * Function:     TriggerUpdateTask
@@ -502,7 +479,7 @@ static void TriggerUpdateTask( void *pParam )
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      TriggersEnd();
-     TriggerEnableTask(FALSE);
+     TmTaskEnable( (TASK_INDEX) Trigger_Task, FALSE );
    }
    else // Normal task execution.
    {
@@ -547,8 +524,8 @@ static
 void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 {
    // Local Data
-   BOOLEAN StartCriteriaMet;
-   BOOLEAN IsStartValid;
+   BOOLEAN startCriteriaMet;
+   BOOLEAN isStartValid;
 
    switch (pTrigData->State)
    {
@@ -556,28 +533,32 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
       case TRIG_START:
 
          // Check if all trigger sensors have reached thresh-hold
-         StartCriteriaMet = TriggerCheckStart(pTrigCfg, pTrigData, &IsStartValid);
+         startCriteriaMet = TriggerCheckStart(pTrigCfg, pTrigData, &isStartValid);
 
-         if( IsStartValid )
+         if( isStartValid )
          {
-           SetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+           SetBit((INT32)pTrigData->TriggerIndex,
+                   m_triggerValidFlags,
+                   sizeof(m_triggerValidFlags));
          }
          else
          {
-           ResetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+           ResetBit((INT32)pTrigData->TriggerIndex,
+                     m_triggerValidFlags,
+                     sizeof(m_triggerValidFlags));
          }
 
-         if (TRUE == StartCriteriaMet)
+         if (TRUE == startCriteriaMet)
          {
             // Record Trigger data for each sensor
-            TriggerUpdateData(pTrigCfg, pTrigData);
+            TriggerUpdateData( pTrigData);
             // Check duration
             if (TRUE == TriggerCheckDuration(pTrigCfg, pTrigData))
             {
                // Change state to Trigger Active
                pTrigData->State  = TRIG_ACTIVE;
                // Set global trigger flag
-               SetBit(pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
+               SetBit((INT32)pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
             }
          }
          // Check if trigger stopped being met before duration was met
@@ -602,16 +583,20 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             pTrigData->State  = TRIG_START;
 
             // Reset trigger flag
-            ResetBit(pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
+            ResetBit((INT32)pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
 
             // Set the validity based on EndType
             if( pTrigData->EndType == TRIG_SENSOR_INVALID )
             {
-                ResetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+                ResetBit((INT32)pTrigData->TriggerIndex,
+                         m_triggerValidFlags,
+                         sizeof(m_triggerValidFlags));
             }
             else
             {
-                SetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+                SetBit((INT32)pTrigData->TriggerIndex,
+                       m_triggerValidFlags,
+                       sizeof(m_triggerValidFlags));
             }
 
             // Log the End - if we are a legacy trigger
@@ -626,10 +611,11 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
          else // Trigger is still active
          {
             // If we're not out of the Trigger yet, then update the data.
-            TriggerUpdateData( pTrigCfg, pTrigData);
+            TriggerUpdateData( pTrigData);
          }
          break;
 
+      case TRIG_NONE:
       default:
          // FATAL ERROR WITH FILTER TYPE
          FATAL("Trigger State Fail: %d - %s - State = %d",
@@ -656,39 +642,31 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
  * Notes:        None.
  *
  *****************************************************************************/
-static BOOLEAN TriggerCheckStart(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData,
-                          BOOLEAN *IsValid)
+static BOOLEAN TriggerCheckStart(const TRIGGER_CONFIG *pTrigCfg,
+                                 const TRIGGER_DATA *pTrigData, BOOLEAN *IsValid)
 {
   // Local Data
-  BOOLEAN StartCriteriaMet;
-  BOOLEAN ValidTmp;
+  BOOLEAN startCriteriaMet;
+  BOOLEAN validTmp;
 
   //Catch IsValid passed as null, preset to true
-  IsValid = IsValid == NULL ? &ValidTmp : IsValid;
+  IsValid = IsValid == NULL ? &validTmp : IsValid;
   *IsValid = TRUE;
 
   // Set validity of 'this' trigger.
   // This supports self-referencing triggers to recover if a referenced sensor
   // is marked as failed from a prior run and may have healed.
-  SetBit(pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+  SetBit((INT32)pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
 
   // Call the configured Trigger-start check rule.
   // Criteria is in return value.
   // Validity of sensors is in IsValid pointer.
-  StartCriteriaMet = (BOOLEAN)EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
-                                                 pTrigData->TriggerIndex,
+  startCriteriaMet = (BOOLEAN)EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
+                                                 (INT32)pTrigData->TriggerIndex,
                                                  &pTrigCfg->StartExpr,
                                                  IsValid);
 
-  // If any sensor in the expression was unused/invalid, the start state must be false
-  // todo DaveB move this inside the eval so apps using expressions directly will be
-  // false when invalid.
-  if(FALSE == *IsValid)
-  {
-    StartCriteriaMet = FALSE;
-  }
-
-  return StartCriteriaMet;
+  return startCriteriaMet;
 }
 
 
@@ -721,7 +699,9 @@ static BOOLEAN TriggerCheckDuration (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTr
 
     bDurationMet = TRUE;
     // Check if flag is already set
-    if ( FALSE == GetBit(pTrigData->TriggerIndex,m_triggerFlags,sizeof(m_triggerFlags) ) )
+    if ( FALSE == GetBit( (INT32)pTrigData->TriggerIndex,
+						   m_triggerFlags,
+						   sizeof(m_triggerFlags) ) )
     {
       // If this trigger is a legacy definition(has sensors defined) start the log.
       if (pTrigData->bLegacyConfig)
@@ -754,11 +734,12 @@ static BOOLEAN TriggerCheckDuration (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTr
  * Notes:        None
  *
  *****************************************************************************/
-TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
+static TRIG_END_TYPE TriggerCheckEnd (const TRIGGER_CONFIG *pTrigCfg,
+							   const TRIGGER_DATA *pTrigData)
 {
    // Local Data
   BOOLEAN        validity;
-  TRIG_END_TYPE  EndType = TRIG_NO_END; // Assume/default to still running
+  TRIG_END_TYPE  endType = TRIG_NO_END; // Assume/default to still running
   INT32          result;
 
   // Process the end expression.
@@ -772,14 +753,14 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
   if(pTrigCfg->EndExpr.size > 0)
   {
     result = EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
-                                pTrigData->TriggerIndex,
+                                (INT32)pTrigData->TriggerIndex,
                                 &pTrigCfg->EndExpr,
                                 &validity );
   }
   else
   {
     result = EvalExeExpression(EVAL_CALLER_TYPE_TRIGGER,
-                               pTrigData->TriggerIndex,
+                               (INT32)pTrigData->TriggerIndex,
                                &pTrigCfg->StartExpr,
                                &validity );
     // If the returned value is 0 or 1, do a boolean inversion.
@@ -788,14 +769,14 @@ TRIG_END_TYPE TriggerCheckEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData
 
   if(result > 0 && validity)
   {
-    EndType = TRIG_END_CRITERIA;
+    endType = TRIG_END_CRITERIA;
   }
   else if(!validity)
   {
-    EndType = TRIG_SENSOR_INVALID;
+    endType = TRIG_SENSOR_INVALID;
   }
 
-  return EndType;
+  return endType;
 }
 
 /******************************************************************************
@@ -819,7 +800,7 @@ void TriggerLogEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
                                        pTrigCfg->TriggerName );
 
    //Log the data collected
-   TriggerLogUpdate( pTrigCfg, pTrigData );
+   TriggerLogUpdate( pTrigData );
    LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
                    LOG_PRIORITY_LOW,
                    &m_triggerLog[pTrigData->TriggerIndex],
@@ -864,16 +845,15 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
  *
  * Description:  Initialize the Trigger data and continue logging a Trigger.
  *
- * Parameters:   TRIGGER_CONFIG *pTrigCfg  - Static Trigger Configuration
- *               TRIGGER_DATA   *pTrigData - Dynamic Trigger Data
+ * Parameters:   TRIGGER_DATA   *pTrigData - Dynamic Trigger Data
+ *
  *
  * Returns:      None.
  *
  * Notes:        None
  *
  *****************************************************************************/
-static
-void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
+static void TriggerUpdateData( TRIGGER_DATA *pTrigData )
 {
    // Local Data
    FLOAT32  oneOverN;
@@ -933,8 +913,8 @@ void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
  * Description:  The trigger log update function creates a system log
  *               containing the trigger data.
  *
- * Parameters:   TRIGGER_CONFIG *pTrigCfg,
- *               TRIGGER_DATA   *pTrigData
+ * Parameters:   [in]  *pTrigData TRIGGER_DATA
+ *
  *
  * Returns:      None.
  *
@@ -942,7 +922,7 @@ void TriggerUpdateData( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
  *
  *****************************************************************************/
 static
-void TriggerLogUpdate( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
+void TriggerLogUpdate( TRIGGER_DATA *pTrigData)
 {
   // Local Data
   FLOAT32         oneOverN;
@@ -1001,7 +981,7 @@ void TriggerLogUpdate( TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
  * Function:     TriggersEnd
  *
  * Description:  Force end all active Triggers
- *               TBD - Should be down when system shutsdown.
+ *
  *
  * Parameters:   none
  *
@@ -1034,7 +1014,7 @@ void TriggersEnd( void)
         pTrigData->EndType = TRIG_COMMANDED_END;
         if( pTrigData->bLegacyConfig )
         {
-          TriggerLogUpdate ( pTrigCfg, pTrigData );
+          TriggerLogUpdate ( pTrigData );
           LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
             LOG_PRIORITY_LOW,
             &m_triggerLog[pTrigData->TriggerIndex],
@@ -1046,154 +1026,6 @@ void TriggersEnd( void)
     }
   }
 }
-
-#if 0
-/******************************************************************************
- * Function:     TriggerCheckStartLegacy
- *
- * Description:  Checks the start of a trigger using legacy approach of
- *               AND-ing the results of all defined sensor.
- *
- * Parameters:   TRIGGER_CONFIG *pTrigCfg,
- *               TRIGGER_DATA   *pTrigData
- *               [out] *IsValid  Optional boolean to return valid/not valid
- *                               status on the sensors driving this trigger
- *
- * Returns:      BOOLEAN StartCriteriaMet
- *
- * Notes:        None.
- *
- *****************************************************************************/
-BOOLEAN TriggerCheckStartLegacy(TRIGGER_CONFIG *pTrigCfg,
-                                  TRIGGER_DATA *pTrigData,
-                                  BOOLEAN *IsValid)
-{
-  // Local Data
-  BOOLEAN     StartCriteriaMet;
-  UINT16      nIndex;
-  TRIG_SENSOR *pTrigSensor;
-  FLOAT32     LVal;
-
-  // Initialize Local Data
-  StartCriteriaMet = TRUE;
-
-  // Loop through all comparisons for this trigger
-  for ( nIndex = 0; nIndex < MAX_TRIG_SENSORS; nIndex++)
-  {
-    pTrigSensor = &(pTrigCfg->TrigSensor[nIndex]);
-
-    // All unused sensors are set to 255 verify sensor index is valid
-    if ( pTrigSensor->SensorIndex < MAX_SENSORS)
-    {
-      // Verify current sensor is being used and valid
-      if ( ( SensorIsUsed(pTrigSensor->SensorIndex)) &&
-        ( SensorIsValid(pTrigSensor->SensorIndex)) )
-      {
-        // Get Current Value
-        LVal = SensorGetValue(pTrigSensor->SensorIndex);
-
-        // Compare sensor to configured trigger parameters
-        StartCriteriaMet &= TriggerCompareValues ( LVal,
-          pTrigSensor->Start.Compare,
-          pTrigSensor->Start.fValue,
-          pTrigData->fValuePrevious[nIndex]);
-        // Save the current value as previous
-        pTrigData->fValuePrevious[nIndex] = LVal;
-      }
-      else // Sensor defined as Unused or sensor is not valid
-      {
-        StartCriteriaMet = FALSE;
-        //SensorValid? T: Set to last value F: Set to FALSE
-        *IsValid = SensorIsValid(pTrigSensor->SensorIndex) ? *IsValid : FALSE;
-      }
-
-    }
-    else // Sensor Index not valid
-    {
-      break;
-    }
-  }
-
-  return StartCriteriaMet;
-}
-#endif
-
-#if 0
-/******************************************************************************
- * Function:     TriggerCheckEndLegacy
- *
- * Description:  Checks the end of a trigger using legacy approach of
- *               OR-ing the results of all defined sensor.
- *
- * Parameters:   TRIGGER_CONFIG *pTrigCfg,
- *               TRIGGER_DATA   *pTrigData
- *
- *
- * Returns:      TRIG_END_TYPE EndType
- *
- * Notes:        None.
- *
- *****************************************************************************/
-TRIG_END_TYPE TriggerCheckEndLegacy(TRIGGER_CONFIG *pTrigCfg,
-                                    TRIGGER_DATA *pTrigData)
-{
-  // Local Data
-  TRIG_END_TYPE EndType;
-  BOOLEAN       EndCriteriaMet;
-  UINT16        nIndex;
-  TRIG_SENSOR   *pTrigSensor;
-  FLOAT32       LVal;
-
-  // Initialize Local Data
-  EndType        = TRIG_NO_END;
-  EndCriteriaMet = FALSE;
-
-  // Loop through all defined trigger sensors
-  for ( nIndex = 0; nIndex < MAX_TRIG_SENSORS; nIndex++)
-  {
-    // Set pointer to current sensor
-    pTrigSensor = &(pTrigCfg->TrigSensor[nIndex]);
-
-    // All unused sensors are set to 255 verify sensor index is valid
-    if ( pTrigSensor->SensorIndex < MAX_SENSORS )
-    {
-      // Check if sensor is actually configured to be used
-      if ( SensorIsUsed(pTrigSensor->SensorIndex) )
-      {
-        // Determine if sensor is valid
-        if ( SensorIsValid(pTrigSensor->SensorIndex) )
-        {
-          // Store the current value to check
-          LVal = SensorGetValue(pTrigSensor->SensorIndex);
-
-          // End trigger criteria
-          EndCriteriaMet |= TriggerCompareValues( LVal,
-            pTrigSensor->End.Compare,
-            pTrigSensor->End.fValue,
-            pTrigData->fValuePrevious[nIndex] );
-          // Make the current the previous
-          pTrigData->fValuePrevious[nIndex] = LVal;
-        }
-        else // Sensor Went invalid - end trigger
-        {
-          EndType = TRIG_SENSOR_INVALID;
-        }
-      }
-    }
-    else // Sensor index is not valid, stop checking sensors
-    {
-      break;
-    }
-  }
-  // Check if end criteria was met and no error type detected
-  if ((TRUE == EndCriteriaMet) && (TRIG_NO_END == EndType))
-  {
-    EndType = TRIG_END_CRITERIA;
-  }
-  return EndType;
-}
-
-#endif
 
 
 /******************************************************************************
@@ -1216,7 +1048,7 @@ TRIG_END_TYPE TriggerCheckEndLegacy(TRIGGER_CONFIG *pTrigCfg,
 *               incrementally up to location '3' without gaps.
 *
 *****************************************************************************/
-EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
+BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
 {
    return( 0 != m_TriggerCfg[trigIdx].StartExpr.size );
 }
@@ -1227,30 +1059,30 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
  *
  * Description:
  *
- * Parameters:    [in]
+ * Parameters:    [in] trigIdx- The index of the trigger to be converted from
+ *                              legacy format to Eval Expression.
  *
- *                [out]
  *
- * Returns:
+ * Returns:      None
  *
  * Notes:
  *
  *
  *****************************************************************************/
-#define MAX_COND_STRING 30
+
 static void TriggerConvertLegacyCfg(INT32 trigIdx )
 {
   INT32   i;
   INT32   exprCnt;
   INT32   bytesMoved;
-  INT32   StrToBinResult;
+  INT32   strToBinResult;
   CHAR    logicalOp;
   CHAR    exprString[255];
   CHAR*   pStr;
   FLOAT32 tempFloat;
 
-  TRIGGER_CONFIG  ConfigTriggerTemp;
-  TRIGGER_CONFIG* pTrigCfg = &ConfigTriggerTemp;
+  TRIGGER_CONFIG  configTriggerTemp;
+  TRIGGER_CONFIG* pTrigCfg = &configTriggerTemp;
   EVAL_EXPR*      pExpr;
   TRIG_CRITERIA*  pCriteria;
 
@@ -1260,9 +1092,9 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 
   // Work in a local temp buffer so we don't change the config
   // in the event a valid criteria string can't be built.
-  memcpy(&ConfigTriggerTemp,
+  memcpy(&configTriggerTemp,
          &CfgMgr_ConfigPtr()->TriggerConfigs[trigIdx],
-         sizeof(ConfigTriggerTemp));
+         sizeof(configTriggerTemp));
 
 
   // Make two Eval Expressions; start (0) and end (1)
@@ -1339,13 +1171,13 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 
     // Finished making an expression string for this criteria.
     // Send it to the evaluator for encoding and a proof-run.
-    StrToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx,
+    strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx,
                                        exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
-    if ( StrToBinResult >= 0)
+    if ( strToBinResult >= 0)
     {
       // Update the local m_TriggerCfg working area ONLY. This change is not propagated to
       // ShadowRAM/EEPROM
-      memcpy(&m_TriggerCfg[trigIdx], &ConfigTriggerTemp, sizeof(ConfigTriggerTemp));
+      memcpy(&m_TriggerCfg[trigIdx], &configTriggerTemp, sizeof(configTriggerTemp));
 
       GSE_DebugStr(NORMAL,FALSE,
                    "Trigger: Trigger[%d] - %s Criteria expression successfully created.\r\n%s",
@@ -1358,7 +1190,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
                     "Trigger: Trigger[%d] - %s Criteria expression failed: %s\r\n%s",
                      trigIdx,
                      critString[exprCnt],
-                     EvalGetMsgFromErrCode(StrToBinResult), exprString);
+                     EvalGetMsgFromErrCode(strToBinResult), exprString);
     }
 
 
@@ -1371,6 +1203,16 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  *  MODIFICATIONS
  *    $History: trigger.c $
  * 
+ * *****************  Version 80  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 8:03p
+ * Updated in $/software/control processor/code/system
+ * Code Review trigger restore static storage class
+ * 
+ * *****************  Version 79  *****************
+ * User: Contractor V&v Date: 11/14/12   Time: 7:57p
+ * Updated in $/software/control processor/code/system
+ * Code Review trigger
+ *
  * *****************  Version 78  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 4:01p
  * Updated in $/software/control processor/code/system
