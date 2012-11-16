@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 10 $  $Date: 12-11-13 12:10p $
+$Revision: 11 $  $Date: 12-11-15 7:03p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -44,37 +44,37 @@ static ACTION_FLAGS  stateActionFlagsTemp;
 /*****************************************************************************/
 //Prototype for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
-USER_HANDLER_RESULT Action_UserCfg    ( USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr );
-USER_HANDLER_RESULT Action_State(USER_DATA_TYPE DataType,
-                                 USER_MSG_PARAM Param,
-                                 UINT32 Index,
-                                 const void *SetPtr,
-                                 void **GetPtr);
-USER_HANDLER_RESULT Action_Flags(USER_DATA_TYPE DataType,
-                                 USER_MSG_PARAM Param,
-                                 UINT32 Index,
-                                 const void *SetPtr,
-                                 void **GetPtr);
-USER_HANDLER_RESULT ActionOut_UserCfg ( USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                         void **GetPtr );
+static USER_HANDLER_RESULT Action_UserCfg    ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+static USER_HANDLER_RESULT Action_State      ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+static USER_HANDLER_RESULT Action_Flags      ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+static USER_HANDLER_RESULT ActionOut_UserCfg ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
 
-USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr );
-USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
-                                       USER_MSG_PARAM Param,
-                                       UINT32 Index,
-                                       const void *SetPtr,
-                                       void **GetPtr);
+static USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+static USER_HANDLER_RESULT Action_ClearLatch ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -104,9 +104,9 @@ static USER_MSG_TBL actionCmd [] =
 static USER_MSG_TBL actionStatus [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange              DataLimit   EnumTbl*/
-   { "ACTIVE_FLAGS",      NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagActive,          0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
-   { "LATCH_FLAGS",       NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagLatch,           0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
-   { "ACK_FLAGS",         NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, &stateActionFlagsTemp.flagACK,             0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
+   { "ACTIVE_FLAGS",      NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, stateActionFlagsTemp.flagActive,          0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
+   { "LATCH_FLAGS",       NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, stateActionFlagsTemp.flagLatch,           0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
+   { "ACK_FLAGS",         NO_NEXT_TABLE,     Action_Flags,      USER_TYPE_128_LIST, USER_RO, stateActionFlagsTemp.flagACK,             0,(MAX_ACTION_DEFINES-1), NO_LIMIT,    NULL },
    { "PERSIST_STATE",     NO_NEXT_TABLE,     Action_State,      USER_TYPE_BOOLEAN,  USER_RO, &stateActionTemp.persist.bState,           -1,-1,                    NO_LIMIT,    NULL },
    { "PERSIST_LATCH",     NO_NEXT_TABLE,     Action_State,      USER_TYPE_BOOLEAN,  USER_RO, &stateActionTemp.persist.bLatch,           -1,-1,                    NO_LIMIT,    NULL },
    { "PERSIST_ACTION_ID", NO_NEXT_TABLE,     Action_State,      USER_TYPE_UINT16,   USER_RO, &stateActionTemp.persist.actionNum,        -1,-1,                    NO_LIMIT,    NULL },
@@ -164,6 +164,7 @@ USER_MSG_TBL    rootActionMsg = {"ACTION", actionRoot, NULL, NO_HANDLER_DATA};
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT Action_UserCfg ( USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
                                      UINT32 Index,
@@ -218,6 +219,7 @@ USER_HANDLER_RESULT Action_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT ActionOut_UserCfg ( USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
@@ -272,7 +274,7 @@ USER_HANDLER_RESULT ActionOut_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-
+static
 USER_HANDLER_RESULT Action_State(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
@@ -313,7 +315,7 @@ USER_HANDLER_RESULT Action_State(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-
+static
 USER_HANDLER_RESULT Action_Flags(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
@@ -355,6 +357,7 @@ USER_HANDLER_RESULT Action_Flags(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
@@ -408,6 +411,7 @@ USER_HANDLER_RESULT Action_ShowConfig ( USER_DATA_TYPE DataType,
  *
  * Notes:        None
  *****************************************************************************/
+static
 USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
@@ -424,6 +428,11 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ *
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-11-15   Time: 7:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review Updates
  *
  * *****************  Version 10  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 12:10p
