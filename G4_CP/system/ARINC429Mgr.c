@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 55 $  $Date: 12-11-14 7:20p $
+     $Revision: 56 $  $Date: 12-11-15 7:04p $
 
 ******************************************************************************/
 
@@ -313,7 +313,7 @@ void Arinc429MgrInitTasks (void)
    Arinc429MgrInitialize ( );
 
    //Add an entry in the user message handler table
-   User_AddRootCmd(&Arinc429RootTblPtr);
+   User_AddRootCmd(&arinc429RootTblPtr);
 
    // Restore User Default
    // memcpy(&m_Arinc429Cfg, &( CfgMgr_ConfigPtr()->Arinc429Config ), sizeof( m_Arinc429Cfg ));
@@ -403,7 +403,8 @@ void Arinc429MgrInitTasks (void)
             // Create PBIT Arinc429 Mgr Startup PBIT Log
             m_StartupLog.result = SYS_A429_PBIT_FAIL;
             m_StartupLog.ch = nChannel;
-            Flt_SetStatus(m_Arinc429Cfg.RxChan[nChannel].PBITSysCond, SYS_ID_A429_PBIT_DRV_FAIL,
+            Flt_SetStatus(m_Arinc429Cfg.RxChan[nChannel].PBITSysCond, 
+                          SYS_ID_A429_PBIT_DRV_FAIL,
                           &m_StartupLog, sizeof(ARINC429_SYS_PBIT_STARTUP_LOG));
          }
       }
@@ -2112,9 +2113,9 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
             /*vcast_dont_instrument_end*/
 #endif
-            // Return previous good value
-            *pWordValid = FALSE;
-            break;
+           // Return previous good value
+           *pWordValid = FALSE;
+           break;
          }
          else
          {
@@ -3064,28 +3065,26 @@ void Arinc429MgrCreateTimeOutSystemLog( RESULT resultType, UINT8 ch )
 
    pArinc429Cfg = &m_Arinc429Cfg.RxChan[ch];
 
-   switch (resultType)
+   if ( SYS_A429_STARTUP_TIMEOUT == resultType )
    {
-      case SYS_A429_STARTUP_TIMEOUT:
-         timeoutLog.result      = resultType;
-         timeoutLog.cfg_timeout = pArinc429Cfg->ChannelStartup_s;
-         timeoutLog.ch          = ch;
-         sysId                  = SYS_ID_A429_CBIT_STARTUP_FAIL;
-         break;
-
-      case SYS_A429_DATA_LOSS_TIMEOUT:
-         timeoutLog.result      = resultType;
-         timeoutLog.cfg_timeout = pArinc429Cfg->ChannelTimeOut_s;
-         timeoutLog.ch          = ch;
-         sysId                  = SYS_ID_A429_CBIT_DATA_LOSS_FAIL;
-         break;
-
-      default:
-         // No such case!
-         FATAL("Unrecognized resultType = %d", resultType);
-         break;
-   } // End switch (resultType)
-
+      timeoutLog.result      = resultType;
+      timeoutLog.cfg_timeout = pArinc429Cfg->ChannelStartup_s;
+      timeoutLog.ch          = ch;
+      sysId                  = SYS_ID_A429_CBIT_STARTUP_FAIL;
+   }
+   else if ( SYS_A429_DATA_LOSS_TIMEOUT == resultType )
+   {
+      timeoutLog.result      = resultType;
+      timeoutLog.cfg_timeout = pArinc429Cfg->ChannelTimeOut_s;
+      timeoutLog.ch          = ch;
+      sysId                  = SYS_ID_A429_CBIT_DATA_LOSS_FAIL;
+   }
+   else
+   {
+      // No such case!
+      FATAL("Unrecognized resultType = %d", resultType);
+   } // end if (resultType)
+   
    Flt_SetStatus(pArinc429Cfg->ChannelSysCond, sysId, &timeoutLog,
                  sizeof(timeoutLog));
 }
@@ -3158,7 +3157,7 @@ void Arinc429MgrDetermineSSMFailure ( UINT32 *pFailCount, UINT8 TotalTests, char
  *
  *****************************************************************************/
 static UINT16 Arinc429MgrReadReduceSnapshot( ARINC429_SNAPSHOT_RECORD_PTR pBuff,
-                                             UINT16 nMaxRecords,
+                                             UINT16 nMaxRecords, 
                                              ARINC429_CHAN_DATA_PTR pChanData,
                                              ARINC429_RX_CFG_PTR pCfg, BOOLEAN bStartSnap )
 {
@@ -3430,9 +3429,10 @@ void Arinc429MgrCreateAllInternalLogs ( void )
  *
  * Parameters:   None.
  *
+ * Returns:      None.
+ * 
  * Notes:        None.
  *
- * Returns:      None.
  ****************************************************************************/
 void Arinc429MgrDisableLiveStream(void)
 {
@@ -3469,7 +3469,7 @@ void Arinc429MgrDispSingleArincChan ( void  )
   ARINC429_RECORD rawDataRecords[ARINC429_MAX_RECORDS];
 
   // Single ch display factor 21 = 115.2 KBps / 100 msec / 4 chan max @ 75% loading
-  #define ARINC429_DEBUG_DISPLAY_SINGLE_CH_MAX  21
+  #define ARINC429_DEBUG_DISP_SINGLE_CH_MAX  21
 
   // Determine number of active channels
   numActiveChannels = 0;
@@ -3484,7 +3484,7 @@ void Arinc429MgrDispSingleArincChan ( void  )
   // Determine number of rows that can be displayed
   if (numActiveChannels > 0)
   {
-    numRows = ARINC429_DEBUG_DISPLAY_SINGLE_CH_MAX / numActiveChannels;
+    numRows = ARINC429_DEBUG_DISP_SINGLE_CH_MAX / numActiveChannels;
   }
 
   for ( j = 0; j < ARINC_RX_CHAN_MAX; j++ )
@@ -3693,6 +3693,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: John Omalley Date: 12-11-15   Time: 7:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 55  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
