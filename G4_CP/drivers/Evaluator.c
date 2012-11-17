@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 23 $  $Date: 11/14/12 4:01p $
+  $Revision: 24 $  $Date: 11/16/12 8:13p $
 
 ******************************************************************************/
 
@@ -72,7 +72,7 @@
 
 
 // Keep this list in sync with enum RPN_ERR
-const CHAR* m_EvalRetValEnumString[12] =
+static const CHAR* m_EvalRetValEnumString[12] =
 {
   "RPN_ERR_UNKNOWN"                  ,  // place unused.
   "RPN_ERR_INDEX_NOT_NUMERIC"        ,  // Unrecognized operand input name
@@ -93,18 +93,18 @@ const CHAR* m_EvalRetValEnumString[12] =
 #undef OPCMD
 #define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd)\
              {OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd}
-const EVAL_OPCODE_TBL_ENTRY m_OpCodeTable[EVAL_OPCODE_MAX] = {EVAL_OPCODE_LIST};
+static const EVAL_OPCODE_TBL_ENTRY m_OpCodeTable[EVAL_OPCODE_MAX] = {EVAL_OPCODE_LIST};
 
 
 //  DataAccessTable[] allocation and initialization
 #undef DAI
 #define DAI(OpCode, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc) \
-           {OpCode, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc}
-const EVAL_DATAACCESS m_DataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
+           {OpCode##_DAI, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc}
+static const EVAL_DATAACCESS m_DataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
 
 // Evaluation rpn stack used at runtime
-EVAL_RPN_ENTRY rpn_stack[EVAL_EXPR_BIN_LEN];
-INT32          rpn_stack_pos = 0;
+static EVAL_RPN_ENTRY rpn_stack[EVAL_EXPR_BIN_LEN];
+static INT32          rpn_stack_pos = 0;
 
 // Array for storing prior sensors values for all managed expressions.
 
@@ -621,7 +621,7 @@ static BOOLEAN EvalVerifyDataType(DATATYPE expectedType,
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
+static BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
@@ -650,7 +650,7 @@ BOOLEAN EvalLoadConstValue( EVAL_EXE_CONTEXT* context )
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadConstFalse( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalLoadConstFalse( EVAL_EXE_CONTEXT* context)
 {
   // A constant is always valid,
   EVAL_RPN_ENTRY rslt;
@@ -680,7 +680,7 @@ BOOLEAN EvalLoadConstFalse( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
@@ -751,7 +751,7 @@ BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalLoadFuncCall ( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalLoadFuncCall ( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY  rslt;
   const EVAL_DATAACCESS* dataAcc;
@@ -807,7 +807,7 @@ BOOLEAN EvalLoadFuncCall ( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalCompareOperands( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalCompareOperands( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
@@ -907,7 +907,7 @@ BOOLEAN EvalCompareOperands( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalIsNotEqualPrev( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalIsNotEqualPrev( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprndCurrent;
   EVAL_RPN_ENTRY oprndPrevious;
@@ -972,7 +972,7 @@ BOOLEAN EvalIsNotEqualPrev( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformNot( EVAL_EXE_CONTEXT* context)
+static BOOLEAN EvalPerformNot( EVAL_EXE_CONTEXT* context)
 {
   EVAL_RPN_ENTRY oprnd;
   EVAL_RPN_ENTRY rslt;
@@ -1025,7 +1025,7 @@ BOOLEAN EvalPerformNot( EVAL_EXE_CONTEXT* context)
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
+static BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
@@ -1080,7 +1080,7 @@ BOOLEAN EvalPerformAnd( EVAL_EXE_CONTEXT* context )
  *
  *
  *****************************************************************************/
-BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
+static BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
 {
   EVAL_RPN_ENTRY oprndLeft;
   EVAL_RPN_ENTRY oprndRight;
@@ -1146,7 +1146,7 @@ BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
  *
  *
  *****************************************************************************/
-INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
+static INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   FLOAT32  temp_float;
   CHAR*    end;
@@ -1198,7 +1198,7 @@ INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  *
  *****************************************************************************/
-INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
+static INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   EVAL_CMD cmd;
   INT32    retval;
@@ -1240,7 +1240,7 @@ INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  *
  *****************************************************************************/
-INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
+static INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   EVAL_CMD cmd;
   INT32    retval = 0;
@@ -1310,7 +1310,7 @@ INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  *
  *****************************************************************************/
-INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
+static INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   EVAL_CMD cmd;
 
@@ -1341,7 +1341,7 @@ INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  *
  *****************************************************************************/
-INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
+static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 {
   EVAL_CMD cmd;
   INT32    retval;
@@ -1380,7 +1380,7 @@ INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
  *
  *
  *****************************************************************************/
-INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+static INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, EVAL_OPRND_LEN + 1, "%s%03d", m_OpCodeTable[tblIdx].token,
                                                      (INT32)cmd->data);
@@ -1402,7 +1402,7 @@ INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  *
  *****************************************************************************/
-INT32 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+static INT32 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, MAX_FP_STRING, "%f", cmd->data);
 }
@@ -1423,7 +1423,7 @@ INT32 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  *
  *****************************************************************************/
-INT32 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+static INT32 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return snprintf(str, m_OpCodeTable[tblIdx].tokenLen + 1, "%s", m_OpCodeTable[tblIdx].token);
 }
@@ -1444,7 +1444,7 @@ INT32 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
  *
  *
  *****************************************************************************/
-INT32 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
+static INT32 EvalFmtOperStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 {
   return  snprintf(str, m_OpCodeTable[tblIdx].tokenLen + 1, "%s", m_OpCodeTable[tblIdx].token);
 }
@@ -1629,6 +1629,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
  *  MODIFICATIONS
  *    $History: Evaluator.c $
  * 
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:13p
+ * Updated in $/software/control processor/code/drivers
+ * Code Review updates
+ *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 4:01p
  * Updated in $/software/control processor/code/drivers

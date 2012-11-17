@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 20 $  $Date: 11/12/12 6:39p $
+$Revision: 21 $  $Date: 11/16/12 8:11p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -42,35 +42,35 @@ static ENGRUN_DATA     m_DataTemp;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-USER_HANDLER_RESULT       EngRunUserCfg(USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr);
-
-USER_HANDLER_RESULT       EngRunState(USER_DATA_TYPE DataType,
-                                      USER_MSG_PARAM Param,
-                                      UINT32 Index,
-                                      const void *SetPtr,
-                                      void **GetPtr);
-
-USER_HANDLER_RESULT       EngRunShowConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT  EngRunUserCfg( USER_DATA_TYPE DataType,
                                            USER_MSG_PARAM Param,
                                            UINT32 Index,
                                            const void *SetPtr,
                                            void **GetPtr);
 
-USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
-                                USER_MSG_PARAM Param,
-                                UINT32 Index,
-                                const void *SetPtr,
-                                void **GetPtr);
+static USER_HANDLER_RESULT  EngRunState(USER_DATA_TYPE DataType,
+                                        USER_MSG_PARAM Param,
+                                        UINT32 Index,
+                                        const void *SetPtr,
+                                        void **GetPtr);
 
-USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
-                                USER_MSG_PARAM Param,
-                                UINT32 Index,
-                                const void *SetPtr,
-                                void **GetPtr);
+static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr);
+
+static USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
+                                        USER_MSG_PARAM Param,
+                                        UINT32 Index,
+                                        const void *SetPtr,
+                                        void **GetPtr);
+
+static USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr);
 
 /*****************************************************************************/
 /* User command tables                                                       */
@@ -94,7 +94,7 @@ USER_ENUM_TBL engRunIdEnum[] =
   { NULL, 0 }
 };
 
-USER_ENUM_TBL engRunRateType[] =
+static USER_ENUM_TBL engRunRateType[] =
 { { "1HZ"    , ER_1HZ          },
   { "2HZ"    , ER_2HZ          },
   { "4HZ"    , ER_4HZ          },
@@ -181,7 +181,7 @@ static USER_MSG_TBL engRunStatusCmd [] =
 static USER_MSG_TBL engRunCfgCmd[] =
 {
   /*Str              Next Tbl Ptr   Handler Func     Data Type        Access    Parameter                  IndexRange         DataLimit             EnumTbl*/
-  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,     USER_RW,  &m_CfgTemp.engineName,     0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
+  {"NAME",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_STR,     USER_RW,  m_CfgTemp.engineName,      0,(MAX_ENGINES-1), 0,MAX_ENGINERUN_NAME, NULL            },
   {"STARTTRIGID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.startTrigID,    0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
   {"RUNTRIGID",      NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.runTrigID,      0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
   {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.stopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             TriggerIndexType},
@@ -189,7 +189,7 @@ static USER_MSG_TBL engRunCfgCmd[] =
   {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
   {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
   {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_SNS_LIST,USER_RW,  &m_CfgTemp.sensorMap,      0,(MAX_ENGINES-1), 0,MAX_ENGRUN_SENSORS, NULL            },
+  {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_SNS_LIST,USER_RW,  m_CfgTemp.sensorMap,       0,(MAX_ENGINES-1), 0,MAX_ENGRUN_SENSORS, NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
 
@@ -206,7 +206,7 @@ static USER_MSG_TBL engIdCmd[] =
 static USER_MSG_TBL engInfoCmd[] =
 {
    /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange         DataLimit             EnumTbl       */
-   {"SERVICE_PLAN",  NO_NEXT_TABLE, EngSPUserInfo, USER_TYPE_STR,     USER_RW,  &m_EngineInfo.servicePlan,   -1,-1,             0,MAX_ENGINE_ID,      NULL          },
+   {"SERVICE_PLAN",  NO_NEXT_TABLE, EngSPUserInfo, USER_TYPE_STR,     USER_RW,  m_EngineInfo.servicePlan,    -1,-1,             0,MAX_ENGINE_ID,      NULL          },
    {"ENGINE",        engIdCmd,      NULL,          NO_HANDLER_DATA,                                                                                                 },
    {NULL,            NULL,          NULL,          NO_HANDLER_DATA}
 };
@@ -253,7 +253,7 @@ static USER_MSG_TBL rootEngRunMsg = {"ENG",engRunCmd, NULL,NO_HANDLER_DATA};
  * Notes:        none
  *
  *****************************************************************************/
-USER_HANDLER_RESULT EngRunUserCfg(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT EngRunUserCfg(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
                                   const void *SetPtr,
@@ -305,7 +305,7 @@ USER_HANDLER_RESULT EngRunUserCfg(USER_DATA_TYPE DataType,
  * Notes:        none
  *
  *****************************************************************************/
-USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
                                   const void *SetPtr,
@@ -356,7 +356,7 @@ USER_HANDLER_RESULT EngUserInfo(USER_DATA_TYPE DataType,
  * Notes:        none
  *
  *****************************************************************************/
-USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
                                   const void *SetPtr,
@@ -403,7 +403,7 @@ USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
 * Notes:
 *****************************************************************************/
 
-USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
                                   const void *SetPtr,
@@ -444,7 +444,7 @@ USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
  *
  * Notes:
  *****************************************************************************/
-USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
                                      UINT32 Index,
                                      const void *SetPtr,
@@ -485,6 +485,11 @@ USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
  * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:11p
+ * Updated in $/software/control processor/code/application
+ * CodeReview
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:39p
  * Updated in $/software/control processor/code/application
