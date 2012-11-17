@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 24 $  $Date: 12-11-13 5:46p $
+    $Revision: 25 $  $Date: 12-11-16 10:32p $
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -37,41 +37,41 @@
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-USER_HANDLER_RESULT MSSC_GsmCfgMsg(USER_DATA_TYPE DataType,
-                                         USER_MSG_PARAM Param,
-                                         UINT32 Index,
-                                         const void *SetPtr,
-                                         void **GetPtr);
+static USER_HANDLER_RESULT MSSC_GsmCfgMsg ( USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr);
 
-USER_HANDLER_RESULT MSSC_CfgMsg(USER_DATA_TYPE DataType,
-                                USER_MSG_PARAM Param,
-                                UINT32 Index,
-                                const void *SetPtr,
-                                void **GetPtr);
+static USER_HANDLER_RESULT MSSC_CfgMsg   ( USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr);
 
-USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
-                                  USER_MSG_PARAM Param,
-                                  UINT32 Index,
-                                  const void *SetPtr,
-                                  void **GetPtr);
+static USER_HANDLER_RESULT MSSC_ShellCmd ( USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr);
 
-USER_HANDLER_RESULT MSSC_ShowConfig(USER_DATA_TYPE DataType,
-                                    USER_MSG_PARAM Param,
-                                    UINT32 Index,
-                                    const void *SetPtr,
-                                    void **GetPtr);
+static USER_HANDLER_RESULT MSSC_ShowConfig ( USER_DATA_TYPE DataType,
+                                             USER_MSG_PARAM Param,
+                                             UINT32 Index,
+                                             const void *SetPtr,
+                                             void **GetPtr);
 
-USER_HANDLER_RESULT MSSC_RefreshMSInfo(USER_DATA_TYPE DataType,
-                                       USER_MSG_PARAM Param,
-                                       UINT32 Index,
-                                       const void *SetPtr,
-                                       void **GetPtr);
+static USER_HANDLER_RESULT MSSC_RefreshMSInfo ( USER_DATA_TYPE DataType,
+                                                USER_MSG_PARAM Param,
+                                                UINT32 Index,
+                                                const void *SetPtr,
+                                                void **GetPtr );
 
-USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
-                                   USER_MSG_PARAM Param,
-                                   UINT32 Index,
-                                   const void *SetPtr,
-                                   void **GetPtr);
+static USER_HANDLER_RESULT MSSC_MSTimeMsg ( USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr );
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -79,7 +79,7 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-static USER_ENUM_TBL MSSC_GsmModeCfgEnum[] =
+static USER_ENUM_TBL mSSC_GsmModeCfgEnum[] =
   {
     {"GPRS",MSCP_GSM_MODE_GPRS},
     {"GSM",MSCP_GSM_MODE_GSM},
@@ -94,56 +94,56 @@ USER_ENUM_TBL MSSC_MssimStatusEnum[] =
     {NULL, 0}
   };
 
-static USER_MSG_TBL MsStatusGsmMsgs[] =
+static USER_MSG_TBL msStatusGsmMsgs[] =
 {  /*Str            Next Tbl Ptr      Handler Func.          Data Type           Access        Parameter                    IndexRange   DataLimit EnumTbl*/
-   { "IMEI"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Imei ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "SCID"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Scid ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "IMEI"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Imei ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "SCID"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Scid ,   -1, -1    ,  NO_LIMIT, NULL },
 /*  Note: requesting Signal sends the command over to the MS to re-refresh all GSM status information */
-   { "SIGNAL"     , NO_NEXT_TABLE  ,  MSSC_RefreshMSInfo   , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Signal , -1, -1    ,  NO_LIMIT, NULL },
-   { "OPERATOR"   , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Operator,-1, -1    ,  NO_LIMIT, NULL },
-   { "CIMI"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Cimi ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "CREG"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Creg ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "LAC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Lac ,    -1, -1    ,  NO_LIMIT, NULL },
-   { "CELL"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Cell ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "NCC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Ncc ,    -1, -1    ,  NO_LIMIT, NULL },
-   { "BCC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Bcc ,    -1, -1    ,  NO_LIMIT, NULL },
-   { "CNUM"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Cnum ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "VOLTAGE"    , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Sbv ,    -1, -1    ,  NO_LIMIT, NULL },
-   { "SCTM"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Sctm ,   -1, -1    ,  NO_LIMIT, NULL },
-   { "OTHER"      , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.Gsm.Other ,  -1, -1    ,  NO_LIMIT, NULL },
+   { "SIGNAL"     , NO_NEXT_TABLE  ,  MSSC_RefreshMSInfo   , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Signal , -1, -1    ,  NO_LIMIT, NULL },
+   { "OPERATOR"   , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Operator,-1, -1    ,  NO_LIMIT, NULL },
+   { "CIMI"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Cimi ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "CREG"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Creg ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "LAC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Lac ,    -1, -1    ,  NO_LIMIT, NULL },
+   { "CELL"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Cell ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "NCC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Ncc ,    -1, -1    ,  NO_LIMIT, NULL },
+   { "BCC"        , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Bcc ,    -1, -1    ,  NO_LIMIT, NULL },
+   { "CNUM"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Cnum ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "VOLTAGE"    , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Sbv ,    -1, -1    ,  NO_LIMIT, NULL },
+   { "SCTM"       , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Sctm ,   -1, -1    ,  NO_LIMIT, NULL },
+   { "OTHER"      , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.Gsm.Other ,  -1, -1    ,  NO_LIMIT, NULL },
    { NULL         , NULL,             NULL           , NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL MsStatusMsgs[] =
+static USER_MSG_TBL msStatusMsgs[] =
 {  /*Str            Next Tbl Ptr      Handler Func.          Data Type           Access        Parameter               IndexRange   DataLimit     EnumTbl*/
    { "MS_RDY"     , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_ENUM   ,  USER_RO     , &m_MssimStatus           , -1, -1    , NO_LIMIT  ,   MSSC_MssimStatusEnum },
    { "CF_MOUNTED" , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_YESNO  ,  USER_RO     , &m_CompactFlashMounted   , -1, -1    , NO_LIMIT  ,   NULL },
    { "CLIENT_CONN", NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_YESNO  ,  USER_RO     , &m_IsClientConnected     , -1, -1    , NO_LIMIT  ,   NULL },
    { "VPN_CONN"   , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_YESNO  ,  USER_RO     , &m_IsVPNConnected        , -1, -1    , NO_LIMIT  ,   NULL },
-   { "MSSIM_VER"  , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.MssimVer , -1, -1    , NO_LIMIT  ,   NULL },
-   { "SETRIX_VER" , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.SetrixVer, -1, -1    , NO_LIMIT  ,   NULL },
-   { "PW_VER"     , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , &m_GetMSInfoRsp.PWEHVer  , -1, -1    , NO_LIMIT  ,   NULL },
+   { "MSSIM_VER"  , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.MssimVer ,  -1, -1    , NO_LIMIT  ,   NULL },
+   { "SETRIX_VER" , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.SetrixVer,  -1, -1    , NO_LIMIT  ,   NULL },
+   { "PW_VER"     , NO_NEXT_TABLE  ,  User_GenericAccessor , USER_TYPE_STR    ,  USER_RO     , m_GetMSInfoRsp.PWEHVer  ,  -1, -1    , NO_LIMIT  ,   NULL },
    { "MS_TIME"    , NO_NEXT_TABLE  ,  MSSC_MSTimeMsg       , USER_TYPE_STR    ,  USER_RO     , &m_MsTime                , -1, -1    , NO_LIMIT  ,   NULL },
-   { "GSM"        , MsStatusGsmMsgs,  NULL                 , NO_HANDLER_DATA} ,
+   { "GSM"        , msStatusGsmMsgs,  NULL                 , NO_HANDLER_DATA} ,
    { NULL         , NULL           ,  NULL                 , NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL MsCfgGsmMsgs[] =
+static USER_MSG_TBL msCfgGsmMsgs[] =
 {  /*Str            Next Tbl Ptr      Handler Func.      Data Type           Access        Parameter             IndexRange    DataLimit               EnumTbl*/
-   { "CARRIER"    , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sCarrier  , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "ISPNB"      , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sPhone    , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "MODE"       , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_ENUM   ,  USER_RW     , &m_GsmCfgTemp.mode      , -1, -1   ,NO_LIMIT                , MSSC_GsmModeCfgEnum },
-   { "APN"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sAPN      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "USER"       , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sUser     , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "PASSWORD"   , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sPassword , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "MCC"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sMCC      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
-   { "MNC"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , &m_GsmCfgTemp.sMNC      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "CARRIER"    , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sCarrier  , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "ISPNB"      , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sPhone    , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "MODE"       , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_ENUM   ,  USER_RW     , &m_GsmCfgTemp.mode     , -1, -1   ,NO_LIMIT                , mSSC_GsmModeCfgEnum },
+   { "APN"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sAPN      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "USER"       , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sUser     , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "PASSWORD"   , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sPassword , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "MCC"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sMCC      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
+   { "MNC"        , NO_NEXT_TABLE  ,  MSSC_GsmCfgMsg   , USER_TYPE_STR    ,  USER_RW     , m_GsmCfgTemp.sMNC      , -1, -1   ,0, MSSC_CFG_STR_MAX_LEN , NULL },
    { NULL,    NULL,        NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL MsCfgMsgs[] =
+static USER_MSG_TBL msCfgMsgs[] =
 {  /*Str            Next Tbl Ptr      Handler Func.      Data Type           Access    Parameter                       IndexRange   DataLimit    EnumTbl*/
-   { "GSM"        , MsCfgGsmMsgs   ,  NULL             , NO_HANDLER_DATA},
+   { "GSM"        , msCfgGsmMsgs   ,  NULL             , NO_HANDLER_DATA},
    { "PBITSYSCOND", NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_ENUM,     USER_RW,  &m_MsCfgTemp.sysCondPBIT,       -1, -1,      NO_LIMIT,    Flt_UserEnumStatus },
    { "CBITSYSCOND", NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_ENUM,     USER_RW,  &m_MsCfgTemp.sysCondCBIT,       -1, -1,      NO_LIMIT,    Flt_UserEnumStatus },
    { "HBSTARTUP_S", NO_NEXT_TABLE  ,  MSSC_CfgMsg      , USER_TYPE_UINT16,   USER_RW,  &m_MsCfgTemp.heartBeatStartup_s,-1, -1,      NO_LIMIT,    NULL },
@@ -153,10 +153,10 @@ static USER_MSG_TBL MsCfgMsgs[] =
    { NULL         , NULL           ,  NULL             , NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL MsMsgs[] =
+static USER_MSG_TBL msMsgs[] =
 {   /*Str           Next Tbl Ptr      Handler Func.      Data Type           Access                          Parameter    IndexRange    DataLimit           EnumTbl*/
-   { "STATUS"     , MsStatusMsgs   ,  NULL             , NO_HANDLER_DATA}  ,
-   { "CFG"        , MsCfgMsgs      ,  NULL             , NO_HANDLER_DATA}  ,
+   { "STATUS"     , msStatusMsgs   ,  NULL             , NO_HANDLER_DATA}  ,
+   { "CFG"        , msCfgMsgs      ,  NULL             , NO_HANDLER_DATA}  ,
    { "CMD"        , NO_NEXT_TABLE  ,  MSSC_ShellCmd    , USER_TYPE_STR     , USER_RW                         ,NULL      , -1, -1       , 1, 1024           , NULL },
    { DISPLAY_CFG  , NO_NEXT_TABLE  ,  MSSC_ShowConfig  , USER_TYPE_ACTION  ,(USER_RO|USER_NO_LOG|USER_GSE)   ,NULL      , -1, -1       , NO_LIMIT          , NULL},
    { NULL         , NULL           ,  NULL             , NO_HANDLER_DATA}
@@ -164,7 +164,7 @@ static USER_MSG_TBL MsMsgs[] =
 #pragma ghs endnowarning
 
 static
-USER_MSG_TBL MsRoot   = {"MS", MsMsgs, NULL, NO_HANDLER_DATA};
+USER_MSG_TBL MsRoot   = {"MS", msMsgs, NULL, NO_HANDLER_DATA};
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -197,6 +197,7 @@ USER_MSG_TBL MsRoot   = {"MS", MsMsgs, NULL, NO_HANDLER_DATA};
 * Notes:
 *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_GsmCfgMsg(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -248,6 +249,7 @@ USER_HANDLER_RESULT MSSC_GsmCfgMsg(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -262,7 +264,7 @@ USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
   {
     if(m_MSShellRsp.Len != 0)
     { //buffer length is already checked and terminated by MS response handler
-      *GetPtr = &m_MSShellRsp.Str;
+      *GetPtr = m_MSShellRsp.Str;
       userResult = USER_RESULT_OK;
       m_MSShellRsp.Len = 0;
     }
@@ -271,7 +273,7 @@ USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
   {
     cmd.Len = strlen(str);
     strncpy_safe(cmd.Str,sizeof(cmd.Str),str,_TRUNCATE);
-    if(SYS_OK == MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
+    if(SYS_OK == MSI_PutCommand((UINT16)CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,30000,MSSC_MSICallback_ShellCmd))
     {
       userResult = USER_RESULT_OK;
@@ -305,6 +307,7 @@ USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_ShowConfig(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -316,7 +319,7 @@ USER_HANDLER_RESULT MSSC_ShowConfig(USER_DATA_TYPE DataType,
    const INT16 i = 0;
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
-   USER_MSG_TBL* pCfgTable = MsCfgMsgs;  // Get pointer to config entry;
+   USER_MSG_TBL* pCfgTable = msCfgMsgs;  // Get pointer to config entry;
 
    //Top-level name is a single indented space
    CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
@@ -361,6 +364,7 @@ USER_HANDLER_RESULT MSSC_ShowConfig(USER_DATA_TYPE DataType,
 * Notes:
 *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_RefreshMSInfo(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
@@ -399,6 +403,7 @@ USER_HANDLER_RESULT MSSC_RefreshMSInfo(USER_DATA_TYPE DataType,
 * Notes:
 *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_CfgMsg(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -450,6 +455,7 @@ USER_HANDLER_RESULT MSSC_CfgMsg(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static
 USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
                                    UINT32 Index,
@@ -459,7 +465,7 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
   static CHAR timeStr[80]; // TimeStr needs to be static since,
                            // GetPtr will hold a ref to it on return.
 
-  USER_HANDLER_RESULT UserResult = USER_RESULT_ERROR;
+  USER_HANDLER_RESULT userResult = USER_RESULT_ERROR;
 
   if(SetPtr == NULL)
   {
@@ -473,16 +479,21 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
              m_MsTime.MilliSecond );
 
     *GetPtr = timeStr;
-     UserResult = USER_RESULT_OK;
+     userResult = USER_RESULT_OK;
 
   }
 
-  return UserResult;
+  return userResult;
 }
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-11-16   Time: 10:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

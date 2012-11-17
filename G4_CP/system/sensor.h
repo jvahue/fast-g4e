@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 39 $  $Date: 12-11-12 4:46p $
+      $Revision: 40 $  $Date: 12-11-16 10:32p $
 
 ******************************************************************************/
 
@@ -273,7 +273,7 @@ typedef enum
 typedef enum
 {
   LINEAR_SLOPE   = 0,          /* If linear, SLOPE  is this index */
-  LINEAR_OFFSET  = 1,          /* If linear, OFFSET is this index */
+  LINEAR_OFFSET  = 1           /* If linear, OFFSET is this index */
 } LINEAR_CONV;
 
 typedef enum
@@ -305,7 +305,6 @@ typedef enum
 {
   LD_NONE,                   /* No Live Data Displayed     */
   LD_ASCII,                  /* ASCII live Data Displayed  */
-  LD_BINARY                  /* Binary Live Data Displayed */
 } SENSOR_LD_ENUM;
 
 typedef enum
@@ -480,8 +479,7 @@ typedef struct
     GET_SENSOR        pGetSensorData;               /* Pointer to function to get data   */
     RUN_TEST          pTestSensor;                  /* Ptr to func that tests the sensor */
     INTERFACE_ACTIVE  pInterfaceActive;             /* Ptr to func that tests activity   */
-}
-SENSOR;
+} SENSOR;
 
 // Storage container definition for Sensor failure log
 #pragma pack(1)
@@ -556,6 +554,11 @@ EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 40  *****************
+ * User: John Omalley Date: 12-11-16   Time: 10:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

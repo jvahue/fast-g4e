@@ -13,7 +13,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 65 $  $Date: 12-11-12 10:14a $
+      $Revision: 66 $  $Date: 12-11-16 10:32p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -150,17 +150,15 @@ void MSI_Init(void)
  * Parameters:  [in]  Id      : Command Id
  *              [in]  data*   : Pointer to the data buffer to transmit
  *              [in]  size    : Size, in bytes, of the data
- *              [in]  TO      : Message timeout in milliseconds.  If a
+ *              [in]  TOms      : Message timeout in milliseconds.  If a
  *                              response is not returned by the micro-server,
  *                              within this timeout, a "timeout" status is
  *                              sent to the response handler.
  *                              A value of -1 will disable
- *              [in]  handler*: Pointer to a response handler for the
+ *              [in]  RspHandler*: Pointer to a response handler for the
  *                              micro-server response.  If this parameter
  *                              is null, the response packet is discarded
  *                              when received.
- *              [in]  NoCheck  : Allow command to be sent, even if the
- *                               MSSIM is not alive
  *
  * Returns:     SYS_OK: Message successfully sent to the queue
  *              SYS_SEND_BUF_FULL: Send buffer is full, try later
@@ -196,17 +194,15 @@ RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
  * Parameters:  [in]  Id      : Command Id
  *              [in]  data*   : Pointer to the data buffer to transmit
  *              [in]  size    : Size, in bytes, of the data
- *              [in]  TO      : Message timeout in milliseconds.  If a
+ *              [in]  TOmS      : Message timeout in milliseconds.  If a
  *                              response is not returned by the micro-server,
  *                              within this timeout, a "timeout" status is
  *                              sent to the response handler.
  *                              A value of -1 will disable
- *              [in]  handler*: Pointer to a response handler for the
+ *              [in]  RspHandler: Pointer to a response handler for the
  *                              micro-server response.  If this parameter
  *                              is null, the response packet is discarded
  *                              when received.
- *              [in]  NoCheck  : Allow command to be sent, even if the
- *                               MSSIM is not alive
  *
  * Returns:     SYS_OK: Message successfully sent to the queue
  *              SYS_SEND_BUF_FULL: Send buffer is full, try later
@@ -936,6 +932,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 66  *****************
+ * User: John Omalley Date: 12-11-16   Time: 10:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:14a

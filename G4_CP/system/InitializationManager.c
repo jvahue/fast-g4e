@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 117 $  $Date: 12-11-14 7:20p $
+     $Revision: 118 $  $Date: 12-11-16 9:10p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -58,7 +58,7 @@ extern UINT32   __ghs_pramend;
 /*****************************************************************************/
 // Num seconds to wait for user to press any key to signal startup in
 // degraded mode.
-#define PROCEED_AS_DEGRADED_PROMPT_INTERVAL 5
+#define PROCEED_DEGRADED_PROMPT_INT 5
 #undef DEBUG_STARTUP_TIME
 #define INIT_MGR_DESC_SIZE         32
 #define INIT_MGR_DRV_INIT_BUF_SIZE 80
@@ -66,7 +66,7 @@ extern UINT32   __ghs_pramend;
 
 #define INIT_MGR_SYS_STARTUP_ID             99
 #define INIT_MGR_APP_STARTUP_ID            200
-#define INIT_MGR_PROMPTCONTINUE_STARTUP_ID 300
+#define INIT_MGR_PROMPTCONT_STARTUP_ID 300
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -74,18 +74,18 @@ extern UINT32   __ghs_pramend;
 typedef RESULT (*DRIVER_INIT_FUNC)(SYS_APP_ID *, void *, UINT16 *);
 
 typedef struct {
-  DRIVER_INIT_FUNC InitFunction;
-  RESULT InitResult;
-  INT8 Description[INIT_MGR_DESC_SIZE];
+  DRIVER_INIT_FUNC initFunction;
+  RESULT initResult;
+  INT8 description[INIT_MGR_DESC_SIZE];
 } DRV_INIT_FUNC;
 
 #define INIT_MGR_PBIT_LOG_MAX_SIZE 128
 #define INIT_MGR_MAX_DRV  14
 
 typedef struct {
-  RESULT InitResult;
-  SYS_APP_ID SysId;
-  LOG_PRIORITY Priority; // Init to "0" which is HIGH_PRIORITY
+  RESULT initResult;
+  SYS_APP_ID sysId;
+  LOG_PRIORITY priority; // Init to "0" which is HIGH_PRIORITY
   UINT16 nSize;
   UINT8 data[INIT_MGR_PBIT_LOG_MAX_SIZE];       // Maximum PBIT log must be < 128 bytes
   TIMESTAMP ts;
@@ -106,9 +106,9 @@ typedef struct {
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-INIT_MGR_PBIT_LOGS InitMgrPbitLogs[INIT_MGR_MAX_DRV];
+static INIT_MGR_PBIT_LOGS initMgrPbitLogs[INIT_MGR_MAX_DRV];
 
-static const DRV_INIT_FUNC DriverInitList[INIT_MGR_MAX_DRV] =
+static const DRV_INIT_FUNC driverInitList[INIT_MGR_MAX_DRV] =
                                     {{DIO_Init,              DRV_OK,"Discrete I/0  "},  //1
                                      {TTMR_Init,             DRV_OK,"System Timer  "},  //2
                                      {SPI_Init,              DRV_OK,"SPI Bus       "},  //3
@@ -195,7 +195,7 @@ void Im_InitializeControlProcessor(void)
 
 #ifdef DEGRADE_MODE_DEBUG
    /*vcast_dont_instrument_start*/
-   sprintf( assertLogBuf,
+   snprintf( assertLogBuf, sizeof (assertLogBuf),
        "\r\n\r\nWd1: 0x%08x Wd2: 0x%08x WdFlag: 0x%08x "
        "WdCnt: 0x%08x UnkCnt: 0x%08x PBitCnt: 0x%08x\r\n",
        SRAM_INIT_SAVE, SRAM_INV_SAVE, watchdogFlag,
@@ -291,19 +291,19 @@ static void Im_Driver_Initialize(void)
   CHAR resultStr[RESULTCODES_MAX_STR_LEN];
   INT8 strBuf[INIT_MGR_DRV_INIT_BUF_SIZE];
   INT8 timeStr[INIT_MGR_DRV_INIT_BUF_SIZE];
-  DRV_INIT_FUNC driverInits[sizeof(DriverInitList)/sizeof(DRV_INIT_FUNC)];
+  DRV_INIT_FUNC driverInits[sizeof(driverInitList)/sizeof(DRV_INIT_FUNC)];
 
   INT_MGR_PBIT_LOG_PTR pLog;
   TIMESTAMP ts;
   TIMESTRUCT time_struct;
 
   //Create a local, writable copy of the driver init list
-  memcpy(driverInits, DriverInitList, sizeof(driverInits));
+  memcpy(driverInits, driverInitList, sizeof(driverInits));
 
   //Clear InitMgrPbitLog Struct
-  memset ( InitMgrPbitLogs, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV );
+  memset ( initMgrPbitLogs, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV );
 
-  pLog = &InitMgrPbitLogs[0];
+  pLog = &initMgrPbitLogs[0];
   memset ( pLog, 0x00, sizeof(INIT_MGR_PBIT_LOGS) * INIT_MGR_MAX_DRV );
 
   //Init all drivers in the driver init list defined at the top of this file
@@ -311,10 +311,10 @@ static void Im_Driver_Initialize(void)
   __EI();
   for(i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
-    driverInits[i].InitResult = driverInits[i].InitFunction(&pLog->SysId,
+    driverInits[i].initResult = driverInits[i].initFunction(&pLog->sysId,
                                             (void *) pLog->data,  &pLog->nSize);
     // Record Result to be used to in Im_RecordDrvStartup_Logs() to
-    pLog->InitResult = driverInits[i].InitResult;
+    pLog->initResult = driverInits[i].initResult;
     pLog++;
     STARTUP_ID((i+1));
   }
@@ -324,7 +324,7 @@ static void Im_Driver_Initialize(void)
 
   //Init ts to current time.  Note, SPI and RTC Drivers have been initialized at this point !
   CM_GetTimeAsTimestamp( &ts );
-  pLog = &InitMgrPbitLogs[0];
+  pLog = &initMgrPbitLogs[0];
   for (i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
     pLog->ts = ts;
@@ -344,8 +344,8 @@ static void Im_Driver_Initialize(void)
   //for(i = 0; i < NumDrivers; i++)
   for(i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
-    snprintf(strBuf, sizeof(strBuf),"  %s = %s\r\n",driverInits[i].Description,
-                              RcGetResultCodeString(driverInits[i].InitResult,resultStr));
+    snprintf(strBuf, sizeof(strBuf),"  %s = %s\r\n",driverInits[i].description,
+                              RcGetResultCodeString(driverInits[i].initResult,resultStr));
     GSE_PutLine(strBuf);
   }
 
@@ -580,12 +580,12 @@ static void Im_RecordDrvStartup_Logs(void)
   // clear this in preparation of PBIT results
   DIO_SetPin( LED_FLT, DIO_SetLow);
 
-  pLog = &InitMgrPbitLogs[0];
+  pLog = &initMgrPbitLogs[0];
   for(i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
-    if (pLog->InitResult != DRV_OK)
+    if (pLog->initResult != DRV_OK)
     {
-      LogWriteSystem( pLog->SysId, pLog->Priority, (void *) pLog->data, pLog->nSize,
+      LogWriteSystem( pLog->sysId, pLog->priority, (void *) pLog->data, pLog->nSize,
                       &pLog->ts );
 
       // PBIT error turn on LED FLT
@@ -609,16 +609,17 @@ static void Im_RecordDrvStartup_Logs(void)
 * Notes:
 *
 *****************************************************************************/
+static
 BOOLEAN Im_PromptContinueAsDegraded(void)
 {
   BOOLEAN proceedAsDegraded = FALSE;
-  const CHAR* PromptString = "\rNormal startup in %d seconds.";
+  const CHAR* promptString = "\rNormal startup in %d seconds.";
   CHAR       promptBuffer[INIT_MGR_PROMPT_BUF_SIZE];
   UINT32     lastTime;
   UINT32     currentTime;
-  UINT32     startup_Id = INIT_MGR_PROMPTCONTINUE_STARTUP_ID;
+  UINT32     startup_Id = INIT_MGR_PROMPTCONT_STARTUP_ID;
 
-  INT8       timeRemainingSecs = PROCEED_AS_DEGRADED_PROMPT_INTERVAL;
+  INT8       timeRemainingSecs = PROCEED_DEGRADED_PROMPT_INT;
   /*
   Activate this code to to flash the fault light during countdown.
   UINT32     flashTime;
@@ -632,7 +633,7 @@ BOOLEAN Im_PromptContinueAsDegraded(void)
   // skip down a couple of line to separate the countdown prompt
   GSE_PutLine("\r\n\r\nProblems detected\r\nPress 'D' to start in degraded mode\r\n");
 
-  snprintf(promptBuffer, sizeof(promptBuffer), PromptString, timeRemainingSecs);
+  snprintf(promptBuffer, sizeof(promptBuffer), promptString, timeRemainingSecs);
   GSE_PutLine(promptBuffer);
 
   // Set up a countdown timer to await some input from the user
@@ -661,7 +662,7 @@ BOOLEAN Im_PromptContinueAsDegraded(void)
     {
       --timeRemainingSecs;
       lastTime = currentTime;
-      snprintf(promptBuffer, sizeof(promptBuffer), PromptString, timeRemainingSecs);
+      snprintf(promptBuffer, sizeof(promptBuffer), promptString, timeRemainingSecs);
       GSE_PutLine(promptBuffer);
     }
 
@@ -767,6 +768,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ *
+ * *****************  Version 118  *****************
+ * User: John Omalley Date: 12-11-16   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 117  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
