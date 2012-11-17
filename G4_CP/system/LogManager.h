@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 54 $  $Date: 12-11-13 5:46p $
+    $Revision: 55 $  $Date: 12-11-16 9:10p $
 
 ******************************************************************************/
 
@@ -29,11 +29,6 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#define ASSERT_ON_LOG_REQ_FAILED
-
-#define LOG_EEPROM_CFG_DEFAULT   0, /*Start Offset*/\
-                                 0  /*Size        */
-
 
 // Queue SIZE Must be a power of 2 (2, 4, 8, 16, 32, 64, 128....)
 #define LOG_QUEUE_SIZE          512   // Number of possible pending requests
@@ -117,7 +112,6 @@ typedef enum
 
 typedef enum
 {
-   LOG_MARK_NONE,
    LOG_MARK_IN_PROGRESS,
    LOG_MARK_COMPLETE,
    LOG_MARK_FAIL
@@ -162,7 +156,7 @@ typedef enum
 {
    LOG_ERASE_NONE,
    LOG_ERASE_NORMAL,
-   LOG_ERASE_QUICK,
+   LOG_ERASE_QUICK
 } LOG_ERASE_TYPE;
 
 typedef enum
@@ -320,13 +314,6 @@ typedef struct
     UINT32          found;
 } LOG_MON_ERASE_PARMS;
 
-typedef struct
-{
-   TASK_INDEX taskID;
-   BOOLEAN bDeleteVerified;
-   LOG_MNG_TASK_PARMS **pTaskParams;
-} LOG_BCKGRD_ERASE_PARMS;
-
 // Log CBIT Health Status
 typedef struct
 {
@@ -434,6 +421,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ *
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 12-11-16   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 54  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
