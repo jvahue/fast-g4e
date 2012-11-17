@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 14 $  $Date: 11/08/12 4:26p $
+ $Revision: 15 $  $Date: 11/16/12 8:11p $
 
 ******************************************************************************/
 
@@ -133,7 +133,7 @@ void TrendInitialize( void )
     pData->trendState      = TREND_STATE_INACTIVE;
     pData->nActionReqNum   = ACTION_NO_REQ;
 
-    pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * pCfg->rate;
+    pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * (INT16)pCfg->rate;
 
     // Calculate the expected number of stability sensors based on config
     pData->nStabExpectedCnt = 0;
@@ -153,7 +153,7 @@ void TrendInitialize( void )
   // Create Trend Task - DT
   memset(&tcb, 0, sizeof(tcb));
   strncpy_safe(tcb.Name, sizeof(tcb.Name),"Trend Task",_TRUNCATE);
-  tcb.TaskID           = Trend_Task;
+  tcb.TaskID           = (TASK_INDEX)Trend_Task;
   tcb.Function         = TrendTask;
   tcb.Priority         = taskInfo[Trend_Task].priority;
   tcb.Type             = taskInfo[Trend_Task].taskType;
@@ -188,7 +188,6 @@ void TrendTask( void* pParam )
 
   if(Tm.systemMode == SYS_SHUTDOWN_ID)
   {
-
     for ( nTrend = TREND_0; nTrend < MAX_TRENDS; nTrend++ )
     {
       // Log and terminate any active trends
@@ -388,7 +387,8 @@ static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
     // Activate Action
     if( pCfg->nAction)
     {
-      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_ON, FALSE, FALSE);
+      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+                                           ACTION_ON, FALSE, FALSE);
     }
 
     trendLog.trendIndex = pData->trendIndex;
@@ -588,7 +588,8 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     // Activate Action
     if( pCfg->nAction)
     {
-      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_OFF, FALSE, FALSE);
+      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+                                           ACTION_OFF, FALSE, FALSE);
     }
 
 #ifdef TREND_DEBUG
@@ -645,7 +646,8 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   }
 
   // Reset the stability and max-stability history
-  // todo DaveB confirm we want to clear max-history during reset. If inflight engine-restart (i.e. no reset-trigger), this info will be cleared! OK?
+  // todo DaveB confirm we want to clear max-history during reset.
+  // If inflight engine-restart (i.e. no reset-trigger), this info will be cleared! OK?
   pData->stability.stableCnt    = 0;
   pData->maxStability.stableCnt = 0;
 
@@ -857,7 +859,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 
     GSE_DebugStr(NORMAL,TRUE,"Trend[%d] Autotrend Reset Detected ",pData->trendIndex);
 
-     if ( 0 == pData->trendCnt)
+    if ( 0 == pData->trendCnt)
     {
       // No autotrends taken? Log it.
       TrendLogAutoTrendNotDetected(pCfg, pData);
@@ -946,7 +948,8 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
- static void TrendUpdateTimeElapsed(UINT32 currentTime, UINT32* lastTimeCalled, UINT32* elapsedTime)
+ static void TrendUpdateTimeElapsed(UINT32 currentTime, UINT32* lastTimeCalled,
+                                    UINT32* elapsedTime)
  {
    // If first time thru, set last time to current so elapsed will be zero.
    if (0 == *lastTimeCalled)
@@ -991,7 +994,8 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
   // Activate Action
   if( pCfg->nAction)
   {
-    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction, ACTION_ON, FALSE, FALSE);
+    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+                                         ACTION_ON, FALSE, FALSE);
   }
 
   pData->trendState   = TREND_STATE_AUTO;
@@ -1010,6 +1014,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
  *  MODIFICATIONS
  *    $History: trend.c $
  * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:11p
+ * Updated in $/software/control processor/code/application
+ * CodeReview
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:26p
  * Updated in $/software/control processor/code/application

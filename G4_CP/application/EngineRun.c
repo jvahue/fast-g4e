@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 37 $  $Date: 12-11-14 6:51p $
+      $Revision: 38 $  $Date: 11/16/12 8:11p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -61,6 +61,8 @@ static INT32 m_event_tag;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static void    EngRunTask       ( void* pParam );
+static void    EngReInitFile    ( void );
 static void    EngRunForceEnd   ( void );
 static void    EngRunReset      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
@@ -169,8 +171,8 @@ void EngRunInitialize(void)
 {
   TCB taskBlock;
   UINT16 i;
-  ENGRUN_CFG*  pErCfg;
-  ENGRUN_DATA* pErData;
+  ENGRUN_CFG_PTR  pErCfg;
+  ENGRUN_DATA_PTR pErData;
   RESULT result;
 
   // Add user commands for EngineRun to the user command tables.
@@ -252,99 +254,6 @@ void EngRunInitialize(void)
   taskBlock.Rmt.MifRate      = taskInfo[EngRun_Task].MIFrate;
   taskBlock.pParamBlock      = NULL;
   TmTaskCreate (&taskBlock);
-}
-
-/******************************************************************************
- * Function:    EngReInitFile
- *
- * Description: Set the NV data (Engine Serial Numbers) to
- *              the default values
- *
- * Parameters:  void
- *
- * Returns:     void
- *
- * Notes:
- *
- *****************************************************************************/
-void EngReInitFile(void)
-{
-  CHAR resultStr[RESULTCODES_MAX_STR_LEN];
-  INT16 i;
-
-  memset(&m_EngineInfo,0,sizeof(m_EngineInfo));
-
-  strncpy_safe(m_EngineInfo.servicePlan,
-               sizeof(m_EngineInfo.servicePlan),
-               ENGINE_DEFAULT_SERVICE_PLAN,_TRUNCATE);
-
-  for ( i = 0; i < MAX_ENGINES; i++)
-  {
-     strncpy_safe(m_EngineInfo.engine[i].serialNumber,
-                  sizeof(m_EngineInfo.engine[i].serialNumber),
-                  ENGINE_DEFAULT_SERIAL_NUMBER, _TRUNCATE);
-     strncpy_safe(m_EngineInfo.engine[i].modelNumber,
-                  sizeof(m_EngineInfo.engine[i].modelNumber),
-                  ENGINE_DEFAULT_MODEL_NUMBER, _TRUNCATE);
-  }
-
-  NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
-  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, resultStr));
-}
-
-/******************************************************************************
- * Function:     EngRunTask
- *
- * Description:  Monitors transitions for starting and ending engine run.
- *
- * Parameters:   [in] pParam (i) - dummy to match function signature.
- *
- * Returns:      None
- *
- * Notes:        None
- *
- *****************************************************************************/
-void EngRunTask(void* pParam)
-{
-  UINT16 i;
-  static BOOLEAN is_active_last = FALSE;
-  BOOLEAN is_active = FALSE;
-
-  if (Tm.systemMode == SYS_SHUTDOWN_ID)
-  {
-    EngRunForceEnd();
-    TmTaskEnable ((TASK_INDEX)EngRun_Task, FALSE);
-    if(m_event_func != NULL)
-    {
-      m_event_func(m_event_tag,FALSE);
-    }
-    is_active_last = FALSE;
-  }
-  else
-  {
-    // EngRunUpdateAll - Normal execution
-    for ( i = 0; i < MAX_ENGINES; i++)
-    {
-      if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
-      {
-        EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
-
-        is_active =   (m_engineRunData[i].erState == ER_STATE_RUNNING) ||
-                      (m_engineRunData[i].erState == ER_STATE_STARTING)   ?
-                      TRUE : is_active;
-      }
-    }
-
-    //Update recording/active status to "parent"
-    if(is_active != is_active_last)
-    {
-      if(m_event_func != NULL)
-      {
-        m_event_func(m_event_tag,is_active);
-      }
-      is_active_last = is_active;
-    }
-  }
 }
 
 /******************************************************************************
@@ -448,7 +357,98 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
+/******************************************************************************
+ * Function:    EngReInitFile
+ *
+ * Description: Set the NV data (Engine Serial Numbers) to
+ *              the default values
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static void EngReInitFile(void)
+{
+  CHAR resultStr[RESULTCODES_MAX_STR_LEN];
+  INT16 i;
 
+  memset(&m_EngineInfo,0,sizeof(m_EngineInfo));
+
+  strncpy_safe(m_EngineInfo.servicePlan,
+               sizeof(m_EngineInfo.servicePlan),
+               ENGINE_DEFAULT_SERVICE_PLAN,_TRUNCATE);
+
+  for ( i = 0; i < MAX_ENGINES; i++)
+  {
+     strncpy_safe(m_EngineInfo.engine[i].serialNumber,
+                  sizeof(m_EngineInfo.engine[i].serialNumber),
+                  ENGINE_DEFAULT_SERIAL_NUMBER, _TRUNCATE);
+     strncpy_safe(m_EngineInfo.engine[i].modelNumber,
+                  sizeof(m_EngineInfo.engine[i].modelNumber),
+                  ENGINE_DEFAULT_MODEL_NUMBER, _TRUNCATE);
+  }
+
+  NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
+  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, resultStr));
+}
+
+/******************************************************************************
+ * Function:     EngRunTask
+ *
+ * Description:  Monitors transitions for starting and ending engine run.
+ *
+ * Parameters:   [in] pParam (i) - dummy to match function signature.
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static void EngRunTask(void* pParam)
+{
+  UINT16 i;
+  static BOOLEAN is_active_last = FALSE;
+  BOOLEAN is_active = FALSE;
+
+  if (Tm.systemMode == SYS_SHUTDOWN_ID)
+  {
+    EngRunForceEnd();
+    TmTaskEnable ((TASK_INDEX)EngRun_Task, FALSE);
+    if(m_event_func != NULL)
+    {
+      m_event_func(m_event_tag,FALSE);
+    }
+    is_active_last = FALSE;
+  }
+  else
+  {
+    // EngRunUpdateAll - Normal execution
+    for ( i = 0; i < MAX_ENGINES; i++)
+    {
+      if (m_engineRunData[i].erIndex != ENGRUN_UNUSED)
+      {
+        EngRunUpdate(&m_engineRunCfg[i],&m_engineRunData[i]);
+
+        is_active =   (m_engineRunData[i].erState == ER_STATE_RUNNING) ||
+                      (m_engineRunData[i].erState == ER_STATE_STARTING)   ?
+                      TRUE : is_active;
+      }
+    }
+
+    //Update recording/active status to "parent"
+    if(is_active != is_active_last)
+    {
+      if(m_event_func != NULL)
+      {
+        m_event_func(m_event_tag,is_active);
+      }
+      is_active_last = is_active;
+    }
+  }
+}
 
 /******************************************************************************
  * Function:     EngRunForceEnd
@@ -1057,11 +1057,16 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 38  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:11p
+ * Updated in $/software/control processor/code/application
+ * CodeReview
+ *
  * *****************  Version 37  *****************
  * User: John Omalley Date: 12-11-14   Time: 6:51p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 12:25p
  * Updated in $/software/control processor/code/application
