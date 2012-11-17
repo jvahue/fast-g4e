@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 25 $  $Date: 11/12/12 6:39p $
+      $Revision: 26 $  $Date: 11/16/12 8:11p $
 
 ******************************************************************************/
 
@@ -33,7 +33,6 @@
 ******************************************************************************/
 #define MAX_ENGINERUN_NAME  32
 #define MAX_ENGINE_ID       16
-#define MAX_ER_STATE         3
 
 #define ENGINE_DEFAULT_SERIAL_NUMBER "000000"
 #define ENGINE_DEFAULT_SERVICE_PLAN  "NONE"
@@ -76,7 +75,7 @@ typedef enum
   /* Start of states within an engine run */
   ER_STATE_STOPPED,     /* Engine stopped for this engine run  */
   ER_STATE_STARTING,    /* Engine starting for this engine run */
-  ER_STATE_RUNNING,     /* Engine running for this engine run  */
+  ER_STATE_RUNNING      /* Engine running for this engine run  */
 } ER_STATE;
 
 
@@ -172,13 +171,12 @@ typedef struct
   SENSOR_INDEX   monMaxSensorID;          /* Sensor ID for monitored max                    */
   SENSOR_INDEX   monMinSensorID;          /* Sensor ID for monitored min                    */
   BITARRAY128    sensorMap;    /* Bit map of flags of sensors managed by this ER 0-127      */
-}
-ENGRUN_CFG, *ENGRUN_CFG_PTR;
+} ENGRUN_CFG, *ENGRUN_CFG_PTR;
 
 typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 
 /******************************************************************************
-                             Package Exports                             
+                             Package Exports
 ******************************************************************************/
 #undef EXPORT
 
@@ -210,11 +208,9 @@ USER_ENUM_TBL engineRunStateEnum[] =
 ******************************************************************************/
 // Task init and execution.
 EXPORT void             EngRunInitialize(void);
-EXPORT void             EngRunTask            ( void* pParam );
 EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
 EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
 EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
-EXPORT void             EngReInitFile         ( void );
 EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // ENGINERUN_H
@@ -223,6 +219,11 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
  *  MODIFICATIONS
  *    $History: EngineRun.h $
  * 
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:11p
+ * Updated in $/software/control processor/code/application
+ * CodeReview
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:39p
  * Updated in $/software/control processor/code/application

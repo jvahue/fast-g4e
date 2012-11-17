@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 17 $  $Date: 11/14/12 4:01p $
+  $Revision: 18 $  $Date: 11/16/12 8:13p $
 
 ******************************************************************************/
 
@@ -28,14 +28,9 @@
                       Package Defines
 ******************************************************************************/
 //  Each expression must also accommodate X operators per input.
-//  Defined as 2, each operand can have 1 unary ! and two operands have one binary & or |
-//  so '2' actual defines one extra operator per input.
-#define EVAL_OPS_PER_OPERAND       2
-#define EVAL_MAX_OPERANDS_PER_EXPR 8    // Number of operands in an expression
 
 #define EVAL_OPRND_LEN             7    // Fixed Len SVLUnnn, SVLDnnn
 #define EVAL_OPERAND_DIGIT_LEN     3
-#define EVAL_PREFIX_LEN  (EVAL_OPRND_LEN - EVAL_OPERAND_DIGIT_LEN)
 
 #define EVAL_EXPR_BIN_LEN  16
 
@@ -44,8 +39,6 @@
 // will always be large enough at runtime
 
 #define EVAL_MAX_EXPR_STR_LEN 256
-//#define EVAL_MAX_EXPR_STR_LEN ((EVAL_OPS_PER_OPERAND +\
-//                                EVAL_OPERAND_LEN)*EVAL_MAX_OPERANDS_PER_EXPR)
 
 // Used by Cfg manager to create default into for EVAL_EXPR definitions.
 #define EVAL_CMD_DEFAULT  {0, 0.f}
@@ -99,8 +92,7 @@ typedef enum
 
 typedef enum
 {
-  DATATYPE_NONE,
-  DATATYPE_VALUE,
+  DATATYPE_VALUE = 1,
   DATATYPE_BOOL,
   DATATYPE_RPN_PROC_ERR
 }DATATYPE;
@@ -208,7 +200,7 @@ typedef BOOLEAN GET_BOOL_FUNC ( INT32 objIndex );
 
 typedef struct
 {
-  BYTE opCode;    // Lookup-key from EVAL_OPCODE_TBL_ENTRY
+  BYTE opCode;                        // Lookup-key from EVAL_OPCODE_TBL_ENTRY
   GET_BOOL_FUNC*  pfIsSrcConfigured;  // Return is input source configured?
   GET_VALUE_FUNC* pfGetSrcByValue;    // Return source input data as FP number.
   GET_BOOL_FUNC*  pfGetSrcByBool;     // Return source input data as boolean.
@@ -250,38 +242,43 @@ EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 // Functions listed in the function table not really "exported" but
 // need to be declared as such because EvaluatorInterface.h will use them.
 
-BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalLoadInputSrc   (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalLoadFuncCall   (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadInputSrc   (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadFuncCall   (EVAL_EXE_CONTEXT* context);
 
 // Comparison Operators
-BOOLEAN EvalCompareOperands (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalIsNotEqualPrev  (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalCompareOperands (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalIsNotEqualPrev  (EVAL_EXE_CONTEXT* context);
 
 // Logical Operators
-BOOLEAN EvalPerformNot      (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalPerformAnd      (EVAL_EXE_CONTEXT* context);
-BOOLEAN EvalPerformOr       (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalPerformNot      (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalPerformAnd      (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalPerformOr       (EVAL_EXE_CONTEXT* context);
 
 // String-to-Cmd Converter functions.
-INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-INT32 EvalAddFuncCall (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-INT32 EvalAddInputSrc (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-INT32 EvalAddStdOper  (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddFuncCall (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddInputSrc (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddStdOper  (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
 
 // Cmd-to-String representation converters.
-INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT32 EvalFmtLoadConstStr         (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT32 EvalFmtLoadCmdStr           (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtLoadConstStr         (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtLoadCmdStr           (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 
 #endif // EVALUATOR_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
  * 
+ * *****************  Version 18  *****************
+ * User: Contractor V&v Date: 11/16/12   Time: 8:13p
+ * Updated in $/software/control processor/code/drivers
+ * Code Review updates
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 11/14/12   Time: 4:01p
  * Updated in $/software/control processor/code/drivers
