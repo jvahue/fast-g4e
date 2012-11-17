@@ -10,7 +10,7 @@
                  and the debug verbosity.
 
     VERSION
-      $Revision: 56 $  $Date: 12-11-13 5:46p $
+      $Revision: 57 $  $Date: 12-11-16 8:40p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -48,8 +48,8 @@
 // is the highest count is the newest entry.  This approach is used to require
 // one NV_Write (and CRC calculation during an update) when the fault occurs.
 typedef struct {
-  SYS_APP_ID Id;
-  TIMESTAMP  Ts;
+  SYS_APP_ID id;
+  TIMESTAMP  ts;
   UINT32     count;
 } FAULT_HISTORY;
 
@@ -62,15 +62,15 @@ static FAULT_HISTORY faultHistory[FLT_LOG_BUF_ENTRIES];
 static INT8 faultIndex;
 static UINT32 faultCount;
 
-static FLT_STATUS  FaultSystemStatus;
-static BOOLEAN     SetFaultInitialized;
+static FLT_STATUS  faultSystemStatus;
+static BOOLEAN     setFaultInitialized;
 
-static UINT32      FaultSystemStatusCnt[STA_MAX];
+static UINT32      faultSystemStatusCnt[STA_MAX];
 
 static FAULTMGR_ACTION m_Previous;
 static FAULTMGR_ACTION m_Current;
 
-static FLT_DBG_LEVEL  DebugLevel;   // local runtime copy of config data
+static FLT_DBG_LEVEL  debugLevel;   // local runtime copy of config data
 
 // Include cmd tables and functions here after local dependencies are declared.
 #include "FaultMgrUserTables.c"
@@ -104,17 +104,17 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS SetStatus, FLT_STATUS 
 *****************************************************************************/
 void Flt_PreInitFaultMgr(void)
 {
-  FaultSystemStatus = STA_NORMAL;
-  SetFaultInitialized = FALSE;
+  faultSystemStatus = STA_NORMAL;
+  setFaultInitialized = FALSE;
   Flt_SetDebugVerbosity( NORMAL); // SCR# 640
   // Fault Action Flags
   m_Previous.nID     = ACTION_NO_REQ;
   m_Previous.state   = OFF;
-  m_Previous.sysCond = FaultSystemStatus;
+  m_Previous.sysCond = faultSystemStatus;
 
   m_Current.nID     = ACTION_NO_REQ;
   m_Current.state   = OFF;
-  m_Current.sysCond = FaultSystemStatus;
+  m_Current.sysCond = faultSystemStatus;
 }
 
 /******************************************************************************
@@ -183,9 +183,9 @@ void Flt_Init(void)
   }
 
   // Clear fault counter used for keeping real time system status condition
-  memset ( (void *) FaultSystemStatusCnt, 0x00, sizeof(FaultSystemStatusCnt));
+  memset ( (void *) faultSystemStatusCnt, 0x00, sizeof(faultSystemStatusCnt));
 
-  SetFaultInitialized = TRUE;
+  setFaultInitialized = TRUE;
 }
 
 /******************************************************************************
@@ -249,7 +249,7 @@ void Flt_SetStatus( FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
   BOOLEAN    bLogSysStatus = FALSE;
 
   // If Flt_Init() has not been called, ASSERT !
-  ASSERT ( SetFaultInitialized != FALSE );
+  ASSERT ( setFaultInitialized != FALSE );
 
   prevSystemStatus = Flt_GetSystemStatus();
 
@@ -261,7 +261,7 @@ void Flt_SetStatus( FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
     bLogSysStatus = TRUE;
 
     // Increment Sys Condition request
-    FaultSystemStatusCnt[Status] += 1;
+    faultSystemStatusCnt[Status] += 1;
 
     // The FaultSystemStatus always reflect the highest request sys condition
     Flt_UpdateSystemStatus();
@@ -305,12 +305,12 @@ void Flt_ClrStatus(FLT_STATUS Status)
     FLT_STATUS prevSystemStatus;
     // If Count == 0, then we have more decrement requests then increment requests,
     //   some how we go out of sync !
-    ASSERT ( FaultSystemStatusCnt[Status] != 0 );
+    ASSERT ( faultSystemStatusCnt[Status] != 0 );
 
     prevSystemStatus = Flt_GetSystemStatus();
 
     // Dec request for this system condition
-    FaultSystemStatusCnt[Status] -= 1;
+    faultSystemStatusCnt[Status] -= 1;
 
     // Update the current system status
     Flt_UpdateSystemStatus();
@@ -338,7 +338,7 @@ void Flt_ClrStatus(FLT_STATUS Status)
 void Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel)
 {
   // set local working copy
-  DebugLevel = NewLevel;
+  debugLevel = NewLevel;
 }
 
 /******************************************************************************
@@ -355,7 +355,7 @@ void Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel)
 *****************************************************************************/
 FLT_DBG_LEVEL Flt_GetDebugVerbosity( void)
 {
-  return DebugLevel;  //CfgMgr_ConfigPtr()->FaultMgrCfg.DebugLevel;
+  return debugLevel;  //CfgMgr_ConfigPtr()->FaultMgrCfg.DebugLevel;
 }
 
 /******************************************************************************
@@ -375,7 +375,7 @@ FLT_DBG_LEVEL Flt_GetDebugVerbosity( void)
 *****************************************************************************/
 void Flt_InitDebugVerbosity( void)
 {
-  DebugLevel = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.debugLevel;
+  debugLevel = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.debugLevel;
 }
 
 /******************************************************************************
@@ -392,7 +392,7 @@ void Flt_InitDebugVerbosity( void)
 *****************************************************************************/
 FLT_STATUS Flt_GetSystemStatus(void)
 {
-  return FaultSystemStatus;
+  return faultSystemStatus;
 }
 
 /******************************************************************************
@@ -486,16 +486,17 @@ void Flt_UpdateAction ( FLT_STATUS sysCond )
 *              possibility here
 *
 *****************************************************************************/
+static
 void Flt_AddToFaultBuf(SYS_APP_ID LogID, TIMESTAMP ts)
 {
   // insert the data into the buffer
-  faultHistory[faultIndex].Id = LogID;
-  faultHistory[faultIndex].Ts = ts;
+  faultHistory[faultIndex].id = LogID;
+  faultHistory[faultIndex].ts = ts;
   faultHistory[faultIndex].count = faultCount;
 
   //Update EERPROM Log ID
   NV_Write(NV_FAULT_LOG,
-           sizeof(FAULT_HISTORY)*faultIndex, &faultHistory[faultIndex],
+           (UINT32)(sizeof(FAULT_HISTORY)*faultIndex), &faultHistory[faultIndex],
            sizeof(FAULT_HISTORY));
 
   // move to the next slot & check for wrap around
@@ -528,18 +529,18 @@ static void Flt_UpdateSystemStatus( void )
 
   intrLevel = __DIR();
   // The FaultSystemStatus always reflect the highest request sys condition
-  if ( FaultSystemStatusCnt[STA_FAULT] > 0 )
+  if ( faultSystemStatusCnt[STA_FAULT] > 0 )
   {
-    FaultSystemStatus = STA_FAULT;
+    faultSystemStatus = STA_FAULT;
   }
-  else if ( FaultSystemStatusCnt[STA_CAUTION] > 0 )
+  else if ( faultSystemStatusCnt[STA_CAUTION] > 0 )
   {
-    FaultSystemStatus = STA_CAUTION;
+    faultSystemStatus = STA_CAUTION;
   }
   else
   {
     // Clear back to STA_NORMAL;
-    FaultSystemStatus = STA_NORMAL;
+    faultSystemStatus = STA_NORMAL;
   }
   __RIR(intrLevel);
 }
@@ -571,9 +572,9 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
   // Copy the fault status counts into the log structure.
   // Could've just used the array of counts but wanted to
   // de-couple the log structure from the status counting implementation.
-  sysStatusLog.statusNormalCnt  = FaultSystemStatusCnt[STA_NORMAL];
-  sysStatusLog.statusCautionCnt = FaultSystemStatusCnt[STA_CAUTION];
-  sysStatusLog.statusFaultCnt   = FaultSystemStatusCnt[STA_FAULT];
+  sysStatusLog.statusNormalCnt  = faultSystemStatusCnt[STA_NORMAL];
+  sysStatusLog.statusCautionCnt = faultSystemStatusCnt[STA_CAUTION];
+  sysStatusLog.statusFaultCnt   = faultSystemStatusCnt[STA_FAULT];
 
   CM_GetTimeAsTimestamp(&ts);
   LogWriteSystem( SYS_ID_BOX_INFO_SYS_STATUS_UPDATE, LOG_PRIORITY_LOW,
@@ -593,6 +594,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:40p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  *
  * *****************  Version 56  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
