@@ -10,17 +10,13 @@
                  Handler 
     
     VERSION
-      $Revision: 19 $  $Date: 12-11-13 1:32p $     
+      $Revision: 20 $  $Date: 12-11-16 8:12p $     
 
 ******************************************************************************/
-
-
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-
-
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -30,8 +26,6 @@
 #include "GSE.h"
 #include "NVMgr.h"
 #include "Assert.h"
-
-
 
 /*****************************************************************************/
 /* Local Defines                                                             */
@@ -57,12 +51,10 @@
 #define EMU150_BAUD_RATE_76800     5
 #define EMU150_BAUD_RATE_115200    6
 
-
 #define HTONL(A)  ((((A) & 0xff000000) >> 24) | \
                    (((A) & 0x00ff0000) >>  8) | \
                    (((A) & 0x0000ff00) <<  8) | \
                    (((A) & 0x000000ff) << 24))
-
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -86,7 +78,7 @@ typedef struct {
   UINT32 timeout; 
 } EMU150_CMDS_STRUCT;
 
-typedef BOOLEAN (*RSP_HNDL) (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch ); 
+typedef BOOLEAN (*RSP_HNDL) (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch );
 
 
 #pragma pack(1)
@@ -108,11 +100,11 @@ static EMU150_RAW_RX_BUFFER m_EMU150_Rx_Buff;
 static EMU150_RAW_TX_BUFFER m_EMU150_Tx_Buff; 
 static EMU150_RAW_RX_BUFFER m_EMU150_Rx_Record; 
 static EMU150_RECCORDING_HDR m_Record_Hdr[EMU150_RECORDS_MAX]; 
-RSP_HNDL EMU150_RSP[EMU150_STATE_MAX]; 
+static RSP_HNDL pEMU150_RSP[EMU150_STATE_MAX]; 
 
 static UART_CONFIG m_UartCfg; 
 
-static char GSE_OutLine[128]; 
+static CHAR gse_OutLine[128]; 
 
 static EMU150_APP_DATA m_EMU150_AppData; 
 
@@ -127,30 +119,34 @@ static BOOLEAN bStartup;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-#include "EMU150UserTables.c"
+static EMU150_STATES EMU150_State_ProcessCmd        ( UINT8 *data, UINT16 cnt, UINT16 ch );
+static EMU150_STATES EMU150_State_AutoDetect        ( UINT8 *data, UINT32 cnt, UINT16 ch );
 
-static EMU150_STATES EMU150_State_ProcessCmd( UINT8 *data, UINT16 cnt, UINT16 ch );
-static EMU150_STATES EMU150_State_AutoDetect ( UINT8 *data, UINT32 cnt, UINT16 ch);
-
-static BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch);
-static BOOLEAN EMU150_Process_Recording_Hdr (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch);
-static BOOLEAN EMU150_Process_Record (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch);
-static BOOLEAN EMU150_Process_Record_Confirmation (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch);
-static BOOLEAN EMU150_Process_Set_Baud (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch);
-
+static BOOLEAN EMU150_Process_InstallCfg            ( EMU150_BLK_STATES blk_state, 
+                                                      UINT8 *data, UINT32 cnt, UINT16 ch );
+static BOOLEAN EMU150_Process_Recording_Hdr         ( EMU150_BLK_STATES blk_state, 
+                                                      UINT8 *data, UINT32 cnt, UINT16 ch );
+static BOOLEAN EMU150_Process_Record                ( EMU150_BLK_STATES blk_state, 
+                                                      UINT8 *data, UINT32 cnt, UINT16 ch );
+static BOOLEAN EMU150_Process_Rec_Confirmation      ( EMU150_BLK_STATES blk_state, 
+                                                      UINT8 *data, UINT32 cnt, UINT16 ch );
+static BOOLEAN EMU150_Process_Set_Baud              ( EMU150_BLK_STATES blk_state, 
+                                                      UINT8 *data, UINT32 cnt, UINT16 ch );
 
 static void EMU150_CreateTxPacket( UINT8 cnt, UINT8 *data, UINT32 timeout );
 static void EMU150_AppendRecordId( void ); 
 static void EMU150_AppendBaudRate( void ); 
 
-static BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch); 
-static BOOLEAN EMU150_Process_ACK (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch); 
-static void EMU150_NextCmdState ( EMU150_CMD_STATES state, BOOLEAN bClrRetries ); 
+static BOOLEAN EMU150_Process_Blk ( EMU150_BLK_STATES blk_state, 
+                                    UINT8 *data, UINT32 cnt, UINT16 ch ); 
+static BOOLEAN EMU150_Process_ACK ( EMU150_BLK_STATES blk_state, 
+                                    UINT8 *data, UINT32 cnt, UINT16 ch ); 
+static void EMU150_NextCmdState   ( EMU150_CMD_STATES state, BOOLEAN bClrRetries ); 
 
 static void EMU150_NextState( void ); 
 static UINT16 EMU150_GetDesiredBaudRateIndex (UINT32 UartBPS_Desired); 
 
-static void EMU150_SetUart ( UINT16 ch, UART_CFG_BPS bps );
+static void EMU150_SetUart ( UART_CFG_BPS bps );
 
 static void EMU150_ProcessChksum ( void ); 
 
@@ -159,12 +155,14 @@ static UINT32 EMU150_CalcCksum ( UINT32 *data_ptr,  UINT32 nLongWords);
 
 static void EMU150_GetCksumStatus ( UINT8 *data_ptr, UINT32 *cksum, UINT32 *status ); 
 static void EMU150_CreateSummaryLog ( EMU150_STATUS_PTR pStatus ); 
+static EMU150_STATUS_PTR EMU150Protocol_GetStatus (void);
 
+#include "EMU150UserTables.c"
 
 /*****************************************************************************/
 /* Constant Data                                                             */
 /*****************************************************************************/
-const EMU150_CMDS_STRUCT EMU150_CMDS[EMU150_STATE_MAX] = {
+static const EMU150_CMDS_STRUCT EMU150_CMDS[EMU150_STATE_MAX] = {
   // EMU150_STATE_IDLE  
   {NULL, EMU150_TIMEOUT},         
   
@@ -194,15 +192,15 @@ const EMU150_CMDS_STRUCT EMU150_CMDS[EMU150_STATE_MAX] = {
 
 };
 
-const UINT8 EMU150_CMDS_HS = EMU150_CMD_HS;
-const UINT8 EMU150_CMDS_ACK = EMU150_CMD_ACK;
+static const UINT8 EMU150_CMDS_HS = EMU150_CMD_HS;
+static const UINT8 EMU150_CMDS_ACK = EMU150_CMD_ACK;
 
 #define EMU150_STATE_NAMES_MAX 32
 typedef struct {
-  char state[EMU150_STATE_NAMES_MAX]; 
+  CHAR state[EMU150_STATE_NAMES_MAX]; 
 } EMU150_NAMES; 
 
-const EMU150_NAMES EMU150_NAME[EMU150_STATE_MAX] = 
+static const EMU150_NAMES EMU150_NAME[EMU150_STATE_MAX] = 
 {
   "_IDLE",               // EMU150_STATE_IDLE
   "_AUTODETECT",         // EMU150_STATE_AUTODETECT
@@ -216,7 +214,7 @@ const EMU150_NAMES EMU150_NAME[EMU150_STATE_MAX] =
 };
 
 #define EMU150_BAUD_RATES_MAX 5
-const UART_CFG_BPS UART_BPS_SUPPORTED[EMU150_BAUD_RATES_MAX] = 
+static const UART_CFG_BPS UART_BPS_SUPPORTED[EMU150_BAUD_RATES_MAX] = 
 {
   UART_CFG_BPS_9600, 
   UART_CFG_BPS_19200, 
@@ -225,7 +223,7 @@ const UART_CFG_BPS UART_BPS_SUPPORTED[EMU150_BAUD_RATES_MAX] =
   UART_CFG_BPS_115200
 }; 
 
-const UINT8 EMU150_BAUD_RATES[EMU150_BAUD_RATES_MAX] = 
+static const UINT8 EMU150_BAUD_RATES[EMU150_BAUD_RATES_MAX] = 
 {
   1,  // 9600  Must match Index to EMU150_BPS_SUPPORTED[] above 
   2,  // 19200
@@ -233,8 +231,6 @@ const UINT8 EMU150_BAUD_RATES[EMU150_BAUD_RATES_MAX] =
   4,  // 57600
   6   // 115200
 };
-
-
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -273,30 +269,30 @@ void EMU150Protocol_Initialize ( void )
    
    m_EMU150_Status.ack_timer = 0; 
 
-   m_EMU150_Status.port = UART_NUM_OF_UARTS;  // Init to No Ports allocated !
+   m_EMU150_Status.port = (UINT8)UART_NUM_OF_UARTS;  // Init to No Ports allocated !
    
    m_EMU150_Rx_Buff.cnt = 0; 
    m_EMU150_Tx_Buff.cnt = 0; 
    m_EMU150_Rx_Buff.cksum_misaligned_flag = 0; 
      
-   EMU150_RSP[EMU150_STATE_IDLE] = EMU150_Process_ACK;        // NOP State
-   EMU150_RSP[EMU150_STATE_AUTODETECT] = EMU150_Process_ACK;  // NOP State
-   EMU150_RSP[EMU150_STATE_GET_INSTALL_CFG] = EMU150_Process_InstallCfg; 
-   EMU150_RSP[EMU150_STATE_GET_RECORDING_HDR] = EMU150_Process_Recording_Hdr; 
-   EMU150_RSP[EMU150_STATE_GET_RECORDING] = EMU150_Process_Record; 
-   EMU150_RSP[EMU150_STATE_RECORDING_CONFIGRMATION] = EMU150_Process_Record_Confirmation; 
-   EMU150_RSP[EMU150_STATE_WAIT_FOR_STORAGE_CONFIRMATION] = EMU150_Process_ACK;  // NOP State
-   EMU150_RSP[EMU150_STATE_SET_BAUD] = EMU150_Process_Set_Baud; 
-   EMU150_RSP[EMU150_STATE_COMPLETED] = EMU150_Process_ACK; // NOP State
+   pEMU150_RSP[EMU150_STATE_IDLE] = EMU150_Process_ACK;        // NOP State
+   pEMU150_RSP[EMU150_STATE_AUTODETECT] = EMU150_Process_ACK;  // NOP State
+   pEMU150_RSP[EMU150_STATE_GET_INSTALL_CFG] = EMU150_Process_InstallCfg; 
+   pEMU150_RSP[EMU150_STATE_GET_RECORDING_HDR] = EMU150_Process_Recording_Hdr; 
+   pEMU150_RSP[EMU150_STATE_GET_RECORDING] = EMU150_Process_Record; 
+   pEMU150_RSP[EMU150_STATE_RECORDING_CONF] = EMU150_Process_Rec_Confirmation; 
+   pEMU150_RSP[EMU150_STATE_WAIT_FOR_STORE_CONF] = EMU150_Process_ACK;  // NOP State
+   pEMU150_RSP[EMU150_STATE_SET_BAUD] = EMU150_Process_Set_Baud; 
+   pEMU150_RSP[EMU150_STATE_COMPLETED] = EMU150_Process_ACK; // NOP State
    
    m_EMU150_Status.bAllRecords = FALSE; 
    m_EMU150_Status.bDownloadFailed = FALSE; 
    
-   User_AddRootCmd(&EMU150ProtocolRootTblPtr); 
+   User_AddRootCmd(&emu150ProtocolRootTblPtr); 
    
-   m_EMU150_Status.IndexBPS = 0; 
-   m_EMU150_Status.UartBPS = UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS]; 
-   m_EMU150_Status.UartBPS_Desired = 0;  // Set to "uninitialized" as rep by '0'
+   m_EMU150_Status.indexBPS = 0; 
+   m_EMU150_Status.uartBPS = (UINT32)UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS]; 
+   m_EMU150_Status.uartBPS_Desired = 0;  // Set to "uninitialized" as rep by '0'
    
    m_EMU150_Status.nTotalBytes = 0;         
    
@@ -305,7 +301,6 @@ void EMU150Protocol_Initialize ( void )
    
    // Retrieve EMU150 Cfg 
    memcpy(&m_EMU150_Cfg, &(CfgMgr_RuntimeConfigPtr()->EMU150Config), sizeof(EMU150_CFG));
-
    
    // Initialize pointer / temp vars 
    m_EMU150_Download.bStartDownload = FALSE;
@@ -351,15 +346,13 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   UINT16 sent_cnt; 
   EMU150_CFG_PTR pEMU150_Cfg; 
   BOOLEAN bGenerateLog;  
-  
 
   // If EMU150 Protocol not setup during init, then any runtime request are not allowed.
   // If EMU150 Protocol is setup, only the ch requested during init can be processed.
-  ASSERT ((m_EMU150_Status.port != UART_NUM_OF_UARTS) && (m_EMU150_Status.port == ch));
+  ASSERT ((m_EMU150_Status.port != (UINT8)UART_NUM_OF_UARTS) && (m_EMU150_Status.port == ch));
   
   pEMU150_Cfg = &m_EMU150_Cfg; 
   prevState = m_EMU150_Status.state;
-
   bGenerateLog = FALSE; 
   
   if ( *m_EMU150_Download_Ptr.bHalt == TRUE ) 
@@ -376,9 +369,9 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     *m_EMU150_Download_Ptr.bHalt = FALSE; 
     
     // Output msg 
-    sprintf (GSE_OutLine,
-             "\r\nEMU150 Protocol: Download Halt Encountered ! \r\n \0");
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+    snprintf (gse_OutLine, sizeof(gse_OutLine),
+             "\r\nEMU150 Protocol: Download Halt Encountered ! \r\n");
+    GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
   }
 
   switch (m_EMU150_Status.state)
@@ -402,8 +395,8 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         if (bStartup == TRUE) 
         {
           // Reset the Uart to 9600 
-          m_EMU150_Status.IndexBPS = 0; 
-          EMU150_SetUart ( ch, UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS] ); 
+          m_EMU150_Status.indexBPS = 0; 
+          EMU150_SetUart ( UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS] ); 
           bStartup = FALSE; 
         }
       }
@@ -415,8 +408,9 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         // Change of State 
         EMU150_NextState(); 
       }
-      m_EMU150_Status.nIdleRetries = 0;   // Expect no response during AutoDetect().  Clear this flag.
-                                          //   _AutoDetect() has code handle no response. 
+      m_EMU150_Status.nIdleRetries = 0; // Expect no response during AutoDetect().  
+                                        // Clear this flag.
+                                        // _AutoDetect() has code handle no response. 
       break; 
       
     case EMU150_STATE_GET_INSTALL_CFG:
@@ -431,10 +425,10 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       
     // Loop until all records have been retrieved 
     case EMU150_STATE_GET_RECORDING:
-    case EMU150_STATE_RECORDING_CONFIGRMATION:
+    case EMU150_STATE_RECORDING_CONF:
       if ( prevState != EMU150_State_ProcessCmd( data, cnt, ch)) 
       {
-        if ( prevState == EMU150_STATE_RECORDING_CONFIGRMATION )
+        if ( prevState == EMU150_STATE_RECORDING_CONF )
         {
           // Determine if we have retrieved all the records 
           if ( m_EMU150_Status.nCurrRecord >= m_EMU150_Status.nRecordsNew ) 
@@ -455,19 +449,19 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       }
       break;
       
-    case EMU150_STATE_WAIT_FOR_STORAGE_CONFIRMATION:
+    case EMU150_STATE_WAIT_FOR_STORE_CONF:
       if ( *m_EMU150_Download_Ptr.bWriteInProgress == FALSE ) 
       {
         if ( *m_EMU150_Download_Ptr.bWriteOk == TRUE )
         {
           if (pEMU150_Cfg->bMarkDownloaded == TRUE) 
           {
-            m_EMU150_Status.state = EMU150_STATE_RECORDING_CONFIGRMATION; 
+            m_EMU150_Status.state = EMU150_STATE_RECORDING_CONF; 
           }
         }
         
         // If Record Storage failed OR Don't confirm  
-        if ( m_EMU150_Status.state != EMU150_STATE_RECORDING_CONFIGRMATION ) 
+        if ( m_EMU150_Status.state != EMU150_STATE_RECORDING_CONF ) 
         {
           // Move to next record.  Update bad record recording 
           if ( ++m_EMU150_Status.nCurrRecord >= m_EMU150_Status.nRecordsNew ) 
@@ -485,7 +479,7 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         // Change of State 
         EMU150_NextState();
         *m_EMU150_Download_Ptr.bWriteInProgress = TRUE; // Force flag to InProgress
-        *m_EMU150_Download_Ptr.bWriteOk = FALSE;        // Force flag to be Write FAILED as default 
+        *m_EMU150_Download_Ptr.bWriteOk = FALSE;   // Force flag to be Write FAILED as default 
       }
       m_EMU150_Status.cmd_timer = CM_GetTickCount();   // Reset timer
       m_EMU150_Status.nIdleRetries = 0; 
@@ -493,19 +487,20 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
             
     case EMU150_STATE_COMPLETED:
       // If we have failed and have not exceeded Reboot attempts, try again. 
-      if ( (m_EMU150_Status.bDownloadFailed == TRUE) && (m_EMU150_Status.nRestarts < pEMU150_Cfg->nRestarts) )
+      if ( (m_EMU150_Status.bDownloadFailed == TRUE) && 
+           (m_EMU150_Status.nRestarts < pEMU150_Cfg->nRestarts) )
       {
         // Make another attempt from the start 
         m_EMU150_Status.state = EMU150_STATE_AUTODETECT; 
         m_EMU150_Status.bDownloadFailed = FALSE;
         // Reset the Uart to 9600 
-        m_EMU150_Status.IndexBPS = 0; 
-        EMU150_SetUart ( ch, UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS] ); 
+        m_EMU150_Status.indexBPS = 0; 
+        EMU150_SetUart ( UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS] ); 
 
-        sprintf (GSE_OutLine,
-                 "\r\nEMU150 Protocol: Error Encountered.  Re-Attempting Download (n=%d)\r\n \0", 
-                 m_EMU150_Status.nRestarts);
-        GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+        snprintf (gse_OutLine, sizeof(gse_OutLine),
+               "\r\nEMU150 Protocol: Error Encountered.  Re-Attempting Download (n=%d)\r\n", 
+               m_EMU150_Status.nRestarts);
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         m_EMU150_Status.nRestarts++; 
       }
       else 
@@ -513,18 +508,18 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         if (m_EMU150_Status.bDownloadFailed == TRUE) 
         {
           // Completed with Errors
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: Error Encountered.  Download Completed (n=%d)\r\n \0", 
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: Error Encountered.  Download Completed (n=%d)\r\n", 
                    m_EMU150_Status.nRestarts);
         }
         else 
         {
           // Completed w/o Errors
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: Download Completed (n=%d)\r\n \0", 
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: Download Completed (n=%d)\r\n", 
                    m_EMU150_Status.nRestarts);
         }
-        GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         m_EMU150_Status.state = EMU150_STATE_IDLE; 
         bGenerateLog = TRUE; 
       }
@@ -537,7 +532,8 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   }
   
   // If not IDLE state, have overall 2.5 or 10.5 second timeout 
-  if ( (m_EMU150_Status.state != EMU150_STATE_IDLE) && (m_EMU150_Status.state != EMU150_STATE_COMPLETED) )
+  if ( (m_EMU150_Status.state != EMU150_STATE_IDLE) && 
+       (m_EMU150_Status.state != EMU150_STATE_COMPLETED) )
   {
     if (cnt == 0) 
     {
@@ -561,11 +557,11 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         {
           if ( m_EMU150_Status.nRetries <= pEMU150_Cfg->nRetries ) 
           {
-            sprintf (GSE_OutLine,
-                     "\r\nEMU150 Protocol: Cmd Failed/Timeout Retry (%d) State: %s \r\n \0", 
+            snprintf (gse_OutLine, sizeof(gse_OutLine),
+                     "\r\nEMU150 Protocol: Cmd Failed/Timeout Retry (%d) State: %s \r\n", 
                      m_EMU150_Status.nRetries,
                      EMU150_NAME[m_EMU150_Status.state].state );
-            GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
+            GSE_DebugStr(NORMAL,TRUE,gse_OutLine);
           }
         }
       }
@@ -580,7 +576,7 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     if (m_EMU150_Tx_Buff.cnt > 0)
     {
       result = UART_Transmit ( m_EMU150_Status.port, (const INT8*) &m_EMU150_Tx_Buff.buff[0], 
-                               m_EMU150_Tx_Buff.cnt, &sent_cnt );
+                               (UINT16)m_EMU150_Tx_Buff.cnt, &sent_cnt );
       // Note: if result is != OK and nSent != nCnt allow this current action to timeout 
       //   (2.5/10.5 sec) and start over again 
       if (result == DRV_OK)
@@ -600,24 +596,6 @@ BOOLEAN EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   }
   
   return (TRUE);
-}
-
-
-/******************************************************************************
- * Function:    EMU150Protocol_GetStatus
- *
- * Description: Utility function to request current EMU150 Status 
- *
- * Parameters:  None
- *
- * Returns:     Ptr to EMU150 Status Data
- *
- * Notes:       None 
- *
- *****************************************************************************/
-EMU150_STATUS_PTR EMU150Protocol_GetStatus (void)
-{
-  return ( (EMU150_STATUS_PTR) &m_EMU150_Status ); 
 }
 
 
@@ -643,7 +621,7 @@ UINT16 EMU150Protocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size, UINT16
 
   // If EMU150 Protocol not setup during init, then any runtime request are not allowed.
   // If EMU150 Protocol is setup, only the ch requested during init can be processed.
-  ASSERT ((m_EMU150_Status.port != UART_NUM_OF_UARTS) && (m_EMU150_Status.port == ch));
+  ASSERT ((m_EMU150_Status.port != (UINT8)UART_NUM_OF_UARTS) && (m_EMU150_Status.port == ch));
   
   cnt = m_EMU150_AppData.nCnt + sizeof(UINT16); 
 
@@ -673,11 +651,11 @@ void EMU150Protocol_SetBaseUartCfg ( UINT16 ch, UART_CONFIG UartCfg )
 {
   // If EMU150 Protocol already setup, ASSERT to let user know to FIX HIS/HER CFG 
   // Only one EMU150 Protocol can be setup due to EEPROM memory usage. 
-  ASSERT ( m_EMU150_Status.port == UART_NUM_OF_UARTS ); 
+  ASSERT ( m_EMU150_Status.port == (UINT8)UART_NUM_OF_UARTS ); 
 
   m_UartCfg = UartCfg; 
-  m_EMU150_Status.port = ch; 
-  m_EMU150_Status.UartBPS_Desired = m_UartCfg.BPS; 
+  m_EMU150_Status.port = (UINT8)ch; 
+  m_EMU150_Status.uartBPS_Desired = (UINT32)m_UartCfg.BPS; 
 }
 
 
@@ -687,7 +665,7 @@ void EMU150Protocol_SetBaseUartCfg ( UINT16 ch, UART_CONFIG UartCfg )
  * Description: Initializes / synchronizes local control and flags to the calling 
  *              App
  *
- * Parameters:  port
+ * Parameters:  port - Interface port to download
 *               bStartDownload - ptr to flag to begin download process
  *              bDownloadCompleted - ptr to flag to indicate download completed
  *              bWriteInProgress - ptr to flag to indicate FLASH write in progress
@@ -723,6 +701,36 @@ void EMU150Protocol_DownloadHndl ( UINT8 port,
   *pData = &m_EMU150_Rx_Record.buff[0]; 
 }
 
+/******************************************************************************
+ * Function:    EMU150_FileInit
+ *
+ * Description: Clears the EEPROM storage location 
+ *
+ * Parameters:  None 
+ *
+ * Returns:     TRUE
+ *
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
+ *
+ *****************************************************************************/
+BOOLEAN EMU150_FileInit(void)
+{
+  // Init App data
+  // Note: NV_Mgr will record log if data is corrupt
+  memset (&m_EMU150_AppData.data[0], 0, EMU150_APP_DATA_MAX); 
+  m_EMU150_AppData.cksum = 0; 
+  m_EMU150_AppData.nCnt = 0; 
+
+  // Update App data
+  NV_Write(NV_UART_EMU150, 0, (void *) &m_EMU150_AppData, sizeof(EMU150_APP_DATA));
+  
+  return TRUE;
+}
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:    EMU150_State_ProcessCmd
@@ -742,11 +750,10 @@ static
 EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
 {
   EMU150_STATES state; 
-  EMU150_STATES NextState; 
-  EMU150_CMD_STATES NextCmdState; 
+  EMU150_STATES nextState; 
+  EMU150_CMD_STATES nextCmdState; 
   EMU150_CFG_PTR pEMU150_Cfg;
-  UINT16 timeout; 
-
+  UINT32 timeout; 
 
   pEMU150_Cfg = &m_EMU150_Cfg; 
   timeout = pEMU150_Cfg->timeout; 
@@ -767,7 +774,7 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
         m_EMU150_Status.nRetries = 0; 
         
         if  ( (( m_EMU150_Status.state == EMU150_STATE_GET_RECORDING ) ||
-               ( m_EMU150_Status.state == EMU150_STATE_RECORDING_CONFIGRMATION )) )
+               ( m_EMU150_Status.state == EMU150_STATE_RECORDING_CONF )) )
         {
           // Move to next record but exit if all new rec retrieve have been attempted
           if (++m_EMU150_Status.nCurrRecord >= m_EMU150_Status.nRecordsNew) 
@@ -776,11 +783,11 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
           }
           else 
           {
-            sprintf (GSE_OutLine,
-                     "\r\nEMU150 Protocol: Record Retrieve/Confirm Failed. Skipping Rec (n=%d) \r\n \0", 
-                     m_EMU150_Status.nCurrRecord);
-            GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
-            if ( m_EMU150_Status.state == EMU150_STATE_RECORDING_CONFIGRMATION ) 
+            snprintf (gse_OutLine, sizeof(gse_OutLine),
+            "\r\nEMU150 Protocol: Record Retrieve/Confirm Failed. Skipping Rec (n=%d) \r\n", 
+            m_EMU150_Status.nCurrRecord);
+            GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
+            if ( m_EMU150_Status.state == EMU150_STATE_RECORDING_CONF ) 
             {
               // Get next record
               m_EMU150_Status.state = EMU150_STATE_GET_RECORDING; 
@@ -793,15 +800,13 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
           m_EMU150_Status.bDownloadFailed = TRUE;
           m_EMU150_Status.state = EMU150_STATE_COMPLETED; 
         }
-        
       }
       break;
-    
+   
     case EMU150_CMD_STATE_HS_ACK:
       if (EMU150_Process_ACK( EMU150_BLK_RECEIVING, data, cnt, ch) == TRUE) 
       {
         state = m_EMU150_Status.state; 
-        
         // Update counters if get recording summary 
         if ( state == EMU150_STATE_GET_RECORDING_HDR) 
         {
@@ -810,36 +815,32 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
           m_EMU150_Status.nCurrRecord = 0; 
           timeout = pEMU150_Cfg->timeout_rec_hdr; 
         }
-
         // Generate Cmd Msg based on the current state that we are in 
         EMU150_CreateTxPacket( 1, (UINT8 *) &EMU150_CMDS[state].cmd, timeout ); 
 
-        if ( (state == EMU150_STATE_GET_RECORDING) || (state == EMU150_STATE_RECORDING_CONFIGRMATION) )
+        if ( (state == EMU150_STATE_GET_RECORDING) || 
+             (state == EMU150_STATE_RECORDING_CONF) )
         {
           // Have to add Rec Identifier to Cmd Msg for getting records or confirming rec 
           EMU150_AppendRecordId(); 
         }
-
         // If Set Baud send appropriate command
         if ( state == EMU150_STATE_SET_BAUD )
         {
           // Have to add Baud Rate setting to Cmd Msg 
           EMU150_AppendBaudRate(); 
         }
-        
         // Go to next state 
-        if ( (state == EMU150_STATE_RECORDING_CONFIGRMATION) || 
+        if ( (state == EMU150_STATE_RECORDING_CONF) || 
              (state == EMU150_STATE_SET_BAUD) )
         {
-          NextCmdState = EMU150_CMD_STATE_FINAL_ACK; 
+          nextCmdState = EMU150_CMD_STATE_FINAL_ACK; 
         }
         else 
         {
-          NextCmdState = EMU150_CMD_STATE_REC_ACK; 
+          nextCmdState = EMU150_CMD_STATE_REC_ACK; 
         }
-        
-        EMU150_NextCmdState(NextCmdState, TRUE);       
-        
+        EMU150_NextCmdState(nextCmdState, TRUE);       
       }
       else 
       {
@@ -847,16 +848,14 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
         //if ( (m_EMU150_Status.ack_timer + pEMU150_Cfg->timeout_ack) < CM_GetTickCount() )
         if ( (CM_GetTickCount() - m_EMU150_Status.ack_timer) > pEMU150_Cfg->timeout_ack )
         {
-        
           m_EMU150_Status.cmd_timer = CM_GetTickCount();   // Reset timer
           m_EMU150_Status.nRetries++;                      // Update retries 
           m_EMU150_Status.nTotalRetries++; 
           EMU150_NextCmdState(EMU150_CMD_STATE_SEND_HS, FALSE); 
-          
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: Process Cmd (HS ACK) Bad Data TimeOut (n=%d)\r\n \0",
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: Process Cmd (HS ACK) Bad Data TimeOut (n=%d)\r\n",
                    m_EMU150_Status.nRetries );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+          GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         }
       }
       break; 
@@ -865,48 +864,46 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
       // Process bytes as they are rx from port 
       if (cnt > 0)
       {
-        EMU150_Process_Blk( EMU150_BLK_RECEIVING, data, cnt, ch ); 
+         // Waiting for data this function will sometimes return false for no data
+         // received, no need to check return, continue until data is received
+         EMU150_Process_Blk( EMU150_BLK_RECEIVING, data, cnt, ch ); 
       }
-//      else
-//      {
-        // Have we received the expected block size. 
-        // NOTE: Always have to perform logic. We could have received entire blk in current 
-        //       frame, thus can wait until cnt == 0 to process, esp for "babbling EMU Tx". 
-        if ((m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size) == m_EMU150_Status.blk_exp_size) 
-        {
+      // Have we received the expected block size. 
+      // NOTE: Always have to perform logic. We could have received entire blk in current 
+      //       frame, thus can wait until cnt == 0 to process, esp for "babbling EMU Tx". 
+      if((m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size) == m_EMU150_Status.blk_exp_size) 
+      {
+         // Waiting for data this function will sometimes return false for no data
+         // received, no need to check return, continue until data is received
+         EMU150_Process_Blk( EMU150_BLK_EOB, data, cnt, ch ); 
+         // If this is last block then expect ACK to be returned for our ACK otherwise 
+         //    otherwise expect more blocks. 
+         if ( m_EMU150_Status.blk_number == m_EMU150_Status.blk_exp_number ) 
+         {
+           // Send final ACK and exp to receive ACK 
+           EMU150_NextCmdState (EMU150_CMD_STATE_FINAL_ACK, FALSE); 
+         }
+         else 
+         {
+           // Remain in this state for next block 
+           EMU150_NextCmdState (EMU150_CMD_STATE_REC_ACK, FALSE);   
+         }
+         // Send ACK 
+         EMU150_CreateTxPacket( 1, (UINT8 *) &EMU150_CMDS_ACK, timeout); 
+      }
         
-          EMU150_Process_Blk( EMU150_BLK_EOB, data, cnt, ch ); 
-          
-          // If this is last block then expect ACK to be returned for our ACK otherwise 
-          //    otherwise expect more blocks. 
-          if ( m_EMU150_Status.blk_number == m_EMU150_Status.blk_exp_number ) 
-          {
-            EMU150_NextCmdState (EMU150_CMD_STATE_FINAL_ACK, FALSE); // Send final ACK and exp to receive ACK 
-          }
-          else 
-          {
-            EMU150_NextCmdState (EMU150_CMD_STATE_REC_ACK, FALSE);   // Remain in this state for next block 
-          }
-          
-          // Send ACK 
-          EMU150_CreateTxPacket( 1, (UINT8 *) &EMU150_CMDS_ACK, timeout); 
-        }
-        
-        // Terminate immediately if the actual blk size is > exp blk size or we have exceeded are local 
-        //    buffer size ! 
-        if ( ((m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size) > m_EMU150_Status.blk_exp_size) ||
-             (m_EMU150_Rx_Buff.cnt > (256 * 1024)) )
-        {
-          m_EMU150_Status.cmd_timer = CM_GetTickCount();   // Reset timer
-          EMU150_NextCmdState(EMU150_CMD_STATE_SEND_HS, FALSE); 
-          
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: Process Cmd (GET_REC) Bad Data TimeOut (n=%d)\r\n \0",
-                   m_EMU150_Status.nRetries );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
-        }
-        
-//      }
+      // Terminate immediately if the actual blk size is > exp blk size or 
+      // we have exceeded are local buffer size ! 
+      if(((m_EMU150_Rx_Buff.cnt-m_EMU150_Status.blk_hdr_size) > m_EMU150_Status.blk_exp_size)||
+           (m_EMU150_Rx_Buff.cnt > (256 * 1024)) )
+      {
+        m_EMU150_Status.cmd_timer = CM_GetTickCount();   // Reset timer
+        EMU150_NextCmdState(EMU150_CMD_STATE_SEND_HS, FALSE); 
+        snprintf (gse_OutLine, sizeof(gse_OutLine),
+                 "\r\nEMU150 Protocol: Process Cmd (GET_REC) Bad Data TimeOut (n=%d)\r\n",
+                 m_EMU150_Status.nRetries );
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
+      }
       break; 
       
     case EMU150_CMD_STATE_FINAL_ACK: 
@@ -933,10 +930,10 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
           m_EMU150_Status.cmd_timer = CM_GetTickCount();   // Reset timer
           EMU150_NextCmdState(EMU150_CMD_STATE_SEND_HS, FALSE); 
           
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: Process Cmd (FINAL ACK) Bad Data TimeOut (n=%d)\r\n \0",
-                   m_EMU150_Status.nRetries );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                 "\r\nEMU150 Protocol: Process Cmd (FINAL ACK) Bad Data TimeOut (n=%d)\r\n",
+                 m_EMU150_Status.nRetries );
+          GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         }
       }
       break; 
@@ -945,10 +942,9 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
       FATAL("Unsupported EMU Cmd State = %d", m_EMU150_Status.cmd_state);   
       break;   
   }
-  
-  NextState = m_EMU150_Status.state;  // Init to current state 
+  nextState = m_EMU150_Status.state;  // Init to current state 
 
-  return (NextState);
+  return (nextState);
 }
 
 
@@ -969,7 +965,7 @@ EMU150_STATES EMU150_State_ProcessCmd ( UINT8 *data, UINT16 cnt, UINT16 ch )
 static 
 EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
 {
-  EMU150_STATES NextState; 
+  EMU150_STATES nextState; 
   EMU150_CFG_PTR pEMU150_Cfg; 
 
 
@@ -982,26 +978,26 @@ EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
       if ( m_EMU150_Status.nRetries > pEMU150_Cfg->nRetries ) 
       {
         // Loop thru all known baud rates 
-        if ( ++m_EMU150_Status.IndexBPS < EMU150_BAUD_RATES_MAX ) 
+        if ( ++m_EMU150_Status.indexBPS < EMU150_BAUD_RATES_MAX ) 
         {
           // Set the new baud rate
-          EMU150_SetUart ( ch, UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS]); 
+          EMU150_SetUart ( UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS]); 
           
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: AutoDetect Attempting Setting %d BAUD \r\n \0",
-                   UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS] );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: AutoDetect Attempting Setting %d BAUD \r\n",
+                   UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS] );
+          GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         }
         else 
         {
           // Reset the Uart to 9600 
-          m_EMU150_Status.IndexBPS = 0; 
-          EMU150_SetUart ( ch, UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS]); 
+          m_EMU150_Status.indexBPS = 0; 
+          EMU150_SetUart ( UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS]); 
           
           // Indicate FAILED !!! 
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: AutoDetect Failed \r\n \0" );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: AutoDetect Failed \r\n" );
+          GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
           
           m_EMU150_Status.state = EMU150_STATE_COMPLETED; 
           m_EMU150_Status.bDownloadFailed = TRUE; 
@@ -1022,7 +1018,7 @@ EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
       {
         // We got the correct baud rate.  Update UART info. 
         // Transition to Next State
-        if ( m_EMU150_Status.UartBPS == m_EMU150_Status.UartBPS_Desired ) 
+        if ( m_EMU150_Status.uartBPS == m_EMU150_Status.uartBPS_Desired ) 
         {
           m_EMU150_Status.state = EMU150_STATE_GET_INSTALL_CFG;
         }
@@ -1031,10 +1027,10 @@ EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
           m_EMU150_Status.state = EMU150_STATE_SET_BAUD;
         }
         
-        sprintf (GSE_OutLine,
-                 "\r\nEMU150 Protocol: AutoDetect Found EMU150 @ %d BAUD \r\n \0",
-                 UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS] );
-        GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+        snprintf (gse_OutLine, sizeof(gse_OutLine),
+                 "\r\nEMU150 Protocol: AutoDetect Found EMU150 @ %d BAUD \r\n",
+                 UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS] );
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
       }
       else 
       {
@@ -1048,10 +1044,10 @@ EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
           m_EMU150_Status.nTotalRetries++; 
           EMU150_NextCmdState(EMU150_CMD_STATE_SEND_HS, FALSE); 
           
-          sprintf (GSE_OutLine,
-                   "\r\nEMU150 Protocol: AutoDetect Bad Data TimeOut (n=%d)\r\n \0",
+          snprintf (gse_OutLine, sizeof(gse_OutLine),
+                   "\r\nEMU150 Protocol: AutoDetect Bad Data TimeOut (n=%d)\r\n",
                    m_EMU150_Status.nRetries );
-          GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+          GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         }
       }
       break; 
@@ -1061,9 +1057,9 @@ EMU150_STATES EMU150_State_AutoDetect (UINT8 *data, UINT32 cnt, UINT16 ch)
       break; 
   }
   
-  NextState = m_EMU150_Status.state;  // Init to current state 
+  nextState = m_EMU150_Status.state;  // Init to current state 
   
-  return (NextState); 
+  return (nextState); 
   
 }                                              
 
@@ -1089,10 +1085,10 @@ void EMU150_NextState( void )
   m_EMU150_Status.cmd_timer = CM_GetTickCount(); 
   m_EMU150_Status.nIdleRetries = 0; 
   
-  sprintf (GSE_OutLine,
-           "\r\nEMU150 Protocol: New State Transition to %s \r\n \0", 
+  snprintf (gse_OutLine, sizeof(gse_OutLine),
+           "\r\nEMU150 Protocol: New State Transition to %s \r\n", 
            EMU150_NAME[m_EMU150_Status.state].state );
-  GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+  GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
   
   // If new state is IDLE then clear DOWNLOAD STATES 
   if ( m_EMU150_Status.state == EMU150_STATE_IDLE )
@@ -1198,22 +1194,34 @@ void EMU150_CreateTxPacket( UINT8 cnt, UINT8 *data, UINT32 timeout )
 static 
 void EMU150_AppendRecordId( void )
 {
-  UINT32 index;
-
+  UINT32 currIndex;
+  UINT32 elementSize;
   
-  index = m_EMU150_Status.nCurrRecord;
+  currIndex = m_EMU150_Status.nCurrRecord;
   
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning  
   // Copy Rec Type with Bit 16 and 15 masked away.  Note byte swapping not necessary
   // Expect Bit 16 and 15 to be Masked away from Rec Type
-  memcpy ( &m_EMU150_Tx_Buff.buff[1], &m_Record_Hdr[index].nRecType, 2 );
-  
-  // Copy Time Stamp with Bit 32 NOT masked away and incl Cycle. Note byte swapping not 
+  elementSize = sizeof(m_Record_Hdr[currIndex].nRecType);
+  memcpy ( &m_EMU150_Tx_Buff.buff[m_EMU150_Tx_Buff.cnt], 
+           &m_Record_Hdr[currIndex].nRecType, 
+           elementSize );
+  m_EMU150_Tx_Buff.cnt += elementSize;
+  // Copy Time Stamp with Bit 32 NOT masked away. Note byte swapping not 
   // necessary
-  memcpy ( &m_EMU150_Tx_Buff.buff[3], &m_Record_Hdr[index].nRecTime, 5 );
+  elementSize = sizeof(m_Record_Hdr[currIndex].nRecTime);
+  memcpy ( &m_EMU150_Tx_Buff.buff[m_EMU150_Tx_Buff.cnt], 
+           &m_Record_Hdr[currIndex].nRecTime,
+           elementSize );
+  m_EMU150_Tx_Buff.cnt += elementSize;
+  //Copy the Cycle
+  elementSize = sizeof(m_Record_Hdr[currIndex].nCycle);
+  memcpy ( &m_EMU150_Tx_Buff.buff[m_EMU150_Tx_Buff.cnt], 
+           &m_Record_Hdr[currIndex].nCycle,
+           elementSize );
+   m_EMU150_Tx_Buff.cnt += elementSize;
 #pragma ghs endnowarning
-  
-  m_EMU150_Tx_Buff.cnt += 7; 
+
 }
 
 
@@ -1232,13 +1240,13 @@ void EMU150_AppendRecordId( void )
 static 
 void EMU150_AppendBaudRate ( void )
 {
-  UINT16 index; 
+  UINT16 currentIndex; 
   
-  index = EMU150_GetDesiredBaudRateIndex (m_EMU150_Status.UartBPS_Desired); 
+  currentIndex = EMU150_GetDesiredBaudRateIndex (m_EMU150_Status.uartBPS_Desired); 
 
-  m_EMU150_Tx_Buff.buff[1] = EMU150_BAUD_RATES[index]; 
+  m_EMU150_Tx_Buff.buff[m_EMU150_Tx_Buff.cnt] = EMU150_BAUD_RATES[currentIndex]; 
 
-  m_EMU150_Tx_Buff.cnt += 1; 
+  m_EMU150_Tx_Buff.cnt += sizeof(EMU150_BAUD_RATES[0]); 
 }
 
 
@@ -1271,7 +1279,9 @@ BOOLEAN EMU150_Process_ACK (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
   // Process bytes as they are rx from port 
   if (cnt > 0)
   {
-    EMU150_Process_Blk( EMU150_BLK_RECEIVING, data, cnt, ch ); 
+     // Waiting for ACK this function will sometimes return false for no data
+     // received, no need to check return, continue until data is received
+     EMU150_Process_Blk( EMU150_BLK_RECEIVING, data, cnt, ch ); 
   }
 
   // Wait for IDLE time before processing ACK to ensure all bytes have been received 
@@ -1312,8 +1322,8 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
   BOOLEAN bOk; 
   UINT8 *data_ptr;
   UINT16 i; 
-  UINT16 diff; 
-  UINT16 hdr_offset; 
+  UINT32 diff; 
+  UINT32 hdr_offset; 
 
   
   bOk = FALSE; 
@@ -1332,8 +1342,10 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
           if (m_EMU150_Rx_Buff.cnt >= 4) 
           {
             // First block.  Parse Total Number of Blocks AND Parse block size
-            m_EMU150_Status.blk_exp_number = (m_EMU150_Rx_Buff.buff[1] << 8) | (m_EMU150_Rx_Buff.buff[0]); 
-            m_EMU150_Status.blk_exp_size = (m_EMU150_Rx_Buff.buff[3] << 8) | (m_EMU150_Rx_Buff.buff[2]); 
+            m_EMU150_Status.blk_exp_number = (m_EMU150_Rx_Buff.buff[1] << 8) | 
+                                             (m_EMU150_Rx_Buff.buff[0]); 
+            m_EMU150_Status.blk_exp_size   = (m_EMU150_Rx_Buff.buff[3] << 8) | 
+                                             (m_EMU150_Rx_Buff.buff[2]); 
             m_EMU150_Status.blk_hdr_size = 4; 
             
             // Reset cksum misaligned flag for start of new set of blocks
@@ -1345,7 +1357,8 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
           if (m_EMU150_Rx_Buff.cnt >= 2) 
           {
             // Not First block. Parse block size
-            m_EMU150_Status.blk_exp_size = (m_EMU150_Rx_Buff.buff[1] << 8) | (m_EMU150_Rx_Buff.buff[0]);
+            m_EMU150_Status.blk_exp_size = (m_EMU150_Rx_Buff.buff[1] << 8) | 
+                                           (m_EMU150_Rx_Buff.buff[0]);
             m_EMU150_Status.blk_hdr_size = 2; 
           }
         }
@@ -1378,8 +1391,8 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
         }
       }
     
-      // If this is the first block, then the total number of blocks must also be parsed from data stream
-      //  inaddition to block size. Otherwise just parse block size. 
+      // If this is the first block, then the total number of blocks must also be parsed 
+      //  from data stream in addition to block size. Otherwise just parse block size. 
       if (m_EMU150_Status.blk_number == 0) 
       {
         data_ptr = &m_EMU150_Rx_Buff.buff[4]; 
@@ -1390,7 +1403,7 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
         data_ptr = &m_EMU150_Rx_Buff.buff[2]; 
         cnt = m_EMU150_Rx_Buff.cnt - 2; 
       }
-      bOk = EMU150_RSP[m_EMU150_Status.state]( EMU150_BLK_EOB, data_ptr, cnt, ch );
+      bOk = pEMU150_RSP[m_EMU150_Status.state]( EMU150_BLK_EOB, data_ptr, cnt, ch );
       if (bOk)
       {
         m_EMU150_Status.blk_number++;  
@@ -1398,7 +1411,7 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
       break;
       
     case EMU150_BLK_EOM:
-      bOk = EMU150_RSP[m_EMU150_Status.state]( EMU150_BLK_EOM, data, cnt, ch );
+      bOk = pEMU150_RSP[m_EMU150_Status.state]( EMU150_BLK_EOM, data, cnt, ch );
       break; 
       
     default:
@@ -1426,7 +1439,8 @@ BOOLEAN EMU150_Process_Blk (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt
  *
  *****************************************************************************/
 static
-BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch)
+BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, 
+                                   UINT32 cnt, UINT16 ch)
 {
   BOOLEAN bOk; 
   UINT32 calc_cksum; 
@@ -1440,7 +1454,8 @@ BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, UIN
       // Process cksum for each block.  It appears that EMU150 sends a cfg rec for each block. 
       //    Therefore we can calc and validate chksum for each block (diff from data log rec as
       //    they have cksum at end of msg, not end of each block !) 
-      // It is expected that *data will be pointing to start of cfg rec (not current blk size field)
+      // It is expected that *data will be pointing to start of 
+      //   cfg rec (not current blk size field)
 /*  Differ calc chksum as enhancement       
       if (cnt >= 8) 
       {
@@ -1462,7 +1477,7 @@ BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, UIN
       bOk = TRUE; 
 
       GSE_StatusStr( NORMAL, 
-                     "\rEMU150 Protocol: Retrieving Install Cfg, Blk=%d of %d, Blk size=%d \0", 
+                     "\rEMU150 Protocol: Retrieving Install Cfg, Blk=%d of %d, Blk size=%d", 
                      m_EMU150_Status.blk_number + 1,
                      m_EMU150_Status.blk_exp_number,
                      m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size);
@@ -1482,15 +1497,15 @@ BOOLEAN EMU150_Process_InstallCfg (EMU150_BLK_STATES blk_state, UINT8 *data, UIN
       {
         // Update NV memory
         m_EMU150_AppData.cksum = calc_cksum; 
-        m_EMU150_AppData.nCnt = size; 
-        memcpy ( &m_EMU150_AppData.data[0], &m_EMU150_Rx_Record.buff[0], m_EMU150_AppData.nCnt ); 
+        m_EMU150_AppData.nCnt = (UINT16)size; 
+        memcpy(&m_EMU150_AppData.data[0], &m_EMU150_Rx_Record.buff[0], m_EMU150_AppData.nCnt); 
         
         NV_Write( NV_UART_EMU150, 0, (void *) &m_EMU150_AppData,  sizeof(EMU150_APP_DATA)); 
         
-        sprintf (GSE_OutLine,
-                 "\r\nEMU150 Protocol: New EMU Cfg Detected.  (Bytes=%d, Cksum=0x%08x) \r\n \0",
-                 m_EMU150_AppData.nCnt, m_EMU150_AppData.cksum );
-        GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+        snprintf (gse_OutLine, sizeof(gse_OutLine),
+                "\r\nEMU150 Protocol: New EMU Cfg Detected.  (Bytes=%d, Cksum=0x%08x) \r\n",
+                m_EMU150_AppData.nCnt, m_EMU150_AppData.cksum );
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
       }
 
       // Go to get recording state       
@@ -1536,10 +1551,11 @@ BOOLEAN EMU150_Process_Recording_Hdr (EMU150_BLK_STATES blk_state, UINT8 *data, 
     case EMU150_BLK_EOB:
       // Expect each block to contain exactly one record 
       // Determine if the record has been downloaded, if not store in m_Record_Hdr[]
-      if (cnt == 9)
+      if (cnt == sizeof(EMU150_RECCORDING_HDR))
       {
         m_EMU150_Status.nRecords++; // Count the number of records returned by EMU150
-        if ( m_EMU150_Status.nRecordsNew < EMU150_RECORDS_MAX ) // Retrieve only up to the MAX array 
+        // Retrieve only up to the MAX array 
+        if ( m_EMU150_Status.nRecordsNew < EMU150_RECORDS_MAX ) 
         {
           memcpy ( &m_Record_Hdr[m_EMU150_Status.nRecordsNew], data, cnt ); 
           if ( ((m_Record_Hdr[m_EMU150_Status.nRecordsNew].nRecType & 0x0080) == 0) ||
@@ -1559,14 +1575,14 @@ BOOLEAN EMU150_Process_Recording_Hdr (EMU150_BLK_STATES blk_state, UINT8 *data, 
           if ( m_EMU150_Status.nRecords == 1) 
           {
             // Output # of Records / Blks
-            sprintf (GSE_OutLine,
-                     "\r\nEMU150 Protocol: Retrieving Rec Headers, Total Exp Count = %d\r\n \0",
-                     m_EMU150_Status.blk_exp_number);
-            GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+            snprintf (gse_OutLine, sizeof(gse_OutLine),
+                    "\r\nEMU150 Protocol: Retrieving Rec Headers, Total Exp Count = %d\r\n",
+                    m_EMU150_Status.blk_exp_number);
+            GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
           }
         } // End of if ( m_EMU150_Status.nRecords < EMU150_RECORDS_MAX )
-        bOk = TRUE;  // Force to continue even if > EMU150_RECORDS_MAX.  Rec after EMU150_RECORDS_MAX 
-                     //  will not be retrieved later.  
+        bOk = TRUE;  // Force to continue even if > EMU150_RECORDS_MAX.  
+                     // Rec after EMU150_RECORDS_MAX will not be retrieved later.  
       } // End of if (cnt == 9)
       // else 
       // Expect Summary record to be exactly 9 bytes.  Otherwise timeout and try again 
@@ -1591,10 +1607,10 @@ BOOLEAN EMU150_Process_Recording_Hdr (EMU150_BLK_STATES blk_state, UINT8 *data, 
         m_EMU150_Status.state = EMU150_STATE_COMPLETED; 
       }
       
-      sprintf (GSE_OutLine,
-               "\r\nEMU150 Protocol: Total Rec = %d, New Rec = %d \r\n \0",
+      snprintf (gse_OutLine, sizeof(gse_OutLine),
+               "\r\nEMU150 Protocol: Total Rec = %d, New Rec = %d \r\n",
                m_EMU150_Status.nRecords, m_EMU150_Status.nRecordsNew );
-      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+      GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
       bOk = TRUE; 
       break; 
       
@@ -1641,13 +1657,13 @@ BOOLEAN EMU150_Process_Record (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 
       m_EMU150_Rx_Record.cnt += cnt; 
       bOk = TRUE; 
 
-      GSE_StatusStr( NORMAL, 
-                     "\rEMU150 Protocol: Retrieving Rec=%d of %d, Blk=%d of %d, Blk size=%d \0", 
-                     m_EMU150_Status.nCurrRecord + 1,
-                     m_EMU150_Status.nRecordsNew,
-                     m_EMU150_Status.blk_number + 1,
-                     m_EMU150_Status.blk_exp_number,
-                     m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size);
+      GSE_StatusStr(NORMAL, 
+                    "\rEMU150 Protocol: Retrieving Rec=%d of %d, Blk=%d of %d, Blk size=%d", 
+                    m_EMU150_Status.nCurrRecord + 1,
+                    m_EMU150_Status.nRecordsNew,
+                    m_EMU150_Status.blk_number + 1,
+                    m_EMU150_Status.blk_exp_number,
+                    m_EMU150_Rx_Buff.cnt - m_EMU150_Status.blk_hdr_size);
       break; 
       
     case EMU150_BLK_EOM:
@@ -1662,23 +1678,23 @@ BOOLEAN EMU150_Process_Record (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 
       if (exp_cksum == (~(calc_cksum - 1)) )
       {
         // If checksum Ok, otherwise stay in same state !
-        m_EMU150_Status.state = EMU150_STATE_WAIT_FOR_STORAGE_CONFIRMATION; 
+        m_EMU150_Status.state = EMU150_STATE_WAIT_FOR_STORE_CONF; 
         m_EMU150_Status.nRecordsRec++; 
         m_EMU150_Status.nRecordsRecTotalByte += m_EMU150_Rx_Record.cnt; 
         bOk = TRUE; 
       }
       else 
       {
-        sprintf (GSE_OutLine,
-                 "\r\nEMU150 Protocol: Checksum Failed Exp=%08x Calc=%08x (Rec=%d of %d)\r\n \0", 
+        snprintf(gse_OutLine, sizeof(gse_OutLine),
+                 "\r\nEMU150 Protocol: Checksum Failed Exp=%08x Calc=%08x (Rec=%d of %d)\r\n", 
                  exp_cksum, (~(calc_cksum - 1)),
                  m_EMU150_Status.nCurrRecord + 1,  m_EMU150_Status.nRecordsNew);
-        GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+        GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
         m_EMU150_Status.nCksumErr++; 
       }
       break;
-      
-    default:
+       
+   default:
       FATAL("Unsupported EMU Record Block State = %d", blk_state);
       break; 
   }
@@ -1689,7 +1705,7 @@ BOOLEAN EMU150_Process_Record (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 
 
 
 /******************************************************************************
- * Function:    EMU150_Process_Record_Confirmation
+ * Function:    EMU150_Process_Rec_Confirmation
  *
  * Description: Processes EMU150 Rec Confirmation ACK
  *
@@ -1704,8 +1720,8 @@ BOOLEAN EMU150_Process_Record (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 
  *
  *****************************************************************************/
 static 
-BOOLEAN EMU150_Process_Record_Confirmation (EMU150_BLK_STATES blk_state, 
-                                            UINT8 *data, UINT32 cnt, UINT16 ch)
+BOOLEAN EMU150_Process_Rec_Confirmation (EMU150_BLK_STATES blk_state, 
+                                         UINT8 *data, UINT32 cnt, UINT16 ch)
 {
   BOOLEAN bOk; 
 
@@ -1740,7 +1756,8 @@ BOOLEAN EMU150_Process_Record_Confirmation (EMU150_BLK_STATES blk_state,
  *
  *****************************************************************************/
 static 
-BOOLEAN EMU150_Process_Set_Baud (EMU150_BLK_STATES blk_state, UINT8 *data, UINT32 cnt, UINT16 ch)
+BOOLEAN EMU150_Process_Set_Baud (EMU150_BLK_STATES blk_state, 
+                                 UINT8 *data, UINT32 cnt, UINT16 ch)
 {
   BOOLEAN bOk; 
   
@@ -1749,19 +1766,19 @@ BOOLEAN EMU150_Process_Set_Baud (EMU150_BLK_STATES blk_state, UINT8 *data, UINT3
 
   if ( blk_state == EMU150_BLK_EOM ) 
   {
-    EMU150_SetUart ( ch, (UART_CFG_BPS) m_EMU150_Status.UartBPS_Desired ); 
+    EMU150_SetUart ( (UART_CFG_BPS) m_EMU150_Status.uartBPS_Desired ); 
 
     // Set next state
     m_EMU150_Status.state = EMU150_STATE_GET_INSTALL_CFG;  
     
     // Update Current Status indication 
-    m_EMU150_Status.UartBPS = m_EMU150_Status.UartBPS_Desired;
-    m_EMU150_Status.IndexBPS = EMU150_GetDesiredBaudRateIndex(m_EMU150_Status.UartBPS_Desired); 
+    m_EMU150_Status.uartBPS = m_EMU150_Status.uartBPS_Desired;
+    m_EMU150_Status.indexBPS = EMU150_GetDesiredBaudRateIndex(m_EMU150_Status.uartBPS_Desired); 
     
-    sprintf (GSE_OutLine,
-             "\r\nEMU150 Protocol: Setting %d BAUD SUCCESS \r\n \0",
-             UART_BPS_SUPPORTED[m_EMU150_Status.IndexBPS] );
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+    snprintf (gse_OutLine, sizeof(gse_OutLine),
+             "\r\nEMU150 Protocol: Setting %d BAUD SUCCESS \r\n",
+             UART_BPS_SUPPORTED[m_EMU150_Status.indexBPS] );
+    GSE_DebugStr(NORMAL,TRUE,gse_OutLine); 
     
     bOk = TRUE; 
   }
@@ -1787,20 +1804,20 @@ static
 UINT16 EMU150_GetDesiredBaudRateIndex (UINT32 UartBPS_Desired) 
 {
   UINT16 i;
-  UINT16 index; 
+  UINT16 currentIndex; 
   
-  index = m_EMU150_Status.IndexBPS;  // Init to current index 
+  currentIndex = m_EMU150_Status.indexBPS;  // Init to current index 
   
   for (i=0;i<EMU150_BAUD_RATES_MAX;i++)
   {
-    if ( UART_BPS_SUPPORTED[i] == UartBPS_Desired ) 
+    if ( UART_BPS_SUPPORTED[i] == (UART_CFG_BPS)UartBPS_Desired ) 
     {
-      index = i;
+      currentIndex = i;
       break; 
     }
   }
   
-  return (index);
+  return (currentIndex);
 }
 
 
@@ -1818,16 +1835,16 @@ UINT16 EMU150_GetDesiredBaudRateIndex (UINT32 UartBPS_Desired)
  *
  *****************************************************************************/
 static 
-void EMU150_SetUart ( UINT16 ch, UART_CFG_BPS bps ) 
+void EMU150_SetUart ( UART_CFG_BPS bps ) 
 {
-  UART_CONFIG UartCfg; 
+  UART_CONFIG uartCfg; 
   
-  UartCfg = m_UartCfg; 
-  UartCfg.BPS = bps;   // Set to new BPS
-  m_EMU150_Status.UartBPS = UartCfg.BPS;  // Update current Uart Status
+  uartCfg = m_UartCfg; 
+  uartCfg.BPS = bps;   // Set to new BPS
+  m_EMU150_Status.uartBPS = (UINT32)uartCfg.BPS;  // Update current Uart Status
 
-  UART_ClosePort(UartCfg.Port);
-  UART_OpenPort(&UartCfg); 
+  UART_ClosePort(uartCfg.Port);
+  UART_OpenPort(&uartCfg); 
 }
 
 
@@ -1846,9 +1863,9 @@ void EMU150_SetUart ( UINT16 ch, UART_CFG_BPS bps )
 static 
 void EMU150_ProcessChksum (void)
 {
-  UINT16 hdr_offset; 
+  UINT32 hdr_offset; 
   SINT32 diff; 
-  UINT16 i; 
+  UINT32 i; 
   UINT8  *data_ptr; 
   UINT32 curr; 
   UINT8 data[4]; 
@@ -1861,7 +1878,7 @@ void EMU150_ProcessChksum (void)
   if (diff >= 4)
   {
     // Add in misaligned data from previous block
-    if ( (m_EMU150_Rx_Buff.cksum_misaligned_flag != 0) && (m_EMU150_Rx_Buff.cksum_cnt_ptr == 0) )
+    if ((m_EMU150_Rx_Buff.cksum_misaligned_flag != 0) && (m_EMU150_Rx_Buff.cksum_cnt_ptr == 0))
     {
       // Clear local buffer
       for (i=0;i<4;i++)
@@ -1923,13 +1940,14 @@ void EMU150_RestoreAppData (void)
   RESULT result;  
   UINT32 cksum; 
   
+  cksum = 0;
   result = NV_Open(NV_UART_EMU150); 
   if ( result == SYS_OK )
   {
     NV_Read(NV_UART_EMU150, 0, (void *) &m_EMU150_AppData, sizeof(EMU150_APP_DATA));
     
     // Ensure checksum (long word sum and then 2-s complement) is Ok
-    cksum = EMU150_CalcCksum ( (UINT32 *) &m_EMU150_AppData.data[0], m_EMU150_AppData.nCnt / 4); 
+    cksum = EMU150_CalcCksum ((UINT32 *) &m_EMU150_AppData.data[0], m_EMU150_AppData.nCnt / 4); 
   }
 
   // If open failed or checksum bad (if not truncated data), then re-init app data   
@@ -1961,7 +1979,8 @@ UINT32 EMU150_CalcCksum ( UINT32 *data_ptr, UINT32 nLongWords )
   
   
   // Ensure long word aligment before processing 
-  ASSERT_MESSAGE( (((UINT32) data_ptr & 0x3) == 0), "EMU150_CalcCksum: Long Word Aligned Ptr Required %08x", data_ptr); 
+  ASSERT_MESSAGE( (((UINT32) data_ptr & 0x3) == 0), 
+                  "EMU150_CalcCksum: Long Word Aligned Ptr Required %08x", data_ptr); 
   
   cksum = 0; 
   for (i=0;i<nLongWords;i++)
@@ -2027,52 +2046,44 @@ void EMU150_CreateSummaryLog ( EMU150_STATUS_PTR pStatus )
   log.nTotalRetries = pStatus->nTotalRetries; 
   log.nRecordsRec = pStatus->nRecordsRec; 
   log.nRecordsRecTotalByte = pStatus->nRecordsRecTotalByte;
-  log.UartBPS = pStatus->UartBPS;
+  log.uartBPS = pStatus->uartBPS;
   log.nCksumErr = pStatus->nCksumErr; 
   log.nRestarts = pStatus->nRestarts;
   log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
   log.bDownloadFailed = pStatus->bDownloadFailed; 
   
   // Write the log
-  LogWriteSystem (SYS_ID_UART_EMU150_STATUS, LOG_PRIORITY_LOW, &log, sizeof(EMU150_STATUS_LOG), 
+  LogWriteSystem (SYS_ID_UART_EMU150_STATUS, LOG_PRIORITY_LOW, &log, sizeof(EMU150_STATUS_LOG),
                   NULL);
   
 }
 
-
 /******************************************************************************
- * Function:    EMU150_FileInit
+ * Function:    EMU150Protocol_GetStatus
  *
- * Description: Clears the EEPROM storage location 
+ * Description: Utility function to request current EMU150 Status 
  *
- * Parameters:  None 
+ * Parameters:  None
  *
- * Returns:     None
+ * Returns:     Ptr to EMU150 Status Data
  *
- * Notes:       None
+ * Notes:       None 
  *
  *****************************************************************************/
-BOOLEAN EMU150_FileInit(void)
+static
+EMU150_STATUS_PTR EMU150Protocol_GetStatus (void)
 {
-  // Init App data
-  // Note: NV_Mgr will record log if data is corrupt
-  memset (&m_EMU150_AppData.data[0], 0, EMU150_APP_DATA_MAX); 
-  m_EMU150_AppData.cksum = 0; 
-  m_EMU150_AppData.nCnt = 0; 
-
-  // Update App data
-  NV_Write(NV_UART_EMU150, 0, (void *) &m_EMU150_AppData, sizeof(EMU150_APP_DATA));
-  
-  return TRUE;
+  return ( (EMU150_STATUS_PTR) &m_EMU150_Status ); 
 }
-
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 1:32p

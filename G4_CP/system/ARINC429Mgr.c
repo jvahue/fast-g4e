@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 56 $  $Date: 12-11-15 7:04p $
+     $Revision: 57 $  $Date: 12-11-16 8:12p $
 
 ******************************************************************************/
 
@@ -221,7 +221,7 @@ static BOOLEAN Arinc429MgrDataReduction               ( ARINC429_RX_CFG_PTR     
                                                         ARINC_SDI               sdi,
                                                         ARINC429_RECORD_PTR     pDataRecord );
 
-static BOOLEAN Arinc429MgrProcessPW305ABEngineMFD      ( MFD_DATA_TABLE_PTR   pMFDTable,
+static BOOLEAN Arinc429MgrProcPW305ABEngineMFD      ( MFD_DATA_TABLE_PTR   pMFDTable,
                                                          UINT32               *pArincMsg,
                                                          UINT8                Label );
 
@@ -244,7 +244,7 @@ static BOOLEAN Arinc429MgrInvalidateParameter          ( ARINC429_SDI_DATA_PTR p
                                                          ARINC429_WORD_INFO_PTR pWordInfo,
                                                          ARINC429_RECORD_PTR pDataRecord );
 
-static void    Arinc429MgrCheckParameterLostTimeout( ARINC429_RX_CFG_PTR pCfg,
+static void    Arinc429MgrChkParamLostTimeout      ( ARINC429_RX_CFG_PTR pCfg,
                                                      ARINC429_CHAN_DATA_PTR pChanData,
                                                      ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
 static UINT32  Arinc429MgrConvertEngToMsg          ( FLOAT32 EngVal, FLOAT32 Scale,
@@ -252,10 +252,10 @@ static UINT32  Arinc429MgrConvertEngToMsg          ( FLOAT32 EngVal, FLOAT32 Sca
                                                      UINT32 Format,  UINT32 Arinc429Msg,
                                                      BOOLEAN bValid );
 // Sensor
-static void   Arinc429MgrUpdateLabelFilter             ( ARINC429_SENSOR_INFO_PTR pSenorInfo );
+static void   Arinc429MgrUpdateLabelFilter         ( ARINC429_SENSOR_INFO_PTR pSenorInfo );
 
 // Built-In-Test
-static void   Arinc429MgrCreateTimeOutSystemLog        ( RESULT resultType, UINT8 ch );
+static void   Arinc429MgrCreateTimeOutSysLog           ( RESULT resultType, UINT8 ch );
 
 static void   Arinc429MgrDetermineSSMFailure           ( UINT32 *pFailCount, UINT8 TotalTests,
                                                          char *pMsg );
@@ -271,7 +271,7 @@ static UINT16 Arinc429MgrGetReduceHdr                  ( INT8 *pDest,
                              UINT16 *pNumParams );
 
 // Shutdown
-void Arinc429MgrProcessMsgsTaskShutdown(void);
+void Arinc429MgrProcMsgsTaskShutdown(void);
 
 
 /*****************************************************************************/
@@ -580,7 +580,7 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
    // tell Task Mgr to disable my task.
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
-     Arinc429MgrProcessMsgsTaskShutdown();
+     Arinc429MgrProcMsgsTaskShutdown();
      TmTaskEnable((TASK_INDEX)Arinc429_Process_Msgs, FALSE);
    }
    else // Normal task execution.
@@ -650,8 +650,8 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
            ( TRUE == pRxChan->bRecordingActive ) )
          {
            // Now check all configured parameters for reduction protocol
-           Arinc429MgrCheckParameterLostTimeout ( pRxCfgChan, pRxChan,
-                                                  &m_Arinc429RxBuffer[nChannel] );
+           Arinc429MgrChkParamLostTimeout ( pRxCfgChan, pRxChan,
+                                            &m_Arinc429RxBuffer[nChannel] );
          }
        }
      }
@@ -660,7 +660,7 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
 }
 
 /******************************************************************************
- * Function:    Arinc429MgrProcessMsgsTaskShutdown
+ * Function:    Arinc429MgrProcMsgsTaskShutdown
  *
  * Description: Shutdown function for Arinc429MgrProcessMsgsTask. This function
  *              is called when system mode enters SHUTDOWN.
@@ -675,7 +675,7 @@ void Arinc429MgrProcessMsgsTask(void *pParam)
  *
  *
  *****************************************************************************/
-void Arinc429MgrProcessMsgsTaskShutdown(void)
+void Arinc429MgrProcMsgsTaskShutdown(void)
 {
   ARINC429_RX_CFG_PTR  pRxCfgChan;
   ARINC429_TX_CFG_PTR  pTxCfgChan;
@@ -817,7 +817,7 @@ void Arinc429MgrBITTask ( void *pParam )
                               "\r\nArinc429_Monitor: Arinc429 Data Present Lost (Ch=%d) !\r\n",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-                     Arinc429MgrCreateTimeOutSystemLog(SYS_A429_DATA_LOSS_TIMEOUT, Channel);
+                     Arinc429MgrCreateTimeOutSysLog(SYS_A429_DATA_LOSS_TIMEOUT, Channel);
                   }
                   else
                   {
@@ -826,7 +826,7 @@ void Arinc429MgrBITTask ( void *pParam )
                               "\r\nArinc429_Monitor: Arinc429 Startup Time Out (Ch=%d)!\r\n",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-                     Arinc429MgrCreateTimeOutSystemLog(SYS_A429_STARTUP_TIMEOUT, Channel);
+                     Arinc429MgrCreateTimeOutSysLog(SYS_A429_STARTUP_TIMEOUT, Channel);
                   }
                   pArincRxStatus->DataLossCnt++;
                }
@@ -957,7 +957,7 @@ UINT16 Arinc429MgrReadFilteredRaw( void *pDest, UINT32 chan, UINT16 nMaxByteSize
 }
 
 /******************************************************************************
- * Function:    Arinc429MgrReadFilteredRawSnapshot
+ * Function:    Arinc429MgrReadFilteredRawSnap
  *
  * Description: Returns the current snapshot view of all label word data from the
  *              m_ArincLabelData[] data store. Only if label word data has been
@@ -977,8 +977,8 @@ UINT16 Arinc429MgrReadFilteredRaw( void *pDest, UINT32 chan, UINT16 nMaxByteSize
  *
  *
  *****************************************************************************/
-UINT16 Arinc429MgrReadFilteredRawSnapshot( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
-                                           BOOLEAN bStartSnap )
+UINT16 Arinc429MgrReadFilteredRawSnap( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
+                                       BOOLEAN bStartSnap )
 {
    // Local Data
    UINT16                       Cnt;
@@ -1536,7 +1536,7 @@ ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus ( void )
 }
 
 /******************************************************************************
- * Function:     Arinc429MgrCalcDiffCBITHealthStatus
+ * Function:     Arinc429MgrCalcDiffCBITHealthSts
  *
  * Description:  Calc the difference in CBIT Health Counts to support PWEH SEU
  *               (Used to support determining SEU cnt during data capture)
@@ -1548,7 +1548,7 @@ ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus ( void )
  * Notes:        none
  *
  *****************************************************************************/
-ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthStatus ( ARINC429_CBIT_HEALTH_COUNTS
+ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthSts ( ARINC429_CBIT_HEALTH_COUNTS
                                                                   PrevCount )
 {
    // Local Data
@@ -1586,7 +1586,7 @@ ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthStatus ( ARINC429_CBIT_
 }
 
 /******************************************************************************
- * Function:     Arinc429MgrAddPrevCBITHealthStatus
+ * Function:     Arinc429MgrAddPrevCBITHealthSts
  *
  * Description:  Add CBIT Health Counts to support PWEH SEU
  *               (Used to support determining SEU cnt during data capture)
@@ -1599,7 +1599,7 @@ ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthStatus ( ARINC429_CBIT_
  * Notes:        None
  *
  *****************************************************************************/
-ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
+ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthSts (
                                       ARINC429_CBIT_HEALTH_COUNTS CurrCnt,
                                       ARINC429_CBIT_HEALTH_COUNTS PrevCnt )
 {
@@ -2350,9 +2350,9 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
    if ( (pCfg->SubProtocol == ARINC429_RX_SUB_PW305AB_MFD_REDUCE) &&
         ((pLabelData->label >= (UINT8)MFD_300) && (pLabelData->label <= (UINT8)MFD_306)) )
    {
-      if ( Arinc429MgrProcessPW305ABEngineMFD ( &pChanData->MFDTable,
-                                                &pSdiData->CurrentMsg,
-                                                pLabelData->label ) )
+      if ( Arinc429MgrProcPW305ABEngineMFD ( &pChanData->MFDTable,
+                                             &pSdiData->CurrentMsg,
+                                             pLabelData->label ) )
       {
          bSave = TRUE;
          pDataRecord->ARINC429Msg = pLabelData->sd[SDI_IGNORE].CurrentMsg;
@@ -2544,7 +2544,7 @@ static UINT32 Arinc429MgrConvertEngToMsg ( FLOAT32 EngVal, FLOAT32 Scale, UINT8 
 }
 
 /******************************************************************************
- * Function:    Arinc429MgrCheckParameterLostTimeout
+ * Function:    Arinc429MgrChkParamLostTimeout
  *
  * Description: The Check Parameter Lost Timeout Function monitors all the
  *              parameters that are configured for data reduction and checks
@@ -2560,9 +2560,9 @@ static UINT32 Arinc429MgrConvertEngToMsg ( FLOAT32 EngVal, FLOAT32 Scale, UINT8 
  * Notes:       none
  *
  *****************************************************************************/
-static void Arinc429MgrCheckParameterLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
-                                                   ARINC429_CHAN_DATA_PTR pChanData,
-                                                   ARINC429_RAW_RX_BUFFER_PTR pRxBuffer )
+static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
+                                             ARINC429_CHAN_DATA_PTR pChanData,
+                                             ARINC429_RAW_RX_BUFFER_PTR pRxBuffer )
 {
    // Local Data
    ARINC429_RECORD                ARINC429Record;
@@ -2744,7 +2744,7 @@ static BOOLEAN Arinc429MgrInvalidateParameter ( ARINC429_SDI_DATA_PTR pSdiData,
 }
 
 /******************************************************************************
- * Function:     Arinc429MgrProcessPW305ABEngineMFD
+ * Function:     Arinc429MgrProcPW305ABEngineMFD
  *
  * Description:  The Process PW305 A B Engine MFD function is a special
  *               protocol processing to reduce the data being received for the
@@ -2763,8 +2763,8 @@ static BOOLEAN Arinc429MgrInvalidateParameter ( ARINC429_SDI_DATA_PTR pSdiData,
  *               messages 301 to 306.
  *
  *****************************************************************************/
-static BOOLEAN Arinc429MgrProcessPW305ABEngineMFD ( MFD_DATA_TABLE_PTR pMFDTable,
-                                                    UINT32 *pArincMsg, UINT8 Label )
+static BOOLEAN Arinc429MgrProcPW305ABEngineMFD ( MFD_DATA_TABLE_PTR pMFDTable,
+                                                 UINT32 *pArincMsg, UINT8 Label )
 {
    // Local Data
    UINT32    TickCount;
@@ -3042,7 +3042,7 @@ static void Arinc429MgrUpdateLabelFilter ( ARINC429_SENSOR_INFO_PTR pSensorInfo 
 /*****************************************************************************/
 
 /******************************************************************************
- * Function:     Arinc429MgrCreateTimeOutSystemLog
+ * Function:     Arinc429MgrCreateTimeOutSysLog
  *
  * Description:  Creates the Arinc429 TimeOut System Logs
  *
@@ -3056,7 +3056,7 @@ static void Arinc429MgrUpdateLabelFilter ( ARINC429_SENSOR_INFO_PTR pSensorInfo 
  *
  *****************************************************************************/
 static
-void Arinc429MgrCreateTimeOutSystemLog( RESULT resultType, UINT8 ch )
+void Arinc429MgrCreateTimeOutSysLog( RESULT resultType, UINT8 ch )
 {
    // Local Data
    ARINC429_SYS_TIMEOUT_LOG timeoutLog;
@@ -3693,6 +3693,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 56  *****************
  * User: John Omalley Date: 12-11-15   Time: 7:04p

@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
     
     VERSION
-      $Revision: 58 $  $Date: 12-11-14 7:20p $     
+      $Revision: 59 $  $Date: 12-11-16 8:12p $     
 
 ******************************************************************************/
 
@@ -1251,7 +1251,7 @@ PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals ( PWEH_SEU_HEALTH_COUNTS Pr
   diffCount.qar = QAR_CalcDiffCBITHealthStatus( PrevCount.qar ); 
   
   // ARINC429_CBIT_HEALTH_COUNTS
-  diffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthStatus( PrevCount.arinc429 ); 
+  diffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthSts( PrevCount.arinc429 ); 
   
   // Task Manager Health Counts
   diffCount.tm = Tm_CalcDiffTMHealthStatus ( PrevCount.tm ); 
@@ -1300,7 +1300,7 @@ PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals ( PWEH_SEU_HEALTH_COUNTS Cu
   addCount.qar = QAR_AddPrevCBITHealthStatus( CurrCnt.qar, PrevCnt.qar ); 
   
   // ARINC429_CBIT_HEALTH_COUNTS
-  addCount.arinc429 = Arinc429MgrAddPrevCBITHealthStatus( CurrCnt.arinc429, PrevCnt.arinc429 ); 
+  addCount.arinc429 = Arinc429MgrAddPrevCBITHealthSts( CurrCnt.arinc429, PrevCnt.arinc429 ); 
   
   // Task Manager Health Counts
   addCount.tm = Tm_AddPrevTMHealthStatus( CurrCnt.tm, PrevCnt.tm ); 
@@ -1355,6 +1355,11 @@ void CBITMgrPWEHSEU_UpdateEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
