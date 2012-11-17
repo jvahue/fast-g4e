@@ -11,7 +11,7 @@
                  Handler 
     
     VERSION
-      $Revision: 10 $  $Date: 8/28/12 1:43p $     
+      $Revision: 11 $  $Date: 12-11-16 8:12p $     
 
 ******************************************************************************/
 
@@ -19,18 +19,14 @@
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/    
 
-
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_stdtypes.h"
-
 #include "TaskManager.h"
 #include "ClockMgr.h"
-
 #include "UART.h"
 #include "UartMgr.h"
-
 
 /******************************************************************************
                                  Package Defines
@@ -67,8 +63,8 @@ typedef enum {
   EMU150_STATE_GET_INSTALL_CFG,
   EMU150_STATE_GET_RECORDING_HDR, 
   EMU150_STATE_GET_RECORDING,
-  EMU150_STATE_RECORDING_CONFIGRMATION,
-  EMU150_STATE_WAIT_FOR_STORAGE_CONFIRMATION, 
+  EMU150_STATE_RECORDING_CONF,
+  EMU150_STATE_WAIT_FOR_STORE_CONF, 
   EMU150_STATE_COMPLETED, 
   EMU150_STATE_MAX
 } EMU150_STATES; 
@@ -78,8 +74,7 @@ typedef enum {
   EMU150_CMD_STATE_SEND_HS,
   EMU150_CMD_STATE_HS_ACK,
   EMU150_CMD_STATE_REC_ACK,
-  EMU150_CMD_STATE_FINAL_ACK,
-  EMU150_CMD_STATE_MAX
+  EMU150_CMD_STATE_FINAL_ACK
 } EMU150_CMD_STATES; 
 
 typedef enum {
@@ -100,7 +95,6 @@ typedef struct {
   UINT32 ack_timer;     // TimeOut for exp ACK response.  
                         //    Required for "babbling" transmitter
   
-  EMU150_BLK_STATES blk_state; 
   UINT32 blk_number;    // Current block being received 
   UINT32 blk_exp_number;  // Expect number of blocks for this blk retrieval 
                           //   Rx on first blk of rsp to cmd. 
@@ -127,10 +121,10 @@ typedef struct {
 
   BOOLEAN bAllRecords;     // TRUE retrieve all records, FALSE only new records
   
-  UINT16 IndexBPS;         // Index to BPS for current EMU150 setting
-  UINT32 UartBPS;          // Current BPS EMU150 setting
+  UINT16 indexBPS;         // Index to BPS for current EMU150 setting
+  UINT32 uartBPS;          // Current BPS EMU150 setting
   
-  UINT32 UartBPS_Desired;  // Desired BPS EMU150 setting
+  UINT32 uartBPS_Desired;  // Desired BPS EMU150 setting
   
   BOOLEAN bDownloadFailed; // Current download success or failed 
   
@@ -153,7 +147,7 @@ typedef struct {
   UINT16 nRestarts;           // #times to start entire Download Process (from AutoDetect) 
                               //    Required if EMU Resets back to 9600 
   UINT16 nIdleRetries;        // #Cmd Retries in a row with no response before "restarting"
-                              //    from the top (AutoDetect).  This value should be > nRetries.
+                              //    from the top (AutoDetect).  This value should be > nRetries
                               //    If set == nRetries then will restart if current cmd fails.
                               //    NOTE: timeout period == "timeout" above. 
   
@@ -163,6 +157,7 @@ typedef struct {
 } EMU150_CFG, *EMU150_CFG_PTR; 
 
 
+// 6KB is to define the size for the NV Manager file, the -64 is for overhead
 #define EMU150_APP_DATA_MAX ((1024 * 6) - 64)
 #pragma pack(4)
 typedef struct 
@@ -213,14 +208,14 @@ typedef struct
   UINT32 nRecordsRec; // Total number of records recorded for current download
   UINT32 nRecordsRecTotalByte;  // Total number of bytes of all rec recorded 
   
-  UINT32 UartBPS;     // Current BPS EMU150 setting 
+  UINT32 uartBPS;     // Current BPS EMU150 setting 
   
   UINT32 nCksumErr;   // Total Checksum errors 
   
   UINT16 nRestarts;        // Retries of entire Download from the top ! 
   BOOLEAN bDownloadInterrupted;   // Current Download was interrupted 
   BOOLEAN bDownloadFailed;  // Current download success or failed 
-} EMU150_STATUS_LOG, *EMU150_STATUS_LOG_PTR; 
+} EMU150_STATUS_LOG; 
 #pragma pack()
 
 
@@ -249,8 +244,6 @@ EXPORT void EMU150Protocol_Initialize( void );
 EXPORT BOOLEAN  EMU150Protocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch, 
                                          void *runtime_data_ptr, void *info_ptr );
 
-EXPORT EMU150_STATUS_PTR EMU150Protocol_GetStatus (void); 
-
 EXPORT UINT16 EMU150Protocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size, 
                                              UINT16 ch ); 
 
@@ -275,6 +268,11 @@ EXPORT void EMU150Protocol_DownloadHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

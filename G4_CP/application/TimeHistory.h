@@ -9,7 +9,7 @@
     Description: Public functions/defintions.  See header in TimeHistory.c
 
     VERSION
-    $Revision: 8 $  $Date: 11/06/12 11:49a $
+    $Revision: 9 $  $Date: 11/15/12 7:18p $
 
 ******************************************************************************/
 
@@ -46,7 +46,8 @@
 #define TH_MAX_LOG_WRITE_PER_FRAME  10 //Maximum number of TH records to write to log memory
                                        //per MIF
 #define TH_REC_SEARCH_PER_FRAME     100 //Number of records to search per frame, in the TH
-                                        //buffer to see if they are pending write to log memeory
+                                        //buffer to see if they are pending write to
+                                        //log memory
 
 #define TH_LOG_PRIORITY             LOG_PRIORITY_3
 
@@ -64,7 +65,7 @@ typedef enum
    TH_4HZ  =  4,            /*  4Hz Rate */
    TH_5HZ  =  5,            /*  5Hz Rate */
    TH_10HZ = 10,            /* 10Hz Rate */
-   TH_20HZ = TH_MAX_RATE,   /* 20Hz Rate */
+   TH_20HZ = TH_MAX_RATE    /* 20Hz Rate */
 } TIMEHISTORY_SAMPLERATE;
 
 
@@ -99,18 +100,23 @@ typedef struct
 /**********************************************************************************************
                                      Package Exports Functions
 **********************************************************************************************/
-EXPORT BOOLEAN TH_FSMAppBusyGetState(INT32 param);
-EXPORT UINT16  TH_GetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void TH_Open(UINT32 pre_s);
 EXPORT void TH_Close(UINT32 time_s);
+EXPORT BOOLEAN TH_FSMAppBusyGetState(INT32 param);
+EXPORT UINT16  TH_GetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void TH_Init(void);
 EXPORT void TH_SetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
-
 #endif // TIMEHISTORY_H
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
  * 
+ * *****************  Version 9  *****************
+ * User: Jim Mood     Date: 11/15/12   Time: 7:18p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 (Time History Updates) 
+ * SCR 1131 (App Busy Updates)
+ *
  * *****************  Version 8  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:49a
  * Updated in $/software/control processor/code/application

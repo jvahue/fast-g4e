@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429
 
 VERSION
-     $Revision: 14 $  $Date: 12-11-01 6:44p $
+     $Revision: 15 $  $Date: 12-11-16 8:12p $
 
 ******************************************************************************/
 
@@ -541,11 +541,11 @@ typedef struct
 // Arinc429 System Status
 typedef struct
 {
-    BOOLEAN  Enabled;             // Indicates if the channel is enabled for processing
+    BOOLEAN  Enabled;           // Indicates if the channel is enabled for processing
 
-    UINT32   SwBuffOverFlowCnt;   // Count of times ARINC429_RAW_BUFFER->bOverFlow indicates OF
-    UINT32   ParityErrCnt;        // Count of times HW RSR indicates parity error, check 10 msec
-    UINT32   FramingErrCnt;       // Count of times HW RSR indicates framing error, check 10 msec
+    UINT32   SwBuffOverFlowCnt; // Count of times ARINC429_RAW_BUFFER->bOverFlow indicates OF
+    UINT32   ParityErrCnt;      // Count of times HW RSR indicates parity error, check 10 msec
+    UINT32   FramingErrCnt;     // Count of times HW RSR indicates framing error, check 10 msec
     UINT16   FPGA_Status;
 
     BOOLEAN  bChanActive;         // Updated on first channel activity
@@ -656,11 +656,14 @@ EXPORT void    Arinc429MgrBITTask                 ( void *pParam );
 EXPORT void    Arinc429MgrProcessMsgsTask         ( void *pParam );
 EXPORT void    Arinc429MgrDisplaySWBufferTask     ( void *pParam );
 
-EXPORT UINT16  Arinc429MgrReadFilteredRaw         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
-EXPORT UINT16  Arinc429MgrReadFilteredRawSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
+EXPORT UINT16  Arinc429MgrReadFilteredRaw         ( void *pDest, UINT32 chan, 
+                                                    UINT16 nMaxByteSize );
+EXPORT UINT16  Arinc429MgrReadFilteredRawSnap     ( void *pDest, UINT32 chan, 
+                                                    UINT16 nMaxByteSize,
                                                     BOOLEAN bStartSnap );
 EXPORT void    Arinc429MgrSyncTime                ( UINT32 chan   );
-EXPORT UINT16  Arinc429MgrGetFileHdr              ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
+EXPORT UINT16  Arinc429MgrGetFileHdr              ( void *pDest, UINT32 chan, 
+                                                    UINT16 nMaxByteSize );
 EXPORT UINT16  Arinc429MgrGetSystemHdr            ( void *pDest, UINT16 nMaxByteSize );
 EXPORT BOOLEAN Arinc429MgrSensorTest              ( UINT16 nIndex );
 EXPORT BOOLEAN Arinc429MgrInterfaceValid          ( UINT16 nIndex );
@@ -673,10 +676,10 @@ EXPORT void    Arinc429MgrDisableLiveStream       (void);
 
 EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrGetCBITHealthStatus( void );
 
-EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthStatus
+EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrCalcDiffCBITHealthSts
                                    ( ARINC429_CBIT_HEALTH_COUNTS PrevCount );
 
-EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
+EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthSts (
                                       ARINC429_CBIT_HEALTH_COUNTS CurrCnt,
                                       ARINC429_CBIT_HEALTH_COUNTS PrevCnt );
 
@@ -690,6 +693,11 @@ EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthStatus (
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 12-11-01   Time: 6:44p

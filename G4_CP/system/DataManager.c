@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 85 $  $Date: 12-11-13 11:10a $ 
+      $Revision: 86 $  $Date: 12-11-16 8:12p $ 
     
 ******************************************************************************/
 
@@ -1415,7 +1415,7 @@ void DataMgrInitChannels(void)
           DataMgrCreateTask( i,                                  // ACS Index
                              pACSConfig,
                              Arinc429MgrReadFilteredRaw,         // func to read the data
-                             Arinc429MgrReadFilteredRawSnapshot, // func to read the snapshot
+                             Arinc429MgrReadFilteredRawSnap,     // func to read the snapshot
                              Arinc429MgrSyncTime,                // Time Sync Function
                              Arinc429MgrGetFileHdr,
                              fpTask, nMIFframes,
@@ -1879,6 +1879,11 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 86  *****************
+ * User: John Omalley Date: 12-11-16   Time: 8:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1087 - Code Review Updates
  * 
  * *****************  Version 85  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
