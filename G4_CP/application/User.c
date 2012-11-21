@@ -2780,6 +2780,11 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   errno = 0;
   decValue = strtoul(SetStr, &leftOver, 10);
 
+ #if 0
+ GSE_DebugStr(NORMAL,TRUE,"User: strtoul: SetStr Addr: 0x%08X, SetStr: \"%s\",
+               decValue: %d, leftOver: 0x%08X", &SetStr, SetStr, decValue, *leftOver);
+#endif
+
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
   // test errno to see if ERANGE was flagged.

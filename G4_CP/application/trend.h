@@ -246,7 +246,8 @@ typedef struct
 
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
-  UINT32       sampleCnt;           /* Counts of samples take this period                    */
+  UINT32       masterSampleCnt;     /* Counts of samples take this period each SNSR_SUMMARY
+                                       has it own value which matches this value             */
 
   // Interval handling
   UINT32       lastIntervalCheckMs; /* Starting time (CM_GetTickCount()                      */
@@ -290,7 +291,7 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
- * 
+ *
  * *****************  Version 12  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 1:58p
  * Updated in $/software/control processor/code/application
