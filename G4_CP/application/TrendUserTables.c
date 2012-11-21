@@ -92,7 +92,7 @@ USER_ENUM_TBL TrendEngRunIdEnum[] =
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
   { "3"     , ENGRUN_ID_3  },
-  { "100"   , ENGRUN_ID_ANY},
+//{ "100"   , ENGRUN_ID_ANY},
   { "UNUSED", ENGRUN_UNUSED},
   { NULL, 0 }
 };
@@ -370,12 +370,12 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
- * 
+ *
  * *****************  Version 12  *****************
  * User: Melanie Jutras Date: 12-11-15   Time: 2:55p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Errors
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:39p
  * Updated in $/software/control processor/code/application
@@ -385,7 +385,7 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Changed Actions to UINT8
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 10/30/12   Time: 4:01p
  * Updated in $/software/control processor/code/application
