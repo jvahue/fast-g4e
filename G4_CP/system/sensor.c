@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 79 $  $Date: 12-11-13 5:46p $
+      $Revision: 81 $  $Date: 12-11-19 7:35p $
 
 ******************************************************************************/
 
@@ -836,6 +836,7 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
    // Local Data
    FLOAT32  fVal;
    FLOAT32  filterVal;
+   UINT32   lastUpdateTick;
 
    ASSERT( NULL != pSensor->pGetSensorData );
    ASSERT( NULL != pSensor->pInterfaceActive );
@@ -847,11 +848,11 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
       // Preset TickCount to current time.  For bus i/f type, TickCount will be
       //  updated to actual param rx time.  For others (ANALOG,DISC) it will be
       //  this time as param rx time.
-      pSensor->lastUpdateTick = CM_GetTickCount();
+      lastUpdateTick = CM_GetTickCount();
 
       // Read the Sensor data from the configured interface
       fVal      = pSensor->pGetSensorData(pSensor->nInterfaceIndex,
-                                         &pSensor->lastUpdateTick);
+                                          &lastUpdateTick);
 
       // Check if calibration is configured for sensor
       if (pConfig->calibration.type != NONE)
@@ -878,6 +879,10 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
          // Save the previous value and current good value
          pSensor->fPriorValue = pSensor->fValue;
          pSensor->fValue      = filterVal;
+
+         // Only if the sensor fValue has been updated (and passed SensorCheck())
+         //    will this be considered a new updated value
+         pSensor->lastUpdateTick = lastUpdateTick;
       }
    }
    else // The interface isn't valid so the sensor cannot be valid
@@ -1932,6 +1937,17 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ *
+ * *****************  Version 81  *****************
+ * User: Peter Lee    Date: 12-11-19   Time: 7:35p
+ * Updated in $/software/control processor/code/system
+ * SCR #1195 had to update GetSensorData()  to pGetSensorData()
+ *
+ * *****************  Version 80  *****************
+ * User: Peter Lee    Date: 12-11-18   Time: 3:26p
+ * Updated in $/software/control processor/code/system
+ * SCR #1195 Creep coding errors.  Incorrect update of
+ * sensor.lastUpdateTick.
  *
  * *****************  Version 79  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

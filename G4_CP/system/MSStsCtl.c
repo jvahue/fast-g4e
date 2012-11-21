@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 60 $  $Date: 12-11-13 5:46p $
+      $Revision: 61 $  $Date: 11/19/12 8:29p $
 
 ******************************************************************************/
 
@@ -126,7 +126,7 @@ void MSSC_Init(void)
   m_HeartbeatTimedOut = FALSE;
   m_HeartbeatLogCount = 0;
   m_MaxHeartbeatLogs = (UINT32)CfgMgr_ConfigPtr()->MsscConfig.heartBeatLogCnt;
-
+  m_CBITSysCond = CfgMgr_ConfigPtr()->MsscConfig.sysCondCBIT;
   m_CompactFlashMounted = FALSE;
 
   // Register flag indicating file transfering MS -> GRND.
@@ -706,8 +706,6 @@ void MSSC_HBMonitor(void)
     {
       // new timeout
       m_HeartbeatTimedOut = TRUE;
-      // save configured cbit condition for possible recovery
-      m_CBITSysCond = CfgMgr_ConfigPtr()->MsscConfig.sysCondCBIT;
 
       // check if timeout should be logged
       if (m_HeartbeatLogCount < m_MaxHeartbeatLogs)
@@ -939,10 +937,20 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
     m_MsTime.Second      = pRspData->Time.Second;
     m_MsTime.MilliSecond = pRspData->Time.MilliSecond;
 
+    if(!m_MssimVersionError)
+    {
     m_TimeSynced = pRspData->TimeSynched;
     m_IsClientConnected  = pRspData->ClientConnected;
     m_IsVPNConnected = pRspData->VPNConnected;
     m_CompactFlashMounted = pRspData->CompactFlashMounted;
+    }
+    else
+    {
+      m_TimeSynced =          FALSE;
+      m_IsClientConnected =   FALSE;
+      m_IsVPNConnected =      FALSE;
+      m_CompactFlashMounted = FALSE;
+    }
 
 #if 0
     /*vcast_dont_instrument_start*/
@@ -1030,6 +1038,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ *
+ * *****************  Version 61  *****************
+ * User: Jim Mood     Date: 11/19/12   Time: 8:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1173
  *
  * *****************  Version 60  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

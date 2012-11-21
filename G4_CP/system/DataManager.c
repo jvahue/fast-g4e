@@ -9,8 +9,8 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 86 $  $Date: 12-11-16 8:12p $ 
-    
+      $Revision: 87 $  $Date: 11/19/12 7:55p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -292,21 +292,30 @@ void DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
  *****************************************************************************/
 void DataMgrRecord (BOOLEAN bEnable )
 {
+   BOOLEAN is_busy;
+   INT32 int_save;
+
    DMRecordEnabled = bEnable;
-
-
    if (bEnable == TRUE)
    {
       // Kill any downloads in process
       DataMgrStopDownload();
+   }
 
-      //Notify event handler on record status change.
-      if((m_event_func != NULL) && !m_is_busy_last)
+   int_save = __DIR();
+   //Notify event handler on record status change.
+   if(m_event_func != NULL)
+   {
+      is_busy = (DMRecordEnabled || (m_channel_busy_flags != 0));
+      if(is_busy != m_is_busy_last)
       {
-        m_event_func(m_event_tag,TRUE);
-        m_is_busy_last = TRUE;
+         m_is_busy_last = is_busy;
+         __RIR(int_save);
+         m_event_func(m_event_tag,is_busy);
       }
    }
+   __RIR(int_save);
+
 }
 
 /******************************************************************************
@@ -400,20 +409,20 @@ UINT16 DataMgrGetHeader (INT8 *pDest, LOG_ACS_FIELD ACS, UINT16 nMaxByteSize )
 
       // Update protocol file hdr first !
       pBuffer = (CHAR *)(pDest + sizeof(DataHdr));  // Move to end of UartMgr File Hdr
-   
+
       if ( (ACS_PORT_NONE != pDMInfo->acs_Config.portType) && (pDMParam->pGetDataHdr != NULL) )
       {
          cnt = pDMParam->pGetDataHdr( pBuffer, pDMInfo->acs_Config.nPortIndex, nMaxByteSize);
       }
 
       // Update Data hdr
-      DataHdr.version = HDR_VERSION; 
+      DataHdr.version = HDR_VERSION;
       DataHdr.type    = pDMInfo->acs_Config.portType;
-  
-      // Copy hdr to destination 
-      pBuffer = (CHAR *)pDest; 
-      memcpy ( pBuffer, &DataHdr, sizeof(DataHdr) ); 
-   
+
+      // Copy hdr to destination
+      pBuffer = (CHAR *)pDest;
+      memcpy ( pBuffer, &DataHdr, sizeof(DataHdr) );
+
       cnt += sizeof(DataHdr);
    }
 
@@ -616,19 +625,19 @@ BOOLEAN DataMgrStartDownload( void )
       {
          pDMInfo    = &DataMgrInfo[nChannel];
          pACSConfig = &pDMInfo->acs_Config;
-      
+
          if (pACSConfig->mode == ACS_DOWNLOAD)
          {
             pDMInfo->dl.bDownloading                           = TRUE;
             StartLog.nChannel  = nChannel;
-            strncpy_safe(StartLog.model, sizeof(StartLog.model), 
+            strncpy_safe(StartLog.model, sizeof(StartLog.model),
                          pDMInfo->acs_Config.sModel, _TRUNCATE);
-            strncpy_safe(StartLog.id,    sizeof(StartLog.id),    
+            strncpy_safe(StartLog.id,    sizeof(StartLog.id),
                          pDMInfo->acs_Config.sID,    _TRUNCATE);
             StartLog.portType  = pDMInfo->acs_Config.portType;
             StartLog.portIndex = pDMInfo->acs_Config.nPortIndex;
-         
-            LogWriteSystem(APP_DM_DOWNLOAD_STARTED, LOG_PRIORITY_LOW, 
+
+            LogWriteSystem(APP_DM_DOWNLOAD_STARTED, LOG_PRIORITY_LOW,
                            &StartLog, sizeof(StartLog), NULL);
 
             pStatistics = &pDMInfo->dl.statistics;
@@ -813,7 +822,7 @@ static void DataMgrTask( void *pParam )
 
    // Empty the SW FIFO and discard the data
    nSize = pDMParam->pGetData( DMTempBuffer, pDMInfo->acs_Config.nPortIndex,
-                              sizeof(DMTempBuffer)); 
+                              sizeof(DMTempBuffer));
 
    // Is the Recording Active?
    if (TRUE == DMRecordEnabled)
@@ -1038,7 +1047,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
                 // Now build the fail log and record the failure
                 nSize = DataMgrBuildFailLog(pDMParam->nChannel, pDMInfo, &FailLog);
 
-                // Set the system status and record failure          
+                // Set the system status and record failure
                 Flt_SetStatus( pDMInfo->acs_Config.systemCondition,
                                APP_DM_SINGLE_BUFFER_OVERFLOW,
                                &FailLog, nSize);
@@ -1241,7 +1250,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
             *(pDMInfo->msgBuf[i].pDL_Status) = DL_WRITE_IN_PROGRESS;
             // Attempt to store packet in Data Flash
             // Add the checksum's checksum to the checksum for Log Write
-            LogWrite ( LOG_TYPE_DATA, 
+            LogWrite ( LOG_TYPE_DATA,
                        tempChannel,
                        pDMInfo->acs_Config.priority,
                        (void*)&pDMInfo->msgBuf[i].packet,
@@ -1475,7 +1484,7 @@ UINT16 DataMgrBuildFailLog( UINT32 Channel, DATA_MNG_INFO *pDMInfo,
    strncpy_safe(pFailLog->model, sizeof(pFailLog->model),
      pDMInfo->acs_Config.sModel,_TRUNCATE);
    strncpy_safe(pFailLog->id,sizeof(pFailLog->id),pDMInfo->acs_Config.sID,_TRUNCATE);
-   
+
    pFailLog->nChannel = Channel;
 
    strncpy_safe(pFailLog->recordStatus,   sizeof(pFailLog->recordStatus),
@@ -1561,7 +1570,7 @@ static void DataMgrDownloadTask( void *pParam )
             // Request the next record to download from the interface
             pDMInfo->dl.pDataSrc = DataMgrRequestRecord ( pDMInfo->acs_Config.portType,
                                                           pDMInfo->acs_Config.nPortIndex,
-                                                          &RequestStatus, &pDMInfo->dl.nBytes, 
+                                                          &RequestStatus, &pDMInfo->dl.nBytes,
                                                           pMsgBuf->pDL_Status );
             // Did the interface report no records or no more records to download?
             if ( RequestStatus == DL_NO_RECORDS )
@@ -1880,31 +1889,36 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
  *  MODIFICATIONS
  *    $History: DataManager.c $
  * 
+ * *****************  Version 87  *****************
+ * User: Jim Mood     Date: 11/19/12   Time: 7:55p
+ * Updated in $/software/control processor/code/system
+ * SCR 1131 Modfix for app busy when no ACSs are configured
+ *
  * *****************  Version 86  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:12p
  * Updated in $/software/control processor/code/system
  * SCR 1087 - Code Review Updates
- * 
+ *
  * *****************  Version 85  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Code Review Formatting Issues
- * 
+ *
  * *****************  Version 84  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:50p
  * Updated in $/software/control processor/code/system
  * SCR 1131 Recording busy status
- * 
+ *
  * *****************  Version 83  *****************
  * User: John Omalley Date: 12-11-09   Time: 4:10p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 82  *****************
  * User: John Omalley Date: 12-11-09   Time: 10:34a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 81  *****************
  * User: Melanie Jutras Date: 12-10-23   Time: 1:08p
  * Updated in $/software/control processor/code/system

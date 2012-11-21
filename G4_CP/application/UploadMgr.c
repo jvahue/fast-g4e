@@ -12,7 +12,7 @@
                   micro-server and ground server.
     
    VERSION
-   $Revision: 163 $  $Date: 12-11-12 9:49a $
+   $Revision: 164 $  $Date: 11/19/12 3:56p $
     
 ******************************************************************************/
 
@@ -240,7 +240,7 @@ static UPLOADMGR_UPLOAD_ORDER_TBL UploadOrderTbl[] =
                 {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_5 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_6 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_7 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_8 },				
+                {LOG_TYPE_DATA,LOG_PRIORITY_2,ACS_8 },
                 {LOG_TYPE_ETM, LOG_PRIORITY_3,ACS_DONT_CARE},
                 {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_1 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_2 },
@@ -249,7 +249,7 @@ static UPLOADMGR_UPLOAD_ORDER_TBL UploadOrderTbl[] =
                 {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_5 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_6 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_7 },
-                {LOG_TYPE_DATA,LOG_PRIORITY_1,ACS_8 },				
+                {LOG_TYPE_DATA,LOG_PRIORITY_3,ACS_8 },
                 {LOG_TYPE_ETM, LOG_PRIORITY_4,ACS_DONT_CARE},
                 {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_1 },
                 {LOG_TYPE_DATA,LOG_PRIORITY_4,ACS_2 },
@@ -1533,7 +1533,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
           GSE_DebugStr(NORMAL, TRUE,
             "UploadMgr: File Verification Table full, cannot transfer files!");
           //Stop immediatly, no error retries
-          Task->State = LOG_COLLECTION_FINISHED;
+          UploadMgr_MaintainFileTable(TRUE);
+          Task->State = LOG_COLLECTION_POST_MAINTENANCE;
         }
       }
       break;  
@@ -2450,7 +2451,7 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
   {
     source.nNumber = LOG_SOURCE_DONT_CARE;
     result = LogFindNextRecord(LOG_DONT_CARE,
-                               LOG_TYPE_SYSTEM,
+                               LOG_TYPE_DONT_CARE,
                                source,
                                LOG_PRIORITY_DONT_CARE,
                                &ReadOffset,
@@ -2460,7 +2461,7 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
     if(result != LOG_BUSY)
     {
       result = LogFindNextRecord(LOG_DONT_CARE,
-                                 LOG_TYPE_SYSTEM,
+                                 LOG_TYPE_DONT_CARE,
                                  source,
                                  LOG_PRIORITY_DONT_CARE,
                                  &ReadOffset,
@@ -3474,6 +3475,12 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 164  *****************
+ * User: Jim Mood     Date: 11/19/12   Time: 3:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1135 Findflight error
+ * SCR #1137 Fix skip mark for deletion
+ *
  * *****************  Version 163  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:49a
  * Updated in $/software/control processor/code/application
