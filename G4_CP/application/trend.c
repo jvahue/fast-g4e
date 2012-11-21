@@ -554,10 +554,11 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
       pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
                                            ACTION_OFF, FALSE, FALSE);
     }
-
+/*vcast_dont_instrument_start*/
 #ifdef TREND_DEBUG
-    GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Sample Ended...Logged\n",pData->trendIndex );
+    GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Sample Ended...Logged",pData->trendIndex );
 #endif
+/*vcast_dont_instrument_end*/
 
   } // End of finishing up a log for trend in progress.
 
