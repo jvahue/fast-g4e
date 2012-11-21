@@ -1,14 +1,14 @@
 #define TRIGGER_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+         Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
 
-  File:        triggerUserTables.c 
+  File:        triggerUserTables.c
 
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 29 $  $Date: 11/10/12 4:48p $    
+$Revision: 29 $  $Date: 11/10/12 4:48p $
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -23,11 +23,11 @@ $Revision: 29 $  $Date: 11/10/12 4:48p $
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Defines                                                             */  
+/* Local Defines                                                             */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Local Typedefs                                                            */  
+/* Local Typedefs                                                            */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -79,9 +79,9 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-USER_ENUM_TBL TriggerIndexType[]   = 
-{ { "0"  , TRIGGER_0   }, { "1"  , TRIGGER_1   }, { "2"  , TRIGGER_2   }, 
-  { "3"  , TRIGGER_3   }, { "4"  , TRIGGER_4   }, { "5"  , TRIGGER_5   }, 
+USER_ENUM_TBL TriggerIndexType[]   =
+{ { "0"  , TRIGGER_0   }, { "1"  , TRIGGER_1   }, { "2"  , TRIGGER_2   },
+  { "3"  , TRIGGER_3   }, { "4"  , TRIGGER_4   }, { "5"  , TRIGGER_5   },
   { "6"  , TRIGGER_6   }, { "7"  , TRIGGER_7   }, { "8"  , TRIGGER_8   },
   { "9"  , TRIGGER_9   }, { "10" , TRIGGER_10  }, { "11" , TRIGGER_11  },
   { "12" , TRIGGER_12  }, { "13" , TRIGGER_13  }, { "14" , TRIGGER_14  },
@@ -108,11 +108,11 @@ USER_ENUM_TBL TriggerIndexType[]   =
 
 
 USER_ENUM_TBL TrigRateType[]    =  { { "1HZ"    , TR_1HZ          },
-                                     { "2HZ"    , TR_2HZ          }, 
-                                     { "4HZ"    , TR_4HZ          }, 
-                                     { "5HZ"    , TR_5HZ          }, 
-                                     { "10HZ"   , TR_10HZ         }, 
-                                     { "20HZ"   , TR_20HZ         }, 
+                                     { "2HZ"    , TR_2HZ          },
+                                     { "4HZ"    , TR_4HZ          },
+                                     { "5HZ"    , TR_5HZ          },
+                                     { "10HZ"   , TR_10HZ         },
+                                     { "20HZ"   , TR_20HZ         },
                                      { "50HZ"   , TR_50HZ         },
                                      { NULL     , 0               }
                                    };
@@ -129,7 +129,7 @@ USER_ENUM_TBL TrigStateEnum[]  = { {"NOT_USED",     TRIG_NONE },
 static
 USER_MSG_TBL TriggerSensorCfgCmd [] =
 {
-     /*Str             Next Tbl Ptr   Handler Func.    Data Type        Access     Parameter                                        IndexRange           DataLimit EnumTbl*/ 
+     /*Str             Next Tbl Ptr   Handler Func.    Data Type        Access     Parameter                                        IndexRange           DataLimit EnumTbl*/
     { "INDEXA"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[0].SensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
     { "STARTVALUEA"  , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_FLOAT, USER_RW,   &m_configTriggerTemp.TrigSensor[0].Start.fValue,   0,(MAX_TRIGGERS-1),  NO_LIMIT, NULL },
     { "STARTCOMPAREA", NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.TrigSensor[0].Start.Compare,  0,(MAX_TRIGGERS-1),  NO_LIMIT, ComparisonEnum},
@@ -175,7 +175,6 @@ static USER_MSG_TBL TriggerStatus [] =
   { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , &m_triggerValidTemp,                0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
-  { "SAMPLECOUNT" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT16, USER_RO    , &m_stateTriggerTemp.nSampleCount,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { NULL          , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_NONE,   USER_RW    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
 };
 
@@ -201,9 +200,9 @@ USER_MSG_TBL    RootTriggerMsg = {"TRIGGER",TriggerRoot,NULL,NO_HANDLER_DATA};
 * Function:     Trigger_UserCfg
 *
 * Description:  Handles User Manager requests to change trigger configuration
-*               items.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               items.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -218,7 +217,7 @@ USER_MSG_TBL    RootTriggerMsg = {"TRIGGER",TriggerRoot,NULL,NO_HANDLER_DATA};
 *
 * Returns:      USER_HANDLER_RESULT
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
@@ -244,21 +243,21 @@ USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
             &m_configTriggerTemp,
             sizeof(TRIGGER_CONFIG));
 
-     //Store the modified temporary structure in the EEPROM.       
+     //Store the modified temporary structure in the EEPROM.
      CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                             &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
                             sizeof(m_configTriggerTemp));
    }
-   return result;  
+   return result;
 }
 
 /******************************************************************************
 * Function:     Trigger_State
 *
 * Description:  Handles User Manager requests to retrieve the current trigger
-*               status.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               status.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -273,7 +272,7 @@ USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
 *
 * Returns:      USER_HANDLER_RESULT
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 
 USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
@@ -296,9 +295,9 @@ USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
 * Function:    Trigger_ShowConfig
 *
 * Description:  Handles User Manager requests to retrieve the configuration
-*               settings. 
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -312,9 +311,9 @@ USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
 
 *
 * Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.       
+*              USER_RESULT_ERROR: Error processing command.
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
@@ -323,14 +322,14 @@ USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
                                        void **GetPtr)
 {
    CHAR  LabelStem[] = "\r\n\r\nTRIGGER.CFG";
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];   
+   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
    INT16 i;
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    USER_MSG_TBL*  pCfgTable;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";   
+   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
 
    pCfgTable = &TriggerCmd[0];  // Get pointer to config entry
 
@@ -343,20 +342,20 @@ USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
       if ( User_OutputMsgString( Label, FALSE ) )
       {
          result = User_DisplayConfigTree(BranchName, pCfgTable, i, 0, NULL);
-      }      
-   }   
+      }
+   }
    return result;
 }
 
 /******************************************************************************
  * Function:     Trigger_CfgExprStrCmd | USER COMMAND HANDLER
- *  
+ *
  * Description:  Takes or returns a trigger criteria expression string. Converts
  *               to and from the binary form of the string as it is stored
  *               in the configuration memory
- *           
  *
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -383,11 +382,11 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
                                           void **GetPtr)
 {
   USER_HANDLER_RESULT result = USER_RESULT_OK;
-  INT32 StrToBinResult;  
+  INT32 StrToBinResult;
 
   //User Mgr uses this obj outside of this function's scope
-  static CHAR str[EVAL_MAX_EXPR_STR_LEN];  
-  
+  static CHAR str[EVAL_MAX_EXPR_STR_LEN];
+
 
   // Move the current trigger[x] config data from shadow to the local temp storage.
   // ('Param' is pointing to either the StartExpr or EndExpr struct
@@ -396,12 +395,12 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
   memcpy(&m_configTriggerTemp,
          &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
          sizeof(m_configTriggerTemp));
-   
+
   if(SetPtr == NULL)
   {
     // Getter - Convert binary expression in Param to string, return
     EvalExprBinToStr(str, (EVAL_EXPR*) Param.Ptr );
-    *GetPtr = str;    
+    *GetPtr = str;
   }
   else
   {
@@ -409,8 +408,8 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
     // Convert from string to binary form.
     // If successful, transfer the temp dest structure to the real one.
 
-    strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);    
-     
+    strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);
+
     StrToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_PARSE, Index,
                                       str, (EVAL_EXPR*) Param.Ptr, MAX_TRIG_EXPR_OPRNDS);
 
@@ -418,20 +417,20 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
     {
       // Move the successfully updated binary expression to the m_configTriggerTemp storage
       // memcpy(&Param.Ptr, &tempExpr, sizeof(EVAL_EXPR) );
-      
+
       memcpy(&CfgMgr_ConfigPtr()->TriggerConfigs[Index],
              &m_configTriggerTemp,
              sizeof(m_configTriggerTemp));
-      
-      //Store the modified structure in the EEPROM.       
+
+      //Store the modified structure in the EEPROM.
       CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                              &CfgMgr_ConfigPtr()->TriggerConfigs[Index],
                              sizeof(m_configTriggerTemp) );
     }
     else
-    {  
+    {
       GSE_DebugStr( NORMAL,FALSE,"EvalExprStrToBin Failed: %s"NEW_LINE,
-                    EvalGetMsgFromErrCode(StrToBinResult));     
+                    EvalGetMsgFromErrCode(StrToBinResult));
       result = USER_RESULT_ERROR;
     }
   }
@@ -440,11 +439,11 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 }
 /******************************************************************************
  * Function:     Trigger_Valid | USER COMMAND HANDLER
- *  
- * Description:  Returns the validity for the trigger passed in "Index'               
- *           
  *
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ * Description:  Returns the validity for the trigger passed in "Index'
+ *
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -473,161 +472,161 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 {
    // Use the supplied Accessor to return the validity of the indicated trigger.
    m_triggerValidTemp = TriggerValidGetState((TRIGGER_INDEX)Index);
-   *GetPtr = Param.Ptr;  
+   *GetPtr = Param.Ptr;
    return USER_RESULT_OK;
 }
 
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 4:48p
  * Updated in $/software/control processor/code/system
  * SCR# 1107 - nmistype on Trigger32 enum mapping.
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system
  * Code Review
- * 
+ *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:56p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 6:20p
  * Updated in $/software/control processor/code/system
  * SCR# 1107 - !P Table Full processing
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 8/29/12    Time: 3:09p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 !P Processing
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 8/15/12    Time: 7:23p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 BITARRAY128 input as integer list
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 8/08/12    Time: 3:49p
  * Updated in $/software/control processor/code/system
  * SCR #1107 add line break to output EvalExprStrToBin failed
- * 
+ *
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-07-13   Time: 9:03a
  * Updated in $/software/control processor/code/system
  * SCR 1124 - Packed the configuration structures for ARINC429 Mgr,
  * Sensors and Triggers. Suppressed the alignment warnings for those three
  * objects also.
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 4/23/12    Time: 8:02p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2 Evaluator cleanup
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 4/11/12    Time: 5:08p
  * Updated in $/software/control processor/code/system
  * FAST2  Trigger uses Evaluator
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST2 Refactoring names
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:52p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 Trigger processing
- * 
+ *
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 9/01/10    Time: 6:57p
  * Updated in $/software/control processor/code/system
  * SCR #845 Code Review Updates
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 7/29/10    Time: 4:06p
  * Updated in $/software/control processor/code/system
  * SCR# 698 - cleanup
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor3  Date: 7/29/10    Time: 1:31p
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix for code review findings.
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 6/18/10    Time: 4:48p
  * Updated in $/software/control processor/code/system
  * SCR# 649 - add NO_COMPARE back in for use in Signal Tests.
- * 
+ *
  * *****************  Version 12  *****************
  * User: Contractor3  Date: 6/10/10    Time: 10:44a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Changes based on Code Review
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:55p
  * Updated in $/software/control processor/code/system
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor2  Date: 5/03/10    Time: 4:07p
  * Updated in $/software/control processor/code/system
  * SCR 530: Error: Trigger NO_COMPARE infinite logs
  * Removed NO_COMPARE from code.
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #248 Parameter Log Change Add no log for showcfg
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 3/05/10    Time: 12:16p
  * Updated in $/software/control processor/code/system
  * SCR# 413 - Actions cmds are RO
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 4:05p
  * Updated in $/software/control processor/code/system
  * SCR 67 Interrupted SPI Access (Multiple / Nested SPI Access)
- * 
+ *
  * *****************  Version 6  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:59p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jeff Vahue   Date: 2/17/10    Time: 1:24p
  * Updated in $/software/control processor/code/system
  * SCR# 452 - code coverage mods
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 1/13/10    Time: 4:58p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:28p
  * Updated in $/software/control processor/code/system
  * SCR 333
- * 
+ *
  * *****************  Version 2  *****************
  * User: John Omalley Date: 12/17/09   Time: 5:49p
  * Updated in $/software/control processor/code/system
  * SCR 214
  * Removed Trigger END state because it was not used
- * 
+ *
  * *****************  Version 1  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:44p
  * Created in $/software/control processor/code/system
  * SCR 106
 *
 *
-****************************************************************************/ 
+****************************************************************************/

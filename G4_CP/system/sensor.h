@@ -211,6 +211,9 @@
 
 #define SENSOR_LD_MAX_RATE  500
 
+#define IS_SUMMARY_ENTRY_INITIALIZED(s) ((summary[s].fMinValue < FLT_MAX) ||\
+                                         (summary[s].fMaxValue > -FLT_MAX))
+
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -343,12 +346,13 @@ typedef BOOLEAN (*INTERFACE_ACTIVE) (UINT16);
 typedef struct
 {
   SENSOR_INDEX SensorIndex;
-  BOOLEAN      bInitialized;
+//  BOOLEAN      bInitialized;
+  UINT32       nSampleCount;
   BOOLEAN      bValid;
-  FLOAT32      fMinValue;
-  FLOAT32      fMaxValue;
   TIMESTAMP    timeMinValue;
+  FLOAT32      fMinValue;
   TIMESTAMP    timeMaxValue;
+  FLOAT32      fMaxValue;
   FLOAT32      fAvgValue;
   FLOAT32      fTotal;
 } SNSR_SUMMARY;
@@ -542,29 +546,34 @@ EXPORT void    SensorsInitialize       ( void );
 EXPORT void    SensorDisableLiveStream ( void );
 EXPORT UINT16  SensorGetSystemHdr      ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  SensorGetETMHdr         ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
+
+// Functions for managing SNSR_SUMMARY objects
 EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
-                                        INT32 summarySize,
+                                        INT32  summarySize,
                                         UINT32 snsrMask[],
                                         INT32  snsrMaskSizeBytes);
-EXPORT void    SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary);
-EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
+
+EXPORT void SensorUpdateSummaries     ( SNSR_SUMMARY summaryArray[], INT16 nEntries );
+EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], INT16 nEntries);
+
 
 
 #endif // SENSOR_H
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
- * 
+ *
  * *****************  Version 40  *****************
  * User: John Omalley Date: 12-11-16   Time: 10:32p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 39  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

@@ -282,7 +282,7 @@ typedef struct
    TIMESTAMP          tsCriteriaMetTime;            /* Time the start criteria was met   */
    TIMESTAMP          tsDurationMetTime;            /* Time the duration was met         */
    TIMESTAMP          tsEndTime;                    /* Time the event ended              */
-   UINT32             nSampleCount;                 /* Sensor sample count for calc avg  */
+// UINT32             nSampleCount;                 /* Sensor sample count for calc avg  */
    UINT16             nTotalSensors;                /* Total sensors being sampled       */
    SNSR_SUMMARY       sensor[MAX_EVENT_SENSORS];    /* Array to store sampling results   */
    UINT16             nRateCounts;                  /* Number of counts between process  */
@@ -475,22 +475,22 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- * 
+ *
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/application
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1131 - Busy Recording Logic
- * 
+ *
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12-11-06   Time: 11:12a
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 27  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 12:51p
  * Updated in $/software/control processor/code/application

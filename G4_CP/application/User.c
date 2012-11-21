@@ -2777,7 +2777,13 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   CHAR*   leftOver;
 
   // Convert the input string to decimal integer if possible.
+  errno = 0;
   decValue = strtoul(SetStr, &leftOver, 10);
+
+ #if 0
+ GSE_DebugStr(NORMAL,TRUE,"User: strtoul: SetStr Addr: 0x%08X, SetStr: \"%s\",
+               decValue: %d, leftOver: 0x%08X", &SetStr, SetStr, decValue, *leftOver);
+#endif
 
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
@@ -2978,17 +2984,17 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 107  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 11:53a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - 128 Bit List parsing fix BB# 66
- * 
+ *
  * *****************  Version 106  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 11:17a
  * Updated in $/software/control processor/code/application
  * SCR# 1107 - 128 Bit parsing fix.
- * 
+ *
  * *****************  Version 105  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:27p
  * Updated in $/software/control processor/code/application

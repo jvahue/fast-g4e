@@ -69,7 +69,7 @@ static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
 
 static void EngRunUpdate   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
-static void EngRunStartLog       ( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
+static void EngRunStartLog       ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
 static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 								   ENGRUN_DATA* pErData,
 								   BOOLEAN bUpdateDuration);
@@ -529,7 +529,6 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     pErData->monMinValue         = FLT_MAX;
     pErData->maxValueValid       = TRUE;
     pErData->monMaxValue         = -FLT_MAX;
-    pErData->nSampleCount        = 0;
 
     /* SNSR_SUMMARY field setup */
 
@@ -721,7 +720,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 /******************************************************************************
 * Function:     EngRunStartLog
 *
-* Description:  Start taking EngineRunlog data
+* Description:  Start collecting EngineRunlog data
 *
 *
 * Parameters:   [in] pErCfg
@@ -732,17 +731,21 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 * Notes:        None
 *
 *****************************************************************************/
-static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
+static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
 {
-  UINT8 i;
-  SNSR_SUMMARY*   pSnsr;
 
   // Set the start timestamp, init the end timestamp
   CM_GetTimeAsTimestamp(&pErData->startTime);
 
   // Set the 'tick count' of the start time( used to calc duration)
   pErData->startingTime_ms = CM_GetTickCount();
-  pErData->nSampleCount    = 0;
+
+  // Reset the sensor summary
+  pErData->nTotalSensors = SensorSetupSummaryArray(pErData->snsrSummary,
+                                                   MAX_ENGRUN_SENSORS,
+                                                   (UINT32*)pErCfg->sensorMap,
+                                                   sizeof(pErCfg->sensorMap) );
+
   pErData->erDuration_ms   = 0;
 
   // Init the current values of the starting sensors.
@@ -752,17 +755,7 @@ static void EngRunStartLog( const ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   pErData->monMinValue = pErData->monMinValue;
 
   // Initialize the summary values for monitored sensors
-
-  for (i = 0; i < pErData->nTotalSensors; ++i)
-  {
-    pSnsr = &(pErData->snsrSummary[i]);
-
-    pSnsr->bValid = SensorIsValid(pSnsr->SensorIndex);
-    if(pSnsr->bValid)
-    {
-      pSnsr->fMaxValue = SensorGetValue(pSnsr->SensorIndex);
-    }
-  }
+  SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors ); 
 }
 
 /******************************************************************************
@@ -833,7 +826,6 @@ static void EngRunWriteStartLog( ER_REASON reason, const ENGRUN_CFG* pErCfg,
 static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
 {
   INT32   i;
-  FLOAT32 oneOverN;
   UINT32  cycleCounts[MAX_CYCLES];
   ENGRUN_RUNLOG* pLog;
 
@@ -843,8 +835,6 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
   memset(cycleCounts, 0, sizeof(cycleCounts) );
 
   pLog = &m_engineRunLog[pErData->erIndex];
-
-  oneOverN = (1.0f / (FLOAT32)pErData->nSampleCount);
 
   // GSE_DebugStr(NORMAL,TRUE,"Frames: %d", pErData->nSampleCount);
 
@@ -865,6 +855,8 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
   pLog->startingDuration_ms = pErData->startingDuration_ms;
   pLog->erDuration_ms       = pErData->erDuration_ms;
 
+  SensorCalculateSummaryAvgs(pErData->snsrSummary, pErData->nTotalSensors);
+
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
   for (i = 0; i < MAX_ENGRUN_SENSORS; ++i)
   {
@@ -883,8 +875,7 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
 
       // if sensor is valid, calculate the final average,
       // otherwise use the average calculated at the point it went invalid.
-      pLogSummary->fAvgValue = (pErSummary->bValid) ? pErSummary->fTotal * oneOverN
-                                                    : pErSummary->fAvgValue;
+      pLogSummary->fAvgValue = pErSummary->fAvgValue;
     }
     else // Sensor Not Used
     {
@@ -926,46 +917,42 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
  *****************************************************************************/
 static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
 {
-  UINT8    i;
-  FLOAT32  oneOverN;
-  SNSR_SUMMARY* pSummary;
-
   // Update the total run duration
   pErData->erDuration_ms = CM_GetTickCount() - pErData->startingTime_ms;
 
-  // update the sample count so average can be calculated at end of engine run.
-  pErData->nSampleCount++;
+  // Update the sensor summaries
+  SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors);
 
-  // Loop thru all sensors handled by this this ER
-  for ( i = 0; i < pErData->nTotalSensors; i++ )
-  {
-    pSummary = &pErData->snsrSummary[i];
+	#if 0
+	  // Loop thru all sensors handled by this this ER
+	  for ( i = 0; i < pErData->nTotalSensors; i++ )
+	  {
+	    pSummary = &pErData->snsrSummary[i];
 
-    // If the sensor is known to be invalid but WAS VALID in
-    // the past( initialized is TRUE ) then ignore processing for
-    // the remainder of this engine run.
-    if( !pSummary->bValid && pSummary->bInitialized )
-    {
-      continue;
-    }
+	    // If the sensor is known to be invalid but WAS VALID in
+	    // the past( initialized is TRUE ) then ignore processing for
+	    // the remainder of this engine run.
+	    if( !pSummary->bValid && pSummary->bInitialized )
+	    {
+	      continue;
+	    }
 
-    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
+	    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
 
-    if ( pSummary->bValid )
-    {
-      pSummary->bInitialized = TRUE;
-      SensorUpdateSummaryItem(pSummary);
-    }
-    else if ( pSummary->bInitialized)
-    {
-     // Sensor is now invalid but had been valid
-     // calculate average for valid period.
-     oneOverN = (1.0f / (FLOAT32)(pErData->nSampleCount - 1));
-     pSummary->fAvgValue = pSummary->fTotal * oneOverN;
-    }
-  } // for nTotalSensors
-
-
+	    if ( pSummary->bValid )
+	    {
+	      pSummary->bInitialized = TRUE;
+	      SensorUpdateSummaryItem(pSummary);
+	    }
+	    else if ( pSummary->bInitialized)
+	    {
+	     // Sensor is now invalid but had been valid
+	     // calculate average for valid period.
+	     oneOverN = (1.0f / (FLOAT32)(pErData->nSampleCount - 1));
+	     pSummary->fAvgValue = pSummary->fTotal * oneOverN;
+	    }
+	  } // for nTotalSensors
+	#endif
 }
 
 /******************************************************************************
@@ -1056,7 +1043,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p
  * Updated in $/software/control processor/code/application

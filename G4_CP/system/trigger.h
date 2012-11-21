@@ -254,7 +254,6 @@ typedef struct
   TIMESTAMP          EndTime;
   UINT32             nStartTime_ms;
   UINT32             nDuration_ms;
-  UINT32             nSampleCount;   /* For calculating averages */
   BITARRAY128        sensorMap;      /* Bit encoded flags of sensors used. Only for legacy  */
   UINT16             nTotalSensors;  /* Total sensors being sampled */
   SNSR_SUMMARY       snsrSummary[MAX_TRIG_SENSORS];

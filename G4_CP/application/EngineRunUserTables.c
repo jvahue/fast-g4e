@@ -107,13 +107,13 @@ static USER_ENUM_TBL engRunRateType[] =
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
+//{"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
 // Macro defines the 'prototype' declaration for entry in EngRunSensrTbl
 #define DECL_SNSR_SUMMARY_ENTRY( n )\
 static USER_MSG_TBL snsrSummaryEntry##n [] =\
 {\
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/\
   {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[n].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },\
-  {"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
   {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
   {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
   {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
@@ -121,7 +121,7 @@ static USER_MSG_TBL snsrSummaryEntry##n [] =\
   {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
   { NULL,        NULL,          NULL, NO_HANDLER_DATA}\
 }
-// Declare formal entries in EngRunSensrTbl 0...15
+// Declare formal entries in EngRunSensrTbl0...15
   DECL_SNSR_SUMMARY_ENTRY(0);
   DECL_SNSR_SUMMARY_ENTRY(1);
   DECL_SNSR_SUMMARY_ENTRY(2);
@@ -173,7 +173,6 @@ static USER_MSG_TBL engRunStatusCmd [] =
   {"RUN_DUR_MS",      NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"MINVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"MAXVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"SAMPLECOUNT",     NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.nSampleCount,        0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"SENSOR",          engRunSensrTbl, NULL,        NO_HANDLER_DATA,                                                                                                  },
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
@@ -484,7 +483,7 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p
  * Updated in $/software/control processor/code/application

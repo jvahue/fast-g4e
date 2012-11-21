@@ -493,7 +493,7 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    memset ( &pData->tsCriteriaMetTime, 0, sizeof(pData->tsCriteriaMetTime) );
    memset ( &pData->tsDurationMetTime, 0, sizeof(pData->tsDurationMetTime) );
    memset ( &pData->tsEndTime, 0, sizeof(pData->tsEndTime) );
-   pData->nSampleCount  = 0;
+
    pData->endType       = EVENT_NO_END;
 
    // Re-init the sensor summary data for the event
@@ -539,7 +539,7 @@ void EventTableResetData ( EVENT_TABLE_DATA *pTableData )
    memset(&pTableData->tsExceedanceEndTime, 0, sizeof(pTableData->tsExceedanceEndTime));
 
    // Loop through all the regions and reset the statistics
-   for (nRegionIndex = (UINT32)REGION_A; 
+   for (nRegionIndex = (UINT32)REGION_A;
         nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++)
    {
       pStats = &pTableData->regionStats[nRegionIndex];
@@ -1544,11 +1544,8 @@ static
 void EventUpdateData ( EVENT_DATA *pData )
 {
    // Local Data
-   SNSR_SUMMARY     *pSummary;
-   UINT8            numSensor;
    UINT32           nCurrentTick;
-   FLOAT32          oneOverN;
-
+   
    // Initialize Local Data
    nCurrentTick = CM_GetTickCount();
 
@@ -1557,42 +1554,14 @@ void EventUpdateData ( EVENT_DATA *pData )
    {
       // general Event initialization
       pData->nStartTime_ms   = nCurrentTick;
-      pData->nSampleCount    = 0;
+//    pData->nSampleCount    = 0;
       CM_GetTimeAsTimestamp(&pData->tsCriteriaMetTime);
       memset((void *)&pData->tsDurationMetTime,0, sizeof(TIMESTAMP));
       memset((void *)&pData->tsEndTime        ,0, sizeof(TIMESTAMP));
    }
+
    // update the sample count for the average calculation
-   pData->nSampleCount++;
-
-   // Loop through the Event Sensors
-   for ( numSensor = 0; numSensor < pData->nTotalSensors; numSensor++ )
-   {
-      // Set a pointer to the data summary
-      pSummary    = &(pData->sensor[numSensor]);
-
-      // If the sensor is known to be invalid and was valid in the past(initialized)...
-      // ignore processing for the remainder of this event.
-      if( !pSummary->bValid && pSummary->bInitialized )
-      {
-         continue;
-      }
-
-      pSummary->bValid = SensorIsValid(pSummary->SensorIndex);
-
-      if ( pSummary->bValid )
-      {
-         pSummary->bInitialized = TRUE;
-         SensorUpdateSummaryItem(pSummary);
-      }
-      else if ( pSummary->bInitialized)
-      {
-         // Sensor is now invalid but had been valid
-         // calculate average for valid period.
-         oneOverN = (1.0f / (FLOAT32)(pData->nSampleCount - 1));
-         pSummary->fAvgValue = pSummary->fTotal * oneOverN;
-      }
-   }
+   SensorUpdateSummaries(pData->sensor, pData->nTotalSensors);
 }
 
 /******************************************************************************
@@ -1641,7 +1610,6 @@ static
 void EventLogUpdate( EVENT_DATA *pData )
 {
   // Local Data
-  FLOAT32       oneOverN;
   EVENT_END_LOG *pLog;
   SNSR_SUMMARY  *pSummary;
   UINT8         numSensor;
@@ -1649,8 +1617,7 @@ void EventLogUpdate( EVENT_DATA *pData )
   // Initialize Local Data
   pLog = &m_EventEndLog[pData->eventIndex];
 
-  // Calculate the multiplier for the average
-  oneOverN = (1.0f / (FLOAT32)pData->nSampleCount);
+  SensorCalculateSummaryAvgs(pData->sensor, pData->nTotalSensors);
 
   // update the Event duration
   pLog->nDuration_ms  = CM_GetTickCount() - pData->nStartTime_ms;
@@ -1683,9 +1650,7 @@ void EventLogUpdate( EVENT_DATA *pData )
        pLog->sensor[numSensor].bValid      = pSummary->bValid;
        // if sensor is valid, calculate the final average,
        // otherwise use the average calculated at the point it went invalid.
-       pLog->sensor[numSensor].fAvgValue   = (TRUE == pSummary->bValid ) ?
-                                              pSummary->fTotal * oneOverN :
-                                              pSummary->fAvgValue;
+       pLog->sensor[numSensor].fAvgValue   = pSummary->fAvgValue;
     }
     else // Sensor Not Used
     {
@@ -1798,12 +1763,12 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * User: Contractor V&v Date: 11/14/12   Time: 4:01p
  * Updated in $/software/control processor/code/application
  * Code Review
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-08   Time: 3:03p
  * Updated in $/software/control processor/code/application
  * SCR 1131 - Busy Recording Logic
- * 
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-07   Time: 8:30a
  * Updated in $/software/control processor/code/application
@@ -1987,4 +1952,4 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *
  *
  ***************************************************************************/
- 
+
