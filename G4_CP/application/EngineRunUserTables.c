@@ -89,7 +89,6 @@ USER_ENUM_TBL engRunIdEnum[] =
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
   { "3"     , ENGRUN_ID_3  },
-  { "ANY"   , ENGRUN_ID_ANY},
   { "UNUSED", ENGRUN_UNUSED},
   { NULL, 0 }
 };
@@ -113,13 +112,14 @@ static USER_ENUM_TBL engRunRateType[] =
 static USER_MSG_TBL snsrSummaryEntry##n [] =\
 {\
   /*Str          Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                                    IndexRange            DataLimit     EnumTbl*/\
-  {"SENSORID",   NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[n].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },\
-  {"VALID",      NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
-  {"MIN",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
-  {"MAX",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
-  {"AVG",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
-  {"TOT",        NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
-  { NULL,        NULL,          NULL, NO_HANDLER_DATA}\
+  {"SENSORID",    NO_NEXT_TABLE, EngRunState,   USER_TYPE_ENUM,    USER_RO,  &m_DataTemp.snsrSummary[n].SensorIndex,      0,(MAX_ENGINES-1),    NO_LIMIT,     SensorIndexType },\
+  {"VALID",       NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bValid,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  {"MIN",         NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMinValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  {"MAX",         NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fMaxValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  {"AVG",         NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fAvgValue,        0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  {"TOT",         NO_NEXT_TABLE, EngRunState,   USER_TYPE_FLOAT,   USER_RO,  &m_DataTemp.snsrSummary[n].fTotal,           0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  {"SAMPLE_COUNT",NO_NEXT_TABLE, EngRunState,   USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.snsrSummary[n].nSampleCount,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
+  { NULL,         NULL,          NULL, NO_HANDLER_DATA}\
 }
 // Declare formal entries in EngRunSensrTbl0...15
   DECL_SNSR_SUMMARY_ENTRY(0);
