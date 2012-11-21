@@ -476,7 +476,7 @@ void SensorDisableLiveStream( void )
  *               are to be added to the provided list.
  *
  * Parameters:   [in/out] summary           - SNSR_SUMMARY array structure to be populated.
- *               [in]     summarySize       - The number of entries in SNSR_SUMMARY[].
+ *               [in]     summarySize       - The max allowable entries in SNSR_SUMMARY[].
  *               [in]     snsrMask          - Array of bits denoting sensors to add to list.
  *               [in]     snsrMaskSizeBytes - Size of snsrMask[] in bytes.
 
@@ -485,7 +485,7 @@ void SensorDisableLiveStream( void )
  * Notes:
  *****************************************************************************/
  UINT16 SensorSetupSummaryArray (SNSR_SUMMARY summary[],  INT32  summarySize,
-                                 UINT32       snsrMask[], INT32 snsrMaskSizeBytes)
+                                 UINT32 snsrMask[], INT32 snsrMaskSizeBytes)
 {
   SENSOR_INDEX snsrIdx;
   UINT16        summaryCnt;
@@ -515,7 +515,8 @@ void SensorDisableLiveStream( void )
       // Get the TOTAL COUNT of configured sensors in the mask.
 
       summary[summaryCnt].SensorIndex  = snsrIdx;
-      summary[summaryCnt].bInitialized = FALSE;
+      summary[summaryCnt].nSampleCount = 0;
+//      summary[summaryCnt].bInitialized = FALSE;
       summary[summaryCnt].bValid       = FALSE;
       summary[summaryCnt].fMinValue    = FLT_MAX;
       summary[summaryCnt].timeMinValue = timeStampNow;
@@ -533,41 +534,111 @@ void SensorDisableLiveStream( void )
   return summaryCnt;
 }
 
-
 /******************************************************************************
- * Function:     SensorUpdateSummaryItem
+ * Function:     SensorUpdateSummaries
  *
- * Description:  Update the total, min and max for the passed SNSR_SUMMARY item.
+ * Description:  Update all the configured values in passed SNSR_SUMMARY array.
+ *               Un-configured sensor-entries are ignored.
+ *               Configured sensors which have become invalid are latched at
+ *               their late-valid values time and averages.
  *
- * Parameters:   [in/out] pSummary - SNSR_SUMMARY structure to be populated.
+ * Parameters:   [in/out] summaryArray - SNSR_SUMMARY structure to be updated.
+ *               [in]     nEntries     - Number of active entries in SNSR_SUMMARY
  *
  * Returns:      None
  *
  * Notes:        None
  *****************************************************************************/
-void SensorUpdateSummaryItem(SNSR_SUMMARY* pSummary)
+void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], INT16 nEntries )
 {
-  FLOAT32  newValue = SensorGetValue(pSummary->SensorIndex);
+  SNSR_SUMMARY* pSummary;
+  FLOAT32       newValue;
+  BOOLEAN       bInitialized;
+  INT32         i = 0;
 
-  // Add value to total
-  pSummary->fTotal += newValue;
-
-  if(newValue < pSummary->fMinValue)
+  // Process each CONFIGURED entry in the array
+  for (i = 0; i < nEntries; ++i)
   {
-    pSummary->fMinValue = newValue;
-    CM_GetTimeAsTimestamp(&pSummary->timeMinValue);
-  }
+    pSummary = &summaryArray[i];
 
-  if( newValue > pSummary->fMaxValue )
-  {
-    pSummary->fMaxValue = newValue;
-    CM_GetTimeAsTimestamp(&pSummary->timeMaxValue);
-  }
+    // If the min or max values have been updated from default, it indicates
+    // this sensor has been "initialized" (i.e. transitioned from unknown -> valid)
+    bInitialized = (pSummary->fMinValue < FLT_MAX) || (pSummary->fMaxValue > -FLT_MAX);
 
-  // Set the sensor validity
-  pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
+    // If the sensor is now invalid but WAS valid in
+    // the past, as indicated by min/max being initialized, then...
+    // ignore processing until this object is reset.
+    if( !pSummary->bValid && bInitialized )
+    {
+      continue;
+    }
+
+    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
+
+
+    // If the sensor is valid update its total and sample count
+    // If not, we stop updating the sensor summary and it's average will
+    // be correctly calculated from the total and sample count prior to going invalid
+    if ( pSummary->bValid )
+    {
+      ++pSummary->nSampleCount;
+
+      newValue = SensorGetValue(pSummary->SensorIndex);
+
+      // Add value to total
+
+      pSummary->fTotal += newValue;
+
+      // Update min/max values and timestamp as needed.
+      if(newValue < pSummary->fMinValue)
+      {
+        pSummary->fMinValue = newValue;
+        CM_GetTimeAsTimestamp(&pSummary->timeMinValue);
+      }
+
+      if( newValue > pSummary->fMaxValue )
+      {
+        pSummary->fMaxValue = newValue;
+        CM_GetTimeAsTimestamp(&pSummary->timeMaxValue);
+      }
+
+    }
+  }
 }
 
+
+/******************************************************************************
+ * Function:     SensorCalculateSummaryAvgs
+ *
+ * Description:  Calculate the average for configured values in passed SNSR_SUMMARY array.
+ *               Un-configured sensor-entries are ignored.
+ *               Configured sensors which have become invalid had their averages
+ *               calculated at the time they went invalid and are not updated.
+ *
+ * Parameters:   [in/out] summaryArray - SNSR_SUMMARY structure to be updated.
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *****************************************************************************/
+void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], INT16 nEntries )
+{
+  SNSR_SUMMARY* pSummary;
+  INT32 i;
+
+  // Process each CONFIGURED entry in the array
+  for(i = 0; i < nEntries; ++i)
+  {
+    pSummary = &summaryArray[i];
+
+    // If the sensor is still valid, and the sample count is not zero,
+    // calculate the average, otherwise
+    if(pSummary->bValid && pSummary->nSampleCount != 0)
+    {
+      pSummary->fAvgValue = pSummary->fTotal * (1.0f / (FLOAT32) pSummary->nSampleCount);
+    }
+  }
+}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -2316,4 +2387,4 @@ static void SensorDumpASCIILiveData(void)
  * SCR #87 Function Prototype
  *
  *****************************************************************************/
-                              
+
