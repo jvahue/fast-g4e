@@ -152,7 +152,6 @@ typedef struct
   FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */
   BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
   FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
-  UINT32       nSampleCount;            /* For calculating averages                          */
   UINT16       nRateCounts;             /* Count of cycles until this engine run is executed */
   UINT16       nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
@@ -218,7 +217,7 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p
  * Updated in $/software/control processor/code/application
