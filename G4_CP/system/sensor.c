@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 82 $  $Date: 11/26/12 12:42p $
+      $Revision: 83 $  $Date: 11/26/12 6:05p $
 
 ******************************************************************************/
 
@@ -549,8 +549,8 @@ void SensorDisableLiveStream( void )
  *
  * Notes:        None
  *****************************************************************************/
-void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], INT16 nEntries )
-{
+ EXPORT void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
+ {
   SNSR_SUMMARY* pSummary;
   FLOAT32       newValue;
   BOOLEAN       bInitialized;
@@ -621,8 +621,8 @@ void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], INT16 nEntries )
  *
  * Notes:        None
  *****************************************************************************/
-void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], INT16 nEntries )
-{
+ EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
+ {
   SNSR_SUMMARY* pSummary;
   INT32 i;
 
@@ -2009,6 +2009,11 @@ static void SensorDumpASCIILiveData(void)
  *  MODIFICATIONS
  *    $History: sensor.c $
  * 
+ * *****************  Version 83  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 6:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review
+ *
  * *****************  Version 82  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:42p
  * Updated in $/software/control processor/code/system

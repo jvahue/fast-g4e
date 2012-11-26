@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 16 $  $Date: 11/26/12 12:33p $
+ $Revision: 17 $  $Date: 11/26/12 6:07p $
 
 ******************************************************************************/
 
@@ -405,9 +405,10 @@ static void TrendStartManualTrend(const TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendUpdatedData
  *
- * Description:
+ * Description:   Update the status of active trend
  *
- * Parameters:   None
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
  * Returns:      None
  *
@@ -425,7 +426,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
     // as failing to maintain stability
     if( TREND_STATE_AUTO == pData->trendState )
     {
-      if( 0 == pData->nTimeStableMs && pData->trendCnt < pCfg->maxTrends )
+      if( 0 == pData->nTimeStableMs && pData->trendCnt <= pCfg->maxTrends )
       {
         // Force a finish to this sampling and flag it for autotrend-failure logging.
         bAutoTrendFailed = TRUE;
@@ -457,9 +458,10 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
 /******************************************************************************
  * Function: TrendFinish
  *
- * Description:
+ * Description:  Finish and create log for active trend.
  *
- * Parameters:   None
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
  * Returns:      None
  *
@@ -570,7 +572,10 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
  *
  * Description: Reset the processing state data for the passed Trend.
  *
- * Parameters:   None
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
+ *               [in]     bRunTime flag to signal whether this func is being called during
+ *                        init or runtime. Used to set first trend-interval
  *
  * Returns:      None
  *
@@ -652,13 +657,13 @@ static void TrendEnableTask(BOOLEAN bEnable)
 /******************************************************************************
  * Function: TrendCheckStability
  *
- * Description: Check whether the psas
+ * Description: Check whether the configured stability sensors have met their criteria
  *
- * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task.
- *                  FALSE - Disable the Trend task.
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
- * Returns:      None
+ * Returns:      If all sensors are stable then TRUE otherwise FALSE
+ *
  *
  * Notes:
  *
@@ -738,9 +743,9 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
  *
  * Description: Create a log that an active AutoTrend did not maintain stability
  *
- * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task.
- *                  FALSE - Disable the Trend task.
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
+ *
  *
  * Returns:      None
  *
@@ -761,11 +766,11 @@ static void TrendLogAutoTrendFailure( TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendLogAutoTrendNotDetected
  *
- * Description: Create a log that a triggered AutoTrend did not atain stability
+ * Description: Create a log that an AutoTrend was not taken
  *
- * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task.
- *                  FALSE - Disable the Trend task.
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
+ *
  *
  * Returns:      None
  *
@@ -793,11 +798,11 @@ static void TrendLogAutoTrendNotDetected( TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendUpdateAutoTrend
  *
- * Description: Create a log that a AutoTrend did not reach stability
+ * Description:  Check to see if Auto trend criteria has been met
  *
- * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task.
- *                  FALSE - Disable the Trend task.
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
+ *
  *
  * Returns:      None
  *
@@ -811,8 +816,8 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
   // Each Trend shall reset the maximum trend count when the
   // configured trend reset trigger becomes ACTIVE.
 
-  // Only handle the reset-event on detection, the flag
-  // will be cleared by the trigger becoming inactive or
+  // Only handle the reset-event on detection and the trigger is configured and ACTIVE.
+  // the flag will be cleared by the trigger becoming inactive or
   // the next engine-run starting.
   if ( FALSE == pData->bResetDetected          &&
        pCfg->resetTrigger != TRIGGER_UNUSED    &&
@@ -987,6 +992,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
  *  MODIFICATIONS
  *    $History: trend.c $
  * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 6:07p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
  * Updated in $/software/control processor/code/application

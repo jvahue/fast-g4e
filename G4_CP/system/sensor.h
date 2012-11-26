@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 41 $  $Date: 11/26/12 12:42p $
+      $Revision: 42 $  $Date: 11/26/12 6:05p $
 
 ******************************************************************************/
 
@@ -554,8 +554,8 @@ EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
                                         UINT32 snsrMask[],
                                         INT32  snsrMaskSizeBytes);
 
-EXPORT void SensorUpdateSummaries     ( SNSR_SUMMARY summaryArray[], INT16 nEntries );
-EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], INT16 nEntries);
+EXPORT void SensorUpdateSummaries ( SNSR_SUMMARY summaryArray[], UINT16 nEntries );
+EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries);
 
 
 
@@ -563,6 +563,11 @@ EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], INT16 nEntr
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 42  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 6:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review
  * 
  * *****************  Version 41  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:42p
