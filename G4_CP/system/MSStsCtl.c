@@ -856,7 +856,7 @@ void MSSC_MSICallback_ShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
        2. append the final string segment after the last /n
           at the loop exit*/
     m_MSShellRsp.Str[0] = '\0';
-    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this, 
+    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this,
                                //      extra char sometimes appears on ms.cmd rsp
     while(NULL != (str_end = strchr(str_start,'\n')))
     {
@@ -912,7 +912,7 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
         //MSSIM version less than 2.1.0 or decode
         else
         {
-          strncpy_safe(log.sMssimVer, sizeof(log.sMssimVer), 
+          strncpy_safe(log.sMssimVer, sizeof(log.sMssimVer),
                        m_GetMSInfoRsp.MssimVer,_TRUNCATE);
           Flt_SetStatus(m_CBITSysCond,SYS_ID_MS_VERSION_MISMATCH, &log,
                         sizeof(MSSC_MS_VERSION_ERR_LOG));
@@ -939,10 +939,10 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 
     if(!m_MssimVersionError)
     {
-    m_TimeSynced = pRspData->TimeSynched;
-    m_IsClientConnected  = pRspData->ClientConnected;
-    m_IsVPNConnected = pRspData->VPNConnected;
-    m_CompactFlashMounted = pRspData->CompactFlashMounted;
+      m_TimeSynced = pRspData->TimeSynched;
+      m_IsClientConnected  = pRspData->ClientConnected;
+      m_IsVPNConnected = pRspData->VPNConnected;
+      m_CompactFlashMounted = pRspData->CompactFlashMounted;
     }
     else
     {
@@ -1038,7 +1038,7 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
- *
+ * 
  * *****************  Version 61  *****************
  * User: Jim Mood     Date: 11/19/12   Time: 8:29p
  * Updated in $/software/control processor/code/system
@@ -1362,4 +1362,4 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
  *
  *
  ***************************************************************************/
- 
+

@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 21 $  $Date: 11/16/12 8:11p $
+$Revision: 22 $  $Date: 11/26/12 12:31p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -483,6 +483,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p

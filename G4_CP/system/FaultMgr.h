@@ -142,7 +142,7 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
- *
+ * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
  * Updated in $/software/control processor/code/system

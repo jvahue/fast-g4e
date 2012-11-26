@@ -3687,7 +3687,7 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
- *
+ * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-11-15   Time: 7:04p
  * Updated in $/software/control processor/code/system

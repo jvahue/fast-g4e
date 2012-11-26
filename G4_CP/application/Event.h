@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 30 $  $Date: 12-11-12 4:46p $
+  $Revision: 31 $  $Date: 11/26/12 12:32p $
 
 ******************************************************************************/
 
@@ -475,6 +475,11 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:32p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

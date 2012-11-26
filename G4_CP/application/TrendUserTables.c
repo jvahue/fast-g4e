@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 12 $  $Date: 12-11-15 2:55p $
+$Revision: 13 $  $Date: 11/26/12 12:33p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -370,6 +370,11 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #  BitBucket #61 Cycle does not work with ER_ANY
  *
  * *****************  Version 12  *****************
  * User: Melanie Jutras Date: 12-11-15   Time: 2:55p

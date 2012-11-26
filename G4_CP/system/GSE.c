@@ -568,7 +568,7 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
- *
+ * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
  * Updated in $/software/control processor/code/system

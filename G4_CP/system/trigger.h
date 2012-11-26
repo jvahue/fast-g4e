@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing.
 
   VERSION
-  $Revision: 38 $  $Date: 12-11-12 4:46p $
+  $Revision: 39 $  $Date: 11/26/12 12:44p $
 
 ******************************************************************************/
 
@@ -329,6 +329,11 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1167 SensorSummary
  * 
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
