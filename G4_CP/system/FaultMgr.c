@@ -594,7 +594,7 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
- *
+ * 
  * *****************  Version 57  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:40p
  * Updated in $/software/control processor/code/system

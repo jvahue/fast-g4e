@@ -1,5 +1,5 @@
 #ifndef VALIDATE_H
-#define	VALIDATE_H
+#define VALIDATE_H
 /******************************************************************************
           Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                 All Rights Reserved. Proprietary and Confidential.

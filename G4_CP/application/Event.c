@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 35 $  $Date: 12-11-14 6:51p $
+ $Revision: 36 $  $Date: 11/26/12 12:32p $
 
 ******************************************************************************/
 
@@ -1753,6 +1753,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:32p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 35  *****************
  * User: John Omalley Date: 12-11-14   Time: 6:51p

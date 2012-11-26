@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 12 $  $Date: 12-11-01 1:58p $
+  $Revision: 13 $  $Date: 11/26/12 12:33p $
 
 *******************************************************************************/
 
@@ -291,6 +291,11 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 12  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 1:58p

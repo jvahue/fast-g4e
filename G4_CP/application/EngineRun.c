@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 38 $  $Date: 11/16/12 8:11p $
+      $Revision: 39 $  $Date: 11/26/12 12:31p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1043,6 +1043,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p

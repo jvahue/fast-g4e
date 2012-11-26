@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 107 $  $Date: 11/10/12 11:53a $
+   $Revision: 108 $  $Date: 11/26/12 12:35p $
 
 ******************************************************************************/
 
@@ -2780,11 +2780,6 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   errno = 0;
   decValue = strtoul(SetStr, &leftOver, 10);
 
- #if 0
- GSE_DebugStr(NORMAL,TRUE,"User: strtoul: SetStr Addr: 0x%08X, SetStr: \"%s\",
-               decValue: %d, leftOver: 0x%08X", &SetStr, SetStr, decValue, *leftOver);
-#endif
-
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
   // test errno to see if ERANGE was flagged.
@@ -2984,6 +2979,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 108  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:35p
+ * Updated in $/software/control processor/code/application
+ * SCR #1186 Followup: Reset errno prior to strtoul
  *
  * *****************  Version 107  *****************
  * User: Jeff Vahue   Date: 11/10/12   Time: 11:53a

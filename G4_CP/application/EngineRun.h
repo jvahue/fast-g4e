@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 26 $  $Date: 11/16/12 8:11p $
+      $Revision: 27 $  $Date: 11/26/12 12:31p $
 
 ******************************************************************************/
 
@@ -217,6 +217,11 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p

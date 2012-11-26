@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 15 $  $Date: 11/16/12 8:11p $
+ $Revision: 16 $  $Date: 11/26/12 12:33p $
 
 ******************************************************************************/
 
@@ -986,6 +986,11 @@ static void TrendStartAutoTrend(const TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 12:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 SensorSummary
  *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:11p

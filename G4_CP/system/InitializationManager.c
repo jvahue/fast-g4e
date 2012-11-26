@@ -768,7 +768,7 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
- *
+ * 
  * *****************  Version 118  *****************
  * User: John Omalley Date: 12-11-16   Time: 9:10p
  * Updated in $/software/control processor/code/system
