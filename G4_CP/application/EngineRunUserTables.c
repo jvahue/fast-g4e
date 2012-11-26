@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 22 $  $Date: 11/26/12 12:31p $
+$Revision: 23 $  $Date: 11/26/12 6:06p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -106,7 +106,6 @@ static USER_ENUM_TBL engRunRateType[] =
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-//{"INITIALIZE", NO_NEXT_TABLE, EngRunState,   USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.snsrSummary[n].bInitialized,     0,(MAX_ENGINES-1),    NO_LIMIT,     NULL            },\
 // Macro defines the 'prototype' declaration for entry in EngRunSensrTbl
 #define DECL_SNSR_SUMMARY_ENTRY( n )\
 static USER_MSG_TBL snsrSummaryEntry##n [] =\
@@ -483,6 +482,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 6:06p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review
  * 
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:31p

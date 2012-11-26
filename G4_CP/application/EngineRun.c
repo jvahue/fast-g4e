@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 39 $  $Date: 11/26/12 12:31p $
+      $Revision: 40 $  $Date: 11/26/12 6:06p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -755,7 +755,7 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   pErData->monMinValue = pErData->monMinValue;
 
   // Initialize the summary values for monitored sensors
-  SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors ); 
+  SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors );
 }
 
 /******************************************************************************
@@ -922,37 +922,6 @@ static void EngRunUpdateRunData( ENGRUN_DATA* pErData)
 
   // Update the sensor summaries
   SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors);
-
-	#if 0
-	  // Loop thru all sensors handled by this this ER
-	  for ( i = 0; i < pErData->nTotalSensors; i++ )
-	  {
-	    pSummary = &pErData->snsrSummary[i];
-
-	    // If the sensor is known to be invalid but WAS VALID in
-	    // the past( initialized is TRUE ) then ignore processing for
-	    // the remainder of this engine run.
-	    if( !pSummary->bValid && pSummary->bInitialized )
-	    {
-	      continue;
-	    }
-
-	    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
-
-	    if ( pSummary->bValid )
-	    {
-	      pSummary->bInitialized = TRUE;
-	      SensorUpdateSummaryItem(pSummary);
-	    }
-	    else if ( pSummary->bInitialized)
-	    {
-	     // Sensor is now invalid but had been valid
-	     // calculate average for valid period.
-	     oneOverN = (1.0f / (FLOAT32)(pErData->nSampleCount - 1));
-	     pSummary->fAvgValue = pSummary->fTotal * oneOverN;
-	    }
-	  } // for nTotalSensors
-	#endif
 }
 
 /******************************************************************************
@@ -1044,6 +1013,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 40  *****************
+ * User: Contractor V&v Date: 11/26/12   Time: 6:06p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:31p
  * Updated in $/software/control processor/code/application
