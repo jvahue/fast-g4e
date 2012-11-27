@@ -3647,11 +3647,13 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 
    USER_MSG_TBL*  pCfgTable;
    INT16          channelIdx;
-   INT16          nMaxChannel = 0;
+   INT16          nMaxChannel;
 
    pCfgTable = arinc429CfgTbl;
    while (pCfgTable->MsgStr != NULL && result == USER_RESULT_OK)
    {
+      nMaxChannel = 0;
+      
       if (strncmp(pCfgTable->MsgStr,"RX", 2) == 0)
       {
          nMaxChannel =  FPGA_MAX_RX_CHAN;
@@ -3661,19 +3663,33 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
          nMaxChannel =  FPGA_MAX_TX_CHAN;
       }
 
-      for (channelIdx = 0;
-          channelIdx < nMaxChannel && result == USER_RESULT_OK;
-          ++channelIdx)
+      if (nMaxChannel != 0)
+      {
+         for ( channelIdx = 0;
+               channelIdx < nMaxChannel && result == USER_RESULT_OK;
+               ++channelIdx )
+         {
+            // Display element info above each set of data.
+            snprintf ( sLabel, sizeof(sLabel), "%s%s[%d]",
+                       sLabelStem, pCfgTable->MsgStr, channelIdx);
+
+            result = USER_RESULT_ERROR;
+            if (User_OutputMsgString( sLabel, FALSE ) )
+            {
+              result = User_DisplayConfigTree(sBranchName, pCfgTable->pNext, channelIdx,
+                                              0, NULL);
+            }
+         }
+      }
+      else
       {
          // Display element info above each set of data.
-         snprintf(sLabel, sizeof(sLabel), "%s%s[%d]",
-                  sLabelStem, pCfgTable->MsgStr, channelIdx);
-
+         snprintf ( sLabel, sizeof(sLabel), "%s%s", sLabelStem, pCfgTable->MsgStr);
+         
          result = USER_RESULT_ERROR;
          if (User_OutputMsgString( sLabel, FALSE ) )
          {
-           result = User_DisplayConfigTree(sBranchName, pCfgTable->pNext, channelIdx,
-                                           0, NULL);
+            result = User_DisplayConfigTree(sBranchName, pCfgTable, 0, 0, NULL);
          }
       }
 
