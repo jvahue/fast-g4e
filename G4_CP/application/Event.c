@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 36 $  $Date: 11/26/12 12:32p $
+ $Revision: 37 $  $Date: 12-11-28 2:25p $
 
 ******************************************************************************/
 
@@ -108,6 +108,7 @@ static void           EventLogUpdate         ( EVENT_DATA *pData  );
 static void           EventLogEnd            ( EVENT_CFG  *pConfig, EVENT_DATA *pData   );
 static void           EventForceEnd          ( void );
 /*-------------------------- EVENT TABLES ----------------------------------*/
+static void           EventTablesInitialize    ( void );
 static void           EventTableResetData      ( EVENT_TABLE_DATA *pTableData );
 static EVENT_TABLE_STATE EventTableUpdate         ( EVENT_TABLE_INDEX eventTableIndex,
                                                  UINT32 nCurrentTick,
@@ -224,99 +225,6 @@ void EventsInitialize ( void )
    tTaskInfo.pParamBlock     = NULL;
 
    TmTaskCreate (&tTaskInfo);
-}
-
-/******************************************************************************
-* Function:     EventTablesInitialize
-*
-* Description:  Initializes all the event table variables based on the
-*               configuration.
-*
-* Parameters:   None
-*
-* Returns:      None
-*
-* Notes:
-*
-*****************************************************************************/
-void EventTablesInitialize ( void )
-{
-   // Local Data
-   EVENT_TABLE_DATA *pTableData;
-   EVENT_TABLE_CFG  *pTableCfg;
-   REGION_DEF       *pReg;
-   SEGMENT_DEF      *pSeg;
-   LINE_CONST       *pConst;
-   UINT32           nTableIndex;
-   UINT32           nRegionIndex;
-   UINT32           nSegmentIndex;
-
-   // Add Trigger Tables to the User Manager
-   User_AddRootCmd(&rootEventTableMsg);
-
-   // Reset the Sensor configuration storage array
-   memset((void *)m_EventTableCfg, 0, sizeof(m_EventTableCfg));
-
-   // Load the current configuration to the configuration array.
-   memcpy((void *)m_EventTableCfg,
-          (const void *)(CfgMgr_RuntimeConfigPtr()->EventTableConfigs),
-          sizeof(m_EventTableCfg));
-
-   // Loop through all the Tables
-   for ( nTableIndex = 0; nTableIndex < MAX_TABLES; nTableIndex++ )
-   {
-      // Set pointers to the Table Cfg and the Table Data
-      pTableCfg  = &m_EventTableCfg  [nTableIndex];
-      pTableData = &m_EventTableData [nTableIndex];
-
-      pTableData->nTableIndex      = (EVENT_TABLE_INDEX)nTableIndex;
-      pTableData->seqNumber        = 0;
-      pTableData->maximumCfgRegion = REGION_NOT_FOUND;
-      pTableData->nActionReqNum    = ACTION_NO_REQ;
-
-      // Loop through all the Regions
-      for ( nRegionIndex = (UINT32)REGION_A;
-            nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++ )
-      {
-         // Set a pointer the Region Cfg
-         pReg = &pTableCfg->region[nRegionIndex];
-
-         // Initialize Region Statistic Data
-         pTableData->regionStats[nRegionIndex].bRegionConfirmed       = FALSE;
-         pTableData->regionStats[nRegionIndex].logStats.nEnteredCount = 0;
-         pTableData->regionStats[nRegionIndex].logStats.nExitCount    = 0;
-         pTableData->regionStats[nRegionIndex].logStats.nDuration_ms  = 0;
-         pTableData->regionStats[nRegionIndex].nEnteredTime           = 0;
-
-         // Loop through each line segment in the region
-         for ( nSegmentIndex = 0; nSegmentIndex < MAX_REGION_SEGMENTS; nSegmentIndex++ )
-         {
-            // Set pointers to the line segment and constant data
-            pSeg       = &pReg->segment[nSegmentIndex];
-            pConst     = &pTableData->segment[nRegionIndex][nSegmentIndex];
-
-            // Need to protect against divide by 0 here so make sure
-            // Start and Stop Times not equal
-            pConst->m = ( pSeg->nStopTime_ms == pSeg->nStartTime_ms ) ? 0 :
-                        ( (pSeg->fStopValue - pSeg->fStartValue) /
-                          (pSeg->nStopTime_ms - pSeg->nStartTime_ms) );
-            pConst->b = pSeg->fStartValue - (pSeg->nStartTime_ms * pConst->m);
-
-            // Find the last configured region
-            if ( pSeg->nStopTime_ms != 0 )
-            {
-               pTableData->maximumCfgRegion = (EVENT_REGION)nRegionIndex;
-            }
-         }
-      }
-
-      // Now initialize the remaining Table Data
-      pTableData->bStarted             = FALSE;
-      pTableData->nStartTime_ms        = 0;
-      pTableData->maximumRegionEntered = REGION_NOT_FOUND;
-      pTableData->currentRegion        = REGION_NOT_FOUND;
-      pTableData->confirmedRegion      = REGION_NOT_FOUND;
-   }
 }
 
 /******************************************************************************
@@ -503,6 +411,100 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
                                                   pConfig->sensorMap,
                                                   sizeof (pConfig->sensorMap) );
 #pragma ghs endnowarning
+}
+
+/******************************************************************************
+* Function:     EventTablesInitialize
+*
+* Description:  Initializes all the event table variables based on the
+*               configuration.
+*
+* Parameters:   None
+*
+* Returns:      None
+*
+* Notes:
+*
+*****************************************************************************/
+static
+void EventTablesInitialize ( void )
+{
+   // Local Data
+   EVENT_TABLE_DATA *pTableData;
+   EVENT_TABLE_CFG  *pTableCfg;
+   REGION_DEF       *pReg;
+   SEGMENT_DEF      *pSeg;
+   LINE_CONST       *pConst;
+   UINT32           nTableIndex;
+   UINT32           nRegionIndex;
+   UINT32           nSegmentIndex;
+
+   // Add Trigger Tables to the User Manager
+   User_AddRootCmd(&rootEventTableMsg);
+
+   // Reset the Sensor configuration storage array
+   memset((void *)m_EventTableCfg, 0, sizeof(m_EventTableCfg));
+
+   // Load the current configuration to the configuration array.
+   memcpy((void *)m_EventTableCfg,
+          (const void *)(CfgMgr_RuntimeConfigPtr()->EventTableConfigs),
+          sizeof(m_EventTableCfg));
+
+   // Loop through all the Tables
+   for ( nTableIndex = 0; nTableIndex < MAX_TABLES; nTableIndex++ )
+   {
+      // Set pointers to the Table Cfg and the Table Data
+      pTableCfg  = &m_EventTableCfg  [nTableIndex];
+      pTableData = &m_EventTableData [nTableIndex];
+
+      pTableData->nTableIndex      = (EVENT_TABLE_INDEX)nTableIndex;
+      pTableData->seqNumber        = 0;
+      pTableData->maximumCfgRegion = REGION_NOT_FOUND;
+      pTableData->nActionReqNum    = ACTION_NO_REQ;
+
+      // Loop through all the Regions
+      for ( nRegionIndex = (UINT32)REGION_A;
+            nRegionIndex < (UINT32)MAX_TABLE_REGIONS; nRegionIndex++ )
+      {
+         // Set a pointer the Region Cfg
+         pReg = &pTableCfg->region[nRegionIndex];
+
+         // Initialize Region Statistic Data
+         pTableData->regionStats[nRegionIndex].bRegionConfirmed       = FALSE;
+         pTableData->regionStats[nRegionIndex].logStats.nEnteredCount = 0;
+         pTableData->regionStats[nRegionIndex].logStats.nExitCount    = 0;
+         pTableData->regionStats[nRegionIndex].logStats.nDuration_ms  = 0;
+         pTableData->regionStats[nRegionIndex].nEnteredTime           = 0;
+
+         // Loop through each line segment in the region
+         for ( nSegmentIndex = 0; nSegmentIndex < MAX_REGION_SEGMENTS; nSegmentIndex++ )
+         {
+            // Set pointers to the line segment and constant data
+            pSeg       = &pReg->segment[nSegmentIndex];
+            pConst     = &pTableData->segment[nRegionIndex][nSegmentIndex];
+
+            // Need to protect against divide by 0 here so make sure
+            // Start and Stop Times not equal
+            pConst->m = ( pSeg->nStopTime_ms == pSeg->nStartTime_ms ) ? 0 :
+                        ( (pSeg->fStopValue - pSeg->fStartValue) /
+                          (pSeg->nStopTime_ms - pSeg->nStartTime_ms) );
+            pConst->b = pSeg->fStartValue - (pSeg->nStartTime_ms * pConst->m);
+
+            // Find the last configured region
+            if ( pSeg->nStopTime_ms != 0 )
+            {
+               pTableData->maximumCfgRegion = (EVENT_REGION)nRegionIndex;
+            }
+         }
+      }
+
+      // Now initialize the remaining Table Data
+      pTableData->bStarted             = FALSE;
+      pTableData->nStartTime_ms        = 0;
+      pTableData->maximumRegionEntered = REGION_NOT_FOUND;
+      pTableData->currentRegion        = REGION_NOT_FOUND;
+      pTableData->confirmedRegion      = REGION_NOT_FOUND;
+   }
 }
 
 /******************************************************************************
@@ -1753,6 +1755,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:25p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:32p

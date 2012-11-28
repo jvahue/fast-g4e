@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 46 $  $Date: 12-11-14 7:20p $     
+      $Revision: 47 $  $Date: 12-11-28 2:08p $     
 
 ******************************************************************************/
 
@@ -156,17 +156,12 @@ void UartMgr_Initialize (void)
   UARTMGR_PORT_CFG_PTR pUartMgrPortCfg; 
   UARTMGR_STATUS_PTR pUartMgrStatus; 
   UART_CONFIG uartCfg; 
-  
   UARTMGR_WORD_INFO_PTR pWordInfo; 
-  
   UART_SYS_PBIT_STARTUP_LOG startupLog; 
-  
   BOOLEAN bAtLeastOneEnabled; 
-
   UARTMGR_PARAM_DATA_PTR   pUartData; 
   UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr; 
-  
-  
+    
   // Initialize all local variables 
   memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * (UINT8)UART_NUM_OF_UARTS); 
   memset (m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * (UINT8)UARTMGR_MAX_PARAM_WORD );
@@ -174,7 +169,6 @@ void UartMgr_Initialize (void)
   memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * (UINT8)UART_NUM_OF_UARTS ); 
   memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * (UINT8)UART_NUM_OF_UARTS); 
   memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * (UINT8)UART_NUM_OF_UARTS); 
-
   // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
   for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++) 
   {
@@ -187,7 +181,6 @@ void UartMgr_Initialize (void)
       runtime_data_ptr->bReInit = TRUE; 
     }
   }
-
   // UartMgr_WordInfo.nIndex to UARTMGR_WORD_INDEX_NOT_FOUND
   for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
   {
@@ -201,17 +194,13 @@ void UartMgr_Initialize (void)
     }
     m_UartMgr_WordSensorCount[k] = 0; 
   }    
-  
   // Initialize all protocol handlers after UargMgrConfig restored 
   F7XProtocol_Initialize(); 
   EMU150Protocol_Initialize(); 
-
   //Add an entry in the user message handler table
   User_AddRootCmd(&UartMgrRootTblPtr);
-  
   // Restore User Default 
   memcpy(m_UartMgrCfg, CfgMgr_RuntimeConfigPtr()->UartMgrConfig, sizeof(m_UartMgrCfg));
-  
   // Open and initialize each UART Port.  Exclude UART[0] GSE port !
   result = SYS_OK; 
   bAtLeastOneEnabled = FALSE; 
@@ -219,16 +208,13 @@ void UartMgr_Initialize (void)
   {
     pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[i]; 
     pUartMgrCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[i];
-  
     // Port Cfg for use ?
     if ( pUartMgrCfg->bEnabled == TRUE ) 
     {
       // Update flag to indicate at least one Uart Ch is enabled 
       bAtLeastOneEnabled = TRUE; 
-    
       // Update the protocol for current status 
       pUartMgrStatus->protocol = pUartMgrCfg->protocol; 
-    
       // Cfg Port 
       pUartMgrPortCfg = (UARTMGR_PORT_CFG_PTR) &pUartMgrCfg->port; 
       uartCfg = UartDrvDefaultCfg;    // Set the defaults; 
@@ -240,7 +226,6 @@ void UartMgr_Initialize (void)
       uartCfg.Duplex = pUartMgrPortCfg->duplex; 
       uartCfg.RxFIFO = NULL;
       uartCfg.TxFIFO = NULL; 
-      
       // Init UartMgrBlock[] struct       
       UartMgrBlock[i].nChannel = i; 
       switch ( pUartMgrCfg->protocol )
@@ -250,14 +235,12 @@ void UartMgr_Initialize (void)
           UartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr; 
           UartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl; 
           break;
-          
         case UARTMGR_PROTOCOL_EMU150: 
           UartMgrBlock[i].exec_protocol = EMU150Protocol_Handler; 
           UartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr; 
           UartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl; 
           EMU150Protocol_SetBaseUartCfg(i, uartCfg); 
           break;
-          
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through 
@@ -267,7 +250,6 @@ void UartMgr_Initialize (void)
                     pUartMgrCfg->protocol, i);
           break;
       }
-      
       // Open Uart Port 
       result = UART_OpenPort( &uartCfg ); 
       
@@ -285,14 +267,11 @@ void UartMgr_Initialize (void)
         tcbTaskInfo.Enabled     = TRUE; 
         tcbTaskInfo.Locked      = FALSE; 
         tcbTaskInfo.MIFrames    = taskInfo[(UINT8)UART_Mgr0 + i].MIFframes;
-        
         // Store my TaskID in the param block
         // so the shared UartMgr_Task function can disambiguate when needed.
         UartMgrBlock[i].taskID = tcbTaskInfo.TaskID;
-
         tcbTaskInfo.pParamBlock = (void *) &UartMgrBlock[i]; 
         TmTaskCreate ( &tcbTaskInfo ); 
-        
         pUartMgrStatus->status = UARTMGR_STATUS_OK; 
       }
       else 
@@ -300,31 +279,25 @@ void UartMgr_Initialize (void)
         // Set PBIT sys condition and exit 
         pUartMgrStatus->status = UARTMGR_STATUS_FAULTED_PBIT; 
       }
-      
     } // End if ( pUartCfg->bEnabled == TRUE )
     else 
     {
       pUartMgrStatus->status = UARTMGR_STATUS_DISABLED_OK; 
     }
-    
     // Create log and update sys status if failure detected 
     if ( result != SYS_OK )
     {
       // Update log data 
       startupLog.result = SYS_UART_PBIT_UART_OPEN_FAIL; 
       startupLog.ch = i; 
-      
       // Set Fault Status 
       Flt_SetStatus(pUartMgrCfg->sysCondPBIT, SYS_ID_UART_PBIT_FAIL, 
                     &startupLog, sizeof(UART_SYS_PBIT_STARTUP_LOG));
     } 
-    
     // Update internal variables 
     UartMgr_ClearDownloadState(i); 
-    
   } // End for loop 
-  
-  
+
   // Enable UartMgr BIT Task if any Uart is enabled 
   if ( bAtLeastOneEnabled == TRUE ) 
   {
@@ -343,7 +316,6 @@ void UartMgr_Initialize (void)
     
     tcbTaskInfo.pParamBlock = (void *) &UartMgrBITBlock; 
     TmTaskCreate ( &tcbTaskInfo ); 
-    
     // Enable UartMgr Display Task
     memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo)); 
     strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Uart Mgr Debug Disp",_TRUNCATE);
@@ -361,18 +333,14 @@ void UartMgr_Initialize (void)
     tcbTaskInfo.pParamBlock = (void *) &UartMgrDispDebugBlock; 
     TmTaskCreate ( &tcbTaskInfo ); 
   }
-  
   // For UART[0] force to GSE default conditions 
-  
 
   // Initialize Uart Mgr Debug 
   memset ( &m_UartMgr_Debug, 0x00, sizeof(UARTMGR_DEBUG) );
   m_UartMgr_Debug.bDebug = FALSE; 
   m_UartMgr_Debug.ch = 1; 
   m_UartMgr_Debug.num_bytes = 20; 
-  
 }
-
 
 /******************************************************************************
  * Function:    UartMgr_GetStatus
@@ -1964,6 +1932,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 47  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:08p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197- Code Review Updates
  * 
  * *****************  Version 46  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
