@@ -127,10 +127,22 @@ typedef enum
   MAX_TREND_STATES
 }TREND_STATE;
 
+typedef enum
+{
+  STAB_UNKNOWN = 0,         // The sensor status is unknown
+  STAB_OK,                  // The sensor is OK
+  STAB_SNSR_NOT_DECLARED,   // The sensor is not declared
+  STAB_SNSR_INVALID,        // The sensor is invalid
+  STAB_SNSR_RANGE_ERROR,    // The sensor reading is outside configured range
+  STAB_SNSR_VARIANCE_ERROR  // The sensor reading is outside configured variance
+} STABILITY_STATUS;
+
+
+
 #pragma pack(1)
 
-
-
+//***************************************
+// Trend data collection  sub-structures
 typedef struct
 {
   CYCLE_INDEX cycIndex;
@@ -145,7 +157,10 @@ typedef struct
   FLOAT32      fAvgValue;
 }TREND_SENSORS;
 
-// STABILITY_CRITERIA
+
+//***************************************
+// Stability structure and sub-structures
+
 typedef struct
 {
   FLOAT32 lower;
@@ -161,9 +176,16 @@ typedef struct
 
 typedef struct
 {
-  UINT16       stableCnt;                       /* Count of stable sensors   */
-  FLOAT32      prevStabValue[MAX_STAB_SENSORS]; /* Prior readings of sensors */
+  UINT16           stableCnt;                   /* Count of stable sensors observed      */
+  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
+  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
+  STABILITY_STATUS status   [MAX_STAB_SENSORS];    /* The status of the stability sensor */
 }STABILITY_DATA;
+
+
+
+//****************************
+// Logging structures
 
 typedef struct
 {
@@ -183,10 +205,10 @@ typedef struct
 
 typedef struct
 {
-  TREND_INDEX        trendIndex;              /* The Id of this trend                     */
+  TREND_INDEX        trendIndex;              /* The Id of this trend                        */
   STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
   STABILITY_DATA     data;                    /* The max observed stability data during      */
-}TREND_NOT_DETECTED_LOG;                      /* the un-activated trend                      */
+}TREND_ERROR_LOG;                             /* the UNDETECTED OR FAILED TREND              */
 
 
 // TREND_CFG
@@ -199,7 +221,7 @@ typedef struct
    /* Sampling control */
    UINT16        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
    ENGRUN_INDEX  engineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
-   UINT16        maxTrends;          /* Max # of autotrends to be recorded by this trend     */
+   UINT16        maxTrends;          /* Max # of stable/auto trends to be recorded.          */
    TRIGGER_INDEX startTrigger;       /* Starting trigger                                     */
    TRIGGER_INDEX resetTrigger;       /* Ending trigger                                       */
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
@@ -208,7 +230,7 @@ typedef struct
    UINT8         nAction;            /* Action to annunciate during the trend                */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
-}TREND_CFG, *TREND_CFG_PTR;
+}TREND_CFG;
 
 // A typedef for an array of the maximum number of trends
 // Used for storing Trend configurations in the configuration manager
@@ -228,7 +250,7 @@ typedef struct
 
 #pragma pack()
 
-
+//****************************
 // TREND_DATA - Run Time Data
 typedef struct
 {
@@ -238,9 +260,11 @@ typedef struct
   INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
 
   // State/status info
+  BOOLEAN      bEnabled;            /* Indicates the assoc-ER is active, enabling this trend */
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
-  UINT16       trendCnt;            /* # of autotrends taken since Reset                     */
+  UINT16       trendCnt;            /* # of all trends ( stability and trigger since Reset   */
+  UINT16       stableTrendCnt;      /* # of autotrends since Reset (0 -> TREND_CFG.maxTrends)*/
   BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
 
@@ -257,7 +281,7 @@ typedef struct
   UINT16       nStabExpectedCnt;  /* Expected count based on configured.                     */
   UINT32       lastStabCheckMs;   /* Starting time (CM_GetTickCount()                        */
   UINT32       nTimeStableMs;     /* Time in ms the stability-sensors have been stable.      */
-  STABILITY_DATA stability;       /* Current stability                                       */
+  STABILITY_DATA curStability;    /* Current stability                                       */
   STABILITY_DATA maxStability;    /* Max observed stable sensors and count                   */
 
   // Monitored sensors during trends.
@@ -291,7 +315,7 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
  * Updated in $/software/control processor/code/application
