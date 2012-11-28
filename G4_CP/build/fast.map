@@ -1,9 +1,9 @@
-Link Date:	Wed Nov 28 12:18:36 2012
+Link Date:	Wed Nov 28 14:15:22 2012
 Host OS:	Windows XP Service Pack 3
 Version:	ELXR 5.0 (c) 1998-2009 Green Hills Software    Build: Nov  9 2009
 
 
-Load Map Wed Nov 28 12:18:36 2012
+Load Map Wed Nov 28 14:15:22 2012
 Image Summary
 
   Section              Base      Size(hex)    Size(dec)  SecOffs
@@ -15,18 +15,18 @@ Image Summary
   .stackbase           31f00000  00000000            0   00317f4
   .stack               31f00000  00100000      1048576   00317f4
   .vector              00100000  00000416         1046   00317f4
-  .text                00100420  0006d606       448006   0031c14
-  .rodata              0016da26  00000000            0   009f21a
-  .secinfo             0016da28  00000288          648   009f21c
-  .fixaddr             0016dcb0  00000000            0   009f4a4
-  .fixtype             0016dcb0  00000000            0   009f4a4
-  .sdata               0016dcb0  00000000            0   009f4a4
-  .syscall             0016dcb0  00000004            4   009f4a4
-  .ROM.data            0016dcb4  00031654       202324   00001a0
-  .crcDefault          0019f308  00000004            4   009f4a8
-  .buildDate           0019f30c  00000020           32   009f4ac
+  .text                00100420  0006d676       448118   0031c14
+  .rodata              0016da96  00000000            0   009f28a
+  .secinfo             0016da98  00000288          648   009f28c
+  .fixaddr             0016dd20  00000000            0   009f514
+  .fixtype             0016dd20  00000000            0   009f514
+  .sdata               0016dd20  00000000            0   009f514
+  .syscall             0016dd20  00000004            4   009f514
+  .ROM.data            0016dd24  00031654       202324   00001a0
+  .crcDefault          0019f378  00000004            4   009f518
+  .buildDate           0019f37c  00000020           32   009f51c
 
-Load Map Wed Nov 28 12:18:36 2012
+Load Map Wed Nov 28 14:15:22 2012
 Module Summary
 
   Origin+Size    Section          Module
@@ -103,7 +103,7 @@ Module Summary
 304ee1c0+00010c  .bss             UART.o
 00125ee6+0001e8  .text            Version.o
 31880e80+00000c  .data            Version.o
-0019f30c+000020  .buildDate       Version.o
+0019f37c+000020  .buildDate       Version.o
 001260ce+00026a  .text            amdfujiscs.o
 00126338+00203c  .text            arinc429.o
 304ee2cc+000001  .bss             arinc429.o
@@ -115,142 +115,142 @@ Module Summary
 00129374+0013e0  .text            actionmanager.o
 31880e8c+0005e4  .data            actionmanager.o
 304ef33c+000584  .bss             actionmanager.o
-0012a758+004080  .text            arinc429mgr.o
+0012a758+0040d8  .text            arinc429mgr.o
 31881470+017fd8  .data            arinc429mgr.o
 304ef8c0+0e7620  .bss             arinc429mgr.o
-0012e7d8+000f28  .text            Box.o
+0012e830+000f28  .text            Box.o
 31899448+0006e8  .data            Box.o
 305d6ee0+000200  .bss             Box.o
-0012f700+0012e4  .text            CBITManager.o
+0012f758+0012e4  .text            CBITManager.o
 31899b30+0001a0  .data            CBITManager.o
 305d70e0+000238  .bss             CBITManager.o
-0019f308+000004  .crcDefault      CBITManager.o
-001309e4+0161fc  .text            CfgManager.o
+0019f378+000004  .crcDefault      CBITManager.o
+00130a3c+0161fc  .text            CfgManager.o
 305d7318+02b734  .bss             CfgManager.o
-00146be0+000c52  .text            ClockMgr.o
+00146c38+000c52  .text            ClockMgr.o
 30602a4c+000218  .bss             ClockMgr.o
-00147838+0014e0  .text            Cycle.o
+00147890+0014e0  .text            Cycle.o
 31899cd0+00051c  .data            Cycle.o
 30602c64+000964  .bss             Cycle.o
-00148d18+00040c  .text            DIOMgr.o
+00148d70+00040c  .text            DIOMgr.o
 3189a1ec+000bac  .data            DIOMgr.o
-00149124+0025e6  .text            DataManager.o
+0014917c+002600  .text            DataManager.o
 3189ad98+000b94  .data            DataManager.o
 306035c8+10ee9b4  .bss             DataManager.o
-0014b70a+0007e4  .text            FPGAManager.o
+0014b77c+0007e4  .text            FPGAManager.o
 3189b92c+00032c  .data            FPGAManager.o
 316f1f7c+000014  .bss             FPGAManager.o
-0014beee+0004e8  .text            Fault.o
+0014bf60+0004e8  .text            Fault.o
 3189bc58+000608  .data            Fault.o
 316f1f90+000c60  .bss             Fault.o
-0014c3d6+000a3e  .text            FaultMgr.o
+0014c448+000a3e  .text            FaultMgr.o
 3189c260+000398  .data            FaultMgr.o
 316f2bf0+0021e0  .bss             FaultMgr.o
-0014ce14+000538  .text            GSE.o
+0014ce86+000538  .text            GSE.o
 316f4dd0+004018  .bss             GSE.o
-0014d34c+000bf0  .text            InitializationManager.o
+0014d3c0+000bf0  .text            InitializationManager.o
 3189c5f8+000004  .data            InitializationManager.o
 316f8de8+00081c  .bss             InitializationManager.o
-0014df40+002b80  .text            LogManager.o
+0014dfb0+002b80  .text            LogManager.o
 3189c5fc+000368  .data            LogManager.o
 316f9604+09a1a8  .bss             LogManager.o
-00150ac0+000ba8  .text            MSInterface.o
+00150b30+000ba8  .text            MSInterface.o
 317937ac+000108  .bss             MSInterface.o
-00151668+001042  .text            MSStsCtl.o
+001516d8+001042  .text            MSStsCtl.o
 3189c964+0009f8  .data            MSStsCtl.o
 317938b4+002a50  .bss             MSStsCtl.o
-001526ac+001180  .text            MemManager.o
+0015271c+001180  .text            MemManager.o
 31796304+001080  .bss             MemManager.o
-00153830+002900  .text            Monitor.o
+001538a0+002900  .text            Monitor.o
 3189d35c+000058  .data            Monitor.o
 31797384+000014  .bss             Monitor.o
-00156130+002004  .text            NVMgr.o
+001561a0+002004  .text            NVMgr.o
 3189d3b4+0002e0  .data            NVMgr.o
 31797398+0420c0  .bss             NVMgr.o
-00158134+001300  .text            PowerManager.o
+001581a4+001300  .text            PowerManager.o
 3189d694+000308  .data            PowerManager.o
 317d9458+000034  .bss             PowerManager.o
 318a3ca8+0000bc  .pbss            PowerManager.o
-00159434+00098e  .text            QARManager.o
+001594a4+00098e  .text            QARManager.o
 3189d99c+000d6c  .data            QARManager.o
 317d948c+002c0c  .bss             QARManager.o
-00159dc4+001088  .text            SpiManager.o
+00159e34+001088  .text            SpiManager.o
 317dc098+0000bc  .bss             SpiManager.o
-0015ae4c+001974  .text            SystemLog.o
+0015aebc+001974  .text            SystemLog.o
 317dc154+00013c  .bss             SystemLog.o
-0015c7c0+0018b8  .text            TaskManager.o
+0015c830+0018b8  .text            TaskManager.o
 317dc290+002340  .bss             TaskManager.o
-0015e078+000bfc  .text            UtilRegSetCheck.o
+0015e0e8+000bfc  .text            UtilRegSetCheck.o
 317de5d0+0109a4  .bss             UtilRegSetCheck.o
-0015ec74+0011dc  .text            Utility.o
+0015ece4+0011dc  .text            Utility.o
 317eef74+00000c  .bss             Utility.o
-0015fe50+000020  .text            main.o
-0015fe70+002620  .text            sensor.o
+0015fec0+000020  .text            main.o
+0015fee0+002620  .text            sensor.o
 3189e708+0015c0  .data            sensor.o
 317eef80+0090b8  .bss             sensor.o
-00162490+0017c0  .text            trigger.o
+00162500+0017c0  .text            trigger.o
 3189fcc8+000ac8  .data            trigger.o
 317f8038+009f20  .bss             trigger.o
-00163c50+001e0c  .text            UartMgr.o
+00163cc0+001e0c  .text            UartMgr.o
 318a0790+0008c4  .data            UartMgr.o
 31801f58+021414  .bss             UartMgr.o
-00165a5c+00307c  .text            F7XProtocol.o
+00165acc+00307c  .text            F7XProtocol.o
 318a1054+002220  .data            F7XProtocol.o
 3182336c+0049a8  .bss             F7XProtocol.o
-00168ad8+00293c  .text            EMU150Protocol.o
+00168b48+00293c  .text            EMU150Protocol.o
 318a3274+000820  .data            EMU150Protocol.o
 31827d14+04a700  .bss             EMU150Protocol.o
-0016b414+00003c  .text            WatchDog.o
-0016b450+000010  .text            libmulti.a
-0016b460+000068  .text            libansi.a(ccstrccmp.o)
-0016b4c8+00009a  .text            libansi.a(ccstrtok.o)
+0016b484+00003c  .text            WatchDog.o
+0016b4c0+000010  .text            libmulti.a
+0016b4d0+000068  .text            libansi.a(ccstrccmp.o)
+0016b538+00009a  .text            libansi.a(ccstrtok.o)
 31872414+000004  .bss             libansi.a(ccstrtok.o)
-0016b562+00004e  .text            libansi.a(ccstrstr.o)
-0016b5b0+00002a  .text            libansi.a(ccstrspn.o)
-0016b5da+00002c  .text            libansi.a(ccstrpbr.o)
-0016b606+000032  .text            libansi.a(ccstrncp.o)
-0016b638+000036  .text            libansi.a(ccstrncm.o)
-0016b66e+000018  .text            libansi.a(ccstrlen.o)
-0016b686+00002a  .text            libansi.a(ccstrcsp.o)
-0016b6b0+00001a  .text            libansi.a(ccstrcpy.o)
-0016b6ca+000024  .text            libansi.a(ccstrcmp.o)
-0016b6ee+000026  .text            libansi.a(ccstrchr.o)
-0016b714+000020  .text            libansi.a(ccstrcat.o)
-0016b734+000576  .text            libansi.a(ccefgout.o)
+0016b5d2+00004e  .text            libansi.a(ccstrstr.o)
+0016b620+00002a  .text            libansi.a(ccstrspn.o)
+0016b64a+00002c  .text            libansi.a(ccstrpbr.o)
+0016b676+000032  .text            libansi.a(ccstrncp.o)
+0016b6a8+000036  .text            libansi.a(ccstrncm.o)
+0016b6de+000018  .text            libansi.a(ccstrlen.o)
+0016b6f6+00002a  .text            libansi.a(ccstrcsp.o)
+0016b720+00001a  .text            libansi.a(ccstrcpy.o)
+0016b73a+000024  .text            libansi.a(ccstrcmp.o)
+0016b75e+000026  .text            libansi.a(ccstrchr.o)
+0016b784+000020  .text            libansi.a(ccstrcat.o)
+0016b7a4+000576  .text            libansi.a(ccefgout.o)
 318a3a94+000020  .data            libansi.a(ccefgout.o)
-0016bcaa+0006ea  .text            libansi.a(ccvsprnt.o)
-0016c394+000090  .text            libansi.a(ccsnprtf.o)
-0016c424+00005c  .text            libansi.a(ccsprntf.o)
-0016c480+000490  .text            libansi.a(ccdocvt.o)
-0016c910+00002e  .text            libansi.a(ccexit.o)
-0016c93e+00005e  .text            libansi.a(ccwctomb.o)
-0016c99c+00013c  .text            libansi.a(ccstrtul.o)
-0016cad8+000160  .text            libansi.a(ccstrtol.o)
-0016cc38+0000f2  .text            libansi.a(cclocale.o)
+0016bd1a+0006ea  .text            libansi.a(ccvsprnt.o)
+0016c404+000090  .text            libansi.a(ccsnprtf.o)
+0016c494+00005c  .text            libansi.a(ccsprntf.o)
+0016c4f0+000490  .text            libansi.a(ccdocvt.o)
+0016c980+00002e  .text            libansi.a(ccexit.o)
+0016c9ae+00005e  .text            libansi.a(ccwctomb.o)
+0016ca0c+00013c  .text            libansi.a(ccstrtul.o)
+0016cb48+000160  .text            libansi.a(ccstrtol.o)
+0016cca8+0000f2  .text            libansi.a(cclocale.o)
 318a3ab4+000004  .data            libansi.a(cclocale.o)
 31872418+000044  .bss             libansi.a(cclocale.o)
-0016cd2a+000010  .text            libansi.a(ccabs.o)
-0016cd3a+000018  .text            libansi.a(ccatoi.o)
-0016cd52+00002c  .text            libansi.a(ccmemcmp.o)
-0016cd7e+000026  .text            libmath.a(indfabs.o)
-0016cda8+000578  .text            libmath.a(ccstrtod.o)
-0016d320+000014  .text            libmath.a(ccatof.o)
-0016d334+00013c  .text            libmath.a(indscalbln.o)
-0016d470+000144  .text            libind.a(ind64tod.o)
-0016d5b4+00009c  .text            libstartup.a(ind_uzip.o)
-0016d650+000054  .text            libstartup.a(ind_mset.o)
-0016d6a4+00007c  .text            libstartup.a(ind_mcpy.o)
-0016d720+0000ae  .text            libsys.a(ind_exit.o)
+0016cd9a+000010  .text            libansi.a(ccabs.o)
+0016cdaa+000018  .text            libansi.a(ccatoi.o)
+0016cdc2+00002c  .text            libansi.a(ccmemcmp.o)
+0016cdee+000026  .text            libmath.a(indfabs.o)
+0016ce18+000578  .text            libmath.a(ccstrtod.o)
+0016d390+000014  .text            libmath.a(ccatof.o)
+0016d3a4+00013c  .text            libmath.a(indscalbln.o)
+0016d4e0+000144  .text            libind.a(ind64tod.o)
+0016d624+00009c  .text            libstartup.a(ind_uzip.o)
+0016d6c0+000054  .text            libstartup.a(ind_mset.o)
+0016d714+00007c  .text            libstartup.a(ind_mcpy.o)
+0016d790+0000ae  .text            libsys.a(ind_exit.o)
 3187245c+000004  .bss             libsys.a(ind_exit.o)
-0016d7ce+00002e  .text            libsys.a(ind_errn.o)
-0016dcb0+000004  .syscall         libsys.a(ind_dots.o)
-0016d7fc+000030  .text            libsys.a(ind_call.o)
-0016d82c+00010e  .text            libsys.a(ind_crt1.o)
-0016d93a+000088  .text            libsys.a(ind_thrd.o)
+0016d83e+00002e  .text            libsys.a(ind_errn.o)
+0016dd20+000004  .syscall         libsys.a(ind_dots.o)
+0016d86c+000030  .text            libsys.a(ind_call.o)
+0016d89c+00010e  .text            libsys.a(ind_crt1.o)
+0016d9aa+000088  .text            libsys.a(ind_thrd.o)
 31872460+000004  .bss             libsys.a(ind_thrd.o)
-0016d9d0+000056  .text            libarch.a(indclz32.o)
+0016da40+000056  .text            libarch.a(indclz32.o)
 
-Load Map Wed Nov 28 12:18:36 2012
+Load Map Wed Nov 28 14:15:22 2012
 Global Symbols (sorted alphabetically)
 
  .text            0011b794 A0Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -382,49 +382,49 @@ Global Symbols (sorted alphabetically)
  .text            00127168 Arinc429DrvTest_Rx_FIFO..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
  .text            001278e2 Arinc429DrvTest_Tx_FIFO..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
  .text            00126d62 Arinc429DrvTxGetCounts
- .text            0012c94c Arinc429MgrAddPrevCBITHealthSts
- .text            0012d39a Arinc429MgrApplyProtocol..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012bdce Arinc429MgrBITTask
- .text            0012c88c Arinc429MgrCalcDiffCBITHealthSts
- .text            0012cc1a Arinc429MgrCfgReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012d8ca Arinc429MgrChkPW305AB_MFDTimeout..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012d7b8 Arinc429MgrChkParamLostTimeout..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012d648 Arinc429MgrConvertEngToMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012dd60 Arinc429MgrCreateTimeOutSysLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012d464 Arinc429MgrDataReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012de2e Arinc429MgrDetermineSSMFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012e2b8 Arinc429MgrDisableLiveStream
- .text            0012e2c6 Arinc429MgrDispSingleArincChan
- .text            0012e6b2 Arinc429MgrDisplayFmtedLine
- .text            0012e43e Arinc429MgrDisplayMultiArincChan
- .text            0012c0c0 Arinc429MgrDisplaySWBufferTask
- .text            0012c7f2 Arinc429MgrGetCBITHealthStatus
- .text            0012c2dc Arinc429MgrGetFileHdr
- .text            0012e172 Arinc429MgrGetReduceHdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012c3b6 Arinc429MgrGetSystemHdr
- .text            0012b300 Arinc429MgrInitTasks
- .text            0012b8a4 Arinc429MgrInitialize
- .text            0012c782 Arinc429MgrInterfaceValid
- .text            0012d994 Arinc429MgrInvalidateParameter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012dbd0 Arinc429MgrParameterTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012d118 Arinc429MgrParseBCD..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012cef0 Arinc429MgrParseGPA_GPB..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012cfec Arinc429MgrParseMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012bd3a Arinc429MgrProcMsgsTaskShutdown
- .text            0012da26 Arinc429MgrProcPW305ABEngineMFD..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012bb26 Arinc429MgrProcessMsgsTask
- .text            0012d27a Arinc429MgrReadBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012c0fa Arinc429MgrReadFilteredRaw
- .text            0012c162 Arinc429MgrReadFilteredRawSnap
- .text            0012deec Arinc429MgrReadReduceSnapshot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012c4d8 Arinc429MgrReadWord
- .text            0012ca02 Arinc429MgrReconfigureHW..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012c466 Arinc429MgrSensorSetup
- .text            0012c656 Arinc429MgrSensorTest
- .text            0012d306 Arinc429MgrStoreLabelData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012c282 Arinc429MgrSyncTime
- .text            0012dc5a Arinc429MgrUpdateLabelFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0012db70 Arinc429MgrWriteBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c9a4 Arinc429MgrAddPrevCBITHealthSts
+ .text            0012d3f2 Arinc429MgrApplyProtocol..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012be26 Arinc429MgrBITTask
+ .text            0012c8e4 Arinc429MgrCalcDiffCBITHealthSts
+ .text            0012cc72 Arinc429MgrCfgReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d922 Arinc429MgrChkPW305AB_MFDTimeout..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d810 Arinc429MgrChkParamLostTimeout..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d6a0 Arinc429MgrConvertEngToMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012ddb8 Arinc429MgrCreateTimeOutSysLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d4bc Arinc429MgrDataReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012de86 Arinc429MgrDetermineSSMFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012e310 Arinc429MgrDisableLiveStream
+ .text            0012e31e Arinc429MgrDispSingleArincChan
+ .text            0012e70a Arinc429MgrDisplayFmtedLine
+ .text            0012e496 Arinc429MgrDisplayMultiArincChan
+ .text            0012c118 Arinc429MgrDisplaySWBufferTask
+ .text            0012c84a Arinc429MgrGetCBITHealthStatus
+ .text            0012c334 Arinc429MgrGetFileHdr
+ .text            0012e1ca Arinc429MgrGetReduceHdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c40e Arinc429MgrGetSystemHdr
+ .text            0012b358 Arinc429MgrInitTasks
+ .text            0012b8fc Arinc429MgrInitialize
+ .text            0012c7da Arinc429MgrInterfaceValid
+ .text            0012d9ec Arinc429MgrInvalidateParameter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012dc28 Arinc429MgrParameterTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d170 Arinc429MgrParseBCD..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012cf48 Arinc429MgrParseGPA_GPB..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012d044 Arinc429MgrParseMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012bd92 Arinc429MgrProcMsgsTaskShutdown
+ .text            0012da7e Arinc429MgrProcPW305ABEngineMFD..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012bb7e Arinc429MgrProcessMsgsTask
+ .text            0012d2d2 Arinc429MgrReadBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c152 Arinc429MgrReadFilteredRaw
+ .text            0012c1ba Arinc429MgrReadFilteredRawSnap
+ .text            0012df44 Arinc429MgrReadReduceSnapshot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c530 Arinc429MgrReadWord
+ .text            0012ca5a Arinc429MgrReconfigureHW..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c4be Arinc429MgrSensorSetup
+ .text            0012c6ae Arinc429MgrSensorTest
+ .text            0012d35e Arinc429MgrStoreLabelData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c2da Arinc429MgrSyncTime
+ .text            0012dcb2 Arinc429MgrUpdateLabelFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012dbc8 Arinc429MgrWriteBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .text            0012ab4a Arinc429Msg_Cfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .text            0012a92a Arinc429Msg_CfgRx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .text            0012aa30 Arinc429Msg_CfgTx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
@@ -457,124 +457,124 @@ Global Symbols (sorted alphabetically)
  .data            3189947c BoxMsgs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox.
  .data            31899448 BoxRoot
  .data            31899684 BoxStatusMsgs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox.
- .text            0012ece4 Box_AircraftUserCfg
- .text            0012f6e2 Box_BackGroundTask
- .text            0012e854 Box_BoardUserMsg
- .text            0012e7d8 Box_BoxUserMsg
- .text            0012ec74 Box_FastUserCfg
- .text            0012ee12 Box_GetFastSwVer
- .text            0012f1c0 Box_GetMfg
- .text            0012ee4e Box_GetMsPwVer
- .text            0012edd8 Box_GetMssimStatus
- .text            0012f206 Box_GetPowerOnCount
- .text            0012f1e8 Box_GetPowerOnTime
- .text            0012f198 Box_GetRev
- .text            0012f170 Box_GetSerno
- .text            0012ed9e Box_GetSystemStatus
- .text            0012ee8a Box_GetUlFilesPending
+ .text            0012ed3c Box_AircraftUserCfg
+ .text            0012f73a Box_BackGroundTask
+ .text            0012e8ac Box_BoardUserMsg
+ .text            0012e830 Box_BoxUserMsg
+ .text            0012eccc Box_FastUserCfg
+ .text            0012ee6a Box_GetFastSwVer
+ .text            0012f218 Box_GetMfg
+ .text            0012eea6 Box_GetMsPwVer
+ .text            0012ee30 Box_GetMssimStatus
+ .text            0012f25e Box_GetPowerOnCount
+ .text            0012f240 Box_GetPowerOnTime
+ .text            0012f1f0 Box_GetRev
+ .text            0012f1c8 Box_GetSerno
+ .text            0012edf6 Box_GetSystemStatus
+ .text            0012eee2 Box_GetUlFilesPending
  .bss             30013922 Box_Info
- .text            0012eebc Box_Init
- .text            0012ec44 Box_InstallIdCmd
- .text            0012ed4c Box_LogGetStatus
- .text            0012eb50 Box_PowerOnMsg
- .text            0012f262 Box_PowerOn_InitializeUsage
+ .text            0012ef14 Box_Init
+ .text            0012ec9c Box_InstallIdCmd
+ .text            0012eda4 Box_LogGetStatus
+ .text            0012eba8 Box_PowerOnMsg
+ .text            0012f2ba Box_PowerOn_InitializeUsage
  .bss             300096c4 Box_PowerOn_RunTime
- .text            0012f214 Box_PowerOn_SetStartupTime
- .text            0012f34a Box_PowerOn_StartTimeCounting
- .text            0012f38e Box_PowerOn_UpdateElapsedUsage
- .text            0012f658 Box_ReInitFile
- .text            0012e8e8 Box_SysTimeMsg
- .text            0012ebf4 Box_VersionCmd
+ .text            0012f26c Box_PowerOn_SetStartupTime
+ .text            0012f3a2 Box_PowerOn_StartTimeCounting
+ .text            0012f3e6 Box_PowerOn_UpdateElapsedUsage
+ .text            0012f6b0 Box_ReInitFile
+ .text            0012e940 Box_SysTimeMsg
+ .text            0012ec4c Box_VersionCmd
  .text            0011b8d0 BusTimeoutException
  .bss             305d730c CBITHealthCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            001307e4 CBITMgrPWEHSEU_AddPrevCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0013066c CBITMgrPWEHSEU_GetAllCurrCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            001306ee CBITMgrPWEHSEU_GetDiffCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            00130952 CBITMgrPWEHSEU_UpdateEepromData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            00130302 CBITMgr_AddPrevCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012fc6a CBITMgr_CRC_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            00130340 CBITMgr_CalcDiffCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            00130382 CBITMgr_GetCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012f700 CBITMgr_Initialize
- .text            0012fa9c CBITMgr_PWEHSEU_FileInit
- .text            0012f998 CBITMgr_PWEHSEU_Initialize
- .text            00130530 CBITMgr_PWEHSEU_Rec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0013039e CBITMgr_PWEHSEU_ResumeRec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0013004e CBITMgr_PWEHSEU_ShutDown..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0013009a CBITMgr_PWEHSEU_Startup..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012ff8e CBITMgr_PWEHSEU_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            001304b6 CBITMgr_PWEHSEU_WaitForRec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012fd52 CBITMgr_Ram_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012fafe CBITMgr_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
- .text            0012faec CBITMgr_UpdateFlightState
- .text            001475d4 CM_CBit
- .text            0014750c CM_CompareSystemToMsClockDrift
- .text            00147126 CM_ConvertTimeStamptoTimeStruct
- .text            001477de CM_CreateClockUpdateLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
- .text            00146f78 CM_GetRTCClock
- .text            001473bc CM_GetSecSinceBaseYr
- .text            00146d26 CM_GetSystemClock
- .text            001471e4 CM_GetTickCount
- .text            001470a8 CM_GetTimeAsTimestamp
- .text            00146be0 CM_Init
- .text            00146d14 CM_PreInit
+ .text            0013083c CBITMgrPWEHSEU_AddPrevCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001306c4 CBITMgrPWEHSEU_GetAllCurrCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            00130746 CBITMgrPWEHSEU_GetDiffCntVals..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001309aa CBITMgrPWEHSEU_UpdateEepromData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0013035a CBITMgr_AddPrevCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012fcc2 CBITMgr_CRC_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            00130398 CBITMgr_CalcDiffCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001303da CBITMgr_GetCBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012f758 CBITMgr_Initialize
+ .text            0012faf4 CBITMgr_PWEHSEU_FileInit
+ .text            0012f9f0 CBITMgr_PWEHSEU_Initialize
+ .text            00130588 CBITMgr_PWEHSEU_Rec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001303f6 CBITMgr_PWEHSEU_ResumeRec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001300a6 CBITMgr_PWEHSEU_ShutDown..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            001300f2 CBITMgr_PWEHSEU_Startup..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012ffe6 CBITMgr_PWEHSEU_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0013050e CBITMgr_PWEHSEU_WaitForRec..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012fdaa CBITMgr_Ram_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012fb56 CBITMgr_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
+ .text            0012fb44 CBITMgr_UpdateFlightState
+ .text            0014762c CM_CBit
+ .text            00147564 CM_CompareSystemToMsClockDrift
+ .text            0014717e CM_ConvertTimeStamptoTimeStruct
+ .text            00147836 CM_CreateClockUpdateLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
+ .text            00146fd0 CM_GetRTCClock
+ .text            00147414 CM_GetSecSinceBaseYr
+ .text            00146d7e CM_GetSystemClock
+ .text            0014723c CM_GetTickCount
+ .text            00147100 CM_GetTimeAsTimestamp
+ .text            00146c38 CM_Init
+ .text            00146d6c CM_PreInit
  .bss             30602a60 CM_PreInitFlag..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
- .text            001471f2 CM_RTCTick
+ .text            0014724a CM_RTCTick
  .bss             30602a4c CM_SYS_CLOCK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
- .text            00146cfa CM_SYS_CLOCK_DEFAULT..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
- .text            0014702e CM_SetRTCClock
- .text            00146d8c CM_SetSystemClock
- .text            001471b6 CM_SynchRTCtoWallClock
+ .text            00146d52 CM_SYS_CLOCK_DEFAULT..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
+ .text            00147086 CM_SetRTCClock
+ .text            00146de4 CM_SetSystemClock
+ .text            0014720e CM_SynchRTCtoWallClock
  .bss             30602a5c CM_TickCount..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
- .text            00147736 CM_TimeSourceSyncToRemote..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
+ .text            0014778e CM_TimeSourceSyncToRemote..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
  .bss             30009944 CQ_EEPromOutput
  .bss             3000bb6c CQ_RtcNvRamOutput
  .bss             3000aa58 CQ_RtcOutput
- .text            0015ee82 CRC16
- .text            0015eed2 CRC16Tbl
- .text            0015f324 CRC32
- .text            0015f394 CRC32Tbl
+ .text            0015eef2 CRC16
+ .text            0015ef42 CRC16Tbl
+ .text            0015f394 CRC32
+ .text            0015f404 CRC32Tbl
  .bss             30016950 CRCMismatchStateStr.FSM_Init.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..16
- .text            0015f0d2 CRC_CCITT
- .text            0015f124 CRC_CCITT_TBL
+ .text            0015f142 CRC_CCITT
+ .text            0015f194 CRC_CCITT_TBL
  .text            0011ed86 CRC_CMP
- .crcDefault      0019f308 CRC_DEFAULT
+ .crcDefault      0019f378 CRC_DEFAULT
  .text            0011b6c4 CRLF..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011eaac CRLF..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
- .text            0015f794 CalculateCheckSum
+ .text            0015f804 CalculateCheckSum
  .data            31899b64 CbitMgrRoot
  .data            31899b30 CbitMgrRootTblPtr
  .data            31899bcc CbitStatusTbl
  .data            318759cc CfgCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr.
  .data            31875028 CfgFlagsCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
- .text            00146adc CfgMgr_CancelBatchCfg
- .text            00146aea CfgMgr_CommitBatchCfg
- .text            0014680c CfgMgr_ConfigPtr
- .text            0014678c CfgMgr_FileInit
- .text            001468f6 CfgMgr_GetETMBinaryHdr
- .text            00146838 CfgMgr_GetSystemBinaryHdr
- .text            001309e4 CfgMgr_Init
- .text            00146b04 CfgMgr_IsEEWritePending
- .text            001467c0 CfgMgr_ResetConfig
- .text            00146a14 CfgMgr_RetrieveConfig
- .text            0014682a CfgMgr_RuntimeConfigPtr
- .text            00146aac CfgMgr_StartBatchCfg
- .text            00146a64 CfgMgr_StoreConfig
- .text            00146b2a CfgMgr_StoreConfigItem
+ .text            00146b34 CfgMgr_CancelBatchCfg
+ .text            00146b42 CfgMgr_CommitBatchCfg
+ .text            00146864 CfgMgr_ConfigPtr
+ .text            001467e4 CfgMgr_FileInit
+ .text            0014694e CfgMgr_GetETMBinaryHdr
+ .text            00146890 CfgMgr_GetSystemBinaryHdr
+ .text            00130a3c CfgMgr_Init
+ .text            00146b5c CfgMgr_IsEEWritePending
+ .text            00146818 CfgMgr_ResetConfig
+ .text            00146a6c CfgMgr_RetrieveConfig
+ .text            00146882 CfgMgr_RuntimeConfigPtr
+ .text            00146b04 CfgMgr_StartBatchCfg
+ .text            00146abc CfgMgr_StoreConfig
+ .text            00146b82 CfgMgr_StoreConfigItem
  .data            31875ad0 CfgStateCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr.
  .data            31875ba0 CfgTCCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr.
  .bss             300432e0 CheckFileCnt.UploadMgr_FileCollectionTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..24
  .bss             300432d5 CheckFileRsp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             30045368 CheckSum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
- .text            0015ed78 ChecksumBuffer
+ .text            0015ede8 ChecksumBuffer
  .text            00121940 CodeDescriptions..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CResultCodes.
  .bss             30009844 CodeSec
- .text            0015f82e CompareVersions
+ .text            0015f89e CompareVersions
  .data            318a02ec ComparisonEnum
  .bss             306035c8 ConfigTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .bss             316f1f90 ConfigTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
  .bss             304d1ba0 ConfigTrendTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrend.
- .text            001529f4 ConstMemMap
+ .text            00152a64 ConstMemMap
  .text            0011eb4e CrcFail..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
  .text            00115408 CreepMsg_Cfg
  .text            00115742 CreepMsg_Clear
@@ -619,33 +619,33 @@ Global Symbols (sorted alphabetically)
  .text            001166cc Creep_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCreep.
  .text            0011756e Creep_UpdateCreepXAppData
  .bss             317d9448 CurrentDev.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..28
- .text            0014832a CycleBackupPersistentCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00148b54 CycleCalcCheckID..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00148382 CycleBackupPersistentCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00148bac CycleCalcCheckID..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
  .data            31899cd0 CycleCfgCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
  .data            31899e6c CycleCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00147eb2 CycleCollectCounts
+ .text            00147f0a CycleCollectCounts
  .data            3189a0dc CycleEnumType
- .text            00148628 CycleFinishEngineRun
- .text            00147d56 CycleGetBinaryHeader
- .text            00147e96 CycleGetPersistentCount
- .text            00148038 CycleInitPersistent..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00147ba6 CycleInitialize
- .text            00147d0c CycleIsPersistentType
- .text            0014789e CyclePCount
+ .text            00148680 CycleFinishEngineRun
+ .text            00147dae CycleGetBinaryHeader
+ .text            00147eee CycleGetPersistentCount
+ .text            00148090 CycleInitPersistent..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00147bfe CycleInitialize
+ .text            00147d64 CycleIsPersistentType
+ .text            001478f6 CyclePCount
  .data            3189a040 CyclePCountsCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00148124 CycleReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00148b8c CycleResetEngineRun
- .text            0014868e CycleRestoreCountsFromPersistFiles..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00147a90 CycleShowConfig
- .text            00147838 CycleState
+ .text            0014817c CycleReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00148be4 CycleResetEngineRun
+ .text            001486e6 CycleRestoreCountsFromPersistFiles..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00147ae8 CycleShowConfig
+ .text            00147890 CycleState
  .data            31899f70 CycleStatusCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00148c06 CycleSyncPersistFiles..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00148c5e CycleSyncPersistFiles..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
  .data            31899e08 CycleTypeEnum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00148178 CycleUpdate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00147c8a CycleUpdateAll
- .text            00148a92 CycleUpdateCheckId..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            0014821e CycleUpdateSimpleAndDuration..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
- .text            00147990 CycleUserCfg
+ .text            001481d0 CycleUpdate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00147ce2 CycleUpdateAll
+ .text            00148aea CycleUpdateCheckId..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            00148276 CycleUpdateSimpleAndDuration..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCycle.
+ .text            001479e8 CycleUserCfg
  .text            0011b764 D0Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b76a D1Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b770 D2Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -654,7 +654,7 @@ Global Symbols (sorted alphabetically)
  .text            0011b782 D5Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b788 D6Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b78e D7Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
- .buildDate       0019f30c DATETIME
+ .buildDate       0019f37c DATETIME
  .bss             317d9428 DEV_EE_BKUP_DevSem..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .bss             317d9028 DEV_EE_BKUP_RefCount..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .bss             317b8826 DEV_EE_BKUP_Shadow..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
@@ -673,15 +673,15 @@ Global Symbols (sorted alphabetically)
  .bss             31797aa0 DEV_RTC_PRI_sectorIoResult..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .data            3189a220 DIOCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr.
  .data            3189a2bc DIOInTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr.
- .text            001490b4 DIOMgr_FSMGetStateDIO
- .text            0014903e DIOMgr_FSMRunDIO
- .text            00148d9c DIOMgr_Init
- .text            00148d68 DIOMgr_InputPin
- .text            00148d18 DIOMgr_OutputPin
- .text            00149026 DIOMgr_UpdateDiscreteInputs
+ .text            0014910c DIOMgr_FSMGetStateDIO
+ .text            00149096 DIOMgr_FSMRunDIO
+ .text            00148df4 DIOMgr_Init
+ .text            00148dc0 DIOMgr_InputPin
+ .text            00148d70 DIOMgr_OutputPin
+ .text            0014907e DIOMgr_UpdateDiscreteInputs
  .data            3189a768 DIOOutTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr.
- .text            00149110 DIOTable.DIOMgr_FSMGetStateDIO.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr..5
- .text            001490a0 DIOTable.DIOMgr_FSMRunDIO.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr..4
+ .text            00149168 DIOTable.DIOMgr_FSMGetStateDIO.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr..5
+ .text            001490f8 DIOTable.DIOMgr_FSMRunDIO.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIOMgr..4
  .text            0011a6b6 DIO_AddPortToList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
  .text            0011a76e DIO_CheckWrapAround..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
  .text            0011a5ae DIO_DebounceState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
@@ -719,55 +719,55 @@ Global Symbols (sorted alphabetically)
  .text            0011ab8c DPRAM_WriteBlock
  .text            0011ac66 DPRAM_WriteFreeCnt
  .bss             30043364 DataBuf.UploadMgr_UploadFileBlock.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..36
- .text            0014ad00 DataMgrBuildFailLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014a68c DataMgrBuildPacketHdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149d0c DataMgrCreateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014b248 DataMgrDLSaveAndChangeState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014b65e DataMgrDLUpdateStatistics..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014ad72 DataMgrBuildFailLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014a7c2 DataMgrBuildPacketHdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149d64 DataMgrCreateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014b2ba DataMgrDLSaveAndChangeState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014b6d0 DataMgrDLUpdateStatistics..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .bss             316f151c DataMgrDLWriteStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001499e6 DataMgrDownloadGetState
- .text            00149a0e DataMgrDownloadRun
- .text            0014ae82 DataMgrDownloadTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149b06 DataMgrDownloadingACS
- .text            0014a6dc DataMgrFinishPacket..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014971c DataMgrGetACSDataSet
- .text            0014993c DataMgrGetHeader
- .text            0014a5a8 DataMgrGetSnapShot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149a3e DataMgrDownloadGetState
+ .text            00149a66 DataMgrDownloadRun
+ .text            0014aef4 DataMgrDownloadTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149b5e DataMgrDownloadingACS
+ .text            0014a812 DataMgrFinishPacket..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149774 DataMgrGetACSDataSet
+ .text            00149994 DataMgrGetHeader
+ .text            0014a6de DataMgrGetSnapShot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .bss             3060361c DataMgrInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014ab94 DataMgrInitChannels..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001495fe DataMgrIntialize
- .text            00149786 DataMgrIsFFDInhibtMode
- .text            001497a8 DataMgrIsPortFFD
- .text            0014a418 DataMgrNewBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014a7b0 DataMgrProcBuffers..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001499f8 DataMgrRecRun
- .text            001497f6 DataMgrRecord
- .text            0014a348 DataMgrRecordData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149890 DataMgrRecordFinished
- .text            0014b468 DataMgrRequestRecord..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014b4b2 DataMgrSaveDLRecord..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001497da DataMgrSetRecStateChangeEvt
- .text            00149b54 DataMgrStartDownload
- .text            0014a27e DataMgrStartRecording..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149a2a DataMgrStopDownload
- .text            0014a0f4 DataMgrTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014aab2 DataMgrWriteBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014958a DataMgr_ACS_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149372 DataMgr_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001494b8 DataMgr_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149524 DataMgr_TCB_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149264 DataMgr_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            00149124 DataMgr_UserForceDownload..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            001491d2 DataMgr_UserStopDownload..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014ac06 DataMgrInitChannels..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149656 DataMgrIntialize
+ .text            001497de DataMgrIsFFDInhibtMode
+ .text            00149800 DataMgrIsPortFFD
+ .text            0014a4f0 DataMgrNewBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014a8e6 DataMgrProcBuffers..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149a50 DataMgrRecRun
+ .text            0014984e DataMgrRecord
+ .text            0014a420 DataMgrRecordData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            001498e8 DataMgrRecordFinished
+ .text            0014b4da DataMgrRequestRecord..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014b524 DataMgrSaveDLRecord..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149832 DataMgrSetRecStateChangeEvt
+ .text            00149bac DataMgrStartDownload
+ .text            0014a356 DataMgrStartRecording..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149a82 DataMgrStopDownload
+ .text            0014a14c DataMgrTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014ab78 DataMgrWriteBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            001495e2 DataMgr_ACS_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            001493ca DataMgr_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            00149510 DataMgr_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014957c DataMgr_TCB_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            001492bc DataMgr_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014917c DataMgr_UserForceDownload..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
+ .text            0014922a DataMgr_UserStopDownload..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .bss             3000985c DataRam
  .text            00118d9c DataReduction
  .text            001191d0 DataReductionGetCurrentValue
  .text            00118d58 DataReductionInit
- .text            001473ae DaysPerMonth..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
+ .text            00147406 DaysPerMonth..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
  .bss             317dc150 DefaultIoResultAddress..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSpiManager.
- .text            00130b40 DefaultNVCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCfgManager.
- .text            0016d7c2 DefaultSignalHandler
- .text            00153e88 Delimiters.MonitorSysCmds.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor..1
+ .text            00130b98 DefaultNVCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCfgManager.
+ .text            0016d832 DefaultSignalHandler
+ .text            00153ef8 Delimiters.MonitorSysCmds.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor..1
  .bss             317d9438 Dev.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..24
  .bss             317d9430 DevSectorSize.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..22
  .bss             317d942c DevSize.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..21
@@ -794,43 +794,43 @@ Global Symbols (sorted alphabetically)
  .text            0011b596 EEPROM_IsWriteInProgress
  .text            0011b0c0 EEPROM_ReadBlock
  .text            0011b30e EEPROM_WriteBlock
- .text            00168b90 EMU150Msg_Cfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00168b2a EMU150Msg_Debug..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00168c5e EMU150Msg_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00168ad8 EMU150Msg_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            001699c2 EMU150Protocol_DownloadHndl
- .text            0016b404 EMU150Protocol_GetStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            001690b6 EMU150Protocol_Handler
- .text            00168d7c EMU150Protocol_Initialize
- .text            001698b6 EMU150Protocol_ReturnFileHdr
- .text            0016992e EMU150Protocol_SetBaseUartCfg
- .text            0016a59a EMU150_AppendBaudRate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a4c8 EMU150_AppendRecordId..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a5d0 EMU150_BAUD_RATES..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169ec0 EMU150_CMDS..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169f4a EMU150_CMDS_ACK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169e74 EMU150_CMDS_HS..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b272 EMU150_CalcCksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b38e EMU150_CreateSummaryLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a472 EMU150_CreateTxPacket..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169a2a EMU150_FileInit
- .text            0016b32e EMU150_GetCksumStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b050 EMU150_GetDesiredBaudRateIndex..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169757 EMU150_NAME..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a40c EMU150_NextCmdState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a35e EMU150_NextState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b0d4 EMU150_ProcessChksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a5d6 EMU150_Process_ACK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a644 EMU150_Process_Blk..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016a866 EMU150_Process_InstallCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016af4a EMU150_Process_Rec_Confirmation..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016ad14 EMU150_Process_Record..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016aaa4 EMU150_Process_Recording_Hdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016af82 EMU150_Process_Set_Baud..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b204 EMU150_RestoreAppData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016b08e EMU150_SetUart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169ff4 EMU150_State_AutoDetect..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            00169a7c EMU150_State_ProcessCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00168c00 EMU150Msg_Cfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00168b9a EMU150Msg_Debug..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00168cce EMU150Msg_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00168b48 EMU150Msg_Status..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169a32 EMU150Protocol_DownloadHndl
+ .text            0016b474 EMU150Protocol_GetStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169126 EMU150Protocol_Handler
+ .text            00168dec EMU150Protocol_Initialize
+ .text            00169926 EMU150Protocol_ReturnFileHdr
+ .text            0016999e EMU150Protocol_SetBaseUartCfg
+ .text            0016a60a EMU150_AppendBaudRate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a538 EMU150_AppendRecordId..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a640 EMU150_BAUD_RATES..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169f30 EMU150_CMDS..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169fba EMU150_CMDS_ACK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169ee4 EMU150_CMDS_HS..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b2e2 EMU150_CalcCksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b3fe EMU150_CreateSummaryLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a4e2 EMU150_CreateTxPacket..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169a9a EMU150_FileInit
+ .text            0016b39e EMU150_GetCksumStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b0c0 EMU150_GetDesiredBaudRateIndex..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            001697c7 EMU150_NAME..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a47c EMU150_NextCmdState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a3ce EMU150_NextState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b144 EMU150_ProcessChksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a646 EMU150_Process_ACK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a6b4 EMU150_Process_Blk..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a8d6 EMU150_Process_InstallCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016afba EMU150_Process_Rec_Confirmation..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016ad84 EMU150_Process_Record..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016ab14 EMU150_Process_Recording_Hdr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016aff2 EMU150_Process_Set_Baud..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b274 EMU150_RestoreAppData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016b0fe EMU150_SetUart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016a064 EMU150_State_AutoDetect..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00169aec EMU150_State_ProcessCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            00102f5e EngReInitFile..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .text            0010315c EngRunForceEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .text            00102e18 EngRunGetBinaryHeader
@@ -922,15 +922,15 @@ Global Symbols (sorted alphabetically)
  .data            318a30d4 F7XDebugTbl
  .bss             31823498 F7XDebugTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .bss             31827848 F7XDispDebugBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00166964 F7XDispDebug_Task
+ .text            001669d4 F7XDispDebug_Task
  .data            318a2dc8 F7XDumpListRoot
- .text            00165ab4 F7XMsg_Cfg
- .text            00165bae F7XMsg_Debug
- .text            00165dde F7XMsg_DumpListShowConfig
- .text            00165cf0 F7XMsg_ParamEntryList
- .text            00165c1a F7XMsg_ParamList
- .text            0016614a F7XMsg_ParamListShowConfig
- .text            00165a5c F7XMsg_Status
+ .text            00165b24 F7XMsg_Cfg
+ .text            00165c1e F7XMsg_Debug
+ .text            00165e4e F7XMsg_DumpListShowConfig
+ .text            00165d60 F7XMsg_ParamEntryList
+ .text            00165c8a F7XMsg_ParamList
+ .text            001661ba F7XMsg_ParamListShowConfig
+ .text            00165acc F7XMsg_Status
  .data            318a2af0 F7XParamCfgTbl
  .data            318a2bc0 F7XParamEntryCfgTbl
  .bss             318240b8 F7XParamEntryTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
@@ -940,29 +940,29 @@ Global Symbols (sorted alphabetically)
  .data            318a2cf8 F7XProtocolParamTblPtr
  .data            318a2d2c F7XProtocolRoot
  .data            318a2c90 F7XProtocolRootTblPtr
- .text            00167f68 F7XProtocol_Decoder_NotSynced..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            001682a8 F7XProtocol_Decoder_Synced..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00168aca F7XProtocol_DisableLiveStream
- .text            00168446 F7XProtocol_DumpListRecognized..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00168a7e F7XProtocol_FileInit
- .text            00166908 F7XProtocol_GetCfg
- .text            00166928 F7XProtocol_GetDebug
- .text            00166944 F7XProtocol_GetParamEntryList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00166936 F7XProtocol_GetParamList
- .text            001668e8 F7XProtocol_GetStatus
- .text            001667d0 F7XProtocol_Handler
- .text            00168890 F7XProtocol_InitUartMgrData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00166458 F7XProtocol_Initialize
- .text            00168a2a F7XProtocol_RestoreAppData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00168410 F7XProtocol_Resync..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00167d46 F7XProtocol_ReturnFileHdr
- .text            00167cd8 F7XProtocol_SensorSetup
- .text            0016878c F7XProtocol_UpdateFrame..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            0016898c F7XProtocol_UpdateUartMgrData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00167fd8 F7XProtocol_Decoder_NotSynced..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00168318 F7XProtocol_Decoder_Synced..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00168b3a F7XProtocol_DisableLiveStream
+ .text            001684b6 F7XProtocol_DumpListRecognized..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00168aee F7XProtocol_FileInit
+ .text            00166978 F7XProtocol_GetCfg
+ .text            00166998 F7XProtocol_GetDebug
+ .text            001669b4 F7XProtocol_GetParamEntryList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            001669a6 F7XProtocol_GetParamList
+ .text            00166958 F7XProtocol_GetStatus
+ .text            00166840 F7XProtocol_Handler
+ .text            00168900 F7XProtocol_InitUartMgrData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            001664c8 F7XProtocol_Initialize
+ .text            00168a9a F7XProtocol_RestoreAppData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00168480 F7XProtocol_Resync..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00167db6 F7XProtocol_ReturnFileHdr
+ .text            00167d48 F7XProtocol_SensorSetup
+ .text            001687fc F7XProtocol_UpdateFrame..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            001689fc F7XProtocol_UpdateUartMgrData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .data            318a2f00 F7XStatusTbl
  .bss             3182336c F7XStatusTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            001666fc F7X_ParamList_DefaultEntry..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
- .text            00166cb4 F7X_Param_Names..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            0016676c F7X_ParamList_DefaultEntry..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00166d24 F7X_Param_Names..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .bss             305d6f30 FASTConfigTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox.
  .bss             30015d04 FASTConfigTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .bss             30015ea4 FASTStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
@@ -1010,15 +1010,15 @@ Global Symbols (sorted alphabetically)
  .text            0011dd36 FIFO_PopBlock
  .text            0011dbb2 FIFO_PushBlock
  .bss             316f1f80 FPGACBITHealthStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
- .text            0014bb5e FPGAMgr_AddPrevCBITHealthStatus
- .text            0014b9ce FPGAMgr_CBIT_Task
- .text            0014bde0 FPGAMgr_CBIT_VerifyShadowReg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
- .text            0014bb14 FPGAMgr_CalcDiffCBITHealthStatus
- .text            0014bab8 FPGAMgr_GetCBITHealthStatus
- .text            0014b84a FPGAMgr_Initialize
- .text            0014bb96 FPGAMgr_Monitor_HW_CRC..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
- .text            0014b74e FPGAMsg_Register
- .text            0014b70a FPGAMsg_Status
+ .text            0014bbd0 FPGAMgr_AddPrevCBITHealthStatus
+ .text            0014ba40 FPGAMgr_CBIT_Task
+ .text            0014be52 FPGAMgr_CBIT_VerifyShadowReg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
+ .text            0014bb86 FPGAMgr_CalcDiffCBITHealthStatus
+ .text            0014bb2a FPGAMgr_GetCBITHealthStatus
+ .text            0014b8bc FPGAMgr_Initialize
+ .text            0014bc08 FPGAMgr_Monitor_HW_CRC..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
+ .text            0014b7c0 FPGAMsg_Register
+ .text            0014b77c FPGAMsg_Status
  .data            3189bc38 FPGASystemStrs
  .text            0011e960 FPGA_CheckStartupConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGA.
  .text            0011e8fc FPGA_CheckVersion..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGA.
@@ -1064,20 +1064,20 @@ Global Symbols (sorted alphabetically)
  .text            00106ce0 FSM_TaskStrToBin..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr.
  .text            0011b743 FSStr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011eadb FailHeader..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
- .text            0012c652 FailureCondition..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
+ .text            0012c6aa FailureCondition..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            318752b8 FastCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .data            3187589c FastTxTestEnum
  .data            31875834 FastTxTestStatusEnum
- .text            0014c258 FaultCheckSensorStates..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
- .text            0014c2c8 FaultCheckSensorTriggers..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
+ .text            0014c2ca FaultCheckSensorStates..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
+ .text            0014c33a FaultCheckSensorTriggers..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
  .data            3189bc58 FaultCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
- .text            0014c20c FaultCompareValues
+ .text            0014c27e FaultCompareValues
  .data            3189c150 FaultIndexType
- .text            0014c196 FaultInitialize
+ .text            0014c208 FaultInitialize
  .data            3189c0b4 FaultRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
  .bss             305d7078 FaultSystemStatusTemp.Box_GetSystemStatus.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox..4
- .text            0014bfe6 Fault_ShowConfig
- .text            0014beee Fault_UserCfg
+ .text            0014c058 Fault_ShowConfig
+ .text            0014bf60 Fault_UserCfg
  .data            31880e30 FieldInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .data            31876468 FileCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             3002b2b0 FileDataBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
@@ -1098,27 +1098,27 @@ Global Symbols (sorted alphabetically)
  .text            001289c8 FlashSectorErase
  .text            001284be FlashWriteBufferMode
  .text            0012873c FlashWriteWordMode
- .text            0014cc96 Flt_AddToFaultBuf..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014cad2 Flt_ClrStatus
- .text            0014cb74 Flt_GetDebugVerbosity
- .text            0014c4ea Flt_GetFltBuffEntry..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014cbc8 Flt_GetSysAnunciationMode
- .text            0014cbae Flt_GetSysCondOutputPin
- .text            0014cba0 Flt_GetSystemStatus
- .text            0014c85e Flt_Init
- .text            0014cb82 Flt_InitDebugVerbosity
- .text            0014c98a Flt_InitFltBuf
- .text            0014cd94 Flt_LogSysStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014c80a Flt_PreInitFaultMgr
- .text            0014cb62 Flt_SetDebugVerbosity
- .text            0014c9d8 Flt_SetStatus
- .text            0014c604 Flt_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014cbe2 Flt_UpdateAction
- .text            0014cd48 Flt_UpdateSystemStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014c73c Flt_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014cd08 Flt_AddToFaultBuf..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014cb44 Flt_ClrStatus
+ .text            0014cbe6 Flt_GetDebugVerbosity
+ .text            0014c55c Flt_GetFltBuffEntry..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014cc3a Flt_GetSysAnunciationMode
+ .text            0014cc20 Flt_GetSysCondOutputPin
+ .text            0014cc12 Flt_GetSystemStatus
+ .text            0014c8d0 Flt_Init
+ .text            0014cbf4 Flt_InitDebugVerbosity
+ .text            0014c9fc Flt_InitFltBuf
+ .text            0014ce06 Flt_LogSysStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014c87c Flt_PreInitFaultMgr
+ .text            0014cbd4 Flt_SetDebugVerbosity
+ .text            0014ca4a Flt_SetStatus
+ .text            0014c676 Flt_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014cc54 Flt_UpdateAction
+ .text            0014cdba Flt_UpdateSystemStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014c7ae Flt_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .data            3189c5d8 Flt_UserEnumStatus
- .text            0014c3d6 Flt_UserMessage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0014c400 Flt_UserMessageRecentAll..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014c448 Flt_UserMessage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
+ .text            0014c472 Flt_UserMessageRecentAll..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .text            0011b72f FormatStr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .data            3189dba4 FormatStrs
  .bss             316f1f8c FpgaFailLogged..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
@@ -1128,25 +1128,25 @@ Global Symbols (sorted alphabetically)
  .data            3189b960 FpgaRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
  .data            3189b92c FpgaRootTblPtr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
  .data            3189bb68 FpgaStatusTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFPGAManager.
- .text            0014d214 GSE_DebugStr
- .text            0014cf62 GSE_GetLine
+ .text            0014d286 GSE_DebugStr
+ .text            0014cfd4 GSE_GetLine
  .bss             30009734 GSE_GetLineBuf
- .text            0014ce14 GSE_Init
+ .text            0014ce86 GSE_Init
  .bss             30602a61 GSE_OutLine..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
  .bss             31827c92 GSE_OutLine..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .bss             304edfa2 GSE_OutLine..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .bss             31821aec GSE_OutLine..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .bss             305baacc GSE_OutLine..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0014cf4c GSE_PutLine
- .text            0014ced2 GSE_PutLineBlocked
- .text            0014d256 GSE_StatusStr
- .text            0014d1b0 GSE_ToggleDisplayLiveStream
- .text            0014d0e2 GSE_getc
- .text            0014d172 GSE_read
- .text            0014d290 GSE_vDebugOutput..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CGSE.
- .text            0014d12a GSE_write
- .text            0015fa86 GetBit
- .text            0015e570 GetRegCheckNumReg
+ .text            0014cfbe GSE_PutLine
+ .text            0014cf44 GSE_PutLineBlocked
+ .text            0014d2c8 GSE_StatusStr
+ .text            0014d222 GSE_ToggleDisplayLiveStream
+ .text            0014d154 GSE_getc
+ .text            0014d1e4 GSE_read
+ .text            0014d302 GSE_vDebugOutput..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CGSE.
+ .text            0014d19c GSE_write
+ .text            0015faf6 GetBit
+ .text            0015e5e0 GetRegCheckNumReg
                   00000000 GetThreadLocalStorage
  .text            0011b6c7 HeaderLn1..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b6fa HeaderLn2..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -1155,13 +1155,13 @@ Global Symbols (sorted alphabetically)
  .text            0011b85e HexTable..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .data            3189ad80 HighLow
  .bss             30009864 IDataRam
- .text            0014dc6a Im_Application_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            0014d544 Im_Driver_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            0014d34c Im_InitializeControlProcessor
- .text            0014dd64 Im_PromptContinueAsDegraded..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            0014dcf4 Im_RecordDrvStartup_Logs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            0014deea Im_StartupTickHandler
- .text            0014da22 Im_System_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0014dcde Im_Application_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0014d5b8 Im_Driver_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0014d3c0 Im_InitializeControlProcessor
+ .text            0014ddd8 Im_PromptContinueAsDegraded..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0014dd68 Im_RecordDrvStartup_Logs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0014df5e Im_StartupTickHandler
+ .text            0014da96 Im_System_Initialize..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
  .bss             305d719a InFlight..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
  .text            0011b86e InitGSEBuf
  .bss             305d70e0 IntFailLogged..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
@@ -1171,74 +1171,74 @@ Global Symbols (sorted alphabetically)
  .bss             317f8030 LiveDataBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .bss             317f38a8 LiveDataDisplay..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189f084 LiveDataMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0014f2a2 LogAddPrevCBITHealthStatus
+ .text            0014f312 LogAddPrevCBITHealthStatus
  .bss             3178379c LogBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f288 LogCalcDiffCBITHealthStatus
- .text            001500f4 LogCheckEraseInProgress..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            001504ea LogCheckHeader..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f940 LogCheckResult..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f2f8 LogCalcDiffCBITHealthStatus
+ .text            00150164 LogCheckEraseInProgress..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0015055a LogCheckHeader..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f9b0 LogCheckResult..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f96d0 LogCmdEraseBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014fb42 LogCmdEraseTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014fbb2 LogCmdEraseTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9604 LogConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             305d7058 LogConfigTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox.
- .text            0014f2ea LogETM_SetRecStateChangeEvt
- .text            0014f07a LogErase
+ .text            0014f35a LogETM_SetRecStateChangeEvt
+ .text            0014f0ea LogErase
  .bss             316f962c LogEraseData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             3179379c LogEraseFailTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9654 LogEraseRequest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014fd8c LogEraseStatusWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014fdfc LogEraseStatusWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9638 LogError..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014eccc LogFindNextRecord
- .text            001502ce LogFindNextWriteOffset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f276 LogGetCBITHealthStatus
- .text            0014f268 LogGetConfigPtr
- .text            0014f2be LogGetLastAddress
- .text            0014f24a LogGetLogCount
- .text            00150550 LogHdrFilterMatch..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014ed3c LogFindNextRecord
+ .text            0015033e LogFindNextWriteOffset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f2e6 LogGetCBITHealthStatus
+ .text            0014f2d8 LogGetConfigPtr
+ .text            0014f32e LogGetLastAddress
+ .text            0014f2ba LogGetLogCount
+ .text            001505c0 LogHdrFilterMatch..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9648 LogHealthCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014e0d0 LogInitialize
- .text            0014f258 LogIsEraseInProgress
- .text            0014f236 LogIsLogEmpty
- .text            0014f2cc LogIsWriteComplete
- .text            0014f306 LogManageTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            001506a0 LogManageWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014e140 LogInitialize
+ .text            0014f2c8 LogIsEraseInProgress
+ .text            0014f2a6 LogIsLogEmpty
+ .text            0014f33c LogIsWriteComplete
+ .text            0014f376 LogManageTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            00150710 LogManageWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f964c LogManagerPause..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f96ac LogMarkBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f0f6 LogMarkState
+ .text            0014f166 LogMarkState
  .bss             300432ec LogMarkStatus.UploadMgr_MaintainFileTable.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..28
- .text            0014f9e8 LogMarkTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014fa58 LogMarkTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9678 LogMngBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f58c LogMngPending..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f344 LogMngStart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014f6ca LogMngStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f5fc LogMngPending..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f3b4 LogMngStart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014f73a LogMngStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f9624 LogMonEraseBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014fde8 LogMonEraseTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014ebf2 LogPauseWrites
- .text            0014eb32 LogPreInit
+ .text            0014fe58 LogMonEraseTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014ec62 LogPauseWrites
+ .text            0014eba2 LogPreInit
  .bss             316f96f4 LogQueue..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .data            3189c700 LogQueueCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0015062e LogQueueGet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            00150600 LogQueueInit..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014eac4 LogQueuePut
- .text            0014ee4a LogRead
+ .text            0015069e LogQueueGet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            00150670 LogQueueInit..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014eb34 LogQueuePut
+ .text            0014eeba LogRead
  .bss             3178378c LogReadFailTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014ec7c LogRegisterEraseCleanup
- .text            00150928 LogRegisterIndex
+ .text            0014ecec LogRegisterEraseCleanup
+ .text            00150998 LogRegisterIndex
  .data            3189c630 LogRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            00150004 LogSaveEraseData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            00150074 LogSaveEraseData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .data            3189c79c LogStatusCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f96a8 LogStatusTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             316f96f0 LogSystemInit..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014fea6 LogSystemLogManageTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            001509f2 LogUpdateWritePendingStatuses..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            001505b0 LogVerifyAllDeleted..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0014ef7a LogWrite
- .text            0014f1f4 LogWriteETM
- .text            0014ec1c LogWriteIsPaused
- .text            0014f170 LogWriteSystem
- .text            0014f1b2 LogWriteSystemEx
- .text            0014df66 Log_EraseBlock
- .text            0014df40 Log_GetStatus
+ .text            0014ff16 LogSystemLogManageTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            00150a62 LogUpdateWritePendingStatuses..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            00150620 LogVerifyAllDeleted..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
+ .text            0014efea LogWrite
+ .text            0014f264 LogWriteETM
+ .text            0014ec8c LogWriteIsPaused
+ .text            0014f1e0 LogWriteSystem
+ .text            0014f222 LogWriteSystemEx
+ .text            0014dfd6 Log_EraseBlock
+ .text            0014dfb0 Log_GetStatus
  .data            318766a4 LookupCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .data            31875fe4 MSFXMsgsTbl
  .data            318761b8 MSFXStateEnumTbl
@@ -1284,112 +1284,112 @@ Global Symbols (sorted alphabetically)
  .text            00107e6a MSFX_YMdmSndrWaitForACKNAK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSFileXfr.
  .text            00108286 MSFX_YMdmSndrWaitForEOT_ACKNAK..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSFileXfr.
  .text            00107d68 MSFX_YMdmSndrWaitForStart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSFileXfr.
- .text            00150e36 MSI_AddCmdHandler
- .text            001514e6 MSI_AddPendingRsp
- .text            00151326 MSI_CheckDPRAM
- .text            0015126c MSI_CheckMsgTimeouts
+ .text            00150ea6 MSI_AddCmdHandler
+ .text            00151556 MSI_AddPendingRsp
+ .text            00151396 MSI_CheckDPRAM
+ .text            001512dc MSI_CheckMsgTimeouts
  .bss             317938a0 MSI_CmdSeqNum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface.
- .text            00151458 MSI_FindAndRemovePendingRsp
- .text            001511d4 MSI_HandleMSCommand
- .text            00151106 MSI_HandleMSResponse
- .text            00150ac0 MSI_Init
+ .text            001514c8 MSI_FindAndRemovePendingRsp
+ .text            00151244 MSI_HandleMSCommand
+ .text            00151176 MSI_HandleMSResponse
+ .text            00150b30 MSI_Init
  .bss             3179384c MSI_MSCmdHandlerList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface.
- .text            001513e6 MSI_MSCommandFailed
- .text            00150e94 MSI_MSPacketTask
+ .text            00151456 MSI_MSCommandFailed
+ .text            00150f04 MSI_MSPacketTask
  .bss             317937ac MSI_PendingMSResponseList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface.
- .text            00150bee MSI_PutCommand
- .text            00150c2a MSI_PutCommandEx
- .text            00150d8c MSI_PutResponse
- .text            0015159e MSI_ValidatePacket
- .text            0015193e MSSC_CfgMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151ff4 MSSC_DoRefreshMSInfo
- .text            00151da8 MSSC_FSMGetCFStatus
- .text            00151d94 MSSC_FSMGetVPNStatus
- .text            00152068 MSSC_GetConfigSysCond
- .text            00151e32 MSSC_GetGSMSCID
- .text            00151e5a MSSC_GetGSMSignalStrength
- .text            00151dec MSSC_GetIsAlive
- .text            00151e06 MSSC_GetIsCompactFlashMounted
- .text            00151d84 MSSC_GetIsVPNConnected
- .text            00151e16 MSSC_GetLastMSSIMTime
- .text            00152668 MSSC_GetMSInfoRspHandler..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151eaa MSSC_GetMSTimeSynced
- .text            00151e82 MSSC_GetMsPwVer
- .text            0015205a MSSC_GetMsStatus
- .text            00151dbc MSSC_GetSTS
- .text            00151dd4 MSSC_GetXFR
- .text            00151668 MSSC_GsmCfgMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            001521a2 MSSC_HBMonitor..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151aa6 MSSC_Init
- .text            001522a4 MSSC_MSGetCPInfoCmdHandler..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            0015231a MSSC_MSICallback_GSMCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            0015236a MSSC_MSICallback_ShellCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00152434 MSSC_MSRspCallback..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151a00 MSSC_MSTimeMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00150c5e MSI_PutCommand
+ .text            00150c9a MSI_PutCommandEx
+ .text            00150dfc MSI_PutResponse
+ .text            0015160e MSI_ValidatePacket
+ .text            001519ae MSSC_CfgMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00152064 MSSC_DoRefreshMSInfo
+ .text            00151e18 MSSC_FSMGetCFStatus
+ .text            00151e04 MSSC_FSMGetVPNStatus
+ .text            001520d8 MSSC_GetConfigSysCond
+ .text            00151ea2 MSSC_GetGSMSCID
+ .text            00151eca MSSC_GetGSMSignalStrength
+ .text            00151e5c MSSC_GetIsAlive
+ .text            00151e76 MSSC_GetIsCompactFlashMounted
+ .text            00151df4 MSSC_GetIsVPNConnected
+ .text            00151e86 MSSC_GetLastMSSIMTime
+ .text            001526d8 MSSC_GetMSInfoRspHandler..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151f1a MSSC_GetMSTimeSynced
+ .text            00151ef2 MSSC_GetMsPwVer
+ .text            001520ca MSSC_GetMsStatus
+ .text            00151e2c MSSC_GetSTS
+ .text            00151e44 MSSC_GetXFR
+ .text            001516d8 MSSC_GsmCfgMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00152212 MSSC_HBMonitor..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151b16 MSSC_Init
+ .text            00152314 MSSC_MSGetCPInfoCmdHandler..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            0015238a MSSC_MSICallback_GSMCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            001523da MSSC_MSICallback_ShellCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            001524a4 MSSC_MSRspCallback..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151a70 MSSC_MSTimeMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
  .data            3189d030 MSSC_MssimStatusEnum
- .text            00151900 MSSC_RefreshMSInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151eba MSSC_SendGSMCfgCmd
- .text            00152118 MSSC_SendHeartbeatCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00151d72 MSSC_SetIsOnGround
- .text            0015172a MSSC_ShellCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            001517c8 MSSC_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            001520f2 MSSC_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
- .text            00167e60 M_UNDEFINED_DUMPLIST..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
+ .text            00151970 MSSC_RefreshMSInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151f2a MSSC_SendGSMCfgCmd
+ .text            00152188 MSSC_SendHeartbeatCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151de2 MSSC_SetIsOnGround
+ .text            0015179a MSSC_ShellCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00151838 MSSC_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00152162 MSSC_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
+ .text            00167ed0 M_UNDEFINED_DUMPLIST..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .bss             3000e51a MaxStackSize
- .text            0015349c MemCheckAddr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152f72 MemChipErase
+ .text            0015350c MemCheckAddr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00152fe2 MemChipErase
  .bss             31796334 MemClearBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
  .bss             31797370 MemClearPBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            001536ca MemClearTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152b08 MemCommandErase
+ .text            0015373a MemClearTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00152b78 MemCommandErase
  .bss             31797334 MemCurrentState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
  .bss             31796304 MemDescription..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152dfe MemErase
+ .text            00152e6e MemErase
  .bss             31797350 MemErasePBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00153106 MemEraseTask
- .text            0015358a MemFindCurrentOffset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152f3a MemGetBlockSize
- .text            001530ea MemGetSectorSize
- .text            00152e9e MemGetStatus
- .text            001526ac MemInitialize
- .text            001530f8 MemMgrStatus
+ .text            00153176 MemEraseTask
+ .text            001535fa MemFindCurrentOffset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00152faa MemGetBlockSize
+ .text            0015315a MemGetSectorSize
+ .text            00152f0e MemGetStatus
+ .text            0015271c MemInitialize
+ .text            00153168 MemMgrStatus
  .bss             31797338 MemProgPBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            0015365e MemProgTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152be2 MemRead
- .text            00152abe MemSetupErase
- .text            001532f0 MemStateErase..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            0015322a MemStateProgram..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            001533c2 MemStateRead..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
- .text            00152b68 MemStatusErase
- .text            00152c86 MemWrite
+ .text            001536ce MemProgTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00152c52 MemRead
+ .text            00152b2e MemSetupErase
+ .text            00153360 MemStateErase..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            0015329a MemStateProgram..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00153432 MemStateRead..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMemManager.
+ .text            00152bd8 MemStatusErase
+ .text            00152cf6 MemWrite
  .bss             31797384 MessageHandlerCallback..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
  .bss             317eef78 MinuteCounter.UTIL_MinuteTimerDisplay.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtility..1
- .text            001541a2 MonitorGetMem..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            001559f8 MonitorGetMemUsage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155e78 MonitorGetNvRAM..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            001549b8 MonitorGetRtc..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155ba0 MonitorGetStackUsage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155070 MonitorGetTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            001539c2 MonitorGetTaskId
- .text            0015570e MonitorGetTaskList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155778 MonitorGetTaskTiming..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00154a4c MonitorGetTm..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00153830 MonitorInitialize
- .text            00155cf0 MonitorInvalidCommand..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00154554 MonitorMemoryWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00154112 MonitorPrintCRCs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            001539ce MonitorPrintVersion
- .text            001543d8 MonitorSetMem..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            001539b0 MonitorSetMsgCallback
- .text            00155f76 MonitorSetNvRAM..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00154642 MonitorSetRtc..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155e08 MonitorSetTaskEnable..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00155d76 MonitorSetTaskMode..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            0015475c MonitorSetTaskPulse..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00153ca0 MonitorSysCmds..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00153e9c MonitorSysGet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00153ffe MonitorSysSet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
- .text            00153a9c MonitorTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00154212 MonitorGetMem..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00155a68 MonitorGetMemUsage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00155ee8 MonitorGetNvRAM..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00154a28 MonitorGetRtc..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00155c10 MonitorGetStackUsage..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001550e0 MonitorGetTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153a32 MonitorGetTaskId
+ .text            0015577e MonitorGetTaskList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001557e8 MonitorGetTaskTiming..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00154abc MonitorGetTm..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001538a0 MonitorInitialize
+ .text            00155d60 MonitorInvalidCommand..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001545c4 MonitorMemoryWrite..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00154182 MonitorPrintCRCs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153a3e MonitorPrintVersion
+ .text            00154448 MonitorSetMem..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153a20 MonitorSetMsgCallback
+ .text            00155fe6 MonitorSetNvRAM..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001546b2 MonitorSetRtc..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00155e78 MonitorSetTaskEnable..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00155de6 MonitorSetTaskMode..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            001547cc MonitorSetTaskPulse..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153d10 MonitorSysCmds..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153f0c MonitorSysGet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            0015406e MonitorSysSet..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
+ .text            00153b0c MonitorTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor.
  .bss             305d70a0 MsPwVersion.Box_GetMsPwVer.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox..7
  .data            3189ccf0 MsRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
  .bss             30045360 MsgSource..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
@@ -1397,31 +1397,31 @@ Global Symbols (sorted alphabetically)
  .bss             305d707c MssimStatusTemp.Box_GetMssimStatus.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox..5
  .bss             305d7318 NVRAMShadow..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCfgManager.
  .bss             317d944c NVTaskState.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..29
- .text            00156dc4 NV_Close
- .text            001580a8 NV_CopyBackupToPrimaryShadow
- .text            001580ee NV_CopyPrimaryToBackupShadow
- .text            00156528 NV_DevInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
+ .text            00156e34 NV_Close
+ .text            00158118 NV_CopyBackupToPrimaryShadow
+ .text            0015815e NV_CopyPrimaryToBackupShadow
+ .text            00156598 NV_DevInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .bss             31797398 NV_DevSpaceUsed..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
- .text            00157684 NV_EERead
- .text            001576c6 NV_EEWrite
- .text            00157552 NV_Erase
+ .text            001576f4 NV_EERead
+ .text            00157736 NV_EEWrite
+ .text            001575c2 NV_Erase
  .bss             31797688 NV_FileCRC..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
- .text            00157bec NV_FileDevToShadow
- .text            001565d8 NV_FileInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
- .text            00157ea4 NV_FileShadowToDev
- .text            001577e2 NV_GetFileCRC
- .text            001577ba NV_GetFileName
- .text            00156130 NV_Init
- .text            00157924 NV_MgrTask
- .text            001568a8 NV_Open
- .text            00157740 NV_RTCRead
- .text            00157778 NV_RTCWrite
- .text            00156ddc NV_Read
- .text            001575a6 NV_ResetConfig
+ .text            00157c5c NV_FileDevToShadow
+ .text            00156648 NV_FileInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
+ .text            00157f14 NV_FileShadowToDev
+ .text            00157852 NV_GetFileCRC
+ .text            0015782a NV_GetFileName
+ .text            001561a0 NV_Init
+ .text            00157994 NV_MgrTask
+ .text            00156918 NV_Open
+ .text            001577b0 NV_RTCRead
+ .text            001577e8 NV_RTCWrite
+ .text            00156e4c NV_Read
+ .text            00157616 NV_ResetConfig
  .bss             317973a8 NV_RuntimeInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
- .text            00156f38 NV_Write
- .text            0015732a NV_WriteNow
- .text            0015780e NV_WriteState
+ .text            00156fa8 NV_Write
+ .text            0015739a NV_WriteNow
+ .text            0015787e NV_WriteState
  .data            3189dbbc NumWordsStrs
  .text            0011eac4 OkMsg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
  .text            00106be4 OpTbl.FSM_TCStrToBin.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..25
@@ -1432,32 +1432,32 @@ Global Symbols (sorted alphabetically)
  .text            0011f2be PI_FlushBranchCache
  .text            0011f2ec PI_FlushCache
  .text            0011f290 PI_FlushInstructionCache
- .text            001581fa PMMsg_Cfg
- .text            001582d4 PMMsg_ShowConfig
- .text            00158134 PMMsg_State
+ .text            0015826a PMMsg_Cfg
+ .text            00158344 PMMsg_ShowConfig
+ .text            001581a4 PMMsg_State
  .data            31880e84 PRODUCT_COPYRIGHT
  .data            31880e88 PRODUCT_NAME
  .data            31880e80 PRODUCT_VERSION
- .text            0015ed40 PadString
+ .text            0015edb0 PadString
  .pbss            318a3ca8 Pm
- .text            001590bc PmBatteryProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            001593b0 PmCallAppBusInterrupt..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            001593e6 PmCallAppShutDownNormal..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            00158c1c PmFSMAppBusyGetState
- .text            00158c06 PmFSMAppBusyRun
- .text            00158c4c PmFileInit
- .text            00158e96 PmGlitchProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            0015838a PmInitializePowerManager
- .text            00158aea PmInsertAppBusInterrupt
- .text            00158a32 PmInsertAppShutDownNormal
- .text            00159312 PmProcessPowerFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            00158b98 PmRegisterAppBusyFlag
- .text            0015941c PmSetCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            00158c30 PmSetPowerOnTime
- .text            00158ca6 PmTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
- .text            00159368 PmUpdateAppBusyStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            0015912c PmBatteryProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            00159420 PmCallAppBusInterrupt..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            00159456 PmCallAppShutDownNormal..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            00158c8c PmFSMAppBusyGetState
+ .text            00158c76 PmFSMAppBusyRun
+ .text            00158cbc PmFileInit
+ .text            00158f06 PmGlitchProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            001583fa PmInitializePowerManager
+ .text            00158b5a PmInsertAppBusInterrupt
+ .text            00158aa2 PmInsertAppShutDownNormal
+ .text            00159382 PmProcessPowerFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            00158c08 PmRegisterAppBusyFlag
+ .text            0015948c PmSetCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            00158ca0 PmSetPowerOnTime
+ .text            00158d16 PmTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
+ .text            001593d8 PmUpdateAppBusyStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
  .bss             30009880 Pm_Eeprom
- .text            001589b2 PowerFailIsr
+ .text            00158a22 PowerFailIsr
  .data            3189d694 PowerManagerCfgTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
  .data            3189d764 PowerManagerRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
  .data            3189d96c PowerManagerStateStrs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPowerManager.
@@ -1477,16 +1477,16 @@ Global Symbols (sorted alphabetically)
  .bss             304e9f28 QARFrame..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .bss             304ebf38 QARFramePrevGood..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .data            31880e4c QARLBTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            00159d86 QARMgr_DisableLiveStream
- .text            001599ae QARMgr_Initialize
- .text            00159cd4 QARMgr_Task
- .text            001596a2 QARMsg_Cfg
- .text            0015977e QARMsg_CfgBarker
- .text            0015983c QARMsg_Reconfigure
- .text            00159434 QARMsg_Register
- .text            0015985c QARMsg_ShowConfig
- .text            0015960a QARMsg_State
- .text            0015965c QARMsg_State_SubFrameOk
+ .text            00159df6 QARMgr_DisableLiveStream
+ .text            00159a1e QARMgr_Initialize
+ .text            00159d44 QARMgr_Task
+ .text            00159712 QARMsg_Cfg
+ .text            001597ee QARMsg_CfgBarker
+ .text            001598ac QARMsg_Reconfigure
+ .text            001594a4 QARMsg_Register
+ .text            001598cc QARMsg_ShowConfig
+ .text            0015967a QARMsg_State
+ .text            001596cc QARMsg_State_SubFrameOk
  .bss             304e9eb4 QARState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .bss             30003640 QARWordInfo
  .bss             3000dd06 QARWordSensorCount
@@ -1570,24 +1570,24 @@ Global Symbols (sorted alphabetically)
  .bss             300432d8 ReadOffset.UploadMgr_FileCollectionTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..22
  .text            0011b83c RebootingStr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .bss             316f1c9c RecordStats..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0015e156 RegAdd
- .text            0015e1d8 RegCheck
+ .text            0015e1c6 RegAdd
+ .text            0015e248 RegCheck
  .bss             317de5d0 RegCheckStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e918 RegCheckUint16..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e9e0 RegCheckUint32..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e836 RegCheckUint8..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015eb2e RegCmpEntries..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e0ca RegSet
- .text            0015e078 RegSetCheck_Init
- .text            0015e446 RegSetOrUpdate
- .text            0015e6c8 RegSetUint16..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e77c RegSetUint32..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e5f4 RegSetUint8..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015e580 RegSetUintX..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
- .text            0015ea98 RegUpdateEntryChksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e988 RegCheckUint16..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015ea50 RegCheckUint32..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e8a6 RegCheckUint8..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015eb9e RegCmpEntries..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e13a RegSet
+ .text            0015e0e8 RegSetCheck_Init
+ .text            0015e4b6 RegSetOrUpdate
+ .text            0015e738 RegSetUint16..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e7ec RegSetUint32..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e664 RegSetUint8..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015e5f0 RegSetUintX..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
+ .text            0015eb08 RegUpdateEntryChksum..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
  .bss             30043354 RemoveFileRsp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            0015fbf4 ResetBit
- .text            0015fd06 ResetBits
+ .text            0015fc64 ResetBit
+ .text            0015fd76 ResetBits
  .bss             305d7304 ResetHealthCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCBITManager.
  .bss             30043358 ResponseStatusBusy..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             30043357 ResponseStatusSuccess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
@@ -1614,31 +1614,31 @@ Global Symbols (sorted alphabetically)
  .bss             304e9314 RxMessageCnt..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDPRAM.
  .data            3189e688 SFStateStrs
  .data            3189e660 SFStrs
- .text            0015ad2a SPIMgr_CircQueue_Add
- .text            0015ae0c SPIMgr_CircQueue_GetHead
- .text            0015acc4 SPIMgr_CircQueue_Remove
- .text            0015adac SPIMgr_CircQueue_Reset
- .text            0015ac0e SPIMgr_CircQueue_SetName
- .text            0015a9b6 SPIMgr_GetACBattVoltage
- .text            0015a99e SPIMgr_GetACBusVoltage
- .text            0015a9e6 SPIMgr_GetBoardTemp
- .text            0015a9ce SPIMgr_GetLiBattVoltage
- .text            0015a624 SPIMgr_GetTime
- .text            00159dc4 SPIMgr_Initialize
- .text            0015aaa0 SPIMgr_LogError
- .text            0015a83c SPIMgr_ReadBlock
- .text            0015a93a SPIMgr_SensorTest
- .text            0015a080 SPIMgr_SetModeDirectToDevice
- .text            0015a698 SPIMgr_SetRTC
- .text            0015a9fe SPIMgr_SetupDataPassing
- .text            0015a092 SPIMgr_Task
- .text            0015a320 SPIMgr_UpdateAnalogDevice
- .text            0015a430 SPIMgr_UpdateEEProm
- .text            0015a0f2 SPIMgr_UpdateRTC
- .text            0015a25a SPIMgr_UpdateRTCNVRam
- .text            0015a752 SPIMgr_WriteEEPROM
- .text            0015a88c SPIMgr_WriteRTCNvRam
- .text            0015a028 SPI_DevInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSpiManager.
+ .text            0015ad9a SPIMgr_CircQueue_Add
+ .text            0015ae7c SPIMgr_CircQueue_GetHead
+ .text            0015ad34 SPIMgr_CircQueue_Remove
+ .text            0015ae1c SPIMgr_CircQueue_Reset
+ .text            0015ac7e SPIMgr_CircQueue_SetName
+ .text            0015aa26 SPIMgr_GetACBattVoltage
+ .text            0015aa0e SPIMgr_GetACBusVoltage
+ .text            0015aa56 SPIMgr_GetBoardTemp
+ .text            0015aa3e SPIMgr_GetLiBattVoltage
+ .text            0015a694 SPIMgr_GetTime
+ .text            00159e34 SPIMgr_Initialize
+ .text            0015ab10 SPIMgr_LogError
+ .text            0015a8ac SPIMgr_ReadBlock
+ .text            0015a9aa SPIMgr_SensorTest
+ .text            0015a0f0 SPIMgr_SetModeDirectToDevice
+ .text            0015a708 SPIMgr_SetRTC
+ .text            0015aa6e SPIMgr_SetupDataPassing
+ .text            0015a102 SPIMgr_Task
+ .text            0015a390 SPIMgr_UpdateAnalogDevice
+ .text            0015a4a0 SPIMgr_UpdateEEProm
+ .text            0015a162 SPIMgr_UpdateRTC
+ .text            0015a2ca SPIMgr_UpdateRTCNVRam
+ .text            0015a7c2 SPIMgr_WriteEEPROM
+ .text            0015a8fc SPIMgr_WriteRTCNvRam
+ .text            0015a098 SPI_DevInfo..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSpiManager.
  .text            0012419c SPI_Devices
  .text            00123e74 SPI_Init
  .text            0012443c SPI_ReadBlock
@@ -1653,57 +1653,57 @@ Global Symbols (sorted alphabetically)
  .bss             317eef74 SecondCounter.UTIL_MinuteTimerDisplay.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtility..0
  .bss             304ef334 SectorCount.FlashSectorErase.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash..2
  .data            3189c068 SenseType
- .text            00161d46 SensorApplyFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160d5c SensorCalculateSummaryAvgs
- .text            001614a8 SensorCheck..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160b22 SensorDisableLiveStream
- .text            0016224e SensorDumpASCIILiveData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161f16 SensorExponential..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161db6 SensorApplyFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00160dcc SensorCalculateSummaryAvgs
+ .text            00161518 SensorCheck..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00160b92 SensorDisableLiveStream
+ .text            001622be SensorDumpASCIILiveData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161f86 SensorExponential..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189fc98 SensorFailureNames
  .data            3189fcb0 SensorFilterNames
- .text            001609f2 SensorGetETMHdr
- .text            0016089c SensorGetLastUpdateTime
- .text            001608e2 SensorGetPreviousValid
- .text            001608ba SensorGetPreviousValue
- .text            00160902 SensorGetSystemHdr
- .text            00160874 SensorGetValue
+ .text            00160a62 SensorGetETMHdr
+ .text            0016090c SensorGetLastUpdateTime
+ .text            00160952 SensorGetPreviousValid
+ .text            0016092a SensorGetPreviousValue
+ .text            00160972 SensorGetSystemHdr
+ .text            001608e4 SensorGetValue
  .data            3189f64c SensorIndexType
- .text            00161ad6 SensorInitFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161844 SensorInterfaceTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160846 SensorIsUsed
- .text            00160826 SensorIsValid
- .text            00161908 SensorLogFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161ce2 SensorManageSamples..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00162058 SensorMaxReject..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            001618f8 SensorNoInterface..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            001618e8 SensorNoTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161e84 SensorPersistCounter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161594 SensorRangeTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0016165e SensorRateTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            001612e6 SensorRead..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0016117c SensorReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160b30 SensorSetupSummaryArray
- .text            0016177e SensorSignalTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0016211c SensorSlope..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161f52 SensorSpikeReject..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160c6c SensorUpdateSummaries
- .text            0015ffcc Sensor_Live_Data_Cfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            001600d0 Sensor_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0015ff62 Sensor_State..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0015fe70 Sensor_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161b46 SensorInitFilter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001618b4 SensorInterfaceTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001608b6 SensorIsUsed
+ .text            00160896 SensorIsValid
+ .text            00161978 SensorLogFailure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161d52 SensorManageSamples..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001620c8 SensorMaxReject..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161968 SensorNoInterface..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161958 SensorNoTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161ef4 SensorPersistCounter..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161604 SensorRangeTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001616ce SensorRateTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161356 SensorRead..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001611ec SensorReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00160ba0 SensorSetupSummaryArray
+ .text            001617ee SensorSignalTest..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            0016218c SensorSlope..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00161fc2 SensorSpikeReject..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00160cdc SensorUpdateSummaries
+ .text            0016003c Sensor_Live_Data_Cfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            00160140 Sensor_ShowConfig..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            0015ffd2 Sensor_State..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            0015fee0 Sensor_UserCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .bss             317ef010 Sensors..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160df0 SensorsConfigure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00160356 SensorsInitialize
- .text            00162204 SensorsLiveDataTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161130 SensorsReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            00161272 SensorsUpdateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0015fb3a SetBit
- .text            0015fc7c SetBits
+ .text            00160e60 SensorsConfigure..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001603c6 SensorsInitialize
+ .text            00162274 SensorsLiveDataTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001611a0 SensorsReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            001612e2 SensorsUpdateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
+ .text            0015fbaa SetBit
+ .text            0015fcec SetBits
  .text            0011bbf4 SetXMT
- .text            0015eca4 Slower
+ .text            0015ed14 Slower
  .data            3187d3f0 StabCritTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrend.
  .bss             3000986c Stack
- .text            0015612c StackFill
+ .text            0015619c StackFill
  .text            0011b829 StackInstErr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b815 StackLabels..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011b836 StackMainStr..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -1726,16 +1726,16 @@ Global Symbols (sorted alphabetically)
  .bss             3182784a Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CF7XProtocol.
  .bss             317d9498 Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQARManager.
  .bss             31821b6c Str..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            0015ecd4 StripString
- .text            0015fa40 SuperStrcat
- .text            0015ec74 Supper
+ .text            0015ed44 StripString
+ .text            0015fab0 SuperStrcat
+ .text            0015ece4 Supper
  .bss             30015ec0 SwVersion..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .bss             305d7080 SwVersionTemp.Box_GetFastSwVer.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox..6
  .data            3189e6f0 SyncStatusStrs
- .text            0015ae4c SystemLogIDString
- .text            0015c6ea SystemLogInitLimitCheck
- .text            0015c752 SystemLogLimitCheck
- .text            0015c70c SystemLogResetLimitCheck
+ .text            0015aebc SystemLogIDString
+ .text            0015c75a SystemLogInitLimitCheck
+ .text            0015c7c2 SystemLogLimitCheck
+ .text            0015c77c SystemLogResetLimitCheck
  .bss             317de5d4 SystemRegTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
  .bss             317e6aa4 SystemRegTblShadow..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtilRegSetCheck.
  .data            3189d3a0 TASK_STATES
@@ -1769,7 +1769,7 @@ Global Symbols (sorted alphabetically)
  .bss             304ee1b4 TaskMgrTickHandler..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTTMR.
  .bss             317dc2a8 TcbArray..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTaskManager.
  .bss             316f1d7c TempDebugString..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0015fd72 TestBits
+ .text            0015fde2 TestBits
  .bss             304ee1b8 TestCounter
  .bss             300432dc TickLast.UploadMgr_FileCollectionTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..23
  .bss             317938ac TimeElapsed.MSI_CheckDPRAM.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface..7
@@ -1777,23 +1777,23 @@ Global Symbols (sorted alphabetically)
  .bss             317938a4 TimeLast.MSI_CheckMsgTimeouts.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface..5
  .data            31875264 TimeSourceStrs
  .bss             305d6ee0 TimeStr.Box_SysTimeMsg.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CBox..0
- .text            0015edae Timeout
- .text            0015edda TimeoutEx
+ .text            0015ee1e Timeout
+ .text            0015ee4a TimeoutEx
  .bss             30000008 Tm
- .text            0015d0ae TmDispatchDtTasks
- .text            0015d64e TmDispatchRmtTasks
- .text            0015cc00 TmInitializeTaskDispatcher
- .text            0015c7c0 TmInitializeTaskManager
- .text            0015d408 TmScheduleRmtTasks
- .text            0015d87a TmScheduleTask
- .text            0015d958 TmSetMode
- .text            0015c8da TmStartTaskManager
- .text            0015c8fa TmTaskCreate
- .text            0015d834 TmTaskEnable
- .text            0015ce04 TmTick
- .text            0015d9fe Tm_AddPrevTMHealthStatus
- .text            0015d9be Tm_CalcDiffTMHealthStatus
- .text            0015d996 Tm_GetTMHealthStatus
+ .text            0015d11e TmDispatchDtTasks
+ .text            0015d6be TmDispatchRmtTasks
+ .text            0015cc70 TmInitializeTaskDispatcher
+ .text            0015c830 TmInitializeTaskManager
+ .text            0015d478 TmScheduleRmtTasks
+ .text            0015d8ea TmScheduleTask
+ .text            0015d9c8 TmSetMode
+ .text            0015c94a TmStartTaskManager
+ .text            0015c96a TmTaskCreate
+ .text            0015d8a4 TmTaskEnable
+ .text            0015ce74 TmTick
+ .text            0015da6e Tm_AddPrevTMHealthStatus
+ .text            0015da2e Tm_CalcDiffTMHealthStatus
+ .text            0015da06 Tm_GetTMHealthStatus
  .bss             317d9444 TotalWritten.NV_MgrTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..27
  .text            00114d30 TrendCheckResetTrigger..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrend.
  .text            00114bd4 TrendCheckStability..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrend.
@@ -1838,42 +1838,42 @@ Global Symbols (sorted alphabetically)
  .text            00113dbc Trend_UserCfg
  .data            318a02ac TrigRateType
  .data            318a0560 TrigStateEnum
- .text            00163318 TriggerCheckDuration..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            001633ca TriggerCheckEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            001632ac TriggerCheckStart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163388 TriggerCheckDuration..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            0016343a TriggerCheckEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            0016331c TriggerCheckStart..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .data            3189fcc8 TriggerCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            00162d22 TriggerCompareValues
+ .text            00162d92 TriggerCompareValues
  .data            3189bcf4 TriggerConfigCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFault.
- .text            001637e2 TriggerConvertLegacyCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            00162fe2 TriggerGetState
- .text            00162e8e TriggerGetSystemHdr
+ .text            00163852 TriggerConvertLegacyCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163052 TriggerGetState
+ .text            00162efe TriggerGetSystemHdr
  .data            318a0580 TriggerIndexType
- .text            001629c8 TriggerInitialize
- .text            00162ce2 TriggerIsActive
- .text            001637b4 TriggerIsConfigured
- .text            0016343e TriggerLogEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            0016357e TriggerLogUpdate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            001630e0 TriggerProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            001634c2 TriggerReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00162a38 TriggerInitialize
+ .text            00162d52 TriggerIsActive
+ .text            00163824 TriggerIsConfigured
+ .text            001634ae TriggerLogEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            001635ee TriggerLogUpdate..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163150 TriggerProcess..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163532 TriggerReset..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .data            318a0358 TriggerRoot..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .data            3189fe68 TriggerSensorCfgCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .data            318a045c TriggerStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            00163504 TriggerUpdateData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            0016304e TriggerUpdateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            00163018 TriggerValidGetState
- .text            00162822 Trigger_CfgExprStrCmd
- .text            001625f0 Trigger_ShowConfig
- .text            00162582 Trigger_State
- .text            00162490 Trigger_UserCfg
- .text            00162996 Trigger_Valid
- .text            001636f0 TriggersEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163574 TriggerUpdateData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            001630be TriggerUpdateTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
+ .text            00163088 TriggerValidGetState
+ .text            00162892 Trigger_CfgExprStrCmd
+ .text            00162660 Trigger_ShowConfig
+ .text            001625f2 Trigger_State
+ .text            00162500 Trigger_UserCfg
+ .text            00162a06 Trigger_Valid
+ .text            00163760 TriggersEnd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .bss             316f4de8 TxBuf.GSE_Init.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CGSE..1
  .bss             317938a8 TxCntLast.MSI_CheckDPRAM.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSInterface..6
  .bss             316f4dd0 TxFIFO..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CGSE.
  .bss             304e9318 TxMessageCnt..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDPRAM.
  .data            318755c4 TxTestTable..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .text            00125a16 UART_BITStatus
- .text            00168f68 UART_BPS_SUPPORTED..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            00168fd8 UART_BPS_SUPPORTED..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            001258ce UART_CheckForTXDone
  .text            00124fbc UART_ClosePort
  .bss             304ee1c0 UART_Config..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUART.
@@ -1895,7 +1895,7 @@ Global Symbols (sorted alphabetically)
  .text            00125342 UART_Transmit
  .text            0012553a UART_Write
  .bss             3002b248 ULTaskData..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            0015f8ec UTIL_MinuteTimerDisplay
+ .text            0015f95c UTIL_MinuteTimerDisplay
  .data            318a0b88 UartDrvDefaultCfg..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .bss             318216d4 UartMgrBITBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .data            318a0abc UartMgrBPSStrs
@@ -1905,11 +1905,11 @@ Global Symbols (sorted alphabetically)
  .data            318a0f54 UartMgrDebugTbl
  .bss             31801fd8 UartMgrDebugTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .bss             318216d6 UartMgrDispDebugBlock..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            00165400 UartMgrDispDebug_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            00163ca8 UartMgrMsg_Cfg
- .text            00163da2 UartMgrMsg_Debug
- .text            00163e16 UartMgrMsg_ShowConfig
- .text            00163c50 UartMgrMsg_Status
+ .text            00165470 UartMgrDispDebug_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00163d18 UartMgrMsg_Cfg
+ .text            00163e12 UartMgrMsg_Debug
+ .text            00163e86 UartMgrMsg_ShowConfig
+ .text            00163cc0 UartMgrMsg_Status
  .data            318a0984 UartMgrPortCfgTbl
  .data            318a0964 UartMgrProtocolStrs
  .data            318a0bac UartMgrRoot
@@ -1918,32 +1918,32 @@ Global Symbols (sorted alphabetically)
  .data            318a0cb0 UartMgrStatusTbl
  .bss             31801f58 UartMgrStatusTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .data            318a1024 UartMgrSysStatusStrs
- .text            00164958 UartMgr_BITTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            001653bc UartMgr_ClearDownloadState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            001659aa UartMgr_ConvertToEngUnits..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            00165940 UartMgr_CopyRollBuff..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            00165706 UartMgr_CreateTimeOutSystemLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            00165510 UartMgr_DetermineChanLoss..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            0016568e UartMgr_DetermineParamDataLoss..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            0016523a UartMgr_DownloadRecord
- .text            00165390 UartMgr_DownloadStop
- .text            001659ea UartMgr_Download_NoneHndl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            001651e2 UartMgr_FlushChannels
- .text            001646fa UartMgr_GetCfg
- .text            00165502 UartMgr_GetDebug
- .text            00165064 UartMgr_GetFileHdr
- .text            001646da UartMgr_GetStatus
- .text            00165136 UartMgr_GetSystemHdr
- .text            00163fa2 UartMgr_Initialize
- .text            00164d94 UartMgr_InterfaceValid
- .text            00164dd2 UartMgr_ReadBuffer
- .text            00164ec4 UartMgr_ReadBufferSnapshot
- .text            00164aba UartMgr_ReadWord
- .text            00165028 UartMgr_ResetBufferTimeCnt
- .text            001649f0 UartMgr_SensorSetup
- .text            00164bf6 UartMgr_SensorTest
- .text            0016471a UartMgr_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            001657d2 UartMgr_UpdateDataReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            001649c8 UartMgr_BITTask..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            0016542c UartMgr_ClearDownloadState..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00165a1a UartMgr_ConvertToEngUnits..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            001659b0 UartMgr_CopyRollBuff..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00165776 UartMgr_CreateTimeOutSystemLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00165580 UartMgr_DetermineChanLoss..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            001656fe UartMgr_DetermineParamDataLoss..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            001652aa UartMgr_DownloadRecord
+ .text            00165400 UartMgr_DownloadStop
+ .text            00165a5a UartMgr_Download_NoneHndl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00165252 UartMgr_FlushChannels
+ .text            0016476a UartMgr_GetCfg
+ .text            00165572 UartMgr_GetDebug
+ .text            001650d4 UartMgr_GetFileHdr
+ .text            0016474a UartMgr_GetStatus
+ .text            001651a6 UartMgr_GetSystemHdr
+ .text            00164012 UartMgr_Initialize
+ .text            00164e04 UartMgr_InterfaceValid
+ .text            00164e42 UartMgr_ReadBuffer
+ .text            00164f34 UartMgr_ReadBufferSnapshot
+ .text            00164b2a UartMgr_ReadWord
+ .text            00165098 UartMgr_ResetBufferTimeCnt
+ .text            00164a60 UartMgr_SensorSetup
+ .text            00164c66 UartMgr_SensorTest
+ .text            0016478a UartMgr_Task..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
+ .text            00165842 UartMgr_UpdateDataReduction..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .data            318a0aec UartMgrsDBStrs
  .data            318a0b3c UartMgrsDuplexStrs
  .data            318a0b1c UartMgrsParityStrs
@@ -2046,15 +2046,15 @@ Global Symbols (sorted alphabetically)
  .bss             3002b19c VfyRowTmp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             300432d4 VfyRspFailed..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             300432d0 VfyRspId..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            0016b414 WatchdogReboot
+ .text            0016b484 WatchdogReboot
  .text            0011a8a4 WrapAround
  .data            3189d3ac YES_NO
  .bss             30009640 _ERR
- .text            0016d734 _Exit
+ .text            0016d7a4 _Exit
  .bss             3000360c _SPIERR
  .vector          00100000 _VECTOR_TABLE
- .text            0016d9d0 __CLZ32
-                  0019f308 __CRC_END
+ .text            0016da40 __CLZ32
+                  0019f378 __CRC_END
                   00100000 __CRC_START
                   00000000 __Char_Max__
                   31f00000 __SP_END
@@ -2063,103 +2063,103 @@ Global Symbols (sorted alphabetically)
  .bss             3000ccb0 __atexit_cleanup
                   00000000 __cpp_exception_cleanup
                   00000000 __cpp_exception_init
- .text            0016c480 __docvt
- .syscall         0016dcb0 __dotsyscall
- .text            0016d95a __get_eh_globals
- .text            0016d7e0 __gh_errno_ptr
+ .text            0016c4f0 __docvt
+ .syscall         0016dd20 __dotsyscall
+ .text            0016d9ca __get_eh_globals
+ .text            0016d850 __gh_errno_ptr
                   00000000 __gh_error_init
- .text            0016b972 __gh_float_printf
- .text            0016d7ee __gh_get_errno
- .text            0016bf5c __gh_hexout
+ .text            0016b9e2 __gh_float_printf
+ .text            0016d85e __gh_get_errno
+ .text            0016bfcc __gh_hexout
                   00000000 __gh_iob_init
- .text            0016d97e __gh_lock_init
+ .text            0016d9ee __gh_lock_init
                   00000000 __gh_long_long_printf
- .text            0016bfbc __gh_octhexout
- .text            0016bce4 __gh_outspaces
- .text            0016d7ce __gh_set_errno
+ .text            0016c02c __gh_octhexout
+ .text            0016bd54 __gh_outspaces
+ .text            0016d83e __gh_set_errno
                   00000000 __gh_signal_init
- .text            0016bd10 __gh_strout
+ .text            0016bd80 __gh_strout
                   00000000 __gh_uns_long_long_printf
- .text            0016c002 __gh_vsprintf
- .text            0016bcaa __gh_xxdecout
- .text            0016d96e __ghsLock
- .text            0016d976 __ghsUnlock
- .text            0016d93a __ghs_GetThreadLocalStorageItem
- .text            0016d990 __ghs_RestoreSignalContext
- .text            0016d986 __ghs_SaveSignalContext
+ .text            0016c072 __gh_vsprintf
+ .text            0016bd1a __gh_xxdecout
+ .text            0016d9de __ghsLock
+ .text            0016d9e6 __ghsUnlock
+ .text            0016d9aa __ghs_GetThreadLocalStorageItem
+ .text            0016da00 __ghs_RestoreSignalContext
+ .text            0016d9f6 __ghs_SaveSignalContext
                   31872464 __ghs_allocatedramend
- .text            0016d79c __ghs_at_exit
+ .text            0016d80c __ghs_at_exit
                   00000000 __ghs_board_cache_sync
                   00000000 __ghs_board_devices_init
                   00000000 __ghs_board_memory_init
                   80010000 __ghs_cframstart
                   00000000 __ghs_checksum
- .text            0016d5b4 __ghs_decompress
- .text            0016d9b2 __ghs_flock_create
- .text            0016d9ba __ghs_flock_destroy
- .text            0016d998 __ghs_flock_file
- .text            0016d9a8 __ghs_ftrylock_file
- .text            0016d9a0 __ghs_funlock_file
+ .text            0016d624 __ghs_decompress
+ .text            0016da22 __ghs_flock_create
+ .text            0016da2a __ghs_flock_destroy
+ .text            0016da08 __ghs_flock_file
+ .text            0016da18 __ghs_ftrylock_file
+ .text            0016da10 __ghs_funlock_file
  .text            00129004 __ghs_ind_crt0
- .text            0016d82c __ghs_ind_crt1
+ .text            0016d89c __ghs_ind_crt1
                   00000000 __ghs_init_d2
                   00000000 __ghs_init_d3
                   00000000 __ghs_init_d4
                   00000000 __ghs_init_d5
                   00000000 __ghs_manprf_init
- .text            0016cd52 __ghs_memcmp
+ .text            0016cdc2 __ghs_memcmp
                   318a3d64 __ghs_pramend
                   318a3ab8 __ghs_pramstart
                   00000000 __ghs_rambootcodeend
                   00000000 __ghs_rambootcodestart
                   31f00000 __ghs_ramend
                   30000000 __ghs_ramstart
-                  0016dcb0 __ghs_rombootcodeend
+                  0016dd20 __ghs_rombootcodeend
                   00100420 __ghs_rombootcodestart
                   02000000 __ghs_romend
                   00000000 __ghs_romstart
- .text            0016b714 __ghs_strcat
- .text            0016b6ee __ghs_strchr
- .text            0016b6ca __ghs_strcmp
- .text            0016b6b0 __ghs_strcpy
- .text            0016b66e __ghs_strlen
- .text            0016b638 __ghs_strncmp
- .text            0016b606 __ghs_strncpy
- .text            0016b562 __ghs_strstr
- .text            0016d7fc __ghs_syscall
+ .text            0016b784 __ghs_strcat
+ .text            0016b75e __ghs_strchr
+ .text            0016b73a __ghs_strcmp
+ .text            0016b720 __ghs_strcpy
+ .text            0016b6de __ghs_strlen
+ .text            0016b6a8 __ghs_strncmp
+ .text            0016b676 __ghs_strncpy
+ .text            0016b5d2 __ghs_strstr
+ .text            0016d86c __ghs_syscall
                   00000000 __ghs_undefined_func
- .fixaddr         0016dcb0 __ghsbegin_fixaddr
- .fixtype         0016dcb0 __ghsbegin_fixtype
+ .fixaddr         0016dd20 __ghsbegin_fixaddr
+ .fixtype         0016dd20 __ghsbegin_fixtype
                   00000000 __ghsbegin_picbase
                   00000000 __ghsbegin_pidbase
                   00000000 __ghsbegin_robase
  .sdabase         318a3d64 __ghsbegin_sdabase
- .secinfo         0016da28 __ghsbegin_secinfo
- .secinfo         0016da40 __ghsbinfo_aclear
- .secinfo         0016da4c __ghsbinfo_acopy
- .secinfo         0016da28 __ghsbinfo_clear
- .secinfo         0016da4c __ghsbinfo_comacopy
- .secinfo         0016da4c __ghsbinfo_comcopy
- .secinfo         0016da4c __ghsbinfo_comtcopy
- .secinfo         0016da40 __ghsbinfo_copy
- .secinfo         0016da4c __ghsbinfo_tcopy
- .secinfo         0016da40 __ghseinfo_clear
- .secinfo         0016da4c __ghseinfo_comcopy
- .secinfo         0016da4c __ghseinfo_copy
- .fixaddr         0016dcb0 __ghsend_fixaddr
+ .secinfo         0016da98 __ghsbegin_secinfo
+ .secinfo         0016dab0 __ghsbinfo_aclear
+ .secinfo         0016dabc __ghsbinfo_acopy
+ .secinfo         0016da98 __ghsbinfo_clear
+ .secinfo         0016dabc __ghsbinfo_comacopy
+ .secinfo         0016dabc __ghsbinfo_comcopy
+ .secinfo         0016dabc __ghsbinfo_comtcopy
+ .secinfo         0016dab0 __ghsbinfo_copy
+ .secinfo         0016dabc __ghsbinfo_tcopy
+ .secinfo         0016dab0 __ghseinfo_clear
+ .secinfo         0016dabc __ghseinfo_comcopy
+ .secinfo         0016dabc __ghseinfo_copy
+ .fixaddr         0016dd20 __ghsend_fixaddr
  .stack           32000000 __ghsend_stack
- .text            0016d504 __i64tod
- .secinfo         0016da4c __secinfo
+ .text            0016d574 __i64tod
+ .secinfo         0016dabc __secinfo
  .bss             3000ccb4 __stdio_cleanup
- .text            0016d470 __u64tod
- .text            0016d720 _enter
- .text            0016d734 _exit
+ .text            0016d4e0 __u64tod
+ .text            0016d790 _enter
+ .text            0016d7a4 _exit
  .bss             3000cc80 _multiArgs
- .text            0016b45c _multibufSize
+ .text            0016b4cc _multibufSize
  .bss             30013c50 _multibuffer
- .text            0016b450 _multiend
+ .text            0016b4c0 _multiend
  .text            00128f58 _start
- .text            0016cd2a abs
+ .text            0016cd9a abs
  .data            3189b070 acsCfgTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            3189ad98 acsCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            3189aff0 acsMode
@@ -2446,8 +2446,8 @@ Global Symbols (sorted alphabetically)
  .bss             304ef9b8 arinc429SysStatusTemp_Rx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .bss             304ef9f4 arinc429SysStatusTemp_Tx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            31899404 arincSysStatusStrs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0016d320 atof
- .text            0016cd3a atoi
+ .text            0016d390 atof
+ .text            0016cdaa atoi
  .bss             304d92dc bDebounceActive..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
  .bss             304f518d bIgnoreDrvPBIT..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            31875eac bPwrOnInit.FSM_TaskFunc.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..22
@@ -2501,8 +2501,8 @@ Global Symbols (sorted alphabetically)
  .data            3189b4cc dl_LargeStats..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            3189b6d4 dl_SlowStats..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            3189b5d0 dl_SmallStats..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
- .text            0014d784 driverInitList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            0016b734 efout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccefgout.
+ .text            0014d7f8 driverInitList..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
+ .text            0016b7a4 efout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccefgout.
  .data            318a3274 emu150CfgTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .bss             31827d78 emu150CfgTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .data            318a3a2c emu150DebugTbl..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
@@ -2572,8 +2572,8 @@ Global Symbols (sorted alphabetically)
  .data            3187c69c eventTableStatus..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvent.
  .data            31876c98 eventTableType
  .data            3187ccb4 evt_Region_UserEnumType
- .text            0016c910 exit
- .text            0016cd7e fabs
+ .text            0016c980 exit
+ .text            0016cdee fabs
  .text            001105ab fact.User_AuthenticateModeRequest.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser..6
  .bss             316f4dbc faultCount..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .bss             316f4bf4 faultHistory..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
@@ -2617,7 +2617,7 @@ Global Symbols (sorted alphabetically)
  .bss             317f38a0 liveDataTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189f634 liveDataType..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189c93c lm_UserEnumPriority
- .text            0016ccbe localeconv
+ .text            0016cd2e localeconv
  .data            3189b8fc logReqType
  .bss             317dc154 logWriteCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSystemLog.
  .bss             304d1b98 log_mgr_state.TH_Task.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTimehistory..19
@@ -2835,13 +2835,13 @@ Global Symbols (sorted alphabetically)
  .bss             318001d8 m_triggerLog..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .bss             318001c8 m_triggerValidFlags..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
  .bss             317fb934 m_triggerValidTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger.
- .text            0015fe50 main
+ .text            0015fec0 main
  .bss             317f8034 maxSensorUsed..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189d35c memInfoTable
  .data            3189d394 memInfoTableLen
- .text            0016cd52 memcmp
- .text            0016d6a4 memcpy
- .text            0016d650 memset
+ .text            0016cdc2 memcmp
+ .text            0016d714 memcpy
+ .text            0016d6c0 memset
  .bss             3000987c mifPulse
  .bss             3004536b msBuffer..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
  .data            3189cb04 msCfgGsmMsgs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMSStsCtl.
@@ -2886,12 +2886,12 @@ Global Symbols (sorted alphabetically)
  .bss             304e9b90 rpn_stack..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvaluator.
  .bss             304e9b8c rpn_stack_pos..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvaluator.
  .data            3189c260 sFltEmptyStr.Flt_GetFltBuffEntry.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..4
- .text            0014c6a3 sLabelStem.Flt_ShowConfig.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..6
+ .text            0014c715 sLabelStem.Flt_ShowConfig.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..6
  .bss             316f4c94 sRecentLogStr.Flt_GetFltBuffEntry.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..3
  .bss             316f2bf0 sResultBuffer.Flt_UserMessageRecentAll.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..0
  .bss             316f9600 sameIdCount.Im_StartupTickHandler.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager..3
  .data            3189ec88 sampleType..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            0016d334 scalbln
+ .text            0016d3a4 scalbln
  .data            3189ecc8 sensorCalConfigCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189e708 sensorCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189ed98 sensorConvConfigCmd..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
@@ -2901,8 +2901,8 @@ Global Symbols (sorted alphabetically)
  .bss             317f3810 sensorTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            3189ec50 sensorType..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .bss             316f4da8 setFaultInitialized..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            0016cc38 setlocale
- .text            0016c408 snprintf
+ .text            0016cca8 setlocale
+ .text            0016c478 snprintf
  .data            31873628 snsrSummaryEntry0..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            318737c8 snsrSummaryEntry1..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            31874668 snsrSummaryEntry10..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
@@ -2920,9 +2920,9 @@ Global Symbols (sorted alphabetically)
  .data            31874328 snsrSummaryEntry8..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            318744c8 snsrSummaryEntry9..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            31881abc speedStrs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0016c452 sprintf
- .text            0016c46a sputc..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsprntf.
- .text            0016c394 sputc_limit..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsnprtf.
+ .text            0016c4c2 sprintf
+ .text            0016c4da sputc..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsprntf.
+ .text            0016c404 sputc_limit..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsnprtf.
  .bss             3000349c startHSTick
  .bss             3000142c startupId
  .bss             304ef6c8 stateActionFlagsTemp..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
@@ -2935,32 +2935,32 @@ Global Symbols (sorted alphabetically)
  .bss             30015f44 str.FSM_CfgTaskStrCmd.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..1
  .bss             30015fd8 str.FSM_GetRunningTasks.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..8
  .bss             317fb834 str.Trigger_CfgExprStrCmd.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger..5
- .text            0016b460 strcasecmp
- .text            0016b714 strcat
- .text            0016b6ee strchr
- .text            0016b6ca strcmp
- .text            0016b6b0 strcpy
- .text            0016b686 strcspn
- .text            0016b66e strlen
- .text            0016b638 strncmp
- .text            0016b606 strncpy
- .text            0015f9ba strncpy_safe
- .text            0016b5da strpbrk
- .text            0016b5b0 strspn
- .text            0016b562 strstr
- .text            0016cda8 strtod
- .text            0016b522 strtok
- .text            0016b4c8 strtok_r
- .text            0016cad8 strtol
- .text            0016c99c strtoul
+ .text            0016b4d0 strcasecmp
+ .text            0016b784 strcat
+ .text            0016b75e strchr
+ .text            0016b73a strcmp
+ .text            0016b720 strcpy
+ .text            0016b6f6 strcspn
+ .text            0016b6de strlen
+ .text            0016b6a8 strncmp
+ .text            0016b676 strncpy
+ .text            0015fa2a strncpy_safe
+ .text            0016b64a strpbrk
+ .text            0016b620 strspn
+ .text            0016b5d2 strstr
+ .text            0016ce18 strtod
+ .text            0016b592 strtok
+ .text            0016b538 strtok_r
+ .text            0016cb48 strtol
+ .text            0016ca0c strtoul
  .data            31881af4 subProtocolStrs..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            31884f58 swapLabelStrsRx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            31884f70 swapLabelStrsTx..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0015aeb4 systemLogStrings..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSystemLog.
- .text            0015ae9c systemLogUndefindedID..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSystemLog.
+ .text            0015af24 systemLogStrings..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSystemLog.
+ .text            0015af0c systemLogUndefindedID..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSystemLog.
  .bss             317dc29c systemModeTransitions..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTaskManager.
  .bss             316fdefc systemTable..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
- .text            0015da30 taskInfo
+ .text            0015daa0 taskInfo
  .bss             304d1b8c task_state.TH_Task.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTimehistory..16
  .bss             30015eec testStart.FAST_TxTestTask.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr..17
  .bss             3004534c timeElapsedmS.UploadMgr_PrintUploadStats.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..39
@@ -2974,11 +2974,11 @@ Global Symbols (sorted alphabetically)
  .bss             30045354 totalBytesSent.UploadMgr_PrintUploadStats.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..41
  .bss             30045358 totalMessagesSent.UploadMgr_PrintUploadStats.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..42
  .bss             30043360 txSize.UploadMgr_UploadFileBlock.C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..37
- .text            0016bf26 unsout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccvsprnt.
+ .text            0016bf96 unsout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccvsprnt.
  .bss             30001430 userMsgQ
- .text            0016c3ba vsnprintf
- .text            0016c424 vsprintf
+ .text            0016c42a vsnprintf
+ .text            0016c494 vsprintf
  .bss             304d92d8 waFailLogRecorded..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
- .text            0016c93e wctomb
+ .text            0016c9ae wctomb
  .bss             30015ebd wlanOverride..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .bss             304d92d4 wrapFailCounts..C.3A.5Cdevelopment.5CKnowlogic.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
