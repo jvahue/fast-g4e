@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 87 $  $Date: 11/19/12 7:55p $
+      $Revision: 88 $  $Date: 11/27/12 5:33p $
 
 ******************************************************************************/
 
@@ -106,7 +106,7 @@ static void DataMgrBuildPacketHdr( DATA_MNG_BUFFER *pMsgBuf, UINT16 nChannel,
 static void DataMgrFinishPacket( DATA_MNG_INFO *pDMInfo, UINT32 nChannel,
                                  INT32 recordInfo);
 
-static void DataMgrProcBuffers   ( DATA_MNG_INFO *pDMInfo, UINT32 nChannel );
+static BOOLEAN DataMgrProcBuffers   ( DATA_MNG_INFO *pDMInfo, UINT32 nChannel );
 
 static UINT16 DataMgrWriteBuffer ( DATA_MNG_BUFFER *pMsgBuf, UINT8 *pSrc,
                                    UINT16 nBytes );
@@ -810,7 +810,7 @@ static void DataMgrTask( void *pParam )
    DATA_MNG_INFO       *pDMInfo;
    DATA_MNG_BUFFER     *pMsgBuf;
    DATA_MNG_TASK_PARMS *pDMParam;
-
+   BOOLEAN              buffers_active;
    // Initialize Local Data
    pDMParam       = (DATA_MNG_TASK_PARMS *)pParam;
    pDMInfo        = &DataMgrInfo[pDMParam->nChannel];
@@ -864,7 +864,29 @@ static void DataMgrTask( void *pParam )
    }
 
    // Check buffers and write any pending data packets
-   DataMgrProcBuffers( pDMInfo, pDMParam->nChannel );
+   buffers_active = DataMgrProcBuffers( pDMInfo, pDMParam->nChannel );
+
+   //After processing channel buffers, check if all were idle or
+   //if one was being processed.
+   if(buffers_active || (DM_RECORD_IN_PROGRESS == pDMInfo->recordStatus) )
+   {
+      m_channel_busy_flags |= 1 << pDMParam->nChannel;
+   }
+   else
+   {
+      m_channel_busy_flags &= ~(1 << pDMParam->nChannel);
+   }
+
+   //If the busy status (idle or record enabled) changes, then update
+   //the event handler.
+   if( (m_channel_busy_flags || DMRecordEnabled) != m_is_busy_last )
+   {
+      m_is_busy_last = (m_channel_busy_flags || DMRecordEnabled);
+      if(m_event_func != NULL)
+      {
+        m_event_func(m_event_tag,m_is_busy_last);
+      }
+   }
 }
 
 /******************************************************************************
@@ -1026,19 +1048,36 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
     UINT32          nSize;
     DM_FAIL_DATA    FailLog;
     DATA_MNG_BUFFER *pMsgBuf;
+    TIMESTAMP        tempTime;
 
     // Check if packet timeout has been reached, or we overflowed the buffer
     if ((pDMInfo->nCurrTime_mS >= pDMInfo->nNextTime_mS) || *nLeftOver > 0)
     {
+        // Save the time in case this is an overflow
+        tempTime = pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs;
+        
         // Close out packet in buffer and mark for storage
         DataMgrFinishPacket(pDMInfo, pDMParam->nChannel, (INT32)*nLeftOver);
 
         // Increment the next time
         pDMInfo->nNextTime_mS += pDMInfo->acs_Config.nPacketSize_ms;
 
+        //------------------------ prep new buffer or error ----------------------------
+        pMsgBuf = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
+        
+        // Check if the new buffer is ready to receive new data
+        ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
+                       "Channel %d Buffers Full", pDMParam->nChannel);
+        
+        
         // Check if the buffer is full and there is still data to write
         if ( *nLeftOver > 0)
         {
+            // Need to keep the same timestamp as the previous buffer because
+            // the time deltas will be wrong otherwise
+            pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs = tempTime;
+           
+            // Check if the overflow was already reported
             if (FALSE == pDMInfo->bBufferOverflow)
             {
                 // Set Buffer Overflow TRUE
@@ -1058,17 +1097,12 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
                     pDMParam->nChannel, *nLeftOver);
             }
         }
-
-        //------------------------ prep new buffer or error ----------------------------
-        pMsgBuf = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
-
-        // Check if the new buffer is ready to receive new data
-        ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
-                        "Channel %d Buffers Full", pDMParam->nChannel);
-
-        // Set the Timestamp for the next packet
-        CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
-        pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
+        else // This is not an overflow continue on normally
+        {
+           // Set the Timestamp for the next packet
+           CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
+           pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
+        }
     }
 }
 
@@ -1221,18 +1255,19 @@ static void DataMgrFinishPacket( DATA_MNG_INFO *pDMInfo, UINT32 nChannel,
  *              UINT32        Timeout_nS - Number of nanoseconds to wait
  *                                         before declaring a timeout.
  *
- * Returns:     None.
+ * Returns:     Active status TRUE - Buffer(s) pending write to FLASH
+ *                            FALSE - All Buffers written to FLASH
  *
  * Notes:       None.
  *
  *****************************************************************************/
 static
-void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
+BOOLEAN DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
 {
    // Local Data
    UINT32       i;
    LOG_SOURCE   tempChannel;
-   BOOLEAN      all_idle = TRUE;
+   BOOLEAN      active = FALSE;
 
    tempChannel.nNumber = nChannel;
 
@@ -1242,7 +1277,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
       // Check that current buffer is ready to transmit
       if (DM_BUF_STORE == pDMInfo->msgBuf[i].status)
       {
-         all_idle = FALSE;
+         active = TRUE;
          // Has the Current buffer been queued for storage yet?
          if (LOG_REQ_NULL == pDMInfo->msgBuf[i].wrStatus)
          {
@@ -1281,27 +1316,7 @@ void DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
       }
    }
 
-   //After processing channel buffers, check if all were idle or
-   //if one was being processed.
-   if(all_idle)
-   {
-      m_channel_busy_flags &= ~(1 << nChannel);
-   }
-   else
-   {
-      m_channel_busy_flags |= 1 << nChannel;
-   }
-
-   //If the busy status (idle or record enabled) changes, then update
-   //the event handler.
-   if( (m_channel_busy_flags || DMRecordEnabled) != m_is_busy_last )
-   {
-      m_is_busy_last = (m_channel_busy_flags || DMRecordEnabled);
-      if(m_event_func != NULL)
-      {
-        m_event_func(m_event_tag,m_is_busy_last);
-      }
-   }
+  return active;
 }
 
 /******************************************************************************
@@ -1345,18 +1360,22 @@ static UINT16 DataMgrWriteBuffer(DATA_MNG_BUFFER *pMsgBuf, UINT8 *pSrc, UINT16 n
       // Update the buffer index
       pMsgBuf->index += nBytes;
    }
-   else // Buffer will overflow just fill to the end less the checksum
+   else // Buffer will overflow, because we don't know the format of the data
+        // in the temporary buffer, we should just return that we have the bytes
+        // remaining to write. This will force the software to write them in the 
+        // next packet.
    {
       // Copy as much as possible
-      memcpy (&pMsgBuf->packet.data[pMsgBuf->index], pSrc, nAvailable);
+      // memcpy (&pMsgBuf->packet.data[pMsgBuf->Index], pSrc, nAvailable);
 
       // Checksum the buffer here to help level out the loading
-      pMsgBuf->packet.checksum += ChecksumBuffer(pSrc, nAvailable, 0xFFFFFFFF);
+      // pMsgBuf->packet.checksum += ChecksumBuffer(pSrc, nAvailable, 0xFFFFFFFF);      
 
       // Update the buffer index
-      pMsgBuf->index += nAvailable;
+      // pMsgBuf->Index += nAvailable;
       // Calculate the remaining to be written
-      nRemainingToWrite = nBytes - nAvailable;
+      // nRemainingToWrite = nBytes - nAvailable;
+      nRemainingToWrite = nBytes;
    }
 
    // Return the number of bytes left to write
@@ -1889,6 +1908,12 @@ static void DataMgrDLUpdateStatistics ( DATA_MNG_INFO *pDMInfo,
  *  MODIFICATIONS
  *    $History: DataManager.c $
  * 
+ * *****************  Version 88  *****************
+ * User: Jim Mood     Date: 11/27/12   Time: 5:33p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1131 Modfix for error indication record not active when dm buffers
+ * were empty.
+ *
  * *****************  Version 87  *****************
  * User: Jim Mood     Date: 11/19/12   Time: 7:55p
  * Updated in $/software/control processor/code/system
