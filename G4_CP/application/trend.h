@@ -264,7 +264,7 @@ typedef struct
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
   UINT16       trendCnt;            /* # of all trends ( stability and trigger since Reset   */
-  UINT16       stableTrendCnt;      /* # of autotrends since Reset (0 -> TREND_CFG.maxTrends)*/
+  UINT16       autoTrendCnt;        /* # of autotrends since Reset (0 -> TREND_CFG.maxTrends)*/
   BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
 
