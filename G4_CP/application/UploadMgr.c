@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 164 $  $Date: 11/19/12 3:56p $
+   $Revision: 165 $  $Date: 11/27/12 8:34p $
 
 ******************************************************************************/
 
@@ -475,6 +475,7 @@ void UploadMgr_StartUpload(UPLOAD_START_SOURCE StartSource)
         if(StartSource == UPLOAD_START_AUTO)
         {
           LCTaskData.State = LOG_COLLECTION_INIT_AUTO;
+          GSE_DebugStr(VERBOSE,TRUE,"UploadMgr: Starting auto-upload check");
           //Skip log write, only write log if the upload actually starts in
           //the LC task.
         }
@@ -1200,7 +1201,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
   LOG_SOURCE          Source;
   LOG_FIND_STATUS     result;
   UPLOAD_START_SOURCE StartSource;
-
+  LOG_TYPE types[] = {LOG_TYPE_DATA,LOG_TYPE_ETM};
   switch (Task->State)
   {
     //Start the Log Collection process only if there are
@@ -1209,16 +1210,21 @@ void UploadMgr_FileCollectionTask(void *pParam)
     case LOG_COLLECTION_INIT_AUTO:
 
       Source.nNumber = LOG_SOURCE_DONT_CARE;
-      result = LogFindNextRecord(LOG_NEW ,
-                                 LOG_TYPE_DATA,
-                                 Source,
-                                 LOG_PRIORITY_DONT_CARE,
-                                 &ReadOffset,
-                                 LOG_NEXT,
-                                 &Task->LogOffset,
-                                 &Task->LogSize);
+      //Search for any records, break every 500ms to allow lower tasks to run.
+      //This allows a search of about 10k logs/frame depending on loading of
+      //higher priority tasks.
+      result = LogFindNextRecordEx(LOG_NEW ,
+                                   types,
+                                   2,
+                                   Source,
+                                   LOG_PRIORITY_DONT_CARE,
+                                   &ReadOffset,
+                                   LOG_NEXT,
+                                   &Task->LogOffset,
+                                   &Task->LogSize,500);
       if(LOG_FOUND == result)
       {
+        GSE_DebugStr(VERBOSE,NORMAL,"UploadMgr: Auto upload found data/etm log");
         StartSource = UPLOAD_START_AUTO;
         Task->State = LOG_COLLECTION_INIT;
         LogWriteSystem(APP_UPM_INFO_UPLOAD_START,LOG_PRIORITY_LOW,
@@ -1226,6 +1232,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
       }
       else if(LOG_NOT_FOUND == result)
       {
+        GSE_DebugStr(VERBOSE,NORMAL,
+                     "UploadMgr: Auto upload, no data/etm logs found, stopping");
         Task->InProgress = FALSE;
         TmTaskEnable(UL_Log_Collection, FALSE);
       }
@@ -3475,6 +3483,12 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 165  *****************
+ * User: Jim Mood     Date: 11/27/12   Time: 8:34p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1166 Auto Upload Task Overrun (from FASTMgr.c)
+ * SCR #1136 Auto Upload on ETM and Data Logs present
+ *
  * *****************  Version 164  *****************
  * User: Jim Mood     Date: 11/19/12   Time: 3:56p
  * Updated in $/software/control processor/code/application

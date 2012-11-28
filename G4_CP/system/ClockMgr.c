@@ -1,7 +1,7 @@
 #define SYS_CLOCKMGR_BODY
 
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:        ClockMgr.c
@@ -17,13 +17,13 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 46 $  $Date: 12-11-13 1:11p $
+     $Revision: 47 $  $Date: 12-11-27 7:06p $
 
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include "mcf548x.h"
 
 #include <string.h>
@@ -44,10 +44,10 @@
 #include "FASTMgr.h"
 #include "MSStsCtl.h"
 
-//extern TIME_SOURCE_ENUM FAST_TimeSourceCfg(void); 
+//extern TIME_SOURCE_ENUM FAST_TimeSourceCfg(void);
 //extern BOOLEAN MSSC_GetIsAlive(void);
 //extern TIMESTRUCT MSSC_GetLastMSSIMTime(void);
-//extern BOOLEAN MSSC_GetMSTimeSynced(void); 
+//extern BOOLEAN MSSC_GetMSTimeSynced(void);
 
 
 
@@ -70,8 +70,8 @@
                            ((Yr % 100) != 0) ? TRUE : \
                            ((Yr % 400) != 0) ? FALSE: TRUE )
 
-#define CM_DAYS_IN_YEAR_NO_LEAP    365          // Ignoring leap year 
-#define CM_DAYS_IN_YEAR_WITH_LEAP  365.242199f  // Including leap year  
+#define CM_DAYS_IN_YEAR_NO_LEAP    365          // Ignoring leap year
+#define CM_DAYS_IN_YEAR_WITH_LEAP  365.242199f  // Including leap year
 
 #define CM_SEC_IN_MIN  60
 #define CM_MIN_IN_HR   60
@@ -86,7 +86,7 @@
 #define CM_SYS_MS_CLOCK_DRIFT_MAX_SECS  6 //Max acceptable clock diff for sys and ms clocks.
 #define CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS 6 //Max acceptable clock diff for sys and rtc clocks.
 
-                             
+
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -130,9 +130,9 @@ static char GSE_OutLine[512];
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 void CM_CBit(void* pParam);
-static void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct ); 
-static void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime, 
-                                     TIMESTRUCT *newTime ); 
+static void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct );
+static void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
+                                     TIMESTRUCT *newTime );
 
 
 /*****************************************************************************/
@@ -140,7 +140,7 @@ static void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
 /*****************************************************************************/
 
 // Initial value of CM_SYS_CLOCK
-static const TIMESTRUCT CM_SYS_CLOCK_DEFAULT = 
+static const TIMESTRUCT CM_SYS_CLOCK_DEFAULT =
 {
   CM_INIT_CLK_YR,   // Year
   CM_INIT_CLK_MON,  // Month
@@ -155,31 +155,31 @@ static const TIMESTRUCT CM_SYS_CLOCK_DEFAULT =
   // CM System Logs - For Test Purposes
   static CM_TIME_INVALID_LOG CmTimeInvalidLog[] = {
     {DRV_RTC_TIME_NOT_VALID, {2000, 12, 25, 16, 15, 14, 13} }
-  }; 
-  
+  };
+
   static CM_TIME_INVALID_LOG CmTimeSetFailedLog[] = {
     {DRV_RTC_ERR_CANNOT_SET_TIME, {1997, 1, 1, 0, 0, 0, 0} }
-  }; 
-  
+  };
+
   static CM_RTC_SYS_TIME_DRIFT_LOG CmTimeDriftLog[] = {
     { {2001, 1, 2, 12, 0,  5, 0},
       {2001, 1, 2, 12, 0, 15, 1},
       {6}
     }
-  }; 
-  
+  };
+
   static CM_CLOCKUPDATE_LOG CmClockUpdateLog[] = {
     {1999, 12, 25, 12, 10, 5, 0},
     {1999, 11, 25, 12, 10, 5, 0}
-  }; 
-  
+  };
+
   static CM_RTC_DRV_PBIT_LOG CmRTCDrvFailLog[] = {
     {SYS_CM_RTC_PBIT_FAIL}
   };
 #endif
 
 
-#ifdef GENERATE_SYS_LOGS 
+#ifdef GENERATE_SYS_LOGS
 
 #include "User.h"
 
@@ -205,29 +205,29 @@ USER_MSG_TBL CMRoot[] =
 
 
 /*****************************************************************************
- * Function:    CM_Init   
+ * Function:    CM_Init
  *
  * Description: Initial setup for the Clock Manager and clock manager task
  *              It is expected that this routine is called at startup
  *              after the SPI and RTC periperals are intialized.
- *              
+ *
  *
  * Parameters:  none
- *              
+ *
  * Returns:     none
  *
  * Notes:       none
- *              
+ *
  ****************************************************************************/
 void CM_Init(void)
 {
   TCB TaskBlock;
   TIMESTRUCT Time;
-  CM_RTC_DRV_PBIT_LOG log; 
+  CM_RTC_DRV_PBIT_LOG log;
 
  #ifdef GENERATE_SYS_LOGS
   USER_MSG_TBL CMRootTblPtr = {"CM",CMRoot,NULL,NO_HANDLER_DATA};
- #endif 
+ #endif
 
   //Initialize clock manager data
   CM_SYS_CLOCK    = CM_SYS_CLOCK_DEFAULT;
@@ -238,7 +238,7 @@ void CM_Init(void)
   //the system clock
   CM_GetRTCClock(&Time);
   CM_SetSystemClock(&Time, FALSE);
-  
+
   memset(&TaskBlock, 0, sizeof(TaskBlock));
   strncpy_safe(TaskBlock.Name, sizeof(TaskBlock.Name),"Clock CBIT",_TRUNCATE);
   TaskBlock.TaskID         = Clock_CBIT;
@@ -253,12 +253,12 @@ void CM_Init(void)
   TaskBlock.Locked         = FALSE;
   TaskBlock.pParamBlock    = NULL;
   TmTaskCreate (&TaskBlock);
-  
-  if ( RTC_GetStatus() != DRV_OK ) 
+
+  if ( RTC_GetStatus() != DRV_OK )
   {
     CM_SYS_CLOCK = CM_SYS_CLOCK_DEFAULT;  // reset system clock to default
-    log.result = SYS_CM_RTC_PBIT_FAIL; 
-    Flt_SetStatus( STA_CAUTION, SYS_CM_PBIT_RTC_BAD, &log, sizeof(CM_RTC_DRV_PBIT_LOG) ); 
+    log.result = SYS_CM_RTC_PBIT_FAIL;
+    Flt_SetStatus( STA_CAUTION, SYS_CM_PBIT_RTC_BAD, &log, sizeof(CM_RTC_DRV_PBIT_LOG) );
   }
 
   #ifdef GENERATE_SYS_LOGS
@@ -284,11 +284,11 @@ void CM_Init(void)
  *              interrupt driven clock is initialized.
  *
  * Parameters:  none
- *              
- * Returns:     none 
+ *
+ * Returns:     none
  *
  * Notes:       none
- *              
+ *
  *****************************************************************************/
 void CM_PreInit(void)
 {
@@ -301,17 +301,17 @@ void CM_PreInit(void)
  *
  * Description: Returns the current value of the system real-time clock
  *
- * Parameters:  pTime - ptr to return current system time 
- *              
+ * Parameters:  pTime - ptr to return current system time
+ *
  * Returns:     none
  *
  * Notes:       May encur a SPI overhead time penalty (See RTC_GetTime)
- *              
+ *
  ****************************************************************************/
 void CM_GetSystemClock(TIMESTRUCT* pTime)
 {
   UINT32 intrLevel;
-  
+
   //If system clock is not yet running (during system start "pre-init" phase)
   //Need to silently discard errors.  If an error occurs, RTCClock returns the
   //default time.  This case only applies in the pre-init stage.
@@ -324,7 +324,7 @@ void CM_GetSystemClock(TIMESTRUCT* pTime)
       *pTime = CM_SYS_CLOCK_DEFAULT;      // Set to default date
     }
   }
-  else 
+  else
   {
     intrLevel = __DIR();
     *pTime = CM_SYS_CLOCK;    // Copy system clock
@@ -339,21 +339,21 @@ void CM_GetSystemClock(TIMESTRUCT* pTime)
  * Description: Sets the time values in the system real-time clock
  *
  * Parameters:  pTime time to set
- *              bRecordLog record update change log 
- *              
+ *              bRecordLog record update change log
+ *
  * Returns:     none
  *
  * Notes:       none
- *              
+ *
  ****************************************************************************/
 void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
 {
   UINT32 intrLevel;
-  TIMESTRUCT currTime;  
-  
+  TIMESTRUCT currTime;
+
   intrLevel = __DIR();
-  currTime = CM_SYS_CLOCK; 
-  
+  currTime = CM_SYS_CLOCK;
+
   CM_SYS_CLOCK.MilliSecond = pTime->MilliSecond;
   CM_SYS_CLOCK.Second = pTime->Second;
   CM_SYS_CLOCK.Minute = pTime->Minute;
@@ -362,25 +362,25 @@ void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
   CM_SYS_CLOCK.Month  = pTime->Month;
   CM_SYS_CLOCK.Year   = pTime->Year;
   __RIR(intrLevel);
-  
-  if (bRecordLog == TRUE) 
+
+  if (bRecordLog == TRUE)
   {
-    CM_CreateClockUpdateLog( SYS_CM_CLK_UPDATE_CPU, &currTime, pTime ); 
-    
-    // Output Debug Message 
-    sprintf (GSE_OutLine, 
-             "\r\nCM_SetSystemClock: Auto update time (old=%02d/%02d/%4d %02d:%02d:%02d)\r\n", 
-             currTime.Month, currTime.Day, currTime.Year, currTime.Hour, currTime.Minute, 
-             currTime.Second); 
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
-    
-    sprintf (GSE_OutLine, 
-             "\r\nCM_SetSystemClock: Auto update time (new=%02d/%02d/%4d %02d:%02d:%02d)\r\n", 
-             CM_SYS_CLOCK.Month,CM_SYS_CLOCK.Day, CM_SYS_CLOCK.Year, CM_SYS_CLOCK.Hour, 
-             CM_SYS_CLOCK.Minute, CM_SYS_CLOCK.Second); 
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine); 
+    CM_CreateClockUpdateLog( SYS_CM_CLK_UPDATE_CPU, &currTime, pTime );
+
+    // Output Debug Message
+    sprintf (GSE_OutLine,
+             "\r\nCM_SetSystemClock: Auto update time (old=%02d/%02d/%4d %02d:%02d:%02d)\r\n",
+             currTime.Month, currTime.Day, currTime.Year, currTime.Hour, currTime.Minute,
+             currTime.Second);
+    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
+
+    sprintf (GSE_OutLine,
+             "\r\nCM_SetSystemClock: Auto update time (new=%02d/%02d/%4d %02d:%02d:%02d)\r\n",
+             CM_SYS_CLOCK.Month,CM_SYS_CLOCK.Day, CM_SYS_CLOCK.Year, CM_SYS_CLOCK.Hour,
+             CM_SYS_CLOCK.Minute, CM_SYS_CLOCK.Second);
+    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
   }
-  
+
 }
 
 
@@ -388,21 +388,21 @@ void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
  * Function:    CM_GetRTCClock
  *
  * Description: Returns the RTC clock time as read from the real-time clock
- *              on the SPI bus.  Note that the system maintained clock is different 
- *              than the real-time clock on the SPI bus.  
+ *              on the SPI bus.  Note that the system maintained clock is different
+ *              than the real-time clock on the SPI bus.
  *
- * Parameters:  PTime  -  ptr to TIMESTRUCT 
- *              
- * Returns:     none 
+ * Parameters:  PTime  -  ptr to TIMESTRUCT
  *
- * Notes:       none 
- *              
+ * Returns:     none
+ *
+ * Notes:       none
+ *
  ****************************************************************************/
 void CM_GetRTCClock(TIMESTRUCT* pTime)
 {
   RESULT Result;
   CM_TIME_INVALID_LOG InvalidTimeLog;
- 
+
   Result = RTC_GetTime(pTime);
   if(Result != DRV_OK)
   {
@@ -413,7 +413,7 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
       LogWriteSystem(SYS_CM_CBIT_TIME_INVALID_LOG,
           LOG_PRIORITY_LOW,&InvalidTimeLog,sizeof(InvalidTimeLog),NULL);
     }
-    
+
     //Set return time to default value
     *pTime = CM_SYS_CLOCK_DEFAULT;
     Result = RTC_SetTime(pTime);
@@ -422,10 +422,10 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
       if(!CM_PreInitFlag)
       {
         //Cannot set the time, log a fault (with "Result")
-        InvalidTimeLog.Result = Result; 
-        InvalidTimeLog.TimeRead = *pTime; 
+        InvalidTimeLog.Result = Result;
+        InvalidTimeLog.TimeRead = *pTime;
         LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &InvalidTimeLog,
-                       sizeof(InvalidTimeLog),NULL); 
+                       sizeof(InvalidTimeLog),NULL);
       }
     }
   }
@@ -435,41 +435,41 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
 /*****************************************************************************
  * Function:    CM_SetRTCClock
  *
- * Description: Writes the time passed in the Time paramter to the real-time 
+ * Description: Writes the time passed in the Time paramter to the real-time
  *              clock on the SPI bus.  Note that the system maintained clock
- *              is different than the real-time clock on the SPI bus.  
+ *              is different than the real-time clock on the SPI bus.
  *
  * Parameters:  pTime - new time to set
- *              bRecordLog - Record time update change log 
- *              
+ *              bRecordLog - Record time update change log
+ *
  * Returns:     none
  *
- * Notes:       none 
- *              
+ * Notes:       none
+ *
  ****************************************************************************/
 void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
 {
-  TIMESTRUCT currTime; 
+  TIMESTRUCT currTime;
   CM_TIME_INVALID_LOG InvalidTimeLog;
-  RESULT Result; 
-  
-  CM_GetRTCClock( &currTime ); 
-  
-  Result = RTC_SetTime(pTime); 
+  RESULT Result;
+
+  CM_GetRTCClock( &currTime );
+
+  Result = RTC_SetTime(pTime);
 
   if(Result != DRV_OK)
   {
     //Cannot set the time, log a fault (with "Result")
-    InvalidTimeLog.Result = Result; 
-    InvalidTimeLog.TimeRead = *pTime; 
+    InvalidTimeLog.Result = Result;
+    InvalidTimeLog.TimeRead = *pTime;
     LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &InvalidTimeLog,
-                   sizeof(InvalidTimeLog),NULL); 
+                   sizeof(InvalidTimeLog),NULL);
   }
-  else 
+  else
   {
-    CM_CreateClockUpdateLog( SYS_CM_CLK_UPDATE_RTC, &currTime, pTime ); 
+    CM_CreateClockUpdateLog( SYS_CM_CLK_UPDATE_RTC, &currTime, pTime );
   }
-  
+
 }
 
 
@@ -478,7 +478,7 @@ void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
  * Function:    CM_GetTimeAsTimestamp
  *
  * Description: Returns the current time from the RTC in a packed 48-bit word
- *              aka: Altair "timestamp" format.  
+ *              aka: Altair "timestamp" format.
  *
  *      Bit 47           37   32   28      22     16         0
  *           :            :    :    :       :      :
@@ -502,7 +502,7 @@ void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
  *
  * Parameters:  TimeStamp - Pointer to the time stamp structure.
  *
- * Returns:     none 
+ * Returns:     none
  *
  * Notes:       The time returned is a combination of the real-time clock and
  *              wall clock.  The software requirements state that the second,
@@ -515,7 +515,7 @@ void CM_GetTimeAsTimestamp (TIMESTAMP* TimeStamp)
  TIMESTRUCT Time;
 
   CM_GetSystemClock(&Time);
- 
+
   TimeStamp->Timestamp =   ((UINT32) ((Time.Second & 0x3F)))       +
                            ((UINT32) ((Time.Minute & 0x3F)) << 6)  +
                            ((UINT32) ((Time.Month  & 0x0F)) << 12) +
@@ -536,7 +536,7 @@ void CM_GetTimeAsTimestamp (TIMESTAMP* TimeStamp)
  * Parameters:  [in]  Tp: Pointer to a TIMESTAMP structure to convert
  *              [out] Ts: Pointer to a TIMESTRUCT location to receive the
  *                        converted data
- * Returns:     none 
+ * Returns:     none
  *
  * Notes:       garbage-in-garbage-out
  *
@@ -557,19 +557,19 @@ void CM_ConvertTimeStamptoTimeStruct(const TIMESTAMP* Tp, TIMESTRUCT* Ts)
 /*****************************************************************************
  * Function:    CM_SynchRTCtoWallClock
  *
- * Description: Syncs the RTC to the internal system maintained clock 
- *              
- * Parameters:  none 
- *              
- * Returns:     none 
+ * Description: Syncs the RTC to the internal system maintained clock
  *
- * Notes:       none 
- *              
+ * Parameters:  none
+ *
+ * Returns:     none
+ *
+ * Notes:       none
+ *
  ****************************************************************************/
 void CM_SynchRTCtoWallClock(void)
 {
   TIMESTRUCT localTm;
-  //Get seconds difference 
+  //Get seconds difference
   if(RTC_GetTime(&localTm) == DRV_OK)          //Get wallclock time
   {
     localTm.MilliSecond = CM_SYS_CLOCK.MilliSecond;  //Keep the ms the same
@@ -589,7 +589,7 @@ void CM_SynchRTCtoWallClock(void)
  *
  * Parameters:  None
  *
- * Returns:     TickCount: Number of milliseconds since power on.   
+ * Returns:     TickCount: Number of milliseconds since power on.
  *
  * Notes:       COUNTER ROLLS OVER EVERY 49.7 DAYS, < > COMPARISONS OF TICK
  *              COUNT VALUES ARE NOT VALID! ONLY THE DIFFERNCE OF TWO TIMES
@@ -608,9 +608,9 @@ UINT32 CM_GetTickCount(void)
 /*****************************************************************************
  * Function:    CM_GenerateDebugLogs
  *
- * Parameters:  
+ * Parameters:
  *
- * Returns:     
+ * Returns:
  *
  * Notes:
  *
@@ -622,7 +622,7 @@ void CM_GenerateDebugLogs(void)
 {
   CM_RTC_SYS_TIME_DRIFT_LOG TimeDriftLog;
   CM_TIME_INVALID_LOG TimeInvalidLog;
-  
+
   //Initialize the test log date/times to a couple different dates.
   TimeDriftLog.RTC.Year           = 1979;
   TimeDriftLog.RTC.Month          = 9;
@@ -650,7 +650,7 @@ void CM_GenerateDebugLogs(void)
 //      LOG_PRIORITY_LOW,&InvalidTimeLog,sizeof(InvalidTimeLog),NULL);
 
 
-  
+
 }
 /*vcast_dont_instrument_end*/
 
@@ -662,13 +662,13 @@ void CM_GenerateDebugLogs(void)
  * Description: Increments the real-time clock, rolls over each time unit,
  *              accounting for leap-years.  Also schedules a CBIT routine to
  *              run every 10 minutes
- *              
- * Parameters:  none
- *              
- * Returns:     none 
  *
- * Notes:       none 
- *              
+ * Parameters:  none
+ *
+ * Returns:     none
+ *
+ * Notes:       none
+ *
  ****************************************************************************/
 void CM_RTCTick(void)
 {
@@ -682,7 +682,7 @@ void CM_RTCTick(void)
     CM_SYS_CLOCK.Second  = (CM_SYS_CLOCK.Second + 1) % SECONDS_PER_MINUTE;
 
     if (CM_SYS_CLOCK.Second == 0)                             // Update Minutes
-    {                                                   
+    {
       CM_SYS_CLOCK.Minute = (CM_SYS_CLOCK.Minute + 1) % MINUTES_PER_HOUR;
 
       if(CM_SYS_CLOCK.Minute == 0)
@@ -714,14 +714,14 @@ void CM_RTCTick(void)
         }//Hour == 0
       }//Minute == 0
     }//Second == 0
-    
-    // Check sync to Cfg Time Source every 2 sec 
+
+    // Check sync to Cfg Time Source every 2 sec
     if ( (((CM_SYS_CLOCK.Second) % 2) == 0) &&
          (FAST_TimeSourceCfg() != TIME_SOURCE_LOCAL) )
     {
-      CM_TimeSourceSyncToRemote( CM_SYS_CLOCK ); 
+      CM_TimeSourceSyncToRemote( CM_SYS_CLOCK );
     }
-    
+
   }
 }
 
@@ -731,80 +731,80 @@ void CM_RTCTick(void)
 /*****************************************************************************
  * Function:    CM_GetSecSinceBaseYr
  *
- * Description: Returns the number of seconds since the Base Year 
- *                                                    (1/1/1997 00:00:00) 
+ * Description: Returns the number of seconds since the Base Year
+ *                                                    (1/1/1997 00:00:00)
  *
- * Parameters:  ts     -  ptr to TimeStamp to convert to sec since base yr 
+ * Parameters:  ts     -  ptr to TimeStamp to convert to sec since base yr
  *              time_s -  ptr to TimeStruct to conver to sec since base yr
  *
  * Returns:     Seconds since Base Year or "0" if Date-Time invalid / out of range
  *
- * Notes:       
- *  - To make algorithm simple will ignore leap year for century.  Next 
- *    century milestone will be 2100 and all of us will have pasted away. 
+ * Notes:
+ *  - To make algorithm simple will ignore leap year for century.  Next
+ *    century milestone will be 2100 and all of us will have pasted away.
  *
  ****************************************************************************/
 UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
 {
-  UINT16 i; 
-  UINT32 sec; 
-  UINT32 itemp; 
-  TIMESTRUCT time_struct; 
-  
+  UINT16 i;
+  UINT32 sec;
+  UINT32 itemp;
+  TIMESTRUCT time_struct;
+
   // We need one of these to be NONE NULL
   ASSERT( ts != NULL || time_s != NULL);
 
-  if ( ts != NULL ) 
+  if ( ts != NULL )
   {
     CM_ConvertTimeStamptoTimeStruct((const TIMESTAMP *) ts, &time_struct);
   }
-  
-  if ( time_s != NULL ) 
+
+  if ( time_s != NULL )
   {
-    time_struct = *time_s; 
+    time_struct = *time_s;
   }
 
   // CM_ConvertTimeStamptoTimeStruct((const TIMESTAMP *) &ts, &time_struct);
 
-  
+
   // Determine years since 1997 in sec
   // Note: Year will be > 1997 as year in ts format is years since Base Year !
-  // Note: Leap yr calc not compliant to /4 and /100 is not a leap yr unless also 
-  //       /400.  Leap yr calc would fail for 2100.  
-  itemp = 0; 
-  if ( time_struct.Year >= 2000 ) 
+  // Note: Leap yr calc not compliant to /4 and /100 is not a leap yr unless also
+  //       /400.  Leap yr calc would fail for 2100.
+  itemp = 0;
+  if ( time_struct.Year >= 2000 )
   {
-    // Determine # leap days, from last leap year of 1996. 
-    itemp = ((time_struct.Year - 1996) / 4); 
+    // Determine # leap days, from last leap year of 1996.
+    itemp = ((time_struct.Year - 1996) / 4);
   }
-  // else date between 1997 and 2000, no leap yr calc required 
-  itemp = (CM_DAYS_IN_YEAR_NO_LEAP * (time_struct.Year - BASE_YEAR)) + itemp;  
-  sec = itemp * CM_SEC_IN_DAY; 
-  
-  
+  // else date between 1997 and 2000, no leap yr calc required
+  itemp = (CM_DAYS_IN_YEAR_NO_LEAP * (time_struct.Year - BASE_YEAR)) + itemp;
+  sec = itemp * CM_SEC_IN_DAY;
+
+
   // Determine # months for current year in sec
-  itemp = 0; 
-  for (i=0;i<time_struct.Month;i++)
+  itemp = 0;
+  for (i=1;i<=time_struct.Month;i++)
   {
-    itemp += DaysPerMonth[i]; 
+    itemp += DaysPerMonth[i];
   }
-  sec += (itemp * CM_SEC_IN_DAY); 
-  
+  sec += (itemp * CM_SEC_IN_DAY);
+
 
   // Determine # days for current year in sec
-  sec += (time_struct.Day * CM_SEC_IN_DAY); 
-  
-  
+  sec += (time_struct.Day * CM_SEC_IN_DAY);
+
+
   // Determine # hours in sec
-  sec += (time_struct.Hour * CM_SEC_IN_MIN * CM_MIN_IN_HR); 
-  
-  // Determine # min in sec 
-  sec += (time_struct.Minute * CM_SEC_IN_MIN); 
-  
-  // Add in current sec 
-  sec += time_struct.Second; 
-  
-  return sec; 
+  sec += (time_struct.Hour * CM_SEC_IN_MIN * CM_MIN_IN_HR);
+
+  // Determine # min in sec
+  sec += (time_struct.Minute * CM_SEC_IN_MIN);
+
+  // Add in current sec
+  sec += time_struct.Second;
+
+  return sec;
 
 }
 
@@ -813,7 +813,7 @@ UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
 /*****************************************************************************
  * Function:    CM_CreateAllInternalLogs
  *
- * Description: Creates the Clock Update Change Log 
+ * Description: Creates the Clock Update Change Log
  *
  *              Log Write Test will write one copy of every log the Clock
  *              Manager generates.  The purpose if to test the log format
@@ -832,34 +832,34 @@ UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
  * Notes:       none
  *
  ****************************************************************************/
-#ifdef GENERATE_SYS_LOGS 
+#ifdef GENERATE_SYS_LOGS
 
 /*vcast_dont_instrument_start*/
 void CM_CreateAllInternalLogs( void )
 {
   // 1 SYS_CM_CBIT_TIME_DRIFT_GT_6s
   LogWriteSystem( SYS_CM_CBIT_TIME_DRIFT_LIMIT_EXCEEDED, LOG_PRIORITY_LOW, &CmTimeDriftLog,
-                  sizeof(CM_RTC_SYS_TIME_DRIFT_LOG), NULL ); 
-  
+                  sizeof(CM_RTC_SYS_TIME_DRIFT_LOG), NULL );
+
   // 2 SYS_CM_CBIT_TIME_INVALID_LOG
   LogWriteSystem( SYS_CM_CBIT_TIME_INVALID_LOG, LOG_PRIORITY_LOW, &CmTimeInvalidLog,
-                  sizeof(CM_TIME_INVALID_LOG), NULL ); 
-                            
+                  sizeof(CM_TIME_INVALID_LOG), NULL );
+
   // 3 SYS_CM_CBIT_SET_RTC_FAILED
   LogWriteSystem( SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &CmTimeSetFailedLog,
-                  sizeof(CM_TIME_INVALID_LOG), NULL ); 
-  
+                  sizeof(CM_TIME_INVALID_LOG), NULL );
+
   // 4 SYS_CM_CLK_UPDATE_RTC
   LogWriteSystem( SYS_CM_CLK_UPDATE_RTC, LOG_PRIORITY_LOW, &CmClockUpdateLog,
-                  sizeof(CM_CLOCKUPDATE_LOG), NULL ); 
-  
+                  sizeof(CM_CLOCKUPDATE_LOG), NULL );
+
   // 5 SYS_CM_CLK_UPDATE_CPU
   LogWriteSystem( SYS_CM_CLK_UPDATE_CPU, LOG_PRIORITY_LOW, &CmClockUpdateLog,
-                  sizeof(CM_CLOCKUPDATE_LOG), NULL ); 
-                            
-  // 6 SYS_CM_PBIT_RTC_BAD                          
+                  sizeof(CM_CLOCKUPDATE_LOG), NULL );
+
+  // 6 SYS_CM_PBIT_RTC_BAD
   LogWriteSystem( SYS_CM_PBIT_RTC_BAD, LOG_PRIORITY_LOW, &CmRTCDrvFailLog,
-                  sizeof(CM_RTC_DRV_PBIT_LOG), NULL ); 
+                  sizeof(CM_RTC_DRV_PBIT_LOG), NULL );
 }
 /*vcast_dont_instrument_end*/
 
@@ -870,15 +870,15 @@ void CM_CreateAllInternalLogs( void )
  * Function:    CMMsg_CreateLogs (clock.createlogs)
  *
  * Description: Create all the internal clock system logs
- *              
+ *
  * Parameters:  USER_DATA_TYPE DataType
- *              USER_MSG_PARAM Param 
+ *              USER_MSG_PARAM Param
  *              UINT32 Index
  *              const void *SetPtr
  *              void **GetPtr
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command. 
+ *              USER_RESULT_ERROR: Error processing command.
  *
  * Notes:       none
  *
@@ -892,7 +892,7 @@ USER_HANDLER_RESULT CMMsg_CreateLogs(USER_DATA_TYPE DataType,
                                      const void *SetPtr,
                                      void **GetPtr)
 {
-  USER_HANDLER_RESULT result = USER_RESULT_OK; 
+  USER_HANDLER_RESULT result = USER_RESULT_OK;
 
   CM_CreateAllInternalLogs();
 
@@ -907,23 +907,23 @@ USER_HANDLER_RESULT CMMsg_CreateLogs(USER_DATA_TYPE DataType,
 /*****************************************************************************
  * Function:    CM_CompareSystemToMsClockDrift
  *
- * Description: Used to check clock drift between Control Processor and MicroServer. 
+ * Description: Used to check clock drift between Control Processor and MicroServer.
  *              If difference is greater than prescribed limit, a sys log entry is written.
  *
  * Parameters:  none
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  ****************************************************************************/
 void CM_CompareSystemToMsClockDrift(void)
 {
   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-  
+
   // If this is the first time since start that  MSSIM has been detected,
   // check for clock drift.
   // SRS-3091
-  
+
   UINT32     msClockTime;
   UINT32     systemClockTime;
   CM_MS_SYS_TIME_DRIFT_LOG timeDriftLog;
@@ -939,7 +939,7 @@ void CM_CompareSystemToMsClockDrift(void)
 
   // If the difference between the clocks exceeds the limit, create log entry.
   if( abs(msClockTime - systemClockTime) > timeDriftLog.MaxAllowedDriftSecs )
-  {     
+  {
     LogWriteSystem(SYS_CM_MS_TIME_DRIFT_LIMIT_EXCEEDED, LOG_PRIORITY_LOW, &timeDriftLog,
                    sizeof(timeDriftLog), 0);
     GSE_DebugStr(NORMAL,FALSE, "ClockMgr: Sys/MS Clock delta > %ds",
@@ -956,10 +956,10 @@ void CM_CompareSystemToMsClockDrift(void)
  *
  * Description:   Detects and corrects drift between the processor maintained
  *                RTC clock (RTC), and the RTC peripheral clock (Wallclock)
- *                
+ *
  *
  * Parameters:    pParam - not used.  Generic header for system tasks
- *              
+ *
  * Returns:       none
  *
  * Notes:  The clock test shall ensure the system clock is accurate to +/-
@@ -970,7 +970,7 @@ void CM_CompareSystemToMsClockDrift(void)
  *         a fault is detected.
  *         The clock failure log shall contain the delta time when the
  *         error is recorded.
- *              
+ *
  ****************************************************************************/
 void CM_CBit(void* pParam)
 {
@@ -994,7 +994,7 @@ void CM_CBit(void* pParam)
     SysS += SysTime.Hour * CM_SEC_IN_HR;
     SysS += SysTime.Minute * CM_SEC_IN_MIN;
     SysS += SysTime.Second;
-    
+
     //Now, check for midnight roll over and compensate
     if(RtcTime.Day != SysTime.Day)
     {
@@ -1025,7 +1025,7 @@ void CM_CBit(void* pParam)
       GSE_DebugStr(NORMAL,FALSE, "ClockMgr: Clock drift > %ds in 10 min",
                    CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS);
     }
-    
+
   }
   else
   {
@@ -1047,128 +1047,133 @@ void CM_CBit(void* pParam)
  * Notes:       none
  *
  ****************************************************************************/
-static 
-void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )  
+static
+void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
 {
-  BOOLEAN bSync; 
-  TIMESTRUCT mssc_TimeStruct; 
-  UINT32 mssc_SecSinceBaseYr; 
+  BOOLEAN bSync;
+  TIMESTRUCT mssc_TimeStruct;
+  UINT32 mssc_SecSinceBaseYr;
   UINT32 cm_SecSinceBaseYr;
-  UINT32 time_diff;  
+  UINT32 time_diff;
 
 
-  bSync = TRUE; 
-  
+  bSync = TRUE;
+
   // Have we received heart beat from MS ?
-  // NOTE: Expect that when heart beat goes away ("data loss"), FALSE will be 
-  //       returned 
-  // NOTE: The time out for heart beat loss must be < 1 min otherwise 
-  //       the logic below will re-sync the system clock 
-  // NOTE: To make logic simplier, will not have test to ensure time is 
-  //       "ticking from ms".  
-  if ( MSSC_GetIsAlive() == TRUE ) 
+  // NOTE: Expect that when heart beat goes away ("data loss"), FALSE will be
+  //       returned
+  // NOTE: The time out for heart beat loss must be < 1 min otherwise
+  //       the logic below will re-sync the system clock
+  // NOTE: To make logic simplier, will not have test to ensure time is
+  //       "ticking from ms".
+  if ( MSSC_GetIsAlive() == TRUE )
   {
-    // If cfg set for TIME_SOURCE_REMOTE and ms has not synced to remote server 
-    //    do not attempt to sync FAST time to ms 
-    if ( (FAST_TimeSourceCfg() == TIME_SOURCE_REMOTE) && 
+    // If cfg set for TIME_SOURCE_REMOTE and ms has not synced to remote server
+    //    do not attempt to sync FAST time to ms
+    if ( (FAST_TimeSourceCfg() == TIME_SOURCE_REMOTE) &&
          (MSSC_GetMSTimeSynced() != TRUE) )
     {
-      bSync = FALSE; 
+      bSync = FALSE;
     }
   }
-  else 
+  else
   {
-    // ms not connected, do not perform time sync processing 
-    bSync = FALSE; 
+    // ms not connected, do not perform time sync processing
+    bSync = FALSE;
   }
-  
-  // Update system clock and RTC if time difference is > 1 minute ! 
+
+  // Update system clock and RTC if time difference is > 1 minute !
   if (bSync == TRUE)
   {
-    // Get current ms time.  
+    // Get current ms time.
     // NOTE: Heart beat is at 1 sec and timeout to be 10 sec
-    mssc_TimeStruct = MSSC_GetLastMSSIMTime(); 
+    mssc_TimeStruct = MSSC_GetLastMSSIMTime();
 
-    // If ms < 1997 then it is not a correct time ! 
+    // If ms < 1997 then it is not a correct time !
     if ( (mssc_TimeStruct.Year >= CM_BASE_YEAR) &&
          (mssc_TimeStruct.Year <= CM_BASE_YEAR_MAX) )
     {
-      // Convert ms timestruct to sec since base year 
-      mssc_SecSinceBaseYr = CM_GetSecSinceBaseYr( NULL, &mssc_TimeStruct ); 
-      
-      // Get current time timestruct to sec since base year 
-      cm_SecSinceBaseYr = CM_GetSecSinceBaseYr( NULL, &cm_time_struct ); 
-      
-      // Determine time difference 
-      if ( mssc_SecSinceBaseYr > cm_SecSinceBaseYr ) 
+      // Convert ms timestruct to sec since base year
+      mssc_SecSinceBaseYr = CM_GetSecSinceBaseYr( NULL, &mssc_TimeStruct );
+
+      // Get current time timestruct to sec since base year
+      cm_SecSinceBaseYr = CM_GetSecSinceBaseYr( NULL, &cm_time_struct );
+
+      // Determine time difference
+      if ( mssc_SecSinceBaseYr > cm_SecSinceBaseYr )
       {
-        time_diff = mssc_SecSinceBaseYr - cm_SecSinceBaseYr; 
+        time_diff = mssc_SecSinceBaseYr - cm_SecSinceBaseYr;
       }
-      else 
+      else
       {
-        time_diff = cm_SecSinceBaseYr - mssc_SecSinceBaseYr; 
+        time_diff = cm_SecSinceBaseYr - mssc_SecSinceBaseYr;
       }
-      
+
       // If time diff is >  CM_MS_TIME_DIFF, then sync system clk to MS
-      if ( time_diff > CM_MS_TIME_DIFF_SECS ) 
+      if ( time_diff > CM_MS_TIME_DIFF_SECS )
       {
-        // Update system clock, log created within func call 
-        CM_SetSystemClock( &mssc_TimeStruct, TRUE ); 
-        
-        // Update RTC clock, log created within func call 
-        CM_SetRTCClock( &mssc_TimeStruct, TRUE ); 
+        // Update system clock, log created within func call
+        CM_SetSystemClock( &mssc_TimeStruct, TRUE );
+
+        // Update RTC clock, log created within func call
+        CM_SetRTCClock( &mssc_TimeStruct, TRUE );
       }
     }
-    // else TBD indicate that ms time is "suspect"  
+    // else TBD indicate that ms time is "suspect"
 
   } // End of if (bSync == TRUE)
-  
-} 
+
+}
 
 
 /*****************************************************************************
  * Function:    CM_CreateClockUpdateLog
  *
- * Description: Creates the Clock Update Change Log 
+ * Description: Creates the Clock Update Change Log
  *
  * Parameters:  SysId  SYS_CM_CLK_UPDATE_RTC or SYS_CM_CLK_UPDATE_CPU
  *              currTime Current time
- *              newTime  Time to change to 
+ *              newTime  Time to change to
  *
  * Returns:     none
  *
  * Notes:       none
  *
  ****************************************************************************/
-static 
-void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime, 
+static
+void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
                               TIMESTRUCT *newTime )
 {
-  CM_CLOCKUPDATE_LOG ClockUpdateLog; 
-  
-  ClockUpdateLog.currTime = *currTime; 
-  ClockUpdateLog.newTime = *newTime; 
+  CM_CLOCKUPDATE_LOG ClockUpdateLog;
 
-  LogWriteSystem( SysId, LOG_PRIORITY_LOW, &ClockUpdateLog, 
-                  sizeof(CM_CLOCKUPDATE_LOG), NULL ); 
+  ClockUpdateLog.currTime = *currTime;
+  ClockUpdateLog.newTime = *newTime;
+
+  LogWriteSystem( SysId, LOG_PRIORITY_LOW, &ClockUpdateLog,
+                  sizeof(CM_CLOCKUPDATE_LOG), NULL );
 }
- 
+
 
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
  * 
+ * *****************  Version 47  *****************
+ * User: Peter Lee    Date: 12-11-27   Time: 7:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1156
+ *
  * *****************  Version 46  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 1:11p
  * Updated in $/software/control processor/code/system
  * SCR #1142 File Format Error
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor2  Date: 9/22/10    Time: 2:28p
  * Updated in $/software/control processor/code/system
@@ -1177,184 +1182,184 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
  * Also made sure system clock year is 4 digits. Timestamp conversion
  * depends on 4 digit year. Added validity check of call to RTC_ReadTime
  * during pre-init operation.
- * 
+ *
  * *****************  Version 43  *****************
  * User: John Omalley Date: 9/20/10    Time: 11:33a
  * Updated in $/software/control processor/code/system
  * SCR 843 - Changed Default Time to 97
- * 
+ *
  * *****************  Version 42  *****************
  * User: Peter Lee    Date: 9/03/10    Time: 5:22p
  * Updated in $/software/control processor/code/system
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 41  *****************
  * User: Jeff Vahue   Date: 8/28/10    Time: 12:22p
  * Updated in $/software/control processor/code/system
  * SCR# 830 - GENERATE_SYS_LOGS exclude area from coverage results
- * 
+ *
  * *****************  Version 40  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor3  Date: 5/27/10    Time: 10:57a
  * Updated in $/software/control processor/code/system
  * SCR #617 - Changes made to meet coding standards as a result of code
  * review.
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 5/26/10    Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:54p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:10p
  * Updated in $/software/control processor/code/system
  * SCR #579 Change LogWriteSys to return void
- * 
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 4/28/10    Time: 4:53p
  * Updated in $/software/control processor/code/system
  * SCR #559 Check clock diff CP-MS on startup
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 4/12/10    Time: 5:43p
  * Updated in $/software/control processor/code/system
  * SCR #541 - all XXX_CreateLogs functions are now dependent on
  * GENERATE_SYS_LOGS
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:10p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 32  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 5:03p
  * Updated in $/software/control processor/code/system
  * Fix comment error
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 3/04/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR 67 Use RTC for time until init complete
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:57p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 2/19/10    Time: 12:58p
  * Updated in $/software/control processor/code/system
  * SCR# 455 - remove LINT issues
- * 
+ *
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 1/28/10    Time: 9:20a
  * Updated in $/software/control processor/code/system
  * SCR #427 ClockMgr.c Issues and SRS-3090
- * 
+ *
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 1/27/10    Time: 4:31p
  * Updated in $/software/control processor/code/system
- * SCR #427 Misc Clock Updates 
- * 
+ * SCR #427 Misc Clock Updates
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 5:05p
  * Updated in $/software/control processor/code/system
  * SCR# 397
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 12/04/09   Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR# 350
- * 
+ *
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 12/01/09   Time: 5:15p
  * Updated in $/software/control processor/code/system
  * SCR #347 Time Sync Requirements
- * 
+ *
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 11/23/09   Time: 5:57p
  * Updated in $/software/control processor/code/system
  * SCR #347 Time Sync Requirements
- * 
+ *
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 11/02/09   Time: 2:13p
  * Updated in $/software/control processor/code/system
- * Misc non-code updates to support WIN32 and spelling.  
- * 
+ * Misc non-code updates to support WIN32 and spelling.
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 9/29/09    Time: 1:25p
  * Updated in $/software/control processor/code/system
  * SCR #280 Fix Compiler Warnings
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 9/28/09    Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR 275 Support routines for Power On Usage Requirements
- * 
+ *
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 9/16/09    Time: 10:27a
  * Updated in $/software/control processor/code/system
- * SCR #258 CM_GetSystemClock() returns "0" during system initialization. 
- * 
+ * SCR #258 CM_GetSystemClock() returns "0" during system initialization.
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 4/29/09    Time: 11:27a
  * Updated in $/software/control processor/code/system
  * SCR #168
- * 
+ *
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 4/20/09    Time: 9:31a
  * Updated in $/control processor/code/system
  * SCR #161, #51 and added required logs
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 10/23/08   Time: 3:07p
  * Updated in $/control processor/code/system
  * Added clock pre-init that forces clock manager to server "get" time
  * requests from the RTC chip.  This is useful for maintaining time during
  * system startup, when the interrupt driven clock is not yet running
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 10/16/08   Time: 5:46p
  * Updated in $/control processor/code/system
  * Added ConvertTimeStampToTimeStruct function and updated the SDD to
  * refelect the new function.
- * 
+ *
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 10/08/08   Time: 10:20a
  * Updated in $/control processor/code/system
  * Remove unnecessary #define
- * 
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 2:42p
  * Updated in $/control processor/code/system
  * SCR #87 Function Prototype
- * 
- * 
+ *
+ *
  *
  ***************************************************************************/
- 
+
 

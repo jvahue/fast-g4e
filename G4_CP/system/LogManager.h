@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 55 $  $Date: 12-11-16 9:10p $
+    $Revision: 56 $  $Date: 11/27/12 8:35p $
 
 ******************************************************************************/
 
@@ -373,13 +373,15 @@ EXPORT USER_ENUM_TBL lm_UserEnumPriority[];
 ******************************************************************************/
 EXPORT void            LogInitialize     ( void );
 EXPORT void            LogPreInit        ( void );
-EXPORT LOG_FIND_STATUS LogFindNextRecord ( LOG_STATE State, LOG_TYPE Type,
-                                           LOG_SOURCE Source,
-                                           LOG_PRIORITY Priority,
-                                           UINT32 *pRdOffset,
-                                           UINT32 EndOffset,
-                                           UINT32 *pFoundOffset,
-                                           UINT32 *pSize);
+EXPORT LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State, LOG_TYPE Type,
+                                          LOG_SOURCE Source, LOG_PRIORITY Priority,
+                                          UINT32 *pRdOffset, UINT32 EndOffset,
+                                          UINT32 *pFoundOffset, UINT32 *pSize);
+EXPORT LOG_FIND_STATUS LogFindNextRecordEx(LOG_STATE State,      LOG_TYPE *Type, INT32 TypeCnt,
+                                           LOG_SOURCE Source,    LOG_PRIORITY Priority,
+                                           UINT32 *pRdOffset,    UINT32 EndOffset,
+                                           UINT32 *pFoundOffset, UINT32 *pSize,
+                                           UINT32 tmout_ms);
 EXPORT LOG_READ_STATUS LogRead           ( UINT32 nOffset, LOG_BUF *pBuf );
 EXPORT void            LogWrite          ( LOG_TYPE Type, LOG_SOURCE Source,
                                            LOG_PRIORITY Priority,
@@ -422,6 +424,12 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
  *  MODIFICATIONS
  *    $History: LogManager.h $
  * 
+ * *****************  Version 56  *****************
+ * User: Jim Mood     Date: 11/27/12   Time: 8:35p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1166 Auto Upload Task Overrun (from FASTMgr.c)
+ * SCR #1136 Auto Upload on ETM and Data Logs present
+ *
  * *****************  Version 55  *****************
  * User: John Omalley Date: 12-11-16   Time: 9:10p
  * Updated in $/software/control processor/code/system

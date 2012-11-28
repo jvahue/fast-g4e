@@ -1048,36 +1048,19 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
     UINT32          nSize;
     DM_FAIL_DATA    FailLog;
     DATA_MNG_BUFFER *pMsgBuf;
-    TIMESTAMP        tempTime;
 
     // Check if packet timeout has been reached, or we overflowed the buffer
     if ((pDMInfo->nCurrTime_mS >= pDMInfo->nNextTime_mS) || *nLeftOver > 0)
     {
-        // Save the time in case this is an overflow
-        tempTime = pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs;
-        
         // Close out packet in buffer and mark for storage
         DataMgrFinishPacket(pDMInfo, pDMParam->nChannel, (INT32)*nLeftOver);
 
         // Increment the next time
         pDMInfo->nNextTime_mS += pDMInfo->acs_Config.nPacketSize_ms;
 
-        //------------------------ prep new buffer or error ----------------------------
-        pMsgBuf = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
-        
-        // Check if the new buffer is ready to receive new data
-        ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
-                       "Channel %d Buffers Full", pDMParam->nChannel);
-        
-        
         // Check if the buffer is full and there is still data to write
         if ( *nLeftOver > 0)
         {
-            // Need to keep the same timestamp as the previous buffer because
-            // the time deltas will be wrong otherwise
-            pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs = tempTime;
-           
-            // Check if the overflow was already reported
             if (FALSE == pDMInfo->bBufferOverflow)
             {
                 // Set Buffer Overflow TRUE
@@ -1097,12 +1080,17 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
                     pDMParam->nChannel, *nLeftOver);
             }
         }
-        else // This is not an overflow continue on normally
-        {
-           // Set the Timestamp for the next packet
-           CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
-           pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
-        }
+
+        //------------------------ prep new buffer or error ----------------------------
+        pMsgBuf = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
+
+        // Check if the new buffer is ready to receive new data
+        ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
+                        "Channel %d Buffers Full", pDMParam->nChannel);
+
+        // Set the Timestamp for the next packet
+        CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
+        pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
     }
 }
 
@@ -1360,22 +1348,18 @@ static UINT16 DataMgrWriteBuffer(DATA_MNG_BUFFER *pMsgBuf, UINT8 *pSrc, UINT16 n
       // Update the buffer index
       pMsgBuf->index += nBytes;
    }
-   else // Buffer will overflow, because we don't know the format of the data
-        // in the temporary buffer, we should just return that we have the bytes
-        // remaining to write. This will force the software to write them in the 
-        // next packet.
+   else // Buffer will overflow just fill to the end less the checksum
    {
       // Copy as much as possible
-      // memcpy (&pMsgBuf->packet.data[pMsgBuf->Index], pSrc, nAvailable);
+      memcpy (&pMsgBuf->packet.data[pMsgBuf->index], pSrc, nAvailable);
 
       // Checksum the buffer here to help level out the loading
-      // pMsgBuf->packet.checksum += ChecksumBuffer(pSrc, nAvailable, 0xFFFFFFFF);      
+      pMsgBuf->packet.checksum += ChecksumBuffer(pSrc, nAvailable, 0xFFFFFFFF);
 
       // Update the buffer index
-      // pMsgBuf->Index += nAvailable;
+      pMsgBuf->index += nAvailable;
       // Calculate the remaining to be written
-      // nRemainingToWrite = nBytes - nAvailable;
-      nRemainingToWrite = nBytes;
+      nRemainingToWrite = nBytes - nAvailable;
    }
 
    // Return the number of bytes left to write
