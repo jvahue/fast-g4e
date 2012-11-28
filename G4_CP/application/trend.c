@@ -453,6 +453,8 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
                           pCfg->stability,
                           &pData->curStability);
 
+      TrendReset(pCfg, pData, TRUE);
+
     }else if ( pData->masterSampleCnt >= pData->nSamplesPerPeriod )
     {
       // Sampling period complete on last pass
