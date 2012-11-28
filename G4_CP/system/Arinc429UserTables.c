@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 45 $  $Date: 12-11-15 7:04p $
+     $Revision: 46 $  $Date: 12-11-27 6:36p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -3667,7 +3667,7 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
       {
          for ( channelIdx = 0;
                channelIdx < nMaxChannel && result == USER_RESULT_OK;
-               ++channelIdx )
+               ++channelIdx)
          {
             // Display element info above each set of data.
             snprintf ( sLabel, sizeof(sLabel), "%s%s[%d]",
@@ -3703,6 +3703,11 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 12-11-27   Time: 6:36p
+ * Updated in $/software/control processor/code/system
+ * SCR 1203 - ARINC Mgr Show cfg crashes system fix
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-11-15   Time: 7:04p

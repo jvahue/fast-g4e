@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 115 $  $Date: 12-11-14 7:09p $
+   $Revision: 116 $  $Date: 11/27/12 8:34p $
 
 
 ******************************************************************************/
@@ -593,7 +593,7 @@ void FAST_Task(void* pParam)
   }
   /*Transition out of the on ground state
     Could be in air or sensor went invalid, so don't assume "in air"*/
-  else if(!TriggerIsActive((BITARRAY128 *)CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers) 
+  else if(!TriggerIsActive((BITARRAY128 *)CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers)
            && FASTStatus.OnGround)
   {
     LogWriteSystem(APP_ID_FAST_WOWEND, LOG_PRIORITY_LOW, 0, 0, NULL);
@@ -780,7 +780,6 @@ void FAST_WatchdogTask2(void* pParam)
     PI_FlushCache();
 #endif
 }
-
 /******************************************************************************
  * Function:    FAST_UploadCheckTask() | TASK
  *
@@ -799,15 +798,12 @@ void FAST_WatchdogTask2(void* pParam)
  *****************************************************************************/
 void FAST_UploadCheckTask(void* pParam)
 {
-  LOG_FIND_STATUS result;
-  UINT32 Offset;
-  UINT32 LogSize;
-  UINT32 ReadPtr = 0;
-  INT32  IntrLevel;
-  LOG_SOURCE Source;
   FASTMGR_AUTO_UL_TASK_DATA* Task = pParam;
   static BOOLEAN UploadImmediateAfterDownload = FALSE;
+  INT32 IntrLevel;
+
   Task->TimeElapsedS += 1;
+
   //If auto upload is enabled
   if(0 != CfgMgr_RuntimeConfigPtr()->FASTCfg.AutoULPer_s)
   {
@@ -819,44 +815,20 @@ void FAST_UploadCheckTask(void* pParam)
       if (!FASTStatus.AutoDownload && !DataMgrDownloadingACS() &&
           !m_IsRecordBusy    && !UploadMgr_IsUploadInProgress())
       {
-         FASTStatus.AutoDownload = DataMgrStartDownload();
-         UploadImmediateAfterDownload = FASTStatus.AutoDownload;
+        FASTStatus.AutoDownload = DataMgrStartDownload();
+        UploadImmediateAfterDownload = FASTStatus.AutoDownload;
       }
 
       Task->TimeElapsedS = 0;
 
+      IntrLevel = __DIR();
       if(!FASTStatus.Recording && !UploadMgr_IsUploadInProgress() &&
          !DataMgrDownloadingACS() && MSSC_GetIsAlive())
       {
-        Source.nNumber = LOG_SOURCE_DONT_CARE;
-        result = LogFindNextRecord(LOG_NEW ,
-                                   LOG_TYPE_DATA,
-                                   Source,
-                                   LOG_PRIORITY_DONT_CARE,
-                                   &ReadPtr,
-                                   LOG_NEXT,
-                                   &Offset,
-                                   &LogSize);
-
-        if(LOG_FOUND == result)
-        {
-          IntrLevel = __DIR();
-          //Double check recording, download and upload status with interrupts off
-          //ensure a download, upload or recording wasn't kicked off between the last
-          //test of these flags.
-          if ( !FASTStatus.Recording && !UploadMgr_IsUploadInProgress() &&
-               !DataMgrDownloadingACS() )
-          {
-            UploadMgr_StartUpload(UPLOAD_START_AUTO);
-          }
-          __RIR(IntrLevel);
-          UploadImmediateAfterDownload = FALSE;
-        }
-        else if(LOG_NOT_FOUND == result)
-        {
-          UploadImmediateAfterDownload = FALSE;
-        }
+        UploadMgr_StartUpload(UPLOAD_START_AUTO);
+        UploadImmediateAfterDownload = FALSE;
       }
+      __RIR(IntrLevel);
     }
   }
   else
@@ -993,7 +965,7 @@ void FAST_DioControl(void)
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static
@@ -1003,7 +975,7 @@ void FAST_UpdateSysAnnuciation ( DIO_OUT_OP Blink )
    FLT_STATUS   sysCond;
    FLT_ANUNC_MODE AnuncMode;
    DIO_OUTPUT   SysCondOutPin;
-   
+
    sysCond   = Flt_GetSystemStatus();
    AnuncMode = Flt_GetSysAnunciationMode();
 
@@ -1496,7 +1468,7 @@ INT32 FAST_TxTestStateUL (INT32 NumFilesPendingRoundTrip)
 {
    // Local Data
    INT32 numFilesStillPendingRoundTrip;
-   
+
    if(NumFilesPendingRoundTrip == -1)
    {
       if(!UploadMgr_IsUploadInProgress())
@@ -1520,7 +1492,7 @@ INT32 FAST_TxTestStateUL (INT32 NumFilesPendingRoundTrip)
                NumFilesPendingRoundTrip);
 
       if(numFilesStillPendingRoundTrip == 0)
-      { 
+      {
          m_FastTxTest.ULStatus = FAST_TXTEST_PASS;
          m_FastTxTest.State = FAST_TXTEST_STATE_PASS;
       }
@@ -1596,11 +1568,16 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 116  *****************
+ * User: Jim Mood     Date: 11/27/12   Time: 8:34p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1166 Auto Upload Task Overrun (from FASTMgr.c)
+ *
  * *****************  Version 115  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:09p
  * Updated in $/software/control processor/code/application
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 114  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:16p
  * Updated in $/software/control processor/code/application

@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 107 $  $Date: 12-11-14 7:20p $
+      $Revision: 108 $  $Date: 11/27/12 8:35p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -112,7 +112,8 @@ static BOOLEAN        LogFindNextWriteOffset ( UINT32 *pOffset,
 static LOG_HDR_STATUS LogCheckHeader         ( LOG_HEADER Hdr );
 static BOOLEAN        LogHdrFilterMatch      ( LOG_HEADER Hdr,
                                                LOG_STATE State,
-                                               LOG_TYPE Type,
+                                               LOG_TYPE *Type,
+                                               INT32     TypeCnt,
                                                LOG_SOURCE Source,
                                                LOG_PRIORITY Priority );
 static BOOLEAN        LogVerifyAllDeleted    ( UINT32 *pRdOffset,
@@ -210,7 +211,7 @@ void LogInitialize (void)
    {
       GSE_DebugStr(NORMAL,TRUE, "Log Initialize - Reset NV_LOG_COUNTS...FAILED");
    }
-   
+
    // Set the Fail flags to FALSE
    LogError.bReadAccessFail   = FALSE;
    LogError.bWriteAccessFail  = FALSE;
@@ -627,6 +628,57 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
                                    UINT32 *pRdOffset,    UINT32 EndOffset,
                                    UINT32 *pFoundOffset, UINT32 *pSize)
 {
+
+   return LogFindNextRecordEx(State,&Type, 1, Source, Priority, pRdOffset,
+                               EndOffset, pFoundOffset, pSize,0);
+}
+
+/******************************************************************************
+ * Function:    LogFindNextRecordEx
+ *
+ * Description: The LogFindNext function will search from the current read
+ *              offset and locate the next requested log.
+ *
+ * Parameters:  LOG_STATE State       - State of the log [NEW or ERASED]
+ *              LOG_TYPE  Type        - List of Types to match [DATA, SYSTEM, ETM]
+ *              INT32     TypeCnt     - Count of types in the list.
+ *              LOG_SOURCE Source     - Index of the ACS log
+ *              LOG_PRIORITY Priority - Priority of the stored log [LOW or HIGH]
+ *              UINT32 *pRdOffset     - Offset to start the search from
+ *              UINT32 EndOffset      - Offset to search up to, passing in
+ *                                      LOG_NEXT will use the end of the memory
+ *                                      block.
+ *              UINT32 *pFoundOffset  - [in/out] Storage location of the found
+ *                                               log.
+ *              UINT32 *pSize         - Size of the log that was found
+ *              INT32  tmout_ms       - Maximum amount of time to execute the
+ *                                      search for this iteration.  Returns
+ *                                      LOG_BUSY if the timeout occurs before
+ *                                      the requested log was found.  In this
+ *                                      case, pRdOffset is updated to the last
+ *                                      location searched and repeated calls
+ *                                      will continue the search.
+ *                                      Set to (0) to ignore timeout.
+ *
+ * Returns:     LOG_FIND_STATUS       - Status of the requested search
+ *                                      [LOG_BUSY, LOG_FOUND, LOG_NOT_FOUND]
+ *
+ * Notes:       The Log Find Next should use the ACS, TYPE, PRIORITY and STATE
+ *              to determine which log is being seeked. The Log Find Next will
+ *              return the offset to the log when the criteria is met.
+ *              Each of the fields should be enumerated to include a Don't
+ *              care state. This way the calling function can search on just
+ *              the parameter it wants. For example if the calling function is
+ *              looking for system type logs the other fields would be set to
+ *              don't care and the type would be set to SYS.
+ *
+ *****************************************************************************/
+LOG_FIND_STATUS LogFindNextRecordEx(LOG_STATE State,      LOG_TYPE *Type, INT32 TypeCnt,
+                                    LOG_SOURCE Source,    LOG_PRIORITY Priority,
+                                    UINT32 *pRdOffset,    UINT32 EndOffset,
+                                    UINT32 *pFoundOffset, UINT32 *pSize,
+                                    UINT32 tmout_ms)
+{
    // Local Data
    BOOLEAN         bDone;
    LOG_HDR_STATUS  hdrStatus;
@@ -634,6 +686,10 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
    LOG_HEADER      hdr;
    RESULT          result;
    UINT32          previousOffset;
+   UINT32          timer_val;
+   BOOLEAN         is_timeout = FALSE;
+   UINT32          logs_searched = 0;
+
 
    // Initialize Local Data
    findStatus = LOG_NOT_FOUND;
@@ -649,10 +705,25 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
          EndOffset = LogConfig.nEndOffset;
       }
 
+      Timeout(TO_START,(tmout_ms *TICKS_PER_mSec),&timer_val);
+
       // Check the Read Offset has not exceeded end of block OR Last Offset
       while ((*pRdOffset <= EndOffset) &&
              ((*pRdOffset + sizeof(hdr)) < LogConfig.nEndOffset))
       {
+         //Check for timeout and exit the loop just after determining search is not
+         //at the EndOffset yet.  This makes sure the timeout indication is correct
+         //and prevents a race where the timeout occurs just after the
+         //last log is checked.
+         is_timeout = tmout_ms == 0 ? FALSE :
+         Timeout(TO_CHECK,(tmout_ms *TICKS_PER_mSec),&timer_val);
+
+         logs_searched++;
+
+         if(is_timeout)
+         {
+            break;
+         }
          // Read the header at the current Read Offset
          // Note: Using MemRead will advance the Offset to the location
          //       following the size read.
@@ -675,7 +746,8 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
                *pRdOffset += MEM_ALIGN_SIZE(hdr.nSize);
 
                // Does the filter match?
-               if (TRUE == LogHdrFilterMatch(hdr, State, Type, Source, Priority))
+               if (TRUE == LogHdrFilterMatch(hdr, State, Type, TypeCnt,
+                                             Source, Priority))
                {
                   // Log was found, set offset, set size and exit loop
                   findStatus    = LOG_FOUND;
@@ -719,18 +791,26 @@ LOG_FIND_STATUS LogFindNextRecord (LOG_STATE State,      LOG_TYPE Type,
             LogCheckResult ( result, "LogFindNextRecord:",
                              SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
                              &LogError.bReadAccessFail, &LogError.counts.nRdAccess,
-                             &LogReadFailTemp, sizeof(LogReadFailTemp)
-                           );
+                             &LogReadFailTemp, sizeof(LogReadFailTemp));
 
             // Exit the loop
             break;
          }
       }
+
+      if(is_timeout)
+      {
+
+         GSE_DebugStr(VERBOSE,TRUE,"FindLog: Timeout %s %d logs searched",
+                      findStatus == LOG_BUSY ? "LOG_BUSY" :
+                      findStatus == LOG_FOUND ? "LOG_FOUND" : "LOG_NOT_FOUND",
+                      logs_searched);
+         findStatus = LOG_BUSY;
+      }
    }
 
-   // Return the status of the requested search
-   return (findStatus);
 
+   return (findStatus);
 } // LogFindNextRecord
 
 /******************************************************************************
@@ -1973,7 +2053,7 @@ void LogCmdEraseTask ( void *pParam )
 /******************************************************************************
  * Function:    LogEraseStatusWrite
  *
- * Description: The LogEraseStatusWrite function manages writing the erase 
+ * Description: The LogEraseStatusWrite function manages writing the erase
  *              status data to non-volatile memory during normal operation.
  *
  * Parameters:  LOG_CMD_ERASE_PARMS *pTCB
@@ -1993,7 +2073,7 @@ void LogEraseStatusWrite (LOG_CMD_ERASE_PARMS *pTCB)
       pTCB->bUpdatingStatusFile = TRUE;
       // ( nOffset, nSize, bChipErase, bInProgress, bWriteNow )
       LogSaveEraseData (pTCB->nOffset, pTCB->nSize, FALSE, TRUE, FALSE);
-   }  
+   }
    else // Update was issued in previous frame.
    {
       // Checking if write completed. If so, change to the LOG_ERASE_MEMORY state.
@@ -2288,7 +2368,7 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
    UINT32         previousOffset;
    LOG_SOURCE     source;
    UINT32         startup_Id = LOG_FIND_NEXT_WRITE_STARTUP_ID;
-
+   LOG_TYPE       log_type_dont_care = LOG_TYPE_DONT_CARE;
    // Initialize Local Data
    bCorruptFound = FALSE;
    bTimerStarted = FALSE;
@@ -2325,7 +2405,8 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
             // Now determine the state of the log found and count it
             if ( TRUE == LogHdrFilterMatch(hdr,
                                            LOG_NEW,
-                                           LOG_TYPE_DONT_CARE,
+                                           &log_type_dont_care,
+                                           1,
                                            source,
                                            LOG_PRIORITY_DONT_CARE) )
             {
@@ -2333,7 +2414,8 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
             }
             else if ( TRUE == LogHdrFilterMatch(hdr,
                                                 LOG_DELETED,
-                                                LOG_TYPE_DONT_CARE,
+                                                &log_type_dont_care,
+                                                1,
                                                 source,
                                                 LOG_PRIORITY_DONT_CARE) )
             {
@@ -2488,12 +2570,12 @@ LOG_HDR_STATUS LogCheckHeader (LOG_HEADER Hdr)
  *
  *****************************************************************************/
 static
-BOOLEAN LogHdrFilterMatch(LOG_HEADER Hdr, LOG_STATE State, LOG_TYPE Type,
-                          LOG_SOURCE Source, LOG_PRIORITY Priority)
+BOOLEAN LogHdrFilterMatch(LOG_HEADER Hdr, LOG_STATE State, LOG_TYPE *Type,
+                          INT32 TypeCnt, LOG_SOURCE Source, LOG_PRIORITY Priority)
 {
    // Local Data
    BOOLEAN bFound;
-
+   INT32   i;
    // Initialize Local Data
    bFound = FALSE;
 
@@ -2505,16 +2587,19 @@ BOOLEAN LogHdrFilterMatch(LOG_HEADER Hdr, LOG_STATE State, LOG_TYPE Type,
            (LOG_PRIORITY_DONT_CARE == Priority) )
       {
          // Check the Type
-         if ((Hdr.nType == (UINT16)Type) || (LOG_TYPE_DONT_CARE == Type))
+         for(i = 0; i < TypeCnt; i++)
          {
-            // Check the ACS
-            if ((Hdr.nSource == Source.nNumber) ||
-                (LOG_SOURCE_DONT_CARE == Source.nNumber))
-            {
-               // One of the requested logs has been found
-               // Set the Found Offset and Mark the status as found
-               bFound = TRUE;
-            }
+           if ((Hdr.nType == (UINT16)Type[i]) || (LOG_TYPE_DONT_CARE == Type[i]))
+           {
+              // Check the ACS
+              if ((Hdr.nSource == Source.nNumber) ||
+                  (LOG_SOURCE_DONT_CARE == Source.nNumber))
+              {
+                 // One of the requested logs has been found
+                 // Set the Found Offset and Mark the status as found
+                 bFound = TRUE;
+              }
+           }
          }
       }
    }
@@ -2852,6 +2937,12 @@ void LogUpdateWritePendingStatuses( void )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  * 
+ * *****************  Version 108  *****************
+ * User: Jim Mood     Date: 11/27/12   Time: 8:35p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1166 Auto Upload Task Overrun (from FASTMgr.c)
+ * SCR #1136 Auto Upload on ETM and Data Logs present
+ *
  * *****************  Version 107  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
  * Updated in $/software/control processor/code/system
@@ -2866,7 +2957,7 @@ void LogUpdateWritePendingStatuses( void )
  * User: John Omalley Date: 12-11-12   Time: 1:11p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 104  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system
