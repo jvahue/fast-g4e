@@ -101,8 +101,8 @@ USER_ENUM_TBL TrendEngRunIdEnum[] =
 USER_ENUM_TBL TrendStateEnum[] =
 {
   { "INACTIVE"      , TREND_STATE_INACTIVE  },
-  { "MANUAL_TREND"  , TREND_STATE_INACTIVE  },
-  { "AUTO_TREND"    , TREND_STATE_MANUAL    },
+  { "MANUAL_TREND"  , TREND_STATE_MANUAL    },
+  { "AUTO_TREND"    , TREND_STATE_AUTO      },
   { NULL,  0 }
 };
 
@@ -189,14 +189,14 @@ static USER_MSG_TBL TrendCmd [] =
 
 static USER_MSG_TBL TrendStatus [] =
 {
-  /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
-   { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,         0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
-   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,       0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
-   { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,           0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+  /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                              IndexRange           DataLimit   EnumTbl*/
+   { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
+   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,          0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
+   { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,              0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
-   { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.stability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,      0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { NULL,               NULL,              NULL ,           NO_HANDLER_DATA }
 };
 
@@ -353,7 +353,7 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 
    pCfgTable = &TrendCmd[0];  // Get pointer to config entry
 
-   for (i = 0; i < MAX_EVENTS && result == USER_RESULT_OK; ++i)
+   for (i = 0; i < MAX_TRENDS && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
       sprintf(Label, "%s[%d]", LabelStem, i);
@@ -370,7 +370,7 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
  * Updated in $/software/control processor/code/application
