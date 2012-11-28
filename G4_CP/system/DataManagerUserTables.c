@@ -10,7 +10,7 @@ Description: The data manager contains the functions used to record
 
 
 VERSION
-$Revision: 24 $  $Date: 12-11-13 11:10a $ 
+$Revision: 25 $  $Date: 12-11-28 4:50p $ 
 
 ******************************************************************************/
 
@@ -88,6 +88,7 @@ static USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 /* Local Variables                                                           */
 /*****************************************************************************/
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+static
 USER_ENUM_TBL recordStatusType[] =
 {
   { "IDLE"     , DM_RECORD_IDLE        },
@@ -95,6 +96,7 @@ USER_ENUM_TBL recordStatusType[] =
   { NULL, 0}
 };
 
+static
 USER_ENUM_TBL bufferStatusType[] =
 {
   { "EMPTY", DM_BUF_EMPTY },
@@ -103,6 +105,7 @@ USER_ENUM_TBL bufferStatusType[] =
   { NULL, 0}
 };
 
+static
 USER_ENUM_TBL logReqType[] =
 {
   { "NULL"       , LOG_REQ_NULL },
@@ -114,6 +117,7 @@ USER_ENUM_TBL logReqType[] =
 };
 
 // ACS User Manager Tables
+static
 USER_ENUM_TBL acsPortType[] =
 {
   { "NONE",     ACS_PORT_NONE     },
@@ -124,6 +128,7 @@ USER_ENUM_TBL acsPortType[] =
 };
 
 // ACS Mode Table
+static
 USER_ENUM_TBL acsMode[] =
 {
    { "RECORD",    ACS_RECORD     },
@@ -132,6 +137,7 @@ USER_ENUM_TBL acsMode[] =
 };
 
 // ACS Mode Table
+static
 USER_ENUM_TBL priorityTbl[] =
 {
    { "1", LOG_PRIORITY_1 },
@@ -145,35 +151,35 @@ USER_ENUM_TBL priorityTbl[] =
 static
 USER_MSG_TBL dataManagerStatusCmd [] =
 {/*Str                 Next Tbl Ptr   Handler Func.        Data Type         Access   Parameter                             IndexRange          DataLimit EnumTbl*/
-  { "CHANNEL"        , NO_NEXT_TABLE, DataMgr_TCB_Status,     USER_TYPE_UINT16, USER_RO, &TCBTemp.nChannel      ,              0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
-  { "RECORD_STATUS"  , NO_NEXT_TABLE, DataMgr_TCB_Status,     USER_TYPE_ENUM  , USER_RO, &DMInfoTemp.recordStatus  ,           0,MAX_ACS_CONFIG-1, NO_LIMIT, recordStatusType },
-  { "TIMEOUT_MS"     , NO_NEXT_TABLE, DataMgr_TCB_Status,     USER_TYPE_UINT16, USER_RO, &DMInfoTemp.acs_Config.nPacketSize_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
-  { "STARTTIME"      , NO_NEXT_TABLE, DataMgr_Status, USER_TYPE_UINT32, USER_RO, &DMInfoTemp.nStartTime_mS      ,       0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
-  { "CURRENT_BUFFER" , NO_NEXT_TABLE, DataMgr_Status, USER_TYPE_UINT16, USER_RO, &DMInfoTemp.nCurrentBuffer     ,       0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
+  { "CHANNEL"        , NO_NEXT_TABLE, DataMgr_TCB_Status,  USER_TYPE_UINT16, USER_RO, &tcbTemp.nChannel      ,              0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
+  { "RECORD_STATUS"  , NO_NEXT_TABLE, DataMgr_TCB_Status,  USER_TYPE_ENUM  , USER_RO, &dmInfoTemp.recordStatus  ,           0,MAX_ACS_CONFIG-1, NO_LIMIT, recordStatusType },
+  { "TIMEOUT_MS"     , NO_NEXT_TABLE, DataMgr_TCB_Status,  USER_TYPE_UINT16, USER_RO, &dmInfoTemp.acs_Config.nPacketSize_ms,0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
+  { "STARTTIME"      , NO_NEXT_TABLE, DataMgr_Status,      USER_TYPE_UINT32, USER_RO, &dmInfoTemp.nStartTime_mS      ,      0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
+  { "CURRENT_BUFFER" , NO_NEXT_TABLE, DataMgr_Status,      USER_TYPE_UINT16, USER_RO, &dmInfoTemp.nCurrentBuffer     ,      0,MAX_ACS_CONFIG-1, NO_LIMIT, NULL },
   { NULL, NULL, NULL, NO_HANDLER_DATA }
 };
 
 // ~~~~~~~~~ ACS Commands ~~~~~~~~~~~~~~
 static USER_MSG_TBL acsCmd [] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                     IndexRange          DataLimit       EnumTbl*/
-  { "MODEL"         , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , &ConfigTemp.sModel,            0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
-  { "ID"            , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , &ConfigTemp.sID,               0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
-  { "PRIORITY"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &ConfigTemp.priority,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       priorityTbl },
-  { "PORTTYPE"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &ConfigTemp.portType,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsPortType },
-  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT8 , USER_RW , &ConfigTemp.nPortIndex,        0,MAX_ACS_CONFIG-1, 0,3,            NULL        },
-  { "PACKETSIZE_MS" , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT16, USER_RW , &ConfigTemp.nPacketSize_ms,    0,MAX_ACS_CONFIG-1, 500,4000,       NULL        },
-  { "SYSCOND"       , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &ConfigTemp.systemCondition,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       Flt_UserEnumStatus },
-  { "MODE"          , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &ConfigTemp.mode,             0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsMode     },
+  { "MODEL"         , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , configTemp.sModel,            0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
+  { "ID"            , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , configTemp.sID,               0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
+  { "PRIORITY"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.priority,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       priorityTbl },
+  { "PORTTYPE"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.portType,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsPortType },
+  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT8 , USER_RW , &configTemp.nPortIndex,       0,MAX_ACS_CONFIG-1, 0,3,            NULL        },
+  { "PACKETSIZE_MS" , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT16, USER_RW , &configTemp.nPacketSize_ms,   0,MAX_ACS_CONFIG-1, 500,4000,       NULL        },
+  { "SYSCOND"       , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.systemCondition,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       Flt_UserEnumStatus },
+  { "MODE"          , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.mode,             0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsMode     },
   { NULL            , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_NONE  , USER_RW , NULL,                         0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL        },
   { NULL, NULL, NULL, NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL dl_LargeStats[] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                                   IndexRange          DataLimit       EnumTbl*/
-   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.largestRecord.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.largestRecord.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.largestRecord.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.largestRecord.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.largestRecord.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.largestRecord.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.largestRecord.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.largestRecord.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "REQUEST_TIME" , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.RequestTime,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "FOUND_TIME"   , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.FoundTime,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
    { NULL, NULL, NULL, NO_HANDLER_DATA }
@@ -181,10 +187,10 @@ static USER_MSG_TBL dl_LargeStats[] =
 
 static USER_MSG_TBL dl_SmallStats[] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                                    IndexRange          DataLimit       EnumTbl*/
-   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.smallestRecord.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.smallestRecord.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.smallestRecord.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.smallestRecord.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.smallestRecord.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.smallestRecord.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.smallestRecord.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.smallestRecord.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "REQUEST_TIME" , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.RequestTime,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "FOUND_TIME"   , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.FoundTime,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
    { NULL, NULL, NULL, NO_HANDLER_DATA }
@@ -192,10 +198,10 @@ static USER_MSG_TBL dl_SmallStats[] =
 
 static USER_MSG_TBL dl_SlowStats[] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                                    IndexRange          DataLimit       EnumTbl*/
-   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.longestRequest.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.longestRequest.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.longestRequest.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.longestRequest.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.longestRequest.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.longestRequest.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.longestRequest.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.longestRequest.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "REQUEST_TIME" , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.RequestTime,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "FOUND_TIME"   , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.FoundTime,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
    { NULL, NULL, NULL, NO_HANDLER_DATA }
@@ -203,10 +209,10 @@ static USER_MSG_TBL dl_SlowStats[] =
 
 static USER_MSG_TBL dl_FastStats[] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                                     IndexRange          DataLimit       EnumTbl*/
-   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.shortestRequest.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.shortestRequest.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.shortestRequest.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.shortestRequest.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "NUMBER"       , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.shortestRequest.nNumber,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "SIZE"         , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.shortestRequest.nSize,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "START_TIME_MS", NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.shortestRequest.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+   { "DURATION_MS"  , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.shortestRequest.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "REQUEST_TIME" , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.RequestTime,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //   { "FOUND_TIME"   , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.FoundTime,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
    { NULL, NULL, NULL, NO_HANDLER_DATA }
@@ -214,12 +220,12 @@ static USER_MSG_TBL dl_FastStats[] =
 
 static USER_MSG_TBL acsStatus [] =
 {/*Str                Next Tbl Ptr    Handler Func. Data Type         Access    Parameter                     IndexRange          DataLimit       EnumTbl*/
-  { "TOTAL_RCVD"    , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.nRcvd,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-  { "TOTAL_BYTES"   , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.nTotalBytes,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+  { "TOTAL_RCVD"    , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.nRcvd,        0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+  { "TOTAL_BYTES"   , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.nTotalBytes,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //  { "START_TIME"    , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.StartTime,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
 //  { "END_TIME"      , NO_NEXT_TABLE , ACS_Status,   TIMESTAMP       , USER_RO,  &ACS_StatusTemp.EndTime,      0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-  { "START_TIME_MS" , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
-  { "DURATION_MS"   , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &ACS_StatusTemp.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+  { "START_TIME_MS" , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.nStart_ms,    0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
+  { "DURATION_MS"   , NO_NEXT_TABLE , DataMgr_ACS_Status,   USER_TYPE_UINT32, USER_RO,  &acs_StatusTemp.nDuration_ms, 0,MAX_ACS_CONFIG-1, NO_LIMIT,       NULL },
   { "LARGEST"       , dl_LargeStats , NULL,         NO_HANDLER_DATA},
   { "SMALLEST"      , dl_SmallStats , NULL,         NO_HANDLER_DATA},
   { "SLOWEST"       , dl_SlowStats  , NULL,         NO_HANDLER_DATA},
@@ -228,13 +234,13 @@ static USER_MSG_TBL acsStatus [] =
 };
 
 static USER_MSG_TBL acsCfgTbl[] =
-{/*Str                Next Tbl Ptr       Handler Func.           Data Type            Access                        Parameter       IndexRange  DataLimit    EnumTbl*/
-  {"CFG"            , acsCmd        ,    NULL,                   NO_HANDLER_DATA},
-  {"STATUS"         , acsStatus     ,    NULL,                   NO_HANDLER_DATA},
-  {"FORCEDOWNLOAD"  , NO_NEXT_TABLE ,    DataMgr_UserForceDownload,  USER_TYPE_ACTION,   USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
-  {"STOPDOWNLOAD"   , NO_NEXT_TABLE ,    DataMgr_UserStopDownload,   USER_TYPE_ACTION,   USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
-  { DISPLAY_CFG     , NO_NEXT_TABLE ,    DataMgr_ShowConfig        , USER_TYPE_ACTION  ,(USER_RO|USER_NO_LOG|USER_GSE)  ,NULL           ,-1,-1      ,NO_LIMIT    ,NULL },
-  { NULL            , NULL          ,    NULL                  , NO_HANDLER_DATA }
+{/*Str                Next Tbl Ptr       Handler Func.             Data Type            Access                        Parameter       IndexRange  DataLimit    EnumTbl*/
+  {"CFG"            , acsCmd        ,    NULL,                     NO_HANDLER_DATA},
+  {"STATUS"         , acsStatus     ,    NULL,                     NO_HANDLER_DATA},
+  {"FORCEDOWNLOAD"  , NO_NEXT_TABLE ,    DataMgr_UserForceDownload,USER_TYPE_ACTION,   USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
+  {"STOPDOWNLOAD"   , NO_NEXT_TABLE ,    DataMgr_UserStopDownload, USER_TYPE_ACTION,   USER_RO,  NULL, -1,-1,  NO_LIMIT, NULL },
+  { DISPLAY_CFG     , NO_NEXT_TABLE ,    DataMgr_ShowConfig,       USER_TYPE_ACTION  ,(USER_RO|USER_NO_LOG|USER_GSE)  ,NULL           ,-1,-1      ,NO_LIMIT    ,NULL },
+  { NULL            , NULL          ,    NULL                  ,   NO_HANDLER_DATA }
 };
 #pragma ghs endnowarning
 static USER_MSG_TBL rootACSMsg = {"ACS", acsCfgTbl, NULL, NO_HANDLER_DATA};
@@ -370,17 +376,17 @@ USER_HANDLER_RESULT DataMgr_UserCfg(USER_DATA_TYPE DataType,
  USER_HANDLER_RESULT result = USER_RESULT_OK;
 
   //Get sensor structure based on index
-  memcpy(&ConfigTemp,
+  memcpy(&configTemp,
          &CfgMgr_ConfigPtr()->ACSConfigs[Index],
-         sizeof(ConfigTemp));
+         sizeof(configTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    memcpy(&CfgMgr_ConfigPtr()->ACSConfigs[Index],&ConfigTemp,sizeof(ConfigTemp));
+    memcpy(&CfgMgr_ConfigPtr()->ACSConfigs[Index],&configTemp,sizeof(configTemp));
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                            &CfgMgr_ConfigPtr()->ACSConfigs[Index],
-                           sizeof(ConfigTemp));
+                           sizeof(configTemp));
   }
   return result;
 }
@@ -477,7 +483,7 @@ USER_HANDLER_RESULT DataMgr_Status(USER_DATA_TYPE DataType,
 
    result = USER_RESULT_OK;
 
-   memcpy(&DMInfoTemp, &DataMgrInfo[Index], sizeof(DMInfoTemp));
+   memcpy(&dmInfoTemp, &dataMgrInfo[Index], sizeof(dmInfoTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    return result;
@@ -517,7 +523,7 @@ USER_HANDLER_RESULT DataMgr_TCB_Status(USER_DATA_TYPE DataType,
 
    result = USER_RESULT_OK;
 
-   memcpy(&TCBTemp, &DMPBlock[Index], sizeof(TCBTemp));
+   memcpy(&tcbTemp, &dmpBlock[Index], sizeof(tcbTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
@@ -548,7 +554,7 @@ USER_HANDLER_RESULT DataMgr_TCB_Status(USER_DATA_TYPE DataType,
 * Notes:
 *
 *****************************************************************************/
-
+static
 USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
                                 USER_MSG_PARAM Param,
                                 UINT32 Index,
@@ -559,8 +565,8 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 
    result = USER_RESULT_ERROR;
 
-    memcpy(&ACS_StatusTemp, &DataMgrInfo[Index].dl.statistics, 
-           sizeof(DataMgrInfo[Index].dl.statistics));
+    memcpy(&acs_StatusTemp, &dataMgrInfo[Index].dl.statistics, 
+           sizeof(dataMgrInfo[Index].dl.statistics));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    return result;
@@ -570,6 +576,11 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: DataManagerUserTables.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-11-28   Time: 4:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 24  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a

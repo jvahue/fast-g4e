@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 42 $  $Date: 12-11-13 11:10a $
+      $Revision: 43 $  $Date: 12-11-28 4:50p $
 
 ******************************************************************************/
 
@@ -231,14 +231,17 @@ EXPORT BOOLEAN    DataMgrDownloadingACS ( void );
 EXPORT BOOLEAN    DataMgrDownloadGetState ( INT32 param );
 EXPORT void       DataMgrRecRun         ( BOOLEAN Run, INT32 param );
 EXPORT void       DataMgrDownloadRun    ( BOOLEAN Run, INT32 param );
-EXPORT BOOLEAN    DataMgrIsFFDInhibtMode( void );
-EXPORT BOOLEAN    DataMgrIsPortFFD      ( const ACS_CONFIG *ACS_Config );
 EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
 #endif // DATA_MNG_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 12-11-28   Time: 4:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 42  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
