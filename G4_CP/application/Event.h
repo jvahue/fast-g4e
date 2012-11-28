@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 31 $  $Date: 11/26/12 12:32p $
+  $Revision: 32 $  $Date: 12-11-28 2:25p $
 
 ******************************************************************************/
 
@@ -37,6 +37,7 @@
 ******************************************************************************/
 /*------------------------------------  EVENT  ----------------------------------------------*/
 #define MAX_EVENTS              32      /* Total Events defined in the system           */
+#define EVENT_INDEX             UINT32
 #define MAX_EVENT_NAME          32      /* Maximum Length of the event name             */
 #define MAX_EVENT_ID             5      /* Character length for the event id            */
 #define MAX_EVENT_SENSORS       32      /* Maximum sensors to be analyzed by the event  */
@@ -132,22 +133,10 @@
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT
 
+
 /******************************************************************************
                                   Package Typedefs
 ******************************************************************************/
-typedef enum
-{
-   EVENT_0   =   0, EVENT_1   =   1, EVENT_2   =   2, EVENT_3   =   3,
-   EVENT_4   =   4, EVENT_5   =   5, EVENT_6   =   6, EVENT_7   =   7,
-   EVENT_8   =   8, EVENT_9   =   9, EVENT_10  =  10, EVENT_11  =  11,
-   EVENT_12  =  12, EVENT_13  =  13, EVENT_14  =  14, EVENT_15  =  15,
-   EVENT_16  =  16, EVENT_17  =  17, EVENT_18  =  18, EVENT_19  =  19,
-   EVENT_20  =  20, EVENT_21  =  21, EVENT_22  =  22, EVENT_23  =  23,
-   EVENT_24  =  24, EVENT_25  =  25, EVENT_26  =  26, EVENT_27  =  27,
-   EVENT_28  =  28, EVENT_29  =  29, EVENT_30  =  30, EVENT_31  =  31,
-   EVENT_UNUSED = 255
-} EVENT_INDEX;
-
 typedef enum
 {
    EVENT_TABLE_0   =   0, EVENT_TABLE_1   =   1, EVENT_TABLE_2   =   2, EVENT_TABLE_3   =   3,
@@ -190,7 +179,7 @@ typedef enum
 {
    EVENT_NONE,
    EVENT_START,
-   EVENT_ACTIVE,
+   EVENT_ACTIVE
 } EVENT_STATE;
 
 typedef enum
@@ -443,21 +432,6 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
    #define EXPORT extern
 #endif
 
-#if defined ( EVENT_BODY )
-   // Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
-   USER_ENUM_TBL evt_Region_UserEnumType [] =
-   { { "REGION_A",         REGION_A            },
-     { "REGION_B",         REGION_B            },
-     { "REGION_C",         REGION_C            },
-     { "REGION_D",         REGION_D            },
-     { "REGION_E",         REGION_E            },
-     { "REGION_F",         REGION_F            },
-     { "NONE",             REGION_NOT_FOUND    },
-     { NULL,          0                        }
-   };
-#else
-   EXPORT USER_ENUM_TBL evt_Region_UserEnumType[];
-#endif
 /******************************************************************************
                                   Package Exports Variables
 ******************************************************************************/
@@ -466,7 +440,6 @@ typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
                                   Package Exports Functions
 *******************************************************************************/
 EXPORT void    EventsInitialize        ( void );
-EXPORT void    EventTablesInitialize   ( void );
 EXPORT UINT16  EventGetBinaryHdr       ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  EventTableGetBinaryHdr  ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
@@ -475,6 +448,11 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:25p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:32p

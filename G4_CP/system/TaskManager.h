@@ -9,7 +9,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 66 $  $Date: 12-11-13 5:46p $  
+     $Revision: 67 $  $Date: 12-11-28 2:07p $  
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -34,8 +34,6 @@
 #define MAX_DT_OVERRUNS    3        //  Max of 3 sequential DT task overruns
 
 #define EVENT_DRIVEN_RMT   0
-
-#define TASK_TIMER_CHAN    TPU_CHAN_0
 
 #define MIF_PERIOD_mS (TTMR_TASK_MGR_TICK_INTERRUPT_INTERVAL_uS/1000) 
 #define MIFs_PER_SECOND (1000/MIF_PERIOD_mS)
@@ -174,7 +172,7 @@ typedef enum {
 #ifdef STE_TP
   SYS_TEST_ID     = 3,
 #endif
-  SYS_MAX_MODE_ID, // NOT A MODE - DO NOT USE
+  SYS_MAX_MODE_ID  // NOT A MODE - DO NOT USE
 } SYS_MODE_IDS;
 
 typedef enum {
@@ -329,8 +327,6 @@ typedef struct
 ******************************************************************************/
 EXPORT TM_DATA Tm; 
 
-EXPORT UINT16  MaxStackSize;
-
 EXPORT INT32 mifPulse;
 
 extern const TaskInformation taskInfo[MAX_TASK];
@@ -380,6 +376,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 67  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:07p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 66  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

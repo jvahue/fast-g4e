@@ -3667,7 +3667,7 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
       {
          for ( channelIdx = 0;
                channelIdx < nMaxChannel && result == USER_RESULT_OK;
-               ++channelIdx)
+               ++channelIdx )
          {
             // Display element info above each set of data.
             snprintf ( sLabel, sizeof(sLabel), "%s%s[%d]",

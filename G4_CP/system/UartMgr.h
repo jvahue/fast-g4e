@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 14 $  $Date: 12-11-13 5:46p $     
+      $Revision: 15 $  $Date: 12-11-28 2:09p $     
 
 ******************************************************************************/
 
@@ -214,7 +214,7 @@ typedef struct
   UINT8  paramId; 
   UINT16 paramVal; 
   BOOLEAN bValidity; 
-} UARTMGR_STORE_DATA, *UARTMGR_STORE_DATA_PTR; 
+} UARTMGR_STORE_DATA; 
 
 typedef struct 
 {
@@ -222,7 +222,7 @@ typedef struct
   UINT8  paramId; 
   UINT16 paramVal; 
   BOOLEAN bValidity; 
-} UARTMGR_STORE_SNAP_DATA, *UARTMGR_STORE_SNAP_DATA_PTR; 
+} UARTMGR_STORE_SNAP_DATA; 
 #pragma pack()
 
 
@@ -282,7 +282,7 @@ typedef struct
 typedef struct 
 {
   TASK_INDEX taskID; // Task ID for UartMgr_BITTask from TM
-} UARTMGR_BIT_TASK_PARAMS, *UARTMGR_BIT_TASK_PARAMS_PTR;
+} UARTMGR_BIT_TASK_PARAMS;
 
 
 
@@ -295,7 +295,7 @@ typedef struct
   RESULT result; 
   UINT32 cfg_timeout;
   UINT8  ch; 
-} UART_TIMEOUT_LOG, UART_TIMEOUT_LOG_PTR; 
+} UART_TIMEOUT_LOG; 
 
 typedef struct 
 {
@@ -321,7 +321,7 @@ typedef struct
   UINT8  ch;       // Uart Ch
   CHAR   sName[UART_CFG_NAME_SIZE];  // Uart Ch Name
   UARTMGR_PROTOCOLS protocol;  // Uart Ch Protocol selection 
-} UARTMGR_FILE_HDR, *UARTMGR_FILE_HDR_PTR; 
+} UARTMGR_FILE_HDR; 
 
 typedef struct
 {
@@ -412,10 +412,6 @@ typedef struct
 ******************************************************************************/
 
 EXPORT void    UartMgr_Initialize       (void); 
-EXPORT void    UartMgr_ProcessTask      (void *pParam); 
-
-EXPORT UINT16  UartMgr_ReadDataBuffer   ( void *pDest, UINT32 chan, UINT16 nMaxByteSize); 
-EXPORT UINT16  UartMgr_ReadDataSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSize); 
 
 EXPORT BOOLEAN UartMgr_SensorTest       (UINT16 nIndex);
 EXPORT BOOLEAN UartMgr_InterfaceValid   (UINT16 nIndex);  
@@ -449,6 +445,11 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 14  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

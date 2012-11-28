@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 108 $  $Date: 12-11-12 1:11p $
+      $Revision: 109 $  $Date: 12-11-28 2:04p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -228,83 +228,6 @@ SYS_LOG_ID(APP_UPM_MS_CRC_FAIL                      ,0xA327 ,0)\
 \
 SYS_LOG_ID(APP_FM_INFO_USER_UPDATED_CLOCK           ,0xA226 ,0)
 
-//SYS_LOG_ID(SYS_ID_PBIT_WATCHDOG_RESET               ,0x9 ,0)\
-//SYS_LOG_ID(SYS_ID_PBIT_QUART                        ,0xA ,0)\
-//SYS_LOG_ID(SYS_ID_PBIT_LAMP                         ,0xB ,0)\
-//SYS_LOG_ID(SYS_ID_PBIT_WALLCLOCK                    ,0xC ,0)\
-//SYS_LOG_ID(SYS_ID_CBIT_PFLASH_CRC                   ,0xD ,0)\
-//SYS_LOG_ID(SYS_ID_CBIT_RAM                          ,0xE ,0)\
-//SYS_LOG_ID(SYS_ID_CBIT_TPU_RAM                      ,0xF ,0)\
-//SYS_LOG_ID(SYS_ID_CBIT_UART                         ,0x10 ,0)\
-//SYS_LOG_ID(SYS_ID_CBIT_WALLCLOCK                    ,0x11 ,0)\
-//SYS_LOG_ID(SYS_ID_ASSERT                            ,0x12 ,0)\
-//SYS_LOG_ID(SYS_ID_TM_MIF_OVERRUN                    ,0x13 ,0)\
-//SYS_LOG_ID(SYS_ID_TM_RMT_OVERRUN                    ,0x14 ,0)\
-//SYS_LOG_ID(SYS_ID_UNHANDLED_EXCEPTION               ,0x15 ,0)\
-//SYS_LOG_ID(SYS_ID_GPIO_OVERLAP                      ,0x16 ,0)\
-//SYS_LOG_ID(SYS_ID_GPIO_WIDTH                        ,0x17 ,0)\
-//SYS_LOG_ID(SYS_ID_GPIO_DIN_EXCEEDED                 ,0x18 ,0)\
-//SYS_LOG_ID(SYS_ID_GPIO_DOUT_EXCEEDED                ,0x19 ,0)\
-//SYS_LOG_ID(SYS_ID_INIT_POT                          ,0x1A ,0)\
-//SYS_LOG_ID(SYS_ID_INVALID_WC                        ,0x1B ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_REG                      ,0x1C ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_SRAM                     ,0x1D ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_DMT                      ,0x1E ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_LOOP_GRP0                ,0x1F ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_LOOP_GRP1                ,0x20 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_ERR_INT                  ,0x21 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_DATA_LOSS                ,0x22 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_SSM_FAIL_00              ,0x23 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_SSM_NO_COMP              ,0x24 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_SSM_TEST                 ,0x25 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_SSM_FAIL_11              ,0x26 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_PARITY                   ,0x27 ,0)\
-//SYS_LOG_ID(SYS_ID_ARINC429_NO_COMM                  ,0x28 ,0)\
-//SYS_LOG_ID(APP_ID                                   ,0x3E8 ,0)\
-//SYS_LOG_ID(APP_ID_ACS_BUF_OVERFLOW                  ,0x3E9 ,0)\
-//SYS_LOG_ID(APP_ID_ACS_DATA_RETRIEVE_STARTED         ,0x3EA ,0)\
-//SYS_LOG_ID(APP_ID_ACS_DATA_RETRIEVE_FAILED          ,0x3EB ,0)\
-//SYS_LOG_ID(APP_ID_ACS_DATA_ERROR                    ,0x3EC ,0)\
-//SYS_LOG_ID(APP_ID_ACS_DATA_LOSS                     ,0x3ED ,0)\
-//SYS_LOG_ID(APP_ID_MS_TX_SUCCESS                     ,0x3EE ,0)\
-//SYS_LOG_ID(APP_ID_MS_TX_FAIL                        ,0x3EF ,0)\
-//SYS_LOG_ID(APP_ID_MS_SETUP_SUCCESS                  ,0x3F0 ,0)\
-//SYS_LOG_ID(APP_ID_MS_SETUP_FAILED                   ,0x3F1 ,0)\
-//SYS_LOG_ID(APP_ID_MS_GSM_CONNECT                    ,0x3F2 ,0)\
-//SYS_LOG_ID(APP_ID_MS_FAIL                           ,0x3F3 ,0)\
-//SYS_LOG_ID(APP_ID_LOG_RETRIEVAL                     ,0x3F4 ,0)\
-//SYS_LOG_ID(APP_ID_BUF_OVERFLOW                      ,0x3F5 ,0)\
-//SYS_LOG_ID(APP_ID_MS_PWR_FAULT                      ,0x3F6 ,0)\
-//SYS_LOG_ID(APP_ID_GSM_PWR_FAULT                     ,0x3F7 ,0)\
-//SYS_LOG_ID(APP_ID_ACS_UART_OPEN_FAIL                ,0x3F8 ,0)\
-//SYS_LOG_ID(APP_ID_MS_UART_OPEN_FAIL                 ,0x3F9 ,0)\
-//SYS_LOG_ID(APP_ID_AIRCRAFT_CONFIG_UPDATE            ,0x3FE ,0)\
-//SYS_LOG_ID(APP_ID_AIRCRAFT_CONFIG_FAULT             ,0x3FF ,0)\
-//SYS_LOG_ID(DRV_ID_SPI_PBIT_FAIL                     ,0x0800 ,0)\
-//SYS_LOG_ID(DRV_ID_RTC_PBIT_FAIL_LOG                 ,0x0900 ,0)\
-//SYS_LOG_ID(DRV_ID_DIO_PBIT_FAIL                     ,0x0A00 ,0)\
-//SYS_LOG_ID(DRV_ID_EEPROM_PBIT_FAIL                  ,0x0B00 ,0)\
-//SYS_LOG_ID(DRV_ID_DF_PBIT_FAIL                      ,0x0D00 ,0)\
-//SYS_LOG_ID(DRV_ID_DPRAM_PBIT_FAIL                   ,0x0F00 ,0)\
-//SYS_LOG_ID(DRV_ID_ADC_PBIT_FAIL                     ,0x1000 ,0)\
-//SYS_LOG_ID(DRV_ID_A429_PBIT_FAIL                    ,0x1100 ,0)\
-//SYS_LOG_ID(DRV_ID_FPGA_PBIT_FAIL                    ,0x1800 ,0)\
-//SYS_LOG_ID(SYS_CFG_PBIT_CFG_FMT_FAIL                ,0x4802 ,0)\
-//SYS_LOG_ID(SYS_CFG_CBIT_FAIL_LOG                    ,0x4810 ,0)\
-//SYS_LOG_ID(SYS_NVM_PBIT_FAIL_LOG                    ,0x4B00 ,0)\
-//SYS_LOG_ID(SYS_NVM_CBIT_FAIL_LOG                    ,0x4B10 ,0)\
-//SYS_LOG_ID(SYS_LOG_100_PERCENT_FULL                 ,0x4C11 ,0)\
-//SYS_LOG_ID(SYS_ID_A429_PBIT_FAIL                    ,0x5100 ,0)\
-//SYS_LOG_ID(SYS_ID_A429_CBIT_FAIL                    ,0x5110 ,0)\
-//SYS_LOG_ID(SYS_ID_QAR_PBIT_FAIL                     ,0x5200 ,0)\
-//SYS_LOG_ID(SYS_ID_QAR_CBIT_FAIL                     ,0x5210 ,0)\
-//SYS_LOG_ID(SYS_ID_SENSOR_PBIT_FAIL                  ,0x5300 ,0)\
-//SYS_LOG_ID(SYS_ID_SENSOR_INTERFACE_FAIL             ,0x5314 ,0)\
-//SYS_LOG_ID(SYS_ID_FPGA_CBIT_FAIL                    ,0x5810 ,0)\
-//SYS_LOG_ID(SYS_ID_BOX_PBIT_FAIL_LOG                 ,0x5900 ,0)\
-//SYS_LOG_ID(SYS_ID_GSE_PBIT_FAIL                     ,0x5B00 ,0)\
-//
-
 typedef enum {
   SYS_LOG_IDS
   SYS_APP_ID_MAX
@@ -357,6 +280,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 109  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 108  *****************
  * User: John Omalley Date: 12-11-12   Time: 1:11p

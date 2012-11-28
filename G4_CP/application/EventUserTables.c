@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 31 $  $Date: 11/26/12 12:33p $
+$Revision: 32 $  $Date: 12-11-28 2:25p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -44,42 +44,43 @@ static EVENT_TABLE_DATA  stateEventTableTemp;   // Event Table State Temp Storag
 /*****************************************************************************/
 //Prototype for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
+static
 USER_HANDLER_RESULT Event_UserCfg       ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-
+static
 USER_HANDLER_RESULT Event_State         ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-
+static
 USER_HANDLER_RESULT Event_ShowConfig       ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-
+static
 USER_HANDLER_RESULT Event_CfgExprStrCmd ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-
+static
 USER_HANDLER_RESULT EventTable_UserCfg  ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr);
-
+static
 USER_HANDLER_RESULT EventTable_State    ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-
+static
 USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
                                             UINT32 Index,
@@ -89,6 +90,7 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
+static
 USER_ENUM_TBL eventTableType[]   =
 {  { "0"  , EVENT_TABLE_0   }, { "1"  ,  EVENT_TABLE_1   }, {  "2"  , EVENT_TABLE_2   },
    { "3"  , EVENT_TABLE_3   }, { "4"  ,  EVENT_TABLE_4   }, {  "5"  , EVENT_TABLE_5   },
@@ -96,7 +98,7 @@ USER_ENUM_TBL eventTableType[]   =
    { "UNUSED", EVENT_TABLE_UNUSED }, { NULL, 0}
 };
 
-
+static
 USER_ENUM_TBL eventRateType[]   =  { { "1HZ"      , EV_1HZ          },
                                      { "2HZ"      , EV_2HZ          },
                                      { "4HZ"      , EV_4HZ          },
@@ -106,13 +108,27 @@ USER_ENUM_TBL eventRateType[]   =  { { "1HZ"      , EV_1HZ          },
                                      { "50HZ"     , EV_50HZ         },
                                      { NULL       , 0               }
                                    };
-
+static
 USER_ENUM_TBL eventStateEnum[]  =  { {"NOT_USED"  , EVENT_NONE      },
                                      {"NOT_ACTIVE", EVENT_START     },
                                      {"ACTIVE"    , EVENT_ACTIVE    },
                                      {NULL        , 0               }
                                    };
 
+
+// Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
+static 
+USER_ENUM_TBL evt_Region_UserEnumType [] =
+  { { "REGION_A",         REGION_A            },
+	{ "REGION_B",         REGION_B            },
+	{ "REGION_C",         REGION_C            },
+	{ "REGION_D",         REGION_D            },
+	{ "REGION_E",         REGION_E            },
+	{ "REGION_F",         REGION_F            },
+	{ "NONE",             REGION_NOT_FOUND    },
+	{ NULL,          0                        }
+};
+								   
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
 // Events - EVENT User and Configuration Table
@@ -903,6 +919,7 @@ USER_MSG_TBL rootEventTableMsg = {"EVENTTABLE", eventTableRoot, NULL, NO_HANDLER
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT Event_UserCfg ( USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -958,6 +975,7 @@ USER_HANDLER_RESULT Event_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT EventTable_UserCfg ( USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
@@ -1013,7 +1031,7 @@ USER_HANDLER_RESULT EventTable_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-
+static
 USER_HANDLER_RESULT Event_State(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
@@ -1054,7 +1072,7 @@ USER_HANDLER_RESULT Event_State(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-
+static
 USER_HANDLER_RESULT EventTable_State(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
                                      UINT32 Index,
@@ -1096,6 +1114,7 @@ USER_HANDLER_RESULT EventTable_State(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT Event_ShowConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
@@ -1152,6 +1171,7 @@ USER_HANDLER_RESULT Event_ShowConfig(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static
 USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
                                             UINT32 Index,
@@ -1211,6 +1231,7 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
@@ -1274,6 +1295,11 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 12-11-28   Time: 2:25p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code Review Updates
  * 
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
