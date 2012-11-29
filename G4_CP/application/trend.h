@@ -260,6 +260,7 @@ typedef struct
   INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
 
   // State/status info
+  BOOLEAN      bAutoTrendStabFailed;/* Flag used to track an autotrend has failed            */
   BOOLEAN      bEnabled;            /* Indicates the assoc-ER is active, enabling this trend */
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
