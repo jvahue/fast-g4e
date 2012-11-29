@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 5 $  $Date: 11/06/12 11:49a $    
+$Revision: 6 $  $Date: 11/29/12 3:59p $
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -85,7 +85,7 @@ static USER_MSG_TBL time_history_cmd [] =
 static USER_MSG_TBL time_history_status [] =
 {
   /* Str            Next Tbl Ptr     Handler Func.            Data Type          Access     Parameter        IndexRange DataLimit            EnumTbl*/
-  { "WRITE_REQ",    NO_NEXT_TABLE,   User_GenericAccessor,    USER_TYPE_UINT32,  USER_RO,   &m_WriteReqCnt,  -1,-1,     NO_LIMIT,            NULL},
+  { "WRITE_REQ",    NO_NEXT_TABLE,   User_GenericAccessor,    USER_TYPE_UINT32,  USER_RO,   &m_THDataBuf.write_cnt,   -1,-1,     NO_LIMIT,            NULL},
   { "WRITTEN",      NO_NEXT_TABLE,   User_GenericAccessor,    USER_TYPE_UINT32,  USER_RO,   &m_WrittenCnt,   -1,-1,     NO_LIMIT,            NULL},
   { NULL,           NULL,            NULL,                    NO_HANDLER_DATA}
 };
@@ -95,6 +95,7 @@ static USER_MSG_TBL time_history_debug [] =
   /* Str            Next Tbl Ptr         Handler Func.  Data Type          Access     Parameter        IndexRange DataLimit            EnumTbl*/
    { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,   USER_WO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
    { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,   USER_WO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL time_history_root [] =
@@ -304,6 +305,11 @@ USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
  * 
+ * *****************  Version 6  *****************
+ * User: Jim Mood     Date: 11/29/12   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107
+ *
  * *****************  Version 5  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:49a
  * Updated in $/software/control processor/code/application
