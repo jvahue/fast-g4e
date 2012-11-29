@@ -133,6 +133,7 @@ void TrendInitialize( void )
     pData->nRateCounts     = (INT16)(MIFs_PER_SECOND / (INT16)pCfg->rate);
     pData->nRateCountdown  = (INT16)((pCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pData->bEnabled        = FALSE;
+    pData->bAutoTrendStabFailed = FALSE;
     pData->trendState      = TREND_STATE_INACTIVE;
     pData->nActionReqNum   = ACTION_NO_REQ;
 
@@ -445,15 +446,21 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
   if ( pData->trendState != TREND_STATE_INACTIVE )
   {
     // Check if the preceding call to TrendUpdateAutoTrend flagged an auto-trend
-    // as failing to maintain stability
+    // as failing to maintain stability. If fewer than the max trends were taken,
+    // log it.
     if( TREND_STATE_AUTO == pData->trendState )
     {
-      if( 0 == pData->nTimeStableMs && pData->autoTrendCnt <= pCfg->maxTrends )
+      if( pData->bAutoTrendStabFailed && pData->autoTrendCnt < pCfg->maxTrends )
       {
         // Force a finish to this sampling and flag it for autotrend-failure logging.
-        bAutoTrendFailed = TRUE;
+        bAutoTrendFailed = TRUE;        
       }
+
+      // Reset the signal, it will be set during the next frame if needed.
+      pData->bAutoTrendStabFailed = FALSE;
     }
+
+    // General update handling and end-of-trend logging
 
     if (bAutoTrendFailed)
     {
@@ -473,7 +480,6 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
       // Reset interval timer
       pData->TimeSinceLastTrendMs = 0;
       pData->lastIntervalCheckMs  = 0;
-
 
     }else if ( pData->masterSampleCnt >= pData->nSamplesPerPeriod )
     {
@@ -636,14 +642,15 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
                  pData->trendState == TREND_STATE_AUTO ? "AUTO" : "MANUAL");
   }
 
-  pData->trendState       = TREND_STATE_INACTIVE;
-  pData->bResetDetected   = FALSE;
-  pData->bEnabled         = FALSE;
-  pData->trendCnt         = 0;
-  pData->autoTrendCnt     = 0;
+  pData->trendState           = TREND_STATE_INACTIVE;
+  pData->bResetDetected       = FALSE;
+  pData->bEnabled             = FALSE;
+  pData->bAutoTrendStabFailed = FALSE;
+  pData->trendCnt             = 0;
+  pData->autoTrendCnt         = 0;
 
-  pData->nTimeStableMs    = 0;
-  pData->lastStabCheckMs  = 0;
+  pData->nTimeStableMs        = 0;
+  pData->lastStabCheckMs      = 0;
 
   // If called at start of an ENGINE RUN set the interval to appear
   // as though the interval has elapsed so there will be no wait to begin the
@@ -825,8 +832,10 @@ void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
     // Flag the Reset as detected so we don't do this again until the next new reset.
     pData->bResetDetected = TRUE;
 
-    // If, no stable/auto trends taken, log it.
-    if ( pData->bEnabled  &&  0 == pData->autoTrendCnt)
+    // If, no stable/auto trends taken and AutoTrend criteria are defined, log it.
+    if ( pData->bEnabled  &&
+         0 == pData->autoTrendCnt &&
+         SENSOR_UNUSED !=  pCfg->stability[0].sensorIndex )
     {
       TrendWriteErrorLog( APP_ID_TREND_AUTO_NOT_DETECTED,
                           pData->trendIndex,
@@ -930,7 +939,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
       // If stability and interval durations have been met AND not already processing
       // trend, start one
       if ((TREND_STATE_INACTIVE == pData->trendState)                                      &&
-          (pData->nTimeStableMs    >= (pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS))     &&
+          (pData->nTimeStableMs        >= (pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS)) &&
           (pData->TimeSinceLastTrendMs >= (pCfg->trendInterval_s   * ONE_SEC_IN_MILLSECS)) )
       {
         TrendStartAutoTrend(pCfg, pData);
@@ -939,11 +948,14 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     }
     else // Criteria sensors didn't reach stability or active autotrend went unstable
     {
-      // Reset the stability timing for next pass.
-      // NOTE: If an TREND_STATE_AUTO is in progress, resetting the nTimeStableMs
-      //       acts as a signal for TrendUpdateData() to create a autotrend fail log.
+      // Reset the stability timing for next stability timing period.
       pData->lastStabCheckMs = 0;
-      pData->nTimeStableMs   = 0;
+
+      // If an AT is in progress, flag it to be processed in TrendUpdateData()
+      if (TREND_STATE_AUTO == pData->trendState)
+      {
+        pData->bAutoTrendStabFailed = TRUE;
+      }
     }
 
   } // More trend-samples can be taken.
@@ -1014,10 +1026,10 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
   trendLog.type       = pData->trendState;
 
   LogWriteETM(APP_ID_TREND_START,
-    LOG_PRIORITY_3,
-    &trendLog,
-    sizeof(trendLog),
-    NULL);
+              LOG_PRIORITY_3,
+              &trendLog,
+              sizeof(trendLog),
+              NULL);
 
   // Activate Action
   if( pCfg->nAction)
@@ -1027,7 +1039,7 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
   }
 
   GSE_DebugStr( NORMAL,TRUE,
-            "Trend[%d]: Auto-Trend started Auto-Trend count: %d, Stable: %dms, Interval: %dms",
+  "Trend[%d]: Auto-Trend started AutoTrendCnt: %d, TimeStable: %dms, TimeSinceLastMs: %dms",
              pData->trendIndex,
              pData->autoTrendCnt,
              pData->nTimeStableMs,
