@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 40 $  $Date: 11/26/12 6:06p $
+      $Revision: 41 $  $Date: 11/28/12 6:36p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -50,8 +50,8 @@ static ENGRUN_RUNLOG   m_engineRunLog[MAX_ENGINES];
 
 static ENGINE_FILE_HDR m_EngineInfo;
 
-static void (*m_event_func)(INT32,BOOLEAN);
-static INT32 m_event_tag;
+static void (*m_event_func)(INT32,BOOLEAN) = NULL;
+static INT32 m_event_tag                   = 0;
 
 
 // Include cmd tables and functions here after local dependencies are declared.
@@ -186,8 +186,10 @@ void EngRunInitialize(void)
           CfgMgr_RuntimeConfigPtr()->EngineRunConfigs,
           sizeof(m_engineRunCfg) );
 
-  m_event_tag = 0;
-  m_event_func = NULL;
+  //Allow c-init to take care of these b/c FASTMgr init sets them and may
+  //overwrite depending on order of initialization.
+  //m_event_tag = 0;
+  //m_event_func = NULL;
 
   // Open Engine Identification File
   result =  NV_Open(NV_ENGINE_ID);
@@ -1013,6 +1015,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 41  *****************
+ * User: Jim Mood     Date: 11/28/12   Time: 6:36p
+ * Updated in $/software/control processor/code/application
+ * SCR #1131 Modfix
+ *
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:06p
  * Updated in $/software/control processor/code/application
