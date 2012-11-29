@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 13 $  $Date: 11/26/12 12:33p $
+$Revision: 14 $  $Date: 11/29/12 4:20p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -61,7 +61,7 @@ USER_HANDLER_RESULT Trend_ShowConfig       ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static TREND_CFG         ConfigTrendTemp;      // Trend Configuration temp Storage
+static TREND_CFG         m_ConfigTrendTemp;      // Trend Configuration temp Storage
 
 static TREND_DATA        StateTrendTemp;       // Trend State Temp Storage
 
@@ -110,15 +110,15 @@ USER_ENUM_TBL TrendStateEnum[] =
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-// Macro defines the 'prototype' declaration for entry in StabCritTbl
+// Macro defines the 'prototype' declaration for entry in stabCritTbl
 #define DECL_TREND_STAB_TBL_ENTRY( n )\
   static USER_MSG_TBL TrendStabTbl##n [] =\
 {\
   /*Str          Next Tbl Ptr   Handler Func     Data Type          Access    Parameter                                       IndexRange           DataLimit     EnumTbl*/\
-  {"SENSORID",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_ENUM,    USER_RW,  &ConfigTrendTemp.stability[n].sensorIndex,      0,(MAX_TRENDS-1),    NO_LIMIT,     SensorIndexType },\
-  {"LOWER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &ConfigTrendTemp.stability[n].criteria.lower,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"UPPER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &ConfigTrendTemp.stability[n].criteria.upper,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"VARIANCE",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &ConfigTrendTemp.stability[n].criteria.variance,0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"SENSORID",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_ENUM,    USER_RW,  &m_ConfigTrendTemp.stability[n].sensorIndex,      0,(MAX_TRENDS-1),    NO_LIMIT,     SensorIndexType },\
+  {"LOWER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.lower,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"UPPER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.upper,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"VARIANCE",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.variance,0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
   { NULL,        NULL,          NULL, NO_HANDLER_DATA}\
 }
 
@@ -141,7 +141,7 @@ USER_ENUM_TBL TrendStateEnum[] =
   DECL_TREND_STAB_TBL_ENTRY(15);
 
 
-static USER_MSG_TBL StabCritTbl[] =
+static USER_MSG_TBL stabCritTbl[] =
 {
   { "S0",   TrendStabTbl0 ,  NULL, NO_HANDLER_DATA },
   { "S1",   TrendStabTbl1 ,  NULL, NO_HANDLER_DATA },
@@ -163,52 +163,52 @@ static USER_MSG_TBL StabCritTbl[] =
 };
 
 // Trends - TREND User and Configuration Table
-static USER_MSG_TBL TrendCmd [] =
+static USER_MSG_TBL trendCmd [] =
 {
   /* Str              Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
-  { "NAME",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_STR,     USER_RW,   &ConfigTrendTemp.trendName,         0,(MAX_TRENDS-1),    0,MAX_TREND_NAME,    NULL                 },
-  { "RATE",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.rate,              0,(MAX_TRENDS-1),    NO_LIMIT,            TrendRateType        },
-  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &ConfigTrendTemp.nOffset_ms,        0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "SAMPLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.nSamplePeriod_s,   0,(MAX_TRENDS-1),    1,3600,              NULL                 },
-  { "ENGINEID",       NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.engineRunId,       0,(MAX_TRENDS-1),    NO_LIMIT,            TrendEngRunIdEnum    },
-  { "MAXSAMPLECOUNT", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.maxTrends,         0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "STARTTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.startTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
-  { "RESETTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.resetTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
-  { "INTERVAL_S",     NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &ConfigTrendTemp.trendInterval_s,   0,(MAX_TRENDS-1),    0,SECS_PER_DAY,      NULL                 },
-  { "SENSORS",        NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &ConfigTrendTemp.sensorMap,         0,(MAX_TRENDS-1),    0,MAX_TREND_SENSORS, NULL                 },
-  { "CYCLEA",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[0],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
-  { "CYCLEB",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[1],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
-  { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[2],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
-  { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
-  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
-  { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
-  { "STABILITY",      StabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
+  { "NAME",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_STR,     USER_RW,   &m_ConfigTrendTemp.trendName,         0,(MAX_TRENDS-1),    0,MAX_TREND_NAME,    NULL                 },
+  { "RATE",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.rate,              0,(MAX_TRENDS-1),    NO_LIMIT,            TrendRateType        },
+  { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &m_ConfigTrendTemp.nOffset_ms,        0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "SAMPLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.nSamplePeriod_s,   0,(MAX_TRENDS-1),    1,3600,              NULL                 },
+  { "ENGINEID",       NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.engineRunId,       0,(MAX_TRENDS-1),    NO_LIMIT,            TrendEngRunIdEnum    },
+  { "MAXSAMPLECOUNT", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.maxTrends,         0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "STARTTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.startTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
+  { "RESETTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.resetTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      TriggerIndexType     },
+  { "INTERVAL_S",     NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &m_ConfigTrendTemp.trendInterval_s,   0,(MAX_TRENDS-1),    0,SECS_PER_DAY,      NULL                 },
+  { "SENSORS",        NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &m_ConfigTrendTemp.sensorMap,         0,(MAX_TRENDS-1),    0,MAX_TREND_SENSORS, NULL                 },
+  { "CYCLEA",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[0],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
+  { "CYCLEB",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[1],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
+  { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[2],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
+  { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            CycleEnumType        },
+  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
+  { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 
 
-static USER_MSG_TBL TrendStatus [] =
+static USER_MSG_TBL trendStatus [] =
 {
   /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                              IndexRange           DataLimit   EnumTbl*/
    { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   TrendStateEnum      },
    { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &StateTrendTemp.prevEngState,          0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
    { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.trendCnt,              0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.TimeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.timeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
    { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &StateTrendTemp.nTimeStableMs,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { NULL,               NULL,              NULL ,           NO_HANDLER_DATA }
 };
 
-static USER_MSG_TBL TrendRoot [] =
+static USER_MSG_TBL trendRoot [] =
 { /* Str            Next Tbl Ptr       Handler Func.        Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
-   { "CFG",         TrendCmd     ,     NULL,                NO_HANDLER_DATA},
-   { "STATUS",      TrendStatus  ,     NULL,                NO_HANDLER_DATA},
+   { "CFG",         trendCmd     ,     NULL,                NO_HANDLER_DATA},
+   { "STATUS",      trendStatus  ,     NULL,                NO_HANDLER_DATA},
    { DISPLAY_CFG,   NO_NEXT_TABLE,     Trend_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL  RootTrendMsg = {"TREND",TrendRoot,NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL  rootTrendMsg = {"TREND",trendRoot,NULL,NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
 
@@ -252,20 +252,20 @@ USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
    //Load Event structure into the temporary location based on index param
    //Param.Ptr points to the struct member to be read/written
    //in the temporary location
-   memcpy(&ConfigTrendTemp,
+   memcpy(&m_ConfigTrendTemp,
           &CfgMgr_ConfigPtr()->TrendConfigs[Index],
-          sizeof(ConfigTrendTemp));
+          sizeof(m_ConfigTrendTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
    if(SetPtr != NULL && USER_RESULT_OK == result)
    {
      memcpy ( &CfgMgr_ConfigPtr()->TrendConfigs[Index],
-              &ConfigTrendTemp,
+              &m_ConfigTrendTemp,
               sizeof(TREND_CFG));
      //Store the modified temporary structure in the EEPROM.
      CfgMgr_StoreConfigItem ( CfgMgr_ConfigPtr(),
                               &CfgMgr_ConfigPtr()->TrendConfigs[Index],
-                              sizeof(ConfigTrendTemp));
+                              sizeof(m_ConfigTrendTemp));
    }
    return result;
 }
@@ -341,27 +341,27 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
                                        const void *SetPtr,
                                        void **GetPtr)
 {
-   CHAR  LabelStem[] = "\r\n\r\nTREND.CFG";
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
+   CHAR  labelStem[] = "\r\n\r\nTREND.CFG";
+   CHAR  label[USER_MAX_MSG_STR_LEN * 3];
    INT16 i;
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    USER_MSG_TBL*  pCfgTable;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
 
-   pCfgTable = &TrendCmd[0];  // Get pointer to config entry
+   pCfgTable = &trendCmd[0];  // Get pointer to config entry
 
    for (i = 0; i < MAX_TRENDS && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
-      sprintf(Label, "%s[%d]", LabelStem, i);
+      snprintf(label, sizeof(label), "%s[%d]", labelStem, i);
 
       result = USER_RESULT_ERROR;
-      if ( User_OutputMsgString( Label, FALSE ) )
+      if ( User_OutputMsgString( label, FALSE ) )
       {
-         result = User_DisplayConfigTree(BranchName, pCfgTable, i, 0, NULL);
+         result = User_DisplayConfigTree(branchName, pCfgTable, i, 0, NULL);
       }
    }
    return result;
@@ -370,6 +370,11 @@ USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 11/29/12   Time: 4:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1200 Requirements: GSE command to view the number of trend
  *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p

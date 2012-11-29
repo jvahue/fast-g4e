@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 17 $  $Date: 11/26/12 6:07p $
+ $Revision: 18 $  $Date: 11/29/12 4:19p $
 
 ******************************************************************************/
 
@@ -58,6 +58,7 @@ static TREND_LOG   m_TrendLog [MAX_TRENDS];   // Trend Log data for each trend
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static void TrendTask         ( void* pParam );
 static void TrendProcess         ( TREND_CFG* pCfg, TREND_DATA* pData );
 
 static void TrendFinish          ( TREND_CFG* pCfg, TREND_DATA* pData );
@@ -109,7 +110,7 @@ void TrendInitialize( void )
   TREND_DATA* pData;
 
   // Add user commands for Trend to the user command tables.
-  User_AddRootCmd(&RootTrendMsg);
+  User_AddRootCmd(&rootTrendMsg);
 
   // Clear and Load the current cfg info.
   memset(m_TrendData, 0, sizeof(m_TrendData));
@@ -178,14 +179,14 @@ void TrendInitialize( void )
  *
  * Description: Task function for Trend processing
  *
- * Parameters:   None
+ * Parameters:   pParam - optional param block passed from Task Manatger
  *
  * Returns:      None
  *
  * Notes:
  *
  *****************************************************************************/
-void TrendTask( void* pParam )
+static void TrendTask( void* pParam )
 {
   // Local Data
   TREND_CFG    *pCfg;
@@ -254,11 +255,11 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( trendHdr, 0, sizeof(trendHdr) );
+   memset ( trendHdr, 0, sizeof(TREND_HDR) );
 
    // Loop through all the Trends
    for ( trendIndex = TREND_0;
-         ((trendIndex < MAX_TRENDS) && (nRemaining > sizeof (trendHdr[trendIndex])));
+         ((trendIndex < MAX_TRENDS) && (nRemaining > sizeof (TREND_HDR)));
          trendIndex++ )
    {
       // Copy the Trend names
@@ -272,13 +273,13 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
       trendHdr[trendIndex].maxTrends     = m_TrendCfg[trendIndex].maxTrends;
       trendHdr[trendIndex].trendInterval = m_TrendCfg[trendIndex].trendInterval_s;
       trendHdr[trendIndex].nTimeStable_s = m_TrendCfg[trendIndex].stabilityPeriod_s;
-      trendHdr[trendIndex].StartTrigger  = m_TrendCfg[trendIndex].startTrigger;
-      trendHdr[trendIndex].ResetTrigger  = m_TrendCfg[trendIndex].resetTrigger;
+      trendHdr[trendIndex].startTrigger  = m_TrendCfg[trendIndex].startTrigger;
+      trendHdr[trendIndex].resetTrigger  = m_TrendCfg[trendIndex].resetTrigger;
 
 
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (trendHdr[trendIndex]);
-      nRemaining -= sizeof (trendHdr[trendIndex]);
+      nTotal     += sizeof (TREND_HDR);
+      nRemaining -= sizeof (TREND_HDR);
    }
    // Copy the Trend header to the buffer
    memcpy ( pBuffer, trendHdr, nTotal );
@@ -295,7 +296,8 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
  *
  * Description: Normal processing function for Trend. Called by TrendTask.
  *
- * Parameters:   None
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
  * Returns:      None
  *
@@ -379,7 +381,8 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
  *              The trend will be sampled for the
  *              duration of TREND_CFG.nSamplePeriod_s
  *
- * Parameters:   None
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
  * Returns:      None
  *
@@ -426,7 +429,7 @@ static void TrendStartManualTrend(TREND_CFG* pCfg, TREND_DATA* pData )
 }
 
 /******************************************************************************
- * Function: TrendUpdatedData
+ * Function: TrendUpdateData
  *
  * Description:   Update the status of active trend
  *
@@ -453,7 +456,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
       if( pData->bAutoTrendStabFailed && pData->autoTrendCnt < pCfg->maxTrends )
       {
         // Force a finish to this sampling and flag it for autotrend-failure logging.
-        bAutoTrendFailed = TRUE;        
+        bAutoTrendFailed = TRUE;
       }
 
       // Reset the signal, it will be set during the next frame if needed.
@@ -478,7 +481,7 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
       pData->nTimeStableMs    = 0;
 
       // Reset interval timer
-      pData->TimeSinceLastTrendMs = 0;
+      pData->timeSinceLastTrendMs = 0;
       pData->lastIntervalCheckMs  = 0;
 
     }else if ( pData->masterSampleCnt >= pData->nSamplesPerPeriod )
@@ -542,14 +545,14 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
         pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
 
         // Only some of the sensor stats are used for trend logging
-        pLog->sensor[i].SensorIndex = pSummary->SensorIndex;
+        pLog->sensor[i].sensorIndex = pSummary->SensorIndex;
         pLog->sensor[i].bValid      = pSummary->bValid;
         pLog->sensor[i].fMaxValue   = pSummary->fMaxValue;
         pLog->sensor[i].fAvgValue   = pSummary->fAvgValue;
       }
       else // Sensor Not Used
       {
-        pLog->sensor[i].SensorIndex = SENSOR_UNUSED;
+        pLog->sensor[i].sensorIndex = SENSOR_UNUSED;
         pLog->sensor[i].bValid      = FALSE;
         pLog->sensor[i].fMaxValue   = 0.0;
         pLog->sensor[i].fAvgValue   = 0.0;
@@ -600,7 +603,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->nTimeStableMs    = 0;
 
     // Reset interval timer
-    pData->TimeSinceLastTrendMs  = 0;
+    pData->timeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
 
 
@@ -657,12 +660,12 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   // initial stability check
   if (bRunTime)
   {
-    pData->TimeSinceLastTrendMs = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
+    pData->timeSinceLastTrendMs = pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS;
     pData->lastIntervalCheckMs  = CM_GetTickCount();
   }
   else
   {
-    pData->TimeSinceLastTrendMs  = 0;
+    pData->timeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
   }
 
@@ -696,9 +699,9 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
  *
  * Description: Wrapper function for enabling/disabling the Trend task.
  *
- * Parameters:   BOOLEAN flag
- *                  TRUE  - Enable the Trend task.
- *                  FALSE - Disable the Trend task.
+ * Parameters:     [in] Trend_Task - id of the task to be enabled/disabled
+ *                 [in] bEnable - TRUE  - Enable the Trend task.
+ *                                FALSE - Disable the Trend task.
  *
  * Returns:      None
  *
@@ -818,7 +821,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
  * Notes:
  *
  *****************************************************************************/
-void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
+static void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
 {
    //Each Trend shall record a "Trend not Detected" log when the reset trigger becomes active,
    //the trend processing was ENABLED and a trend has not been taken.
@@ -861,10 +864,10 @@ void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
  *
  * Description: Create an error log using the passed parameters
  *
- * Parameters:   [in] logId     - identifier of log type
- *               [in] trendIdx  - object index of trend being reported
- *               [in] criteria  - configured stability criteria of trend being reported
- *               [in] data      - the state of the sensors being monitored.
+ * Parameters:   [in] logID      identifier of log type
+ *               [in] trendIdx   object index of trend being reported
+ *               [in] stabCrit   configured stability criteria of trend being reported
+ *               [in] stabData   the state of the sensors being monitored.
  *
  * Returns:      None
  *
@@ -916,7 +919,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
     // Update minimum time between trends
     TrendUpdateTimeElapsed(timeNow,
                            &pData->lastIntervalCheckMs,
-                           &pData->TimeSinceLastTrendMs);
+                           &pData->timeSinceLastTrendMs);
 
    /* GSE_DebugStr(NORMAL,TRUE,"Trend[%d]: Trend Interval: %d of %d",
       pData->trendIndex,
@@ -940,7 +943,7 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
       // trend, start one
       if ((TREND_STATE_INACTIVE == pData->trendState)                                      &&
           (pData->nTimeStableMs        >= (pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS)) &&
-          (pData->TimeSinceLastTrendMs >= (pCfg->trendInterval_s   * ONE_SEC_IN_MILLSECS)) )
+          (pData->timeSinceLastTrendMs >= (pCfg->trendInterval_s   * ONE_SEC_IN_MILLSECS)) )
       {
         TrendStartAutoTrend(pCfg, pData);
       }
@@ -964,10 +967,12 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendUpdateTimeElapsed
  *
- * Description: Generalized routine to update time elapsed
+ * Description: Generalized routine to update an elapsed time
  *
- * Parameters:
- *
+ * Parameters:  [in]     currentTime    - time now.
+ *              [in/out] lastTimeCalled - the time this was last-called.
+ *              [in/out] elapsedTime    - the time elapsed between lastTimeCalled
+ *                                        and now.
  * Returns:      None
  *
  * Notes:
@@ -979,11 +984,11 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
    // If first time thru, set last time to current so elapsed will be zero.
    if (0 == *lastTimeCalled)
    {
-     // if elapsed time is zero we are starting a
      *lastTimeCalled  = currentTime;
      *elapsedTime     = 0;
    }
-   // Update the elapsed time
+
+   // Update the elapsed time & record
    *elapsedTime     += (currentTime - *lastTimeCalled);
    *lastTimeCalled  =  currentTime;
  }
@@ -992,9 +997,10 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
 /******************************************************************************
  * Function: TrendStartAutoTrend
  *
- * Description: Generalized routine to update time elapsed
+ * Description: Generalized routine to update time elapsed.
  *
- * Parameters:
+ * Parameters:   [in]     pCfg  Pointer to trend  config data
+ *               [in/out] pData Pointer to trend runtime data
  *
  * Returns:      None
  *
@@ -1043,12 +1049,17 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
              pData->trendIndex,
              pData->autoTrendCnt,
              pData->nTimeStableMs,
-             pData->TimeSinceLastTrendMs );
+             pData->timeSinceLastTrendMs );
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Contractor V&v Date: 11/29/12   Time: 4:19p
+ * Updated in $/software/control processor/code/application
+ * SCR #1200 Requirements: GSE command to view the number of trend
  *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:07p
