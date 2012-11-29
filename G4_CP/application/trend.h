@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 13 $  $Date: 11/26/12 12:33p $
+  $Revision: 14 $  $Date: 11/29/12 4:19p $
 
 *******************************************************************************/
 
@@ -38,7 +38,6 @@
 #define MAX_TREND_CYCLES   4
 
 #define ONE_SEC_IN_MILLSECS  1000u
-#define SECS_PER_HR          3600
 #define SECS_PER_DAY         86400
 
 
@@ -123,8 +122,7 @@ typedef enum
 {
   TREND_STATE_INACTIVE,
   TREND_STATE_MANUAL,
-  TREND_STATE_AUTO,
-  MAX_TREND_STATES
+  TREND_STATE_AUTO
 }TREND_STATE;
 
 typedef enum
@@ -151,7 +149,7 @@ typedef struct
 
 typedef struct
 {
-  SENSOR_INDEX SensorIndex;
+  SENSOR_INDEX sensorIndex;
   BOOLEAN      bValid;
   FLOAT32      fMaxValue;
   FLOAT32      fAvgValue;
@@ -244,8 +242,8 @@ typedef struct
    UINT16        maxTrends;
    UINT32        trendInterval;
    UINT16        nTimeStable_s;
-   TRIGGER_INDEX StartTrigger;
-   TRIGGER_INDEX ResetTrigger;
+   TRIGGER_INDEX startTrigger;
+   TRIGGER_INDEX resetTrigger;
 }TREND_HDR;
 
 #pragma pack()
@@ -276,7 +274,7 @@ typedef struct
 
   // Interval handling
   UINT32       lastIntervalCheckMs; /* Starting time (CM_GetTickCount()                      */
-  UINT32       TimeSinceLastTrendMs;/* time since last trend                                 */
+  UINT32       timeSinceLastTrendMs;/* time since last trend                                 */
 
   // Stability handling
   UINT16       nStabExpectedCnt;  /* Expected count based on configured.                     */
@@ -309,13 +307,17 @@ typedef struct
                                   Package Exports Functions
 *******************************************************************************/
 EXPORT void   TrendInitialize   ( void );
-EXPORT void   TrendTask         ( void* pParam );
 EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 
 #endif // TREND_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 11/29/12   Time: 4:19p
+ * Updated in $/software/control processor/code/application
+ * SCR #1200 Requirements: GSE command to view the number of trend
  *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
