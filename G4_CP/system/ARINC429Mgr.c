@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 57 $  $Date: 12-11-16 8:12p $
+     $Revision: 58 $  $Date: 12-11-29 4:13p $
 
 ******************************************************************************/
 
@@ -501,9 +501,9 @@ void Arinc429MgrInitialize ( void )
       m_Arinc429DebugBuffer[nChannel].RecordSize = sizeof(UINT32);
 
       FIFO_Init( &pRxBuffer->RecordFIFO,    (INT8*)m_Arinc429RxStorage[nChannel],
-                 sizeof(ARINC429_RECORD) );
+                 sizeof(m_Arinc429RxStorage[0]) );
       FIFO_Init( &pDebugBuffer->RecordFIFO, (INT8*)m_Arinc429DebugStorage[nChannel],
-                 sizeof(UINT32) );
+                 sizeof(m_Arinc429DebugStorage[0]) );
 
       if ( ( TRUE == Arinc429DrvStatus_OK ( ARINC429_RCV, nChannel ) ) ||
            ( m_Arinc429Cfg.bIgnoreDrvPBIT == TRUE ) )
@@ -3693,6 +3693,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: John Omalley Date: 12-11-29   Time: 4:13p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Fixes
  * 
  * *****************  Version 57  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:12p
