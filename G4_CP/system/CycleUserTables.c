@@ -46,36 +46,36 @@ static CYCLE_ENTRY m_persistTemp; // Temp buffer for persisted counts info.
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
-USER_HANDLER_RESULT       CycleState(USER_DATA_TYPE DataType,
-                                     USER_MSG_PARAM Param,
-                                     UINT32 Index,
-                                     const void *SetPtr,
-                                     void **GetPtr);
+static USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr);
 
-USER_HANDLER_RESULT       CycleUserCfg(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT CycleUserCfg(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr);
 
 
-USER_HANDLER_RESULT       CyclePCount(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
                                        const void *SetPtr,
                                        void **GetPtr);
 
-USER_HANDLER_RESULT       CycleShowConfig(USER_DATA_TYPE DataType,
-                                          USER_MSG_PARAM Param,
-                                          UINT32 Index,
-                                          const void *SetPtr,
-                                          void **GetPtr);
+static USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr);
 
 /*****************************************************************************/
 /* User command tables                                                       */
 /*****************************************************************************/
 
-static USER_ENUM_TBL CycleTypeEnum[] =
+static USER_ENUM_TBL cycleTypeEnum[] =
 {
   { "NONE",             CYC_TYPE_NONE_CNT             },
   { "SIMPLE",           CYC_TYPE_SIMPLE_CNT           },
@@ -86,7 +86,7 @@ static USER_ENUM_TBL CycleTypeEnum[] =
 };
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-static USER_MSG_TBL CycleStatusCmd [] =
+static USER_MSG_TBL cycleStatusCmd [] =
 {
   /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                     IndexRange         DataLimit   EnumTbl*/
   {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.cycleActive,      0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
@@ -95,11 +95,11 @@ static USER_MSG_TBL CycleStatusCmd [] =
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL CycleCfgCmd[] =
+static USER_MSG_TBL cycleCfgCmd[] =
 {
   /*Str          Next Tbl Ptr   Handler Func     Data Type       Access    Parameter               IndexRange          DataLimit              EnumTbl*/
   {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  &m_CfgTemp.name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
-  {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              CycleTypeEnum    },
+  {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              cycleTypeEnum    },
   {"COUNT",      NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nCount,       0,(MAX_CYCLES-1),   NO_LIMIT,              NULL             },
   {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              TriggerIndexType },
   {"ENGINERUNID",NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nEngineRunId, 0,(MAX_CYCLES-1),   NO_LIMIT,              engRunIdEnum     },
@@ -107,7 +107,7 @@ static USER_MSG_TBL CycleCfgCmd[] =
 };
 
 // Persisted Counts
-static USER_MSG_TBL CyclePCountsCmd[] =
+static USER_MSG_TBL cyclePCountsCmd[] =
 {
   /*Str        Next Tbl Ptr   Handler Func  Data Type         Access    Parameter                 IndexRange          DataLimit         EnumTbl*/
   {"COUNT",    NO_NEXT_TABLE, CyclePCount,  USER_TYPE_UINT32, USER_RW,  &m_persistTemp.count.n,   0,(MAX_CYCLES-1),   NO_LIMIT,       NULL },
@@ -116,18 +116,18 @@ static USER_MSG_TBL CyclePCountsCmd[] =
 };
 
 
-static USER_MSG_TBL CycleCmd [] =
+static USER_MSG_TBL cycleCmd [] =
 {
   /*Str             Next Tbl Ptr      Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/
-  {"CFG",           CycleCfgCmd,      NULL,             NO_HANDLER_DATA,                                                                                },
-  {"STATUS",        CycleStatusCmd,   NULL,             NO_HANDLER_DATA,                                                                                },
-  {"PERSIST",       CyclePCountsCmd,  NULL,             NO_HANDLER_DATA,                                                                                },
+  {"CFG",           cycleCfgCmd,      NULL,             NO_HANDLER_DATA,                                                                                },
+  {"STATUS",        cycleStatusCmd,   NULL,             NO_HANDLER_DATA,                                                                                },
+  {"PERSIST",       cyclePCountsCmd,  NULL,             NO_HANDLER_DATA,                                                                                },
   {DISPLAY_CFG,     NO_NEXT_TABLE,    CycleShowConfig, USER_TYPE_ACTION,    (USER_RO|USER_NO_LOG|USER_GSE)  ,NULL       ,-1,-1,     NO_LIMIT,   NULL   },
   { NULL,           NULL,             NULL,             NO_HANDLER_DATA}
 };
 #pragma ghs endnowarning
 
-static USER_MSG_TBL RootCycleMsg = {"CYCLE",CycleCmd, NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL rootCycleMsg = {"CYCLE",cycleCmd, NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
@@ -158,11 +158,11 @@ static USER_MSG_TBL RootCycleMsg = {"CYCLE",CycleCmd, NULL,NO_HANDLER_DATA};
 * Notes:
 ******************************************************************************/
 
-USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
-                                USER_MSG_PARAM Param,
-                                UINT32 Index,
-                                const void *SetPtr,
-                                void **GetPtr)
+static USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr)
 {
   USER_HANDLER_RESULT result;
 
@@ -200,11 +200,11 @@ USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
 * Notes:
 ******************************************************************************/
 
-USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
-                                USER_MSG_PARAM Param,
-                                UINT32 Index,
-                                const void *SetPtr,
-                                void **GetPtr)
+static USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
+                                        USER_MSG_PARAM Param,
+                                        UINT32 Index,
+                                        const void *SetPtr,
+                                        void **GetPtr)
 {
   USER_HANDLER_RESULT result;
 
@@ -238,7 +238,17 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
  * Description:  User message handler to set/get configuration items of the
  *               EngineRun object
  *
- * Parameters:   See user.h command handler prototype
+ Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
  *
  * Returns:      USER_RESULT_OK:    Processed successfully
  *               USER_RESULT_ERROR: Error processing command.
@@ -246,11 +256,11 @@ USER_HANDLER_RESULT CyclePCount(USER_DATA_TYPE DataType,
  * Notes:        none
  *
  *****************************************************************************/
-USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
-                                  USER_MSG_PARAM Param,
-                                  UINT32 Index,
-                                  const void *SetPtr,
-                                  void **GetPtr)
+static USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr)
 {
  USER_HANDLER_RESULT result = USER_RESULT_OK;
 
@@ -299,17 +309,17 @@ USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
  *
  * Notes:
  *****************************************************************************/
-USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
-                                       USER_MSG_PARAM Param,
-                                       UINT32 Index,
-                                       const void *SetPtr,
-                                       void **GetPtr)
+static USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr)
 {
   USER_HANDLER_RESULT result;
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];
+  CHAR label[USER_MAX_MSG_STR_LEN * 3];
 
   //Top-level name is a single indented space
-  CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+  CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
 
   USER_MSG_TBL*  pCfgTable;
   INT16 cycIdx;
@@ -320,14 +330,14 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
   for (cycIdx = 0; cycIdx < MAX_CYCLES && result == USER_RESULT_OK; ++cycIdx)
   {
     // Display sensor id info above each set of data.
-    sprintf(Label, "\r\n\r\nCYCLE[%d].CFG", cycIdx);
+    snprintf(label, sizeof(label), "\r\n\r\nCYCLE[%d].CFG", cycIdx);
     result = USER_RESULT_ERROR;
-    if (User_OutputMsgString( Label, FALSE ) )
+    if (User_OutputMsgString( label, FALSE ) )
     {
-      pCfgTable = CycleCfgCmd; // Re-set the pointer to beginning of CFG table
+      pCfgTable = cycleCfgCmd; // Re-set the pointer to beginning of CFG table
 
       // User_DisplayConfigTree will invoke itself recursively to display all fields.
-      result = User_DisplayConfigTree(BranchName, pCfgTable, cycIdx, 0, NULL);
+      result = User_DisplayConfigTree(branchName, pCfgTable, cycIdx, 0, NULL);
     }
   }
   return result;
@@ -343,12 +353,12 @@ USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:40p
  * Updated in $/software/control processor/code/system
  * Code Review
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system

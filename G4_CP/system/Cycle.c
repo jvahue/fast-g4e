@@ -130,7 +130,7 @@ EXPORT void CycleInitialize(void)
 {
   UINT16 i;
   // Add user commands for Cycles to the user command tables.
-  User_AddRootCmd(&RootCycleMsg);
+  User_AddRootCmd(&rootCycleMsg);
 
   // Load the current cfg info.
   memcpy(m_Cfg,
@@ -155,7 +155,7 @@ EXPORT void CycleInitialize(void)
  *
  * Description:  Updates all cycles for EngineRun 'erIndex'
  *
- * Parameters:   The index into the CYCLE_CFG and CYCLE_DATA object arrays.
+ * Parameters:   erIndex - The index into the CYCLE_CFG and CYCLE_DATA object arrays.
  *
  * Returns:      None.
  *
@@ -182,9 +182,9 @@ void CycleUpdateAll(ENGRUN_INDEX erIndex)
  *
  * Description:  checks cycle type for persistent.
  *
- * Parameters:   [in] cycle table index.
+ * Parameters:   [in] nCycle - cycle table index.
  *
- * Returns:      None.
+ * Returns:      TRUE if Cycle is persistent otherwise FALSE.
  *
  * Notes:        None.
  *
@@ -236,12 +236,12 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
          cycleIndex++ )
    {
       // Copy the Cycle names
-      strncpy_safe( cycleHdr[cycleIndex].Name,
-                    sizeof(cycleHdr[cycleIndex].Name),
+      strncpy_safe( cycleHdr[cycleIndex].name,
+                    sizeof(cycleHdr[cycleIndex].name),
                     m_Cfg[cycleIndex].name,
                     _TRUNCATE);
 
-      cycleHdr[cycleIndex].Type         = m_Cfg[cycleIndex].type;
+      cycleHdr[cycleIndex].type         = m_Cfg[cycleIndex].type;
       cycleHdr[cycleIndex].nCount       = m_Cfg[cycleIndex].nCount;
       cycleHdr[cycleIndex].nTriggerId   = m_Cfg[cycleIndex].nTriggerId;
       cycleHdr[cycleIndex].nEngineRunId = m_Cfg[cycleIndex].nEngineRunId;
@@ -263,7 +263,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
  * Description:  Retrieves the count for cycle 'nCycle'
  *
  *
- * Parameters:   UINT8 nCycle         - Cycle Index of the value to return
+ * Parameters:   UINT8 nCycle - Cycle Index of the value to return
  *
  *
  * Returns:      UINT32 - Value of cycle as persisted to RTCRam
@@ -342,20 +342,21 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
   }
 }
 
-/*********************************************************************************************/
-/* Local Functions                                                                           */
-/*********************************************************************************************/
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
+
 
 /******************************************************************************
+
  * Function:     CycleInitPersistent
  *
  * Description:  Copies persistent cycle from RTC RAM or EEPROM and
  *               copies to run time memory (ies).
  *
- * Parameters:   [in] bStateCorrupted - Flag indicating whether persistent data
- *                                      is corrupted.
+ * Parameters:   None
  *
- * Returns:      Boolean indicating update was successful.
+ * Returns:      None.
  *
  * Notes:        None.
  *
@@ -455,7 +456,8 @@ static void CycleInitPersistent(void)
  *                Called when we transition to RUN mode, we initialize the Cycle
  *                data so that valid checks may subsequently be done
  *
- * Parameters:   [in] nCycle - Index of Cycle to update
+ * Parameters:   [in]     pCycleCfg  Pointer to cycle config data
+ *               [in/out] pCycleData Pointer to cycle runtime data
  *
  * Returns:      None.
  *
@@ -517,7 +519,9 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
  *
  * Description:  Check to see if a specific cycle needs counting.
  *
- * Parameters:   [in] nCycle - Index of Cycle to update
+ * Parameters:   [in]     pCycleCfg  Pointer to cycle config data
+ *               [in/out] pCycleData Pointer to cycle runtime data
+ *               [in]     cycIndex   index value of this cycle for updating
  *
  * Returns:      None.
  *
@@ -569,7 +573,9 @@ static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cy
  *
  * Description:  Processes simple and duration count cycle object.
  *
- * Parameters:   [in] nCycle the cycle object being processed.
+ * Parameters:   [in]     pCycleCfg  Pointer to cycle config data
+ *               [in/out] pCycleData Pointer to cycle runtime data
+ *               [in]     cycIndex   index value of this cycle for updating
  *
  * Returns:      None.
  *
@@ -597,9 +603,8 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
     {
       // Increment duration every time through when active.
 
-      // Update the millisec duration in the enginerun count object.
+      // Update the millisec duration count
       nowTimeMs = CM_GetTickCount();
-
       pCycleData->currentCount     += nowTimeMs - pCycleData->cycleLastTime_ms;
       pCycleData->cycleLastTime_ms =  nowTimeMs;
 
@@ -625,7 +630,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
   }
   else
   {
-    // Previous cycle was inactive - see if the start criteria are met
+    // Cycle is inactive - see if the start criteria are met
     // Set up a bit-mask for querying the state of the trigger for this cycle
 
     CycleStart = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
@@ -762,7 +767,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
           if (m_CountsEEProm.data[nCycle].count.n !=  m_CountsRTC.data[nCycle].count.n &&
               m_CountsEEProm.data[nCycle].checkID !=  m_CountsRTC.data[nCycle].checkID)
           {
-            GSE_DebugStr(NORMAL,TRUE,"m_CountsEEProm[%d] = %d, %d  |  m_CountsRTC[%d] = %d, %d",
+            GSE_DebugStr(NORMAL,TRUE,"m_CountsEEProm[%d] = %d, %d  | m_CountsRTC[%d] = %d, %d",
                           i, m_CountsEEProm.data[i].count.n, m_CountsEEProm.data[i].checkID,
                           i, m_CountsRTC.data[i].count.n,    m_CountsRTC.data[i].checkID);
           }
@@ -785,7 +790,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
  * Description:  Called by EngineRun to finish up any currently running
  *               cycles for the indicated Engine Run
  *
- * Parameters:   [in] id of owning-EngineRun.
+ * Parameters:   [in] erID - id of owning-EngineRun.
  *
  * Returns:      None.
  *
@@ -800,7 +805,6 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
     // If the cycle entry is configured, and belongs to the EngineRun,
     // save the values and close it out.
 
-    // TODO: handle ER = ANY
     if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT  && m_Cfg[i].nEngineRunId == erID)
     {
       if (CycleIsPersistentType( i))
@@ -819,7 +823,7 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
  *
  * Parameters:   [in] None
  *
- * Returns:      None.
+ * Returns:      TRUE if restore was successful, otherwise FALSE.
  *
  * Notes:        None.
  *
@@ -907,7 +911,7 @@ static BOOLEAN CycleRestoreCountsFromPersistFiles(void)
  * Parameters:   [in] nCycle the persist cycle to be updated.
  *               [in] bLogUpdate
  *
- * Returns:      None.
+ * Returns:      TRUE if persist needs to be updated, otherwise FALSE.
  *
  * Notes:        None.
  *
@@ -959,9 +963,8 @@ static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate )
  *               nEngineRunId
  *
  * Parameters:   [in] nCycle the persist cycle to be updated.
- *               [in] bLogUpdate
  *
- * Returns:      None.
+ * Returns:      The checksum value.
  *
  * Notes:        None.
  *
@@ -985,7 +988,7 @@ static UINT16 CycleCalcCheckID( UINT16 nCycle )
  * Description:  Reset Cycle calculations for a given
  *               Engine Run
  *
- * Parameters:   [in] Engine Run Index
+ * Parameters:   [in] erID - Engine Run Index
  *
  * Returns:      None.
  *
@@ -1013,7 +1016,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
  * Description:  Write back the persist counts to both EE and RTC NvRam
  *               Engine Run
  *
- * Parameters:   [in] boolean write mode flag
+ * Parameters:   [in] bNow - commit update to NV memory immediately
  *
  * Returns:      None.
  *
@@ -1046,7 +1049,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:16p
  * Updated in $/software/control processor/code/system
