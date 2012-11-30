@@ -23,7 +23,7 @@
                  "transmitted" with one command.                 
 
     VERSION
-    $Revision: 28 $  $Date: 12-10-10 12:03p $   
+    $Revision: 29 $  $Date: 11/29/12 7:44p $
     
 ******************************************************************************/
 
@@ -976,7 +976,7 @@ static void MSFX_YMdmSndrSend(void)
     m_TaskState = TASK_YMDM_SNDR_WAIT_FOR_ACKNAK;
     Timeout(TO_START,YMDM_TX_TO,&to);
     //While GSE tx is busy){} //While GSE tx is busy
-    while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+    while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
            !Timeout(TO_CHECK,YMDM_TX_TO,&to))
     {
     }
@@ -1090,7 +1090,7 @@ static void MSFX_YMdmSndrSendEOT(void)
     m_TaskState = TASK_YMDM_SNDR_WAIT_EOT_ACKNAK;
     Timeout(TO_START,YMDM_TX_TO,&to);
     //While GSE tx is busy){} //While GSE tx is busy
-    while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+    while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
            !Timeout(TO_CHECK,YMDM_TX_TO,&to))
     {
     }
@@ -1195,7 +1195,7 @@ static void MSFX_YMdmRcvrSendStartChar(void)
     m_TaskState = TASK_YMDM_RCVR_WAIT_FOR_SNDR;
     Timeout(TO_START,YMDM_TX_TO,&to);
     //While GSE tx is busy){} //While GSE tx is busy
-    while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+    while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
            !Timeout(TO_CHECK,YMDM_TX_TO,&to))
     {
     }
@@ -1236,7 +1236,7 @@ static void MSFX_YMdmRcvrSendACK(void)
   {
     Timeout(TO_START,YMDM_TX_TO,&to);
     //While GSE tx is busy){} //While GSE tx is busy
-    while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+    while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
            !Timeout(TO_CHECK,YMDM_TX_TO,&to))
     {
     }
@@ -1294,7 +1294,7 @@ static void MSFX_YMdmRcvrSendNAK(void)
   {
     Timeout(TO_START,YMDM_TX_TO,&to);
     //While GSE tx is busy){} //While GSE tx is busy
-    while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+    while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
            !Timeout(TO_CHECK,YMDM_TX_TO,&to))
     {
     }
@@ -1540,7 +1540,7 @@ static void MSFX_SendStartPutFileToMS(MSFX_YMODEM_BLK* YMdm)
     {
       Timeout(TO_START,YMDM_TX_TO,&to);
       //While GSE tx is busy){} //While GSE tx is busy
-      while( UART0_TRANSMITTING & UART_CheckForTXDone() & 
+      while( (UART0_TRANSMITTING & UART_CheckForTXDone()) &&
              !Timeout(TO_CHECK,YMDM_TX_TO,&to))
       {
       }
@@ -2072,6 +2072,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
  * 
+ * *****************  Version 29  *****************
+ * User: Jim Mood     Date: 11/29/12   Time: 7:44p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 28  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:03p
  * Updated in $/software/control processor/code/application

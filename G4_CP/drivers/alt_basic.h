@@ -6,11 +6,11 @@
 
  File: alt_basic.h
 
- Description: This file provides a set of basic defintions that are common to all Altair
- software.
+ Description: This file provides a set of basic defintions that are common to
+              all Altair software.
 
  VERSION
-      $Revision: 11 $  $Date: 12-11-02 1:38p $
+      $Revision: 12 $  $Date: 11/29/12 7:23p $
 
 ******************************************************************************/
 
@@ -25,14 +25,9 @@
 #include "alt_stdtypes.h"
 #include "compiler.h"
 
-
-
 /******************************************************************************
                                    Package Defines
 ******************************************************************************/
-#define CR '\r'
-#define LF '\n'
-#define TAB '\t'
 #define NEW_LINE "\r\n"
 #define NEWLINE  NEW_LINE
 #define NL NEW_LINE
@@ -65,28 +60,6 @@
 ******************************************************************************/
 #define FIELD( w, b ,s) ( ((w) & ( (1U << (s)) - 1U)) << (b) )
 
-
-/******************************************************************************
-  Set one bit in a word
-    word - the word to set the bit in
-    bit  - the bit to set
-******************************************************************************/
-#define SET_BIT( word, bit) ( (word) | (1U << (bit)) )
-
-/*************************************/
-/* Set a group of bits in a word     */
-/* word - the word to set bits in    */
-/* pattern - the bit patterns to set */
-/*************************************/
-#define SET_BITS( word, pattern) ( (word) | (pattern))
-
-/***************************************************/
-/* Reset a single bit in a word                    */
-/* word - the word that contains the bit to reset  */
-/* bit - the bit in the word to reset, set to zero */
-/***************************************************/
-#define RESET_BIT(  word, bit)     ( ~(1U << (bit)) & word)
-
 /******************************************/
 /* Reset a goup of bits in a word         */
 /* word - the word to reset bits in       */
@@ -94,101 +67,13 @@
 /******************************************/
 #define RESET_BITS( word, pattern) ( (word) & ~(pattern))
 
-/*------------------------ Byte (un)Packing ---------------------*/
-/* NOTE: these values should be used in all (UN)PACK_BYTE calls  */
-/*---------------------------------------------------------------*/
-#define BYTE0   0
-#define BYTE1   8
-#define BYTE2  16
-#define BYTE3  24
-
-/**********************************************************/
-/* Pack a byte into a word                                */
-/* pw - the word to pack the byte into                    */
-/* b  - the byte to pack, the LSbyte of this word is used */
-/* p  - position of the byte (i.e., BYTE0 .. BYTE3)       */
-/**********************************************************/
-#define PACK_BYTE( pw, b, p) ( (pw) | (( (b) & 0xFF) << p) )
-
-/***************************************/
-/* Extract a byte from a word          */
-/* uw - word to extract the byte from  */
-/* p  - the byte position to extract   */
-/***************************************/
-#define UNPACK_BYTE( pw, p)  ( ((pw) >> (p)) & 0xFF)
-
-/*--------------------- Half Word (un)Packing -------------------*/
-/* NOTE: these values should be used in all (UN)PACK_HALF calls  */
-/*---------------------------------------------------------------*/
-#define LOWER   0
-#define UPPER  16
-
-/**********************************************************/
-/* Pack a half word byte into a word                      */
-/* pw - the word to pack the half into                    */
-/* b  - the half to pack, the LOWER  of this word is used */
-/* p  - position of the half (i.e., LOWER .. UPPER)       */
-/**********************************************************/
-#define PACK_HALF( pw, b, p) ( (pw) | (( (b) & 0xFFFF) << p) )
-
-/***************************************/
-/* Extract a HALF from a word          */
-/* uw - word to extract the HALF from  */
-/* p  - the HALF position to extract   */
-/***************************************/
-#define UNPACK_HALF( pw, p) ( ((pw) >> (p)) & 0xFFFF)
-
-/**************************************************/
-/* Word Part Manipulation                         */
-/**************************************************/
-#define LSHALF( word) ((word) & 0xFFFF)
-#define MSHALF( word) (((word) >> 16) & 0xFFFF)
-
-#define GET_BYTE( word, byte) (((word) >> (byte)) & 0xFF)
-
 /*-----------------------------------------------------------------------------
-  BOOLEAN operations
-   NOT  - inverts the input
-   XOR  - exclusive OR
-   AND  - standard AND function
-    OR  - standard OR  function
-   ANDN - standard AND with 2nd input NOTed
-    ORN - standard OR  with 2nd input NOTed
-------------------------------------------------------------------------------*/
-#define  NOT( i1)     ((i1) ^ 1)
-#define  XOR( i1, i2) ((i1) ^ (i2))
-#define  AND( i1, i2) ((i1) & (i2))
-#define   OR( i1, i2) ((i1) | (i2))
-#define ANDN( i1, i2) ((i1) & NOT(i2))
-#define  ORN( i1, i2) ((i1) & NOT(i2))
-
-/*-----------------------------------------------------------------------------
-  Latches
-   SLATCH - Set   Dominate Latch, output will be true  whenever set   is true
-   RLATCH - Reset Dominate Latch, output will be false whenever reset is true
-
-  Usage:
-   value = RLATCH( setCondition, resetCondition, value);
-   value = SLATCH( setCondition, resetCondition, value);
--------------------------------------------------------------------------------*/
-#define RLATCH( set, reset, last) ANDN( OR( set, last), reset)
-#define SLATCH( set, reset, last) ANDN( OR( set, last), ANDN( reset, set) )
-
-/*-----------------------------------------------------------------------------
-  Switch, Min/Max, and Circular Buffer operators.
+  Switch and Min/Max Buffer operators.
 -----------------------------------------------------------------------------*/
 #define SWITCH( if, then, else)   ((if) ? (then) : (else))
 
 #define MAX( a, b) SWITCH( (a) > (b), (a), (b))
 #define MIN( a, b) SWITCH( (a) < (b), (a), (b))
-
-#define INC_WRAP( v, m)  ((v) >= ((m)-1)) ? 0 : ((v)+1)
-#define DEC_WRAP( v, m)  ((v) == 0) ? ((m)-1) : ((v)-1)
-
-#define MEMBER(  m, l, u) (((m) >= (l)) & ((m) <= (u)))
-#define BETWEEN( m, l, u) (((m) >  (l)) & ((m) <  (u)))
-#define ARRAY( m, u)      MEMBER( m, 0, u-1)
-
 
 /*---------------------------------------------------------------------------------------------
   SET AND CHECK Macro
@@ -197,34 +82,34 @@
 #define SET_AND_CHECK( a, b, result)  \
 {\
    a = b;\
-   result &= (a == b);\
+   result = ((a == b) && result);\
 }
 
 #define SET_CHECK_MASK_AND( a, b, result)\
 {\
    a &= ~b;\
-   result &= ((a & b) == 0x00);\
+   result = (((a & b) == 0x00) && result);\
 }
 
 #define SET_CHECK_MASK_OR( a, b, result)\
 {\
    a |= b;\
-   result &= ((a & b) == b);\
+   result = (((a & b) == b) && result);\
 }
 
 #define CHECK_SETTING( a, b, result )\
 {\
-  result &= (a == b);\
+  result = ((a == b) && result);\
 }
 
 #define CHECK_SETTING_AND_MASK( a, b, result )\
 {\
-   result &= ((a & b) == 0x00);\
+   result = (((a & b) == 0x00) && result);\
 }
 
 #define CHECK_SETTING_AND_OR( a, b, result )\
 {\
-   result &= ((a & b) == b);\
+   result = (((a & b) == b) && result);\
 }
 
 /******************************************************************************
@@ -255,6 +140,11 @@
  *  MODIFICATIONS
  *    $History: alt_basic.h $
  * 
+ * *****************  Version 12  *****************
+ * User: Jim Mood     Date: 11/29/12   Time: 7:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1197
+ *
  * *****************  Version 11  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:38p
  * Updated in $/software/control processor/code/drivers
