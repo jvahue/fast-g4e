@@ -13,7 +13,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 66 $  $Date: 12-11-16 10:32p $
+      $Revision: 67 $  $Date: 12-11-30 1:08p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -150,7 +150,7 @@ void MSI_Init(void)
  * Parameters:  [in]  Id      : Command Id
  *              [in]  data*   : Pointer to the data buffer to transmit
  *              [in]  size    : Size, in bytes, of the data
- *              [in]  TOms      : Message timeout in milliseconds.  If a
+ *              [in]  TOmS      : Message timeout in milliseconds.  If a
  *                              response is not returned by the micro-server,
  *                              within this timeout, a "timeout" status is
  *                              sent to the response handler.
@@ -203,6 +203,7 @@ RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
  *                              micro-server response.  If this parameter
  *                              is null, the response packet is discarded
  *                              when received.
+ *              [in]  NoCheck
  *
  * Returns:     SYS_OK: Message successfully sent to the queue
  *              SYS_SEND_BUF_FULL: Send buffer is full, try later
@@ -582,7 +583,7 @@ void MSI_HandleMSResponse(MSCP_CMDRSP_PACKET* Packet)
 
 
 /******************************************************************************
- * Function:    MSI_HandlerMSCommand
+ * Function:    MSI_HandleMSCommand
  *
  * Description: Handles asynchronous commands originating from the micro-server
  *              and routes them to a command handler callback to process the
@@ -632,7 +633,7 @@ void MSI_HandleMSCommand(MSCP_CMDRSP_PACKET* Packet)
 
 
 /******************************************************************************
- * Function:    MSI_CheckMsgTimeout
+ * Function:    MSI_CheckMsgTimeouts
  *
  * Description: Checks the timeout values of pending responses from the micro-
  *              server.  If any expected responses timeout, the command is
@@ -932,6 +933,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 67  *****************
+ * User: Melanie Jutras Date: 12-11-30   Time: 1:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 File Format Changes
  * 
  * *****************  Version 66  *****************
  * User: John Omalley Date: 12-11-16   Time: 10:32p

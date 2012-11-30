@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 108 $  $Date: 11/27/12 8:35p $
+      $Revision: 109 $  $Date: 12-11-30 11:51a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -2559,7 +2559,8 @@ LOG_HDR_STATUS LogCheckHeader (LOG_HEADER Hdr)
  *
  * Parameters:  LOG_HEADER    Hdr       - Header to check
  *              LOG_STATE     State     - Requested state to find
- *              LOG_TYPE      Type      - Requested type to find
+ *              LOG_TYPE  *   Type      - Requested type to find
+ *              INT32         TypeCnt   - Count of Types to check
  *              LOG_SOURCE    Source    - Requested ACS to find
  *              LOG_PRIORITY  Priority  - Requested Priority to find
  *
@@ -2936,6 +2937,11 @@ void LogUpdateWritePendingStatuses( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 109  *****************
+ * User: Melanie Jutras Date: 12-11-30   Time: 11:51a
+ * Updated in $/software/control processor/code/system
+ * SCR #1142 Code Review File Format Fix
  * 
  * *****************  Version 108  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:35p
