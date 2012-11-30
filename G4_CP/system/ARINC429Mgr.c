@@ -3557,13 +3557,13 @@ void Arinc429MgrDisplayMultiArincChan ( )
     if ( m_Arinc429_Debug.OutputType == DEBUG_OUT_RAW )
     {
       RawDataCnt[i] = Arinc429MgrReadBuffer ( RawDataArinc[i],
-                                              sizeof(UINT32),
+                                              sizeof(RawDataArinc[0]),
                                               &m_Arinc429DebugBuffer[i] );
     }
     else
     {
       RawDataCnt[i] = Arinc429MgrReadBuffer ( RawRecords[i],
-                                             sizeof(ARINC429_RECORD),
+                                             sizeof(RawRecords[0]),
                                              &m_Arinc429RxBuffer[i] );
     }
   }
