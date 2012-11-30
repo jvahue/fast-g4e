@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 58 $  $Date: 12-11-29 4:13p $
+     $Revision: 59 $  $Date: 12-11-29 7:19p $
 
 ******************************************************************************/
 
@@ -3693,6 +3693,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: John Omalley Date: 12-11-29   Time: 7:19p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 12-11-29   Time: 4:13p
