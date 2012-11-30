@@ -33,7 +33,7 @@
                  solution was the least complex.
 
     VERSION
-    $Revision: 13 $  $Date: 11/15/12 7:18p $
+    $Revision: 14 $  $Date: 11/29/12 3:59p $
 
 ******************************************************************************/
 
@@ -143,10 +143,8 @@ static TH_BUF m_THDataBuf;
 static UINT32 m_OpenCnt;
 static UINT32 m_StopTime;
 static TIMEHISTORY_CONFIG m_Cfg;
-static UINT32 m_WriteReqCnt;   //Number of records to write to log mem since PO
-                               // used to track app BUSY/IDLE status
 static UINT32 m_WrittenCnt;    //Number of records written to log mem
-                               // used to track app BUSY/IDLE status
+                               // used for status commands
 /*Busy/Not Busy event data*/
 static INT32 m_event_tag;
 static void (*m_event_func)(INT32 tag,BOOLEAN is_busy) = NULL;
@@ -215,7 +213,6 @@ void TH_Init ( void )
   memcpy(&m_Cfg,&CfgMgr_ConfigPtr()->TimeHistoryConfig,sizeof(m_Cfg));
   m_OpenCnt  = 0;
   m_StopTime = 0;
-  m_WriteReqCnt = 0;
   m_WrittenCnt = 0;
 
   // Create Time History Task - DT
@@ -819,17 +816,22 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
  * 
+ * *****************  Version 14  *****************
+ * User: Jim Mood     Date: 11/29/12   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 11/15/12   Time: 7:18p
  * Updated in $/software/control processor/code/application
- * SCR 1107 (Time History Updates) 
+ * SCR 1107 (Time History Updates)
  * SCR 1131 (App Busy Updates)
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:49a
  * Updated in $/software/control processor/code/application
  * SCR 1105, 1107, 1131, 1154 - Code Review Updates
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:49a
  * Updated in $/software/control processor/code/application
