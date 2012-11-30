@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 165 $  $Date: 11/27/12 8:34p $
+   $Revision: 166 $  $Date: 11/29/12 9:38a $
 
 ******************************************************************************/
 
@@ -1224,7 +1224,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                                    &Task->LogSize,500);
       if(LOG_FOUND == result)
       {
-        GSE_DebugStr(VERBOSE,NORMAL,"UploadMgr: Auto upload found data/etm log");
+        GSE_DebugStr(VERBOSE,TRUE,"UploadMgr: Auto upload found data/etm log");
         StartSource = UPLOAD_START_AUTO;
         Task->State = LOG_COLLECTION_INIT;
         LogWriteSystem(APP_UPM_INFO_UPLOAD_START,LOG_PRIORITY_LOW,
@@ -1232,7 +1232,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       }
       else if(LOG_NOT_FOUND == result)
       {
-        GSE_DebugStr(VERBOSE,NORMAL,
+        GSE_DebugStr(VERBOSE,TRUE,
                      "UploadMgr: Auto upload, no data/etm logs found, stopping");
         Task->InProgress = FALSE;
         TmTaskEnable(UL_Log_Collection, FALSE);
@@ -3483,6 +3483,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 166  *****************
+ * User: Jim Mood     Date: 11/29/12   Time: 9:38a
+ * Updated in $/software/control processor/code/application
+ * SCR #1123 Modfix for debug strings
+ *
  * *****************  Version 165  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:34p
  * Updated in $/software/control processor/code/application
