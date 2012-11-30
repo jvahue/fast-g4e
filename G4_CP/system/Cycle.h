@@ -162,8 +162,8 @@ typedef struct
 
 typedef struct
 {
-   char          Name[MAX_CYCLENAME];     /* cycle name                                   */
-   CYC_TYPE      Type;          /* How cycle is counted 0xFFFF == This cycle unused       */
+   char          name[MAX_CYCLENAME];     /* cycle name                                   */
+   CYC_TYPE      type;          /* How cycle is counted 0xFFFF == This cycle unused       */
    UINT32        nCount;        /* value added for incrementing cycle                     */
    TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
    ENGRUN_INDEX  nEngineRunId;  /* which EngineRun this cycle is associated               */
@@ -268,12 +268,12 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- * 
+ *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:16p
  * Updated in $/software/control processor/code/system

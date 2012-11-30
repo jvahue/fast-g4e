@@ -334,7 +334,7 @@ ENGINE_FILE_HDR* EngRunGetFileHeader ( void )
 /*****************************************************************************
  * Function:    EngRunSetRecStateChangeEvt
  *
- * Description: Set the callback fuction to call when the busy/not busy
+ * Description: Set the callback function to call when the busy/not busy
  *              status of the Engine Run module changes
  *
  *
@@ -521,26 +521,26 @@ static void EngRunForceEnd( void )
  *****************************************************************************/
 static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 {
-  {
-    pErData->erState             = ER_STATE_STOPPED;
-    memset(&pErData->startTime, 0, sizeof(TIMESTAMP));
-    pErData->startingTime_ms     = 0;
-    pErData->startingDuration_ms = 0;
-    pErData->erDuration_ms       = 0;
-    pErData->minValueValid       = TRUE;
-    pErData->monMinValue         = FLT_MAX;
-    pErData->maxValueValid       = TRUE;
-    pErData->monMaxValue         = -FLT_MAX;
 
-    /* SNSR_SUMMARY field setup */
+  pErData->erState             = ER_STATE_STOPPED;
+  memset(&pErData->startTime, 0, sizeof(TIMESTAMP));
+  pErData->startingTime_ms     = 0;
+  pErData->startingDuration_ms = 0;
+  pErData->erDuration_ms       = 0;
 
-    pErData->nTotalSensors = SensorSetupSummaryArray(pErData->snsrSummary,
-                                                     MAX_ENGRUN_SENSORS,
-                                                     pErCfg->sensorMap,
-                                                     sizeof(pErCfg->sensorMap) );
-    // Reset cycles & counts for this enginerun
-    CycleResetEngineRun(pErData->erIndex);
-  }
+  pErData->minValueValid       = TRUE;
+  pErData->monMinValue         = FLT_MAX;
+  pErData->maxValueValid       = TRUE;
+  pErData->monMaxValue         = -FLT_MAX;
+
+  /* SNSR_SUMMARY field setup */
+
+  pErData->nTotalSensors = SensorSetupSummaryArray(pErData->snsrSummary,
+                                                   MAX_ENGRUN_SENSORS,
+                                                   pErCfg->sensorMap,
+                                                   sizeof(pErCfg->sensorMap) );
+  // Reset cycles & counts for this enginerun
+  CycleResetEngineRun(pErData->erIndex);
 }
 
 
@@ -668,7 +668,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {
         // Add additional 1 second to close of ER due to ERROR.  Normally
         // UpdateEngineRunLog() updates ->Duration, which is only called
-		// on !EngineRunIsError()
+        // on !EngineRunIsError()
         pErData->erDuration_ms += (UINT32)pErCfg->erRate;
 
         // Finish the engine run log
@@ -679,8 +679,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       else
       {
         // Update the EngineRun log data
-        // Allow additional update so that is ER is closed, this last second
-        // is counted.
         EngRunUpdateRunData( pErData);
 
         // If the engine run has stopped, finish the engine run and change states
@@ -753,11 +751,6 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   // Init the current values of the starting sensors.
   // Note: Validity was already checked as a pre-condition of calling this function.)
   pErData->monMaxValue = SensorGetValue(pErCfg->monMaxSensorID);
-
-  pErData->monMinValue = pErData->monMinValue;
-
-  // Initialize the summary values for monitored sensors
-  SensorUpdateSummaries(pErData->snsrSummary, pErData->nTotalSensors );
 }
 
 /******************************************************************************
@@ -875,18 +868,18 @@ static void EngRunWriteRunLog( ER_REASON reason, ENGRUN_DATA* pErData )
       pLogSummary->fMaxValue    = pErSummary->fMaxValue;
       pLogSummary->timeMaxValue = pErSummary->timeMaxValue;
 
-      // if sensor is valid, calculate the final average,
-      // otherwise use the average calculated at the point it went invalid.
-      pLogSummary->fAvgValue = pErSummary->fAvgValue;
+      pLogSummary->nSampleCount = pErSummary->nSampleCount;
+      pLogSummary->fAvgValue    = pErSummary->fAvgValue;
     }
     else // Sensor Not Used
     {
-      pLogSummary->SensorIndex = SENSOR_UNUSED;
-      pLogSummary->bValid      = FALSE;
-      pLogSummary->fTotal      = 0.f;
-      pLogSummary->fMinValue   = 0.f;
-      pLogSummary->fMaxValue   = 0.f;
-      pLogSummary->fAvgValue   = 0.f;
+      pLogSummary->SensorIndex  = SENSOR_UNUSED;
+      pLogSummary->bValid       = FALSE;
+      pLogSummary->fTotal       = 0.f;
+      pLogSummary->fMinValue    = 0.f;
+      pLogSummary->fMaxValue    = 0.f;
+      pLogSummary->fAvgValue    = 0.f;
+      pLogSummary->nSampleCount = 0;
     }
   }
 #pragma ghs endnowarning
@@ -1014,7 +1007,7 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 41  *****************
  * User: Jim Mood     Date: 11/28/12   Time: 6:36p
  * Updated in $/software/control processor/code/application
