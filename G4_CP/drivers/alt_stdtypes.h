@@ -1,5 +1,5 @@
-#ifndef alt_stdtypes_H
-#define alt_stdtypes_H
+#ifndef ALT_STDTYPES_H
+#define ALT_STDTYPES_H
 /******************************************************************************
             Copyright (C) 2012 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
@@ -9,7 +9,7 @@
     Description: This file provides the standard data types for all Altair Software systems.
  
  VERSION
-      $Revision: 18 $  $Date: 8/28/12 1:06p $ 
+      $Revision: 19 $  $Date: 12-12-01 10:14a $ 
  
 ******************************************************************************/
 
@@ -141,11 +141,6 @@ typedef  UINT32 BITARRAY128[4];
 
 #else
 
-    #define strtok_r strtok_r
-    #define snprintf snprintf
-    #define strcasecmp strcasecmp
-    #define strtod strtod
-
     typedef char          BOOLEAN;
     typedef char          INT8;
 
@@ -169,6 +164,11 @@ typedef  UINT32 BITARRAY128[4];
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: alt_stdtypes.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 12-12-01   Time: 10:14a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

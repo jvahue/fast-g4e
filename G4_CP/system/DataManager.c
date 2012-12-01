@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 90 $  $Date: 12-11-28 4:50p $
+      $Revision: 91 $  $Date: 12-12-01 10:09a $
 
 ******************************************************************************/
 
@@ -993,11 +993,9 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
         // Save the time in case this is an overflow
         tempTime = pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs;
         
-        // Close out packet in buffer and mark for storage
+        // Close out packet in buffer and mark for storage, nCurrentBuffer is
+		// incremented when the packet is finished!!!
         DataMgrFinishPacket(pDMInfo, pDMParam->nChannel, (INT32)*nLeftOver);
-
-        // Increment the next time
-        pDMInfo->nNextTime_mS += pDMInfo->acs_Config.nPacketSize_ms;
 
         //------------------------ prep new buffer or error ----------------------------
         pMsgBuf = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
@@ -1005,8 +1003,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
         // Check if the new buffer is ready to receive new data
         ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
                        "Channel %d Buffers Full", pDMParam->nChannel);
-        
-        
+       
         // Check if the buffer is full and there is still data to write
         if ( *nLeftOver > 0)
         {
@@ -1036,6 +1033,9 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
         }
         else // This is not an overflow continue on normally
         {
+           // Increment the next time
+           pDMInfo->nNextTime_mS += pDMInfo->acs_Config.nPacketSize_ms;
+
            // Set the Timestamp for the next packet
            CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
            pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
@@ -1910,6 +1910,11 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 91  *****************
+ * User: John Omalley Date: 12-12-01   Time: 10:09a
+ * Updated in $/software/control processor/code/system
+ * SCR 1116
  * 
  * *****************  Version 90  *****************
  * User: John Omalley Date: 12-11-28   Time: 4:50p
