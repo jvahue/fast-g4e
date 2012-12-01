@@ -12,13 +12,14 @@ extern "C"
 
     // Make connection to these externally required items
     extern void FPGA_EP6_ISR(void);
-    extern const FPGA_RX_REG fpgaRxReg[FPGA_MAX_RX_CHAN]; 
+    extern const FPGA_RX_REG fpgaRxReg[FPGA_MAX_RX_CHAN];
     //extern const FPGA_TX_REG fpgaTxReg_v9[FPGA_MAX_TX_CHAN];
 
 
 };
 
 #define FPGA_OFFSET ((UINT32)addr - (UINT32)&hw_FPGA)
+#define MEMBER(  m, l, u) (((m) >= (l)) & ((m) <= (u)))
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 32 Bit Wide by 256 deep A429FIFO
@@ -205,11 +206,11 @@ void FPGAemulation::Reset()
     *FPGA_429_TX1_FIFO_STATUS = TSR_429_FIFO_EMPTY;
     *FPGA_429_TX2_FIFO_STATUS = TSR_429_FIFO_EMPTY;
 
-    // 
+    //
     //UINT32* x = (UINT32*)&MCF_INTC_IMRL;
     MCF_INTC_IMRL = 0xFFFFFFFF;
 
-    // Initialize the FPGA   
+    // Initialize the FPGA
     dio->SetDio( FPGA_Err, 0);
     dio->SetDio( FPGA_Cfg, 1);
     dio->SetDio( FFD_Enb, 1);
@@ -223,7 +224,7 @@ bool FPGAemulation::GetRegisterSet( volatile UINT16* addr, RegisterGroup& group,
     group = eInvalidFpgaAddr;
     index = 0;
 
-    if (addr >= FPGA_ISR && addr < (UINT16*)(&hw_FPGA + sizeof(hw_FPGA))) 
+    if (addr >= FPGA_ISR && addr < (UINT16*)(&hw_FPGA + sizeof(hw_FPGA)))
     {
         if ( MEMBER( addr, FPGA_429_COMMON_CONTROL, FPGA_429_LOOPBACK_CONTROL))
         {
@@ -232,9 +233,9 @@ bool FPGAemulation::GetRegisterSet( volatile UINT16* addr, RegisterGroup& group,
         }
         else if ( MEMBER( addr, FPGA_429_RX1_STATUS, FPGA_429_RX4_MSW_TEST))
         {
-            for (int i = 0; i < FPGA_MAX_RX_CHAN; ++i) 
+            for (int i = 0; i < FPGA_MAX_RX_CHAN; ++i)
             {
-                if ( addr <= m_fpgaRxReg[i].msw_test) 
+                if ( addr <= m_fpgaRxReg[i].msw_test)
                 {
                     group = eArincRx;
                     index = (UINT16)i;
@@ -296,7 +297,7 @@ void FPGAemulation::Process()
         m_rxFifo[i].HandleRegisterStates();
     }
 
-    // Empty the Tx FIFOs as they must be busy transmitting ... 
+    // Empty the Tx FIFOs as they must be busy transmitting ...
     // Remove X words every every call based on setup speed, and check for loopback testing
     for (int i=0; i < FPGA_MAX_TX_CHAN; ++i)
     {
@@ -313,7 +314,7 @@ void FPGAemulation::Process()
 
                 // check for wraparound testing
                 for (int r=0; r < FPGA_MAX_RX_CHAN; ++r)
-                {   
+                {
                     UINT16 loopback = (*FPGA_429_LOOPBACK_CONTROL >> (1 + (r*2)) & 3);
                     if ( loopback == 2 && i == 1)
                     {
@@ -509,12 +510,12 @@ void FPGAemulation::WriteArincRx( volatile UINT16* addr, UINT16 index, UINT16 va
         // echo some status over to the status register
         *m_fpgaRxReg[index].Status = value & 3;  // set parity and enable bits
     }
-    else if ( addr == m_fpgaRxReg[index].lsw_test && 
+    else if ( addr == m_fpgaRxReg[index].lsw_test &&
               !(*m_fpgaRxReg[index].Configuration & RCR_429_ENABLE))
     {
         m_rxTestWrite[index] = value;
     }
-    else if ( addr == m_fpgaRxReg[index].msw_test && 
+    else if ( addr == m_fpgaRxReg[index].msw_test &&
               !(*m_fpgaRxReg[index].Configuration & RCR_429_ENABLE))
     {
         m_rxTestWrite[index] |= (value << 16);
@@ -535,12 +536,12 @@ void FPGAemulation::WriteArincTx( volatile UINT16* addr, UINT16 index, UINT16 va
         // send some cfg bits to the status register
         *m_fpgaTxReg[index].Status = value & 3; // copy parity and enable bits
     }
-    else if ( addr == m_fpgaTxReg[index].lsw_test && 
+    else if ( addr == m_fpgaTxReg[index].lsw_test &&
               !(*m_fpgaTxReg[index].Configuration & RCR_429_ENABLE))
     {
         m_txTestWrite[index] = value;
     }
-    else if ( addr == m_fpgaTxReg[index].msw_test && 
+    else if ( addr == m_fpgaTxReg[index].msw_test &&
               !(*m_fpgaTxReg[index].Configuration & RCR_429_ENABLE))
     {
         m_txTestWrite[index] |= (value << 16);
@@ -692,14 +693,14 @@ void FPGAemulation::HandleFifoState( A429Fifo& fifo, FPGA_TX_REG_PTR pfpgaReg)
 // filter raw 429 messages
 bool FPGAemulation::MessageFilter( UINT16 chan, UINT32 msg)
 {
-    UINT16 filterOffset[4] = { 
+    UINT16 filterOffset[4] = {
       0x100, 0x300,
       0x500, 0x700
     };
 
     int lbl = (msg & 0xFF) << 1;
     UINT16 filter = hw_FPGA[filterOffset[chan] + lbl];
-   
+
     return filter != 0;
 }
 
