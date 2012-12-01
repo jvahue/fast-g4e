@@ -9,7 +9,7 @@
   Description: Driver for the LT1594 ADC connected by the SPI bus
 
   VERSION
-      $Revision: 20 $  $Date: 12-11-01 2:44p $
+      $Revision: 21 $  $Date: 12-12-01 10:10a $
 
 
 ******************************************************************************/
@@ -90,7 +90,6 @@ typedef struct {
                              Package Exports Functions
 ******************************************************************************/
 EXPORT FLOAT32 ADC_GetValue         (UINT16 nIndex, UINT32 *null);
-EXPORT RESULT  ADC_ReadRaw          (ADC_CHANNEL Channel, UINT16* ADCResult);
 EXPORT RESULT  ADC_Init             (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize);
 EXPORT BOOLEAN ADC_SensorTest       (UINT16 nIndex);
 
@@ -113,6 +112,11 @@ EXPORT RESULT ADC_ReadBoardTemp     (FLOAT32* Temp);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12-12-01   Time: 10:10a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 20  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 2:44p

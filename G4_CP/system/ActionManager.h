@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 13 $  $Date: 12-11-12 6:26p $
+  $Revision: 14 $  $Date: 12-12-01 11:00a $
 
 ******************************************************************************/
 
@@ -198,13 +198,17 @@ typedef struct
 EXPORT void ActionsInitialize    ( void );
 EXPORT INT8 ActionRequest        ( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
                                    BOOLEAN bACK, BOOLEAN bLatch );
-EXPORT void ActionResetNVPersist ( void );
 EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
 
 #endif // ACTION_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 12-12-01   Time: 11:00a
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 12-11-12   Time: 6:26p

@@ -20,7 +20,7 @@
                SPI.h - Accessing the SPI bus to read the converter
 
   VERSION
-      $Revision: 32 $  $Date: 12-11-05 2:10p $
+      $Revision: 33 $  $Date: 12-12-01 10:10a $
 
 
 ******************************************************************************/
@@ -69,7 +69,7 @@ typedef struct {
 /*****************************************************************************/
 
 
-const REG_SETTING ADC_Registers[] =
+static const REG_SETTING adc_Registers[] =
 {
   //Set FEC1L7 port to GPIO output.
   // SET_CHECK_MASK_OR(MCF_GPIO_PDDR_FEC1L, MCF_GPIO_PDDR_FEC1L_PDDR_FEC1L7, bInitOk);
@@ -84,7 +84,7 @@ static ADC_DATA m_ADC_ChanData[ADC_CHAN_MAX];
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-
+static RESULT  ADC_ReadRaw          (ADC_CHANNEL Channel, UINT16* ADCResult);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -123,9 +123,9 @@ RESULT ADC_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   // Initialize the ADC Registers
   bInitOk = TRUE;
-  for (i=0;i<(sizeof(ADC_Registers)/sizeof(REG_SETTING));i++)
+  for (i=0;i<(sizeof(adc_Registers)/sizeof(REG_SETTING));i++)
   {
-    bInitOk &= RegSet( (REG_SETTING_PTR) &ADC_Registers[i] );
+    bInitOk &= RegSet( (REG_SETTING_PTR) &adc_Registers[i] );
   }
 
   if ( TRUE != STPU( bInitOk, eTpAdc3807))
@@ -288,12 +288,12 @@ RESULT ADC_GetBoardTemp (FLOAT32* Temp)
 *****************************************************************************/
 RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
 {
-  UINT16 ADReading;
+  UINT16 nADReading;
   RESULT result;
 
-  result = ADC_ReadRaw( ADC_CHAN_AC_BUS_V, &ADReading);
+  result = ADC_ReadRaw( ADC_CHAN_AC_BUS_V, &nADReading);
 
-  *ACBusVoltage = (ADReading * ADC_V_PER_BIT * ADC_BUS_V_PER_V);
+  *ACBusVoltage = (nADReading * ADC_V_PER_BIT * ADC_BUS_V_PER_V);
   *ACBusVoltage = (*ACBusVoltage > MIN_OFF_VOLTAGE) ?
                    *ACBusVoltage + ADC_BUS_V_TRANSITOR_DROP : 0;
 
@@ -316,17 +316,17 @@ RESULT ADC_ReadACBusVoltage(FLOAT32 *ACBusVoltage)
 ******************************************************************************/
 RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
 {
-  UINT16 ADReading;
-  FLOAT32 TempVoltage;
+  UINT16 nADReading;
+  FLOAT32 tempVoltage;
   RESULT result;
 
-  result = ADC_ReadRaw( ADC_CHAN_AC_BATT_V, &ADReading);
+  result = ADC_ReadRaw( ADC_CHAN_AC_BATT_V, &nADReading);
 
-  TempVoltage = ADReading * ADC_V_PER_BIT * ADC_BATT_V_PER_V;
+  tempVoltage = nADReading * ADC_V_PER_BIT * ADC_BATT_V_PER_V;
 
   // Voltage Formula Provided by Hardware Engineering Group
-  *ACBattVoltage = (BATT_CAL_FACTOR1 * (TempVoltage * TempVoltage)) +
-                   (BATT_CAL_FACTOR2 * TempVoltage);
+  *ACBattVoltage = (BATT_CAL_FACTOR1 * (tempVoltage * tempVoltage)) +
+                   (BATT_CAL_FACTOR2 * tempVoltage);
   return result;
 }
 
@@ -346,12 +346,12 @@ RESULT ADC_ReadACBattVoltage (FLOAT32* ACBattVoltage)
 ******************************************************************************/
 RESULT ADC_ReadLiBattVoltage(FLOAT32* Voltage)
 {
-  UINT16 ADReading;
-  RESULT result = DRV_OK;
+  UINT16 nADReading;
+  RESULT result;
 
-  result = ADC_ReadRaw(ADC_CHAN_LI_BATT_V,&ADReading);
+  result = ADC_ReadRaw(ADC_CHAN_LI_BATT_V,&nADReading);
 
-  *Voltage = ADReading * ADC_V_PER_BIT;
+  *Voltage = nADReading * ADC_V_PER_BIT;
 
   return result;
 }
@@ -372,71 +372,14 @@ RESULT ADC_ReadLiBattVoltage(FLOAT32* Voltage)
 ******************************************************************************/
 RESULT ADC_ReadBoardTemp (FLOAT32* Temp)
 {
-  UINT16 ADReading;
-  RESULT result = DRV_OK;
+  UINT16 nADReading;
+  RESULT result;
 
-  result = ADC_ReadRaw(ADC_CHAN_TEMP,&ADReading);
+  result = ADC_ReadRaw(ADC_CHAN_TEMP,&nADReading);
 
-  *Temp = (ADReading * ADC_V_PER_BIT * ADC_TEMP_DEG_PER_V) - ADC_TEMP_DEG_OFFSET;
-
-  return result;
-}
-
-
-/******************************************************************************
- * Function:    ADC_ReadRaw
- *
- * Description: Reads the 12-bit A/D converter result from the specified
- *              channel
- *
- * Parameters:  [in]  Channel - ADC channel to read. See enum ADC_CHANNEL
- *              [out] *ADCResult - Pointer to a location to save the A/D
- *                                 conversion result
- *
- * Returns:     Driver operation result: DRV_OK  : Conversion success
- *                                       !DRV_OK : See ResultCodes.h
- *
- * Notes:       1.This routine will block until the conversion is complete.
- *                Conversion time depends on the SPI clock rate.  If the SPI
- *                clock rate is 320kHz, the time to complete a conversion
- *                is <60us.
- *
- *                See the SPI driver module and the LT1594 ADC data sheet for
- *                details
- *              2.The routine handles the switch to connect/disconnect the
- *                lithium battery to/from mux channel 1 of the A/D. The A/D
- *                communication overhead (writing 4 bits) provides a delay
- *                of approximately 12us between turning on the switch to
- *                when the mux switches to channel 1.  This assumes a 320kHz
- *                SPI clock.
- ******************************************************************************/
-RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
-{
- UINT8  MuxSelect;
- RESULT result = DRV_OK;
-
-  if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel, turn on Li
-  {                                             //battery switch if necessary
-    LI_BATT_ON;
-    TTMR_Delay(TTMR_uSEC_DELAY * TICKS_PER_uSec);  //Delay 50uSecs before reading signal
-  }
-
-  MuxSelect = ADC_AD_ENABLE_BIT | (UINT8)Channel;  //Bit 3 (0x8) is the A/D ENABLE bit
-  result = SPI_WriteByte(SPI_DEV_ADC_WR,&MuxSelect,TRUE);
-
-  if (result == DRV_OK)
-  {
-    result = SPI_ReadWord(SPI_DEV_ADC_RD,ADCResult,FALSE);
-    *ADCResult &= 0xFFF;
-  }
-
-  if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel and turn
-  {                                             //the Li switch back off if necessary
-    LI_BATT_OFF;
-  }
+  *Temp = (nADReading * ADC_V_PER_BIT * ADC_TEMP_DEG_PER_V) - ADC_TEMP_DEG_OFFSET;
 
   return result;
-
 }
 
 
@@ -500,6 +443,8 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 {
    // Local Data
    FLOAT32 fValue;
+   
+   fValue = 0;
 
    switch (nIndex)
    {
@@ -528,8 +473,71 @@ FLOAT32 ADC_GetValue (UINT16 nIndex, UINT32 *null)
 /*****************************************************************************/
 
 /******************************************************************************
+ * Function:    ADC_ReadRaw
+ *
+ * Description: Reads the 12-bit A/D converter result from the specified
+ *              channel
+ *
+ * Parameters:  [in]  Channel - ADC channel to read. See enum ADC_CHANNEL
+ *              [out] *ADCResult - Pointer to a location to save the A/D
+ *                                 conversion result
+ *
+ * Returns:     Driver operation result: DRV_OK  : Conversion success
+ *                                       !DRV_OK : See ResultCodes.h
+ *
+ * Notes:       1.This routine will block until the conversion is complete.
+ *                Conversion time depends on the SPI clock rate.  If the SPI
+ *                clock rate is 320kHz, the time to complete a conversion
+ *                is <60us.
+ *
+ *                See the SPI driver module and the LT1594 ADC data sheet for
+ *                details
+ *              2.The routine handles the switch to connect/disconnect the
+ *                lithium battery to/from mux channel 1 of the A/D. The A/D
+ *                communication overhead (writing 4 bits) provides a delay
+ *                of approximately 12us between turning on the switch to
+ *                when the mux switches to channel 1.  This assumes a 320kHz
+ *                SPI clock.
+ ******************************************************************************/
+static
+RESULT ADC_ReadRaw (ADC_CHANNEL Channel, UINT16* ADCResult)
+{
+ UINT8  muxSelect;
+ RESULT result;
+
+  if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel, turn on Li
+  {                                             //battery switch if necessary
+    LI_BATT_ON;
+    TTMR_Delay(TTMR_uSEC_DELAY * TICKS_PER_uSec);  //Delay 50uSecs before reading signal
+  }
+
+  muxSelect = ADC_AD_ENABLE_BIT | (UINT8)Channel;  //Bit 3 (0x8) is the A/D ENABLE bit
+  result = SPI_WriteByte(SPI_DEV_ADC_WR,&muxSelect,TRUE);
+
+  if (result == DRV_OK)
+  {
+    result = SPI_ReadWord(SPI_DEV_ADC_RD,ADCResult,FALSE);
+    *ADCResult &= 0xFFF;
+  }
+
+  if(Channel == ADC_CHAN_LI_BATT_V)             //Check the channel and turn
+  {                                             //the Li switch back off if necessary
+    LI_BATT_OFF;
+  }
+
+  return result;
+
+}
+
+
+/******************************************************************************
  *  MODIFICATIONS
  *    $History: ADC.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-12-01   Time: 10:10a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 32  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 2:10p

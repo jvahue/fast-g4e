@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 17 $  $Date: 12-11-12 6:26p $
+ $Revision: 18 $  $Date: 12-12-01 11:00a $
 
 ******************************************************************************/
 
@@ -48,8 +48,6 @@ static ACTION_PERSIST      m_EE_Copy;
 static ACTION_REQUEST_FIFO m_Request;
 static ACTION_REQUEST      m_RequestStorage [MAX_ACTION_REQUESTS];
 
-#include "ActionManagerUserTables.c"
-
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -65,6 +63,10 @@ static void ActionUpdateOutputs  ( ACTION_CFG  *pCfg,  ACTION_DATA *pData );
 static void ActionSetOutput      ( UINT8 nLSS,         DIO_OUT_OP state );
 static void ActionRectifyOutputs ( ACTION_CFG  *pCfg,  ACTION_DATA *pData,
                                    BOOLEAN      bPersistOn );
+static void ActionResetNVPersist ( void );
+
+#include "ActionManagerUserTables.c"
+
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -292,43 +294,6 @@ INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
    }
 
    return nReqNum;
-}
-
-/******************************************************************************
-* Function:     ActionResetNVPersist
-*
-* Description:  Resets any persistent data in the NV Memory
-*
-* Parameters:   None
-*
-* Returns:      None
-*
-* Notes:        None
-*
-*****************************************************************************/
-void ActionResetNVPersist ( void )
-{
-   // Log the Reset of the non volatile persist data
-   LogWriteETM ( SYS_ID_ACTION_PERSIST_RESET,
-                 LOG_PRIORITY_3,
-                 &m_ActionData.persist,
-                 sizeof(m_ActionData.persist),
-                 NULL );
-
-   memset((void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
-   memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
-
-   m_ActionData.bNVStored = FALSE;
-
-   NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
-   NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
-
-   m_ActionData.bUpdatePersistOut = TRUE;
-   m_ActionData.persist.bLatch    = FALSE;
-   m_ActionData.persist.bState    = OFF;
-   m_ActionData.persist.actionNum = ACTION_NONE;
-
-   ActionClearLatch ( &m_ActionData );
 }
 
 /******************************************************************************
@@ -974,9 +939,52 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
    }
 }
 
+/******************************************************************************
+* Function:     ActionResetNVPersist
+*
+* Description:  Resets any persistent data in the NV Memory
+*
+* Parameters:   None
+*
+* Returns:      None
+*
+* Notes:        None
+*
+*****************************************************************************/
+static
+void ActionResetNVPersist ( void )
+{
+   // Log the Reset of the non volatile persist data
+   LogWriteETM ( SYS_ID_ACTION_PERSIST_RESET,
+                 LOG_PRIORITY_3,
+                 &m_ActionData.persist,
+                 sizeof(m_ActionData.persist),
+                 NULL );
+
+   memset((void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
+   memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
+
+   m_ActionData.bNVStored = FALSE;
+
+   NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+   NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
+
+   m_ActionData.bUpdatePersistOut = TRUE;
+   m_ActionData.persist.bLatch    = FALSE;
+   m_ActionData.persist.bState    = OFF;
+   m_ActionData.persist.actionNum = ACTION_NONE;
+
+   ActionClearLatch ( &m_ActionData );
+}
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 12-12-01   Time: 11:00a
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 17  *****************
  * User: John Omalley Date: 12-11-12   Time: 6:26p
