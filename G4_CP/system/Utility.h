@@ -10,7 +10,7 @@
                   modules.
 
    VERSION
-    $Revision: 29 $  $Date: 8/28/12 1:43p $
+    $Revision: 30 $  $Date: 12-12-02 1:04p $
 
 ******************************************************************************/
 
@@ -82,8 +82,6 @@ EXPORT UINT16 CRC16(const void* Buf, UINT32 Size);
 EXPORT void CRC32(const void *data, UINT32 Size, UINT32* CRC, CRC_FUNC Func);
 EXPORT UINT16 CRC_CCITT(const void* Buf, UINT32 Size);
 EXPORT UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size );
-EXPORT UINT32 BitToBitMask(UINT32 BitPos);
-//EXPORT BOOLEAN CmpBytes ( UINT8 *pDest, UINT8 *pSrc, UINT32 nSize );
 
 EXPORT BOOLEAN Timeout(TIMEOUT_OP Op, UINT32 Timeout, UINT32* StartTime);
 EXPORT BOOLEAN TimeoutEx(TIMEOUT_OP Op, UINT32 Timeout, UINT32* StartTime, UINT32* lastRead);
@@ -91,8 +89,6 @@ EXPORT UINT32  UTIL_MinuteTimerDisplay    ( BOOLEAN bStartTimer );
 
 EXPORT BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
-EXPORT void    SetBits(UINT32 mask[], INT32 maskSizeBytes,
-                       UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes);
 EXPORT void    ResetBits(UINT32 mask[], INT32 maskSizeBytes,
                          UINT32 array[], INT32 arraySizeBytes);
@@ -124,6 +120,11 @@ EXPORT void DumpMemory(UINT8* addr, UINT32 size, CHAR* string);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.h $
+ * 
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 12-12-02   Time: 1:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p

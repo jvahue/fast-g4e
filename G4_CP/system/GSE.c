@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 25 $  $Date: 12-11-13 5:46p $
+     $Revision: 26 $  $Date: 12-12-02 10:39a $
 
 ******************************************************************************/
 
@@ -43,7 +43,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define TEMP_CHAR_BUF_SIZE 1024
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -543,7 +543,7 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
                               const CHAR* str, va_list args)
 {
-    CHAR buf[1024];
+    CHAR buf[TEMP_CHAR_BUF_SIZE];
     TIMESTRUCT dateTime;
 
     if ( newLine)
@@ -568,6 +568,11 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: John Omalley Date: 12-12-02   Time: 10:39a
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
