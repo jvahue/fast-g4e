@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 59 $  $Date: 12-11-29 7:19p $
+     $Revision: 60 $  $Date: 12-12-02 9:59a $
 
 ******************************************************************************/
 
@@ -28,7 +28,7 @@ VERSION
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define ARINC429_MAX_DISPLAY_LINES    8
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -379,7 +379,8 @@ void Arinc429MgrInitTasks (void)
       // Update DISABLE state for Rx Ch where Enable == FALSE
       if (m_Arinc429Cfg.RxChan[nChannel].Enable == FALSE )
       {
-         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
+		 // Note: ->Status updated to ARINC429_STATUS_OK or 
+		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
              m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
@@ -394,8 +395,9 @@ void Arinc429MgrInitTasks (void)
       //   arinc429.reconfigure() called.
       else
       {
-         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
-         if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
+		 // Note: ->Status updated to ARINC429_STATUS_OK or 
+		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
+		 if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Arinc429 DRV PBIT failed.  Disable this Ch.
             m_Arinc429MgrBlock.Rx[nChannel].Enabled = FALSE;
@@ -417,7 +419,8 @@ void Arinc429MgrInitTasks (void)
       // Update DISABLE state for Tx Ch where Enable == FALSE
       if (m_Arinc429Cfg.TxChan[nChannel].Enable == FALSE )
       {
-         // Note: ->Status updated to DRV_OK or FAULTED by Arinc429MgrInitialize() PBIT
+         // Note: ->Status updated to ARINC429_STATUS_OK or 
+		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
             m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
@@ -432,7 +435,8 @@ void Arinc429MgrInitTasks (void)
       //   arinc429.reconfigure() called.
       else
       {
-         // Note: ->Status updated to OK or FAULTED by Arinc429MgrInitialize() PBIT
+         // Note: ->Status updated to ARINC429_STATUS_OK or 
+		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Create PBIT Arinc429 Mgr Startup PBIT Log
@@ -3444,7 +3448,7 @@ void Arinc429MgrDisableLiveStream(void)
  *
  * Description: Debug routine to print single raw Arinc Rx data to the GSE port
  *
- * Parameters:  pParam -  ptr to m_Arinc429MgrBlock
+ * Parameters:  none
  *
  * Returns:     none
  *
@@ -3527,7 +3531,7 @@ void Arinc429MgrDispSingleArincChan ( void  )
  *
  * Description: Debug routine to print single raw Arinc Rx data to the GSE port
  *
- * Parameters:  pParam -  ptr to m_Arinc429MgrBlock
+ * Parameters:  none
  *
  * Returns:     none
  *
@@ -3537,7 +3541,7 @@ void Arinc429MgrDispSingleArincChan ( void  )
  *
  *
  *****************************************************************************/
-void Arinc429MgrDisplayMultiArincChan ( )
+void Arinc429MgrDisplayMultiArincChan ( void )
 {
   UINT16 i;
   UINT16 k;
@@ -3589,8 +3593,9 @@ void Arinc429MgrDisplayMultiArincChan ( )
     GSE_PutLine( GSE_OutLine );
 
     i = 0;
-    while ((i != nMaxCnt) && (i < 8))// Max 12 lines (80 bytes each) at 100 msec
-                                       //   @ 115200 bps GSE
+    while ((i != nMaxCnt) && (i < ARINC429_MAX_DISPLAY_LINES))
+	// Max 12 lines (80 bytes each) at 100 msec
+    //   @ 115200 bps GSE
     {
       for ( k = 0; k < ARINC_RX_CHAN_MAX; k++ )
       {
@@ -3609,14 +3614,14 @@ void Arinc429MgrDisplayMultiArincChan ( )
       } // End for k loop thru each Rx Chan
 
       i++;
-      if ( ( i != nMaxCnt ) && ( i < 8 ) )
+      if ( ( i != nMaxCnt ) && ( i < ARINC429_MAX_DISPLAY_LINES ) )
       {
         GSE_PutLine( "\r\n          ");
       }
       else
       {
         // GSE_PutLine ( " \r\n");
-        if ( ( i >= 8 ) && ( i < nMaxCnt) )
+        if ( ( i >= ARINC429_MAX_DISPLAY_LINES ) && ( i < nMaxCnt) )
         {
           GSE_PutLine(
         "\r\n                 more           more           more           more");
@@ -3693,6 +3698,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 60  *****************
+ * User: John Omalley Date: 12-12-02   Time: 9:59a
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-11-29   Time: 7:19p

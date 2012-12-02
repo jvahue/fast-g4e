@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 42 $  $Date: 11/26/12 6:05p $
+      $Revision: 43 $  $Date: 12-12-02 12:22p $
 
 ******************************************************************************/
 
@@ -211,9 +211,6 @@
 
 #define SENSOR_LD_MAX_RATE  500
 
-#define IS_SUMMARY_ENTRY_INITIALIZED(s) ((summary[s].fMinValue < FLT_MAX) ||\
-                                         (summary[s].fMaxValue > -FLT_MAX))
-
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -307,7 +304,7 @@ typedef enum
 typedef enum
 {
   LD_NONE,                   /* No Live Data Displayed     */
-  LD_ASCII,                  /* ASCII live Data Displayed  */
+  LD_ASCII                  /* ASCII live Data Displayed  */
 } SENSOR_LD_ENUM;
 
 typedef enum
@@ -316,8 +313,7 @@ typedef enum
    EXPO_AVERAGE       = 2,   /* Exponential Smoothing           */
    SPIKEREJECTION     = 3,   /* Spike rejection                 */
    MAXREJECT          = 4,   /* reject max values, average rest */
-   SLOPEFILTER        = 5,   /* Slope over a number of values   */
-   MAXFILTER          = 5
+   SLOPEFILTER        = 5    /* Slope over a number of values   */
 } FILTERTYPE;
 
 typedef enum
@@ -541,7 +537,6 @@ EXPORT BOOLEAN SensorIsUsed            ( SENSOR_INDEX Sensor );
 EXPORT BOOLEAN SensorIsValid           ( SENSOR_INDEX Sensor );
 EXPORT FLOAT32 SensorGetValue          ( SENSOR_INDEX Sensor );
 EXPORT FLOAT32 SensorGetPreviousValue  ( SENSOR_INDEX Sensor );
-EXPORT BOOLEAN SensorGetPreviousValid  ( SENSOR_INDEX Sensor );
 EXPORT void    SensorsInitialize       ( void );
 EXPORT void    SensorDisableLiveStream ( void );
 EXPORT UINT16  SensorGetSystemHdr      ( void *pDest, UINT16 nMaxByteSize );
@@ -563,6 +558,11 @@ EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEnt
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 12-12-02   Time: 12:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:05p

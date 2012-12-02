@@ -9,7 +9,7 @@
                     modules.
 
     VERSION
-      $Revision: 51 $  $Date: 12-10-23 2:49p $
+      $Revision: 52 $  $Date: 12-12-02 1:03p $
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@
    Detection Algorithms" by Ross Williams
    (ross@guest.adelaide.edu.au.). This document is likely to be
    in the FTP archive "ftp.adelaide.edu.au/pub/rocksoft".      */
-const UINT16 CRC16Tbl[]  =
+static const UINT16 crc16Tbl[]  =
                      {0x0000,0xC0C1,0xC181,0x0140,0xC301,0x03C0,0x0280,0xC241,
                       0xC601,0x06C0,0x0780,0xC741,0x0500,0xC5C1,0xC481,0x0440,
                       0xCC01,0x0CC0,0x0D80,0xCD41,0x0F00,0xCFC1,0xCE81,0x0E40,
@@ -97,7 +97,7 @@ const UINT16 CRC16Tbl[]  =
     Width   : 2 bytes.
     Poly    : 0x1021
     Reverse : FALSE.                                            */
-const UINT16 CRC_CCITT_TBL[256] =
+static const UINT16 crc_CCITT_TBL[256] =
 {
  0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
  0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
@@ -141,7 +141,7 @@ const UINT16 CRC_CCITT_TBL[256] =
     Poly    : 0x04C11DB7L
     Reverse : TRUE.
  */
-const UINT32 CRC32Tbl[] =
+static const UINT32 crc32Tbl[] =
 {0x00000000L, 0x77073096L, 0xEE0E612CL, 0x990951BAL, 0x076DC419L, 0x706AF48FL,
  0xE963A535L, 0x9E6495A3L, 0x0EDB8832L, 0x79DCB8A4L, 0xE0D5E91EL, 0x97D2D988L,
  0x09B64C2BL, 0x7EB17CBDL, 0xE7B82D07L, 0x90BF1D91L, 0x1DB71064L, 0x6AB020F2L,
@@ -265,32 +265,32 @@ void Slower(INT8 * str)
 ******************************************************************************/
 void StripString(INT8* Str)
 {
-  INT8 *ScanPtr = Str;
+  INT8 *scanPtr = Str;
 
   //Scan through the input string until a printable char is found
-  while( ((*ScanPtr < '!')  || (*ScanPtr > '~')) && (*ScanPtr != '\0') )
+  while( ((*scanPtr < '!')  || (*scanPtr > '~')) && (*scanPtr != '\0') )
   {
-    ScanPtr++;
+    scanPtr++;
   }
 
   //shift string left to remove any white space if required
-  if(Str != ScanPtr)
+  if(Str != scanPtr)
   {
-    strcpy(Str, ScanPtr);
+    strcpy(Str, scanPtr);
   }
 
   // move p_char ptr to end of the string
-  while(*ScanPtr != '\0')
+  while(*scanPtr != '\0')
   {
-    ScanPtr++;
+    scanPtr++;
   }
 
   //Scan through the input string until a printable char is found.
   //Test that the string isn't null as a result of stripping the leading blanks.
-  while( ((*ScanPtr < '!')  || (*ScanPtr > '~')) && (strlen(Str) > 0))
+  while( ((*scanPtr < '!')  || (*scanPtr > '~')) && (strlen(Str) > 0))
   {
-    *ScanPtr = '\0';
-    ScanPtr--;
+    *scanPtr = '\0';
+    scanPtr--;
   }
 }
 
@@ -304,20 +304,20 @@ void StripString(INT8* Str)
 *               is already longer than Len, no action is performed
 *
 * Parameters:   [in/out]  Str: String to be padded with spaces
-*               [in]      Len: Overall length to make the string
+*               [in]      DesiredLen: Overall length to make the string
 * Returns:      void
 *
 * Notes:
 ******************************************************************************/
 void PadString(INT8* Str, UINT32 DesiredLen)
 {
-  UINT32 StrLen;
+  UINT32 strLen;
 
-  StrLen = strlen(Str);
+  strLen = strlen(Str);
 
-  for(;StrLen < DesiredLen; StrLen++)
+  for(;strLen < DesiredLen; strLen++)
   {
-    Str[StrLen] = ' ';
+    Str[strLen] = ' ';
   }
 
   Str[DesiredLen-1] = '\0';
@@ -473,7 +473,7 @@ BOOLEAN TimeoutEx(TIMEOUT_OP Op, UINT32 TimeoutVal, UINT32* StartTime, UINT32* l
 ******************************************************************************/
 UINT16 CRC16(const void* Buf, UINT32 Size)
 {
-  const UINT16* pCRC16Tbl = CRC16Tbl;
+  const UINT16* pCRC16Tbl = crc16Tbl;
   const UINT8* ptr = Buf;
   UINT16 crc = 0xFFFF;
 
@@ -508,7 +508,7 @@ UINT16 CRC16(const void* Buf, UINT32 Size)
 ******************************************************************************/
 UINT16 CRC_CCITT(const void* Buf, UINT32 Size)
 {
-  const UINT16* pCRC_CCITT_TBL = CRC_CCITT_TBL;
+  const UINT16* pCRC_CCITT_TBL = crc_CCITT_TBL;
   const UINT8* ptr = Buf;
   UINT16 crc = 0;
 
@@ -547,7 +547,7 @@ UINT16 CRC_CCITT(const void* Buf, UINT32 Size)
  * Parameters:  [in]     Data:  Pointer to the block of data to compute the
  *                              crc32 on
  *              [in]     Size:   length of the data block in bytes.
- *              [in/out] CRC:   32-bit location to store the CRC result to
+ *              [in/out] pCRC:   32-bit location to store the CRC result to
  *              [in]     Func:  CRC computing function to perform on this
  *                              call.  Enumerated values are:
  *
@@ -572,81 +572,40 @@ UINT16 CRC_CCITT(const void* Buf, UINT32 Size)
 void CRC32(const void *Data, UINT32 Size, UINT32* pCRC, CRC_FUNC Func)
 {
   const INT8* blk_adr = Data;
-  const UINT32* pCRC32Tbl = CRC32Tbl;   // convert to pointer (faster)
-  UINT32 CRC = *pCRC;                   // convert to local (faster)
+  const UINT32* pCRC32Tbl = crc32Tbl;   // convert to pointer (faster)
+  UINT32 crc = *pCRC;                   // convert to local (faster)
 
   //When starting a CRC calculation, set the initial CRC value to 0xFFFFFFFF
   //The initial value is defined by this CRC algorithm
   if((Func == CRC_FUNC_SINGLE)||(Func == CRC_FUNC_START))
   {
-    CRC = 0xFFFFFFFFL;
+    crc = 0xFFFFFFFFL;
   }
 
   //For all cases, add all bytes to the CRC calculation
   while(Size--)
   {
-    CRC = (pCRC32Tbl[(CRC ^ *blk_adr++) & 0xFFL] ^ (CRC >> 8));
+    crc = (pCRC32Tbl[(crc ^ *blk_adr++) & 0xFFL] ^ (crc >> 8));
   }
 
   //When finishing a CRC calculation, invert the bits in the final result
   //This operation is defined by this CRC algorithm
   if((Func == CRC_FUNC_SINGLE)||(Func == CRC_FUNC_END))
   {
-    CRC ^= 0xFFFFFFFFL;
+    crc ^= 0xFFFFFFFFL;
   }
 
-  *pCRC = CRC;
+  *pCRC = crc;
 }
 /*vcast_dont_instrument_end*/
 
-
-
 /******************************************************************************
-* Function:     CmpBytes
-*
-* Description:  Compares data bytes from one location with another
-*
-* Parameters:   *pDest - Destination location to compare
-*               *pSrc  - Src location to compare
-*               nSize  - size of the data to compare
-*
-* Returns:      TRUE if check ok
-*               FALSE if check fails
-*
-* Notes:        none
-*
-******************************************************************************/
-/*
-BOOLEAN CmpBytes( UINT8 *pDest, UINT8 *pSrc, UINT32 nSize )
-{
-  BOOLEAN bOk;
-  UINT32 i;
-
-  bOk = TRUE;
-
-  for (i=0;i<nSize;i++)
-  {
-    if (*pDest != *pSrc)
-    {
-      bOk = FALSE;
-      break;
-    }
-    pDest++;
-    pSrc++;
-  }
-
-  return (bOk);
-
-}
-*/
-
-/******************************************************************************
-* Function:    CalculateCheckSum()
+* Function:    CalculateCheckSum
 *
 * Description: Returns the CRC or CheckSum for the passed buffer
 *
 *
-* Parameters:  [in] CHK_METHOD to be used for calculating the CRC
+* Parameters:  [in] method: CHK_METHOD to be used for calculating the CRC
 *              [in] Addr: starting address of buffer to be encoded into the crc
 *              [in] Size: size in bytes of the buffer to be encoded into the crc
 *
@@ -656,22 +615,22 @@ BOOLEAN CmpBytes( UINT8 *pDest, UINT8 *pSrc, UINT32 nSize )
 *****************************************************************************/
 UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size )
 {
-  UINT16 CRC = 0x0000;
+  UINT16 crc = 0x0000;
   switch (method)
   {
   case CM_CRC16:
-    CRC = CRC16(Addr, Size);
+    crc = CRC16(Addr, Size);
     break;
 
   case CM_CSUM16:
-    CRC = (UINT16)ChecksumBuffer(Addr, Size, 0xFFFF);
+    crc = (UINT16)ChecksumBuffer(Addr, Size, 0xFFFF);
     break;
 
   default:
     FATAL("Unsupported CheckSum Method: %d",method);
     break;
   };
-  return CRC;
+  return crc;
 }
 
 
@@ -684,8 +643,8 @@ UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size )
 *               equal to the other and the function will return the result of 
 *               that comparison.
 *
-* Parameters:   [in] First version string to compare
-*               [in] Second version string to compare
+* Parameters:   [in] v1 - First version string to compare
+*               [in] v2 - Second version string to compare
 *
 * Returns:      0:  The versions are identical
 *               1:  v1 is greater than v2 
@@ -762,32 +721,32 @@ INT32 CompareVersions(const char* v1,const char* v2)
 UINT32 UTIL_MinuteTimerDisplay ( BOOLEAN bStartTimer )
 {
   // Local Data
-  static UINT32 SecondCounter;
-  static UINT32 MinuteCounter;
-  static UINT32 StartTime;
+  static UINT32 secondCounter;
+  static UINT32 minuteCounter;
+  static UINT32 startTime;
 
   // If the first time called then reset the counters
   if (TRUE == bStartTimer)
   {
     // Initialize the StartTime, Second and Minute Counters
-    StartTime     = TTMR_GetHSTickCount();
-    SecondCounter = 0;
-    MinuteCounter = 0;
+    startTime     = TTMR_GetHSTickCount();
+    secondCounter = 0;
+    minuteCounter = 0;
     // Start displaying on a new line
     GSE_StatusStr(NORMAL,"\r\n");
   }
 
   // Check if we have reached one second
-  if ((TTMR_GetHSTickCount() - StartTime) > TICKS_PER_Sec)
+  if ((TTMR_GetHSTickCount() - startTime) > TICKS_PER_Sec)
   {
     // Increment the second counter
-    SecondCounter++;
+    secondCounter++;
     // Save new start time
-    StartTime  = TTMR_GetHSTickCount();
+    startTime  = TTMR_GetHSTickCount();
     // Check which type of character to print
     // For Even minutes print 60 "."
     // For Odd  minutes print 60 "*"
-    if (MinuteCounter % 2)
+    if (minuteCounter % 2)
     {
       GSE_StatusStr(NORMAL,".");
     }
@@ -797,14 +756,14 @@ UINT32 UTIL_MinuteTimerDisplay ( BOOLEAN bStartTimer )
     }
 
     // Check if a minute has been reached and display the minute
-    if ((SecondCounter % 60) == 0)
+    if ((secondCounter % 60) == 0)
     {
-      MinuteCounter++;
-      GSE_StatusStr(NORMAL, "%d\r", MinuteCounter);
+      minuteCounter++;
+      GSE_StatusStr(NORMAL, "%d\r", minuteCounter);
     }
   }
 
-  return (MinuteCounter);
+  return (minuteCounter);
 }
 #ifdef ENABLE_DUMP_MEMORY_FUNC
 /*vcast_dont_instrument_start*/
@@ -1035,7 +994,7 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
   UINT32 result;
   
   ASSERT (bitOffset >= 0 && bitOffset < (arraySizeBytes * 8));
-  result = array[bitOffset / 32] & ( 1 << (bitOffset % 32) );    
+  result = array[bitOffset / 32] & ( 1U << (bitOffset % 32) );    
 
   return (result != 0);
 }
@@ -1064,7 +1023,7 @@ void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 
   ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
  
-  array[i] = array[i = bitOffset / 32] | (1 << (bitOffset % 32));
+  array[i] = array[i = bitOffset / 32] | (1U << (bitOffset % 32));
 
 }
 
@@ -1091,35 +1050,7 @@ void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 
   ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
 
-  array[i] =( array[i = bitOffset / 32] & ~(1 << (bitOffset % 32) ) );
-}
-
-/******************************************************************************
- * Function:     SetBits
- *
- * Description:  A function which sets multiple bits in an UINT32 array implementing
- *               a bit mask.
- *
- * Parameters:
- *
- * Returns:      None
- *
- * Notes:
- *
- ******************************************************************************/
-void SetBits(UINT32 mask[], INT32 maskSizeBytes,  UINT32 array[], INT32 arraySizeBytes)
-{
-   // Local Data
-   UINT16 i;
-
-   // Check that the sizes are the same
-   ASSERT(maskSizeBytes == arraySizeBytes );
-
-   for ( i = 0; i < (arraySizeBytes / BYTES_PER_WORD); i++ )
-   {
-      array[i] |= mask[i];
-   }
-
+  array[i] =( array[i = bitOffset / 32] & ~(1U << (bitOffset % 32) ) );
 }
 
 /******************************************************************************
@@ -1128,8 +1059,11 @@ void SetBits(UINT32 mask[], INT32 maskSizeBytes,  UINT32 array[], INT32 arraySiz
  * Description:  A function which clears bits in an UINT32 array implementing
  *               a bit mask/field.
  *
- * Parameters:
- *
+ * Parameters:   [in] mask: to be tested against array.
+ *               [in] maskSizeBytes:  the size of the mask in bytes
+ *               [in] array: An array of 32bit words.
+ *               [in] arraySizeBytes: The length of array in bytes.
+ * 
  * Returns:      None
  *
  * Notes:
@@ -1157,9 +1091,9 @@ void ResetBits(UINT32 mask[], INT32 maskSizeBytes, UINT32 array[], INT32 arraySi
  *               an equal length array representing a field of bit flags.
  *               
  * Parameters:   [in] mask: to be tested against array.
- *               [in] MaskSizeBytes:  the size of the mask in bytes
- *               [in] array: An array of 32bit words.
- *               [in] arraySizeBytes: The length of array in bytes.
+ *               [in] maskSizeBytes:  the size of the mask in bytes
+ *               [in] data: An array of 32bit words.
+ *               [in] dataSizeBytes: The length of array in bytes.
  *               [in] exact: true -  The function will test if ALL bits
  *                                   set in mask are also set in data;
  *                           false - The function will test if ANY bits
@@ -1168,7 +1102,7 @@ void ResetBits(UINT32 mask[], INT32 maskSizeBytes, UINT32 array[], INT32 arraySi
  *
  * Returns:      BOOLEAN
  *
- * Notes:        MaskSizeBytes must equals arraySizeBytes.
+ * Notes:        MaskSizeBytes must equals dataSizeBytes.
  *               Otherwise system will ASSERT.
  *
  ******************************************************************************/
@@ -1179,16 +1113,16 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
   INT32 wordCnt  = dataSizeBytes / BYTES_PER_WORD;
 
   INT32 matchedCnt = 0;
-  INT32 ExpectedCnt;
+  INT32 expectedCnt;
 
   // Check that the sizes are the same
   ASSERT(maskSizeBytes == dataSizeBytes );
 
   // If exact matching, expect as many matches as words in array
   // else, a matched bit in any one word will suffice.
-  ExpectedCnt = exact ? wordCnt : 1;
+  expectedCnt = exact ? wordCnt : 1;
 
-  for (i = 0; (i < wordCnt) && (matchedCnt < ExpectedCnt); ++i)
+  for (i = 0; (i < wordCnt) && (matchedCnt < expectedCnt); ++i)
   {
     // If this word is zeros in both the mask and data,
     // consider it matched and skip to next word.
@@ -1209,7 +1143,7 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
       matchedCnt += (mask[i] & data[i]) > 0 ? 1 : 0;
     }
   }
-  return matchedCnt == ExpectedCnt;
+  return matchedCnt == expectedCnt;
 }
 
 
@@ -1222,6 +1156,11 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: John Omalley Date: 12-12-02   Time: 1:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 51  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:49p

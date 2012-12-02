@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 83 $  $Date: 11/26/12 6:05p $
+      $Revision: 84 $  $Date: 12-12-02 12:22p $
 
 ******************************************************************************/
 
@@ -52,14 +52,14 @@
 // Sensor Live Data Task Parameters
 typedef struct
 {
-  UINT32  StartTime;
+  UINT32  startTime;
 }SENSOR_LD_PARMS;
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
 static SENSOR             Sensors[MAX_SENSORS]; // Dynamic Sensor Storage
 static UINT16             maxSensorUsed;   // Storage for largest indexed cfg
-static SENSOR_LD_PARMS    LiveDataBlock;   // Live Data Task block
+static SENSOR_LD_PARMS    liveDataBlock;   // Live Data Task block
 /*static SENSORLOG SensorLog;*/
 static SENSOR_CONFIG      m_SensorCfg[MAX_SENSORS]; // Sensors cfg array
 static SENSOR_LD_CONFIG   LiveDataDisplay; // runtime copy of LiveData config data
@@ -118,7 +118,7 @@ static void          SensorsLiveDataTask ( void *pParam );
 static void          SensorDumpASCIILiveData ( void );
 
 
-const CHAR *SensorFailureNames[MAX_FAILURE+1] =
+static const CHAR *sensorFailureNames[MAX_FAILURE+1] =
 {
   "No Failure",
   "BIT Failure",
@@ -126,16 +126,6 @@ const CHAR *SensorFailureNames[MAX_FAILURE+1] =
   "Range Failure",
   "Rate Failure",
   0
-};
-
-const CHAR *SensorFilterNames[MAXFILTER+1] =
-{
-   "No Filter",
-   "Simple Average Filter",
-   "Spike Reject Filter",
-   "Max Reject Filter",
-   "Slope Filter",
-   0
 };
 
 /*****************************************************************************/
@@ -214,9 +204,9 @@ void SensorsInitialize( void)
 
   tcbTaskInfo.Rmt.InitialMif   = taskInfo[Sensor_Live_Data_Task].InitialMif;
   tcbTaskInfo.Rmt.MifRate      = taskInfo[Sensor_Live_Data_Task].MIFrate;
-  tcbTaskInfo.pParamBlock      = &LiveDataBlock;
+  tcbTaskInfo.pParamBlock      = &liveDataBlock;
 
-  LiveDataBlock.StartTime   = 0;
+  liveDataBlock.startTime   = 0;
   TmTaskCreate (&tcbTaskInfo);
 
 }
@@ -315,25 +305,6 @@ FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 {
    // return the previous value of the sensor
    return (Sensors[Sensor].fPriorValue);
-}
-
-/******************************************************************************
- * Function:     SensorGetPreviousValid
- *
- * Description:  This function provides a method to read the previous value's
- *                validity of a sensor.
- *
- * Parameters:   [in] nSensor - Index of sensor to get value
- *
- * Returns:      [out] BOOLEAN - Validity of the prev sensor value(
- *
- * Notes:        None
- *
- *****************************************************************************/
-BOOLEAN SensorGetPreviousValid( SENSOR_INDEX Sensor )
-{
-   // return the previous validity of the sensor
-   return (Sensors[Sensor].bPriorValueValid);
 }
 
 /******************************************************************************
@@ -549,7 +520,7 @@ void SensorDisableLiveStream( void )
  *
  * Notes:        None
  *****************************************************************************/
- EXPORT void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
+ void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
  {
   SNSR_SUMMARY* pSummary;
   FLOAT32       newValue;
@@ -616,12 +587,13 @@ void SensorDisableLiveStream( void )
  *               calculated at the time they went invalid and are not updated.
  *
  * Parameters:   [in/out] summaryArray - SNSR_SUMMARY structure to be updated.
+ *               [in]     nEntries
  *
  * Returns:      None
  *
  * Notes:        None
  *****************************************************************************/
- EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
+ void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
  {
   SNSR_SUMMARY* pSummary;
   INT32 i;
@@ -727,7 +699,8 @@ static void SensorsConfigure (void)
             Sensors[i].pTestSensor      = UartMgr_SensorTest;
             Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
-         default:
+        case MAX_SAMPLETYPE: 
+		default:
             // FATAL ERROR WITH CONFIGURATION
             // Initialize String
             FATAL("Sensor Config Fail: Sensor %d, Type %d not Valid",
@@ -983,34 +956,34 @@ static BOOLEAN SensorCheck( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
 {
    // Local Data
    BOOLEAN       bOK;
-   SENSOR_STATUS RangeStatus;
-   SENSOR_STATUS RateStatus;
-   SENSOR_STATUS SignalStatus;
-   SENSOR_STATUS InterfaceStatus;
+   SENSOR_STATUS rangeStatus;
+   SENSOR_STATUS rateStatus;
+   SENSOR_STATUS signalStatus;
+   SENSOR_STATUS interfaceStatus;
 
    // Initialize Local Data
    bOK             = FALSE;
 
    // Retrieve the status of each test
-   RangeStatus     = SensorRangeTest     (pConfig, pSensor, filterVal);
-   RateStatus      = SensorRateTest      (pConfig, pSensor, fVal);
-   SignalStatus    = SensorSignalTest    (pConfig, pSensor, fVal);
-   InterfaceStatus = SensorInterfaceTest (pConfig, pSensor, fVal);
+   rangeStatus     = SensorRangeTest     (pConfig, pSensor, filterVal);
+   rateStatus      = SensorRateTest      (pConfig, pSensor, fVal);
+   signalStatus    = SensorSignalTest    (pConfig, pSensor, fVal);
+   interfaceStatus = SensorInterfaceTest (pConfig, pSensor, fVal);
 
    // Check if the sensor is already valid or not
    if ( pSensor->bValueIsValid )
    {
       pSensor->bWasValidOnce = TRUE;
 
-      if ( SENSOR_OK == RangeStatus  && SENSOR_OK == RateStatus &&
-           SENSOR_OK == SignalStatus && SENSOR_OK == InterfaceStatus )
+      if ( SENSOR_OK == rangeStatus  && SENSOR_OK == rateStatus &&
+           SENSOR_OK == signalStatus && SENSOR_OK == interfaceStatus )
       {
          // Report the sensor is OK
          bOK = TRUE;
       }
       // Determine if any test has exceeded persistence and FAILED
-      else if ( SENSOR_FAILED == RangeStatus  || SENSOR_FAILED == RateStatus ||
-                SENSOR_FAILED == SignalStatus || SENSOR_FAILED == InterfaceStatus )
+      else if ( SENSOR_FAILED == rangeStatus  || SENSOR_FAILED == rateStatus ||
+                SENSOR_FAILED == signalStatus || SENSOR_FAILED == interfaceStatus )
       {
          // Sensor is no longer valid
          pSensor->bValueIsValid = FALSE;
@@ -1021,8 +994,8 @@ static BOOLEAN SensorCheck( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    else if ((TRUE == pConfig->bSelfHeal) || (FALSE == pSensor->bWasValidOnce))
    {
       // Check that both the rate AND the range are OK
-      if ( SENSOR_OK == RangeStatus  && SENSOR_OK == RateStatus &&
-           SENSOR_OK == SignalStatus && SENSOR_OK == InterfaceStatus )
+      if ( SENSOR_OK == rangeStatus  && SENSOR_OK == rateStatus &&
+           SENSOR_OK == signalStatus && SENSOR_OK == interfaceStatus )
       {
          // Rate and Range Tests pass now verify the interface test is OK
          pSensor->bValueIsValid = TRUE;
@@ -1059,10 +1032,10 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
                                       FLOAT32 filterVal )
 {
   // Local Data
-  SENSOR_STATUS  Status;
+  SENSOR_STATUS  status;
 
   // Initialize Local Data
-  Status = SENSOR_OK;
+  status = SENSOR_OK;
 
   // Check if the range test is enabled
   if ( TRUE == pConfig->bRangeTest)
@@ -1070,7 +1043,7 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
      // check for range
      if ((filterVal < pConfig->fMinValue) || (filterVal > pConfig->fMaxValue))
      {
-        Status = SENSOR_FAILING;
+        status = SENSOR_FAILING;
 
         // initialize the persistence timer
         if (FALSE == pSensor->bOutofRange)
@@ -1087,11 +1060,11 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
            pSensor->bRangeFail = TRUE;
            // Make a note in the log about the bad sensor.
            SensorLogFailure( pConfig, pSensor, filterVal, RANGE_FAILURE);
-           Status              = SENSOR_FAILED;
+           status              = SENSOR_FAILED;
         }
         else if (TRUE == pSensor->bRangeFail)
         {
-           Status              = SENSOR_FAILED;
+           status              = SENSOR_FAILED;
         }
      }
      else // Sensor is in range reset the countdown
@@ -1107,7 +1080,7 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
      }
   }
 
-  return(Status);
+  return(status);
 }
 
 /******************************************************************************
@@ -1134,11 +1107,11 @@ static SENSOR_STATUS SensorRangeTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
 static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FLOAT32 fVal )
 {
   // Local Data
-  SENSOR_STATUS Status;
-  FLOAT32            slope;
+  SENSOR_STATUS status;
+  FLOAT32       slope;
 
   // Initialize Local Data
-  Status = SENSOR_OK;
+  status = SENSOR_OK;
 
   // Check if the rate test is enabled
   if ( TRUE == pConfig->bRateTest)
@@ -1166,7 +1139,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
         /* check for rate */
         if (slope > pConfig->fRateThreshold)
         {
-           Status = SENSOR_FAILING;
+           status = SENSOR_FAILING;
 
            // Sensor rate exceeded
            if (FALSE == pSensor->bRateExceeded)
@@ -1182,7 +1155,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
            {
               // Sensor is bad
               pSensor->bRateFail = TRUE;
-              Status             = SENSOR_FAILED;
+              status             = SENSOR_FAILED;
               // Make a note in the log about the bad sensor.
               SensorLogFailure( pConfig, pSensor, fVal, RATE_FAILURE);
            }
@@ -1191,7 +1164,7 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
            // sensors configured to be self healing.
            else if (TRUE == pSensor->bRateFail)
            {
-              Status = SENSOR_FAILED;
+              status = SENSOR_FAILED;
            }
         }
         else // Rate is OK Reset the flags
@@ -1204,12 +1177,12 @@ static SENSOR_STATUS SensorRateTest( SENSOR_CONFIG *pConfig, SENSOR *pSensor, FL
 
            pSensor->bRateExceeded = FALSE;
            pSensor->bRateFail     = FALSE;
-           Status                 = SENSOR_OK;
+           status                 = SENSOR_OK;
         }
      }
   }
 
-  return Status;
+  return status;
 }
 
 /******************************************************************************
@@ -1234,10 +1207,10 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
                                        SENSOR *pSensor, FLOAT32 fVal )
 {
    // Local Data
-   SENSOR_STATUS Status;
+   SENSOR_STATUS status;
 
    // Initialize Local Data
-   Status = SENSOR_OK;
+   status = SENSOR_OK;
 
    // Check if the signal test is enabled
    if ( TRUE == pConfig->bSignalTest)
@@ -1245,7 +1218,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
       // Perform the fault processing and check for fault
       if (FaultCompareValues(pConfig->signalTestIndex))
       {
-         Status = SENSOR_FAILING;
+         status = SENSOR_FAILING;
 
          // Signal has failed, check if it is persistent
          if (FALSE == pSensor->bSignalBad)
@@ -1261,7 +1234,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
          {
             // Sensor is now considered FAILED
             pSensor->bSignalFail = TRUE;
-            Status               = SENSOR_FAILED;
+            status               = SENSOR_FAILED;
             // Make a note in the log about the bad sensor.
             SensorLogFailure( pConfig, pSensor, fVal, SIGNAL_FAILURE);
          }
@@ -1269,7 +1242,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
          else if (TRUE == pSensor->bSignalFail)
          {
             // Sensor remains failed
-            Status = SENSOR_FAILED;
+            status = SENSOR_FAILED;
          }
       }
       else // Signal is OK reset the countdown
@@ -1284,7 +1257,7 @@ static SENSOR_STATUS SensorSignalTest( SENSOR_CONFIG *pConfig,
          pSensor->bSignalFail = FALSE;
       }
    }
-   return Status;
+   return status;
 }
 
 /******************************************************************************
@@ -1307,13 +1280,13 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
                                          SENSOR *pSensor, FLOAT32 fVal)
 {
    // Local Data
-   SENSOR_STATUS Status;
+   SENSOR_STATUS status;
    BOOLEAN       bOK;
 
    ASSERT( NULL != pSensor->pTestSensor );
 
    // Initialize Local Data
-   Status = SENSOR_FAILED;
+   status = SENSOR_FAILED;
 
    // Check the Interface Test
    bOK = pSensor->pTestSensor(pSensor->nInterfaceIndex);
@@ -1328,7 +1301,7 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
       }
 
       // No problem with the interface detected
-      Status = SENSOR_OK;
+      status = SENSOR_OK;
       pSensor->bBITFail      = FALSE;
    }
    else if (FALSE == pSensor->bBITFail) // Problem on the interface detected
@@ -1338,7 +1311,7 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
       SensorLogFailure( pConfig, pSensor, fVal, BIT_FAILURE);
    }
 
-   return Status;
+   return status;
 }
 
 /******************************************************************************
@@ -1399,45 +1372,45 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
                               FLOAT32 fVal, SENSORFAILURE type)
 {
    // Local Data
-   SYS_APP_ID LogID;
-   SENSORLOG  FaultLog;
-   CHAR       Str[128];
+   SYS_APP_ID logID;
+   SENSORLOG  faultLog;
+   CHAR       str[128];
 
    // Build the fault log
-   FaultLog.failureType        = type;
-   FaultLog.nIndex             = pSensor->nSensorIndex;
-   strncpy_safe(FaultLog.sName, sizeof(FaultLog.sName), pConfig->sSensorName,_TRUNCATE);
-   FaultLog.fCurrentValue      = fVal;
-   FaultLog.fValue             = pSensor->fValue;
-   FaultLog.fPreviousValue     = pSensor->fPriorValue;
-   FaultLog.fRateValue         = pSensor->fRateValue;
-   FaultLog.fExpectedMin       = pConfig->fMinValue;
-   FaultLog.fExpectedMax       = pConfig->fMaxValue;
-   FaultLog.fExpectedThreshold = pConfig->fRateThreshold;
-   FaultLog.nDuration_ms       = 0;
+   faultLog.failureType        = type;
+   faultLog.nIndex             = pSensor->nSensorIndex;
+   strncpy_safe(faultLog.sName, sizeof(faultLog.sName), pConfig->sSensorName,_TRUNCATE);
+   faultLog.fCurrentValue      = fVal;
+   faultLog.fValue             = pSensor->fValue;
+   faultLog.fPreviousValue     = pSensor->fPriorValue;
+   faultLog.fRateValue         = pSensor->fRateValue;
+   faultLog.fExpectedMin       = pConfig->fMinValue;
+   faultLog.fExpectedMax       = pConfig->fMaxValue;
+   faultLog.fExpectedThreshold = pConfig->fRateThreshold;
+   faultLog.nDuration_ms       = 0;
 
    // Display a debug message about the failure
-   memset(Str,0,sizeof(Str));
-   sprintf(Str,"Sensor (%d) - %s",
-            pSensor->nSensorIndex, SensorFailureNames[type] );
-   GSE_DebugStr(NORMAL,FALSE, Str);
+   memset(str,0,sizeof(str));
+   sprintf(str,"Sensor (%d) - %s",
+            pSensor->nSensorIndex, sensorFailureNames[type] );
+   GSE_DebugStr(NORMAL,FALSE, str);
 
    // Determine the correct log ID to store
    switch (type)
    {
       case BIT_FAILURE:
-         LogID                 = SYS_ID_SENSOR_CBIT_FAIL;
+         logID                 = SYS_ID_SENSOR_CBIT_FAIL;
          break;
       case SIGNAL_FAILURE:
-         LogID                 = SYS_ID_SENSOR_SIGNAL_FAIL;
+         logID                 = SYS_ID_SENSOR_SIGNAL_FAIL;
          break;
       case RANGE_FAILURE:
-         FaultLog.nDuration_ms = pConfig->nRangeDuration_ms;
-         LogID                 = SYS_ID_SENSOR_RANGE_FAIL;
+         faultLog.nDuration_ms = pConfig->nRangeDuration_ms;
+         logID                 = SYS_ID_SENSOR_RANGE_FAIL;
          break;
       case RATE_FAILURE:
-         FaultLog.nDuration_ms = pConfig->nRateDuration_ms;
-         LogID                 = SYS_ID_SENSOR_RATE_FAIL;
+         faultLog.nDuration_ms = pConfig->nRateDuration_ms;
+         logID                 = SYS_ID_SENSOR_RATE_FAIL;
          break;
       case NO_FAILURE:
       case MAX_FAILURE:
@@ -1448,7 +1421,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    }
 
    // Store the fault log data
-   Flt_SetStatus(pConfig->systemCondition, LogID, &FaultLog, sizeof(FaultLog));
+   Flt_SetStatus(pConfig->systemCondition, logID, &faultLog, sizeof(faultLog));
 }
 
 /******************************************************************************
@@ -1681,7 +1654,7 @@ static FLOAT32 SensorExponential (FLOAT32 fVal, FILTER_DATA *pFilterData)
  *               of reject counts.
  *
  * Parameters:   [in] fVal            - Value of raw sensor
- *               [in] pFilterConfig   - Pointer to filter config
+ *               [in] pFilterCfg      - Pointer to filter config
  *               [in/out] pFilterData - pointer to the filter data
  *
  * Returns:      FLOAT32 - Filtered value of the samples
@@ -1880,7 +1853,7 @@ static FLOAT32 SensorSlope( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSenso
         */
        //returnSlope *= TTMR_TASK_FRAMES_PER_SECOND;
        //returnSlope  = returnSlope / (TTMR_TASK_FRAMES_PER_SECOND / pConfig->SampleRate);
-       // TBD - I think this can be reduced to the following
+       // Reduced Code above to the statement below
        returnSlope *= pConfig->sampleRate;
    }
    else
@@ -1920,10 +1893,10 @@ static void SensorsLiveDataTask( void *pParam )
               SENSOR_LD_MAX_RATE : LiveDataDisplay.nRate_ms;
 
       // Check if end of period has been reached
-      if ((CM_GetTickCount() - pTCB->StartTime) >= nRate)
+      if ((CM_GetTickCount() - pTCB->startTime) >= nRate)
       {
          // Save new start time
-         pTCB->StartTime = CM_GetTickCount();
+         pTCB->startTime = CM_GetTickCount();
          SensorDumpASCIILiveData();
       }
    }
@@ -1949,65 +1922,70 @@ static void SensorsLiveDataTask( void *pParam )
 static void SensorDumpASCIILiveData(void)
 {
   // Local Data
-  INT8          Str[2048];
-  INT8          TempStr[64];
-  TIMESTRUCT    TimeStruct;
-  UINT32        SensorIndex;
-  UINT16        Checksum;
+  INT8          str[2048];
+  INT8          tempStr[64];
+  TIMESTRUCT    timeStruct;
+  UINT32        sensorIndex;
+  UINT16        checksum;
 
   // Initialize local data
-  memset(Str,0,sizeof(Str));
+  memset(str,0,sizeof(str));
 
   // Build the live data header
-  sprintf(Str, "\r\n");
-  GSE_PutLine(Str);
+  sprintf(str, "\r\n");
+  GSE_PutLine(str);
 
-  sprintf(Str, "#77");
+  sprintf(str, "#77");
 
   // Loop through all sensors
-  for (SensorIndex = 0; SensorIndex < MAX_SENSORS; SensorIndex++)
+  for (sensorIndex = 0; sensorIndex < MAX_SENSORS; sensorIndex++)
   {
      // Check if inspection is enabled and the sensor is in use.
-     if (TRUE == m_SensorCfg[SensorIndex].bInspectInclude &&
-         SensorIsUsed(( SENSOR_INDEX)SensorIndex) )
+     if (TRUE == m_SensorCfg[sensorIndex].bInspectInclude &&
+         SensorIsUsed(( SENSOR_INDEX)sensorIndex) )
      {
         // Add the sensor index and value to the stream
-        sprintf(TempStr, "|%02d:%.4f", SensorIndex, Sensors[SensorIndex].fValue);
-        strcat(Str,TempStr);
+        sprintf(tempStr, "|%02d:%.4f", sensorIndex, Sensors[sensorIndex].fValue);
+        strcat(str,tempStr);
 
         // Check if the sensor is valid and add 1 if valid 0 not valid
-        if (Sensors[SensorIndex].bValueIsValid)
+        if (Sensors[sensorIndex].bValueIsValid)
         {
-           strcat (Str,":1");
+           strcat (str,":1");
         }
         else
         {
-           strcat (Str,":0");
+           strcat (str,":0");
         }
      }
   }
   // Read the current system time
-  CM_GetSystemClock (&TimeStruct);
+  CM_GetSystemClock (&timeStruct);
   // Add time to the live data stream
-  sprintf (TempStr, "|t:%02d:%02d:%02d.%02d", TimeStruct.Hour,
-                                              TimeStruct.Minute,
-                                              TimeStruct.Second,
-                                             (TimeStruct.MilliSecond/10) );
-  strcat(Str,TempStr);
+  sprintf (tempStr, "|t:%02d:%02d:%02d.%02d", timeStruct.Hour,
+                                              timeStruct.Minute,
+                                              timeStruct.Second,
+                                             (timeStruct.MilliSecond/10) );
+  strcat(str,tempStr);
 
   // Checksum the data
-  Checksum = (UINT16)ChecksumBuffer(Str, strlen(Str), 0xFFFF);
+  checksum = (UINT16)ChecksumBuffer(str, strlen(str), 0xFFFF);
   // Add checksum to end of live data
-  sprintf (TempStr, "|c:%04X", Checksum);
-  strcat(Str,TempStr);
+  sprintf (tempStr, "|c:%04X", checksum);
+  strcat(str,tempStr);
 
   // Output the live data stream on the GSE port
-  GSE_PutLine(Str);
+  GSE_PutLine(str);
 }
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 84  *****************
+ * User: John Omalley Date: 12-12-02   Time: 12:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 83  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:05p
