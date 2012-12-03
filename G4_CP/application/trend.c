@@ -593,6 +593,17 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
         ACTION_OFF, FALSE, FALSE);
     }
 
+    /*vcast_dont_instrument_start*/
+    #ifdef TREND_DEBUG
+    GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
+                                        pData->trendIndex,
+                                        pData->autoTrendCnt,
+                                        pData->trendCnt);
+    #endif
+    /*vcast_dont_instrument_end*/
+
+
+
     // Reset fields for the next sample period.
 
     // Reset sample count.
@@ -607,11 +618,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->lastIntervalCheckMs   = 0;
 
 
-/*vcast_dont_instrument_start*/
-#ifdef TREND_DEBUG
-    GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Sample Ended...Logged",pData->trendIndex );
-#endif
-/*vcast_dont_instrument_end*/
+
 
   } // End of finishing up a log for trend in progress.
 
@@ -933,11 +940,15 @@ static void TrendUpdateAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData )
       // Criteria is stable... update stability time-elapsed.
       TrendUpdateTimeElapsed(timeNow, &pData->lastStabCheckMs, &pData->nTimeStableMs);
 
-      /*GSE_DebugStr(NORMAL,TRUE,"Trend[%d]: Sensors Stable: %d of %d",
+     /*
+      GSE_DebugStr(NORMAL,TRUE,
+      "Trend[%d]: AT Snsrs stable for: %dms required: %dms Intrval: %d required: %d",
                                pData->trendIndex,
                                pData->nTimeStableMs,
-                               pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS);*/
-
+                               pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS,
+                               pData->timeSinceLastTrendMs,
+                               (pCfg->trendInterval_s  * ONE_SEC_IN_MILLSECS ));
+      */
 
       // If stability and interval durations have been met AND not already processing
       // trend, start one
@@ -1043,19 +1054,19 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
     pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
                                          ACTION_ON, FALSE, FALSE);
   }
-
+/*
   GSE_DebugStr( NORMAL,TRUE,
-  "Trend[%d]: Auto-Trend started AutoTrendCnt: %d, TimeStable: %dms, TimeSinceLastMs: %dms",
-             pData->trendIndex,
-             pData->autoTrendCnt,
-             pData->nTimeStableMs,
-             pData->timeSinceLastTrendMs );
+  "Trend[%d]: Auto-Trend started TimeStable: %dms, TimeSinceLastMs: %dms",
+                           pData->trendIndex,
+                           pData->nTimeStableMs,
+                           pData->timeSinceLastTrendMs );
+*/
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 11/29/12   Time: 4:19p
  * Updated in $/software/control processor/code/application
