@@ -1594,8 +1594,8 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
     {
       if (context->tempTbl[idxTempTbl].keyField == m_masterTbl[idxMastTbl].keyField)
       {
-        //m_masterTbl[idxMastTbl].PriorValue = context->tempTbl[idxTempTbl].PriorValue;
-        //m_masterTbl[idxMastTbl].PriorValid = context->tempTbl[idxTempTbl].PriorValid;
+        m_masterTbl[idxMastTbl].priorValue = context->tempTbl[idxTempTbl].priorValue;
+        m_masterTbl[idxMastTbl].priorValid = context->tempTbl[idxTempTbl].priorValid;
         ++updateCnt;
         bFound = TRUE;
         break;
@@ -1628,7 +1628,7 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:13p
  * Updated in $/software/control processor/code/drivers
