@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 101 $  $Date: 12-11-15 10:48a $
+      $Revision: 102 $  $Date: 12-12-03 3:54p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -883,9 +883,9 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
 
   // Determine Max Word Size to Return
   nMaxDestBuffWordSize = nMaxWordSize;
-  if ( nMaxWordSize > ((UINT16)QAR_SF_MAX * pState->TotalWords) )
+  if ( nMaxWordSize > (UINT16)(QAR_SF_MAX * pState->TotalWords) )
   {
-    nMaxDestBuffWordSize = ((UINT16)QAR_SF_MAX * pState->TotalWords);
+    nMaxDestBuffWordSize = (UINT16)(QAR_SF_MAX * pState->TotalWords);
   }
 
   // Copy all four (or as much as possible) into the Dest Buffer
@@ -2275,6 +2275,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 102  *****************
+ * User: John Omalley Date: 12-12-03   Time: 3:54p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 101  *****************
  * User: John Omalley Date: 12-11-15   Time: 10:48a

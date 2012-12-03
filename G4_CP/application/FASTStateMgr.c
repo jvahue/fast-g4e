@@ -12,7 +12,7 @@
 
      
    VERSION
-   $Revision: 19 $  $Date: 12-11-14 2:00p $
+   $Revision: 20 $  $Date: 12-12-03 11:19a $
 
 ******************************************************************************/
 
@@ -928,6 +928,11 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
  * 
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-12-03   Time: 11:19a
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Added back missing history for version 15.
+ * 
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-11-14   Time: 2:00p
  * Updated in $/software/control processor/code/application
@@ -948,6 +953,12 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
  * Updated in $/software/control processor/code/application
  * SCR 1114 - Re labeled after v1.1.1 release
  * 
+ * *****************  Version 15  *****************
+ * User: Jim Mood     Date: 2/09/12    Time: 11:17a
+ * Updated in $/software/control processor/code/application
+ * SCR:1110 This file has changed since 1.1.0, so it is being checked in
+ * back to 1.1.0 so it can be labeled 1.1.1
+ *  
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:49p
  * Updated in $/software/control processor/code/application
