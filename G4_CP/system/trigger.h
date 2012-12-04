@@ -38,22 +38,22 @@
 
 //Default non-volatile configuration for the trigger component.
 #define TRIGGER_CRITERIA_DEFAULT 0.0F,          /*fValue     */\
-                                 LT             /*Compare    */
+                                 LT             /*compare    */
 
 #define TRIGGER_SENSOR_DEFAULT  SENSOR_UNUSED,             /*SensorIndex */\
-                                TRIGGER_CRITERIA_DEFAULT,  /*Start       */\
-                                TRIGGER_CRITERIA_DEFAULT   /*End         */
+                                TRIGGER_CRITERIA_DEFAULT,  /*start       */\
+                                TRIGGER_CRITERIA_DEFAULT   /*end         */
 
-#define TRIGGER_DEFAULT "Unused",           /*&TriggerName[MAX_TRIGGER_NAME]*/\
+#define TRIGGER_DEFAULT "Unused",           /*&triggerName[MAX_TRIGGER_NAME]*/\
                         TRIGGER_SENSOR_DEFAULT,\
                         TRIGGER_SENSOR_DEFAULT,\
                         TRIGGER_SENSOR_DEFAULT,\
-                        TRIGGER_SENSOR_DEFAULT,/*TrigSensor[MAX_TRIG_SENSORS]*/\
+                        TRIGGER_SENSOR_DEFAULT,/*trigSensor[MAX_TRIG_SENSORS]*/\
                         0,                     /*MinDuration*/\
                         TR_1HZ,                /*Trigger Rate */\
                         0,                     /*Trigger Offset mS */\
-                        EVAL_EXPR_CFG_DEFAULT, /*Start Expression*/\
-                        EVAL_EXPR_CFG_DEFAULT  /*End Expression*/
+                        EVAL_EXPR_CFG_DEFAULT, /*start Expression*/\
+                        EVAL_EXPR_CFG_DEFAULT  /*end Expression*/
 
 
 
@@ -187,25 +187,25 @@ typedef enum
 typedef struct
 {
    FLOAT32    fValue;
-   COMPARISON Compare;
+   COMPARISON compare;
 } TRIG_CRITERIA;
 
 typedef struct
 {
-  SENSOR_INDEX   SensorIndex;
-  TRIG_CRITERIA  Start;
-  TRIG_CRITERIA  End;
+  SENSOR_INDEX   sensorIndex;
+  TRIG_CRITERIA  start;
+  TRIG_CRITERIA  end;
 } TRIG_SENSOR;
 
 typedef struct
 {
-  INT8           TriggerName[MAX_TRIGGER_NAME];   /* the name of the trigger */
-  TRIG_SENSOR    TrigSensor [MAX_TRIG_SENSORS];
+  INT8           triggerName[MAX_TRIGGER_NAME];   /* the name of the trigger */
+  TRIG_SENSOR    trigSensor [MAX_TRIG_SENSORS];
   UINT32         nMinDuration_ms;
-  TRIGGER_RATE   Rate;
+  TRIGGER_RATE   rate;
   UINT32         nOffset_ms;
-  EVAL_EXPR      StartExpr;
-  EVAL_EXPR      EndExpr;
+  EVAL_EXPR      startExpr;
+  EVAL_EXPR      endExpr;
 } TRIGGER_CONFIG;
 
 
@@ -214,8 +214,7 @@ typedef struct
 #pragma pack(1)
 typedef struct
 {
-  SENSOR_INDEX SensorIndex;
-  BOOLEAN      bInitialized;
+  SENSOR_INDEX sensorIndex;
   BOOLEAN      bValid;
   FLOAT32      fMinValue;
   FLOAT32      fMaxValue;
@@ -225,33 +224,33 @@ typedef struct
 
 typedef struct
 {
-   TRIGGER_INDEX      TriggerIndex;
-   TRIG_END_TYPE      EndType;
-   TIMESTAMP          CriteriaMetTime;
-   TIMESTAMP          DurationMetTime;
-   TIMESTAMP          EndTime;
+   TRIGGER_INDEX      triggerIndex;
+   TRIG_END_TYPE      endType;
+   TIMESTAMP          criteriaMetTime;
+   TIMESTAMP          durationMetTime;
+   TIMESTAMP          endTime;
    UINT32             nDuration_ms;
-   TRIG_SNSR_SUMMARY  Sensor[MAX_TRIG_SENSORS];
+   TRIG_SNSR_SUMMARY  sensor[MAX_TRIG_SENSORS];
 } TRIGGER_LOG;
 
 typedef struct
 {
-   CHAR         Name[MAX_TRIGGER_NAME];
-   SENSOR_INDEX SensorIndexA;
-   SENSOR_INDEX SensorIndexB;
-   SENSOR_INDEX SensorIndexC;
-   SENSOR_INDEX SensorIndexD;
+   CHAR         name[MAX_TRIGGER_NAME];
+   SENSOR_INDEX sensorIndexA;
+   SENSOR_INDEX sensorIndexB;
+   SENSOR_INDEX sensorIndexC;
+   SENSOR_INDEX sensorIndexD;
 } TRIGGER_HDR;
 #pragma pack()
 
 typedef struct
 {
   // Run Time Data
-  TRIGGER_INDEX      TriggerIndex;
-  TRIG_STATE         State;
-  TIMESTAMP          CriteriaMetTime;
-  TIMESTAMP          DurationMetTime;
-  TIMESTAMP          EndTime;
+  TRIGGER_INDEX      triggerIndex;
+  TRIG_STATE         state;
+  TIMESTAMP          criteriaMetTime;
+  TIMESTAMP          durationMetTime;
+  TIMESTAMP          endTime;
   UINT32             nStartTime_ms;
   UINT32             nDuration_ms;
   BITARRAY128        sensorMap;      /* Bit encoded flags of sensors used. Only for legacy  */
@@ -263,15 +262,8 @@ typedef struct
   BOOLEAN            bStartCompareFail;
   BOOLEAN            bEndCompareFail;
   BOOLEAN            bLegacyConfig;
-  TRIG_END_TYPE      EndType;
+  TRIG_END_TYPE      endType;
 } TRIGGER_DATA;
-
-typedef struct
-{
-  SENSOR_INDEX  snsrIdx;
-  FLOAT32       fValue;
-  BOOLEAN       validity;
-}SENSOR_STATE;
 
 
 //A type for an array of the maximum number of triggers
@@ -293,7 +285,7 @@ typedef TRIGGER_CONFIG TRIGGER_CONFIGS[MAX_TRIGGERS];
 ******************************************************************************/
 #if defined (TRIGGER_BODY)
 // Comparison enumeration for user manager and configuration
-USER_ENUM_TBL ComparisonEnum[] = { {"LT",             LT },
+USER_ENUM_TBL comparisonEnum[] = { {"LT",             LT },
                                    {"GT",             GT },
                                    {"EQUAL",          EQUAL},
                                    {"NOT_EQUAL",      NOT_EQUAL},
@@ -302,11 +294,11 @@ USER_ENUM_TBL ComparisonEnum[] = { {"LT",             LT },
                                    {NULL,             0}
                                  };
 #else
-  EXPORT USER_ENUM_TBL ComparisonEnum[];
+  EXPORT USER_ENUM_TBL comparisonEnum[];
 #endif
 
-// Export the TriggerIndex enum table
-extern USER_ENUM_TBL TriggerIndexType[];
+// Export the triggerIndex enum table
+extern USER_ENUM_TBL triggerIndexType[];
 
 
 
@@ -329,11 +321,11 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
- * 
+ *
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:44p

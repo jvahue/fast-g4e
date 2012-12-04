@@ -342,7 +342,6 @@ typedef BOOLEAN (*INTERFACE_ACTIVE) (UINT16);
 typedef struct
 {
   SENSOR_INDEX SensorIndex;
-//  BOOLEAN      bInitialized;
   UINT32       nSampleCount;
   BOOLEAN      bValid;
   TIMESTAMP    timeMinValue;
