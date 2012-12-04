@@ -1,9 +1,9 @@
-Link Date:	Mon Dec 03 17:56:33 2012
+Link Date:	Mon Dec 03 19:09:32 2012
 Host OS:	Windows XP Service Pack 3
 Version:	ELXR 5.0 (c) 1998-2009 Green Hills Software    Build: Nov  9 2009
 
 
-Load Map Mon Dec 03 17:56:33 2012
+Load Map Mon Dec 03 19:09:32 2012
 Image Summary
 
   Section              Base      Size(hex)    Size(dec)  SecOffs
@@ -26,7 +26,7 @@ Image Summary
   .crcDefault          0019f5cc  00000004            4   009f76c
   .buildDate           0019f5d0  00000020           32   009f770
 
-Load Map Mon Dec 03 17:56:33 2012
+Load Map Mon Dec 03 19:09:32 2012
 Module Summary
 
   Origin+Size    Section          Module
@@ -101,18 +101,18 @@ Module Summary
 001247e6+001830  .text            UART.o
 31880e68+000010  .data            UART.o
 304ee1b8+00010c  .bss             UART.o
-00126016+0001e8  .text            Version.o
+00126016+0001ea  .text            Version.o
 31880e78+00000c  .data            Version.o
 0019f5d0+000020  .buildDate       Version.o
-001261fe+00026a  .text            amdfujiscs.o
-00126468+00203c  .text            arinc429.o
+00126200+00026a  .text            amdfujiscs.o
+0012646c+00203c  .text            arinc429.o
 304ee2c4+000001  .bss             arinc429.o
-001284a4+000be4  .text            flash.o
+001284a8+000be4  .text            flash.o
 304ee2c8+00106c  .bss             flash.o
 00100000+000416  .vector          vectors.o
-00129088+0000ac  .text            crt0.o
-00129134+00036e  .text            ind_crt0.o
-001294a4+0013e0  .text            actionmanager.o
+0012908c+0000ac  .text            crt0.o
+00129138+00036e  .text            ind_crt0.o
+001294a8+0013e0  .text            actionmanager.o
 31880e84+0005e4  .data            actionmanager.o
 304ef334+000584  .bss             actionmanager.o
 0012a888+0040e8  .text            arinc429mgr.o
@@ -250,7 +250,7 @@ Module Summary
 3187245c+000004  .bss             libsys.a(ind_thrd.o)
 0016dcb0+000056  .text            libarch.a(indclz32.o)
 
-Load Map Mon Dec 03 17:56:33 2012
+Load Map Mon Dec 03 19:09:32 2012
 Global Symbols (sorted alphabetically)
 
  .text            0011b80c A0Str..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -318,26 +318,26 @@ Global Symbols (sorted alphabetically)
  .text            001184fa ADC_ReadRaw..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CADC.
  .text            001183be ADC_SensorTest
  .data            31880458 AccessType
- .text            00129d8a ActionAcknowledgable
- .text            0012a25e ActionCheckACK..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a330 ActionClearLatch..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129ae8 ActionInitPersist..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129572 ActionOut_UserCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a518 ActionRectifyOutputs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129cc2 ActionRequest
- .text            0012a056 ActionResetFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a7c6 ActionResetNVPersist..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a0e6 ActionSetFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a760 ActionSetOutput..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129e50 ActionTask..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129fc2 ActionUpdateFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012a404 ActionUpdateOutputs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129844 Action_ClearLatch..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012969a Action_Flags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129704 Action_ShowConfig..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            00129640 Action_State..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            001294a4 Action_UserCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
- .text            0012986a ActionsInitialize
+ .text            00129d8e ActionAcknowledgable
+ .text            0012a262 ActionCheckACK..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a334 ActionClearLatch..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129aec ActionInitPersist..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129576 ActionOut_UserCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a51c ActionRectifyOutputs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129cc6 ActionRequest
+ .text            0012a05a ActionResetFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a7ca ActionResetNVPersist..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a0ea ActionSetFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a764 ActionSetOutput..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129e54 ActionTask..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129fc6 ActionUpdateFlags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012a408 ActionUpdateOutputs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129848 Action_ClearLatch..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012969e Action_Flags..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129708 Action_ShowConfig..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            00129644 Action_State..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            001294a8 Action_UserCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cactionmanager.
+ .text            0012986e ActionsInitialize
  .text            0011ec9f Actual..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
  .data            31872460 AircraftCfgCmd..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CAircraftConfigMgr.
  .data            31872738 AircraftCmd..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CAircraftConfigMgr.
@@ -348,38 +348,38 @@ Global Symbols (sorted alphabetically)
  .text            001005d0 AircraftShowConfig
  .data            31872aac AircraftTaskStateEnum..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CAircraftConfigMgr.
  .text            00100502 AircraftUserCfg
- .text            00126420 AmdFujiSCS_ChipErase
- .text            001262c6 AmdFujiSCS_GetStatus
- .text            0012621e AmdFujiSCS_Program
- .text            00126282 AmdFujiSCS_ProgramBufferToFlash
- .text            001261fe AmdFujiSCS_Reset
- .text            00126406 AmdFujiSCS_SectorEraseCmd
- .text            001263c8 AmdFujiSCS_SectorEraseSetup
- .text            0012629c AmdFujiSCS_WriteBufferAbortReset
- .text            00126254 AmdFujiSCS_WriteToBuffer
+ .text            00126422 AmdFujiSCS_ChipErase
+ .text            001262c8 AmdFujiSCS_GetStatus
+ .text            00126220 AmdFujiSCS_Program
+ .text            00126284 AmdFujiSCS_ProgramBufferToFlash
+ .text            00126200 AmdFujiSCS_Reset
+ .text            00126408 AmdFujiSCS_SectorEraseCmd
+ .text            001263ca AmdFujiSCS_SectorEraseSetup
+ .text            0012629e AmdFujiSCS_WriteBufferAbortReset
+ .text            00126256 AmdFujiSCS_WriteToBuffer
  .bss             300169a4 AnEnum
- .text            001269f0 Arinc429DrvCfgLFR
- .text            00126a90 Arinc429DrvCfgRxChan
- .text            00126c06 Arinc429DrvCfgTxChan
- .text            00126da6 Arinc429DrvCheckBITStatus
- .text            00126d8c Arinc429DrvFPGA_OK
- .text            00126834 Arinc429DrvFlushHWFIFO
- .text            00126468 Arinc429DrvInitialize
- .text            00126eb2 Arinc429DrvLogFpgaRegs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00126640 Arinc429DrvProcessISR_Rx
- .text            0012672a Arinc429DrvProcessISR_Tx
- .text            0012686c Arinc429DrvRead
- .text            00126952 Arinc429DrvReconfigure
- .text            00126f9a Arinc429DrvRestoreStartupCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00126e72 Arinc429DrvRxGetCounts
- .text            00126960 Arinc429DrvSetIMR1_2
- .text            001268e2 Arinc429DrvStatus_OK
- .text            00127014 Arinc429DrvTest_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00127eba Arinc429DrvTest_LFR..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            001280c0 Arinc429DrvTest_LoopBack..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00127298 Arinc429DrvTest_Rx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00127a12 Arinc429DrvTest_Tx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            00126e92 Arinc429DrvTxGetCounts
+ .text            001269f4 Arinc429DrvCfgLFR
+ .text            00126a94 Arinc429DrvCfgRxChan
+ .text            00126c0a Arinc429DrvCfgTxChan
+ .text            00126daa Arinc429DrvCheckBITStatus
+ .text            00126d90 Arinc429DrvFPGA_OK
+ .text            00126838 Arinc429DrvFlushHWFIFO
+ .text            0012646c Arinc429DrvInitialize
+ .text            00126eb6 Arinc429DrvLogFpgaRegs..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            00126644 Arinc429DrvProcessISR_Rx
+ .text            0012672e Arinc429DrvProcessISR_Tx
+ .text            00126870 Arinc429DrvRead
+ .text            00126956 Arinc429DrvReconfigure
+ .text            00126f9e Arinc429DrvRestoreStartupCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            00126e76 Arinc429DrvRxGetCounts
+ .text            00126964 Arinc429DrvSetIMR1_2
+ .text            001268e6 Arinc429DrvStatus_OK
+ .text            00127018 Arinc429DrvTest_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            00127ebe Arinc429DrvTest_LFR..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            001280c4 Arinc429DrvTest_LoopBack..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            0012729c Arinc429DrvTest_Rx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            00127a16 Arinc429DrvTest_Tx_FIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
+ .text            00126e96 Arinc429DrvTxGetCounts
  .text            0012cadc Arinc429MgrAddPrevCBITHealthSts
  .text            0012d52a Arinc429MgrApplyProtocol..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .text            0012bf5e Arinc429MgrBITTask
@@ -1063,22 +1063,22 @@ Global Symbols (sorted alphabetically)
  .data            31876464 FileCmd..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             3002b2b0 FileDataBuffer..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             3003b2b0 FileDataFIFO..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            00128c9c FlashCheckSameSector
- .text            00128a2e FlashChipErase
- .text            001285a0 FlashCmdSet..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
+ .text            00128ca0 FlashCheckSameSector
+ .text            00128a32 FlashChipErase
+ .text            001285a4 FlashCmdSet..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
  .bss             304ee2c8 FlashDescription..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
- .text            00128550 FlashFindCmdSet
- .text            00128f2c FlashGetCFIDeviceGeometry..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
- .text            00128d40 FlashGetCFIIdentification..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
- .text            00128dbe FlashGetCFISystemInterfaceData..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
- .text            00128a88 FlashGetDirectStatus
- .text            00128cc2 FlashGetInfo
- .text            001284a4 FlashInitialize
- .text            00128cde FlashPopulateCFIData..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
- .text            001289e8 FlashRead
- .text            00128af8 FlashSectorErase
- .text            001285ee FlashWriteBufferMode
- .text            0012886c FlashWriteWordMode
+ .text            00128554 FlashFindCmdSet
+ .text            00128f30 FlashGetCFIDeviceGeometry..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
+ .text            00128d44 FlashGetCFIIdentification..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
+ .text            00128dc2 FlashGetCFISystemInterfaceData..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
+ .text            00128a8c FlashGetDirectStatus
+ .text            00128cc6 FlashGetInfo
+ .text            001284a8 FlashInitialize
+ .text            00128ce2 FlashPopulateCFIData..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Cflash.
+ .text            001289ec FlashRead
+ .text            00128afc FlashSectorErase
+ .text            001285f2 FlashWriteBufferMode
+ .text            00128870 FlashWriteWordMode
  .text            0014ce72 Flt_AddToFaultBuf..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .text            0014ccae Flt_ClrStatus
  .text            0014cd50 Flt_GetDebugVerbosity
@@ -1469,43 +1469,43 @@ Global Symbols (sorted alphabetically)
  .bss             304e9eac QARState..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .bss             30003640 QARWordInfo
  .bss             3000dd06 QARWordSensorCount
- .text            00120382 QAR_AddPrevCBITHealthStatus
- .text            00120324 QAR_CalcDiffCBITHealthStatus
+ .text            00120380 QAR_AddPrevCBITHealthStatus
+ .text            00120322 QAR_CalcDiffCBITHealthStatus
  .bss             300098fc QAR_CfgTemp
  .text            00120e0e QAR_CreateTimeOutSystemLog..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .text            00120d0c QAR_FindCurrentGoodSF..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            001202c0 QAR_GetCBITHealthStatus
- .text            001203fc QAR_GetCfg
- .text            0011fddc QAR_GetFileHdr
+ .text            001202be QAR_GetCBITHealthStatus
+ .text            001203fa QAR_GetCfg
+ .text            0011fdda QAR_GetFileHdr
  .text            0011fcba QAR_GetFrameSnapShot
- .text            001203d2 QAR_GetRegisters
- .text            001203ee QAR_GetState
+ .text            001203d0 QAR_GetRegisters
+ .text            001203ec QAR_GetState
  .text            0011fb5a QAR_GetSubFrame
  .text            0011fc28 QAR_GetSubFrameDisplay
- .text            0011fe86 QAR_GetSystemHdr
+ .text            0011fe84 QAR_GetSystemHdr
  .text            0011f578 QAR_Init_Tasks
  .text            0011f418 QAR_Initialize
- .text            00120808 QAR_InterfaceValid
- .text            0011ff06 QAR_MonitorTask..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            00120bd2 QAR_PBIT_DPRAM_Test..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            00120aa0 QAR_PBIT_LoopBack_Test..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
+ .text            00120806 QAR_InterfaceValid
+ .text            0011ff04 QAR_MonitorTask..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
+ .text            00120bd0 QAR_PBIT_DPRAM_Test..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
+ .text            00120a9e QAR_PBIT_LoopBack_Test..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .text            0011f7ee QAR_ProcessISR
  .text            0011f88c QAR_ReadSubFrameTask..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .text            0011fb42 QAR_ReadSubFrameTaskShutdown..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            00120504 QAR_ReadWord
+ .text            00120502 QAR_ReadWord
  .text            0011f7d8 QAR_Reconfigure
- .text            001208ec QAR_ReconfigureFPGAShadowRam..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
+ .text            001208ea QAR_ReconfigureFPGAShadowRam..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .text            0011f79a QAR_Reframe
- .text            001209d8 QAR_ResetState..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
+ .text            001209d6 QAR_ResetState..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
  .text            00120da4 QAR_RestoreStartupCfg..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQAR.
- .text            00120426 QAR_SensorSetup
- .text            00120684 QAR_SensorTest
- .text            0012040a QAR_SetCfg
+ .text            00120424 QAR_SensorSetup
+ .text            00120682 QAR_SensorTest
+ .text            00120408 QAR_SetCfg
  .bss             30009898 QAR_StateTemp
- .text            0011fdd0 QAR_SyncTime
+ .text            0011fdce QAR_SyncTime
  .bss             3000e50c QAR_register
- .text            001208a6 QARread
- .text            00120830 QARwrite
+ .text            001208a4 QARread
+ .text            0012082e QARwrite
  .data            3189d994 QarCfgTbl..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQARManager.
  .bss             317d9488 QarMgrBlock..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQARManager.
  .bss             317d948c QarMgr_Data..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CQARManager.
@@ -2043,7 +2043,7 @@ Global Symbols (sorted alphabetically)
  .text            0016dc80 __ghs_flock_file
  .text            0016dc90 __ghs_ftrylock_file
  .text            0016dc88 __ghs_funlock_file
- .text            00129134 __ghs_ind_crt0
+ .text            00129138 __ghs_ind_crt0
  .text            0016db14 __ghs_ind_crt1
                   00000000 __ghs_init_d2
                   00000000 __ghs_init_d3
@@ -2101,7 +2101,7 @@ Global Symbols (sorted alphabetically)
  .text            0016b744 _multibufSize
  .bss             30013c4e _multibuffer
  .text            0016b738 _multiend
- .text            00129088 _start
+ .text            0012908c _start
  .text            0016d012 abs
  .data            3189b068 acsCfgTbl..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            3189ad90 acsCmd..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
@@ -2550,10 +2550,10 @@ Global Symbols (sorted alphabetically)
  .data            3189c400 flt_SysCondOutPin..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .data            3189c3c8 flt_UserEnumVerbosityTbl..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
  .bss             304ee2c4 fpgaLogged..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429.
- .text            001265a0 fpgaRxReg
+ .text            001265a4 fpgaRxReg
  .bss             304ef8b8 fpgaRxRegTemp..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .bss             304ef8e0 fpgaTxRegTemp..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            001267cc fpgaTxReg_v12
+ .text            001267d0 fpgaTxReg_v12
  .bss             304d1b84 frame_cnt.TH_Task.D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CTimehistory..14
  .bss             304e9c48 fullTableReported.EvalExeExpression.D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvaluator..4
  .bss             304d9228 gse_OutLine..D.3A.5CFAST_Testing.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCreep.
