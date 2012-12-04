@@ -157,16 +157,16 @@ void TriggerInitialize(void)
     pTrigData = &m_triggerData[i];
 
     // Clear the runtime data table
-    pTrigData->TriggerIndex      = (TRIGGER_INDEX)i;
-    pTrigData->State             = TRIG_NONE;
+    pTrigData->triggerIndex      = (TRIGGER_INDEX)i;
+    pTrigData->state             = TRIG_NONE;
     pTrigData->nStartTime_ms     = 0;
     pTrigData->nDuration_ms      = 0;
-    pTrigData->nRateCounts       = (UINT16)(MIFs_PER_SECOND / pTrigCfg->Rate);
+    pTrigData->nRateCounts       = (UINT16)(MIFs_PER_SECOND / pTrigCfg->rate);
     pTrigData->nRateCountdown    = (INT16)((pTrigCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
     pTrigData->bStartCompareFail = FALSE;
     pTrigData->bEndCompareFail   = FALSE;
     pTrigData->bLegacyConfig     = FALSE;
-    pTrigData->EndType           = TRIG_NO_END;
+    pTrigData->endType           = TRIG_NO_END;
 
     // Init the array of monitored sensors for legacy configs
     pTrigData->nTotalSensors     = 0;
@@ -174,9 +174,9 @@ void TriggerInitialize(void)
 
     // If start AND end expressions are empty, but a sensor IS defined in the cfg...
     // this is a legacy-style cfg. Create a start and end cfg expression.
-    if( (pTrigCfg->StartExpr.size == 0 &&
-         pTrigCfg->EndExpr.size == 0)  &&
-         SENSOR_UNUSED != pTrigCfg->TrigSensor[0].SensorIndex )
+    if( (pTrigCfg->startExpr.size == 0 &&
+         pTrigCfg->endExpr.size == 0)  &&
+         SENSOR_UNUSED != pTrigCfg->trigSensor[0].sensorIndex )
     {
       pTrigData->bLegacyConfig = TRUE;
       GSE_DebugStr(NORMAL,FALSE,
@@ -191,10 +191,10 @@ void TriggerInitialize(void)
     {
       for ( tsi = 0; tsi < MAX_TRIG_SENSORS; tsi++)
       {
-        if ( SENSOR_UNUSED != pTrigCfg->TrigSensor[tsi].SensorIndex )
+        if ( SENSOR_UNUSED != pTrigCfg->trigSensor[tsi].sensorIndex )
         {
           // Flag this sensor for tracking during trigger-active
-          SetBit( (INT32)pTrigCfg->TrigSensor[tsi].SensorIndex,
+          SetBit( (INT32)pTrigCfg->trigSensor[tsi].sensorIndex,
                   pTrigData->sensorMap,
                   sizeof(pTrigData->sensorMap) );
         }
@@ -368,19 +368,19 @@ UINT16 TriggerGetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
          triggerIndex++ )
    {
       // Copy the trigger names
-      strncpy_safe( triggerHdr[triggerIndex].Name,
-                    sizeof(triggerHdr[triggerIndex].Name),
-                    m_TriggerCfg[triggerIndex].TriggerName,
+      strncpy_safe( triggerHdr[triggerIndex].name,
+                    sizeof(triggerHdr[triggerIndex].name),
+                    m_TriggerCfg[triggerIndex].triggerName,
                     _TRUNCATE);
       // Copy the sensor indexes
-      triggerHdr[triggerIndex].SensorIndexA =
-         m_TriggerCfg[triggerIndex].TrigSensor[0].SensorIndex;
-      triggerHdr[triggerIndex].SensorIndexB =
-         m_TriggerCfg[triggerIndex].TrigSensor[1].SensorIndex;
-      triggerHdr[triggerIndex].SensorIndexC =
-         m_TriggerCfg[triggerIndex].TrigSensor[2].SensorIndex;
-      triggerHdr[triggerIndex].SensorIndexD =
-         m_TriggerCfg[triggerIndex].TrigSensor[3].SensorIndex;
+      triggerHdr[triggerIndex].sensorIndexA =
+         m_TriggerCfg[triggerIndex].trigSensor[0].sensorIndex;
+      triggerHdr[triggerIndex].sensorIndexB =
+         m_TriggerCfg[triggerIndex].trigSensor[1].sensorIndex;
+      triggerHdr[triggerIndex].sensorIndexC =
+         m_TriggerCfg[triggerIndex].trigSensor[2].sensorIndex;
+      triggerHdr[triggerIndex].sensorIndexD =
+         m_TriggerCfg[triggerIndex].trigSensor[3].sensorIndex;
       // Increment the total number of bytes and decrement the remaining
       nTotal     += sizeof (TRIGGER_HDR);
       nRemaining -= sizeof (TRIGGER_HDR);
@@ -485,7 +485,7 @@ static void TriggerUpdateTask( void *pParam )
        pTrigData = &m_triggerData[nTrigger];
 
        // Determine if current trigger is being used
-       if (pTrigData->State != TRIG_NONE)
+       if (pTrigData->state != TRIG_NONE)
        {
          // Countdown the number of samples until next check
          if (--pTrigData->nRateCountdown <= 0)
@@ -521,7 +521,7 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
    BOOLEAN startCriteriaMet;
    BOOLEAN isStartValid;
 
-   switch (pTrigData->State)
+   switch (pTrigData->state)
    {
       // Trigger start is looking for beginning of trigger
       case TRIG_START:
@@ -531,13 +531,13 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 
          if( isStartValid )
          {
-           SetBit((INT32)pTrigData->TriggerIndex,
+           SetBit((INT32)pTrigData->triggerIndex,
                    m_triggerValidFlags,
                    sizeof(m_triggerValidFlags));
          }
          else
          {
-           ResetBit((INT32)pTrigData->TriggerIndex,
+           ResetBit((INT32)pTrigData->triggerIndex,
                      m_triggerValidFlags,
                      sizeof(m_triggerValidFlags));
          }
@@ -550,9 +550,9 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
             if (TRUE == TriggerCheckDuration(pTrigCfg, pTrigData))
             {
                // Change state to Trigger Active
-               pTrigData->State  = TRIG_ACTIVE;
+               pTrigData->state  = TRIG_ACTIVE;
                // Set global trigger flag
-               SetBit((INT32)pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
+               SetBit((INT32)pTrigData->triggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
             }
          }
          // Check if trigger stopped being met before duration was met
@@ -566,34 +566,34 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
       // Duration has been met now the trigger is considered active
       case TRIG_ACTIVE:
 
-         pTrigData->EndType = TriggerCheckEnd(pTrigCfg, pTrigData);
+         pTrigData->endType = TriggerCheckEnd(pTrigCfg, pTrigData);
 
          // Check if any end criteria has happened
-         if (TRIG_NO_END != pTrigData->EndType)
+         if (TRIG_NO_END != pTrigData->endType)
          {
             // Record the time the trigger ended
-            CM_GetTimeAsTimestamp(&pTrigData->EndTime);
+            CM_GetTimeAsTimestamp(&pTrigData->endTime);
             // Change trigger state back to start
-            pTrigData->State  = TRIG_START;
+            pTrigData->state  = TRIG_START;
 
             // Reset trigger flag
-            ResetBit((INT32)pTrigData->TriggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
+            ResetBit((INT32)pTrigData->triggerIndex, m_triggerFlags, sizeof(m_triggerFlags));
 
-            // Set the validity based on EndType
-            if( pTrigData->EndType == TRIG_SENSOR_INVALID )
+            // Set the validity based on endType
+            if( pTrigData->endType == TRIG_SENSOR_INVALID )
             {
-                ResetBit((INT32)pTrigData->TriggerIndex,
+                ResetBit((INT32)pTrigData->triggerIndex,
                          m_triggerValidFlags,
                          sizeof(m_triggerValidFlags));
             }
             else
             {
-                SetBit((INT32)pTrigData->TriggerIndex,
+                SetBit((INT32)pTrigData->triggerIndex,
                        m_triggerValidFlags,
                        sizeof(m_triggerValidFlags));
             }
 
-            // Log the End - if we are a legacy trigger
+            // Log the end - if we are a legacy trigger
             if ( pTrigData->bLegacyConfig )
             {
               TriggerLogEnd(pTrigCfg, pTrigData);
@@ -613,7 +613,7 @@ void TriggerProcess(TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
       default:
          // FATAL ERROR WITH FILTER TYPE
          FATAL("Trigger State Fail: %d - %s - State = %d",
-                  pTrigData->TriggerIndex, pTrigCfg->TriggerName, pTrigData->State);
+                  pTrigData->triggerIndex, pTrigCfg->triggerName, pTrigData->state);
          break;
    }
 }
@@ -650,14 +650,14 @@ static BOOLEAN TriggerCheckStart(const TRIGGER_CONFIG *pTrigCfg,
   // Set validity of 'this' trigger.
   // This supports self-referencing triggers to recover if a referenced sensor
   // is marked as failed from a prior run and may have healed.
-  SetBit((INT32)pTrigData->TriggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
+  SetBit((INT32)pTrigData->triggerIndex, m_triggerValidFlags, sizeof(m_triggerValidFlags));
 
   // Call the configured Trigger-start check rule.
   // Criteria is in return value.
   // Validity of sensors is in IsValid pointer.
   startCriteriaMet = (BOOLEAN)EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
-                                                 (INT32)pTrigData->TriggerIndex,
-                                                 &pTrigCfg->StartExpr,
+                                                 (INT32)pTrigData->triggerIndex,
+                                                 &pTrigCfg->startExpr,
                                                  IsValid);
 
   return startCriteriaMet;
@@ -689,27 +689,27 @@ static BOOLEAN TriggerCheckDuration (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTr
   // Check for state transition after duration is met
   if ( pTrigData->nDuration_ms >= pTrigCfg->nMinDuration_ms )
   {
-    CM_GetTimeAsTimestamp(&pTrigData->DurationMetTime);
+    CM_GetTimeAsTimestamp(&pTrigData->durationMetTime);
 
     bDurationMet = TRUE;
     // Check if flag is already set
-    if ( FALSE == GetBit( (INT32)pTrigData->TriggerIndex,
+    if ( FALSE == GetBit( (INT32)pTrigData->triggerIndex,
 						   m_triggerFlags,
 						   sizeof(m_triggerFlags) ) )
     {
       // If this trigger is a legacy definition(has sensors defined) start the log.
       if (pTrigData->bLegacyConfig)
       {
-        // Not Set Record the TRIGGER Start Log
-        nTriggerStorage = (UINT32)pTrigData->TriggerIndex;
+        // Not Set Record the TRIGGER start Log
+        nTriggerStorage = (UINT32)pTrigData->triggerIndex;
         LogWriteSystem (SYS_ID_INFO_TRIGGER_STARTED,
                         LOG_PRIORITY_LOW,
                         &nTriggerStorage,
                         sizeof(nTriggerStorage),
                         NULL);
       }
-      GSE_DebugStr(NORMAL,TRUE,"Trigger Start (%d) %s ", pTrigData->TriggerIndex,
-                   pTrigCfg->TriggerName );
+      GSE_DebugStr(NORMAL,TRUE,"Trigger start (%d) %s ", pTrigData->triggerIndex,
+                   pTrigCfg->triggerName );
     }
   }
   return bDurationMet;
@@ -744,18 +744,18 @@ static TRIG_END_TYPE TriggerCheckEnd (const TRIGGER_CONFIG *pTrigCfg,
   // then just check to see if start criteria is no longer active.
   // Note: The result is an INT32 where < 0 is error, 0 is false and 1 is true
 
-  if(pTrigCfg->EndExpr.size > 0)
+  if(pTrigCfg->endExpr.size > 0)
   {
     result = EvalExeExpression( EVAL_CALLER_TYPE_TRIGGER,
-                                (INT32)pTrigData->TriggerIndex,
-                                &pTrigCfg->EndExpr,
+                                (INT32)pTrigData->triggerIndex,
+                                &pTrigCfg->endExpr,
                                 &validity );
   }
   else
   {
     result = EvalExeExpression(EVAL_CALLER_TYPE_TRIGGER,
-                               (INT32)pTrigData->TriggerIndex,
-                               &pTrigCfg->StartExpr,
+                               (INT32)pTrigData->triggerIndex,
+                               &pTrigCfg->startExpr,
                                &validity );
     // If the returned value is 0 or 1, do a boolean inversion.
     result = (result >= 0) ?  (INT32) ! (BOOLEAN)(result) : result;
@@ -790,14 +790,14 @@ static TRIG_END_TYPE TriggerCheckEnd (const TRIGGER_CONFIG *pTrigCfg,
 static
 void TriggerLogEnd (TRIGGER_CONFIG *pTrigCfg, TRIGGER_DATA *pTrigData)
 {
-   GSE_DebugStr(NORMAL,TRUE,"Trigger End (%d) %s", pTrigData->TriggerIndex,
-                                       pTrigCfg->TriggerName );
+   GSE_DebugStr(NORMAL,TRUE,"Trigger end (%d) %s", pTrigData->triggerIndex,
+                                       pTrigCfg->triggerName );
 
    //Log the data collected
    TriggerLogUpdate( pTrigData );
    LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
                    LOG_PRIORITY_LOW,
-                   &m_triggerLog[pTrigData->TriggerIndex],
+                   &m_triggerLog[pTrigData->triggerIndex],
                    sizeof(TRIGGER_LOG),
                    NULL);
 }
@@ -822,10 +822,10 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
    // Local Data
 
    // Reinit the trigger data
-   pTrigData->State         = TRIG_START;
+   pTrigData->state         = TRIG_START;
    pTrigData->nStartTime_ms = 0;
    pTrigData->nDuration_ms  = 0;
-   pTrigData->EndType       = TRIG_NO_END;
+   pTrigData->endType       = TRIG_NO_END;
 
    pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
                                                       MAX_TRIG_SENSORS,
@@ -854,9 +854,9 @@ static void TriggerUpdateData( TRIGGER_DATA *pTrigData )
    {
       // general Trigger initialization
       pTrigData->nStartTime_ms   = CM_GetTickCount();
-      CM_GetTimeAsTimestamp(&pTrigData->CriteriaMetTime);
-      memset(&pTrigData->DurationMetTime,0, sizeof(TIMESTAMP));
-      memset(&pTrigData->EndTime        ,0, sizeof(TIMESTAMP));
+      CM_GetTimeAsTimestamp(&pTrigData->criteriaMetTime);
+      memset(&pTrigData->durationMetTime,0, sizeof(TIMESTAMP));
+      memset(&pTrigData->endTime        ,0, sizeof(TIMESTAMP));
    }
 
    SensorUpdateSummaries(pTrigData->snsrSummary, pTrigData->nTotalSensors);
@@ -888,17 +888,17 @@ void TriggerLogUpdate( TRIGGER_DATA *pTrigData)
   UINT8           i;
 
   // Initialize Local Data
-  pLog = &m_triggerLog[pTrigData->TriggerIndex];
+  pLog = &m_triggerLog[pTrigData->triggerIndex];
 
   // update the Trigger duration
   pLog->nDuration_ms  = CM_GetTickCount() - pTrigData->nStartTime_ms;
 
   // Update the trigger end log
-  pLog->TriggerIndex = pTrigData->TriggerIndex;
-  pLog->EndType         = pTrigData->EndType;
-  pLog->CriteriaMetTime = pTrigData->CriteriaMetTime;
-  pLog->DurationMetTime = pTrigData->DurationMetTime;
-  pLog->EndTime         = pTrigData->EndTime;
+  pLog->triggerIndex = pTrigData->triggerIndex;
+  pLog->endType         = pTrigData->endType;
+  pLog->criteriaMetTime = pTrigData->criteriaMetTime;
+  pLog->durationMetTime = pTrigData->durationMetTime;
+  pLog->endTime         = pTrigData->endTime;
 
   SensorCalculateSummaryAvgs(pTrigData->snsrSummary,pTrigData->nTotalSensors);
 
@@ -914,21 +914,21 @@ void TriggerLogUpdate( TRIGGER_DATA *pTrigData)
       pSummary->bValid = SensorIsValid (pSummary->SensorIndex);
 
       // Update the summary data for the trigger
-      pLog->Sensor[i].SensorIndex   = pSummary->SensorIndex;
-      pLog->Sensor[i].fTotal        = pSummary->fTotal;
-      pLog->Sensor[i].fMinValue     = pSummary->fMinValue;
-      pLog->Sensor[i].fMaxValue     = pSummary->fMaxValue;
-      pLog->Sensor[i].fAvgValue     = pSummary->fAvgValue;
-      pLog->Sensor[i].bValid        = pSummary->bValid;
+      pLog->sensor[i].sensorIndex   = pSummary->SensorIndex;
+      pLog->sensor[i].fTotal        = pSummary->fTotal;
+      pLog->sensor[i].fMinValue     = pSummary->fMinValue;
+      pLog->sensor[i].fMaxValue     = pSummary->fMaxValue;
+      pLog->sensor[i].fAvgValue     = pSummary->fAvgValue;
+      pLog->sensor[i].bValid        = pSummary->bValid;
     }
     else // Sensor Not Used
     {
-      pLog->Sensor[i].SensorIndex  = SENSOR_UNUSED;
-      pLog->Sensor[i].fTotal       = 0.0;
-      pLog->Sensor[i].fMinValue    = 0.0;
-      pLog->Sensor[i].fMaxValue    = 0.0;
-      pLog->Sensor[i].fAvgValue    = 0.0;
-      pLog->Sensor[i].bValid       = FALSE;
+      pLog->sensor[i].sensorIndex  = SENSOR_UNUSED;
+      pLog->sensor[i].fTotal       = 0.0;
+      pLog->sensor[i].fMinValue    = 0.0;
+      pLog->sensor[i].fMaxValue    = 0.0;
+      pLog->sensor[i].fAvgValue    = 0.0;
+      pLog->sensor[i].bValid       = FALSE;
     }
   }
 }
@@ -958,22 +958,22 @@ void TriggersEnd( void)
   for (i = 0; i < MAX_TRIGGERS; i++)
   {
     pTrigCfg    = &m_TriggerCfg[i];
-    pTrigSensor = &(pTrigCfg->TrigSensor[0]);
+    pTrigSensor = &(pTrigCfg->trigSensor[0]);
     pTrigData   = &(m_triggerData[i]);
 
-    if ( pTrigData->State == TRIG_ACTIVE )
+    if ( pTrigData->state == TRIG_ACTIVE )
     {
-      CM_GetTimeAsTimestamp(&pTrigData->EndTime);
-      if (( pTrigSensor->SensorIndex != SENSOR_UNUSED ) &&
-          ( SensorIsUsed(pTrigSensor->SensorIndex) ))
+      CM_GetTimeAsTimestamp(&pTrigData->endTime);
+      if (( pTrigSensor->sensorIndex != SENSOR_UNUSED ) &&
+          ( SensorIsUsed(pTrigSensor->sensorIndex) ))
       {
-        pTrigData->EndType = TRIG_COMMANDED_END;
+        pTrigData->endType = TRIG_COMMANDED_END;
         if( pTrigData->bLegacyConfig )
         {
           TriggerLogUpdate ( pTrigData );
           LogWriteSystem (SYS_ID_INFO_TRIGGER_ENDED,
             LOG_PRIORITY_LOW,
-            &m_triggerLog[pTrigData->TriggerIndex],
+            &m_triggerLog[pTrigData->triggerIndex],
             sizeof(TRIGGER_LOG),
             NULL);
         }
@@ -1006,7 +1006,7 @@ void TriggersEnd( void)
 *****************************************************************************/
 BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx )
 {
-   return( 0 != m_TriggerCfg[trigIdx].StartExpr.size );
+   return( 0 != m_TriggerCfg[trigIdx].startExpr.size );
 }
 
 
@@ -1044,7 +1044,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 
   // KEEP THIS LIST IN THE SAME ORDER AS enum COMPARISON in trigger.h
   const CHAR* trigSensorComparison[] = {"<", ">", "==", "!=", "!P"};
-  const CHAR* critString[2] = {"Start","End"};
+  const CHAR* critString[2] = {"start","end"};
 
   // Work in a local temp buffer so we don't change the config
   // in the event a valid criteria string can't be built.
@@ -1060,55 +1060,55 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
     *pStr = '\0';
 
     // Select the logical operator to use
-    // for Start (&) and End (|)
+    // for start (&) and end (|)
     if (0 == exprCnt)
     {
       logicalOp = '&';
-      pExpr     = &pTrigCfg->StartExpr;
+      pExpr     = &pTrigCfg->startExpr;
     }
     else
     {
       logicalOp = '|';
-      pExpr     = &pTrigCfg->EndExpr;
+      pExpr     = &pTrigCfg->endExpr;
     }
 
     // For each eval expression, check all 4 trig sensors.
     for(i = 0; i < MAX_TRIG_SENSORS; ++i)
     {
       // Get a pointer to the start/end criteria for this trig-sensor
-      pCriteria = ( 0 == exprCnt) ? &pTrigCfg->TrigSensor[i].Start :
-                                    &pTrigCfg->TrigSensor[i].End;
+      pCriteria = ( 0 == exprCnt) ? &pTrigCfg->trigSensor[i].start :
+                                    &pTrigCfg->trigSensor[i].end;
 
       // Only build expressions for active trig-sensor entries
-      if(pTrigCfg->TrigSensor[i].SensorIndex != SENSOR_UNUSED)
+      if(pTrigCfg->trigSensor[i].sensorIndex != SENSOR_UNUSED)
       {
         tempFloat = pCriteria->fValue;
 
         // Ensure the COMPARISON type is in range.
         // This can only ASSERT when cfg is corrupted.
-        ASSERT_MESSAGE(pCriteria->Compare >= LT && pCriteria->Compare <= NO_COMPARE,
-                           "Legacy Comparison not defined: %d", pCriteria->Compare);
+        ASSERT_MESSAGE(pCriteria->compare >= LT && pCriteria->compare <= NO_COMPARE,
+                           "Legacy Comparison not defined: %d", pCriteria->compare);
 
         // Format NO_COMPARE condition as a 'FALSE' const
-        if (NO_COMPARE == pCriteria->Compare)
+        if (NO_COMPARE == pCriteria->compare)
         {
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "FALSE ");
         }
 
-        // Format expression ( sensor Compare value)
-        else if (NOT_EQUAL_PREV != pCriteria->Compare)
+        // Format expression ( sensor compare value)
+        else if (NOT_EQUAL_PREV != pCriteria->compare)
         {
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "SVLU%03d %f %s ",
-                                  pTrigCfg->TrigSensor[i].SensorIndex,
+                                  pTrigCfg->trigSensor[i].sensorIndex,
                                   tempFloat,
-                                  trigSensorComparison[pCriteria->Compare] );
+                                  trigSensorComparison[pCriteria->compare] );
         }
         else
         {
           // Format a (sensor not-equal-prev) expression
           bytesMoved = snprintf( pStr,MAX_COND_STRING, "SVLU%03d %s ",
-                                  pTrigCfg->TrigSensor[i].SensorIndex,
-                                  trigSensorComparison[pCriteria->Compare] );
+                                  pTrigCfg->trigSensor[i].sensorIndex,
+                                  trigSensorComparison[pCriteria->compare] );
         }
         pStr += bytesMoved;
 
@@ -1158,11 +1158,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
- * 
+ *
  * *****************  Version 82  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 81  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:44p
