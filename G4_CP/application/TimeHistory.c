@@ -824,14 +824,14 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 11/15/12   Time: 7:18p
  * Updated in $/software/control processor/code/application
- * SCR 1107 (Time History Updates) 
+ * SCR 1107 (Time History Updates)
  * SCR 1131 (App Busy Updates)
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:49a
  * Updated in $/software/control processor/code/application
  * SCR 1105, 1107, 1131, 1154 - Code Review Updates
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 11/06/12   Time: 11:49a
  * Updated in $/software/control processor/code/application

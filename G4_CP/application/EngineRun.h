@@ -217,7 +217,7 @@ EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
- *
+ * 
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:31p
  * Updated in $/software/control processor/code/application

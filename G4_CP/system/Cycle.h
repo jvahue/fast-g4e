@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 18 $  $Date: 12-11-12 4:46p $
+      $Revision: 19 $  $Date: 12/03/12 5:36p $
 
 ******************************************************************************/
 
@@ -80,7 +80,6 @@
                                Package Typedefs
 ******************************************************************************/
 #define MAX_CYCLENAME        32
-#define MAX_CYCLEPARAM_SIZE 128
 
 #ifdef PEAK_CUM_PROCESSING
 #define CYCLEVALUE_COUNT 15
@@ -143,7 +142,7 @@ typedef struct
 // A cycle is counted when some sensor exceeds some threshold.
 typedef struct
 {
-  char          name[MAX_CYCLENAME + 1]; /* cycle name                                   */
+  CHAR          name[MAX_CYCLENAME + 1]; /* cycle name                                   */
   CYC_TYPE      type;          /* How cycle is counted 0xFFFF == This cycle unused       */
   UINT32        nCount;        /* value added for incrementing cycle                     */
   TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
@@ -162,7 +161,7 @@ typedef struct
 
 typedef struct
 {
-   char          name[MAX_CYCLENAME];     /* cycle name                                   */
+   CHAR          name[MAX_CYCLENAME];     /* cycle name                                   */
    CYC_TYPE      type;          /* How cycle is counted 0xFFFF == This cycle unused       */
    UINT32        nCount;        /* value added for incrementing cycle                     */
    TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
@@ -194,7 +193,7 @@ typedef struct
     FLOAT32 f;    /* used for all other counts          */
   } count;
   UINT16 checkID; /* Csum to ensure the count is valid for the currently configured  settings*/
-} CYCLE_ENTRY, *PCYCLE_ENTRY_PTR;
+} CYCLE_ENTRY;
 
 // Collection of cycle entries with csum for persisting to NV Memory.
 typedef struct
@@ -205,11 +204,6 @@ typedef struct
 
 
 #pragma pack(1)
-typedef struct
-{
-  SYS_APP_ID logReason;
-}CYCLE_SYSYEM_LOG;
-
 
 typedef struct
 {
@@ -235,7 +229,7 @@ typedef struct
                              Package Exports Variables
 ******************************************************************************/
 #if defined ( CYCLE_BODY )
-USER_ENUM_TBL CycleEnumType [] =
+USER_ENUM_TBL cycleEnumType [] =
 { {"0", CYCLE_ID_0}, {"1", CYCLE_ID_1}, {"2", CYCLE_ID_2}, {"3", CYCLE_ID_3},
   {"4", CYCLE_ID_4}, {"5", CYCLE_ID_5}, {"6", CYCLE_ID_6}, {"7", CYCLE_ID_7},
   {"8", CYCLE_ID_8}, {"9", CYCLE_ID_9}, {"10",CYCLE_ID_10},{"11",CYCLE_ID_11},
@@ -247,7 +241,7 @@ USER_ENUM_TBL CycleEnumType [] =
   {"UNUSED",CYCLE_UNUSED },{ NULL,0}
 };
 #else
-EXPORT USER_ENUM_TBL CycleEnumType[];
+EXPORT USER_ENUM_TBL cycleEnumType[];
 #endif
 
 
@@ -256,7 +250,7 @@ EXPORT USER_ENUM_TBL CycleEnumType[];
 ******************************************************************************/
 EXPORT void    CycleInitialize       ( void );
 EXPORT void    CycleUpdateAll        ( ENGRUN_INDEX erIndex );
-EXPORT BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
+
 EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
 EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
@@ -268,6 +262,11 @@ EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
  *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing.
 
   VERSION
-  $Revision: 39 $  $Date: 11/26/12 12:44p $
+  $Revision: 40 $  $Date: 12/03/12 5:36p $
 
 ******************************************************************************/
 
@@ -315,7 +315,7 @@ extern USER_ENUM_TBL TriggerIndexType[];
                              Package Exports Functions
 ******************************************************************************/
 EXPORT void    TriggerInitialize   ( void );
-EXPORT BOOLEAN TriggerIsActive     ( BITARRAY128 * Flags );
+EXPORT BOOLEAN TriggerIsActive     ( BITARRAY128 Flags );
 EXPORT BOOLEAN TriggerCompareValues ( FLOAT32 LVal, COMPARISON Compare,
                                       FLOAT32 RVal, FLOAT32 PrevVal );
 EXPORT UINT16  TriggerGetSystemHdr  ( void *pDest, UINT16 nMaxByteSize );
@@ -330,16 +330,21 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
  *  MODIFICATIONS
  *    $History: trigger.h $
  * 
+ * *****************  Version 40  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:44p
  * Updated in $/software/control processor/code/system
  * SCR #1167 SensorSummary
- * 
+ *
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 11/08/12   Time: 4:28p
  * Updated in $/software/control processor/code/system

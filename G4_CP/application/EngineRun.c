@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 41 $  $Date: 11/28/12 6:36p $
+      $Revision: 42 $  $Date: 12/03/12 5:32p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1018,6 +1018,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 42  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:32p
+ * Updated in $/software/control processor/code/application
+ * SCR #1167 Add sample count to ER Log
  * 
  * *****************  Version 41  *****************
  * User: Jim Mood     Date: 11/28/12   Time: 6:36p

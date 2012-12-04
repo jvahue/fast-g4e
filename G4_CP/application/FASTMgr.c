@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 116 $  $Date: 11/27/12 8:34p $
+   $Revision: 117 $  $Date: 12/03/12 5:29p $
 
 
 ******************************************************************************/
@@ -583,7 +583,7 @@ void FAST_Task(void* pParam)
 
   /*ON GROUND
     Transition into the on ground state*/
-  if( TriggerIsActive((BITARRAY128 *) CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers) &&
+  if( TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers) &&
       !FASTStatus.OnGround)
   {
     LogWriteSystem(APP_ID_FAST_WOWSTART, LOG_PRIORITY_LOW, 0, 0, NULL);
@@ -593,7 +593,7 @@ void FAST_Task(void* pParam)
   }
   /*Transition out of the on ground state
     Could be in air or sensor went invalid, so don't assume "in air"*/
-  else if(!TriggerIsActive((BITARRAY128 *)CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers)
+  else if(!TriggerIsActive(CfgMgr_RuntimeConfigPtr()->FASTCfg.OnGroundTriggers)
            && FASTStatus.OnGround)
   {
     LogWriteSystem(APP_ID_FAST_WOWEND, LOG_PRIORITY_LOW, 0, 0, NULL);
@@ -604,7 +604,7 @@ void FAST_Task(void* pParam)
 
   /*RECORDING
     Transition into the recording state*/
-  if(TriggerIsActive((BITARRAY128 *) CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
+  if(TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
      !FASTStatus.Recording)
   {
     LogWriteSystem(APP_ID_START_OF_RECORDING, LOG_PRIORITY_LOW, 0, 0, NULL);
@@ -613,7 +613,7 @@ void FAST_Task(void* pParam)
     FAST_AtStartOfRecord();
   }
   //Transition out of the recording state
-  else if(!TriggerIsActive((BITARRAY128 *)CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
+  else if(!TriggerIsActive(CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
           FASTStatus.Recording)
   {
     DataMgrRecord(FALSE);                      //Signal Data Mgr and wait for
@@ -664,7 +664,7 @@ void FAST_Task(void* pParam)
 
   /*DOWNLOAD ACS(s)
     Transition into the download state */
-  if (!TriggerIsActive((BITARRAY128 *) CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
+  if (!TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.RecordTriggers) &&
       !FASTStatus.Recording && FASTStatus.DownloadStarted && FASTStatus.OnGround &&
       (FALSE == DataMgrDownloadingACS()))
   {
@@ -1567,6 +1567,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 117  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:29p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review 
  * 
  * *****************  Version 116  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:34p

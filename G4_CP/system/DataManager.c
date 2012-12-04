@@ -994,7 +994,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
         tempTime = pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs;
         
         // Close out packet in buffer and mark for storage, nCurrentBuffer is
-		// incremented when the packet is finished!!!
+        // incremented when the packet is finished!!!
         DataMgrFinishPacket(pDMInfo, pDMParam->nChannel, (INT32)*nLeftOver);
 
         //------------------------ prep new buffer or error ----------------------------
@@ -1003,7 +1003,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
         // Check if the new buffer is ready to receive new data
         ASSERT_MESSAGE(DM_BUF_EMPTY == pMsgBuf->status,
                        "Channel %d Buffers Full", pDMParam->nChannel);
-       
+        
         // Check if the buffer is full and there is still data to write
         if ( *nLeftOver > 0)
         {

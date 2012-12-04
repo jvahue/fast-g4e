@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 25 $  $Date: 11/09/12 5:16p $
+  $Revision: 26 $  $Date: 12/03/12 5:36p $
 
 ******************************************************************************/
 
@@ -99,9 +99,10 @@ static void    CycleUpdateSimpleAndDuration (CYCLE_CFG*  pCycleCfg,
                                              UINT16      cycIndex );
 
 static void    CycleInitPersistent(void);
+static BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
 
-static void    CycleBackupPersistentCounts( UINT16 nCycle, CYC_BKUP_TYPE mode);
-static BOOLEAN CycleRestoreCountsFromPersistFiles(void);
+static void    CycleBackupPersistCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode );
+static BOOLEAN CycleRestoreCntsFromPersistFiles(void);
 static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate);
 static UINT16  CycleCalcCheckID ( UINT16 nCycle );
 static void    CycleSyncPersistFiles(BOOLEAN bNow);
@@ -126,7 +127,7 @@ static void    CycleSyncPersistFiles(BOOLEAN bNow);
  * Notes:        None.
  *
  *****************************************************************************/
-EXPORT void CycleInitialize(void)
+void CycleInitialize(void)
 {
   UINT16 i;
   // Add user commands for Cycles to the user command tables.
@@ -178,30 +179,6 @@ void CycleUpdateAll(ENGRUN_INDEX erIndex)
 }
 
 /******************************************************************************
- * Function:     CycleIsPersistentType
- *
- * Description:  checks cycle type for persistent.
- *
- * Parameters:   [in] nCycle - cycle table index.
- *
- * Returns:      TRUE if Cycle is persistent otherwise FALSE.
- *
- * Notes:        None.
- *
- *****************************************************************************/
-BOOLEAN CycleIsPersistentType( UINT8 nCycle )
-{
-  return (
-          (m_Cfg[nCycle].type     == CYC_TYPE_PERSIST_DURATION_CNT )
-           || (m_Cfg[nCycle].type == CYC_TYPE_PERSIST_SIMPLE_CNT)
-#ifdef PEAK_CUM_PROCESSING
-           || (m_Cfg[nCycle].type == CYC_TYPE_PEAK_VAL_CNT)
-           || (m_Cfg[nCycle].type == CYC_TYPE_CUM_CNT)
-#endif
-       );
-}
-
-/******************************************************************************
  * Function:     CycleGetBinaryHeader
  *
  * Description:  Retrieves the binary header for the Cycle
@@ -232,7 +209,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
 
    // Loop through all the cycles
    for ( cycleIndex = 0;
-         ((cycleIndex < MAX_CYCLES) && (nRemaining > sizeof (cycleHdr[cycleIndex])));
+         ((cycleIndex < MAX_CYCLES) && (nRemaining > sizeof (CYCLE_HDR)));
          cycleIndex++ )
    {
       // Copy the Cycle names
@@ -247,8 +224,8 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
       cycleHdr[cycleIndex].nEngineRunId = m_Cfg[cycleIndex].nEngineRunId;
 
       // Increment the total number of bytes and decrement the remaining
-      nTotal     += sizeof (cycleHdr[cycleIndex]);
-      nRemaining -= sizeof (cycleHdr[cycleIndex]);
+      nTotal     += sizeof (CYCLE_HDR);
+      nRemaining -= sizeof (CYCLE_HDR);
    }
    // Copy the Cycle header to the buffer
    memcpy ( pBuffer, cycleHdr, nTotal );
@@ -334,7 +311,9 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
           counts[cyc] = m_CountsEEProm.data[cyc].count.n;
           break;
 
-        default:
+        case CYC_TYPE_NONE_CNT:
+		case MAX_CYC_TYPE:
+		default:
           FATAL ("Unrecognized Cycle Type Value: %d" ,pCfg->type);
           break;
       }
@@ -373,64 +352,64 @@ static void CycleInitPersistent(void)
   CYCLE_ENTRY*   pCycCntsEE;
   CYCLE_ENTRY*   pCycCntsRTC;
 
+  BOOLEAN bRestored = CycleRestoreCntsFromPersistFiles();
+
 
   /* If both sets of persistent data is corrupted reset to 0 */
-  if ( !CycleRestoreCountsFromPersistFiles() )
+
+  // RTC and EEPROM copies of persist cycles have valid but different CRC's.
+  // Determine which values are valid based on checkID and create a good list.
+
+  for ( i = 0; i < MAX_CYCLES && !bRestored; i++)
   {
-    // RTC and EEPROM copies of persist cycles have valid but different CRC's.
-    // Determine which values are valid based on checkID and create a good list.
-
-    for ( i = 0; i < MAX_CYCLES; i++)
+    if ( CycleIsPersistentType( i) )
     {
-      if ( CycleIsPersistentType( i) )
+      pCycCfg  = &m_Cfg[i];
+
+      // Set ptrs to areas containing files read from NVRAM
+      pCycCntsEE  = &m_CountsEEProm.data[i];
+      pCycCntsRTC = &m_CountsRTC.data[i];
+
+      // Compare the counts. Higher count is considered the
+      // valid one. Make the lesser side equivalent.
+
+      if ( pCycCntsEE->count.n != pCycCntsRTC->count.n )
       {
-        pCycCfg  = &m_Cfg[i];
-
-        // Set ptrs to areas containing files read from NVRAM
-        pCycCntsEE  = &m_CountsEEProm.data[i];
-        pCycCntsRTC = &m_CountsRTC.data[i];
-
-        // Compare the counts. Higher count is considered the
-        // valid one. Make the lesser side equivalent.
-
-        if ( pCycCntsEE->count.n != pCycCntsRTC->count.n )
+        if ( CYC_TYPE_PERSIST_DURATION_CNT == pCycCfg->type )
         {
-          if ( CYC_TYPE_PERSIST_DURATION_CNT == pCycCfg->type )
+          if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
           {
-            if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
-            {
-              pCycCntsRTC->count.n = pCycCntsEE->count.n;
-              bUpdateRTCRAM = TRUE;
-            }
-            else
-            {
-              pCycCntsEE->count.n = pCycCntsRTC->count.n;
-              bUpdateEEPROM = TRUE;
-            }
+            pCycCntsRTC->count.n = pCycCntsEE->count.n;
+            bUpdateRTCRAM = TRUE;
           }
           else
           {
-            if ( pCycCntsEE->count.f > pCycCntsRTC->count.f )
-            {
-              pCycCntsRTC->count.f = pCycCntsEE->count.f;
-              bUpdateRTCRAM = TRUE;
-            }
-            else
-            {
-              pCycCntsEE->count.f = pCycCntsRTC->count.f;
-              bUpdateEEPROM = TRUE;
-            }
-          } /* End of else != P_DURATION_COUNT   */
-        } /* End of if ( != )                  */
-      } /* End of if cycle->type is a persistent */
-    } /* End of for MAX_CYCLES loop             */
+            pCycCntsEE->count.n = pCycCntsRTC->count.n;
+            bUpdateEEPROM = TRUE;
+          }
+        }
+        else
+        {
+          if ( pCycCntsEE->count.f > pCycCntsRTC->count.f )
+          {
+            pCycCntsRTC->count.f = pCycCntsEE->count.f;
+            bUpdateRTCRAM = TRUE;
+          }
+          else
+          {
+            pCycCntsEE->count.f = pCycCntsRTC->count.f;
+            bUpdateEEPROM = TRUE;
+          }
+        } /* End of else != P_DURATION_COUNT   */
+      } /* End of if ( != )                  */
+    } /* End of if cycle->type is a persistent */
+  } /* End of for MAX_CYCLES loop             */
 
-  }
 
 
   /* Both PCycleData and RTC_RAMRunTime are good, and count == */
   /* compare .checkId  */
-  for ( i=0; i < MAX_CYCLES; i++)
+  for ( i = 0; i < MAX_CYCLES; i++)
   {
     if ( CycleIsPersistentType(i) )
     {
@@ -448,6 +427,29 @@ static void CycleInitPersistent(void)
   }
 }
 
+/******************************************************************************
+ * Function:     CycleIsPersistentType
+ *
+ * Description:  checks cycle type for persistent.
+ *
+ * Parameters:   [in] nCycle - cycle table index.
+ *
+ * Returns:      TRUE if Cycle is persistent otherwise FALSE.
+ *
+ * Notes:        None.
+ *
+ *****************************************************************************/
+static BOOLEAN CycleIsPersistentType( UINT8 nCycle )
+{
+  return (
+          (m_Cfg[nCycle].type     == CYC_TYPE_PERSIST_DURATION_CNT )
+           || (m_Cfg[nCycle].type == CYC_TYPE_PERSIST_SIMPLE_CNT)
+#ifdef PEAK_CUM_PROCESSING
+           || (m_Cfg[nCycle].type == CYC_TYPE_PEAK_VAL_CNT)
+           || (m_Cfg[nCycle].type == CYC_TYPE_CUM_CNT)
+#endif
+       );
+}
 
 /******************************************************************************
 * Function:     CycleReset
@@ -558,6 +560,7 @@ static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cy
     case CYC_TYPE_NONE_CNT:
       break;
 
+    case MAX_CYC_TYPE: // fallthru
     default:
       FATAL ("Cycle[%d] %s has Unrecognized Cycle Type: %d",
              cycIndex, pCycleCfg->name,
@@ -586,7 +589,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
                                            CYCLE_DATA* pCycleData,
                                            UINT16      cycIndex )
 {
-  BOOLEAN      CycleStart = FALSE;
+  BOOLEAN      cycleStart = FALSE;
   BITARRAY128  trigMask;
   UINT32       nowTimeMs;
 
@@ -610,11 +613,11 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 
       if (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)
       {
-        CycleBackupPersistentCounts(cycIndex, CYC_BKUP_RTC);
+        CycleBackupPersistCounts(cycIndex, CYC_BKUP_RTC);
       }
     }
     // Update the cycle active status.
-    pCycleData->cycleActive = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
+    pCycleData->cycleActive = ( TriggerIsActive( trigMask ) ) ? TRUE : FALSE;
 
     // If cycle has ended, reset the start-time for the next duration.
     if(!pCycleData->cycleActive)
@@ -633,10 +636,10 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
     // Cycle is inactive - see if the start criteria are met
     // Set up a bit-mask for querying the state of the trigger for this cycle
 
-    CycleStart = ( TriggerIsActive((BITARRAY128 *) trigMask ) )? TRUE : FALSE;
+    cycleStart = ( TriggerIsActive( trigMask ) )? TRUE : FALSE;
 
     // Cycle has started
-    if (CycleStart)
+    if (cycleStart)
     {
       // Previous run was "inactive" and trigger is now active
       // value - count the cycle in the flight log and set the flag
@@ -655,7 +658,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 
         if (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT)
         {
-          CycleBackupPersistentCounts(cycIndex, CYC_BKUP_RTC);
+          CycleBackupPersistCounts(cycIndex, CYC_BKUP_RTC);
         }
       }
     } // End of if cycle has Started
@@ -665,29 +668,31 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
 
 
 /******************************************************************************
- * Function:     CycleBackupPersistentCounts
+ * Function:     CycleBackupPersistCounts
  *
  * Description:  Backs up current persistent counts to RTC RAM or FLASH
  *
- * Parameters:   [in] cycle index
- *               [in] mode flag to indicate RTC RAM or EEPROM should be updated
+ * Parameters:   [in] nCycle index
+ *               [in] mode   flag to indicate RTC RAM or EEPROM should be updated
  *
  * Returns:      None.
  *
  * Notes:        None.
  *
  *****************************************************************************/
-void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
+static void CycleBackupPersistCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
 {
-  union
+  static union
   {
     UINT32  n;
     FLOAT32 f;
   } temp_value;
+
   BOOLEAN bDataChanged = FALSE;
 
   CYCLE_CFG_PTR  pCycleCfg  = &m_Cfg[nCycle];
   CYCLE_DATA_PTR pCycleData = &m_Data[nCycle];
+  temp_value.n = 0;
 
   // Update persistent count
   // The copy in EEPROM acts as the baseline since 'start of ER' against which the
@@ -717,6 +722,12 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       bDataChanged = (temp_value.n - m_CountsRTC.data[nCycle].count.n) >= 1 ? TRUE : FALSE;
       break;
 
+    // Never should get here
+	// non-persisted types, fallthru
+	case CYC_TYPE_NONE_CNT:
+    case CYC_TYPE_SIMPLE_CNT:
+    case CYC_TYPE_DURATION_CNT:
+	case MAX_CYC_TYPE:
     default:
       FATAL ("Unrecognized Cycle Type Value: %d", pCycleCfg->type);
       break;
@@ -785,7 +796,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
 }
 
 /******************************************************************************
- * Function:     CyclesFinishEngineRun
+ * Function:     CycleFinishEngineRun
  *
  * Description:  Called by EngineRun to finish up any currently running
  *               cycles for the indicated Engine Run
@@ -799,7 +810,7 @@ void CycleBackupPersistentCounts( UINT16 nCycle,  CYC_BKUP_TYPE mode )
  *****************************************************************************/
 void CycleFinishEngineRun( ENGRUN_INDEX erID )
 {
-  UINT16 i;
+  UINT8 i;
   for (i = 0; i < MAX_CYCLES; i++)
   {
     // If the cycle entry is configured, and belongs to the EngineRun,
@@ -810,14 +821,14 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
       if (CycleIsPersistentType( i))
       {
         // Persist cycle info to  EEPROM from RTC at end of cycle.
-        CycleBackupPersistentCounts( i, CYC_BKUP_EE );
+        CycleBackupPersistCounts( i, CYC_BKUP_EE );
       }
     }
   }
 }
 
 /******************************************************************************
- * Function:     CycleRestoreCountsFromPersistFiles
+ * Function:     CycleRestoreCntsFromPersistFiles
  *
  * Description:  Opens the Persist Count files RTC and EEPROM
  *
@@ -828,13 +839,13 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
  * Notes:        None.
  *
  *****************************************************************************/
-static BOOLEAN CycleRestoreCountsFromPersistFiles(void)
+static BOOLEAN CycleRestoreCntsFromPersistFiles(void)
 {
   RESULT resultEE;
   RESULT resultRTC;
   BOOLEAN status = FALSE;
-  INT16   i;
-  INT16  size = sizeof(CYCLE_COUNTS);
+  UINT16   i;
+  UINT32  size = sizeof(CYCLE_COUNTS);
 
   // Retrieves the stored counters from non-volatile
   // Note: NV_Open() performs checksum and creates sys log if checksum fails !
@@ -1025,7 +1036,7 @@ void CycleResetEngineRun( ENGRUN_INDEX erID)
  *****************************************************************************/
 static void CycleSyncPersistFiles(BOOLEAN bNow)
 {
-  INT16 size = sizeof(CYCLE_COUNTS);
+  UINT32 size = sizeof(CYCLE_COUNTS);
 
   memcpy ( &m_CountsRTC, &m_CountsEEProm,  size );
   if (bNow)
@@ -1049,6 +1060,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
  *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 11/09/12   Time: 5:16p
