@@ -92,7 +92,7 @@ static USER_MSG_TBL actionOutCmd [] =
 static USER_MSG_TBL actionCmd [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                   IndexRange              DataLimit   EnumTbl*/
-   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                  NO_LIMIT,   TriggerIndexType },
+   { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                  NO_LIMIT,   triggerIndexType },
    { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &configActionTemp.persist.bEnabled,         -1,-1,                  NO_LIMIT,   NULL },
    { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  NO_LIMIT,   NULL },
    { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
