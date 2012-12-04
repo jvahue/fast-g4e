@@ -69,7 +69,7 @@ static USER_MSG_TBL TriggerConfigCmd [] =
   { "STARTVALUEA", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_FLOAT,USER_RW,
     &ConfigTemp.faultTrigger[0].SensorTrigger.fValue,0,MAX_FAULTS-1,NO_LIMIT,NULL },
   { "STARTCOMPAREA", NO_NEXT_TABLE, Fault_UserCfg, USER_TYPE_ENUM, USER_RW,
-    &ConfigTemp.faultTrigger[0].SensorTrigger.Compare,0,MAX_FAULTS-1,NO_LIMIT,ComparisonEnum},
+    &ConfigTemp.faultTrigger[0].SensorTrigger.compare,0,MAX_FAULTS-1,NO_LIMIT,comparisonEnum},
   { "SENSEOFB", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
     &ConfigTemp.faultTrigger[1].SenseOfSignal,0,MAX_FAULTS-1,NO_LIMIT,SenseType },
   { "SENSORINDEXB", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
@@ -77,7 +77,7 @@ static USER_MSG_TBL TriggerConfigCmd [] =
   { "STARTVALUEB", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_FLOAT,USER_RW,
     &ConfigTemp.faultTrigger[1].SensorTrigger.fValue,0,MAX_FAULTS-1,NO_LIMIT,NULL },
   { "STARTCOMPAREB", NO_NEXT_TABLE, Fault_UserCfg, USER_TYPE_ENUM, USER_RW,
-    &ConfigTemp.faultTrigger[1].SensorTrigger.Compare,0,MAX_FAULTS-1,NO_LIMIT,ComparisonEnum},
+    &ConfigTemp.faultTrigger[1].SensorTrigger.compare,0,MAX_FAULTS-1,NO_LIMIT,comparisonEnum},
   { "SENSEOFC", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
     &ConfigTemp.faultTrigger[2].SenseOfSignal,0,MAX_FAULTS-1,NO_LIMIT,SenseType },
   { "SENSORINDEXC", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
@@ -85,7 +85,7 @@ static USER_MSG_TBL TriggerConfigCmd [] =
   { "STARTVALUEC", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_FLOAT,USER_RW,
     &ConfigTemp.faultTrigger[2].SensorTrigger.fValue,0,MAX_FAULTS-1,NO_LIMIT,NULL },
   { "STARTCOMPAREC", NO_NEXT_TABLE, Fault_UserCfg, USER_TYPE_ENUM, USER_RW,
-    &ConfigTemp.faultTrigger[2].SensorTrigger.Compare,0,MAX_FAULTS-1,NO_LIMIT,ComparisonEnum},
+    &ConfigTemp.faultTrigger[2].SensorTrigger.compare,0,MAX_FAULTS-1,NO_LIMIT,comparisonEnum},
   { "SENSEOFD", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
     &ConfigTemp.faultTrigger[3].SenseOfSignal,0,MAX_FAULTS-1,NO_LIMIT,SenseType },
   { "SENSORINDEXD", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_ENUM,USER_RW,
@@ -93,7 +93,7 @@ static USER_MSG_TBL TriggerConfigCmd [] =
   { "STARTVALUED", NO_NEXT_TABLE,Fault_UserCfg, USER_TYPE_FLOAT,USER_RW,
     &ConfigTemp.faultTrigger[3].SensorTrigger.fValue,0,MAX_FAULTS-1,NO_LIMIT,NULL },
   { "STARTCOMPARED", NO_NEXT_TABLE, Fault_UserCfg, USER_TYPE_ENUM, USER_RW,
-    &ConfigTemp.faultTrigger[3].SensorTrigger.Compare,0,MAX_FAULTS-1,NO_LIMIT,ComparisonEnum},              
+    &ConfigTemp.faultTrigger[3].SensorTrigger.compare,0,MAX_FAULTS-1,NO_LIMIT,comparisonEnum},              
   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }  
 };
 

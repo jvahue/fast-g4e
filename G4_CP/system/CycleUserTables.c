@@ -101,7 +101,7 @@ static USER_MSG_TBL cycleCfgCmd[] =
   {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  m_CfgTemp.name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
   {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              cycleTypeEnum    },
   {"COUNT",      NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nCount,       0,(MAX_CYCLES-1),   NO_LIMIT,              NULL             },
-  {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              TriggerIndexType },
+  {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              triggerIndexType },
   {"ENGINERUNID",NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nEngineRunId, 0,(MAX_CYCLES-1),   NO_LIMIT,              engRunIdEnum     },
   { NULL,        NULL,          NULL,         NO_HANDLER_DATA}
 };
