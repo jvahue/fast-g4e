@@ -8,7 +8,7 @@ File:          CycleUserTables.c
 Description:
 
 VERSION
-$Revision: 14 $  $Date: 11/12/12 6:40p $
+$Revision: 15 $  $Date: 12/03/12 5:36p $
 
 ******************************************************************************/
 #ifndef CYCLE_BODY
@@ -98,7 +98,7 @@ static USER_MSG_TBL cycleStatusCmd [] =
 static USER_MSG_TBL cycleCfgCmd[] =
 {
   /*Str          Next Tbl Ptr   Handler Func     Data Type       Access    Parameter               IndexRange          DataLimit              EnumTbl*/
-  {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  &m_CfgTemp.name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
+  {"NAME",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_STR,    USER_RW,  m_CfgTemp.name,         0,(MAX_CYCLES-1),   0,MAX_CYCLENAME,       NULL             },
   {"TYPE",       NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.type,         0,(MAX_CYCLES-1),   NO_LIMIT,              cycleTypeEnum    },
   {"COUNT",      NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_UINT32, USER_RW,  &m_CfgTemp.nCount,       0,(MAX_CYCLES-1),   NO_LIMIT,              NULL             },
   {"TRIGGERID",  NO_NEXT_TABLE, CycleUserCfg, USER_TYPE_ENUM,   USER_RW,  &m_CfgTemp.nTriggerId,   0,(MAX_CYCLES-1),   NO_LIMIT,              TriggerIndexType },
@@ -286,7 +286,7 @@ static USER_HANDLER_RESULT CycleUserCfg( USER_DATA_TYPE DataType,
 }
 
 /******************************************************************************
- * Function:    EngRunShowConfig
+ * Function:    CycleShowConfig
  *
  * Description:  Handles User Manager requests to retrieve the configuration
  *               settings.
@@ -353,6 +353,11 @@ static USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
  *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:40p

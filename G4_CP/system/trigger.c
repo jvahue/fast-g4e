@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 81 $  $Date: 11/26/12 12:44p $
+  $Revision: 82 $  $Date: 12/03/12 5:36p $
 
 ******************************************************************************/
 
@@ -254,7 +254,7 @@ void TriggerInitialize(void)
  * Notes:        None;
  *
  *****************************************************************************/
-BOOLEAN TriggerIsActive (BITARRAY128* Flags)
+BOOLEAN TriggerIsActive (BITARRAY128 Flags)
 {
   // Local Data
   BOOLEAN bActive;
@@ -263,7 +263,7 @@ BOOLEAN TriggerIsActive (BITARRAY128* Flags)
   bActive = FALSE;
 
   // Check if ANY flag is set
-  if (TestBits(Flags[0], sizeof(BITARRAY128 ),
+  if (TestBits(Flags, sizeof(BITARRAY128 ),
                &m_triggerFlags[0], sizeof(BITARRAY128 ), MATCH_ANY))
   {
     // At least one passed in flag is set return TRUE
@@ -1159,6 +1159,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  *  MODIFICATIONS
  *    $History: trigger.c $
  * 
+ * *****************  Version 82  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
+ *
  * *****************  Version 81  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:44p
  * Updated in $/software/control processor/code/system

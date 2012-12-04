@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 18 $  $Date: 11/29/12 4:19p $
+ $Revision: 19 $  $Date: 12/03/12 5:30p $
 
 ******************************************************************************/
 
@@ -1066,6 +1066,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 12/03/12   Time: 5:30p
+ * Updated in $/software/control processor/code/application
+ * SCR #1200 Requirements: GSE command to view the number of trend
  *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 11/29/12   Time: 4:19p

@@ -1,10 +1,10 @@
 #define MSFX_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        MSFileXfr.c
-    
+
     Description: MSFX Micro Server File Transfer
                  msfx.get_file
                  FAST sends files to the GSE port from the Micro-Server by
@@ -12,24 +12,24 @@
                  128 byte packets.
 
                  msfx.put_file
-                 FAST receives files from the GSE port to the Micro-Server 
-                 by YMODEM, not supporting streaming mode, but supporting 
+                 FAST receives files from the GSE port to the Micro-Server
+                 by YMODEM, not supporting streaming mode, but supporting
                  128 and 1024 byte packets and batch transfer for compatibility
                  with most YMODEM senders.
 
                  FAST specific functionality allows a list of transmitted and
                  non-transmitted log files to be retrieved with one command.
-                 Also this module allows log files to be marked as 
-                 "transmitted" with one command.                 
+                 Also this module allows log files to be marked as
+                 "transmitted" with one command.
 
     VERSION
     $Revision: 29 $  $Date: 11/29/12 7:44p $
-    
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include <stdlib.h>
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -222,7 +222,7 @@ static void    MSFX_YMdmRcvrWaitForSndr(void);
  *
  *****************************************************************************/
 void MSFX_Init(void)
-{   
+{
   TCB TaskInfo;
 
   m_TaskState = TASK_STOPPED;
@@ -251,7 +251,7 @@ void MSFX_Init(void)
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = NULL;
   TmTaskCreate (&TaskInfo);
-  
+
 }
 
 
@@ -279,7 +279,7 @@ void MSFX_Init(void)
  *              ReqPri4TXDFileList:
  *              ReqPri4NonTXDFileList:
  *
- *              ..and then enabling the task.  
+ *              ..and then enabling the task.
  *
  * Parameters:  [in/out] pParam: Task parameter, not used
  * Returns:     none
@@ -293,7 +293,7 @@ static void MSFX_Task(void* pParam)
     case TASK_STOPPED:
       //Do nothing, task should be disabled.
       break;
-    
+
     case TASK_STOP_SEND:
       MSFX_SendFileDataResponse(CAN);
       MSFX_Wait(TASK_STOPPED,TASK_STOPPED,"MS returned fail for Messenger Ctl");
@@ -315,23 +315,23 @@ static void MSFX_Task(void* pParam)
     case TASK_REQUEST_NON_TXD_FILE_LIST:
       MSFX_RequestNonTxdFileListState();
       break;
-    
+
     case TASK_REQUEST_TXD_FILE_LIST:
       MSFX_RequestTxdFileListState();
       break;
-      
+
     case TASK_REQPRI4_NON_TXD_FILE_LIST:
       MSFX_ReqPri4NonTxdFileListState();
       break;
-      
+
     case TASK_REQPRI4_TXD_FILE_LIST:
       MSFX_ReqPri4TxdFileListState();
       break;
-      
+
     case TASK_REQUEST_START_FILE:
       MSFX_RequestStartFileSndrState();
       break;
-    
+
     case TASK_MARK_FILE_TXD:
       MSFX_MarkFileTransmittedState();
       break;
@@ -339,11 +339,11 @@ static void MSFX_Task(void* pParam)
     case TASK_YMDM_SNDR_WAIT_FOR_START:
       MSFX_YMdmSndrWaitForStart();
       break;
-    
+
     case TASK_YMDM_SNDR_WAIT_FOR_ACKNAK:
       MSFX_YMdmSndrWaitForACKNAK();
       break;
-    
+
     case TASK_YMDM_SNDR_SEND:
       MSFX_YMdmSndrSend();
       break;
@@ -351,7 +351,7 @@ static void MSFX_Task(void* pParam)
     case TASK_YMDM_SNDR_GET_NEXT:
       MSFX_YMdmSndrGetNext();
       break;
-    
+
     case TASK_YMDM_SNDR_SEND_EOT:
       MSFX_YMdmSndrSendEOT();
       break;
@@ -363,19 +363,19 @@ static void MSFX_Task(void* pParam)
     case TASK_YMDM_RCVR_SEND_START_CHAR:
       MSFX_YMdmRcvrSendStartChar();
       break;
-    
+
     case TASK_YMDM_RCVR_SEND_ACK:
       MSFX_YMdmRcvrSendACK();
       break;
-    
+
     case TASK_YMDM_RCVR_SEND_NAK:
       MSFX_YMdmRcvrSendNAK();
       break;
-    
+
     case TASK_YMDM_RCVR_WAIT_FOR_SNDR:
       MSFX_YMdmRcvrWaitForSndr();
       break;
-    
+
     default:
       FATAL("MSFX TASK: BAD STATE %d",m_TaskState);
       break;
@@ -390,7 +390,7 @@ static void MSFX_Task(void* pParam)
  * Description: Start the MSFX_Task to request a list of transmitted or
  *              non-transmitted log files, then transfer the list as a list of
  *              files.
- *              
+ *
  *
  * Parameters:  [in] ListType: TASK_REQUEST_TXD_FILE_LIST:
  *                             Request the list of transmitted log files
@@ -406,28 +406,28 @@ static void MSFX_Task(void* pParam)
  * Returns:     TRUE: Task started successfully
  *              FALSE: Task did not start.
  *
- * Notes:       ASSERT check that the parameter is one of the two 
+ * Notes:       ASSERT check that the parameter is one of the two
  *              aforementioned states.
  *
  *****************************************************************************/
 static BOOLEAN MSFX_RequestFileList(MSFX_TASK_STATE ListType)
 {
   BOOLEAN retval = FALSE;
- 
+
   ASSERT( (ListType == TASK_REQUEST_TXD_FILE_LIST)    ||
           (ListType == TASK_REQUEST_NON_TXD_FILE_LIST)||
           (ListType == TASK_REQPRI4_NON_TXD_FILE_LIST)||
           (ListType == TASK_REQPRI4_TXD_FILE_LIST)      );
-  
+
   if((m_TaskState == TASK_STOPPED ) || (m_TaskState == TASK_ERROR))
   {
     m_TaskState = ListType;
-    TmTaskEnable(MonitorGetTaskId(),FALSE);    
+    TmTaskEnable(MonitorGetTaskId(),FALSE);
     TmTaskEnable(MS_GSE_File_XFR, TRUE);
 
     //Wait for 'C' char for 30s after GSE requests to transfer a file
     Timeout(TO_START,YMDM_START_CHAR_TO,&m_FileXfrData.TO);
-    
+
     retval = TRUE;
   }
 
@@ -440,7 +440,7 @@ static BOOLEAN MSFX_RequestFileList(MSFX_TASK_STATE ListType)
  * Function:    MSFX_RequestGetFile()
  *
  * Description: Start the MSFX_Task to transfer a file from the Micro-Server
- *              to the GSE port.  
+ *              to the GSE port.
  *
  * Parameters:  [in] FN: Full file name and path of the file to request from
  *                       the micro-server.
@@ -454,18 +454,18 @@ static BOOLEAN MSFX_RequestFileList(MSFX_TASK_STATE ListType)
 static BOOLEAN MSFX_RequestGetFile(const INT8* FN)
 {
   BOOLEAN retval = FALSE;
- 
+
   if((m_TaskState == TASK_STOPPED ) || (m_TaskState == TASK_ERROR))
   {
-    m_FileXfrData.Seq        = 0; 
+    m_FileXfrData.Seq        = 0;
     m_FileXfrData.ExpBlock   = 0;
-    m_FileXfrData.RspPending = 0; 
+    m_FileXfrData.RspPending = 0;
     strncpy_safe(m_FileXfrData.FN,sizeof(m_FileXfrData.FN), FN, _TRUNCATE);
     MSFX_Wait(TASK_REQUEST_START_FILE,TASK_REQUEST_START_FILE,
         "MS returned fail for Messenger Ctl");
     MSFX_PauseJMessenger(TRUE);
 
-    TmTaskEnable(MonitorGetTaskId(),FALSE);    
+    TmTaskEnable(MonitorGetTaskId(),FALSE);
     TmTaskEnable(MS_GSE_File_XFR, TRUE);
 
     //Wait for 'C' char for 30s after GSE requests to transfer a file
@@ -484,7 +484,7 @@ static BOOLEAN MSFX_RequestGetFile(const INT8* FN)
  * Function:    MSFX_RequestPutFile()
  *
  * Description: Start the MSFX_Task to transfer a file from the GSE port to
- *              the GSE port.  
+ *              the GSE port.
  *
  * Parameters:  [in] Path: Full directory path to store the file to.
  *
@@ -497,15 +497,15 @@ static BOOLEAN MSFX_RequestGetFile(const INT8* FN)
 static BOOLEAN MSFX_RequestPutFile(const INT8* Path)
 {
   BOOLEAN retval = FALSE;
- 
+
   if((m_TaskState == TASK_STOPPED ) || (m_TaskState == TASK_ERROR))
   {
-    m_FileXfrData.Seq        = 0; 
-    m_FileXfrData.ExpBlock   = 0; 
+    m_FileXfrData.Seq        = 0;
+    m_FileXfrData.ExpBlock   = 0;
     m_FileXfrData.TOCnt      = 0;
     m_FileXfrData.yMdmB0     = TRUE;
-    strncpy_safe(m_FileXfrData.FN,sizeof(m_FileXfrData.FN), Path, _TRUNCATE);      
-    TmTaskEnable(MonitorGetTaskId(),FALSE);    
+    strncpy_safe(m_FileXfrData.FN,sizeof(m_FileXfrData.FN), Path, _TRUNCATE);
+    TmTaskEnable(MonitorGetTaskId(),FALSE);
     TmTaskEnable(MS_GSE_File_XFR, TRUE);
     m_TaskState = TASK_YMDM_RCVR_SEND_START_CHAR;
     retval = TRUE;
@@ -541,14 +541,14 @@ static BOOLEAN MSFX_RequestPutFile(const INT8* Path)
 static BOOLEAN MSFX_MarkFileAsTransmitted(const INT8* FN)
 {
   BOOLEAN retval = FALSE;
- 
+
   if((m_TaskState == TASK_STOPPED ) || (m_TaskState == TASK_ERROR))
   {
     strncpy_safe(m_FileXfrData.FN, sizeof(m_FileXfrData.FN),FN,_TRUNCATE);
     MSFX_Wait(TASK_MARK_FILE_TXD, TASK_MARK_FILE_TXD,
         "MS returned fail for Messenger Ctl");
     MSFX_PauseJMessenger(TRUE);
-    TmTaskEnable(MonitorGetTaskId(),FALSE);    
+    TmTaskEnable(MonitorGetTaskId(),FALSE);
     TmTaskEnable(MS_GSE_File_XFR, TRUE);
     retval = TRUE;
   }
@@ -564,19 +564,19 @@ static BOOLEAN MSFX_MarkFileAsTransmitted(const INT8* FN)
  *              Previous state: STOPPED
  *              Next state:     WAIT
  *                              ERROR
- *              
+ *
  * Parameters:  none
  *
- * Returns:     none 
+ * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_RequestNonTxdFileListState(void)
 {
   MSCP_CP_SHELL_CMD cmd;
- 
- 
+
+
   //Set file name and path
   sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
 
@@ -584,7 +584,7 @@ static void MSFX_RequestNonTxdFileListState(void)
   //folder and pipe it to /tmp
   sprintf(cmd.Str,"ls -lre [CP_FILES] > %s",
       m_FileXfrData.FN);
-  
+
   cmd.Len = strlen(cmd.Str) + 1;
 
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
@@ -606,19 +606,19 @@ static void MSFX_RequestNonTxdFileListState(void)
  *              Previous state: STOPPED
  *              Next state:     WAIT_FOR_REQUEST_FILE_LIST_RSP
  *                              ERROR
- *              
+ *
  * Parameters:  none
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_RequestTxdFileListState(void)
 {
   MSCP_CP_SHELL_CMD cmd;
- 
- 
+
+
   //Set file name and path
   sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
 
@@ -631,7 +631,7 @@ static void MSFX_RequestTxdFileListState(void)
 
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
             "MS returned fail for get file list");
-  
+
   if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
   {
@@ -650,19 +650,19 @@ static void MSFX_RequestTxdFileListState(void)
  *              Previous state: STOPPED
  *              Next state:     WAIT_FOR_REQUEST_FILE_LIST_RSP
  *                              ERROR
- *              
+ *
  * Parameters:  none
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_ReqPri4TxdFileListState(void)
 {
   MSCP_CP_SHELL_CMD cmd;
- 
- 
+
+
   //Set file name and path
   sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
 
@@ -675,7 +675,7 @@ static void MSFX_ReqPri4TxdFileListState(void)
 
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
             "MS returned fail for get file list");
-  
+
   if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
   {
@@ -694,19 +694,19 @@ static void MSFX_ReqPri4TxdFileListState(void)
  *              Previous state: STOPPED
  *              Next state:     WAIT
  *                              ERROR
- *              
+ *
  * Parameters:  none
  *
- * Returns:     none 
+ * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_ReqPri4NonTxdFileListState(void)
 {
   MSCP_CP_SHELL_CMD cmd;
- 
- 
+
+
   //Set file name and path
   sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
 
@@ -714,7 +714,7 @@ static void MSFX_ReqPri4NonTxdFileListState(void)
   //folder and pipe it to /tmp
   sprintf(cmd.Str,"ls -lre [CP_PRI4] | grep -v [.]qc > %s",
       m_FileXfrData.FN);
-  
+
   cmd.Len = strlen(cmd.Str) + 1;
 
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
@@ -734,16 +734,16 @@ static void MSFX_ReqPri4NonTxdFileListState(void)
  *
  * Description: Request a file from the micro-server to be send out the GSE
  *              port
- *              Previous state: STOPPED 
+ *              Previous state: STOPPED
  *              Next state:     WAIT
  *                              ERROR
- *              
- *              
+ *
+ *
  * Parameters:  none
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_RequestStartFileSndrState(void)
@@ -758,11 +758,11 @@ static void MSFX_RequestStartFileSndrState(void)
   m_FileXfrData.TransferDone = FALSE;
   m_FileXfrData.yMdmB0       = TRUE;
   FIFO_Flush(&m_FileXfrData.Q);
-  
+
   strncpy_safe(cmd.Str, sizeof(cmd.Str), m_FileXfrData.FN, _TRUNCATE);
 
   MSFX_Wait(TASK_YMDM_SNDR_WAIT_FOR_START,TASK_ERROR,NULL);
-  
+
   if(  SYS_OK != MSI_PutCommand(CMD_ID_GET_FILE_START,&cmd,
         sizeof(cmd),MSI_REQ_DATA_TIMEOUT,MSFX_MSRspStartFile)        )
   {
@@ -777,13 +777,13 @@ static void MSFX_RequestStartFileSndrState(void)
  * Function:    MSFX_MarkFileTransmittedState
  *
  * Description: Sends the command to the Micro-Server to mark a log file as
- *              transmitted out the GSE port.  
- *              
+ *              transmitted out the GSE port.
+ *
  * Parameters:  none
  *
- * Returns:     
+ * Returns:
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_MarkFileTransmittedState(void)
@@ -805,14 +805,14 @@ static void MSFX_MarkFileTransmittedState(void)
 
 /******************************************************************************
  * Function:    MSFX_YMdmSndrWaitForStart
- * 
+ *
  * Description: Wait for the prompt for the GSE connected receiver that
  *              indicates it is ready to receive data.  Currently supports
  *              the 'C' character to indicate YMODEM with acknowledges.
- 
+
  *              The routine also waits for the file name block from the Micro-
  *              Server before switching to send the first YMODEM block
- 
+
  *              After receiving the start char from the PC and the file
  *              name block from the Micro-Server, the block is sent to
  *              the receiver.
@@ -821,19 +821,19 @@ static void MSFX_MarkFileTransmittedState(void)
  *              Next State:     YMODEM_SEND
  *                              TASK_YMDM_SNDR_WAIT_FOR_START
  *                              ERROR
- *              
+ *
  * Parameters:
  *
  * Returns:
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrWaitForStart(void)
 {
   INT16 start_char;
   INT8* err_str;
-  
+
   start_char = GSE_getc();
 
   if(start_char == 'C')
@@ -841,7 +841,7 @@ static void MSFX_YMdmSndrWaitForStart(void)
     //ExpBlock is zero until the file name block has been received, then
     //it increments to expect block 1.  Wait in this state until file
     //name block is received.
-    m_TaskState = m_FileXfrData.ExpBlock == 0 ? 
+    m_TaskState = m_FileXfrData.ExpBlock == 0 ?
                           TASK_YMDM_SNDR_WAIT_FOR_START : TASK_YMDM_SNDR_SEND;
   }
   else if(start_char == CAN)
@@ -853,10 +853,10 @@ static void MSFX_YMdmSndrWaitForStart(void)
   {
     if(Timeout(TO_CHECK,YMDM_START_CHAR_TO,&m_FileXfrData.TO))
     {
-      err_str = m_FileXfrData.ExpBlock == 0 ? 
+      err_str = m_FileXfrData.ExpBlock == 0 ?
              "Timeout while waiting for data from Micro-Server" :
              "Timeout while waiting for 'C' from GSE";
-             
+
       MSFX_Wait(TASK_ERROR,TASK_ERROR,NULL);
       MSFX_PauseJMessenger(FALSE);
 
@@ -880,7 +880,7 @@ static void MSFX_YMdmSndrWaitForStart(void)
  *              If ACK, send the next block
  *              If ACK & File Done flag set & File data q empty, send EOT.
  *              If ACK & File name sent blank (last file) stop, all done
- *              
+ *
  *              If NAK, resend YMdm block
  *
  *              If CAN, inform microserver and stop.
@@ -891,18 +891,18 @@ static void MSFX_YMdmSndrWaitForStart(void)
  *                              YMODEM_SEND_FINAL_BLOCK
  *                              TASK_STOP_SEND
  *                              ERROR
- *                       
+ *
  * Parameters:
  *
  * Returns:
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrWaitForACKNAK(void)
 {
   INT16 rsp_char;
- 
+
   rsp_char = GSE_getc();
 
   if(ACK == rsp_char)
@@ -960,12 +960,12 @@ static void MSFX_YMdmSndrWaitForACKNAK(void)
  *              be rolled into the ACK/NAK and WAIT_FOR_START.
  *              Next State: YMODEM_WAIT_FOR_ACKNAK
  *                          YMODEM_SEND_BLOCK
- *              
+ *
  * Parameters:  none
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrSend(void)
@@ -1005,24 +1005,24 @@ static void MSFX_YMdmSndrSend(void)
  *              data from the MS.
  *              Do not allow a partial YMODEM block until the last data
  *              packet.
- *            
+ *
  *              Next state: YMODEM_WAIT_FOR_START (if Block 0)
  *                          YMODEM_SEND_FINAL_BLOCK
  *                          YMODEM_SEND
  *                          YMODEM_GET_NEXT
  *
- *              
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrGetNext(void)
 {
- 
-  //Request more data from the micro-server if the data Q is less than 50 % 
+
+  //Request more data from the micro-server if the data Q is less than 50 %
   //full and the micro-server is waiting to send more data (RspPending)
   if((FIFO_FreeBytes(&m_FileXfrData.Q) > m_FileXfrData.Q.Size/2)
       && (m_FileXfrData.RspPending == TRUE) && !m_FileXfrData.FileDone)
@@ -1062,7 +1062,7 @@ static void MSFX_YMdmSndrGetNext(void)
       MSFX_PauseJMessenger(FALSE);
       m_TaskState = TASK_ERROR;
       MSFX_Error("Timeout while waiting for data from Micro-Server");
-      MSFX_SendFileDataResponse(CAN);      
+      MSFX_SendFileDataResponse(CAN);
     }
   }
 }
@@ -1073,12 +1073,12 @@ static void MSFX_YMdmSndrGetNext(void)
  * Function:    MSFX_YMdmSndrSendEOT
  *
  * Description: Send the terminating EOT
- *            
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrSendEOT(void)
@@ -1116,12 +1116,12 @@ static void MSFX_YMdmSndrSendEOT(void)
  * Description: Wait for the ACK after the EOT.  This is valid in g mode, so
  *              is is separate from the normal ACK/NAK.
  *              EOT is resent on NAK, else, final data block sent.
- *            
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmSndrWaitForEOT_ACKNAK(void)
@@ -1175,22 +1175,22 @@ static void MSFX_YMdmSndrWaitForEOT_ACKNAK(void)
  *              file name, size, and modification date.
  *              Next State:
  *                YMDM_RCVR_WAIT_FOR_SNDR
- *              
- *            
- * Parameters:  
  *
- * Returns:     
  *
- * Notes:       
+ * Parameters:
+ *
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmRcvrSendStartChar(void)
 {
   INT8 buf = 'C';
   UINT32 to;
-  
+
   if(GSE_write(&buf,1))
-  {    
+  {
     m_FileXfrData.SizeRcvd = 0;
     m_TaskState = TASK_YMDM_RCVR_WAIT_FOR_SNDR;
     Timeout(TO_START,YMDM_TX_TO,&to);
@@ -1220,12 +1220,12 @@ static void MSFX_YMdmRcvrSendStartChar(void)
  *              Next State:
  *                YMDM_RCVR_WAIT_FOR_SNDR
  *                YMDM_RCVR_SEND_START_CHAR (after block 0 only)
- *            
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmRcvrSendACK(void)
@@ -1264,7 +1264,7 @@ static void MSFX_YMdmRcvrSendACK(void)
   {
     MSFX_Error("TX error while sending ACK");
     m_TaskState = TASK_ERROR;
-  }  
+  }
 }
 
 
@@ -1277,19 +1277,19 @@ static void MSFX_YMdmRcvrSendACK(void)
  *              the last packet sent was processed successfully.
  *              Next State:
  *                YMDM_RCVR_WAIT_FOR_SNDR
- *            
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmRcvrSendNAK(void)
 {
   INT8 buf = NAK;
   UINT32 to;
-  
+
   if(GSE_write(&buf,1))
   {
     Timeout(TO_START,YMDM_TX_TO,&to);
@@ -1307,7 +1307,7 @@ static void MSFX_YMdmRcvrSendNAK(void)
   {
     MSFX_Error("TX error while sending NAK");
     m_TaskState = TASK_ERROR;
-  }    
+  }
 }
 
 
@@ -1325,12 +1325,12 @@ static void MSFX_YMdmRcvrSendNAK(void)
  *                ERROR (after bad block number of timeout count exceeded)
  *                SEND_START_CHAR (after timeout waiting for block 0)
  *                STOPPED (after getting a NUL block 0)
- *            
- * Parameters:  
  *
- * Returns:     
+ * Parameters:
  *
- * Notes:       
+ * Returns:
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_YMdmRcvrWaitForSndr(void)
@@ -1374,13 +1374,13 @@ static void MSFX_YMdmRcvrWaitForSndr(void)
         m_FileXfrData.yMdmB0 = TRUE;
         m_FileXfrData.ExpBlock = 0;
       }
-      //CAN is not described in the C Forsberg document, but Hyperterminal 
+      //CAN is not described in the C Forsberg document, but Hyperterminal
       //seems to use it to cancel a transfer in progress.
       else if(buf == CAN)
       {
         MSFX_SendEndPutFileToMS(TASK_STOPPED);
         TmTaskEnable(MonitorGetTaskId(),TRUE);
-        TmTaskEnable(MS_GSE_File_XFR, FALSE);        
+        TmTaskEnable(MS_GSE_File_XFR, FALSE);
       }
       else
       {
@@ -1388,7 +1388,7 @@ static void MSFX_YMdmRcvrWaitForSndr(void)
       }
     }
   }
-  else //Receiving data packet    
+  else //Receiving data packet
   {
     MSFX_ReceiveDataPacket(&m_YMdm);
   }
@@ -1407,12 +1407,12 @@ static void MSFX_YMdmRcvrWaitForSndr(void)
  *              transmitted to the Micro-Server.
  *
  *              The next file transfer state is returned.
- *            
+ *
  * Parameters:  [in/out]: YMdm pointer to a YMODEM block to receive the data
  *
  * Returns:
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
@@ -1423,13 +1423,13 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
   INT32 read;
   UINT16 RcvdCRC;
   UINT16 CalcCRC;
-  
+
   read = GSE_read(&ptr[m_FileXfrData.SizeRcvd],size-m_FileXfrData.SizeRcvd);
 
   if(read >= 0)
   {
     m_FileXfrData.SizeRcvd += read;
-      
+
     //Check if entire packet was received
     if(m_FileXfrData.SizeRcvd == size)
     {
@@ -1437,7 +1437,7 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
       //packet size.
       CalcCRC = CRC_CCITT(YMdm->k1.Data,size-YMODEM_OVERHEAD_SIZE);
       RcvdCRC = YMdm->k1.Start == SOH ? YMdm->B128.CRC : YMdm->k1.CRC;
-      
+
       if( m_FileXfrData.yMdmB0                               &&
          (YMdm->k1.Blk            == m_FileXfrData.ExpBlock) &&
          ((UINT8)~YMdm->k1.InvBlk == m_FileXfrData.ExpBlock) &&
@@ -1453,7 +1453,7 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
       {
         //Got a complete block
         MSFX_SendPutFileDataToMS(YMdm);
-        m_FileXfrData.ExpBlock += 1; 
+        m_FileXfrData.ExpBlock += 1;
       }
       else //Block has an error, return NAK;
       {
@@ -1462,7 +1462,7 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
       }
     }
   }
-  else //GSE error, return NAK 
+  else //GSE error, return NAK
   {
     // May want to just allow to ensure we don't hammer the sender if it is still sending
     m_TaskState = TASK_YMDM_RCVR_SEND_NAK;
@@ -1482,9 +1482,9 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
  *              file name and path is mandatory, followed by mandatory file
  *              size and optional file modification date.  Any other YMODEM
  *              defined fields are ignored.
- *         
+ *
  * Parameters:  [in] YMdm: YMODEM block containing the "Block 0" file data
- *              
+ *
  * Returns:     none.  Global file task state is modified depending on the
  *              outcome of sending the MS command
  *
@@ -1497,7 +1497,7 @@ static void MSFX_SendStartPutFileToMS(MSFX_YMODEM_BLK* YMdm)
   INT8                        *ptr;
   INT8 buf = ACK;
   UINT32                      to;
-  
+
   /*Pull apart the file information contained in the Data portion of the
     YMODEM block.  Get the file name, file size and timestamp.  Format is:
 
@@ -1523,7 +1523,7 @@ static void MSFX_SendStartPutFileToMS(MSFX_YMODEM_BLK* YMdm)
     //Convert size and timestamp to binary values.
     cmd.Size     = strtoul(&YMdm->k1.Data[strlen(YMdm->k1.Data)+1],&ptr,BASE_10);
     cmd.UnixTime = strtoul(ptr+1,&ptr,BASE_8);
-    
+
     MSFX_Wait(TASK_YMDM_RCVR_SEND_ACK,TASK_ERROR,
           "MS returned fail: start put file");
     if(SYS_OK != MSI_PutCommand( CMD_ID_PUT_FILE_START,&cmd,sizeof(cmd),MSI_SEND_TIMEOUT,
@@ -1562,21 +1562,21 @@ static void MSFX_SendStartPutFileToMS(MSFX_YMODEM_BLK* YMdm)
  *
  * Description: Sends the file data command as part of the file transfer to
  *              the Micro-Server.  The file data is extracted from the
- *              YMODEM data block.  
- *              
+ *              YMODEM data block.
+ *
  * Parameters:  [in] YMdm: YMODEM block containing file data.
- *              
+ *
  * Returns:     none. Global file task state is modified depending on the
  *              outcome of sending the MS command
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_SendPutFileDataToMS(MSFX_YMODEM_BLK* YMdm)
 {
   MSCP_CP_PUT_FILE_DATA_CMD  cmd;
-  
+
   cmd.Block = YMdm->k1.Blk;
-  cmd.Len   = (YMdm->k1.Start == SOH ? YMODEM_128_SIZE : YMODEM_1024_SIZE) - 
+  cmd.Len   = (YMdm->k1.Start == SOH ? YMODEM_128_SIZE : YMODEM_1024_SIZE) -
               YMODEM_OVERHEAD_SIZE;
 
   memcpy(cmd.Data,YMdm->k1.Data,cmd.Len);
@@ -1601,19 +1601,19 @@ static void MSFX_SendPutFileDataToMS(MSFX_YMODEM_BLK* YMdm)
  * Description: Sends the file data command with zero data to indicated
  *              the end of a file transfer.  This signals the MS to close
  *              the file currently being transfered.
- *              
+ *
  * Parameters:  [in] NextState: State to enter after MS response is received.
- *              
+ *
  * Returns:     none. Global files task state is modified depending on the
  *              outcome of sending the MS command.
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_SendEndPutFileToMS(MSFX_TASK_STATE NextState)
 {
   MSCP_CP_PUT_FILE_DATA_CMD  cmd;
-  
+
   cmd.Len   = 0;
   MSFX_Wait(NextState,TASK_ERROR,
       "MS command failed: put file data");
@@ -1635,11 +1635,11 @@ static void MSFX_SendEndPutFileToMS(MSFX_TASK_STATE NextState)
  *              application by PWEH) while this task is tranferring
  *              log files or marking log files as trasmitted
  *
- *              
+ *
  * Parameters:  [in] Pause: TRUE: Pause JMessenger process
  *                          FALSE: Run JMessenger process
- *              
- * Returns:     
+ *
+ * Returns:
  *
  * Notes:       Task state set to error on failure to send message
  *
@@ -1647,9 +1647,9 @@ static void MSFX_SendEndPutFileToMS(MSFX_TASK_STATE NextState)
 static void MSFX_PauseJMessenger(BOOLEAN Pause)
 {
   MSCP_CP_MSNGR_CTL_CMD cmd;
- 
+
   cmd.Pause = Pause;
-  
+
   if(  SYS_OK != MSI_PutCommand(CMD_ID_MSNGR_CTL,&cmd,
         sizeof(cmd),MSI_PAUSE_TIMEOUT,MSFX_MSRspGenericPassFail)        )
   {
@@ -1667,7 +1667,7 @@ static void MSFX_PauseJMessenger(BOOLEAN Pause)
  *              from the micro-server.  The response or command that the task
  *              is waiting for calls the MSFX_Signal() function to go to the
  *              next state when the response is received
- *              
+ *
  * Parameters:  [in] Success: State to enter when a successful response is
  *                            received
  *              [in] Fail:    State to enter when a fail response is received.
@@ -1677,11 +1677,11 @@ static void MSFX_PauseJMessenger(BOOLEAN Pause)
  *                            MSFX_Signal(FALSE);
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_Wait(MSFX_TASK_STATE Success,MSFX_TASK_STATE Fail,INT8 *Str)
-{  
+{
   m_WaitData.OnSuccess = Success;
   m_WaitData.OnError   = Fail;
   if(Str != NULL)
@@ -1695,14 +1695,14 @@ static void MSFX_Wait(MSFX_TASK_STATE Success,MSFX_TASK_STATE Fail,INT8 *Str)
 /******************************************************************************
  * Function:    MSFX_Signal
  *
- * Description: Used when 
- *              
+ * Description: Used when
+ *
  * Parameters:  [in] Success: TRUE:  Operation successful
  *                            FALSE: Operation failed
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_Signal(BOOLEAN Success)
@@ -1715,7 +1715,7 @@ static void MSFX_Signal(BOOLEAN Success)
   {
     m_TaskState = m_WaitData.OnError;
   }
-    
+
 }
 
 
@@ -1724,18 +1724,18 @@ static void MSFX_Signal(BOOLEAN Success)
  * Function:    MSFX_AddYMdm1kCRC
  *
  * Description: Compute the CRC for the Data portion of a 1k YMODEM block and
- *              store the result in the CRC portion of the block.  
- *              
+ *              store the result in the CRC portion of the block.
+ *
  * Parameters:  [in/out]: MdmBlock .Data portion read, result written to .CRC
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_AddYMdm1kCRC(MSFX_YMODEM_BLK *MdmBlk)
 {
-  
+
   MdmBlk->k1.CRC = CRC_CCITT(MdmBlk->k1.Data,sizeof(MdmBlk->k1.Data));
 }
 
@@ -1744,16 +1744,16 @@ static void MSFX_AddYMdm1kCRC(MSFX_YMODEM_BLK *MdmBlk)
 /******************************************************************************
  * Function:    MSFX_Error
  *
- * Description: Saves a descriptive string describing the condition that caused 
+ * Description: Saves a descriptive string describing the condition that caused
  *              the error.  The errors cannot be fed out real-time by GSE_DebugStr
  *              because it will likely be OFF while doing binary transfers.
- *              
+ *
  * Parameters:  [in]: Str: Description of the error
  *                         must be less than 74 chars.
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_Error(INT8* Str)
@@ -1773,13 +1773,13 @@ static void MSFX_Error(INT8* Str)
  *
  * Returns:     none
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_SendFileDataResponse(INT8 RspType)
 {
   MSCP_CP_GET_FILE_DATA_RSP rsp;
-  
+
   if(RspType == CAN)
   {
     rsp.Status = MSCP_FILE_DATA_CAN;
@@ -1788,7 +1788,7 @@ static void MSFX_SendFileDataResponse(INT8 RspType)
   {
     rsp.Status = MSCP_FILE_DATA_OK;
   }
-  
+
   if(m_FileXfrData.RspPending == TRUE)
   {
     if(SYS_OK == MSI_PutResponse(CMD_ID_GET_FILE_DATA,&rsp,MSCP_RSP_STATUS_SUCCESS,
@@ -1804,12 +1804,12 @@ static void MSFX_SendFileDataResponse(INT8 RspType)
 /******************************************************************************
  * Function:    MSFX_MSRspShellCmd | MS Response Handler
  *
- * Description: Response handler for ls shell commands sent from MSFX task to 
+ * Description: Response handler for ls shell commands sent from MSFX task to
  *              the Micro-Server.  The routine notifies the task of the
  *              response by changing the task state from WAIT_FOR_FILE_LIST to
  *              REQUEST_START_FILE if list creation was successful or ERROR if
  *              a timeout or error occurred.
- *              
+ *
  * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
  *              PacketData: Pointer to the data returned from the microserver.
  *              Size:       Length (in bytes) of the data returned from the
@@ -1817,8 +1817,8 @@ static void MSFX_SendFileDataResponse(INT8 RspType)
  *              Status:     Response status from the micro server
  *
  * Returns:     none
- *              
- * Notes:       
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
@@ -1846,19 +1846,19 @@ static void MSFX_MSRspShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
  *
  * Description: Response handler for the start file command sent to the
  *              Micro-Server.
- *              
+ *
  * Parameters:  see MSInterface.h for prototype
  *
  * Returns:     none
- *              
- * Notes:       
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_MSRspStartFile(UINT16 Id, void* PacketData, UINT16 Size,
                                MSI_RSP_STATUS Status)
-{ 
+{
   MSCP_MS_GET_FILE_START_RSP *rsp = PacketData;
- 
+
   if(Status == MSI_RSP_SUCCESS)
   {
     if(rsp->Status == MSCP_FILE_START_OK)
@@ -1869,7 +1869,7 @@ static void MSFX_MSRspStartFile(UINT16 Id, void* PacketData, UINT16 Size,
     {
       MSFX_Error("MS responded file not found");
       MSFX_Signal(FALSE);
-    }      
+    }
   }
   else
   {
@@ -1884,8 +1884,8 @@ static void MSFX_MSRspStartFile(UINT16 Id, void* PacketData, UINT16 Size,
  * Function:    MSFX_MSRspFileXfrd | MS Response Handler
  *
  * Description: Response handler for the Mark File as Transfered command.
- *              
- *              
+ *
+ *
  * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
  *              PacketData: Pointer to the data returned from the microserver.
  *              Size:       Length (in bytes) of the data returned from the
@@ -1893,13 +1893,13 @@ static void MSFX_MSRspStartFile(UINT16 Id, void* PacketData, UINT16 Size,
  *              Status:     Response status from the micro server
  *
  * Returns:     none
- *              
- * Notes:       
+ *
+ * Notes:
  *
  *****************************************************************************/
 static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
                                MSI_RSP_STATUS Status)
-{ 
+{
   MSCP_MS_FILE_XFRD_RSP *rsp = PacketData;
   INT8 *ptr;
   if(Status == MSI_RSP_SUCCESS)
@@ -1914,7 +1914,7 @@ static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
       {
         *ptr = '\0';
       }
-      
+
       if(UploadMgr_DeleteFVTEntry(m_FileXfrData.FN))
       {
         MSFX_Signal(TRUE);
@@ -1970,7 +1970,7 @@ static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
  *
  *              A file information block with a blank FN field indicates the
  *              entire transfer is complete.
- *              
+ *
  * Parameters:  PacketData: Pointer to the data returned from the microserver.
  *              Size:       Length (in bytes) of the data returned from the
  *                          microserver
@@ -1981,7 +1981,7 @@ static void MSFX_MSRspFileXfrd(UINT16 Id, void* PacketData, UINT16 Size,
  *
  * Returns:     TRUE: Command accepted (always)
  *              FALSE: Command failed (not used)
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static BOOLEAN MSFX_MSCmdFileData(void* Data,UINT16 Size,UINT32 Sequence)
@@ -2015,7 +2015,7 @@ static BOOLEAN MSFX_MSCmdFileData(void* Data,UINT16 Size,UINT32 Sequence)
     }
   }
   else /*Else, push file data into data q*/
-  {  
+  {
     if( (m_TaskState != TASK_STOPPED)                 &&
         (m_TaskState != TASK_ERROR)                   &&
         (FIFO_FreeBytes(&m_FileXfrData.Q) > cmd->Len) &&
@@ -2040,8 +2040,8 @@ static BOOLEAN MSFX_MSCmdFileData(void* Data,UINT16 Size,UINT32 Sequence)
 /******************************************************************************
  * Function:    MSFX_MSRspGenericPassFail | MS Command Handler
  *
- * Description: 
- *              
+ * Description:
+ *
  * Parameters:  Id:         Message Id of the response (MSCP_CMD_ID)
  *              PacketData: Pointer to the data returned from the microserver.
  *              Size:       Length (in bytes) of the data returned from the
@@ -2050,7 +2050,7 @@ static BOOLEAN MSFX_MSCmdFileData(void* Data,UINT16 Size,UINT32 Sequence)
  *
  * Returns:
  *
- * Notes:       
+ * Notes:
  *
  *****************************************************************************/
 static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
@@ -2061,13 +2061,13 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
   success = FALSE;
   if(Status == MSI_RSP_SUCCESS)
   {
-    success = TRUE; 
+    success = TRUE;
   }
 
   MSFX_Signal(success);
 }
 
-    
+
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
@@ -2081,144 +2081,144 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
  * User: Melanie Jutras Date: 12-10-10   Time: 12:03p
  * Updated in $/software/control processor/code/application
  * SCR 1172
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 10:41a
  * Updated in $/software/control processor/code/application
  * SCR 1107: Data Offload changes for 2.0.0
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jim Mood     Date: 11/15/10   Time: 10:34a
  * Updated in $/software/control processor/code/application
  * SCR 998 YMODEM not clearing FIFO after canceled get_file
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jim Mood     Date: 10/15/10   Time: 2:05p
  * Updated in $/software/control processor/code/application
  * SCR 935 again.  Wait() before JMessenger
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jim Mood     Date: 10/14/10   Time: 6:45p
  * Updated in $/software/control processor/code/application
  * SCR 924 (Added while loop timeouts)
  * SCR 935 GetFile race condition
- * 
+ *
  * *****************  Version 22  *****************
  * User: John Omalley Date: 10/08/10   Time: 10:46a
  * Updated in $/software/control processor/code/application
  * SCR 924 - Code Review Updates
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jim Mood     Date: 10/01/10   Time: 3:14p
  * Updated in $/software/control processor/code/application
  * SCR 909 Code Coverage Issues
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jim Mood     Date: 9/30/10    Time: 6:45p
  * Updated in $/software/control processor/code/application
  * SCR 909 Code Coverage Changes
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 5:08p
  * Updated in $/software/control processor/code/application
  * SCR 760 YMODEM half duplex timing
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jim Mood     Date: 7/19/10    Time: 8:40p
  * Updated in $/software/control processor/code/application
  * SCR 693 YMODEM receiver timeout should have been 30s
  * SCR 696 Unpause JMessenger on error exit points for YMODEM Sender
- * 
+ *
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 6/15/10    Time: 5:25p
  * Updated in $/software/control processor/code/application
- * SCR #599 Removed '10 sec" comment. 
- * 
+ * SCR #599 Removed '10 sec" comment.
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 6/11/10    Time: 10:06a
  * Updated in $/software/control processor/code/application
  * SCR 623 Batch mode.  Implements YMODEM  receiver
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 5/18/10    Time: 6:50p
  * Updated in $/software/control processor/code/application
  * SCR 594 YMODEM/Premption of FIFO issue
  * SCR 599 Extend YMODEM sender ACK timeout
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:53p
  * Updated in $/software/control processor/code/application
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:07p
  * Updated in $/software/control processor/code/application
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 4/05/10    Time: 9:57a
  * Updated in $/software/control processor/code/application
  * SCR# 452 - Init some uninitialized locals, rearrange code to eliminate
  * 'else' paths.
- * 
+ *
  * *****************  Version 11  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:15p
  * Updated in $/software/control processor/code/application
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jim Mood     Date: 3/26/10    Time: 5:38p
  * Updated in $/software/control processor/code/application
  * Basic working YMODEM receiver
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:37p
  * Updated in $/software/control processor/code/application
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/application
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor2  Date: 3/02/10    Time: 3:40p
  * Updated in $/software/control processor/code/application
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 2/24/10    Time: 10:49a
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jeff Vahue   Date: 1/23/10    Time: 3:05p
  * Updated in $/software/control processor/code/application
  * SCR# 397
- * 
+ *
  * *****************  Version 4  *****************
  * User: Jim Mood     Date: 1/20/10    Time: 3:45p
  * Updated in $/software/control processor/code/application
  * Initial working build and completion of outstanding TODO:s
- * 
+ *
  * *****************  Version 3  *****************
  * User: Contractor V&v Date: 12/10/09   Time: 5:39p
  * Updated in $/software/control processor/code/application
- * SCR 106 
- * 
+ * SCR 106
+ *
  * *****************  Version 2  *****************
  * User: Jim Mood     Date: 12/08/09   Time: 5:15p
  * Updated in $/software/control processor/code/application
- * 
+ *
  * *****************  Version 1  *****************
  * User: Jim Mood     Date: 11/17/09   Time: 6:26p
  * Created in $/software/control processor/code/application
  * YModem transfer works, still need to fill in todo's
- * 
+ *
  *
  *****************************************************************************/
- 
+
