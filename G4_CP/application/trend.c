@@ -683,20 +683,20 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
 
   for ( i = 0; i < MAX_STAB_SENSORS; i++)
   {
-    pData->curStability.snsrValue[i] = 0.f;
+    pData->curStability.snsrValue[i] = FLT_MAX;
     pData->curStability.validity[i]  = FALSE;
     pData->curStability.status[i]    = STAB_UNKNOWN;
 
-    pData->maxStability.snsrValue[i] = 0.f;
+    pData->maxStability.snsrValue[i] = FLT_MAX;
     pData->maxStability.validity[i]  = FALSE;
     pData->maxStability.status[i]    = STAB_UNKNOWN;
   }
 
   // Reset(Init) the sensor statistics
   pData->nTotalSensors = SensorSetupSummaryArray(pData->snsrSummary,
-                                                   MAX_TREND_SENSORS,
-                                                   pCfg->sensorMap,
-                                                   sizeof(pCfg->sensorMap) );
+                                                 MAX_TREND_SENSORS,
+                                                 pCfg->sensorMap,
+                                                 sizeof(pCfg->sensorMap) );
   #pragma ghs endnowarning
 }
 
@@ -748,7 +748,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
 
   // Check all stability sensors for this trend obj.
   // If no stability configured, we never perform this loop
-  for (i = 0; i < MAX_STAB_SENSORS && (pData->nStabExpectedCnt > 0); ++i)
+  for (i = 0; i < pData->nStabExpectedCnt; ++i)
   {
     pStabCrit = &pCfg->stability[i];
 
@@ -766,12 +766,17 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         // Check absolute min/max values
         if ( (fVal >= pStabCrit->criteria.lower) && (fVal <= pStabCrit->criteria.upper) )
         {
-          // Check the stability of the sensor value withing a given variance
+          // save our current value 
+          pData->curStability.snsrValue[i] = fVal; 
+
+          // Check the stability of the sensor value within a given variance
           // ensure positive difference
 
+          // compute delta and adjust for processing rate
           delta = ( fPrevValue > fVal) ? fPrevValue - fVal :  fVal - fPrevValue;
+          delta *= (FLOAT32)pCfg->rate;
 
-          if (delta >= pStabCrit->criteria.variance)
+          if (delta > pStabCrit->criteria.variance)
           {
             pData->curStability.status[i] = STAB_SNSR_VARIANCE_ERROR;
           }
@@ -779,6 +784,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         else
         {
           pData->curStability.status[i] = STAB_SNSR_RANGE_ERROR;
+          pData->curStability.snsrValue[i] = FLT_MAX;
         }
 
         // If the sensor is in stable range and variance... increment the count
@@ -787,14 +793,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
 
         if (STAB_OK == pData->curStability.status[i] )
         {
-          if (++pData->curStability.stableCnt > pData->maxStability.stableCnt)
-          {
-            memcpy(&pData->maxStability, &pData->curStability, sizeof(STABILITY_DATA));
-          }
-        }
-        else // if any test fails, reset stored sensor value to start over next time
-        {
-           pData->curStability.snsrValue[i] = fVal;
+          ++pData->curStability.stableCnt;
         }
       }
       else
@@ -807,8 +806,14 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
       pData->curStability.status[i] = STAB_SNSR_NOT_DECLARED;
     }
   }
-  // if all configured(expected) sensors are stable, return true
 
+  // track our max stable count data
+  if (pData->curStability.stableCnt > pData->maxStability.stableCnt)
+  {
+    memcpy(&pData->maxStability, &pData->curStability, sizeof(STABILITY_DATA));
+  }
+
+  // if all configured(expected) sensors are stable, return true
   return (pData->curStability.stableCnt == pData->nStabExpectedCnt &&
           pData->nStabExpectedCnt > 0);
 }
