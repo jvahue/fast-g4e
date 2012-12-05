@@ -640,18 +640,18 @@ UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size )
 * Description:  Compares two software version strings in the format
 *               n.n.n.  Only 3 levels of revisions can be processed, however
 *               processing will stop at the first revision level that is not
-*               equal to the other and the function will return the result of 
+*               equal to the other and the function will return the result of
 *               that comparison.
 *
 * Parameters:   [in] v1 - First version string to compare
 *               [in] v2 - Second version string to compare
 *
 * Returns:      0:  The versions are identical
-*               1:  v1 is greater than v2 
+*               1:  v1 is greater than v2
 *               2:  v2 is less than v1
 *              -1: error interpeting v1 or v2
 *
-* Notes:        
+* Notes:
 *
 *****************************************************************************/
 INT32 CompareVersions(const char* v1,const char* v2)
@@ -662,10 +662,10 @@ INT32 CompareVersions(const char* v1,const char* v2)
   INT32 v2_val;
   INT32 i;
   INT32 retval = 0;
-  
+
   v1_pos = v1;
   v2_pos = v2;
-  
+
   //Convert v1 and v2 to their 3-integer representations
   for(i = 0; (i < 3) && (retval == 0); i++)
   {
@@ -679,7 +679,7 @@ INT32 CompareVersions(const char* v1,const char* v2)
     //Advance to next number (pass '.') if not at the end of the string
     v1_pos = *end == '\0' ? end : end  + 1;
 
-    
+
     v2_val = strtol(v2_pos, &end, 10);
     //confirm strtol ate some characters
     if(end == v2_pos)
@@ -689,17 +689,17 @@ INT32 CompareVersions(const char* v1,const char* v2)
     }
     //Advance to next number (pass '.') if not at the end of the string
     v2_pos = *end == '\0' ? end : end + 1;
-    
+
     if(v1_val > v2_val)
     {
       retval = 1;
     }
     else if(v1_val < v2_val)
     {
-      retval = 2;      
-    } 
+      retval = 2;
+    }
   }
-  
+
   return retval;
 }
 
@@ -831,7 +831,7 @@ void DumpMemory(UINT8* addr, UINT32 size, CHAR* string)
                                 addr[ i+15]);
     GSE_PutLineBlocked(Str,TRUE);
   }
-  
+
 }
 /*vcast_dont_instrument_end*/
 #endif
@@ -845,10 +845,10 @@ void DumpMemory(UINT8* addr, UINT32 size, CHAR* string)
 *
 *
 * Parameters:   [in/out] dest: string
-*               [in]     sizeDest: s/b sizeof(dest) 
+*               [in]     sizeDest: s/b sizeof(dest)
 *               [in]     source: string to append to dest
 *               [in]     count: the number of bytes to be moved or _TRUNCATE
-*   
+*
 *
 * Returns:      BOOLEAN  True if the copy was performed, otherwise false
 *
@@ -905,8 +905,8 @@ BOOLEAN strncpy_safe(CHAR* dest, INT32 sizeDest, const CHAR* source, INT32 count
     }
     else
     {
-      status = FALSE;    
-    }    
+      status = FALSE;
+    }
   }
 
   // Perform the copy
@@ -974,7 +974,7 @@ BOOLEAN SuperStrcat(INT8* dest, const INT8* source, UINT32 len)
 /******************************************************************************
  * Function:     GetBit
  *
- * Description:  A function which gets a bit state from an UINT32 array 
+ * Description:  A function which gets a bit state from an UINT32 array
  *               implementing a bit mask.
  *
  * Parameters:   [in] bitOffset: The bit offset into the array.
@@ -992,9 +992,9 @@ BOOLEAN SuperStrcat(INT8* dest, const INT8* source, UINT32 len)
 BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 result;
-  
+
   ASSERT (bitOffset >= 0 && bitOffset < (arraySizeBytes * 8));
-  result = array[bitOffset / 32] & ( 1U << (bitOffset % 32) );    
+  result = array[bitOffset / 32] & ( 1U << (bitOffset % 32) );
 
   return (result != 0);
 }
@@ -1011,18 +1011,18 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
  *               [in] arraySizeBytes: The length of array in bytes.
  *
  * Returns:      None
- *               
+ *
  * Notes:        0 <= bitOffset < (arraySizeBytes x 8)
  *               Otherwise call is ignored.
  *
  ******************************************************************************/
 void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
-  UINT32 i;  
-  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;  
+  UINT32 i;
+  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
 
   ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
- 
+
   array[i] = array[i = bitOffset / 32] | (1U << (bitOffset % 32));
 
 }
@@ -1038,19 +1038,20 @@ void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
  *               [in] arraySizeBytes: The length of array in bytes.
  *
  * Returns:      None
- *               
+ *
  * Notes:        0 <= bitOffset < (arraySizeBytes x 8)
  *               Otherwise system will ASSERT.
  *
  ******************************************************************************/
 void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
-  UINT32 i;  
+  UINT32 wordOffset;
   INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
 
   ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
+  wordOffset = bitOffset / 32;
 
-  array[i] =( array[i = bitOffset / 32] & ~(1U << (bitOffset % 32) ) );
+  array[wordOffset] = ( array[wordOffset] & ~(1U << (bitOffset % 32) ) );
 }
 
 /******************************************************************************
@@ -1063,7 +1064,7 @@ void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
  *               [in] maskSizeBytes:  the size of the mask in bytes
  *               [in] array: An array of 32bit words.
  *               [in] arraySizeBytes: The length of array in bytes.
- * 
+ *
  * Returns:      None
  *
  * Notes:
@@ -1089,7 +1090,7 @@ void ResetBits(UINT32 mask[], INT32 maskSizeBytes, UINT32 array[], INT32 arraySi
  *
  * Description:  A function which compares an array representing a bit mask against
  *               an equal length array representing a field of bit flags.
- *               
+ *
  * Parameters:   [in] mask: to be tested against array.
  *               [in] maskSizeBytes:  the size of the mask in bytes
  *               [in] data: An array of 32bit words.
@@ -1156,102 +1157,102 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.c $
- * 
+ *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 12-12-02   Time: 1:03p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 51  *****************
  * User: John Omalley Date: 12-10-23   Time: 2:49p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 50  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 49  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- * 
+ *
  * *****************  Version 48  *****************
  * User: John Omalley Date: 12-07-13   Time: 3:50p
  * Updated in $/software/control processor/code/system
  * SCR 1107 Added BIT processing for 128 bit array
- * 
+ *
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 3/21/12    Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #1107 FAST 2 relocated evaluator to drivers
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 3/14/12    Time: 4:52p
  * Updated in $/software/control processor/code/system
  * FAST 2 Support trigger/event
- * 
+ *
  * *****************  Version 45  *****************
  * User: Contractor2  Date: 4/11/11    Time: 2:25p
  * Updated in $/software/control processor/code/system
- * SCR 1013: Code Coverage: Removed unused function BCDToBinaryConvert 
- * 
+ * SCR 1013: Code Coverage: Removed unused function BCDToBinaryConvert
+ *
  * *****************  Version 44  *****************
  * User: Contractor2  Date: 10/01/10   Time: 12:59p
  * Updated in $/software/control processor/code/system
  * SCR #915 Loop termination error in SuperStrcat
- * 
+ *
  * *****************  Version 43  *****************
  * User: Peter Lee    Date: 8/04/10    Time: 1:49p
  * Updated in $/software/control processor/code/system
- * SCR #765 Remove unused func UpdateCheckSum(). 
- * 
+ * SCR #765 Remove unused func UpdateCheckSum().
+ *
  * *****************  Version 42  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 41  *****************
  * User: Contractor3  Date: 6/25/10    Time: 9:46a
  * Updated in $/software/control processor/code/system
  * SCR #662 - Changes based on code review
- * 
+ *
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 6/16/10    Time: 6:11p
  * Updated in $/software/control processor/code/system
  * SCR #636 add the ability to read/write EEPROM/RTC via the sys.g
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:55p
  * Updated in $/software/control processor/code/system
  * SCR #615 Showcfg/Long msg enhancement
- * 
+ *
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 5/24/10    Time: 6:57p
  * Updated in $/software/control processor/code/system
  * SCR #585 Cfg File CRC changes from load to load
- * 
+ *
  * *****************  Version 37  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:52p
  * Updated in $/software/control processor/code/system
  * SCR #572 - VectorCast changes
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 4/12/10    Time: 7:22p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:12p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 7:02p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy fixing comment
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:19p
  * Updated in $/software/control processor/code/system

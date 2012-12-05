@@ -127,7 +127,6 @@ void TrendInitialize( void )
     pCfg  = &m_TrendCfg[i];
     pData = &m_TrendData[i];
 
-
     pData->trendIndex      = (ENGRUN_UNUSED == pCfg->engineRunId) ?
                                        TREND_UNUSED : (TREND_INDEX)i;
     pData->prevEngState    = ER_STATE_STOPPED;
@@ -150,7 +149,8 @@ void TrendInitialize( void )
       }
     }
 
-
+    pData->trendCnt      = 0;
+    pData->autoTrendCnt  = 0;
     // Use the reset functions to init the others fields
     TrendReset(pCfg, pData, FALSE);
 
@@ -656,8 +656,6 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   pData->bResetDetected       = FALSE;
   pData->bEnabled             = FALSE;
   pData->bAutoTrendStabFailed = FALSE;
-  pData->trendCnt             = 0;
-  pData->autoTrendCnt         = 0;
 
   pData->nTimeStableMs        = 0;
   pData->lastStabCheckMs      = 0;
@@ -766,8 +764,8 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         // Check absolute min/max values
         if ( (fVal >= pStabCrit->criteria.lower) && (fVal <= pStabCrit->criteria.upper) )
         {
-          // save our current value 
-          pData->curStability.snsrValue[i] = fVal; 
+          // save our current value
+          pData->curStability.snsrValue[i] = fVal;
 
           // Check the stability of the sensor value within a given variance
           // ensure positive difference
@@ -1071,7 +1069,7 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:30p
  * Updated in $/software/control processor/code/application
