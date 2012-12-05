@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 11 $  $Date: 12-11-15 7:03p $
+$Revision: 12 $  $Date: 12-12-05 3:37p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -84,8 +84,8 @@ static USER_HANDLER_RESULT Action_ClearLatch ( USER_DATA_TYPE DataType,
 static USER_MSG_TBL actionOutCmd [] =
 {
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                  IndexRange                  DataLimit   EnumTbl*/
-   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nUsedMask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
-   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nLSS_Mask,                0,(MAX_ACTION_DEFINES-1),   NO_LIMIT,   NULL },
+   { "USED_MASK",         NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nUsedMask,                0,(MAX_ACTION_DEFINES-1),   0,15,   NULL },
+   { "LSS_MASK",          NO_NEXT_TABLE,     ActionOut_UserCfg, USER_TYPE_UINT8,   USER_RW, &configOutputTemp.nLSS_Mask,                0,(MAX_ACTION_DEFINES-1),   0,15,   NULL },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
@@ -94,10 +94,10 @@ static USER_MSG_TBL actionCmd [] =
    /* Str                 Next Tbl Ptr       Handler Func.      Data Type          Access   Parameter                                   IndexRange              DataLimit   EnumTbl*/
    { "ACK_TRIGGER",       NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_ENUM,    USER_RW, &configActionTemp.aCKTrigger,               -1,-1,                  NO_LIMIT,   triggerIndexType },
    { "PERSIST_ENABLE",    NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_BOOLEAN, USER_RW, &configActionTemp.persist.bEnabled,         -1,-1,                  NO_LIMIT,   NULL },
-   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  NO_LIMIT,   NULL },
-   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  NO_LIMIT,   NULL },
+   { "PERSIST_USED_MASK", NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nUsedMask, -1,-1,                  0,15,       NULL },
+   { "PERSIST_LSS_MASK",  NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.persist.output.nLSS_Mask, -1,-1,                  0,15,       NULL },
    { "OUTPUT",            actionOutCmd,      NULL,              NO_HANDLER_DATA },
-   { "ACTIVE_STATE",      NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.activeState,              -1,-1,                  NO_LIMIT,   NULL },
+   { "ACTIVE_STATE",      NO_NEXT_TABLE,     Action_UserCfg,    USER_TYPE_UINT8,   USER_RW, &configActionTemp.activeState,              -1,-1,                  0,15,       NULL },
    { NULL,                NULL,              NULL,              NO_HANDLER_DATA }
 };
 
@@ -428,6 +428,11 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 12-12-05   Time: 3:37p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 12-11-15   Time: 7:03p
