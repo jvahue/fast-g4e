@@ -1164,11 +1164,6 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
  * Updated in $/software/control processor/code/system
  * SCR #1107 Code Review 
  *
- * *****************  Version 83  *****************
- * User: Contractor V&v Date: 12/05/12   Time: 4:17p
- * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
- *
  * *****************  Version 82  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
  * Updated in $/software/control processor/code/system
