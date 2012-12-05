@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 43 $  $Date: 12-12-02 12:22p $
+      $Revision: 44 $  $Date: 12/05/12 4:17p $
 
 ******************************************************************************/
 
@@ -557,6 +557,11 @@ EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEnt
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 44  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Bitbucket #80
  * 
  * *****************  Version 43  *****************
  * User: John Omalley Date: 12-12-02   Time: 12:22p

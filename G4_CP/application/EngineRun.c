@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 42 $  $Date: 12/03/12 5:32p $
+      $Revision: 43 $  $Date: 12/05/12 4:16p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -67,19 +67,19 @@ static void    EngRunForceEnd   ( void );
 static void    EngRunReset      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
 
-static void EngRunUpdate   (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
+static void EngRunUpdate         (ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 
 static void EngRunStartLog       ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData );
 static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
-								   ENGRUN_DATA* pErData,
-								   BOOLEAN bUpdateDuration);
+								                   ENGRUN_DATA* pErData,
+								                   BOOLEAN bUpdateDuration);
 
-static void EngRunWriteStartLog ( ER_REASON reason,
-								  const ENGRUN_CFG* pErCfg,
-								  const ENGRUN_DATA* pErData );
+static void EngRunWriteStartLog  ( ER_REASON reason,
+								                   const ENGRUN_CFG* pErCfg,
+								                   const ENGRUN_DATA* pErData );
 
-static void EngRunUpdateRunData ( ENGRUN_DATA* pErData );
-static void EngRunWriteRunLog   ( ER_REASON reason, ENGRUN_DATA* pErData );
+static void EngRunUpdateRunData  ( ENGRUN_DATA* pErData );
+static void EngRunWriteRunLog    ( ER_REASON reason, ENGRUN_DATA* pErData );
 
 
 /*****************************************************************************/
@@ -1019,11 +1019,16 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 43  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:16p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review 
+ *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:32p
  * Updated in $/software/control processor/code/application
  * SCR #1167 Add sample count to ER Log
- * 
+ *
  * *****************  Version 41  *****************
  * User: Jim Mood     Date: 11/28/12   Time: 6:36p
  * Updated in $/software/control processor/code/application

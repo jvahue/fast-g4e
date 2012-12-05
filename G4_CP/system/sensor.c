@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 84 $  $Date: 12-12-02 12:22p $
+      $Revision: 85 $  $Date: 12/05/12 4:17p $
 
 ******************************************************************************/
 
@@ -1993,6 +1993,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 85  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Bitbucket #80
  *
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-12-02   Time: 12:22p

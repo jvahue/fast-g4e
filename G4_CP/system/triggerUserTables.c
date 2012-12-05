@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 30 $  $Date: 11/26/12 12:44p $
+$Revision: 32 $  $Date: 12/05/12 5:03p $
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -43,35 +43,35 @@ static BOOLEAN        m_triggerValidTemp;
 /*****************************************************************************/
 //Prototype for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
-USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr);
+static USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                          	const void *SetPtr,
+                                            void **GetPtr);
 
-USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
-                                      USER_MSG_PARAM Param,
-                                      UINT32 Index,
-                                      const void *SetPtr,
-                                      void **GetPtr);
+static USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr);
 
-USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
-                                       USER_MSG_PARAM Param,
-                                       UINT32 Index,
-                                       const void *SetPtr,
-                                       void **GetPtr);
-
-USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
-                                             USER_MSG_PARAM Param,
-                                             UINT32 Index,
-                                             const void *SetPtr,
-                                             void **GetPtr);
-
-USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
                                               UINT32 Index,
                                               const void *SetPtr,
                                               void **GetPtr);
+
+static USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
+                                                 USER_MSG_PARAM Param,
+                                                 UINT32 Index,
+                                                 const void *SetPtr,
+                                                 void **GetPtr);
+
+static USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr);
 
 
 
@@ -79,35 +79,8 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-USER_ENUM_TBL triggerIndexType[]   =
-{ { "0"  , TRIGGER_0   }, { "1"  , TRIGGER_1   }, { "2"  , TRIGGER_2   },
-  { "3"  , TRIGGER_3   }, { "4"  , TRIGGER_4   }, { "5"  , TRIGGER_5   },
-  { "6"  , TRIGGER_6   }, { "7"  , TRIGGER_7   }, { "8"  , TRIGGER_8   },
-  { "9"  , TRIGGER_9   }, { "10" , TRIGGER_10  }, { "11" , TRIGGER_11  },
-  { "12" , TRIGGER_12  }, { "13" , TRIGGER_13  }, { "14" , TRIGGER_14  },
-  { "15" , TRIGGER_15  }, { "16" , TRIGGER_16  }, { "17" , TRIGGER_17  },
-  { "18" , TRIGGER_18  }, { "19" , TRIGGER_19  }, { "20" , TRIGGER_20  },
-  { "21" , TRIGGER_21  }, { "22" , TRIGGER_22  }, { "23" , TRIGGER_23  },
-  { "24" , TRIGGER_24  }, { "25" , TRIGGER_25  }, { "26" , TRIGGER_26  },
-  { "27" , TRIGGER_27  }, { "28" , TRIGGER_28  }, { "29" , TRIGGER_29  },
-  { "30" , TRIGGER_30  }, { "31" , TRIGGER_31  }, { "32" , TRIGGER_32  },
-  { "33" , TRIGGER_33  }, { "34" , TRIGGER_34  }, { "35" , TRIGGER_35  },
-  { "36" , TRIGGER_36  }, { "37" , TRIGGER_37  }, { "38" , TRIGGER_38  },
-  { "39" , TRIGGER_39  }, { "40" , TRIGGER_40  }, { "41" , TRIGGER_41  },
-  { "42" , TRIGGER_42  }, { "43" , TRIGGER_43  }, { "44" , TRIGGER_44  },
-  { "45" , TRIGGER_45  }, { "46" , TRIGGER_46  }, { "47" , TRIGGER_47  },
-  { "48" , TRIGGER_48  }, { "49" , TRIGGER_49  }, { "50" , TRIGGER_50  },
-  { "51" , TRIGGER_51  }, { "52" , TRIGGER_52  }, { "53" , TRIGGER_53  },
-  { "54" , TRIGGER_54  }, { "55" , TRIGGER_55  }, { "56" , TRIGGER_56  },
-  { "57" , TRIGGER_57  }, { "58" , TRIGGER_58  }, { "59" , TRIGGER_59  },
-  { "60" , TRIGGER_60  }, { "61" , TRIGGER_61  }, { "62" , TRIGGER_62  },
-  { "63" , TRIGGER_63  },
-
-  { "UNUSED", TRIGGER_UNUSED }, { NULL, 0 }
-};
-
-
-USER_ENUM_TBL TrigRateType[]    =  { { "1HZ"    , TR_1HZ          },
+static
+USER_ENUM_TBL trigRateType[]    =  { { "1HZ"    , TR_1HZ          },
                                      { "2HZ"    , TR_2HZ          },
                                      { "4HZ"    , TR_4HZ          },
                                      { "5HZ"    , TR_5HZ          },
@@ -117,7 +90,8 @@ USER_ENUM_TBL TrigRateType[]    =  { { "1HZ"    , TR_1HZ          },
                                      { NULL     , 0               }
                                    };
 
-USER_ENUM_TBL TrigStateEnum[]  = { {"NOT_USED",     TRIG_NONE },
+static
+USER_ENUM_TBL trigStateEnum[]  = { {"NOT_USED",     TRIG_NONE },
                                    {"NOT_ACTIVE",   TRIG_START },
                                    {"ACTIVE",       TRIG_ACTIVE},
                                    {NULL,           0}
@@ -127,7 +101,7 @@ USER_ENUM_TBL TrigStateEnum[]  = { {"NOT_USED",     TRIG_NONE },
 
 // Triggers - TRIGGER User and Configuration Table
 static
-USER_MSG_TBL TriggerSensorCfgCmd [] =
+USER_MSG_TBL triggerSensorCfgCmd [] =
 {
      /*Str             Next Tbl Ptr   Handler Func.    Data Type        Access     Parameter                                        IndexRange           DataLimit EnumTbl*/
     { "INDEXA"       , NO_NEXT_TABLE, Trigger_UserCfg, USER_TYPE_ENUM,  USER_RW,   &m_configTriggerTemp.trigSensor[0].sensorIndex,    0,(MAX_TRIGGERS-1),  NO_LIMIT, SensorIndexType },
@@ -154,13 +128,13 @@ USER_MSG_TBL TriggerSensorCfgCmd [] =
 };
 
 // Trigger user and configuration Table
-static USER_MSG_TBL TriggerCmd [] =
+static USER_MSG_TBL triggerCmd [] =
 {
   /* Str              Next Tbl Ptr               Handler Func.             Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
-  { "NAME",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.triggerName,     0,(MAX_TRIGGERS-1),  0,MAX_TRIGGER_NAME,  NULL },
-  { "SENSOR",         &TriggerSensorCfgCmd[0],  NULL,                      NO_HANDLER_DATA },
+  { "NAME",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_STR,     USER_RW,   m_configTriggerTemp.triggerName,      0,(MAX_TRIGGERS-1),  0,MAX_TRIGGER_NAME,  NULL },
+  { "SENSOR",         &triggerSensorCfgCmd[0],  NULL,                      NO_HANDLER_DATA },
   { "DURATION_MS",    NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &m_configTriggerTemp.nMinDuration_ms, 0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
-  { "RATE",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_ENUM,    USER_RW,   &m_configTriggerTemp.rate,            0,(MAX_TRIGGERS-1),  NO_LIMIT,            TrigRateType },
+  { "RATE",           NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_ENUM,    USER_RW,   &m_configTriggerTemp.rate,            0,(MAX_TRIGGERS-1),  NO_LIMIT,            trigRateType },
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trigger_UserCfg,           USER_TYPE_UINT32,  USER_RW,   &m_configTriggerTemp.nOffset_ms,      0,(MAX_TRIGGERS-1),  0,1000,              NULL },
   { "SC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.startExpr,       0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
   { "EC",             NO_NEXT_TABLE,            Trigger_CfgExprStrCmd,     USER_TYPE_STR,     USER_RW,   &m_configTriggerTemp.endExpr,         0,(MAX_TRIGGERS-1),  NO_LIMIT,            NULL },
@@ -168,29 +142,33 @@ static USER_MSG_TBL TriggerCmd [] =
 };
 
 
-static USER_MSG_TBL TriggerStatus [] =
+static USER_MSG_TBL triggerStatus [] =
 {
   /* Str            Next Tbl Ptr       Handler Func.    Data Type        Access     Parameter                           IndexRange           DataLimit   EnumTbl*/
-  { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &m_stateTriggerTemp.state,          0, MAX_TRIGGERS - 1, NO_LIMIT,   TrigStateEnum },
+  { "STATE"       , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_ENUM,   USER_RO    , &m_stateTriggerTemp.state,          0, MAX_TRIGGERS - 1, NO_LIMIT,   trigStateEnum },
   { "VALID"       , NO_NEXT_TABLE,     Trigger_Valid,  USER_TYPE_BOOLEAN,USER_RO    , &m_triggerValidTemp,                0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "STARTTIME_MS", NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nStartTime_ms,  0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { "DURATION_MS" , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_UINT32, USER_RO    , &m_stateTriggerTemp.nDuration_ms,   0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
   { NULL          , NO_NEXT_TABLE,     Trigger_State,  USER_TYPE_NONE,   USER_RW    , NULL,                             0, MAX_TRIGGERS - 1, NO_LIMIT,   NULL },
 };
 
-static USER_MSG_TBL TriggerRoot [] =
+static USER_MSG_TBL triggerRoot [] =
 { /* Str            Next Tbl Ptr       Handler Func.        Data Type           Access            Parameter        IndexRange   DataLimit          EnumTbl*/
-   { "CFG",         TriggerCmd   ,     NULL,                NO_HANDLER_DATA},
-   { "STATUS",      TriggerStatus,     NULL,                NO_HANDLER_DATA},
-   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          &m_triggerFlags, -1, -1,      0,MAX_TRIGGERS-1,  NULL },
+   { "CFG",         triggerCmd   ,     NULL,                NO_HANDLER_DATA},
+   { "STATUS",      triggerStatus,     NULL,                NO_HANDLER_DATA},
+   { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          m_triggerFlags,  -1, -1,      0,MAX_TRIGGERS-1,  NULL },
    { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,            -1, -1,      NO_LIMIT,          NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
 static
-USER_MSG_TBL    RootTriggerMsg = {"TRIGGER",TriggerRoot,NULL,NO_HANDLER_DATA};
+USER_MSG_TBL    rootTriggerMsg = {"TRIGGER",triggerRoot,NULL,NO_HANDLER_DATA};
 
 #pragma ghs endnowarning
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -219,11 +197,11 @@ USER_MSG_TBL    RootTriggerMsg = {"TRIGGER",TriggerRoot,NULL,NO_HANDLER_DATA};
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
-                                    USER_MSG_PARAM Param,
-                                    UINT32 Index,
-                                    const void *SetPtr,
-                                    void **GetPtr)
+static USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr)
 {
    USER_HANDLER_RESULT result;
 
@@ -275,11 +253,11 @@ USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
 * Notes:
 *****************************************************************************/
 
-USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
-                                  USER_MSG_PARAM Param,
-                                  UINT32 Index,
-                                  const void *SetPtr,
-                                  void **GetPtr)
+static USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr)
 {
    USER_HANDLER_RESULT result;
 
@@ -315,33 +293,33 @@ USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
-                                       USER_MSG_PARAM Param,
-                                       UINT32 Index,
-                                       const void *SetPtr,
-                                       void **GetPtr)
+static USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
+                                              USER_MSG_PARAM Param,
+                                              UINT32 Index,
+                                              const void *SetPtr,
+                                              void **GetPtr)
 {
-   CHAR  LabelStem[] = "\r\n\r\nTRIGGER.CFG";
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
+   CHAR  labelStem[] = "\r\n\r\nTRIGGER.CFG";
+   CHAR  label[USER_MAX_MSG_STR_LEN * 3];
    INT16 i;
 
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    USER_MSG_TBL*  pCfgTable;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
 
-   pCfgTable = &TriggerCmd[0];  // Get pointer to config entry
+   pCfgTable = &triggerCmd[0];  // Get pointer to config entry
 
    for (i = 0; i < MAX_TRIGGERS && result == USER_RESULT_OK; ++i)
    {
       // Display element info above each set of data.
-      sprintf(Label, "%s[%d]", LabelStem, i);
+      snprintf(label, sizeof(label), "%s[%d]", labelStem, i);
 
       result = USER_RESULT_ERROR;
-      if ( User_OutputMsgString( Label, FALSE ) )
+      if ( User_OutputMsgString( label, FALSE ) )
       {
-         result = User_DisplayConfigTree(BranchName, pCfgTable, i, 0, NULL);
+         result = User_DisplayConfigTree(branchName, pCfgTable, i, 0, NULL);
       }
    }
    return result;
@@ -375,14 +353,14 @@ USER_HANDLER_RESULT Trigger_ShowConfig(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
-                                          USER_MSG_PARAM Param,
-                                          UINT32 Index,
-                                          const void *SetPtr,
-                                          void **GetPtr)
+static USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
+                                                 USER_MSG_PARAM Param,
+                                                 UINT32 Index,
+                                                 const void *SetPtr,
+                                                 void **GetPtr)
 {
   USER_HANDLER_RESULT result = USER_RESULT_OK;
-  INT32 StrToBinResult;
+  INT32 strToBinResult;
 
   //User Mgr uses this obj outside of this function's scope
   static CHAR str[EVAL_MAX_EXPR_STR_LEN];
@@ -410,10 +388,10 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);
 
-    StrToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_PARSE, Index,
+    strToBinResult = EvalExprStrToBin(EVAL_CALLER_TYPE_PARSE, (INT32)Index,
                                       str, (EVAL_EXPR*) Param.Ptr, MAX_TRIG_EXPR_OPRNDS);
 
-    if( StrToBinResult >= 0 )
+    if( strToBinResult >= 0 )
     {
       // Move the successfully updated binary expression to the m_configTriggerTemp storage
       // memcpy(&Param.Ptr, &tempExpr, sizeof(EVAL_EXPR) );
@@ -430,7 +408,7 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
     else
     {
       GSE_DebugStr( NORMAL,FALSE,"EvalExprStrToBin Failed: %s"NEW_LINE,
-                    EvalGetMsgFromErrCode(StrToBinResult));
+                    EvalGetMsgFromErrCode(strToBinResult));
       result = USER_RESULT_ERROR;
     }
   }
@@ -463,11 +441,11 @@ USER_HANDLER_RESULT Trigger_CfgExprStrCmd(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
-                                  USER_MSG_PARAM Param,
-                                  UINT32 Index,
-                                  const void *SetPtr,
-                                  void **GetPtr)
+static USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr)
 
 {
    // Use the supplied Accessor to return the validity of the indicated trigger.
@@ -479,6 +457,16 @@ USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 5:03p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review  Removed tabs
+ *
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review
  *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:44p
