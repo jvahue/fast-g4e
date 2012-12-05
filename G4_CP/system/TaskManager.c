@@ -22,7 +22,7 @@
    TmScheduleTask             Force a specific RMT task for dispatch ASAP
   
  VERSION
-      $Revision: 65 $  $Date: 12-11-13 5:46p $
+      $Revision: 66 $  $Date: 12-12-04 5:10p $
 
 ******************************************************************************/
 
@@ -77,6 +77,7 @@ static BOOLEAN systemModeTransitions[SYS_MAX_MODE_ID][SYS_MAX_MODE_ID];
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static void       TmDispatchDtTasks       (void);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -488,136 +489,6 @@ void TmTick (UINT32 LastIntLvl)
 }
 
 /*****************************************************************************
- * Function:    TmDispatchDtTasks
- *
- * Description: Schedule and dispatch all enabled DT tasks based on their
- *              priority for each MIF.
- *
- * Parameters:  void
- *
- * Returns:     void
- *
- * Notes:       None.
- *
- ****************************************************************************/
-void TmDispatchDtTasks (void)
-{
-    UINT8   taskIndex;
-    UINT32  taskTime;
-    UINT32  executionTime;
-    UINT32  mifStart;
-    TCB**   pTaskSelect;
-    TCB*    pTask;
-
-    mifStart = TTMR_GetHSTickCount();
-
-    //------------------------------------------------------------------------
-    // Increment the current MIF counter with wraparound from MAX_MIF to 0
-    //------------------------------------------------------------------------
-    if (++Tm.currentMIF > MAX_MIF)
-    {
-        Tm.currentMIF = 0;
-    }
-
-    // Pulse LSS0 on the selected MIF
-    if (Tm.currentMIF == mifPulse)
-    {
-      PULSE( 0, DIO_SetHigh);
-    }
-    else if ( mifPulse != -1)
-    {
-      PULSE( 0, DIO_SetLow);
-    }
-
-    //------------------------------------------------------------------------
-    // DT Task Dispatcher
-    //------------------------------------------------------------------------
-    Tm.dutyCycle.cumExecTime = 0;
-
-    // Dispatch each enabled DT Task for this MIF
-    pTaskSelect = Tm.pDtTasks[Tm.currentMIF];
-    for (taskIndex = 0; *pTaskSelect != NULL && taskIndex < MAX_DT_TASKS; taskIndex++)
-    {
-        pTask = *pTaskSelect;
-
-        // if the DT task runs in the MIF and Mode
-        if (pTask->Enabled && ((UINT32)pTask->modes & MODE_MASK((UINT32)Tm.systemMode)))
-        {
-            // Call the task's function while measuring its execution time
-            ++pTask->executionCount;
-            Tm.nDtTaskInProgressID = pTask->TaskID;
-            PULSE(pTask->timingPulse, DIO_SetHigh);
-            taskTime = TTMR_GetHSTickCount();               //Record task start time
-            pTask->Function(pTask->pParamBlock);            // Call the function
-            taskTime = (TTMR_GetHSTickCount() - taskTime)/
-                            TTMR_HS_TICKS_PER_uS;           //Record task run time
-            PULSE(pTask->timingPulse, DIO_SetLow);
-            executionTime = taskTime;
-
-            Tm.dutyCycle.cumExecTime += executionTime;
-
-            // Calculate and save execution time stats for this task
-            pTask->lastExecutionTime = executionTime;
-
-            // Add to total execution time, reset total values when the
-            // time rolls over.
-            if(pTask->totExecutionTime+executionTime < pTask->totExecutionTime)
-            {
-              pTask->totExecutionTime = executionTime;
-              pTask->totExecutionTimeCnt = 1;
-            }
-            else
-            {
-              pTask->totExecutionTime += executionTime;
-              pTask->totExecutionTimeCnt++;
-            }
-
-            //Do min/max execution time calculations
-            if (executionTime > pTask->maxExecutionTime)
-            {
-                pTask->maxExecutionTime  = executionTime;
-                pTask->maxExecutionMif   = pTask->executionCount;
-            }
-            if (executionTime < pTask->minExecutionTime)
-            {
-                pTask->minExecutionTime = executionTime;
-            }
-        }    // End if (task enabled)
-
-        // go to the next task in the list for this MIF
-        pTaskSelect++;
-
-    }   // End for (each task)
-
-    Tm.mifDc[Tm.currentMIF].cur = (TTMR_GetHSTickCount() - mifStart);
-
-    // Handle condition when cumulative execution time rolls over.
-    if (Tm.mifDc[Tm.currentMIF].cumExecTime + Tm.mifDc[Tm.currentMIF].cur <
-        Tm.mifDc[Tm.currentMIF].cumExecTime)
-    {
-      Tm.mifDc[Tm.currentMIF].cumExecTime = Tm.mifDc[Tm.currentMIF].cur;
-      Tm.mifDc[Tm.currentMIF].exeCount = 1;
-    }
-    else
-    {
-      Tm.mifDc[Tm.currentMIF].cumExecTime += Tm.mifDc[Tm.currentMIF].cur;
-      ++Tm.mifDc[Tm.currentMIF].exeCount;
-     // GSE_DebugStr(NORMAL,TRUE,"MIF: %d Cur: %d Cum Time: %d", Tm.CurrentMIF, 
-     // Tm.mifDc[Tm.CurrentMIF].Cur, Tm.mifDc[Tm.CurrentMIF].CumExecTime);
-    }
-
-
-    if (Tm.mifDc[Tm.currentMIF].cur > Tm.mifDc[Tm.currentMIF].max)
-    {
-      Tm.mifDc[Tm.currentMIF].max = Tm.mifDc[Tm.currentMIF].cur;
-    }
-    else if (Tm.mifDc[Tm.currentMIF].cur < Tm.mifDc[Tm.currentMIF].min)
-    {
-      Tm.mifDc[Tm.currentMIF].min = Tm.mifDc[Tm.currentMIF].cur;
-    }
-}
-
-/*****************************************************************************
  * Function:    TmScheduleRmtTasks
  *
  * Description: Schedule all enabled RMT tasks for dispatching based on the
@@ -1023,9 +894,148 @@ TASK_INDEX TmGetTaskId(char* name)
 /* Local Functions                                                           */
 /*****************************************************************************/
 
+/*****************************************************************************
+ * Function:    TmDispatchDtTasks
+ *
+ * Description: Schedule and dispatch all enabled DT tasks based on their
+ *              priority for each MIF.
+ *
+ * Parameters:  void
+ *
+ * Returns:     void
+ *
+ * Notes:       None.
+ *
+ ****************************************************************************/
+static
+void TmDispatchDtTasks (void)
+{
+    UINT8   taskIndex;
+    UINT32  taskTime;
+    UINT32  executionTime;
+    UINT32  mifStart;
+    TCB**   pTaskSelect;
+    TCB*    pTask;
+
+    mifStart = TTMR_GetHSTickCount();
+
+    //------------------------------------------------------------------------
+    // Increment the current MIF counter with wraparound from MAX_MIF to 0
+    //------------------------------------------------------------------------
+    if (++Tm.currentMIF > MAX_MIF)
+    {
+        Tm.currentMIF = 0;
+    }
+
+    // Pulse LSS0 on the selected MIF
+    if (Tm.currentMIF == mifPulse)
+    {
+      PULSE( 0, DIO_SetHigh);
+    }
+    else if ( mifPulse != -1)
+    {
+      PULSE( 0, DIO_SetLow);
+    }
+
+    //------------------------------------------------------------------------
+    // DT Task Dispatcher
+    //------------------------------------------------------------------------
+    Tm.dutyCycle.cumExecTime = 0;
+
+    // Dispatch each enabled DT Task for this MIF
+    pTaskSelect = Tm.pDtTasks[Tm.currentMIF];
+    for (taskIndex = 0; *pTaskSelect != NULL && taskIndex < MAX_DT_TASKS; taskIndex++)
+    {
+        pTask = *pTaskSelect;
+
+        // if the DT task runs in the MIF and Mode
+        if (pTask->Enabled && ((UINT32)pTask->modes & MODE_MASK((UINT32)Tm.systemMode)))
+        {
+            // Call the task's function while measuring its execution time
+            ++pTask->executionCount;
+            Tm.nDtTaskInProgressID = pTask->TaskID;
+            PULSE(pTask->timingPulse, DIO_SetHigh);
+            taskTime = TTMR_GetHSTickCount();               //Record task start time
+            pTask->Function(pTask->pParamBlock);            // Call the function
+            taskTime = (TTMR_GetHSTickCount() - taskTime)/
+                            TTMR_HS_TICKS_PER_uS;           //Record task run time
+            PULSE(pTask->timingPulse, DIO_SetLow);
+            executionTime = taskTime;
+
+            Tm.dutyCycle.cumExecTime += executionTime;
+
+            // Calculate and save execution time stats for this task
+            pTask->lastExecutionTime = executionTime;
+
+            // Add to total execution time, reset total values when the
+            // time rolls over.
+            if(pTask->totExecutionTime+executionTime < pTask->totExecutionTime)
+            {
+              pTask->totExecutionTime = executionTime;
+              pTask->totExecutionTimeCnt = 1;
+            }
+            else
+            {
+              pTask->totExecutionTime += executionTime;
+              pTask->totExecutionTimeCnt++;
+            }
+
+            //Do min/max execution time calculations
+            if (executionTime > pTask->maxExecutionTime)
+            {
+                pTask->maxExecutionTime  = executionTime;
+                pTask->maxExecutionMif   = pTask->executionCount;
+            }
+            if (executionTime < pTask->minExecutionTime)
+            {
+                pTask->minExecutionTime = executionTime;
+            }
+        }    // End if (task enabled)
+
+        // go to the next task in the list for this MIF
+        pTaskSelect++;
+
+    }   // End for (each task)
+
+    Tm.mifDc[Tm.currentMIF].cur = (TTMR_GetHSTickCount() - mifStart);
+
+    // Handle condition when cumulative execution time rolls over.
+    if (Tm.mifDc[Tm.currentMIF].cumExecTime + Tm.mifDc[Tm.currentMIF].cur <
+        Tm.mifDc[Tm.currentMIF].cumExecTime)
+    {
+      Tm.mifDc[Tm.currentMIF].cumExecTime = Tm.mifDc[Tm.currentMIF].cur;
+      Tm.mifDc[Tm.currentMIF].exeCount = 1;
+    }
+    else
+    {
+      Tm.mifDc[Tm.currentMIF].cumExecTime += Tm.mifDc[Tm.currentMIF].cur;
+      ++Tm.mifDc[Tm.currentMIF].exeCount;
+     // GSE_DebugStr(NORMAL,TRUE,"MIF: %d Cur: %d Cum Time: %d", Tm.CurrentMIF, 
+     // Tm.mifDc[Tm.CurrentMIF].Cur, Tm.mifDc[Tm.CurrentMIF].CumExecTime);
+    }
+
+
+    if (Tm.mifDc[Tm.currentMIF].cur > Tm.mifDc[Tm.currentMIF].max)
+    {
+      Tm.mifDc[Tm.currentMIF].max = Tm.mifDc[Tm.currentMIF].cur;
+    }
+    else if (Tm.mifDc[Tm.currentMIF].cur < Tm.mifDc[Tm.currentMIF].min)
+    {
+      Tm.mifDc[Tm.currentMIF].min = Tm.mifDc[Tm.currentMIF].cur;
+    }
+}
+
+
+
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 66  *****************
+ * User: John Omalley Date: 12-12-04   Time: 5:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

@@ -9,7 +9,7 @@
   Description: Task Manager definitions.
  
   VERSION
-     $Revision: 67 $  $Date: 12-11-28 2:07p $  
+     $Revision: 68 $  $Date: 12-12-04 5:10p $  
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -75,10 +75,10 @@ TASK_ENTRY(UART_Mgr2,                   45,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,
 TASK_ENTRY(UART_Mgr3,                   45,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(Sensor_Task,                 50,      DT,   SYS_MODE_GP1, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(Trigger_Task,                60,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
-TASK_ENTRY(EngRun_Task,                 60,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
+TASK_ENTRY(EngRun_Task,                 61,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(Trend_Task,                  62,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
-TASK_ENTRY(Event_Task,                  62,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
-TASK_ENTRY(Action_Task,                 63,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
+TASK_ENTRY(Event_Task,                  63,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
+TASK_ENTRY(Action_Task,                 64,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(FAST_Manager,                65,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(FSM_Task,                    67,      DT,   SYS_MODE_GP0, 0xFFFFFFFF,   0,          0          )\
 TASK_ENTRY(Data_Mgr0,                   70,      DT,   SYS_MODE_GP0, 0x11111111,   0,          0          )\
@@ -351,7 +351,6 @@ const TaskInformation taskInfo[MAX_TASK] = {TASK_LIST};
 EXPORT void       TmInitializeTaskManager   (void);
 EXPORT void       TmInitializeTaskDispatcher(void);
 EXPORT void       TmStartTaskManager      (void);
-EXPORT void       TmDispatchDtTasks       (void);
 EXPORT void       TmScheduleRmtTasks      (void);
 EXPORT void       TmDispatchRmtTasks      (void);
 EXPORT void       TmTaskCreate            (TCB *pTaskInfo);
@@ -376,6 +375,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 68  *****************
+ * User: John Omalley Date: 12-12-04   Time: 5:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 67  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:07p

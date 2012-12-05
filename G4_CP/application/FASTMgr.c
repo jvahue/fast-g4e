@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 117 $  $Date: 12/03/12 5:29p $
+   $Revision: 118 $  $Date: 12/04/12 6:00p $
 
 
 ******************************************************************************/
@@ -223,6 +223,7 @@ void FAST_Init(void)
   //FAST Manager Task
 
   // Register the application busy flag with the Power Manager.
+  PmRegisterAppBusyFlag(PM_FAST_REC_TRIG_BUSY, &FASTStatus.Recording);
   PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &m_IsRecordBusy);
   PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &FASTStatus.LogTransferToGSActive);
 
@@ -1568,11 +1569,16 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 118  *****************
+ * User: Jim Mood     Date: 12/04/12   Time: 6:00p
+ * Updated in $/software/control processor/code/application
+ * SCR #1131 Application busy 
+ *
  * *****************  Version 117  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:29p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
- * 
+ * SCR #1107 Code Review
+ *
  * *****************  Version 116  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:34p
  * Updated in $/software/control processor/code/application
