@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 82 $  $Date: 12/03/12 5:36p $
+  $Revision: 83 $  $Date: 12/05/12 4:17p $
 
 ******************************************************************************/
 
@@ -132,7 +132,7 @@ void TriggerInitialize(void)
   TCB             tcb;
 
   // Add Trigger Tables to the User Manager
-  User_AddRootCmd(&RootTriggerMsg);
+  User_AddRootCmd(&rootTriggerMsg);
 
   // Reset the Trigger configuration storage array
   memset(m_TriggerCfg, 0, sizeof(m_TriggerCfg));
@@ -473,7 +473,7 @@ static void TriggerUpdateTask( void *pParam )
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      TriggersEnd();
-     TmTaskEnable( (TASK_INDEX) Trigger_Task, FALSE );
+     TmTaskEnable( (TASK_INDEX)Trigger_Task, FALSE );
    }
    else // Normal task execution.
    {
@@ -1158,6 +1158,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 83  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
  *
  * *****************  Version 82  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
