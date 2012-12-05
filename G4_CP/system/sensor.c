@@ -536,20 +536,22 @@ void SensorDisableLiveStream( void )
     // this sensor has been "initialized" (i.e. transitioned from unknown -> valid)
     bInitialized = (pSummary->fMinValue < FLT_MAX) || (pSummary->fMaxValue > -FLT_MAX);
 
-    // If the sensor is now invalid but WAS valid in
-    // the past, as indicated by min/max being initialized, then...
-    // ignore processing until this object is reset.
+    // INVALIDITY LATCHING LOGIC and totaling.
+
+    // If sensor was initialized and is flagged as invalid.
+    // Skip processing until this summary obj is reset.
+
     if( !pSummary->bValid && bInitialized )
     {
       continue;
     }
 
+    // If the sensor is valid, update its total and sample count
+    // If not, we stop updating the sensor summary for this sensor, calc it's average
+    // and latch it until the this SNSR_SUMMARY is reset.
+
     pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
 
-
-    // If the sensor is valid update its total and sample count
-    // If not, we stop updating the sensor summary and it's average will
-    // be correctly calculated from the total and sample count prior to going invalid
     if ( pSummary->bValid )
     {
       ++pSummary->nSampleCount;
@@ -572,7 +574,16 @@ void SensorDisableLiveStream( void )
         pSummary->fMaxValue = newValue;
         CM_GetTimeAsTimestamp(&pSummary->timeMaxValue);
       }
-
+    }
+    else
+    {
+      // If sensor WAS valid/initialized and NOW is invalid...
+      // calculate the avg based on current count and total and never update this
+      // sensor until reset.
+      if( bInitialized && pSummary->nSampleCount != 0)
+      {
+        pSummary->fAvgValue = pSummary->fTotal * (1.0f / (FLOAT32) pSummary->nSampleCount);
+      }
     }
   }
 }
@@ -598,13 +609,14 @@ void SensorDisableLiveStream( void )
   SNSR_SUMMARY* pSummary;
   INT32 i;
 
-  // Process each CONFIGURED entry in the array
+  // Process each CONFIGURED entry
   for(i = 0; i < nEntries; ++i)
   {
     pSummary = &summaryArray[i];
 
     // If the sensor is still valid, and the sample count is not zero,
-    // calculate the average, otherwise
+    // calculate the average. If it went invalid the average was already
+    // calculated when the entry was latched to invalid.
     if(pSummary->bValid && pSummary->nSampleCount != 0)
     {
       pSummary->fAvgValue = pSummary->fTotal * (1.0f / (FLOAT32) pSummary->nSampleCount);
@@ -699,7 +711,7 @@ static void SensorsConfigure (void)
             Sensors[i].pTestSensor      = UartMgr_SensorTest;
             Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
-        case MAX_SAMPLETYPE: 
+        case MAX_SAMPLETYPE:
 		default:
             // FATAL ERROR WITH CONFIGURATION
             // Initialize String
@@ -1981,12 +1993,12 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
- * 
+ *
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-12-02   Time: 12:22p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 83  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:05p
  * Updated in $/software/control processor/code/system

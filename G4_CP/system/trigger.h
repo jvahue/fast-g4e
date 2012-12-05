@@ -215,6 +215,7 @@ typedef struct
 typedef struct
 {
   SENSOR_INDEX sensorIndex;
+  BOOLEAN      bInitialized;
   BOOLEAN      bValid;
   FLOAT32      fMinValue;
   FLOAT32      fMaxValue;

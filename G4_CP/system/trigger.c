@@ -920,6 +920,9 @@ void TriggerLogUpdate( TRIGGER_DATA *pTrigData)
       pLog->sensor[i].fMaxValue     = pSummary->fMaxValue;
       pLog->sensor[i].fAvgValue     = pSummary->fAvgValue;
       pLog->sensor[i].bValid        = pSummary->bValid;
+      pLog->sensor[i].bInitialized  = FALSE;
+   // pLog->sensor[i].bInitialized  = (pSummary->fMinValue < FLT_MAX) ||
+   //                                 (pSummary->fMaxValue > -FLT_MAX);
     }
     else // Sensor Not Used
     {
@@ -929,6 +932,7 @@ void TriggerLogUpdate( TRIGGER_DATA *pTrigData)
       pLog->sensor[i].fMaxValue    = 0.0;
       pLog->sensor[i].fAvgValue    = 0.0;
       pLog->sensor[i].bValid       = FALSE;
+      pLog->sensor[i].bInitialized = FALSE;
     }
   }
 }
