@@ -173,7 +173,7 @@ typedef enum
 {
    TRIG_NONE,
    TRIG_START,
-   TRIG_ACTIVE,
+   TRIG_ACTIVE
 } TRIG_STATE;
 
 typedef enum
