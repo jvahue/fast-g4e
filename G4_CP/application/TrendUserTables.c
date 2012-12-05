@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 16 $  $Date: 12/03/12 5:30p $
+$Revision: 17 $  $Date: 12/05/12 4:16p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -374,6 +374,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:16p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review 
  * 
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:30p

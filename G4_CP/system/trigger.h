@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trigger processing.
 
   VERSION
-  $Revision: 40 $  $Date: 12/03/12 5:36p $
+  $Revision: 41 $  $Date: 12/05/12 4:17p $
 
 ******************************************************************************/
 
@@ -297,8 +297,38 @@ USER_ENUM_TBL comparisonEnum[] = { {"LT",             LT },
   EXPORT USER_ENUM_TBL comparisonEnum[];
 #endif
 
-// Export the triggerIndex enum table
-extern USER_ENUM_TBL triggerIndexType[];
+
+#if defined (TRIGGER_BODY)
+// Trigger index enumeration for other modules which ref TriggerIndex
+USER_ENUM_TBL triggerIndexType[] =
+  { { "0"  , TRIGGER_0   }, { "1"  , TRIGGER_1   }, { "2"  , TRIGGER_2   },
+    { "3"  , TRIGGER_3   }, { "4"  , TRIGGER_4   }, { "5"  , TRIGGER_5   },
+    { "6"  , TRIGGER_6   }, { "7"  , TRIGGER_7   }, { "8"  , TRIGGER_8   },
+    { "9"  , TRIGGER_9   }, { "10" , TRIGGER_10  }, { "11" , TRIGGER_11  },
+    { "12" , TRIGGER_12  }, { "13" , TRIGGER_13  }, { "14" , TRIGGER_14  },
+    { "15" , TRIGGER_15  }, { "16" , TRIGGER_16  }, { "17" , TRIGGER_17  },
+    { "18" , TRIGGER_18  }, { "19" , TRIGGER_19  }, { "20" , TRIGGER_20  },
+    { "21" , TRIGGER_21  }, { "22" , TRIGGER_22  }, { "23" , TRIGGER_23  },
+    { "24" , TRIGGER_24  }, { "25" , TRIGGER_25  }, { "26" , TRIGGER_26  },
+    { "27" , TRIGGER_27  }, { "28" , TRIGGER_28  }, { "29" , TRIGGER_29  },
+    { "30" , TRIGGER_30  }, { "31" , TRIGGER_31  }, { "32" , TRIGGER_32  },
+    { "33" , TRIGGER_33  }, { "34" , TRIGGER_34  }, { "35" , TRIGGER_35  },
+    { "36" , TRIGGER_36  }, { "37" , TRIGGER_37  }, { "38" , TRIGGER_38  },
+    { "39" , TRIGGER_39  }, { "40" , TRIGGER_40  }, { "41" , TRIGGER_41  },
+    { "42" , TRIGGER_42  }, { "43" , TRIGGER_43  }, { "44" , TRIGGER_44  },
+    { "45" , TRIGGER_45  }, { "46" , TRIGGER_46  }, { "47" , TRIGGER_47  },
+    { "48" , TRIGGER_48  }, { "49" , TRIGGER_49  }, { "50" , TRIGGER_50  },
+    { "51" , TRIGGER_51  }, { "52" , TRIGGER_52  }, { "53" , TRIGGER_53  },
+    { "54" , TRIGGER_54  }, { "55" , TRIGGER_55  }, { "56" , TRIGGER_56  },
+    { "57" , TRIGGER_57  }, { "58" , TRIGGER_58  }, { "59" , TRIGGER_59  },
+    { "60" , TRIGGER_60  }, { "61" , TRIGGER_61  }, { "62" , TRIGGER_62  },
+    { "63" , TRIGGER_63  },
+    { "UNUSED", TRIGGER_UNUSED }, { NULL, 0 }
+  };
+#else
+  // Export the triggerIndex enum table
+  EXPORT USER_ENUM_TBL triggerIndexType[];
+#endif
 
 
 
@@ -321,6 +351,11 @@ EXPORT BOOLEAN TriggerIsConfigured( TRIGGER_INDEX trigIdx );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.h $
+ * 
+ * *****************  Version 41  *****************
+ * User: Contractor V&v Date: 12/05/12   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review 
  *
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
