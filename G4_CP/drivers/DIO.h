@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 42 $  $Date: 12-11-14 7:12p $
+      $Revision: 43 $  $Date: 12/05/12 8:07p $
 ******************************************************************************/
 
 
@@ -248,7 +248,7 @@ typedef struct {
                              Package Exports Functions
 ******************************************************************************/
 EXPORT  RESULT  DIO_Init     ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize );
-EXPORT  BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig, UINT16 i );
+EXPORT  BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig );
 EXPORT  void    DIO_SetPin   ( DIO_OUTPUT Pin, DIO_OUT_OP Op) ;
 EXPORT  BOOLEAN DIO_ReadPin  ( DIO_INPUT Pin);
 EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
@@ -263,11 +263,16 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
  *  MODIFICATIONS
  *    $History: DIO.h $
  * 
+ * *****************  Version 43  *****************
+ * User: Jim Mood     Date: 12/05/12   Time: 8:07p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1153.  Reg Check failure caused by new FPGA FFD Input
+ *
  * *****************  Version 42  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:12p
  * Updated in $/software/control processor/code/drivers
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 41  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 3:19p
  * Updated in $/software/control processor/code/drivers
