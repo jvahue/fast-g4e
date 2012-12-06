@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 53 $  $Date: 12-11-14 7:12p $
+   $Revision: 54 $  $Date: 12/05/12 8:07p $
 
 
 ******************************************************************************/
@@ -229,8 +229,8 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UINT32 i;
 
-  UINT32 SetupPinResult;
-  UINT32 PinResultSummary;
+  UINT32 setup_pin_result;
+  UINT32 pin_result_summary;
 
   DIO_DRV_PBIT_LOG  *pdest;
 
@@ -252,25 +252,25 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   *psize = sizeof(DIO_DRV_PBIT_LOG);
 
   //Initialize discrete outputs.  DIO_MAX_OUTPUTS must be < 32
-  PinResultSummary = 0;
+  pin_result_summary = 0;
 
   ASSERT_MESSAGE(DIO_MAX_OUTPUTS < DIO_MAX_OUTPUTS_LIMIT,
           "DIO_MAX_OUTPUTS exceeds 32. (Value: %d)",DIO_MAX_OUTPUTS);
 
   for(i = 0; i < DIO_MAX_OUTPUTS; i++)
   {
-    SetupPinResult = (UINT32) DIO_InitPin(&DIO_OutputPins[i], i);
+    setup_pin_result = DIO_InitPin(&DIO_OutputPins[i]) ? 1 : 0;
     //NOTE: The ordering in DIO_OutputPins determine the bit ordering in
     //      PinResultSummary.  See DIO.h
-    PinResultSummary |= (SetupPinResult << i);
+    pin_result_summary |= (setup_pin_result << i);
     DIO_OutputShadow[i] = DIO_OutputPins[i].bInitialState;
   }
   // Set Return Structure Here
-  pdest->dioOutResults = PinResultSummary;
+  pdest->dioOutResults = pin_result_summary;
 
 
   //Initialize the discrete inputs. DIO_MAX_INPUTS must be < 32
-  PinResultSummary = 0;
+  pin_result_summary = 0;
 
   ASSERT_MESSAGE( DIO_MAX_INPUTS < DIO_MAX_INPUTS_LIMIT,
           "DIO_MAX_INPUTS exceeds 32. (Value: %d)",DIO_MAX_INPUTS);
@@ -278,13 +278,13 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   //Initialize discrete inputs
   for(i = 0; i < DIO_MAX_INPUTS; i++)
   {
-    SetupPinResult = (UINT32) DIO_InitPin(&DIO_InputPins[i], i);
+    setup_pin_result = DIO_InitPin(&DIO_InputPins[i]) ? 1 : 0;
     //NOTE: The ordering in DIO_InputPins determine the bit ordering in
     //      PinResultSummary.  See DIO.h
-    PinResultSummary |= (SetupPinResult << i);
+    pin_result_summary |= (setup_pin_result << i);
 
     // If the initialization was successful, set the initial state
-    if (SetupPinResult == 0)
+    if (setup_pin_result == 0)
     {
       Dio_FilteredPins[i].timeStampMs    = CM_GetTickCount();
 
@@ -299,7 +299,7 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     }
   }
   // Set Return Structure Here
-  pdest->dioInResults = PinResultSummary;
+  pdest->dioInResults = pin_result_summary;
 
   if ( ( pdest->dioInResults != 0) || (pdest->dioOutResults != 0) )
   {
@@ -337,12 +337,12 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *          In either cases an ASSERT should be the appropriate err handling processing.
  *
  ****************************************************************************/
-BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
+BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig)
 {
   BOOLEAN bFailed;
   BOOLEAN bInitOk;
   //REG_SETTING RegData;
-  UINT8 SetVal;
+  UINT8 set_val = 0;
 
   bInitOk = TRUE;
   bFailed = FALSE;
@@ -431,7 +431,7 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
           {
             bInitOk = FALSE;
           }
-          SetVal = 1;
+          set_val = 1;
           break;
 
         case OFF:
@@ -442,7 +442,7 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
           {
             bInitOk = FALSE;
           }
-          SetVal = 0;
+          set_val = 0;
           break;
 
         default:
@@ -453,10 +453,10 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
 
       DIO_InitShadowReg( (void *) PinConfig->dataReg,
                           DIO_GPIO_PODR_OFFSET,
-                          PinConfig->pinMask, SetVal);
+                          PinConfig->pinMask, set_val);
       DIO_InitShadowReg( (void *) PinConfig->dataReg,
                           DIO_GPIO_PPDSDR_OFFSET,
-                          PinConfig->pinMask, SetVal);
+                          PinConfig->pinMask, set_val);
 
     } // End if (PinConfig->Direction == DIO_Out)
 
@@ -480,7 +480,7 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
     switch (PinConfig->bInitialState)
     {
       case ON:
-        SetVal = (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI));
+        set_val = (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI));
         break;
 
       case OFF:
@@ -493,8 +493,8 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
         break;
     }
 
-    SET_AND_CHECK ( MCF_GPT_GMS2, SetVal, bInitOk );
-    DIO_InitShadowRegGMS2( 0xFFFFFFFFUL, SetVal);
+    SET_AND_CHECK ( MCF_GPT_GMS2, set_val, bInitOk );
+    DIO_InitShadowRegGMS2( 0xFFFFFFFFUL, set_val);
 
   }
   else if(DIO_FPGA == PinConfig->peripheral)
@@ -504,27 +504,26 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig, UINT16 i)
     switch(PinConfig->bInitialState)
     {
       case ON:
-        /*TBD: FPGA not init yet, need to figure something out here
+        /*FPGA not init yet, need to figure something out here
          *PinConfig->DataReg |= PinConfig->PinMask;*/
-         SetVal = (UINT8) DIO_SetHigh;
+         set_val = (UINT8) DIO_SetHigh;
         break;
 
       case OFF:
-        /*TBD: FPGA not init yet, need to figure something out here
+        /*FPGA not init yet, need to figure something out here
         *PinConfig->DataReg &= ~PinConfig->PinMask; */
-        SetVal = (UINT8) DIO_SetLow;
+        set_val = (UINT8) DIO_SetLow;
         break;
 
       default:
         FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
         break;
     }
-    // TODO: SCR 1153 - Temp Hack to mask detection of a FALSE Reg check FAIL
-    //       The new input for FFD is breaking the pin mask for the output, this is a temporary
-    //       gate to stop that until a fix can be made.
-    if (PinConfig->dataReg == (UINT8*)FPGA_GPIO_0)
+
+    //Only attempt to setup discreet output registers
+    if (PinConfig->direction == DIO_Out)
     {
-       DIO_InitShadowRegFPGA( PinConfig->pinMask, SetVal );
+       DIO_InitShadowRegFPGA( PinConfig->pinMask, set_val );
     }
 
   }
@@ -1190,17 +1189,22 @@ static void DIO_CheckWrapAround( void)
  *  MODIFICATIONS
  *    $History: DIO.c $
  * 
+ * *****************  Version 54  *****************
+ * User: Jim Mood     Date: 12/05/12   Time: 8:07p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1153.  Reg Check failure caused by new FPGA FFD Input
+ *
  * *****************  Version 53  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:12p
  * Updated in $/software/control processor/code/drivers
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 52  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 2:21p
  * Updated in $/software/control processor/code/drivers
  * SCR #1196 PCLint 641 Warning copying enum into a UINT16 could cause a
  * problem.  Modified target variable to be a UINT32.
- * 
+ *
  * *****************  Version 51  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 3:19p
  * Updated in $/software/control processor/code/drivers
