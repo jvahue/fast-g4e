@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 91 $  $Date: 12-12-01 10:09a $
+      $Revision: 92 $  $Date: 12-12-06 4:29p $
 
 ******************************************************************************/
 
@@ -1874,10 +1874,7 @@ BOOLEAN DataMgrIsPortFFD( const ACS_CONFIG *ACS_Config )
   BOOLEAN retval = FALSE;
 
 
-  if( (ACS_Config->portType == ACS_PORT_ARINC429) ||
-      (ACS_Config->portType == ACS_PORT_QAR)      ||
-      ((ACS_Config->portType == ACS_PORT_UART)    &&
-       (ACS_Config->mode == ACS_RECORD       ))      )
+  if( ACS_Config->mode == ACS_RECORD )
   {
     retval = TRUE;
   }
@@ -1910,6 +1907,11 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 92  *****************
+ * User: John Omalley Date: 12-12-06   Time: 4:29p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 91  *****************
  * User: John Omalley Date: 12-12-01   Time: 10:09a
