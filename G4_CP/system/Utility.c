@@ -1018,12 +1018,13 @@ BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
  ******************************************************************************/
 void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
-  UINT32 i;
-  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
+  UINT32 wordOffset;
+  UINT32 wordCnt  = (UINT32)arraySizeBytes / BYTES_PER_WORD;
 
-  ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
+  ASSERT( ((bitOffset >= 0) && ((UINT32)bitOffset < (wordCnt * 32)) ) );
+  wordOffset = (UINT32)bitOffset / 32U;
 
-  array[i] = array[i = bitOffset / 32] | (1U << (bitOffset % 32));
+  array[wordOffset] = array[wordOffset] | (1U << ((UINT32)bitOffset % 32U));
 
 }
 
@@ -1046,12 +1047,12 @@ void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 wordOffset;
-  INT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
+  UINT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
 
-  ASSERT( ((bitOffset >= 0) && (bitOffset < (wordCnt * 32)) ) );
-  wordOffset = bitOffset / 32;
+  ASSERT( ((bitOffset >= 0) && ((UINT32)bitOffset < (wordCnt * 32U)) ) );
+  wordOffset = (UINT32)bitOffset / 32U;
 
-  array[wordOffset] = ( array[wordOffset] & ~(1U << (bitOffset % 32) ) );
+  array[wordOffset] = ( array[wordOffset] & ~(1U << ((UINT32)bitOffset % 32U) ) );
 }
 
 /******************************************************************************
