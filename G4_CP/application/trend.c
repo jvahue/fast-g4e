@@ -471,6 +471,21 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
                           pData->trendIndex,
                           pCfg->stability,
                           &pData->curStability);
+      // Clear Action
+      if( pCfg->nAction)
+      {
+        pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+          ACTION_OFF, FALSE, FALSE);
+      }
+
+      /*vcast_dont_instrument_start*/
+      #ifdef TREND_DEBUG
+      GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
+        pData->trendIndex,
+        pData->autoTrendCnt,
+        pData->trendCnt);
+      #endif
+      /*vcast_dont_instrument_end*/
 
       pData->trendState = TREND_STATE_INACTIVE;
       // Reset sample count.
@@ -616,8 +631,6 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     // Reset interval timer
     pData->timeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
-
-
 
 
   } // End of finishing up a log for trend in progress.

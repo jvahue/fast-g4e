@@ -1212,7 +1212,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   INT32  int_temp;
   FLOAT32 float_temp;
   FLOAT64 float64_temp;
-  UINT32 Base = 10;
+  UINT32 base = 10;
   BOOLEAN result = FALSE;
 
   if ( Type != USER_TYPE_STR)
@@ -1234,11 +1234,11 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     //case USER_TYPE_INT32:
     if ( strncmp("0X",SetStr,2) == 0)
     {
-      Base = 16;
+      base = 16;
     }
     else if ( SetStr[0] == '0' && strlen(SetStr) > 1)
     {
-      Base = 8;
+      base = 8;
     }
   }
 
@@ -1253,7 +1253,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_UINT8:
       /*UINT8 type, check min/max bounds incl. the max value a uint8 can
         represent.  Value also must be positive*/
-      uint_temp = strtoul(SetStr,&end,Base);
+      uint_temp = strtoul(SetStr,&end,base);
       if( *end == '\0' && uint_temp <= Max->Uint && uint_temp >= Min->Uint)
       {
         **(UINT8**)SetPtr = (UINT8)uint_temp;
@@ -1265,7 +1265,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_UINT16:
       /* UINT16 type, check min/max bounds incl. the max value a uint16 can
          represent.  Value also must be positive */
-      uint_temp = strtoul(SetStr,&end,Base);
+      uint_temp = strtoul(SetStr,&end,base);
       if( *end == '\0' && uint_temp <= Max->Uint && uint_temp >= Min->Uint)
       {
         **(UINT16**)SetPtr = (UINT16)uint_temp;
@@ -1279,13 +1279,13 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       // .. as strtoul quietly limits the value to UINT32_MAX
       {
         CHAR reverseBuffer[20];
-        uint_temp = strtoul(SetStr,&end,Base);
-        if (Base == 16)
+        uint_temp = strtoul(SetStr,&end,base);
+        if (base == 16)
         {
           // need to deal with len of input string in hex case as "0X00FF1234" != "0XFF1234"
           snprintf( reverseBuffer, 20, "0X%0*X", strlen(SetStr)-2, uint_temp);
         }
-        else if (Base == 8)
+        else if (base == 8)
         {
           // need to deal with len of input string in octal case as "001234" != "01234"
           snprintf( reverseBuffer, 20, "0%0*o", strlen(SetStr)-1, uint_temp);
@@ -1346,7 +1346,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     //case USER_TYPE_INT8:
     //  /* INT8 type, check min/max bounds incl. the min/max value a int8 can
     //     represent.*/
-    //  int_temp = strtol(SetStr,&end,Base);
+    //  int_temp = strtol(SetStr,&end,base);
     //  if(*end == '\0' && int_temp <= Max->Sint && int_temp >= Min->Sint)
     //  {
     //    **(UINT8**)SetPtr = (UINT8)int_temp;
@@ -1357,7 +1357,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     //case USER_TYPE_INT16:
     //  /* INT16 type, check min/max bounds incl. the min/max value a int16 can
     //     represent. */
-    //  int_temp = strtol(SetStr,&end,Base);
+    //  int_temp = strtol(SetStr,&end,base);
     //  if(*end == '\0' && int_temp <= Max->Sint && int_temp >= Min->Sint)
     //  {
     //    **(UINT16**)SetPtr = (UINT16)int_temp;
@@ -1371,7 +1371,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
          .. as strtol quietly limits the value to INT32_MAX */
       {
         CHAR reverseBuffer[20];
-        int_temp = strtol(SetStr, &end, Base);
+        int_temp = strtol(SetStr, &end, base);
         snprintf( reverseBuffer, 20, "%d", int_temp);
 
         if (strcmp( SetStr, reverseBuffer) == 0)
@@ -2979,7 +2979,7 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 108  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:35p
  * Updated in $/software/control processor/code/application
