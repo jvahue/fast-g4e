@@ -593,14 +593,16 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
         ACTION_OFF, FALSE, FALSE);
     }
 
-    /*vcast_dont_instrument_start*/
     #ifdef TREND_DEBUG
+
+    /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
                                         pData->trendIndex,
                                         pData->autoTrendCnt,
                                         pData->trendCnt);
-    #endif
     /*vcast_dont_instrument_end*/
+
+    #endif
 
 
 
