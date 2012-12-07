@@ -36,8 +36,6 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define TREND_DEBUG
-
 
 
 /*****************************************************************************/
@@ -593,17 +591,11 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
         ACTION_OFF, FALSE, FALSE);
     }
 
-    #ifdef TREND_DEBUG
 
-    /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
-                                        pData->trendIndex,
-                                        pData->autoTrendCnt,
-                                        pData->trendCnt);
-    /*vcast_dont_instrument_end*/
-
-    #endif
-
+                                pData->trendIndex,
+                                pData->autoTrendCnt,
+                                pData->trendCnt);
 
 
     // Reset fields for the next sample period.
