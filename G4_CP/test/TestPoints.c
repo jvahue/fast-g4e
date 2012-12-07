@@ -132,12 +132,12 @@ void TpSupportDt1(  void* pParam)
     //   To see mode switch on scope 
     //   a. trigger on MIF0 pulse
     //   b. enable task pulse for these two DT tasks 1 run 2 stops
-    if ( Tm.CurrentMIF == 0 && TPU( 0, eTpModeTest))
+    if ( Tm.currentMIF == 0 && TPU( 0, eTpModeTest))
     {
         TmSetMode(SYS_TEST_ID);
     }
 
-    if ( Tm.CurrentMIF == 0 && TPU( 0, eTpModeNormal))
+    if ( Tm.currentMIF == 0 && TPU( 0, eTpModeNormal))
     {
         TmSetMode(SYS_NORMAL_ID);
     }
