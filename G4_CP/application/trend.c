@@ -61,7 +61,7 @@ static TREND_LOG   m_TrendLog [MAX_TRENDS];   // Trend Log data for each trend
 static void TrendTask         ( void* pParam );
 static void TrendProcess         ( TREND_CFG* pCfg, TREND_DATA* pData );
 
-static void TrendFinish          ( TREND_CFG* pCfg, TREND_DATA* pData );
+static void TrendFinish ( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN  bWriteEndLog );
 
 
 static void TrendStartManualTrend(TREND_CFG* pCfg, TREND_DATA* pData );
@@ -198,7 +198,7 @@ static void TrendTask( void* pParam )
     for ( nTrend = TREND_0; nTrend < MAX_TRENDS; nTrend++ )
     {
       // Log and terminate any active trends
-      TrendFinish(&m_TrendCfg[nTrend], &m_TrendData[nTrend]);
+      TrendFinish(&m_TrendCfg[nTrend], &m_TrendData[nTrend], TRUE);
     }
     TrendEnableTask(FALSE);
   }
@@ -323,7 +323,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       // check and finish any outstanding trends
       if (pData->prevEngState != ER_STATE_STOPPED)
       {
-        TrendFinish(pCfg, pData);
+        TrendFinish(pCfg, pData, TRUE);
       }
       pData->prevEngState = ER_STATE_STOPPED;
       break;
@@ -333,7 +333,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       // finish any outstanding trends
       if (pData->prevEngState != ER_STATE_STARTING)
       {
-        TrendFinish(pCfg, pData);
+        TrendFinish(pCfg, pData, TRUE);
       }
       pData->prevEngState = ER_STATE_STARTING;
       break;
@@ -443,66 +443,26 @@ static void TrendStartManualTrend(TREND_CFG* pCfg, TREND_DATA* pData )
  *****************************************************************************/
 static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
 {
-  BOOLEAN bAutoTrendFailed = FALSE;
-
   // If this trend is active. Update it's status
   if ( pData->trendState != TREND_STATE_INACTIVE )
   {
-    // Check if the preceding call to TrendUpdateAutoTrend flagged an auto-trend
-    // as failing to maintain stability. If fewer than the max trends were taken,
-    // log it.
-    if( TREND_STATE_AUTO == pData->trendState )
-    {
-      if( pData->bAutoTrendStabFailed && pData->autoTrendCnt < pCfg->maxTrends )
-      {
-        // Force a finish to this sampling and flag it for autotrend-failure logging.
-        bAutoTrendFailed = TRUE;
-      }
-
-      // Reset the signal, it will be set during the next frame if needed.
-      pData->bAutoTrendStabFailed = FALSE;
-    }
-
-    // General update handling and end-of-trend logging
-
-    if (bAutoTrendFailed)
+    if ( pData->bAutoTrendStabFailed )
     {
       TrendWriteErrorLog( APP_ID_TREND_AUTO_FAILED,
                           pData->trendIndex,
                           pCfg->stability,
                           &pData->curStability);
-      // Clear Action
-      if( pCfg->nAction)
-      {
-        pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
-          ACTION_OFF, FALSE, FALSE);
-      }
 
-      /*vcast_dont_instrument_start*/
-      #ifdef TREND_DEBUG
-      GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
-        pData->trendIndex,
-        pData->autoTrendCnt,
-        pData->trendCnt);
-      #endif
-      /*vcast_dont_instrument_end*/
+      // Do trend finish-up activities, DON'T write an end-log(FALSE)
+      TrendFinish(pCfg, pData, FALSE);
 
-      pData->trendState = TREND_STATE_INACTIVE;
-      // Reset sample count.
-      pData->masterSampleCnt  = 0;
-
-      // Reset sensor stability timer
-      pData->lastStabCheckMs  = 0;
-      pData->nTimeStableMs    = 0;
-
-      // Reset interval timer
-      pData->timeSinceLastTrendMs = 0;
-      pData->lastIntervalCheckMs  = 0;
+      // Done with semaphore by this point.
+      pData->bAutoTrendStabFailed = FALSE;
 
     }else if ( pData->masterSampleCnt >= pData->nSamplesPerPeriod )
     {
-      // Sampling period complete on last pass
-      TrendFinish(pCfg, pData);
+      // Sampling period complete on last pass, finish trend and write end-log
+      TrendFinish(pCfg, pData, TRUE);
     }
     else
     {
@@ -524,98 +484,108 @@ static void TrendUpdateData( TREND_CFG* pCfg, TREND_DATA* pData  )
  *
  * Parameters:   [in]     pCfg  Pointer to trend  config data
  *               [in/out] pData Pointer to trend runtime data
+ *               [in]     bWriteEndLog flag indicating whether an TREND_END_LOG
+ *                        will be written.
  *
  * Returns:      None
  *
  * Notes:
  *
  *****************************************************************************/
-static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
+void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bWriteEndLog )
 {
   UINT8         i;
   SNSR_SUMMARY  *pSummary;
   TREND_LOG*    pLog = &m_TrendLog[pData->trendIndex];
 
-  // If a trend was in progress, create a log, otherwise return.
+  // If a trend was in progress, write the end log if flagged and do end of trend cleanup.
   if (pData->trendState > TREND_STATE_INACTIVE )
   {
-    SensorCalculateSummaryAvgs( pData->snsrSummary, pData->nTotalSensors );
 
-    // Trend name
-    pLog->trendIndex = pData->trendIndex;
-    // Log the type/state: MANUAL|AUTO
-    pLog->type     = pData->trendState;
-
-    pLog->nSamples = pData->masterSampleCnt;
-
-    // Loop through all the sensors
-    for ( i = 0; i < pData->nTotalSensors; i++ )
+    if (bWriteEndLog)
     {
-      // Set a pointer the summary
-      pSummary = &(pData->snsrSummary[i]);
+      SensorCalculateSummaryAvgs( pData->snsrSummary, pData->nTotalSensors );
+      // Trend name
+      pLog->trendIndex = pData->trendIndex;
+      // Log the type/state: MANUAL|AUTO
+      pLog->type     = pData->trendState;
 
-      // Check the sensor is used
-      if ( SensorIsUsed((SENSOR_INDEX)pSummary->SensorIndex ) )
+      pLog->nSamples = pData->masterSampleCnt;
+
+      // Loop through all the sensors
+      for ( i = 0; i < pData->nTotalSensors; i++ )
       {
-        pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
+        // Set a pointer the summary
+        pSummary = &(pData->snsrSummary[i]);
 
-        // Only some of the sensor stats are used for trend logging
-        pLog->sensor[i].sensorIndex = pSummary->SensorIndex;
-        pLog->sensor[i].bValid      = pSummary->bValid;
-        pLog->sensor[i].fMaxValue   = pSummary->fMaxValue;
-        pLog->sensor[i].fAvgValue   = pSummary->fAvgValue;
+        // Check the sensor is used
+        if ( SensorIsUsed((SENSOR_INDEX)pSummary->SensorIndex ) )
+        {
+          pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex);
+
+          // Only some of the sensor stats are used for trend logging
+          pLog->sensor[i].sensorIndex = pSummary->SensorIndex;
+          pLog->sensor[i].bValid      = pSummary->bValid;
+          pLog->sensor[i].fMaxValue   = pSummary->fMaxValue;
+          pLog->sensor[i].fAvgValue   = pSummary->fAvgValue;
+        }
+        else // Sensor Not Used
+        {
+          pLog->sensor[i].sensorIndex = SENSOR_UNUSED;
+          pLog->sensor[i].bValid      = FALSE;
+          pLog->sensor[i].fMaxValue   = 0.0;
+          pLog->sensor[i].fAvgValue   = 0.0;
+        }
       }
-      else // Sensor Not Used
+
+      #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+
+      // Update persistent cycle counter data, if configured.
+
+      for (i = 0; i < MAX_TREND_CYCLES; i++)
       {
-        pLog->sensor[i].sensorIndex = SENSOR_UNUSED;
-        pLog->sensor[i].bValid      = FALSE;
-        pLog->sensor[i].fMaxValue   = 0.0;
-        pLog->sensor[i].fAvgValue   = 0.0;
+        pLog->cycleCounts[i].cycIndex =pCfg->cycle[i];
+        if (CYCLE_UNUSED != pCfg->cycle[i])
+        {
+          pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(pCfg->cycle[i]);
+        }
+        else
+        {
+          pLog->cycleCounts[i].cycleCount = 0;
+        }
       }
-    }
 
-#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+      #pragma ghs endnowarning
 
-    // Update persistent cycle counter data, if configured.
+      // Now do the log details...
+      LogWriteETM( APP_ID_TREND_END,
+        LOG_PRIORITY_3,
+        pLog,
+        sizeof(TREND_LOG),
+        NULL);
 
-    for (i = 0; i < MAX_TREND_CYCLES; i++)
-    {
-      pLog->cycleCounts[i].cycIndex =pCfg->cycle[i];
-      if (CYCLE_UNUSED != pCfg->cycle[i])
-      {
-        pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(pCfg->cycle[i]);
-      }
-      else
-      {
-        pLog->cycleCounts[i].cycleCount = 0;
-      }
-    }
-#pragma ghs endnowarning
+      /*vcast_dont_instrument_start*/
+      #ifdef TREND_DEBUG
+      GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
+        pData->trendIndex,
+        pData->autoTrendCnt,
+        pData->trendCnt);
+      #endif
+      /*vcast_dont_instrument_end*/
+    } // Write an END_TREND LOG
 
-    // Now do the log details...
-    LogWriteETM( APP_ID_TREND_END,
-                 LOG_PRIORITY_3,
-                 &m_TrendLog[pData->trendIndex],
-                 sizeof(TREND_LOG),
-                 NULL);
 
-    pData->trendState = TREND_STATE_INACTIVE;
+
+    // Always do this for finishing up a trend.
 
     // Clear Action
     if( pCfg->nAction)
     {
       pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
-        ACTION_OFF, FALSE, FALSE);
+                                          ACTION_OFF, FALSE, FALSE);
     }
 
-    /*vcast_dont_instrument_start*/
-    #ifdef TREND_DEBUG
-    GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
-                                        pData->trendIndex,
-                                        pData->autoTrendCnt,
-                                        pData->trendCnt);
-    #endif
-    /*vcast_dont_instrument_end*/
+
 
 
 
@@ -632,6 +602,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->timeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
 
+    pData->trendState = TREND_STATE_INACTIVE;
 
   } // End of finishing up a log for trend in progress.
 
