@@ -9,7 +9,7 @@
                  to all SPI devices to the application
 
     VERSION
-      $Revision: 30 $  $Date: 12-11-13 5:46p $
+      $Revision: 31 $  $Date: 12-12-07 2:47p $
 
 ******************************************************************************/
 
@@ -898,7 +898,7 @@ RESULT SPIMgr_WriteRTCNvRam(UINT32 DestAddr,void* Buf,size_t Size,
 * Notes:
 *
 ****************************************************************************/
-BOOLEAN SPIMgr_SensorTest (UINT16 nIndex)
+BOOLEAN SPIMgr_SensorTest (UINT32 nIndex)
 {
   ASSERT(nIndex < SPI_MAX_DEV);
   return SPI_RuntimeInfo[nIndex].adcResult == DRV_OK;
@@ -1259,6 +1259,11 @@ void SPIMgr_CircQueue_GetHead(CIRCULAR_QUEUE* cq, SPIMGR_ENTRY** head )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 12-12-07   Time: 2:47p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

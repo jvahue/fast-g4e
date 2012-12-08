@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 63 $  $Date: 12-11-12 4:46p $
+    $Revision: 64 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -153,7 +153,6 @@ NV_CREEP_HISTORY   - Creep Fault History Data
 
 #undef NV_FILE
 #define NV_FILE(Id, Name, Primary, Backup, CSum, Init, Size)
-
 //                                                                             Check     Initialization
 //          Id                Name                 Primary         Backup      Method    Function                     Size
 #define NV_FILE_LIST \
@@ -172,11 +171,11 @@ NV_FILE(NV_LOG_ERASE,      "Log Erase Status",     DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_AC_CFG,         "Recfg Sensor Val",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  AC_FileInit             ,     256), \
 NV_FILE(NV_LOG_COUNTS,     "Log Error Counts",     DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      16), \
 NV_FILE(NV_UART_EMU150,    "Uart EMU150 Data",     DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, EMU150_FileInit         ,   (6 KB)),\
-NV_FILE(NV_PCYCLE_CNTS_EE, "P-Cycle Counts EE",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
-NV_FILE(NV_PCYCLE_CNTS_RTC,"P-Cycle Counts RTC",   DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,     196), \
-NV_FILE(NV_ACT_STATUS_RTC, "Action Status RTC",    DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,       8), \
-NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
-NV_FILE(NV_ENGINE_ID,      "Engine Identification",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
+NV_FILE(NV_PCYCLE_CNTS_EE, "P-Cycle Counts EE",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CycleEEFileInit         ,     256), \
+NV_FILE(NV_PCYCLE_CNTS_RTC,"P-Cycle Counts RTC",   DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  CycleRTCFileInit        ,     196), \
+NV_FILE(NV_ACT_STATUS_RTC, "Action Status RTC",    DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  ActionRTCFileInit       ,       8), \
+NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  ActionEEFileInit        ,     256), \
+NV_FILE(NV_ENGINE_ID,      "Engine Identification",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EngReInitFile           ,     256), \
 NV_FILE(NV_CREEP_DATA,     "Creep Data",           DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  Creep_FileInit          ,     256), \
 NV_FILE(NV_CREEP_CNTS_RTC, "Creep Cnts RTC",       DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      20), \
 NV_FILE(NV_CREEP_HISTORY,  "Creep Fault History",  DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Creep_FaultFileInit     ,     512)
@@ -397,6 +396,11 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 64  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/system
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 63  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p

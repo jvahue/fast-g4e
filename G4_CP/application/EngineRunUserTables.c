@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 24 $  $Date: 12/05/12 4:16p $
+$Revision: 25 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -371,7 +371,7 @@ static USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
   {
     //Copy the new data into the global struct and write it to NV memory
     strncpy_safe(Param.Ptr,MAX_ENGINE_ID, SetPtr, _TRUNCATE );
-    NV_Write(NV_BOX_CFG,0,&m_EngineInfo,sizeof(m_EngineInfo));
+    NV_Write(NV_ENGINE_ID,0,&m_EngineInfo,sizeof(m_EngineInfo));
   }
 
   return USER_RESULT_OK;
@@ -482,6 +482,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/application
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p

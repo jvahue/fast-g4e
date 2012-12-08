@@ -13,7 +13,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 67 $  $Date: 12-11-30 1:08p $
+      $Revision: 68 $  $Date: 12/07/12 8:22p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -81,7 +81,6 @@ void              MSI_HandleMSCommand(MSCP_CMDRSP_PACKET* Packet);
 void              MSI_CheckMsgTimeouts(void);
 void              MSI_CheckDPRAM(void);
 void              MSI_MSCommandFailed(MSCP_CMDRSP_PACKET* Packet);
-void              dbgstr(INT8* str);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -244,7 +243,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
     packet = (void*) dpramBlock.data;
 
     //Determine total size of the data to be written to DPRAM
-    dpramBlock.size       = size + sizeof(*packet) - sizeof(packet->data);
+    dpramBlock.size       = (INT32)(size + sizeof(*packet) - sizeof(packet->data));
 
     //Build the MS-CP packet
     packet->id             = Id;
@@ -255,11 +254,14 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
     packet->status         = (UINT16)MSCP_RSP_STATUS_DATA;
 
     //Copy data into the packet data field
-    memcpy(packet->data,data,size);
+    if(0 != size)
+    {
+       memcpy(packet->data,data,size);
+    }
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
     packet->checksum = ChecksumBuffer(&packet->type,
-                                      dpramBlock.size-sizeof(packet->checksum),
+                                      (UINT32)dpramBlock.size-sizeof(packet->checksum),
                                       0xFFFFFFFF);
 #pragma ghs endnowarning
 
@@ -934,6 +936,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
  *  MODIFICATIONS
  *    $History: MSInterface.c $
  * 
+ * *****************  Version 68  *****************
+ * User: Jim Mood     Date: 12/07/12   Time: 8:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Fixes
+ *
  * *****************  Version 67  *****************
  * User: Melanie Jutras Date: 12-11-30   Time: 1:08p
  * Updated in $/software/control processor/code/system
