@@ -10,7 +10,7 @@
     Description:  Function prototypes and define for SPI Manager
 
     VERSION
-      $Revision: 12 $  $Date: 12-11-12 12:01p $
+      $Revision: 13 $  $Date: 12-12-07 2:47p $
 
 ******************************************************************************/
 
@@ -167,7 +167,7 @@ EXPORT RESULT SPIMgr_GetACBusVoltage  (FLOAT32* ACBusVoltage);
 EXPORT RESULT SPIMgr_GetACBattVoltage (FLOAT32* ACBattVoltage);
 EXPORT RESULT SPIMgr_GetLiBattVoltage (FLOAT32* Voltage);
 EXPORT RESULT SPIMgr_GetBoardTemp     (FLOAT32* Temp);
-EXPORT BOOLEAN SPIMgr_SensorTest      (UINT16 nIndex);
+EXPORT BOOLEAN SPIMgr_SensorTest      (UINT32 nIndex);
 
 // Service functions for RTC Time and NVRAM operations
 EXPORT RESULT SPIMgr_GetTime      (TIMESTRUCT *Ts);
@@ -187,6 +187,11 @@ EXPORT void SPIMgr_SetModeDirectToDevice(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SPIManager.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 12-12-07   Time: 2:47p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 12-11-12   Time: 12:01p

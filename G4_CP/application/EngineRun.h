@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 27 $  $Date: 11/26/12 12:31p $
+      $Revision: 28 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -206,17 +206,23 @@ USER_ENUM_TBL engineRunStateEnum[] =
                              Package Exports Functions
 ******************************************************************************/
 // Task init and execution.
-EXPORT void             EngRunInitialize(void);
-EXPORT ER_STATE         EngRunGetState        ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
-EXPORT UINT16           EngRunGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize );
-EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader   ( void );
-EXPORT void             EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
+EXPORT void             EngRunInitialize           ( void );
+EXPORT ER_STATE         EngRunGetState             ( ENGRUN_INDEX idx, UINT8* EngRunFlags );
+EXPORT UINT16           EngRunGetBinaryHeader      ( void *pDest, UINT16 nMaxByteSize );
+EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader        ( void );
+EXPORT void             EngRunSetRecStateChangeEvt ( INT32 tag,void (*func)(INT32,BOOLEAN));
+EXPORT BOOLEAN          EngReInitFile              ( void );
 
 #endif // ENGINERUN_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/application
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:31p

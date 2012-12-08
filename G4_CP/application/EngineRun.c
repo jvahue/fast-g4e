@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 43 $  $Date: 12/05/12 4:16p $
+      $Revision: 44 $  $Date: 12-12-08 11:44a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -62,7 +62,6 @@ static INT32 m_event_tag                   = 0;
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static void    EngRunTask       ( void* pParam );
-static void    EngReInitFile    ( void );
 static void    EngRunForceEnd   ( void );
 static void    EngRunReset      ( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData);
 static BOOLEAN EngRunIsError    ( const ENGRUN_CFG* pErCfg);
@@ -355,10 +354,6 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
 }
 
 
-
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
 /******************************************************************************
  * Function:    EngReInitFile
  *
@@ -367,14 +362,14 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
  *
  * Parameters:  void
  *
- * Returns:     void
+ * Returns:     TRUE
  *
- * Notes:
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
  *
  *****************************************************************************/
-static void EngReInitFile(void)
+BOOLEAN EngReInitFile ( void )
 {
-  CHAR resultStr[RESULTCODES_MAX_STR_LEN];
   INT16 i;
 
   memset(&m_EngineInfo,0,sizeof(m_EngineInfo));
@@ -394,8 +389,13 @@ static void EngReInitFile(void)
   }
 
   NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
-  GSE_StatusStr( NORMAL, RcGetResultCodeString(SYS_OK, resultStr));
+  
+  return TRUE;
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:     EngRunTask
@@ -1018,6 +1018,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/application
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p

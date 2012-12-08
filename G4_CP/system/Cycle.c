@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 26 $  $Date: 12/03/12 5:36p $
+  $Revision: 27 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -320,6 +320,51 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
     }
   }
 }
+
+/******************************************************************************
+ * Function:    CycleEEFileInit
+ *
+ * Description: Clears the EEPROM storage location 
+ *
+ * Parameters:  None 
+ *
+ * Returns:     TRUE
+ *
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
+ *
+ *****************************************************************************/
+BOOLEAN CycleEEFileInit(void)
+{
+   memset((void *)&m_CountsEEProm,  0, sizeof(m_CountsEEProm ));
+	
+   NV_Write( NV_PCYCLE_CNTS_EE,  0, &m_CountsEEProm,  sizeof(m_CountsEEProm) );
+
+   return TRUE;
+}
+
+/******************************************************************************
+ * Function:    CycleRTCFileInit
+ *
+ * Description: Clears the RTC storage location 
+ *
+ * Parameters:  None 
+ *
+ * Returns:     TRUE
+ *
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
+ *
+ *****************************************************************************/
+BOOLEAN CycleRTCFileInit(void)
+{
+   memset((void *)&m_CountsRTC,  0, sizeof(m_CountsRTC ));
+	
+   NV_Write( NV_PCYCLE_CNTS_RTC,  0, &m_CountsRTC,  sizeof(m_CountsRTC) );
+
+   return TRUE;
+}
+
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -1060,6 +1105,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/system
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p

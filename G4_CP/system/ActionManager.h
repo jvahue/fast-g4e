@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 14 $  $Date: 12-12-01 11:00a $
+  $Revision: 16 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -89,12 +89,6 @@ typedef enum
    ACT_ACKNOWLEDGED
 } ACTION_PERSIST_CLR_TYPE;
 
-typedef enum
-{
-   ACT_RTC_COPY_BAD,
-   ACT_EE_COPY_BAD,
-   ACT_BOTH_COPIES_BAD
-} ACTION_NV_PERSIST_BAD;
 /*---------------------------------------- ACTION -------------------------------------------*/
 #pragma pack(1)
 typedef struct
@@ -174,7 +168,6 @@ typedef struct
    FIFO    recordFIFO;
    UINT32  nRecordCnt;
    BOOLEAN bOverFlow;
-   UINT16  nRecordSize;
 } ACTION_REQUEST_FIFO;
 
 /******************************************************************************
@@ -195,15 +188,27 @@ typedef struct
 /******************************************************************************
                                   Package Exports Functions
 ******************************************************************************/
-EXPORT void ActionsInitialize    ( void );
-EXPORT INT8 ActionRequest        ( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
-                                   BOOLEAN bACK, BOOLEAN bLatch );
-EXPORT BOOLEAN ActionAcknowledgable (  INT32 TrigIdx );
+EXPORT void    ActionsInitialize    ( void );
+EXPORT INT8    ActionRequest        ( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
+                                      BOOLEAN bACK, BOOLEAN bLatch );
+EXPORT BOOLEAN ActionAcknowledgable ( INT32 TrigIdx );
+EXPORT BOOLEAN ActionEEFileInit     ( void );
+EXPORT BOOLEAN ActionRTCFileInit    ( void );
 
 #endif // ACTION_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/system
+ * SCR 1162 - NV MGR File Init function
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12-12-07   Time: 2:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 14  *****************
  * User: John Omalley Date: 12-12-01   Time: 11:00a

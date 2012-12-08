@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 19 $  $Date: 12/03/12 5:36p $
+      $Revision: 20 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -248,20 +248,27 @@ EXPORT USER_ENUM_TBL cycleEnumType[];
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT void    CycleInitialize       ( void );
-EXPORT void    CycleUpdateAll        ( ENGRUN_INDEX erIndex );
+EXPORT void    CycleInitialize         ( void );
+EXPORT void    CycleUpdateAll          ( ENGRUN_INDEX erIndex );
 
-EXPORT void    CycleFinishEngineRun  ( ENGRUN_INDEX erID );
-EXPORT void    CycleResetEngineRun   ( ENGRUN_INDEX erID );
-EXPORT UINT16  CycleGetBinaryHeader  ( void *pDest, UINT16 nMaxByteSize );
-EXPORT UINT32  CycleGetPersistentCount( CYCLE_INDEX nCycle );
-EXPORT void    CycleCollectCounts     (UINT32 counts[], ENGRUN_INDEX erIdx);
+EXPORT void    CycleFinishEngineRun    ( ENGRUN_INDEX erID );
+EXPORT void    CycleResetEngineRun     ( ENGRUN_INDEX erID );
+EXPORT UINT16  CycleGetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
+EXPORT UINT32  CycleGetPersistentCount ( CYCLE_INDEX nCycle );
+EXPORT void    CycleCollectCounts      ( UINT32 counts[], ENGRUN_INDEX erIdx);
+EXPORT BOOLEAN CycleEEFileInit         ( void );
+EXPORT BOOLEAN CycleRTCFileInit        ( void );
 
 #endif // CYCLE_H
 
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/system
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p

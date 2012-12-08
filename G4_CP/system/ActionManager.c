@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 18 $  $Date: 12-12-01 11:00a $
+ $Revision: 19 $  $Date: 12-12-08 11:44a $
 
 ******************************************************************************/
 
@@ -227,7 +227,7 @@ void ActionInitPersist ( void )
       {
          m_EE_Copy = m_RTC_Copy;
 
-         NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+         NV_Write( NV_ACT_STATUS_EE, 0, &m_EE_Copy, sizeof(m_EE_Copy) );
       }
    }
 }
@@ -354,6 +354,62 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
    return bACK;
 }
 
+/******************************************************************************
+ * Function:    ActionEEFileInit
+ *
+ * Description: Clears the EEPROM storage location 
+ *
+ * Parameters:  None 
+ *
+ * Returns:     TRUE
+ *
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
+ *
+ *****************************************************************************/
+BOOLEAN ActionEEFileInit(void)
+{
+   memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
+	
+   NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
+
+   return TRUE;
+}
+
+/******************************************************************************
+ * Function:    ActionRTCFileInit
+ *
+ * Description: Clears the RTC storage location and resets the persistent 
+ *              latched flags.
+ *
+ * Parameters:  None 
+ *
+ * Returns:     TRUE
+ *
+ * Notes:       Standard Initiliazation format to be compatible with 
+ *              NVMgr Interface.
+ *
+ *****************************************************************************/
+BOOLEAN ActionRTCFileInit(void)
+{
+   memset((void *)&m_RTC_Copy,  0, sizeof(m_RTC_Copy ));
+	
+   NV_Write( NV_ACT_STATUS_RTC,  0, &m_RTC_Copy,  sizeof(m_RTC_Copy ) );
+   
+   // Since the RTC is the main storage for the persistent action, we need
+   // to reinit the persistence flags and clear any existing latch.
+   // This doesn't need to be done for the EEPROM copy
+   m_ActionData.bNVStored         = FALSE;
+   m_ActionData.bUpdatePersistOut = TRUE;
+   m_ActionData.persist.bLatch    = FALSE;
+   m_ActionData.persist.bState    = OFF;
+   m_ActionData.persist.actionNum = ACTION_NONE;
+   
+   ActionClearLatch ( &m_ActionData );
+  
+   return TRUE;
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -405,7 +461,7 @@ void ActionTask ( void *pParam )
          // Copy RTC to EE
          m_EE_Copy = m_RTC_Copy;
          // Engine Run ended now update the EEPROM Copy
-         NV_Write( NV_ACT_STATUS_EE, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
+         NV_Write( NV_ACT_STATUS_EE, 0, &m_EE_Copy, sizeof(m_EE_Copy) );
       }
    }
    // Is the engine in starting or run state?
@@ -980,6 +1036,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 12-12-08   Time: 11:44a
+ * Updated in $/software/control processor/code/system
+ * SCR 1162 - NV MGR File Init function
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-12-01   Time: 11:00a
