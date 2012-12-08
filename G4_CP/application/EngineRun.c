@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 44 $  $Date: 12-12-08 11:44a $
+      $Revision: 45 $  $Date: 12-12-08 1:33p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -229,6 +229,10 @@ void EngRunInitialize(void)
       pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / (UINT32)pErCfg->erRate);
       pErData->nRateCountdown = (UINT16)((pErCfg->nOffset_ms / MIF_PERIOD_mS) + 1);
 
+      pErData->nTotalSensors  = SensorInitSummaryArray ( pErData->snsrSummary,
+                                                         MAX_ENGRUN_SENSORS,
+                                                         pErCfg->sensorMap,
+                                                         sizeof(pErCfg->sensorMap) );      
     }
     else // Invalid config...
     {
@@ -534,11 +538,8 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     pErData->monMaxValue         = -FLT_MAX;
 
     /* SNSR_SUMMARY field setup */
+    SensorResetSummaryArray (pErData->snsrSummary, pErData->nTotalSensors);
 
-    pErData->nTotalSensors = SensorSetupSummaryArray(pErData->snsrSummary,
-                                                     MAX_ENGRUN_SENSORS,
-                                                     pErCfg->sensorMap,
-                                                     sizeof(pErCfg->sensorMap) );
     // Reset cycles & counts for this enginerun
     CycleResetEngineRun(pErData->erIndex);
 }
@@ -742,10 +743,7 @@ static void EngRunStartLog( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData )
   pErData->startingTime_ms = CM_GetTickCount();
 
   // Reset the sensor summary
-  pErData->nTotalSensors = SensorSetupSummaryArray(pErData->snsrSummary,
-                                                   MAX_ENGRUN_SENSORS,
-                                                   (UINT32*)pErCfg->sensorMap,
-                                                   sizeof(pErCfg->sensorMap) );
+  SensorResetSummaryArray (pErData->snsrSummary, pErData->nTotalSensors);
 
   pErData->erDuration_ms   = 0;
 
@@ -1018,6 +1016,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:33p
+ * Updated in $/software/control processor/code/application
+ * SCR 1167 - Sensor Summary Init optimization
  * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a

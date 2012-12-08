@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 19 $  $Date: 12/03/12 5:30p $
+ $Revision: 20 $  $Date: 12-12-08 1:34p $
 
 ******************************************************************************/
 
@@ -137,6 +137,11 @@ void TrendInitialize( void )
 
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * (INT16)pCfg->rate;
 
+    pData->nTotalSensors = SensorInitSummaryArray ( pData->snsrSummary,  
+                                                    MAX_TRENDS,
+                                                    pCfg->sensorMap,
+                                                    sizeof(pCfg->sensorMap) ); 
+    
     // Calculate the expected number of stability sensors based on config
     pData->nStabExpectedCnt = 0;
     for (j = 0; j < MAX_STAB_SENSORS; ++j)
@@ -398,12 +403,8 @@ static void TrendStartManualTrend(TREND_CFG* pCfg, TREND_DATA* pData )
     pData->trendCnt++;
 
     // The sensor statistics shall be reset each time the trend becomes ACTIVE.
-    #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-    pData->nTotalSensors = SensorSetupSummaryArray(pData->snsrSummary,
-                                                    MAX_TREND_SENSORS,
-                                                    pCfg->sensorMap,
-                                                    sizeof(pCfg->sensorMap) );
-    #pragma ghs endnowarning
+    SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);
+
     // Activate Action
     if( pCfg->nAction)
     {
@@ -684,12 +685,8 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
     pData->maxStability.status[i]    = STAB_UNKNOWN;
   }
 
-  // Reset(Init) the sensor statistics
-  pData->nTotalSensors = SensorSetupSummaryArray(pData->snsrSummary,
-                                                 MAX_TREND_SENSORS,
-                                                 pCfg->sensorMap,
-                                                 sizeof(pCfg->sensorMap) );
-  #pragma ghs endnowarning
+  // Reset the sensor statistics
+  SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);  
 }
 
 
@@ -1027,13 +1024,7 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
   pData->trendCnt++;
 
   // The sensor statistics shall be reset each time the trend becomes ACTIVE.
-#pragma ghs nowarning 1545
-  pData->nTotalSensors = SensorSetupSummaryArray(pData->snsrSummary,
-                                                 MAX_TREND_SENSORS,
-                                                 pCfg->sensorMap,
-                                                 sizeof(pCfg->sensorMap) );
-#pragma ghs endnowarning
-
+  SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);
 
   // Create Trend Start log
   trendLog.trendIndex = pData->trendIndex;
@@ -1064,6 +1055,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
  *  MODIFICATIONS
  *    $History: trend.c $
  *
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1167 - Sensor Summary Init optimization
+ * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:30p
  * Updated in $/software/control processor/code/application
