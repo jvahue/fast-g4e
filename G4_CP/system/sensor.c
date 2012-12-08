@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 85 $  $Date: 12/05/12 4:17p $
+      $Revision: 86 $  $Date: 12-12-08 1:32p $
 
 ******************************************************************************/
 
@@ -440,28 +440,28 @@ void SensorDisableLiveStream( void )
 }
 
 /******************************************************************************
- * Function:     SensorSetupSummaryArray
+ * Function:     SensorInitSummaryArray
  *
  * Description:  Utility function which uses a provided big-endian Bit-array
- *               representing which which of the available sensors (127...0)
+ *               representing which of the available sensors (127...0)
  *               are to be added to the provided list.
  *
  * Parameters:   [in/out] summary           - SNSR_SUMMARY array structure to be populated.
  *               [in]     summarySize       - The max allowable entries in SNSR_SUMMARY[].
  *               [in]     snsrMask          - Array of bits denoting sensors to add to list.
  *               [in]     snsrMaskSizeBytes - Size of snsrMask[] in bytes.
-
- * Returns:      INT32 the number of entries added to the summary array
  *
- * Notes:
+ * Returns:      UINT16 the number of entries added to the summary array
+ *
+ * Notes:        This just sets up the array during initialization. To reset
+ *               the values at run time use SensorResetSummaryArray.
  *****************************************************************************/
- UINT16 SensorSetupSummaryArray (SNSR_SUMMARY summary[],  INT32  summarySize,
-                                 UINT32 snsrMask[], INT32 snsrMaskSizeBytes)
+UINT16 SensorInitSummaryArray ( SNSR_SUMMARY summary[],  INT32 summarySize,
+                                UINT32 snsrMask[],       INT32 snsrMaskSizeBytes )
 {
   SENSOR_INDEX snsrIdx;
-  UINT16        summaryCnt;
+  UINT16       summaryCnt;
   INT16        i;
-  TIMESTAMP    timeStampNow;
 
   // "Clear" the summary table by setting all indexes to "unused"
   for (i = 0; i < summarySize; ++i)
@@ -470,11 +470,6 @@ void SensorDisableLiveStream( void )
     summary[i].SensorIndex = SENSOR_UNUSED;
   }
 
-  CM_GetTimeAsTimestamp(&timeStampNow);
-
-  // Loop thru the mask-of-sensors to be added to the Summary array
-  // For each "ON" bit, initialize the next available SnsrSummary entry.
-
   summaryCnt = 0;
   for( snsrIdx = SENSOR_0;
        snsrIdx < (SENSOR_INDEX)MAX_SENSORS && summaryCnt < summarySize;
@@ -482,27 +477,51 @@ void SensorDisableLiveStream( void )
   {
     if ( TRUE == GetBit((INT32)snsrIdx, snsrMask, snsrMaskSizeBytes ))
     {
-      // Only store the first <summarySize> number of sensors.
-      // Get the TOTAL COUNT of configured sensors in the mask.
-
       summary[summaryCnt].SensorIndex  = snsrIdx;
-      summary[summaryCnt].nSampleCount = 0;
-//      summary[summaryCnt].bInitialized = FALSE;
-      summary[summaryCnt].bValid       = FALSE;
-      summary[summaryCnt].fMinValue    = FLT_MAX;
-      summary[summaryCnt].timeMinValue = timeStampNow;
-      summary[summaryCnt].fMaxValue    = -FLT_MAX;
-      summary[summaryCnt].timeMaxValue = timeStampNow;
-      summary[summaryCnt].fTotal       = 0.f;
-      summary[summaryCnt].fAvgValue    = 0.f;
       ++summaryCnt;
     }
   }
+ 
+  return (summaryCnt);
+}
 
-  // Return the count of "ON" bits
-  // in the snsrMask[]. Caller should check this to
-  // ensure that the count did not exceed <summarySize>
-  return summaryCnt;
+
+/******************************************************************************
+ * Function:     SensorResetSummaryArray
+ *
+ * Description:  The SensorResetSummaryArray resets the statistics of the 
+ *               sensors that were initilialized to be monitored by independent
+ *               system objects. 
+ *
+ * Parameters:   [in/out] summary      - SNSR_SUMMARY array structure to be reset.
+ *               [in]     nEntries     - number of used entries in SNSR_SUMMARY[].
+ *
+ * Returns:      None
+ *
+ * Notes:        Must run SensorInitSummaryArray to setup the summary array 
+ *               and get the nEntries. This should be done at initialization
+ *               and then use the Reset Summary Array at run time.
+ *****************************************************************************/
+void SensorResetSummaryArray (SNSR_SUMMARY summary[], UINT16 nEntries)
+{
+  UINT32    arrayIdx;
+  TIMESTAMP timeStampNow;
+
+  CM_GetTimeAsTimestamp(&timeStampNow);
+
+  // Loop thru the mask-of-sensors to be added to the Summary array
+  // For each "ON" bit, initialize the next available SnsrSummary entry.
+  for( arrayIdx = 0; arrayIdx < nEntries; arrayIdx++ )
+  {
+     summary[arrayIdx].nSampleCount = 0;
+     summary[arrayIdx].bValid       = FALSE;
+     summary[arrayIdx].fMinValue    = FLT_MAX;
+     summary[arrayIdx].timeMinValue = timeStampNow;
+     summary[arrayIdx].fMaxValue    = -FLT_MAX;
+     summary[arrayIdx].timeMaxValue = timeStampNow;
+     summary[arrayIdx].fTotal       = 0.f;
+     summary[arrayIdx].fAvgValue    = 0.f;
+  }
 }
 
 /******************************************************************************
@@ -1993,6 +2012,11 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 86  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1167 - Sensor Summary Init optimization
  * 
  * *****************  Version 85  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p

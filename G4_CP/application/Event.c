@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 37 $  $Date: 12-11-28 2:25p $
+ $Revision: 38 $  $Date: 12-12-08 1:33p $
 
 ******************************************************************************/
 
@@ -201,6 +201,12 @@ void EventsInitialize ( void )
       // If the event has a Start and End Expression then it must be configured
       if ( (0 != pEventCfg->startExpr.size) && (0 != pEventCfg->endExpr.size) )
       {
+         #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+         pEventData->nTotalSensors = SensorInitSummaryArray ( pEventData->sensor,  
+                                                              MAX_EVENT_SENSORS,
+                                                              pEventCfg->sensorMap,
+                                                              sizeof(pEventCfg->sensorMap) );
+         #pragma ghs endnowarning
          // Reset the events run time data
          EventResetData ( pEventCfg, pEventData );
       }
@@ -402,15 +408,11 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    memset ( &pData->tsDurationMetTime, 0, sizeof(pData->tsDurationMetTime) );
    memset ( &pData->tsEndTime, 0, sizeof(pData->tsEndTime) );
 
-   pData->endType       = EVENT_NO_END;
+   pData->endType = EVENT_NO_END;
 
    // Re-init the sensor summary data for the event
-#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-   pData->nTotalSensors = SensorSetupSummaryArray(pData->sensor,
-                                                  MAX_EVENT_SENSORS,
-                                                  pConfig->sensorMap,
-                                                  sizeof (pConfig->sensorMap) );
-#pragma ghs endnowarning
+   SensorResetSummaryArray (pData->sensor, pData->nTotalSensors);
+
 }
 
 /******************************************************************************
@@ -1755,6 +1757,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:33p
+ * Updated in $/software/control processor/code/application
+ * SCR 1167 - Sensor Summary Init optimization
  * 
  * *****************  Version 37  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:25p

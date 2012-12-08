@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 44 $  $Date: 12/05/12 4:17p $
+      $Revision: 45 $  $Date: 12-12-08 1:32p $
 
 ******************************************************************************/
 
@@ -540,16 +540,14 @@ EXPORT void    SensorsInitialize       ( void );
 EXPORT void    SensorDisableLiveStream ( void );
 EXPORT UINT16  SensorGetSystemHdr      ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  SensorGetETMHdr         ( void *pDest, UINT16 nMaxByteSize );
-EXPORT UINT32  SensorGetLastUpdateTime( SENSOR_INDEX Sensor);
+EXPORT UINT32  SensorGetLastUpdateTime ( SENSOR_INDEX Sensor);
 
 // Functions for managing SNSR_SUMMARY objects
-EXPORT UINT16  SensorSetupSummaryArray (SNSR_SUMMARY summary[],
-                                        INT32  summarySize,
-                                        UINT32 snsrMask[],
-                                        INT32  snsrMaskSizeBytes);
-
-EXPORT void SensorUpdateSummaries ( SNSR_SUMMARY summaryArray[], UINT16 nEntries );
-EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries);
+EXPORT UINT16  SensorInitSummaryArray    ( SNSR_SUMMARY summary[], INT32 summarySize,
+                                           UINT32 snsrMask[],      INT32 snsrMaskSizeBytes );
+EXPORT void    SensorResetSummaryArray   ( SNSR_SUMMARY summary[],      UINT16 nEntries );
+EXPORT void    SensorUpdateSummaries     ( SNSR_SUMMARY summaryArray[], UINT16 nEntries );
+EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEntries);
 
 
 
@@ -557,6 +555,11 @@ EXPORT void SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 nEnt
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1167 - Sensor Summary Init optimization
  * 
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p

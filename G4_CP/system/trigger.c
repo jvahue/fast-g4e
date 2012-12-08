@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 83 $  $Date: 12/05/12 4:17p $
+  $Revision: 84 $  $Date: 12-12-08 1:32p $
 
 ******************************************************************************/
 
@@ -201,12 +201,10 @@ void TriggerInitialize(void)
       }
 
       // Setup the sensor summary array based on whatever was set in the SensorMap above.
-#pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-      pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
-                                                         MAX_TRIG_SENSORS,
-                                                         pTrigData->sensorMap,
-                                                         sizeof (pTrigData->sensorMap) );
-#pragma ghs endnowarning
+      pTrigData->nTotalSensors = SensorInitSummaryArray ( pTrigData->snsrSummary,  
+                                                          MAX_TRIG_SENSORS,
+                                                          pTrigData->sensorMap,
+                                                          sizeof(pTrigData->sensorMap) );        
     }
 
     // There should always be a configuration by the time we get here
@@ -827,10 +825,7 @@ void TriggerReset( TRIGGER_DATA *pTrigData)
    pTrigData->nDuration_ms  = 0;
    pTrigData->endType       = TRIG_NO_END;
 
-   pTrigData->nTotalSensors = SensorSetupSummaryArray(pTrigData->snsrSummary,
-                                                      MAX_TRIG_SENSORS,
-                                                      pTrigData->sensorMap,
-                                                      sizeof (pTrigData->sensorMap) );
+   SensorResetSummaryArray (pTrigData->snsrSummary, pTrigData->nTotalSensors);
 }
 
 /******************************************************************************
@@ -1158,6 +1153,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 84  *****************
+ * User: John Omalley Date: 12-12-08   Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1167 - Sensor Summary Init optimization
  * 
  * *****************  Version 83  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p
