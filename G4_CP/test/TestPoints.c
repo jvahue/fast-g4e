@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 22 $  $Date: 11/12/10 9:54p $  
+    $Revision: 23 $  $Date: 12/08/12 1:56p $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -575,6 +575,11 @@ USER_HANDLER_RESULT DumpCoverage(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 12/08/12   Time: 1:56p
+ * Updated in $/software/control processor/code/test
+ * Update forf v2.0.0
  * 
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 11/12/10   Time: 9:54p
