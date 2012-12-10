@@ -9,7 +9,7 @@
                     modules.
 
     VERSION
-      $Revision: 52 $  $Date: 12-12-02 1:03p $
+      $Revision: 53 $  $Date: 12/10/12 1:44p $
 
 ******************************************************************************/
 
@@ -600,19 +600,21 @@ void CRC32(const void *Data, UINT32 Size, UINT32* pCRC, CRC_FUNC Func)
 /*vcast_dont_instrument_end*/
 
 /******************************************************************************
-* Function:    CalculateCheckSum
-*
-* Description: Returns the CRC or CheckSum for the passed buffer
-*
-*
-* Parameters:  [in] method: CHK_METHOD to be used for calculating the CRC
-*              [in] Addr: starting address of buffer to be encoded into the crc
-*              [in] Size: size in bytes of the buffer to be encoded into the crc
-*
-*
-* Returns:     UINT32 containing the checksum for the address range.
-*
-*****************************************************************************/
+ * Function:    CalculateCheckSum
+ *
+ *  Description: Returns the CRC or CheckSum for the passed buffer
+ *
+ *
+ * Parameters:  [in] method: CHK_METHOD to be used for calculating the CRC
+ *              [in] Addr: starting address of buffer to be encoded into the crc
+ *              [in] Size: size in bytes of the buffer to be encoded into the crc
+ *
+ *
+ * Returns:     UINT32 containing the checksum for the address range.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
 UINT16 CalculateCheckSum(CHECK_METHOD method, void* Addr, UINT32 Size )
 {
   UINT16 crc = 0x0000;
@@ -914,7 +916,7 @@ BOOLEAN strncpy_safe(CHAR* dest, INT32 sizeDest, const CHAR* source, INT32 count
   pDest   = dest;
   // Copy characters until destination size is reached or dest has been
   // assigned a null character.
-  while ( status && copiedCount <= numberOfBytesToMove && (*pDest++ = *pSource++) )
+  while ( status && copiedCount <= numberOfBytesToMove && NULL != (*pDest++ = *pSource++) )
   {
     ++copiedCount;
   }
@@ -1047,7 +1049,7 @@ void SetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 void ResetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 wordOffset;
-  UINT32 wordCnt  = arraySizeBytes / BYTES_PER_WORD;
+  UINT32 wordCnt  = (UINT32)(arraySizeBytes / BYTES_PER_WORD);
 
   ASSERT( ((bitOffset >= 0) && ((UINT32)bitOffset < (wordCnt * 32U)) ) );
   wordOffset = (UINT32)bitOffset / 32U;
@@ -1158,6 +1160,11 @@ BOOLEAN TestBits( UINT32 mask[], INT32 maskSizeBytes, UINT32 data[], INT32 dataS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Utility.c $
+ * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 12/10/12   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review
  *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 12-12-02   Time: 1:03p
