@@ -259,14 +259,17 @@ typedef struct
 
   // State/status info
   BOOLEAN      bAutoTrendStabFailed;/* Flag used to track an autotrend has failed            */
-  BOOLEAN      bEnabled;            /* Indicates the assoc-ER is active, enabling this trend */
+
+  // Reset trigger handling.
+  BOOLEAN      bEnabled;            /* Indicates rst-trigger is enabled for detection        */
+  BOOLEAN      bResetInProg;        /* Latch flag for handling Reset processing              */
+  // States and counts
   TREND_STATE  trendState;          /* Current trend type                                    */
   ER_STATE     prevEngState;        /* last op mode for trending                             */
   UINT16       trendCnt;            /* # of all trends ( stability and trigger since Reset   */
   UINT16       autoTrendCnt;        /* # of autotrends since Reset (0 -> TREND_CFG.maxTrends)*/
-  BOOLEAN      bResetDetected;      /* Latch flag for handling Reset detection               */
+  // Action Manager ID
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
-
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
   UINT32       masterSampleCnt;     /* Counts of samples take this period each SNSR_SUMMARY
@@ -313,7 +316,7 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/29/12   Time: 4:19p
  * Updated in $/software/control processor/code/application

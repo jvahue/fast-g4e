@@ -36,6 +36,10 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
+#define RESET_TRIGGER_ACTIVE(rst)  \
+  ((rst != TRIGGER_UNUSED)    &&  \
+    (TriggerIsConfigured(rst))  &&  \
+    (TriggerGetState(rst)))
 
 
 /*****************************************************************************/
@@ -137,11 +141,11 @@ void TrendInitialize( void )
 
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * (INT16)pCfg->rate;
 
-    pData->nTotalSensors = SensorInitSummaryArray ( pData->snsrSummary,  
+    pData->nTotalSensors = SensorInitSummaryArray ( pData->snsrSummary,
                                                     MAX_TRENDS,
                                                     pCfg->sensorMap,
-                                                    sizeof(pCfg->sensorMap) ); 
-    
+                                                    sizeof(pCfg->sensorMap) );
+
     // Calculate the expected number of stability sensors based on config
     pData->nStabExpectedCnt = 0;
     for (j = 0; j < MAX_STAB_SENSORS; ++j)
@@ -318,7 +322,6 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
   TrendCheckResetTrigger(pCfg, pData);
   pData->bEnabled = FALSE;
 
-
   switch ( erState )
   {
     case ER_STATE_STOPPED:
@@ -327,8 +330,8 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       if (pData->prevEngState != ER_STATE_STOPPED)
       {
         TrendFinish(pCfg, pData);
+        pData->prevEngState = ER_STATE_STOPPED;
       }
-      pData->prevEngState = ER_STATE_STOPPED;
       break;
 
     case ER_STATE_STARTING:
@@ -337,17 +340,31 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       if (pData->prevEngState != ER_STATE_STARTING)
       {
         TrendFinish(pCfg, pData);
+        pData->prevEngState = ER_STATE_STARTING;
       }
-      pData->prevEngState = ER_STATE_STARTING;
       break;
 
 
     case ER_STATE_RUNNING:
 
-      // Upon entering RUNNING state, reset trending info from previous run-state.
+      // Upon entering RUNNING state...
       if (pData->prevEngState != ER_STATE_RUNNING)
       {
+        //reset trending info from previous run-state.
         TrendReset(pCfg, pData,TRUE);
+
+        // if reset trigger is active at start of
+        // RUN STATE, don't enable until it is cleared.
+        pData->bEnabled = ( RESET_TRIGGER_ACTIVE(pCfg->resetTrigger) ) ? FALSE : TRUE;
+
+        // set the last engine run state
+        pData->prevEngState = ER_STATE_RUNNING;
+      }
+      else if ( FALSE == pData->bEnabled &&
+                FALSE == RESET_TRIGGER_ACTIVE(pCfg->resetTrigger))
+      {
+        // In running state and active reset went clear... enable for next reset trigger.
+        pData->bEnabled = TRUE;
       }
 
       // Check to see if an Autotrend has met/maintained stability
@@ -363,11 +380,6 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
       {
         TrendStartManualTrend(pCfg, pData);
       }
-
-      // set the last engine run state
-      // and flag the trend as 'enabled' for subsequent ResetTrigger handling.
-      pData->prevEngState = ER_STATE_RUNNING;
-      pData->bEnabled     = TRUE;
       break;
 
       // Should never get here!
@@ -406,11 +418,8 @@ static void TrendStartManualTrend(TREND_CFG* pCfg, TREND_DATA* pData )
     SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);
 
     // Activate Action
-    if( pCfg->nAction)
-    {
-      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
                                            ACTION_ON, FALSE, FALSE);
-    }
 
     // Create TREND_START log
 
@@ -586,12 +595,8 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     pData->trendState = TREND_STATE_INACTIVE;
 
     // Clear Action
-    if( pCfg->nAction)
-    {
-      pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
-        ACTION_OFF, FALSE, FALSE);
-    }
-
+    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+                                           ACTION_OFF, FALSE, FALSE);
 
     GSE_DebugStr(NORMAL,TRUE, "Trend[%d]: Logged. AutoTrendCnt: %d TrendCnt: %d",
                                 pData->trendIndex,
@@ -611,9 +616,6 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     // Reset interval timer
     pData->timeSinceLastTrendMs  = 0;
     pData->lastIntervalCheckMs   = 0;
-
-
-
 
   } // End of finishing up a log for trend in progress.
 
@@ -648,8 +650,8 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   }
 
   pData->trendState           = TREND_STATE_INACTIVE;
-  pData->bResetDetected       = FALSE;
-  pData->bEnabled             = FALSE;
+  pData->bResetInProg         = FALSE;
+  //pData->bEnabled             = FALSE;
   pData->bAutoTrendStabFailed = FALSE;
 
   pData->nTimeStableMs        = 0;
@@ -686,7 +688,7 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   }
 
   // Reset the sensor statistics
-  SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);  
+  SensorResetSummaryArray (pData->snsrSummary, pData->nTotalSensors);
 }
 
 
@@ -824,20 +826,24 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
  *****************************************************************************/
 static void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
 {
-   //Each Trend shall record a "Trend not Detected" log when the reset trigger becomes active,
-   //the trend processing was ENABLED and a trend has not been taken.
+  //Each Trend shall record a "Trend not Detected" log when the reset trigger becomes active,
+  //the trend processing was ENABLED and a trend has not been taken.
+
+  BOOLEAN bRstState = RESET_TRIGGER_ACTIVE( pCfg->resetTrigger );
+
+  if(!pData->bEnabled && !bRstState)
+  {
+    pData->bEnabled = TRUE;
+  }
 
   // Only handle the reset-event upon initial detected.
-  if ( FALSE == pData->bResetDetected          &&  // RestTrigger WAS NOT already detected.
-       pCfg->resetTrigger != TRIGGER_UNUSED    && // ResetTrigger IS declared.
-       TriggerIsConfigured(pCfg->resetTrigger) && // ResetTrigger IS defined.
-       TriggerGetState    (pCfg->resetTrigger))   // ResetTrigger IS ACTIVE.
+  if ( !pData->bResetInProg && bRstState  )
   {
     // Flag the Reset as detected so we don't do this again until the next new reset.
-    pData->bResetDetected = TRUE;
+    pData->bResetInProg = TRUE;
 
-    // If, no stable/auto trends taken and AutoTrend criteria are defined, log it.
-    if ( pData->bEnabled  &&
+    // If, no auto trends taken and AutoTrend criteria are defined, log it.
+    if ( pData->bEnabled          &&
          0 == pData->autoTrendCnt &&
          SENSOR_UNUSED !=  pCfg->stability[0].sensorIndex )
     {
@@ -847,14 +853,14 @@ static void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
                           &pData->maxStability);
     }
 
-    // Reset max stable count.
+    // Reset max autotrend count.
     pData->autoTrendCnt = 0;
   }
-  else if(pData->bResetDetected && !TriggerGetState(pCfg->resetTrigger))
+  else if(pData->bResetInProg && !bRstState)
   {
     // If trend-reset trigger had been active and is now inactive,
     // clear the flag for next use.
-    pData->bResetDetected = FALSE;
+    pData->bResetInProg = FALSE;
   }
 }
 
@@ -1036,12 +1042,8 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
               sizeof(trendLog),
               NULL);
 
-  // Activate Action
-  if( pCfg->nAction)
-  {
-    pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
+  pData->nActionReqNum = ActionRequest(pData->nActionReqNum, pCfg->nAction,
                                          ACTION_ON, FALSE, FALSE);
-  }
 /*
   GSE_DebugStr( NORMAL,TRUE,
   "Trend[%d]: Auto-Trend started TimeStable: %dms, TimeSinceLastMs: %dms",
@@ -1059,7 +1061,7 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
  * User: John Omalley Date: 12-12-08   Time: 1:34p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:30p
  * Updated in $/software/control processor/code/application

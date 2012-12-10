@@ -194,10 +194,9 @@ static USER_MSG_TBL trendCmd [] =
 static USER_MSG_TBL trendStatus [] =
 {
   /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                              IndexRange           DataLimit   EnumTbl*/
-   { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   trendStateEnum    },
+   { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   trendStateEnum      },
    { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.prevEngState,          0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
    { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.trendCnt,              0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "AT_TRENDCOUNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.autoTrendCnt,          0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.timeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
    { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },

@@ -1531,10 +1531,10 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
  *               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
  *                                the string to enum table
  *
- * Returns:
+ * Returns:      TRUE if result of operation was successful, otherwise FALSE
  *
  * Notes:
-******************************************************************************/
+ ******************************************************************************/
 BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
                        void* GetPtr, USER_ENUM_TBL* MsgEnumTbl)
 {
@@ -1628,7 +1628,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         for( i = 0; i < arraySizeWords; ++i )
         {
           tempWord = word32Ptr[displayHexStart];
-          sprintf( destPtr, "%08X", tempWord );
+          snprintf( destPtr, sizeof(bufHex128), "%08X", tempWord );
           destPtr += 8;
           displayHexStart -= 1;
         }
@@ -1656,7 +1656,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
           // Display a list of integer values, one for each "on" bit.
           for( i = 0; i < (arraySizeWords*32); ++i )
           {
-            if (GetBit(i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
+            if (GetBit((INT32)i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
             {
               snprintf(numStr, sizeof(numStr), "%d,", i);
               SuperStrcat(destPtr, numStr, sizeof(tempOutput));
@@ -1669,7 +1669,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
         *(--destPtr) = ']';
         *(++destPtr) = '\0';
 
-        strncpy_safe(GetStr, Len, tempOutput, _TRUNCATE);
+        strncpy_safe(GetStr, (INT32)Len, tempOutput, _TRUNCATE);
 
 
       } // USER_TYPE_HEX128 scope for decls
