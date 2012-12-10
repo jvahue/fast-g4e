@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 3 $  $Date: 12-11-10 4:37p $
+      $Revision: 4 $  $Date: 12-12-09 6:39p $
 
 ******************************************************************************/
 
@@ -41,7 +41,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define CREEP_RATE_MS_TO_MIF_CNT  10   // i.e cvrt 1000 ms to 100 MIF cnt
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -108,7 +108,7 @@ static void Creep_RestoreFaultHistory( void );
 static void Creep_AddToFaultBuff ( SYS_APP_ID id );
 
 static void Creep_FailAllObjects ( UINT16 index );
-static void Creep_InitPersistentPcnt ( void ); 
+static void Creep_InitPersistentPcnt ( void );
 
 
 #include "CreepUserTables.c"
@@ -175,8 +175,8 @@ const CREEP_TYPE_TO_SYSLOG_ID creep_PBIT_TypeToSysLog[PBIT_FAIL_MAX] =
 {
   SYS_ID_NULL_LOG,
   APP_ID_CREEP_PBIT_CFG_CRC,
+  APP_ID_CREEP_PBIT_CRC_CHANGED,
   APP_ID_CREEP_PBIT_EE_APP,
-  APP_ID_CREEP_PBIT_CRC_CHANGED
 };
 
 // NOTE: Changes to CREEP_FAULT_TYPE enum list will affect the item below.
@@ -247,6 +247,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
     m_Creep_Status[i].interval.nRateCountDown =
              (INT16) (m_Creep_Cfg.creepObj[i].cpuOffset_ms / MIF_PERIOD_mS) + 1;
              // Why "+1" ? To be consistent with other modules.
+    m_Creep_Status[i].lastIdleTime_ms = CM_GetTickCount();
   }
 
   // Did we get a PBIT error ? If no, then update status to OK.
@@ -353,6 +354,8 @@ static void Creep_Task ( void *pParam )
   UINT16 i;
   BOOLEAN bUpdateNV;
   BOOLEAN bLogSummary;
+  BOOLEAN bCreepCountStart;
+  BOOLEAN bErTransFault;
 
 
   pCfg = (CREEP_CFG_PTR) &m_Creep_Cfg;
@@ -368,6 +371,7 @@ static void Creep_Task ( void *pParam )
     pStatus = pStatus + i;
     bUpdateNV = FALSE;
     bLogSummary = FALSE;
+    bErTransFault = FALSE;
 
     // If Creep Object is defined and not PBIT faulted,
     //   then process CREEP else move to next Creep Object
@@ -398,6 +402,9 @@ static void Creep_Task ( void *pParam )
 
       if ( (er_state == ER_STATE_STARTING) || (er_state == ER_STATE_RUNNING) )
       {
+
+        bCreepCountStart = FALSE;
+
         // ER Active.
         if ((pStatus->state == CREEP_STATE_IDLE) ||
             (pStatus->state == CREEP_STATE_FAULT_IDLE) )
@@ -406,9 +413,27 @@ static void Creep_Task ( void *pParam )
           pStatus->state = CREEP_STATE_ENGRUN;
           pCreepData->creepMissionCnt = 0;  // Clear current creep count if not already cleared
           pStatus->erTime_ms = 0;
+          bCreepCountStart = TRUE;  // Flag to store .creepInProgress flag
+          m_Creep_AppDataRTC.creepInProgress[i] = TRUE;
         }
 
-        if (m_Creep_Sensors[i].bFailed == FALSE)
+        // Determine if we started up or sensor self healed while ER was actually
+        //  running.  If so, we might not have been able to perform some creep calculation,
+        //  must declare FAULT
+        if ( (pStatus->lastIdleTime_ms != 0) && (er_state == ER_STATE_RUNNING) )
+        {
+          // If we transitioned to ER RUNNING too quickly then assume
+          //  ER was already RUNNING when we startup or sensor re-healed.
+          if ( (CM_GetTickCount() - pStatus->lastIdleTime_ms) <
+                pCfg->creepObj[i].erTransFault_ms )
+          {
+            bErTransFault = TRUE;
+          }
+          pStatus->lastIdleTime_ms = 0;  // Set to "0" as flag to indicate check has
+                                         //  been performed and we don't need to check again.
+        }
+
+        if ( (m_Creep_Sensors[i].bFailed == FALSE) && (bErTransFault == FALSE) )
         {
           // Process current Creep Cnt, on processing interval
           if (bCPUOffset == TRUE)
@@ -417,6 +442,8 @@ static void Creep_Task ( void *pParam )
                                                pCfg->creepObj[i].creepTblId);
             // Update erTime count
             pStatus->erTime_ms += (pCreepInterval->nRateCounts * 10);
+
+            pStatus->creepIncrement = (UINT32) creepIncrement;
           }
         }
         else
@@ -434,10 +461,12 @@ static void Creep_Task ( void *pParam )
         //   due to sensor failure detected.
         pCreepData->creepMissionCnt += creepIncrement;
 
+
         // Update App Data RTC if new count.  Note: _Calculate occurs every 1 sec
         //   Thus fastest is  1 Hz write (or for two Creep Obj, this will be 2 writes
         //   per sec or 2 Hz).  Do we need to limit ?
-        if (creepIncrement != 0)
+        // Also if we just started creep cnt, flag this in App Data RTC.
+        if ( (creepIncrement != 0) || (bCreepCountStart == TRUE) )
         {
           m_Creep_AppDataRTC.creepMissionCnt[i] = pCreepData->creepMissionCnt;
           NV_Write(NV_CREEP_CNTS_RTC, 0, (void *) &m_Creep_AppDataRTC,
@@ -517,6 +546,7 @@ static void Creep_Task ( void *pParam )
 
           // Clear RTC App Data
           m_Creep_AppDataRTC.creepMissionCnt[i] = 0;
+          m_Creep_AppDataRTC.creepInProgress[i] = FALSE;
           NV_Write(NV_CREEP_CNTS_RTC, 0, (void *) &m_Creep_AppDataRTC,
                    sizeof(CREEP_APP_DATA_RTC) );
 
@@ -534,6 +564,9 @@ static void Creep_Task ( void *pParam )
             Creep_CreateSummaryLog(i);
           }
         }
+
+        pStatus->lastIdleTime_ms = CM_GetTickCount();
+
       } // End of ELSE if current ER State is IDLE
 
       // Clear buffer after interval.  This is done always.
@@ -1228,6 +1261,9 @@ BOOLEAN Creep_FileInit(void)
   // Init App data
   memset ( (void *) &m_Creep_AppData, 0, sizeof(CREEP_APP_DATA) );
 
+  // Update EE APP Data crc16 to default crc16
+  m_Creep_AppData.crc16 = CREEP_DEFAULT_CRC16;
+
   // Update App data
   NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
 
@@ -1254,10 +1290,37 @@ BOOLEAN Creep_FaultFileInit(void)
   // Init App data
   memset ( (void *) &m_creepHistory, 0, sizeof(m_creepHistory) );
 
+  CM_GetTimeAsTimestamp ( (TIMESTAMP *) &m_creepHistory.ts );
+
   // Update App data
   NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
 
   return TRUE;
+}
+
+
+/******************************************************************************
+ * Function:     Creep_ClearFaultFile
+ *
+ * Description:  Clears the Recent Fault File
+ *
+ * Parameters:   TIMESTAMP time function was called
+ *
+ * Returns:      none
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+void Creep_ClearFaultFile(TIMESTAMP *pTs)
+{
+  // Init App data
+  memset ( (void *) &m_creepHistory, 0, sizeof(m_creepHistory) );
+
+  m_creepHistory.ts = *pTs;
+
+  // Update App data
+  NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
+
 }
 
 
@@ -1322,7 +1385,7 @@ void Creep_FailAllObjects ( UINT16 index_obj )
 
   NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
 
-  snprintf (gse_OutLine, sizeof(gse_OutLine), 
+  snprintf (gse_OutLine, sizeof(gse_OutLine),
             "Creep Task: Creep Fault (Obj=%d) ! \r\n", index_obj);
   GSE_DebugStr(NORMAL,TRUE,gse_OutLine);
 
@@ -1663,11 +1726,12 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   {
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
-      if ( m_Creep_AppDataRTC.creepMissionCnt[i] != 0 )
+      if ( ( m_Creep_AppDataRTC.creepMissionCnt[i] != 0 ) || ( m_Creep_AppDataRTC.creepInProgress[i] == TRUE) )
       {
         m_Creep_AppData.data[i].creepAccumCntTrashed += m_Creep_AppDataRTC.creepMissionCnt[i];
         m_Creep_AppData.data[i].creepFailures += 1;
         m_Creep_AppDataRTC.creepMissionCnt[i] = 0;  // Clear data
+        m_Creep_AppDataRTC.creepInProgress[i] = FALSE; // Clear Flag
         // Sys Log to indicate interrupted counting
         m_Creep_Status[i].bCntInterrupted = TRUE;
         bUpdateNV = TRUE;
@@ -1687,34 +1751,8 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   //   then this will be a problem.  This is similar to sensor failure.
   //   Do nothing for now.  TBD
 
+  Creep_InitPersistentPcnt();
 
-  /*
-  // Update Creep Status Object with what was in EE APP DATA
-  m_Creep_100_pcnt = 1;
-  for (i=0;i<(m_Creep_Cfg.baseUnits-2);i++)
-  {
-    // Could use powerof() math func but will require coverage. This is easier.
-    //  "-2" to produce percent (or * 100)
-    m_Creep_100_pcnt *= 10;
-  }
-
-  for (i=0;i<CREEP_MAX_OBJ;i++)
-  {
-    m_Creep_Status[i].data = m_Creep_AppData.data[i];
-    // Need to calculate the percent fields
-    m_Creep_Status[i].data_percent.accumCnt =
-                m_Creep_Status[i].data.creepAccumCnt / m_Creep_100_pcnt;
-    m_Creep_Status[i].data_percent.accumCntTrashed =
-                m_Creep_Status[i].data.creepAccumCntTrashed / m_Creep_100_pcnt;
-    m_Creep_Status[i].data_percent.lastMissionCnt =
-                m_Creep_Status[i].data.creepLastMissionCnt / m_Creep_100_pcnt;
-
-    m_Creep_Status[i].interval.nRateCounts = MIFs_PER_SECOND /
-                                             (INT16) m_Creep_Cfg.creepObj[i].intervalRate;
-  }
-  */
-  Creep_InitPersistentPcnt(); 
-  
 
   // If PBIT failed, record log here
   if ( pbit_status != PBIT_OK)
@@ -1760,39 +1798,39 @@ BOOLEAN Creep_CheckCfgAndData ( void )
  *
  * Returns:      none
  *
- * Notes:        Creep Configuration must have been restored before calling 
+ * Notes:        Creep Configuration must have been restored before calling
  *                  calling this func.
  *
  *****************************************************************************/
 static
 void Creep_InitPersistentPcnt ( void )
 {
-  UINT16 i; 
-	
+  UINT16 i;
+
   // Update Creep Status Object with what was in EE APP DATA
-	m_Creep_100_pcnt = 1;
-	for (i=0;i<(m_Creep_Cfg.baseUnits-2);i++)
-	{
-		// Could use powerof() math func but will require coverage. This is easier.
-		//  "-2" to produce percent (or * 100)
-		m_Creep_100_pcnt *= 10;
-	}
-	
-	for (i=0;i<CREEP_MAX_OBJ;i++)
-	{
-		m_Creep_Status[i].data = m_Creep_AppData.data[i];
-		// Need to calculate the percent fields
-		m_Creep_Status[i].data_percent.accumCnt =
-			m_Creep_Status[i].data.creepAccumCnt / m_Creep_100_pcnt;
-		m_Creep_Status[i].data_percent.accumCntTrashed =
-			m_Creep_Status[i].data.creepAccumCntTrashed / m_Creep_100_pcnt;
-		m_Creep_Status[i].data_percent.lastMissionCnt =
-			m_Creep_Status[i].data.creepLastMissionCnt / m_Creep_100_pcnt;
-	
-		m_Creep_Status[i].interval.nRateCounts = MIFs_PER_SECOND /
-				(INT16) m_Creep_Cfg.creepObj[i].intervalRate;
-	}
-	
+  m_Creep_100_pcnt = 1;
+  for (i=0;i<(m_Creep_Cfg.baseUnits-2);i++)
+  {
+    // Could use powerof() math func but will require coverage. This is easier.
+    //  "-2" to produce percent (or * 100)
+    m_Creep_100_pcnt *= 10;
+  }
+
+  for (i=0;i<CREEP_MAX_OBJ;i++)
+  {
+    m_Creep_Status[i].data = m_Creep_AppData.data[i];
+    // Need to calculate the percent fields
+    m_Creep_Status[i].data_percent.accumCnt =
+      m_Creep_Status[i].data.creepAccumCnt / m_Creep_100_pcnt;
+    m_Creep_Status[i].data_percent.accumCntTrashed =
+      m_Creep_Status[i].data.creepAccumCntTrashed / m_Creep_100_pcnt;
+    m_Creep_Status[i].data_percent.lastMissionCnt =
+      m_Creep_Status[i].data.creepLastMissionCnt / m_Creep_100_pcnt;
+
+    m_Creep_Status[i].interval.nRateCounts =
+          (INT16) (m_Creep_Cfg.creepObj[i].intervalRate_ms / CREEP_RATE_MS_TO_MIF_CNT);
+  }
+
 }
 
 
@@ -1869,6 +1907,11 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 12-12-09   Time: 6:39p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 5,7a,8,10
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 12-11-10   Time: 4:37p
  * Updated in $/software/control processor/code/application

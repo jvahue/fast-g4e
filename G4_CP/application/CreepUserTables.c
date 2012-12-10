@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 3 $  $Date: 12-11-10 4:37p $
+    $Revision: 4 $  $Date: 12-12-09 6:39p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -30,6 +30,7 @@
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define CREEP_MAX_STR_LEN 256
+#define CREEP_MAX_RECENT_DATE_TIME 20  // "HH:MM:SS MM/DD/YYYY"
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -112,6 +113,12 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
                                                   UINT32 Index,
                                                   const void *SetPtr,
                                                   void **GetPtr);
+
+USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
+                                                     USER_MSG_PARAM Param,
+                                                     UINT32 Index,
+                                                     const void *SetPtr,
+                                                     void **GetPtr);
 
 static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index );
 
@@ -397,8 +404,11 @@ USER_MSG_TBL creepObjectTbl[] =
   {"RATEOFFSET_MS", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
               (void *) &creepCfgObjTemp.cpuOffset_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
-  {"RATE_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
-        (void *) &creepCfgObjTemp.intervalRate, 0, CREEP_MAX_OBJ-1, NO_LIMIT, creepRateTypes},
+  {"RATE_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT32,  USER_RW,
+        (void *) &creepCfgObjTemp.intervalRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+
+  {"ER_TRANS_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT32,  USER_RW,
+        (void *) &creepCfgObjTemp.erTransFault_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"SensorRow", creepObjectSenRowTbl, NULL,  NO_HANDLER_DATA},
 
@@ -537,6 +547,9 @@ USER_MSG_TBL creepStatusTbl[] =
   {"ER_TIME_ms",  NO_NEXT_TABLE, CreepMsg_Status,  USER_TYPE_UINT32,  USER_RO,
              (void *) &creepStatusTemp.erTime_ms,  0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
+  {"INTERVAL_cnt",  NO_NEXT_TABLE, CreepMsg_Status,  USER_TYPE_UINT32,  USER_RO,
+             (void *) &creepStatusTemp.creepIncrement,  0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+
   {"SENSOR",  creepSensorTbl,  NULL,  NO_HANDLER_DATA},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -581,6 +594,8 @@ USER_MSG_TBL creepRoot[] =
                  USER_WO,               NULL,   -1, -1, NO_LIMIT,   NULL},
   {"RECENTALL",  NO_NEXT_TABLE,  CreepMsg_UserMessageRecentAll, USER_TYPE_ACTION,
                  (USER_RO|USER_NO_LOG), NULL,   -1, -1, NO_LIMIT,   NULL},
+  {"RECENTUPDATE", NO_NEXT_TABLE,  CreepMsg_UserMessageRecentUpdate, USER_TYPE_STR,
+                 USER_RO,               NULL,   -1, -1, NO_LIMIT,   NULL},
 
   {NULL,      NULL,            NULL,  NO_HANDLER_DATA}
 };
@@ -735,8 +750,8 @@ USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
   // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
   // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime version)
   //       is then copied to AppData.  Executing this cmd during creep processing will/could
-  //       force early update of App Data. If Fault deteced, then some cnt would have been 
-  //       committed to App Data. Normally when creep fault detected, the cnt for that 
+  //       force early update of App Data. If Fault deteced, then some cnt would have been
+  //       committed to App Data. Normally when creep fault detected, the cnt for that
   //       current flight is "thrown" away.
   if (SetPtr != NULL && USER_RESULT_OK == result)
   {
@@ -809,12 +824,12 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
   // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
   // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime version)
   //       is then copied to AppData.  Executing this cmd during creep processing will/could
-  //       force early update of App Data. If Fault deteced, then some cnt would have been 
-  //       committed to App Data. Normally when creep fault detected, the cnt for that current 
+  //       force early update of App Data. If Fault deteced, then some cnt would have been
+  //       committed to App Data. Normally when creep fault detected, the cnt for that current
   //       flight is "thrown" away.
   if (SetPtr != NULL && USER_RESULT_OK == result)
   {
-    // Need to convert data_percent to count values, only of the data_percent val that 
+    // Need to convert data_percent to count values, only of the data_percent val that
     //   has changed
     if ( fabs (creepPercentPrev.accumCnt - creepStatusTemp.data_percent.accumCnt) >=
          DBL_EPSILON )
@@ -829,7 +844,7 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
                                                          m_Creep_100_pcnt;
     }
 
-    if ( fabs (creepPercentPrev.accumCntTrashed - 
+    if ( fabs (creepPercentPrev.accumCntTrashed -
                creepStatusTemp.data_percent.accumCntTrashed) >= DBL_EPSILON )
     {
       // Update associated counts here
@@ -1147,6 +1162,7 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result;
   UINT16 i;
+  TIMESTAMP ts;
 
 
   result = USER_RESULT_ERROR;
@@ -1166,8 +1182,8 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
       // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
       // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime ver)
       //      is then copied to AppData. Executing this cmd during creep processing will/could
-      //      force early update of App Data. If Fault deteced, then some cnt would have been 
-      //      committed to App Data. Normally when creep fault detected, the cnt for that 
+      //      force early update of App Data. If Fault deteced, then some cnt would have been
+      //      committed to App Data. Normally when creep fault detected, the cnt for that
       //      current flight is "thrown" away.
 
       // Update the Data Percent.  Normally Data precent update in init(), and @ end of ER.
@@ -1177,7 +1193,8 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
       Creep_GetStatus(i)->data_percent.lastMissionCnt = 0;
     }
 
-    Creep_FaultFileInit();  // Clear Creep Fault Recent buffer
+    CM_GetTimeAsTimestamp((TIMESTAMP *) &ts);
+    Creep_ClearFaultFile((TIMESTAMP *) &ts);  // Clear Creep Fault Recent buffer
     Creep_GetDebug()->nSensorFailedCnt = 0;
     Creep_GetDebug()->nCreepFailBuffCnt = 0;
   } // End if "really" is enterred
@@ -1204,7 +1221,8 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
       Creep_UpdateCreepXAppData(i);  // Commit to EE APP
     }
 
-    Creep_FaultFileInit();  // Clear Creep Fault Recent buffer
+    CM_GetTimeAsTimestamp((TIMESTAMP *) &ts);
+    Creep_ClearFaultFile((TIMESTAMP *) &ts);  // Clear Creep Fault Recent buffer
     Creep_GetDebug()->nSensorFailedCnt = 0;
     Creep_GetDebug()->nCreepFailBuffCnt = 0;
   } // End if "flags" is entered
@@ -1386,17 +1404,30 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
   USER_HANDLER_RESULT result = USER_RESULT_OK;
   CHAR *pStr;
   UINT32 nOffset, len;
+  CHAR strDateTime[CREEP_MAX_RECENT_DATE_TIME];
+  TIMESTRUCT ts;
 
 
   pStr = (CHAR *) &resultBuffer[0];
 
   // Output # of faults in buffer
-  snprintf ( resultBuffer, USER_SINGLE_MSG_MAX_SIZE, "\r\nCreep Faults = %d\r\n",
-             m_creepHistory.cnt );
+  CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.ts, &ts);
+
+  snprintf ( strDateTime, CREEP_MAX_RECENT_DATE_TIME, "%02d:%02d:%02d %02d/%02d/%4d",
+             ts.Hour,
+             ts.Minute,
+             ts.Second,
+             ts.Month,
+             ts.Day,
+             ts.Year );
+
+  snprintf ( resultBuffer, USER_SINGLE_MSG_MAX_SIZE,
+             "\r\nCreep Faults = %d (of %d Max), Last Update =%s\r\n",
+             m_creepHistory.cnt, CREEP_HISTORY_MAX, strDateTime);
   len = strlen ( resultBuffer );
   nOffset = len;
 
-  for (i=0;i<CREEP_HISTORY_MAX;i++)
+  for (i=0;i<m_creepHistory.cnt;i++)
   {
     pStr = Creep_GetHistoryBuffEntry(i);
     len = strlen (pStr);
@@ -1409,6 +1440,63 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
   User_OutputMsgString(resultBuffer, FALSE);
 
   return result;
+}
+
+
+/******************************************************************************
+ * Function:    CreepMsg_UserMessageRecentUpdate
+ *
+ * Description: Called by the User.c module from the reference to this fucntion
+ *              in the user message tables above.
+ *              Retrieves the Creep Clear update time
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed sucessfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
+                                                     USER_MSG_PARAM Param,
+                                                     UINT32 Index,
+                                                     const void *SetPtr,
+                                                     void **GetPtr)
+{
+  USER_HANDLER_RESULT result = USER_RESULT_OK;
+  TIMESTRUCT ts;
+  static CHAR strDateTime[CREEP_MAX_RECENT_DATE_TIME];
+
+
+  if(SetPtr == NULL)
+  {
+    CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.ts, &ts);
+
+    snprintf ( strDateTime, CREEP_MAX_RECENT_DATE_TIME, "%02d/%02d/%04d %02d:%02d:%02d",
+               ts.Month,
+               ts.Day,
+               ts.Year,
+               ts.Hour,
+               ts.Minute,
+               ts.Second );
+
+    *GetPtr = strDateTime;
+  }
+
+  return result;
+
 }
 
 
@@ -1532,6 +1620,11 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 12-12-09   Time: 6:39p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 5,7a,8,10
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 12-11-10   Time: 4:37p
  * Updated in $/software/control processor/code/application

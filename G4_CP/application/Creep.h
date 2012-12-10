@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 3 $  $Date: 12-11-10 4:37p $
+      $Revision: 4 $  $Date: 12-12-09 6:39p $
 
 ******************************************************************************/
 
@@ -32,7 +32,7 @@
                                  Package Defines
 ******************************************************************************/
 //#define CREEP_100_PERCENT   (1E10) // 1E12 units * 100%  for 1 sec interval
-#define CREEP_100_PERCENT   (1E11)  // 1E13 units * 100%  for 0.1 sec interval
+//#define CREEP_100_PERCENT   (1E11) // 1E13 units * 100%  for 0.1 sec interval
 
 #define CREEP_MAX_ROWS 20
 #define CREEP_MAX_COLS 10
@@ -47,9 +47,9 @@
 #define CREEP_SENSOR_RATE_MINIMUM  1000  // 1 msec tick * 1000 = 1 second (HZ)
 
 #define CREEP_SENSOR_RATE_BUFF_SIZE 20
-#define CREEP_SENSOR_RATE_TOL       2   // Basically 20 msec
+// #define CREEP_SENSOR_RATE_TOL       2   // Basically 20 msec
 
-#define CREEP_TASK_EXE_TIME  10  // 10 msec between Creep Task exe
+// #define CREEP_TASK_EXE_TIME  10  // 10 msec between Creep Task exe
 
 #define CREEP_DEFAULT_TBL    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,/*10 Row 0 Val*/\
                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /*10 Row 1 Val*/\
@@ -160,7 +160,8 @@
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
-                            (CREEP_RATE) CREEP_1HZ, /* Interval Rate */\
+                            1000,                /* Interval Rate (ms)*/\
+                            1000,                   /* erTransFault_ms */\
                             "Unused Creep Object 0"
 
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
@@ -169,7 +170,8 @@
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
-                            (CREEP_RATE) CREEP_1HZ, /* Interval Rate */\
+                            1000,                /* Interval Rate (ms)*/\
+                            1000,                   /* erTransFault_ms */\
                             "Unused Creep Object 1"
 
 
@@ -179,11 +181,12 @@
                             ENGINERUN_UNUSED,    /* EngRun Id   */\
                             0,                   /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
-                            (CREEP_RATE) CREEP_1HZ,           /* Interval Rate */\
+                            1000,                /* Interval Rate (ms) */\
+                            1000,                   /* erTransFault_ms */\
                             "Unused Creep Object T"
 
 
-#define CREEP_DEFAULT_CRC16   0xd1b6
+#define CREEP_DEFAULT_CRC16   0x041E
 
 #define CREEP_DEFAULT_CFG  STA_NORMAL,  /* PBITSysCond */\
                            STA_NORMAL,  /* CBITSysCond */\
@@ -280,7 +283,9 @@ typedef struct {
   UINT16 engId;            // Engine Run Id to assoc with this CREEP object
   UINT16 creepTblId;       // Creep Table to use for calculating creep for this obj
   UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
-  CREEP_RATE intervalRate;    // Creep interval exe frame/rate
+  UINT32 intervalRate_ms;     // Creep interval exe frame/rate
+  UINT32 erTransFault_ms;     // Timeout used to determine fault if box reset during ER
+                              //   or sensors selfed heal during ER.
   CHAR name[CREEP_MAX_NAME];  // Descriptive name for debug purposes
 } CREEP_OBJECT, *CREEP_OBJECT_PTR;
 // NOTE: For CESNA CARAVAN App, two creep obj will be defined. One for Ct and
@@ -369,12 +374,17 @@ typedef struct {
                             //   during prev operation
   UINT32 erTime_ms;         // Last ER Elapse Time in msec
   CREEP_INTERVAL interval;  // Creep Interval Setting
+  UINT32 lastIdleTime_ms;   // Tick time of when Creep State was IDLE.  Used to determine
+                            //   ER going directly to ER on startup or sensor self heal.
+  UINT32 creepIncrement;    // Current 1 sec creep increment count, while creep mission is ACTIVE
 } CREEP_STATUS, *CREEP_STATUS_PTR;
 
-
+#pragma pack(1)
 typedef struct {
   FLOAT64 creepMissionCnt[CREEP_MAX_OBJ];
+  BOOLEAN creepInProgress[CREEP_MAX_OBJ];
 } CREEP_APP_DATA_RTC, *CREEP_APP_DATA_RTC_PTR;
+#pragma pack()
 
 
 #pragma pack(1)
@@ -399,7 +409,7 @@ typedef struct {
 } CREEP_SUMMARY_LOG, *CREEP_SUMMARY_LOG_PTR;
 
 typedef struct {
-  UINT32 index;      // Index of creep object (i.e. CT or PT blade)
+  UINT16 index;      // Index of creep object (i.e. CT or PT blade)
 
   CREEP_FAULT_TYPE type;    // _RESET, _SENSOR_LOSS
   FLOAT64 missionCnt;       // Current mission count to be thrown away
@@ -422,7 +432,7 @@ typedef struct {
 
 
 typedef struct {
-  UINT32 index;   // Index of creep object (i.e. CT or PT blade)
+  UINT16 index;   // Index of creep object (i.e. CT or PT blade)
   BOOLEAN bRowSensorFailed;  // Failed state of row sensor
   BOOLEAN bColSensorFailed;  // Failed state of col sensor
 } CREEP_SENSOR_FAIL_LOG, CREEP_SENSOR_FAIL_LOG_PTR;
@@ -464,10 +474,11 @@ typedef struct {
   TIMESTAMP ts;
 } CREEP_FAULT_BUFFER, *CREEP_FAULT_BUFFER_PTR;
 
-#define CREEP_HISTORY_MAX 10
+#define CREEP_HISTORY_MAX 75
 
 typedef struct {
-  UINT16 cnt;
+  UINT16 cnt;      // Cnt of # buff entries
+  TIMESTAMP ts;    // TS of most recent issue of creep.clear cmd
   CREEP_FAULT_BUFFER buff[CREEP_HISTORY_MAX];
 } CREEP_FAULT_HISTORY;
 
@@ -503,7 +514,7 @@ EXPORT CREEP_DEBUG_PTR Creep_GetDebug (void);
 EXPORT void Creep_UpdateCreepXAppData (UINT16 index_obj);
 
 EXPORT BOOLEAN Creep_FaultFileInit(void);
-
+EXPORT void Creep_ClearFaultFile (TIMESTAMP *pTs);
 
 
 #endif // CREEP_H
@@ -513,6 +524,11 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  *  MODIFICATIONS
  *    $History: Creep.h $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 12-12-09   Time: 6:39p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 5,7a,8,10
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 12-11-10   Time: 4:37p
  * Updated in $/software/control processor/code/application
