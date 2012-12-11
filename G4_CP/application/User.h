@@ -127,7 +127,7 @@ typedef enum{
   USER_TYPE_ONOFF,
   USER_TYPE_ACTION,
   USER_TYPE_FLOAT64,
-  USER_TYPE_END,
+  USER_TYPE_END
 }USER_DATA_TYPE;
 
 /*USER_DATA_ACCESS
@@ -277,7 +277,7 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
- * 
+ *
  * *****************  Version 45  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 1:46p
  * Updated in $/software/control processor/code/application

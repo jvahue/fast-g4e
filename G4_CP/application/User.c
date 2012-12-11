@@ -2612,8 +2612,6 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
  *                             Len will be truncated.
  *               [in]  GetPtr: Pointer to the location of the data to convert
  *                             to a string
- *               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
- *                                the string to enum table
  *
  * Returns:      TRUE if result of operation was successful, otherwise FALSE
  *
