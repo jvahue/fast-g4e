@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 108 $  $Date: 11/26/12 12:35p $
+   $Revision: 109 $  $Date: 12/10/12 7:08p $
 
 ******************************************************************************/
 
@@ -1541,22 +1541,25 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
   BOOLEAN result = TRUE;
   UINT32 i;
 
+  ASSERT(GetStr     != NULL);
+  ASSERT(GetPtr     != NULL);
+
   switch(Type)
   {
     case USER_TYPE_UINT32:
-      sprintf(GetStr,"%u",*(UINT32*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "%u",*(UINT32*)GetPtr);
       break;
 
     case USER_TYPE_UINT16:
-      sprintf(GetStr,"%u",*(UINT16*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "%u",*(UINT16*)GetPtr);
       break;
 
     case USER_TYPE_UINT8:
-      sprintf(GetStr,"%u",*(UINT8*)GetPtr);
+      snprintf(GetStr,(INT32)Len, "%u",*(UINT8*)GetPtr);
       break;
 
     case USER_TYPE_INT32:
-      sprintf(GetStr,"%d",*(UINT32*)GetPtr);
+      snprintf(GetStr,(INT32)Len, "%d",*(UINT32*)GetPtr);
       break;
 
     //case USER_TYPE_INT16:
@@ -1568,15 +1571,15 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     //  break;
 
     case USER_TYPE_HEX8:
-      sprintf(GetStr,"0x%02X",*(UINT8*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
       break;
 
     case USER_TYPE_HEX16:
-      sprintf(GetStr,"0x%04X",*(UINT16*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "0x%04X",*(UINT16*)GetPtr);
       break;
 
     case USER_TYPE_HEX32:
-      sprintf(GetStr,"0x%08X",*(UINT32*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "0x%08X",*(UINT32*)GetPtr);
       break;
 
     case USER_TYPE_ACT_LIST:
@@ -1678,27 +1681,27 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 
     case USER_TYPE_STR:
       //GetStr[Len-1] = '\0';
-      strncpy_safe(GetStr,Len,(INT8*)GetPtr, _TRUNCATE);
+      strncpy_safe(GetStr,(INT32)Len,(INT8*)GetPtr, _TRUNCATE);
       break;
 
     case USER_TYPE_FLOAT:
-      sprintf(GetStr,"%f",*(FLOAT32*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "%f",*(FLOAT32*)GetPtr);
       break;
 
     case USER_TYPE_FLOAT64:
-      sprintf(GetStr,"%lf",*(FLOAT64*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "%lf",*(FLOAT64*)GetPtr);
       break;
 
     case USER_TYPE_BOOLEAN:
-      strncpy_safe(GetStr,Len, *(BOOLEAN*)GetPtr ? "TRUE" : "FALSE", _TRUNCATE);
+      strncpy_safe(GetStr,(INT32)Len, *(BOOLEAN*)GetPtr ? "TRUE" : "FALSE", _TRUNCATE);
       break;
 
     case USER_TYPE_YESNO:
-      strncpy_safe(GetStr,Len,*(BOOLEAN*)GetPtr ? "YES" : "NO", _TRUNCATE);
+      strncpy_safe(GetStr,(INT32)Len,*(BOOLEAN*)GetPtr ? "YES" : "NO", _TRUNCATE);
       break;
 
     case USER_TYPE_ONOFF:
-      strncpy_safe(GetStr,Len,*(BOOLEAN*)GetPtr ? "ON" : "OFF", _TRUNCATE);
+      strncpy_safe(GetStr,(INT32)Len,*(BOOLEAN*)GetPtr ? "ON" : "OFF", _TRUNCATE);
       break;
 
     case USER_TYPE_ENUM:
@@ -1711,7 +1714,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       {
         if(MsgEnumTbl[i].Num == *(UINT32*)GetPtr)
         {
-          strncpy_safe(GetStr,Len, MsgEnumTbl[i].Str, _TRUNCATE);
+          strncpy_safe(GetStr,(INT32)Len, MsgEnumTbl[i].Str, _TRUNCATE);
           break;
         }
         //Cast based on enum width.
@@ -1733,10 +1736,12 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       break;
 
     case USER_TYPE_ACTION:
-
       break;
 
+    case USER_TYPE_END: // Fallthrough
+    case USER_TYPE_NONE:// Fallthrough
     default:
+
       FATAL("User_CvtGetStr() Unrecognized Data Type: %d", Type);
       break;
   }
@@ -2207,7 +2212,8 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
         }
         else
         {
-          if(User_CvtGetStr(pMsgTbl->MsgType, Value, sizeof(Value), GetPtr, pMsgTbl->MsgEnumTbl))
+          if(User_CvtGetStr(pMsgTbl->MsgType, Value, sizeof(Value),
+                            GetPtr, pMsgTbl->MsgEnumTbl))
           {
             if (!User_OutputMsgString( Value, FALSE) )
             {
@@ -2979,6 +2985,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 109  *****************
+ * User: Contractor V&v Date: 12/10/12   Time: 7:08p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review 
  *
  * *****************  Version 108  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:35p
