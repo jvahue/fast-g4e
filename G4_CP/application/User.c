@@ -163,6 +163,8 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
                                              USER_ENUM_TBL* MsgEnumTbl,
                                              USER_RANGE *Min,USER_RANGE *Max);
 
+static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Len,void* GetPtr);
+
 static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
                                         USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max);
@@ -172,7 +174,9 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
                                                 USER_RANGE *Min,USER_RANGE *Max);
 
 static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
-                             USER_RANGE *Min, USER_RANGE *Max);
+                                  USER_RANGE *Min, USER_RANGE *Max);
+
+
 
 
 /*****************************************************************************/
@@ -1240,6 +1244,25 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     {
       base = 8;
     }
+
+    // Unhandled USER types for this operation
+    case USER_TYPE_128_LIST:
+    case USER_TYPE_ACTION:
+    case USER_TYPE_ACT_LIST:
+    case USER_TYPE_BOOLEAN:
+    case USER_TYPE_END:
+    case USER_TYPE_ENUM:
+    case USER_TYPE_FLOAT:
+    case USER_TYPE_FLOAT64:
+    case USER_TYPE_INT32:
+    case USER_TYPE_NONE:
+    case USER_TYPE_ONOFF:
+    case USER_TYPE_SNS_LIST:
+    case USER_TYPE_STR:
+    case USER_TYPE_YESNO:
+    default:
+      // Do nothing, these types are ignored!
+      break;
   }
 
   /*Check and set Min/Max to data type limits if no limits are defined*/
@@ -1505,7 +1528,9 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       }
       break;
 
-
+    case USER_TYPE_NONE:    // Deliberate Fall-through
+    case USER_TYPE_END:     // Deliberate Fall-through
+    case USER_TYPE_ACTION:  // Deliberate Fall-through
     default:
       FATAL("Unsupported USER_DATA_TYPE = %d", Type );
       break;
@@ -1585,99 +1610,8 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     case USER_TYPE_ACT_LIST:
     case USER_TYPE_SNS_LIST:
     case USER_TYPE_128_LIST:
-      {
-        BOOLEAN bEmptyArray;
-        UINT32  tempWord;
-        UINT32  arraySizeWords;
-        UINT32  displayHexStart;
-        CHAR    numStr[5];
-        CHAR    tempOutput[GSE_GET_LINE_BUFFER_SIZE];
-        CHAR    bufHex128[16 * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
-
-        CHAR*   destPtr = tempOutput;
-        UINT32* word32Ptr = (UINT32*)GetPtr;
-
-        if (Type == USER_TYPE_ACT_LIST)
-        {
-          arraySizeWords = 1;
-          displayHexStart = 0;
-        }
-        else
-        {
-          arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
-          displayHexStart = 3;
-        }
-
-        // Display a string containing both the hex and enumeration string:
-        // e.g. 0x0000000000000000000000000000001F [0,1,2,3]
-
-        // CHECK FOR EMPTY
-        tempWord = 0;
-        for (i = 0; i < arraySizeWords; ++i )
-        {
-          tempWord |= word32Ptr[i];
-        }
-        bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
-
-        // DISPLAY THE HEX STRING
-        destPtr = bufHex128;
-        strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
-        destPtr += 2;
-
-        // Display order: 127...0
-        // Read the array from back to front and convert each word
-        // to hex string.
-
-        for( i = 0; i < arraySizeWords; ++i )
-        {
-          tempWord = word32Ptr[displayHexStart];
-          snprintf( destPtr, sizeof(bufHex128), "%08X", tempWord );
-          destPtr += 8;
-          displayHexStart -= 1;
-        }
-        strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
-
-        // APPEND THE ENUMERATED LIST
-
-        // Check each bit in the BITARRAY128.
-        // For each 'on' bit, convert the index to a string
-        // and concatenate to the output buffer.
-
-        destPtr = tempOutput + strlen(tempOutput);
-
-        SuperStrcat(destPtr, " [", sizeof(tempOutput));
-        destPtr += 2;
-
-        if ( bEmptyArray )
-        {
-          // Display "NONE SELECTED" String
-          snprintf(destPtr,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED,");
-          destPtr = tempOutput + strlen(tempOutput);
-        }
-        else
-        {
-          // Display a list of integer values, one for each "on" bit.
-          for( i = 0; i < (arraySizeWords*32); ++i )
-          {
-            if (GetBit((INT32)i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
-            {
-              snprintf(numStr, sizeof(numStr), "%d,", i);
-              SuperStrcat(destPtr, numStr, sizeof(tempOutput));
-              destPtr += strlen(numStr);
-            }
-          }
-        }
-
-        // replace the final ',' with ']' and 'null'
-        *(--destPtr) = ']';
-        *(++destPtr) = '\0';
-
-        strncpy_safe(GetStr, (INT32)Len, tempOutput, _TRUNCATE);
-
-
-      } // USER_TYPE_HEX128 scope for decls
+      result = User_CvtGetBitListStr(Type, GetStr, Len, GetPtr);
       break;
-
 
     case USER_TYPE_STR:
       //GetStr[Len-1] = '\0';
@@ -2663,6 +2597,124 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
   return statusFlag;
 }
 
+
+/******************************************************************************
+ * Function:     User_CvtGetBitListStr
+ *
+ * Description:  Used for "get" type commands, to convert Bit-List data type
+ *               returned by the message handler function to an ASCII string.
+ *
+ * Parameters:   [in] Type: Class of data to be set as indicated by this
+ *                          commands' table entry
+ *               [out] GetStr: Pointer to a location to store the string
+ *                             conversion result
+ *               [in]  Len:    Size of the GetStr location.  Gets longer than
+ *                             Len will be truncated.
+ *               [in]  GetPtr: Pointer to the location of the data to convert
+ *                             to a string
+ *               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
+ *                                the string to enum table
+ *
+ * Returns:      TRUE if result of operation was successful, otherwise FALSE
+ *
+ * Notes:
+ ******************************************************************************/
+static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Len,void* GetPtr)
+{
+  BOOLEAN result = TRUE;
+  BOOLEAN bEmptyArray;
+  INT32  tempWord;
+  UINT32 i;
+  UINT32 arraySizeWords;
+  UINT32 displayHexStart;
+  CHAR   numStr[5];
+  CHAR   tempOutput[GSE_GET_LINE_BUFFER_SIZE];
+  CHAR   bufHex128[16 * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
+
+  CHAR*   destPtr = tempOutput;
+  UINT32* word32Ptr = (UINT32*)GetPtr;
+
+  if (Type == USER_TYPE_ACT_LIST)
+  {
+    arraySizeWords  = 1;
+    displayHexStart = 0;
+  }
+  else
+  {
+    arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
+    displayHexStart = 3;
+  }
+
+  // Display a string containing both the hex and enumeration string:
+  // e.g. 0x0000000000000000000000000000001F [0,1,2,3]
+
+  // CHECK FOR EMPTY
+  tempWord = 0;
+  for (i = 0; i < arraySizeWords; ++i )
+  {
+    tempWord |= word32Ptr[i];
+  }
+  bEmptyArray = (0 == tempWord) ? TRUE : FALSE;
+
+  // DISPLAY THE HEX STRING
+  destPtr = bufHex128;
+  strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
+  destPtr += 2;
+
+  // Display order: 127...0
+  // Read the array from back to front and convert each word
+  // to hex string.
+
+  for( i = 0; i < arraySizeWords; ++i )
+  {
+    tempWord = word32Ptr[displayHexStart];
+    snprintf( destPtr, sizeof(bufHex128), "%08X", tempWord );
+    destPtr += 8;
+    displayHexStart -= 1;
+  }
+  strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
+
+  // APPEND THE ENUMERATED LIST
+
+  // Check each bit in the BITARRAY128.
+  // For each 'on' bit, convert the index to a string
+  // and concatenate to the output buffer.
+
+  destPtr = tempOutput + strlen(tempOutput);
+
+  SuperStrcat(destPtr, " [", sizeof(tempOutput));
+  destPtr += 2;
+
+  if ( bEmptyArray )
+  {
+    // Display "NONE SELECTED" String
+    snprintf(destPtr,GSE_GET_LINE_BUFFER_SIZE, "NONE SELECTED,");
+    destPtr = tempOutput + strlen(tempOutput);
+  }
+  else
+  {
+    // Display a list of integer values, one for each "on" bit.
+    for( i = 0; i < (arraySizeWords*32); ++i )
+    {
+      if (GetBit((INT32)i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
+      {
+        snprintf(numStr, sizeof(numStr), "%d,", i);
+        SuperStrcat(destPtr, numStr, sizeof(tempOutput));
+        destPtr += strlen(numStr);
+      }
+    }
+  }
+
+  // replace the final ',' with ']' and 'null'
+  *(--destPtr) = ']';
+  *(++destPtr) = '\0';
+
+  strncpy_safe(GetStr, (INT32)Len, tempOutput, _TRUNCATE);
+
+  return result;
+
+
+}
 /******************************************************************************
 * Function:     User_SetBitArrayFromHexString
 *
@@ -2985,11 +3037,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 109  *****************
  * User: Contractor V&v Date: 12/10/12   Time: 7:08p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 108  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:35p
