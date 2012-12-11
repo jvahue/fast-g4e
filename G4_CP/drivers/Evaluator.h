@@ -273,7 +273,7 @@ static INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:13p
  * Updated in $/software/control processor/code/drivers

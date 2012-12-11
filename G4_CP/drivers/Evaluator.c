@@ -56,8 +56,8 @@
 #define KEY_MASK_TYPE   0x00FF0000
 
 
-#define EVAL_MAKE_LOOKUP_KEY(type,obj,snsr) ((type << 16) | (obj  <<  8) | (snsr))
-#define EVAL_GET_TYPE(key) ((key & KEY_MASK_TYPE) >> 16)
+#define EVAL_MAKE_LOOKUP_KEY(type,obj,snsr) (((type) << 16) | ((obj)  <<  8) | (snsr))
+#define EVAL_GET_TYPE(key) (((key) & KEY_MASK_TYPE) >> 16)
 
 #define BASE_10 10
 
@@ -139,7 +139,8 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context);
 /******************************************************************************
  * Function:      EvalGetMsgFromErrCode
  *
- * Description:
+ * Description:   Returns a pointer to the string equivalent of the enum name
+ *                for each ErrCode supported by the Evaluator
  *
  * Parameters:    [in] errNum: The evaluator error number from RPN_ERR to be
  *                             converted into descriptive string.
@@ -457,7 +458,8 @@ void  EvalExprBinToStr( CHAR* str, const EVAL_EXPR* expr )
 /******************************************************************************
  * Function:      EvalGetDataAccess
  *
- * Description:
+ * Description:   Returns the pointer to the function used to return the data for
+ *                for this type of operation.
  *
  * Parameters:    [in] OpCode - the command who data-access function is to
  *                              returned.
@@ -492,7 +494,8 @@ static const EVAL_DATAACCESS* EvalGetDataAccess(BYTE  OpCode)
 /******************************************************************************
  * Function:      EvalParseObjectIndex
  *
- * Description:
+ * Description:   Returns the index value for the passed object.
+ *                (e.g. for "TACT023", the function will return the integer value 23
  *
  * Parameters:    [in] str:      string containing object index
  *                [in] maxIndex: max value limit expected for object index
@@ -541,7 +544,7 @@ static INT32 EvalParseObjectIndex( const CHAR* str, INT32 maxIndex)
 /******************************************************************************
  * Function:      EvalGetValidCnt
  *
- * Description:
+ * Description:   Returns the # of passed operands which are in the valid state.
  *
  * Parameters:    [in] operandA: Pointer to the RPN entry containing 1st operand.
  *                [in] operandB: Pointer to the RPN entry containing 2nd operand.
@@ -1133,7 +1136,7 @@ static BOOLEAN EvalPerformOr( EVAL_EXE_CONTEXT* context )
 /******************************************************************************
  * Function: EvalAddConst
  *
- * Description:
+ * Description:   Adds the passed constant float value to the cmd list as a direct value.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
  *                [in]  str    - pointer  to the string containing the const.
@@ -1183,7 +1186,7 @@ static INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalAddFuncCall
  *
- * Description: Add a "load const bool FALSE" to the cmd list.
+ * Description: Add a "load const bool FALSE" to the expression cmd list.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
  *                [in]  str    - pointer  to the string containing the const.
@@ -1226,10 +1229,10 @@ static INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalAddInputSrc
  *
- * Description:
+ * Description:   Add a data-retrieval command to the expression cmd list.
  *
  * Parameters:    [in]  tblIdx - table index
- *                [in]  str    - pointer  to the string containing the const.
+ *                [in]  str    - pointer  to the string whose object value is retrieved.
  *                [out] expr   - pointer to expression obj to be updated.
  *
  * Returns:       value < 0    - processing error code.
@@ -1297,10 +1300,10 @@ static INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalAddStdOper
  *
- * Description:
+ * Description:   Add a operation command to the expression cmd list.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
- *                [in]  str    - pointer  to the string containing the const.
+ *                [in]  str    - pointer  to the string containing the operator.
  *                [out] expr   - pointer to expression obj to be updated.
  *
  * Returns:       value < 0    - processing error code.
@@ -1327,7 +1330,8 @@ static INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalAddNotEqPrev
  *
- * Description:
+ * Description:    Add a sensor-data not equal to prev-value
+ *                 command to the expression cmd list.
  *
  *  Parameters:    [in]  tblIdx - table index
  *                 [in]  str    - pointer  to the string containing the const.
@@ -1366,7 +1370,9 @@ static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalFmtLoadEnumeratedCmdStr
  *
- * Description:
+ * Description:   Create a human-readable string for the indicated command
+ *                e.g. the command represents returning he active state of Trigger 23,
+ *                the function returns "TACT023"
  *
  * Parameters:    [in]  tblIdx - table index
  *                [in]  cmd    - pointer  to the cmd to be coverted to string.
@@ -1389,10 +1395,12 @@ static INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHA
 /******************************************************************************
  * Function: EvalFmtLoadConstStr
  *
- * Description:
+ * Description:   Create a human-readable string for the indicated command
+ *                e.g. the command represents loading the constant 123.4,
+ *                the function returns "123.4"
  *
  * Parameters:    [in]  tblIdx - table index
- *                [in]  cmd    - pointer  to the cmd to be coverted to string.
+ *                [in]  cmd    - pointer  to the cmd to be converted to string.
  *                [out] str   - pointer to string to hold conversion.
  *
  * Returns:       value < 0    - processing error code.
@@ -1410,7 +1418,7 @@ static INT32 EvalFmtLoadConstStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /******************************************************************************
  * Function: EvalFmtLoadCmdStr
  *
- * Description: Return the token string from the opcode table for this tblIdx.
+ * Description:   Return the token string from the opcode table for this tblIdx.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
  *                [in]  cmd    - pointer  to the cmd to be formatted as a string.
@@ -1431,7 +1439,7 @@ static INT32 EvalFmtLoadCmdStr(INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str)
 /******************************************************************************
  * Function: EvalFmtOperStr
  *
- * Description:
+ * Description:   Returns the string representation of the indicated operation.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
  *                [in]  cmd    - pointer  to the command to be coverted.
@@ -1628,7 +1636,7 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:34p
  * Updated in $/software/control processor/code/drivers
