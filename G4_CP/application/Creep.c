@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 4 $  $Date: 12-12-09 6:39p $
+      $Revision: 5 $  $Date: 12-12-10 8:29p $
 
 ******************************************************************************/
 
@@ -1617,7 +1617,7 @@ BOOLEAN Creep_CheckCfgAndData ( void )
 {
   BOOLEAN bOk;
   BOOLEAN bOkCfgCrc;
-  UINT16 calcCRC;
+  UINT16 calcCRC, crc16;
   BOOLEAN bUpdateNV;
   UINT16 i;
 
@@ -1667,26 +1667,31 @@ BOOLEAN Creep_CheckCfgAndData ( void )
         //    default and prev creep processing was enable/active with non default crc16
         //    in EE APP DATA).
         // Record Sys Log crc16 mismatch
-        pbit_status = PBIT_FAIL_CRC_MISMATCH;
+        // If loading over default cfg (where creep was disabled, this should not be
+        //    declared a MISMATCH as this will be a nusciance log. (SCR 1195 Item #7b)
+        if (m_Creep_AppData.crc16 != CREEP_DEFAULT_CRC16)
+        {
+          pbit_status = PBIT_FAIL_CRC_MISMATCH;
+        }
         calcCRC = m_Creep_AppData.crc16;  // Used to create PBIT log below
 
         // Clear EE APP Data and update its crc16 to cfg crc16
-        memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
-        // m_Creep_AppData.bInUse = TRUE;
+        // memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
         m_Creep_AppData.crc16 = m_Creep_Cfg.crc16;
         // Update App data in EEPROM
-        NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(m_Creep_AppData));
+        // NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(m_Creep_AppData));
       }
       // else, we are GOOD, No action required.
     }
     else
     {
       // else cfg crc16 is bad, so don't make comparison with EE APP Data.  Creep processing
-      //   will be disabled.
-      m_Creep_AppData.crc16 = 0x0000;  // Clear the crc, so when cfg get's reloaded mismatch
-                                       //  will be declared and counts updated.
+      //   will be disabled.  Set EE APP crc16 to default, so when cfg reloaded, will not
+      //   generate "nusciance" CRC_MISMATCH log
+      m_Creep_AppData.crc16 = CREEP_DEFAULT_CRC16;
+
       // Update App data in EEPROM
-      NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(m_Creep_AppData));
+      // NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(m_Creep_AppData));
     }
   }
   else
@@ -1704,7 +1709,6 @@ BOOLEAN Creep_CheckCfgAndData ( void )
     //   another log will be recorded above.  Good.
     // Clear EE APP Data and update its crc16 to cfg crc16
     memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
-    // m_Creep_AppData.bInUse = TRUE;
 
     // Update EE APP Data crc16 to default crc16
     m_Creep_AppData.crc16 = CREEP_DEFAULT_CRC16;
@@ -1715,7 +1719,7 @@ BOOLEAN Creep_CheckCfgAndData ( void )
     }
 
     // Update App data in EEPROM
-    NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
+    // NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
   }
 
 
@@ -1759,6 +1763,14 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   {
     // Create Creep PBIT Log
     Creep_CreatePBITLog ( pbit_status, m_Creep_Cfg.crc16, calcCRC );
+
+    // Clear EE APP Data now, after PBIT log is recorded with what was in EE APP
+    crc16 = m_Creep_AppData.crc16;
+    memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
+    m_Creep_AppData.crc16 = crc16;
+    NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(m_Creep_AppData));
+
+    Creep_InitPersistentPcnt();
   }
 
   // If RTC APP DATA indicates interrupted counts then record Creep Fault
@@ -1907,6 +1919,11 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 12-12-10   Time: 8:29p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Item #7b
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 12-12-09   Time: 6:39p
  * Updated in $/software/control processor/code/application
