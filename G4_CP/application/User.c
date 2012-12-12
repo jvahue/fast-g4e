@@ -1246,20 +1246,21 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     }
 
     // Unhandled USER types for this operation
-    case USER_TYPE_128_LIST:
-    case USER_TYPE_ACTION:
-    case USER_TYPE_ACT_LIST:
-    case USER_TYPE_BOOLEAN:
-    case USER_TYPE_END:
-    case USER_TYPE_ENUM:
-    case USER_TYPE_FLOAT:
-    case USER_TYPE_FLOAT64:
-    case USER_TYPE_INT32:
-    case USER_TYPE_NONE:
-    case USER_TYPE_ONOFF:
-    case USER_TYPE_SNS_LIST:
-    case USER_TYPE_STR:
-    case USER_TYPE_YESNO:
+	//lint -fallthrough
+    case USER_TYPE_128_LIST:		 
+    case USER_TYPE_ACTION:		 
+    case USER_TYPE_ACT_LIST:		 
+    case USER_TYPE_BOOLEAN:		 
+    case USER_TYPE_END:	
+    case USER_TYPE_ENUM:	
+    case USER_TYPE_FLOAT:	
+    case USER_TYPE_FLOAT64:	
+    case USER_TYPE_INT32:	
+    case USER_TYPE_NONE:	
+    case USER_TYPE_ONOFF:	
+    case USER_TYPE_SNS_LIST:	
+    case USER_TYPE_STR:	
+    case USER_TYPE_YESNO:	
     default:
       // Do nothing, these types are ignored!
       break;
@@ -1566,8 +1567,8 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
   BOOLEAN result = TRUE;
   UINT32 i;
 
-  ASSERT(GetStr     != NULL);
-  ASSERT(GetPtr     != NULL);
+  ASSERT(GetStr != NULL);
+  ASSERT(GetPtr != NULL);
 
   switch(Type)
   {
@@ -2621,7 +2622,7 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 {
   BOOLEAN result = TRUE;
   BOOLEAN bEmptyArray;
-  INT32  tempWord;
+  UINT32  tempWord;
   UINT32 i;
   UINT32 arraySizeWords;
   UINT32 displayHexStart;
@@ -2631,6 +2632,9 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 
   CHAR*   destPtr = tempOutput;
   UINT32* word32Ptr = (UINT32*)GetPtr;
+
+  ASSERT(GetStr != NULL);
+  ASSERT(GetPtr != NULL);
 
   if (Type == USER_TYPE_ACT_LIST)
   {
