@@ -165,15 +165,23 @@ void CycleInitialize(void)
  *****************************************************************************/
 void CycleUpdateAll(ENGRUN_INDEX erIndex)
 {
+  UINT8  flags;
   UINT16 cycIndex;
 
-  // Update all active cycles associated with this enginerun
+  // Update all active cycles associated with this engine run
   for (cycIndex = 0; cycIndex < MAX_CYCLES; cycIndex++)
   {
     if ( m_Cfg[cycIndex].type != CYC_TYPE_NONE_CNT &&
          m_Cfg[cycIndex].nEngineRunId == erIndex )
     {
-      CycleUpdate(&m_Cfg[cycIndex], &m_Data[cycIndex], cycIndex);
+      if (ER_STATE_STOPPED == EngRunGetState(erIndex, &flags))
+      {
+        m_Data[cycIndex].cycleActive = FALSE;
+      }
+      else
+      {
+        CycleUpdate(&m_Cfg[cycIndex], &m_Data[cycIndex], cycIndex);
+      }
     }
   }
 }

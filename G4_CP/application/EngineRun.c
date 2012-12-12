@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 45 $  $Date: 12-12-08 1:33p $
+      $Revision: 46 $  $Date: 12/12/12 2:13p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -223,7 +223,12 @@ void EngRunInitialize(void)
     {
       // Initialize the common fields in the EngineRun data structure
       pErData->erIndex = (ENGRUN_INDEX)i;
-      EngRunReset(pErCfg,pErData);
+      EngRunReset(pErCfg, pErData);
+
+      // these are handled here as they are monitored in stop mode and not done in EngRunReset
+      // They are also reset on all transitions into STOPPED mode un EngRunUpdate
+      pErData->minValueValid = TRUE;
+      pErData->monMinValue   = FLT_MAX;
 
       // Init Task scheduling data
       pErData->nRateCounts    = (UINT16)(MIFs_PER_SECOND / (UINT32)pErCfg->erRate);
@@ -532,19 +537,17 @@ static void EngRunReset(ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     pErData->startingDuration_ms = 0;
     pErData->erDuration_ms       = 0;
 
-    pErData->minValueValid       = TRUE;
-    pErData->monMinValue         = FLT_MAX;
+    //pErData->minValueValid       = TRUE;
+    //pErData->monMinValue         = FLT_MAX;
     pErData->maxValueValid       = TRUE;
     pErData->monMaxValue         = -FLT_MAX;
 
     /* SNSR_SUMMARY field setup */
     SensorResetSummaryArray (pErData->snsrSummary, pErData->nTotalSensors);
 
-    // Reset cycles & counts for this enginerun
+    // Reset cycles & counts for this engine run
     CycleResetEngineRun(pErData->erIndex);
 }
-
-
 
 /******************************************************************************
  * Function:     EngRunUpdate
@@ -597,14 +600,14 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
               // init the start-log entry and set start-time
               // clear the cycle counts for this engine run
               EngRunStartLog(pErCfg, pErData);
-              CycleResetEngineRun(pErData->erIndex);
+              EngRunReset(pErCfg, pErData);
               pErData->erState = ER_STATE_STARTING;
             }
           }
           else
           {
             // Ensure we don't collected any false start data while invalid
-            // reset this enginerun and its cycles.
+            // reset this engine run and its cycles.
             EngRunReset(pErCfg, pErData);
           }
         }
@@ -624,10 +627,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 
         // Finish the engine run log
         EngRunWriteStartLog( ER_LOG_ERROR, pErCfg, pErData);
-
-        // Reset the enginerun and it's cycles.
-        EngRunReset(pErCfg, pErData);
-
         pErData->erState = ER_STATE_STOPPED;
       }
       else
@@ -652,8 +651,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
           {
             // Finish the engine run log and reset my cycles.
             EngRunWriteStartLog(ER_LOG_STOPPED, pErCfg, pErData);
-            EngRunReset(pErCfg, pErData);
-
             pErData->erState = ER_STATE_STOPPED;
           }
         }
@@ -661,6 +658,10 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       break;
 
     case ER_STATE_RUNNING:
+
+      // Update the EngineRun data
+      EngRunUpdateRunData( pErData);
+
       // If we have a problem determining the EngineRun state for this engine run,
       // end the engine run log, and transition to error mode
 
@@ -669,19 +670,15 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {
         // Add additional 1 second to close of ER due to ERROR.  Normally
         // UpdateEngineRunLog() updates ->Duration, which is only called
-		// on !EngineRunIsError()
+		    // on !EngineRunIsError()
         pErData->erDuration_ms += (UINT32)pErCfg->erRate;
 
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErData);
-        EngRunReset(pErCfg, pErData);
         pErData->erState = ER_STATE_STOPPED;
       }
       else
       {
-        // Update the EngineRun log data
-        EngRunUpdateRunData( pErData);
-
         // If the engine run has stopped, finish the engine run and change states
         // RUNNING -> STOP
         if ( TriggerGetState( pErCfg->stopTrigID) ||
@@ -689,7 +686,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
         {
           // Finish the engine run log
           EngRunWriteRunLog(ER_LOG_STOPPED, pErData);
-          EngRunReset(pErCfg, pErData);
           pErData->erState = ER_STATE_STOPPED;
         }
       }
@@ -700,20 +696,26 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       break;
     }
 
-    // Update the cycles for this engine run if starting or running.
-    if ( pErData->erState == ER_STATE_STARTING ||
-         pErData->erState == ER_STATE_RUNNING )
-    {
-      CycleUpdateAll(pErData->erIndex);
-    }
+    // Update the cycles state and data for this engine run
+    CycleUpdateAll(pErData->erIndex);
 
-    // Display msg when state changes.
-    if ( pErData->erState !=  curState )
+    // General State Transition processing
+    if ( pErData->erState != curState )
     {
+      // on transition into STOPPED state from any state reset the monitored min value info
+      if (pErData->erState == ER_STATE_STOPPED)
+      {
+          // these are monitored in stop mode so the must be reset on transition into STOPPED
+          pErData->minValueValid = TRUE;
+          pErData->monMinValue   = FLT_MAX;
+      }
+
+      // Always display msg when state changes.
       GSE_DebugStr ( NORMAL, TRUE, "EngineRun(%d) %s -> %s ",
                      pErData->erIndex,
                      engineRunStateEnum[curState].Str,
                      engineRunStateEnum[pErData->erState].Str);
+
     }
   }
 }
@@ -1017,6 +1019,11 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 2:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 BitBucket #87
+ *
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:33p
  * Updated in $/software/control processor/code/application
