@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 45 $  $Date: 12-12-08 1:33p $
+      $Revision: 46 $  $Date: 12/12/12 2:13p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -232,7 +232,7 @@ void EngRunInitialize(void)
       pErData->nTotalSensors  = SensorInitSummaryArray ( pErData->snsrSummary,
                                                          MAX_ENGRUN_SENSORS,
                                                          pErCfg->sensorMap,
-                                                         sizeof(pErCfg->sensorMap) );      
+                                                         sizeof(pErCfg->sensorMap) );
     }
     else // Invalid config...
     {
@@ -368,7 +368,7 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with 
+ * Notes:       Standard Initiliazation format to be compatible with
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -393,7 +393,7 @@ BOOLEAN EngReInitFile ( void )
   }
 
   NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
-  
+
   return TRUE;
 }
 
@@ -661,6 +661,10 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       break;
 
     case ER_STATE_RUNNING:
+
+      // Update the EngineRun data
+      EngRunUpdateRunData( pErData);
+
       // If we have a problem determining the EngineRun state for this engine run,
       // end the engine run log, and transition to error mode
 
@@ -669,7 +673,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       {
         // Add additional 1 second to close of ER due to ERROR.  Normally
         // UpdateEngineRunLog() updates ->Duration, which is only called
-		// on !EngineRunIsError()
+		    // on !EngineRunIsError()
         pErData->erDuration_ms += (UINT32)pErCfg->erRate;
 
         // Finish the engine run log
@@ -679,9 +683,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       }
       else
       {
-        // Update the EngineRun log data
-        EngRunUpdateRunData( pErData);
-
         // If the engine run has stopped, finish the engine run and change states
         // RUNNING -> STOP
         if ( TriggerGetState( pErCfg->stopTrigID) ||
@@ -1017,20 +1018,25 @@ static void EngRunUpdateStartData( const ENGRUN_CFG* pErCfg,
  *  MODIFICATIONS
  *    $History: EngineRun.c $
  * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 2:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 BitBucket #87
+ *
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:33p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
  * Updated in $/software/control processor/code/application
  * SCR 1162 - NV MGR File Init function
- * 
+ *
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:32p
