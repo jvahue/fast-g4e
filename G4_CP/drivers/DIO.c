@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 55 $  $Date: 12-12-11 4:27p $
+   $Revision: 56 $  $Date: 12/12/12 7:20p $
 
 
 ******************************************************************************/
@@ -1191,6 +1191,11 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 7:20p
+ * Updated in $/software/control processor/code/drivers
+ * Code Review  add STATIC macro support for G4E
  *
  * *****************  Version 55  *****************
  * User: John Omalley Date: 12-12-11   Time: 4:27p
