@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 18 $  $Date: 11/16/12 8:13p $
+  $Revision: 19 $  $Date: 12/12/12 6:24p $
 
 ******************************************************************************/
 
@@ -23,7 +23,7 @@
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_basic.h"
-#include "EvaluatorInterface.h"
+//#include "EvaluatorInterface.h"
 /******************************************************************************
                       Package Defines
 ******************************************************************************/
@@ -68,54 +68,6 @@
                              Package Typedefs
 ******************************************************************************/
 
-
-// Declare enum from just the list of supported op codes.
-#undef  OPCMD
-#define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd) OpCode
-typedef enum
-{
-  EVAL_OPCODE_LIST,
-  EVAL_OPCODE_MAX
-} EVAL_OPCODE;
-
-
-// The following enum is to generate EVAL_DAI_MAX.
-// Only a subset of OPCODE need a data access interface so...
-// EVAL_DAI_MAX <= EVAL_OPCODE_MAX
-#undef DAI
-#define DAI(OpCode, IsConfiged, RetValueFunc, RetBoolFunc, ValidFunc) OpCode##_DAI
-typedef enum
-{
-  EVAL_DAI_LIST,
-  EVAL_DAI_MAX
-}EVAL_DAI;
-
-typedef enum
-{
-  DATATYPE_VALUE = 1,
-  DATATYPE_BOOL,
-  DATATYPE_RPN_PROC_ERR
-}DATATYPE;
-
-// Note: Keep this enum in sync with EvalRetValEnumString[]
-typedef enum
-{
-  RPN_ERR_UNKNOWN                  =  0,  // place unused.
-  RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index
-  RPN_ERR_INVALID_TOKEN            = -2,  // Unrecognized operand input name
-  RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range
-  RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.
-  RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand
-  RPN_ERR_CONST_VALUE_OTRG         = -6,  // Const value out of range for FLOAT32
-  RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present
-  RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation
-  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack
-  RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval
-  RPN_ERR_NOT_PREV_TABLE_FULL      = -11, // The table storing Prior-sensor values is full.
-  //-----
-  RPN_ERR_MAX                      = -12
-}RPN_ERR;
-
 typedef enum
 {
   EVAL_CALLER_TYPE_PARSE,    // Do not insert into !P tables during the parse of a Cfg
@@ -145,14 +97,6 @@ typedef struct
 }EVAL_EXPR;
 #pragma pack()
 
-
-typedef struct
-{
-  DATATYPE dataType;
-  FLOAT32  data;
-  BOOLEAN  validity;
-}EVAL_RPN_ENTRY;
-
 // Entry to handle prior sensor values in expressions
 // KeyField layout:
 // 0x000000FF - Sensor ID 00-255
@@ -176,36 +120,6 @@ typedef struct
   PRIOR_SENSOR_ENTRY tempTbl[MAX_TEMP_PRIOR_VALUES];
   UINT8              tempTblCnt;
 }EVAL_EXE_CONTEXT;
-
-
-// Typedef to function pointers.
-typedef INT32   ADD_CMD (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-typedef INT32   FMT_CMD (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-typedef BOOLEAN OP_CMD  (EVAL_EXE_CONTEXT* context);
-
-typedef struct
-{
-  BYTE     opCode;
-  CHAR     token[EVAL_OPRND_LEN+1];
-  UINT8    tokenLen;
-  ADD_CMD* pfAddCmd;        // Ptr to function STR -> CMD obj
-  FMT_CMD* pfFmtCmd;        // Ptr to function CMDobj -> STR
-  OP_CMD*  pfExeCmd;        // Ptr to function to execute CMD
-}EVAL_OPCODE_TBL_ENTRY;
-
-
-// Data Access Interface
-typedef FLOAT32 GET_VALUE_FUNC( INT32 objIndex );
-typedef BOOLEAN GET_BOOL_FUNC ( INT32 objIndex );
-
-typedef struct
-{
-  BYTE opCode;                        // Lookup-key from EVAL_OPCODE_TBL_ENTRY
-  GET_BOOL_FUNC*  pfIsSrcConfigured;  // Return is input source configured?
-  GET_VALUE_FUNC* pfGetSrcByValue;    // Return source input data as FP number.
-  GET_BOOL_FUNC*  pfGetSrcByBool;     // Return source input data as boolean.
-  GET_BOOL_FUNC*  pfGetSrcValidity;   // Return source validity
-}EVAL_DATAACCESS;
 
 /******************************************************************************
                                  Package Exports
@@ -239,40 +153,16 @@ EXPORT INT32 EvalExeExpression  ( EVAL_CALLER_TYPE objType, INT32 objID,
 
 EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 
-// Functions listed in the function table not really "exported" but
-// need to be declared as such because EvaluatorInterface.h will use them.
-
-static BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalLoadInputSrc   (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalLoadFuncCall   (EVAL_EXE_CONTEXT* context);
-
-// Comparison Operators
-static BOOLEAN EvalCompareOperands (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalIsNotEqualPrev  (EVAL_EXE_CONTEXT* context);
-
-// Logical Operators
-static BOOLEAN EvalPerformNot      (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalPerformAnd      (EVAL_EXE_CONTEXT* context);
-static BOOLEAN EvalPerformOr       (EVAL_EXE_CONTEXT* context);
-
-// String-to-Cmd Converter functions.
-static INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-static INT32 EvalAddFuncCall (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-static INT32 EvalAddInputSrc (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-static INT32 EvalAddStdOper  (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
-
-// Cmd-to-String representation converters.
-static INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-static INT32 EvalFmtLoadConstStr         (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-static INT32 EvalFmtLoadCmdStr           (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
-static INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
 
 #endif // EVALUATOR_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 6:24p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 Code Review 
  *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 11/16/12   Time: 8:13p

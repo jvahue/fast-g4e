@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 109 $  $Date: 12/10/12 7:08p $
+   $Revision: 110 $  $Date: 12/12/12 4:31p $
 
 ******************************************************************************/
 
@@ -3039,6 +3039,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 110  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 4:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review 
  *
  * *****************  Version 109  *****************
  * User: Contractor V&v Date: 12/10/12   Time: 7:08p

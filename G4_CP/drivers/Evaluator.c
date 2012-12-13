@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 25 $  $Date: 12/03/12 5:34p $
+  $Revision: 26 $  $Date: 12/12/12 6:23p $
 
 ******************************************************************************/
 
@@ -31,7 +31,6 @@
 /*****************************************************************************/
 #include "GSE.h"
 #include "Evaluator.h"
-#include "EvaluatorInterface.h"
 #include "assert.h"
 #include "Utility.h"
 
@@ -61,10 +60,162 @@
 
 #define BASE_10 10
 
+/************************************************************************************/
+/* SPECIAL FWD DECL for Functions declared in EVAL_OPCODE_LIST&EVAL_DAI_LIST tables */
+/************************************************************************************/
+static BOOLEAN EvalLoadConstValue (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadConstFalse (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadInputSrc   (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalLoadFuncCall   (EVAL_EXE_CONTEXT* context);
+// Comparison Operators
+static BOOLEAN EvalCompareOperands (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalIsNotEqualPrev  (EVAL_EXE_CONTEXT* context);
+// Logical Operators
+static BOOLEAN EvalPerformNot      (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalPerformAnd      (EVAL_EXE_CONTEXT* context);
+static BOOLEAN EvalPerformOr       (EVAL_EXE_CONTEXT* context);
+// String-to-Cmd Converter functions.
+static INT32 EvalAddConst    (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddFuncCall (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddInputSrc (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddStdOper  (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+// Cmd-to-String representation converters.
+static INT32 EvalFmtLoadEnumeratedCmdStr (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtLoadConstStr         (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtLoadCmdStr           (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+static INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+
+// Token -> Opcode lookup table
+#undef  OPCMD
+#define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd)
+
+/*              EVAL_OPCODE_LIST is greater than 95 chars for clarity.                       */
+
+#define EVAL_OPCODE_LIST \
+  /*       OpCode       Token   Len  AddCmd             FmtString                      ExeCmd */\
+  /* Load/Fetch commands                                                                      */\
+  /* Operands: KEEP LIST IN SAME ORDER AS EVAL_DAI_LIST BELOW. LOOKUPS USE OPCMD AS INDEXES   */\
+  OPCMD(OP_GETSNRVAL,   "SVLU",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+  OPCMD(OP_GETSNRVALID, "SVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+  OPCMD(OP_GETTRIGVAL,  "TACT",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+  OPCMD(OP_GETTRIGVALID,"TVLD",  4, EvalAddInputSrc,    EvalFmtLoadEnumeratedCmdStr,   EvalLoadInputSrc    ),\
+  OPCMD(OP_CALL_ACTACK, "AACK",  4, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadFuncCall    ),\
+  OPCMD(OP_CONST_FALSE, "FALSE", 5, EvalAddFuncCall,    EvalFmtLoadCmdStr,             EvalLoadConstFalse  ),\
+  OPCMD(OP_CONST_VAL,   "",      0, EvalAddConst,       EvalFmtLoadConstStr,           EvalLoadConstValue  ),\
+  /* Operators: KEEP LIST IN DESCENDING SIZE ORDER ( "!=" MUST BE FOUND BEFORE "!" )                       */\
+  OPCMD(OP_NE,          "!=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_EQ,          "==",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_NOT_EQ_PREV, "!P",    2, EvalAddNotEqPrev,   EvalFmtOperStr,                EvalIsNotEqualPrev  ),\
+  OPCMD(OP_GE,          ">=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_LE,          "<=",    2, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_GT,          ">",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_LT,          "<",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalCompareOperands ),\
+  OPCMD(OP_NOT,         "!",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformNot      ),\
+  OPCMD(OP_AND,         "&",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformAnd      ),\
+  OPCMD(OP_OR,          "|",     1, EvalAddStdOper,     EvalFmtOperStr,                EvalPerformOr       )
+
+
+// Data Access Interface table
+#undef DAI
+#define DAI(OpCode, IsConfiged, RetValueFunc, RetBoolFunc, ValidFunc)
+
+/*              EVAL_DAI_LIST is greater than 95 chars for clarity.                          */
+
+#define EVAL_DAI_LIST \
+  /*   NOTE: RetValueFunc and RetBoolFunc are mutually exclusive -DO NOT DECLARE BOTH!                */\
+  /*       OpCode      IsConfiged           RetValueFunc    RetBoolFunc           ValidFunc           */\
+  DAI(OP_GETSNRVAL,    SensorIsUsed,        SensorGetValue, NULL,                 SensorIsValid       ),\
+  DAI(OP_GETSNRVALID,  SensorIsUsed,        NULL,           SensorIsValid,        SensorIsValid       ),\
+  DAI(OP_GETTRIGVAL,   TriggerIsConfigured, NULL,           TriggerGetState,      TriggerValidGetState),\
+  DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, TriggerValidGetState),\
+  DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, NULL                )
+
 //#define DEBUG_EVALUATOR
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+// Declare enum from just the list of supported op codes.
+#undef  OPCMD
+#define OPCMD(OpCode, Token, TokenLen, AddCmd, FmtString, ExeCmd) OpCode
+typedef enum
+{
+  EVAL_OPCODE_LIST,
+  EVAL_OPCODE_MAX
+} EVAL_OPCODE;
+
+// The following enum is to generate EVAL_DAI_MAX.
+// Only a subset of OPCODE need a data access interface so...
+// EVAL_DAI_MAX <= EVAL_OPCODE_MAX
+
+#undef DAI
+#define DAI(OpCode, IsConfiged, RetValueFunc, RetBoolFunc, ValidFunc) OpCode##_DAI
+typedef enum
+{
+  EVAL_DAI_LIST,
+  EVAL_DAI_MAX
+}EVAL_DAI;
+
+typedef enum
+{
+  DATATYPE_VALUE = 1,
+  DATATYPE_BOOL,
+  DATATYPE_RPN_PROC_ERR
+}DATATYPE;
+
+typedef struct
+{
+  DATATYPE dataType;
+  FLOAT32  data;
+  BOOLEAN  validity;
+}EVAL_RPN_ENTRY;
+
+// Typedef to function pointers.
+typedef INT32   ADD_CMD (INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr);
+typedef INT32   FMT_CMD (INT16 tblIdx, const EVAL_CMD* cmd, CHAR* str);
+typedef BOOLEAN OP_CMD  (EVAL_EXE_CONTEXT* context);
+
+typedef struct
+{
+  BYTE     opCode;
+  CHAR     token[EVAL_OPRND_LEN+1];
+  UINT8    tokenLen;
+  ADD_CMD* pfAddCmd;        // Ptr to function STR -> CMD obj
+  FMT_CMD* pfFmtCmd;        // Ptr to function CMDobj -> STR
+  OP_CMD*  pfExeCmd;        // Ptr to function to execute CMD
+}EVAL_OPCODE_TBL_ENTRY;
+
+// Data Access Interface
+typedef FLOAT32 GET_VALUE_FUNC( INT32 objIndex );
+typedef BOOLEAN GET_BOOL_FUNC ( INT32 objIndex );
+
+typedef struct
+{
+  BYTE opCode;                        // Lookup-key from EVAL_OPCODE_TBL_ENTRY
+  GET_BOOL_FUNC*  pfIsSrcConfigured;  // Return is input source configured?
+  GET_VALUE_FUNC* pfGetSrcByValue;    // Return source input data as FP number.
+  GET_BOOL_FUNC*  pfGetSrcByBool;     // Return source input data as boolean.
+  GET_BOOL_FUNC*  pfGetSrcValidity;   // Return source validity
+}EVAL_DATAACCESS;
+
+// Note: Keep this enum in sync with EvalRetValEnumString[]
+typedef enum
+{
+  RPN_ERR_UNKNOWN                  =  0,  // place unused.
+  RPN_ERR_INDEX_NOT_NUMERIC        = -1,  // Unrecognized operand index
+  RPN_ERR_INVALID_TOKEN            = -2,  // Unrecognized operand input name
+  RPN_ERR_INDEX_OTRNG              = -3,  // Index out of range
+  RPN_ERR_TOO_MANY_OPRNDS          = -4,  // Too many operands in the expression.
+  RPN_ERR_OP_REQUIRES_SENSOR_OPRND = -5,  // Operation is invalid on this operand
+  RPN_ERR_CONST_VALUE_OTRG         = -6,  // Const value out of range for FLOAT32
+  RPN_ERR_TOO_FEW_STACK_VARS       = -7,  // Operation requires more vars on stack than present
+  RPN_ERR_INV_OPRND_TYPE           = -8,  // One or more operands are invalid for operation
+  RPN_ERR_TOO_MANY_TOKENS_IN_EXPR  = -9,  // Too many tokens to fit on stack
+  RPN_ERR_TOO_MANY_STACK_VARS      = -10, // Too many stack vars were present at end of eval
+  RPN_ERR_NOT_PREV_TABLE_FULL      = -11, // The table storing Prior-sensor values is full.
+  //-----
+  RPN_ERR_MAX                      = -12
+}RPN_ERR;
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -1636,6 +1787,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 6:23p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 Code Review 
  *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:34p

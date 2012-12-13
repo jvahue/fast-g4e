@@ -15,7 +15,7 @@ BigEndian   = YES
 -- EndAdj is -4 for CRC plus -32 for build Data/Time
 -----------------------------------------------------------------------------------------------
 [Section_0]
-SectionSize   = 800000
+SectionSize   = 1000000
 StartAddr     = 0x00100000
 EndAddr       = 0x0
 EndAdj        = -36

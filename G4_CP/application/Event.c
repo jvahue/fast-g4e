@@ -408,7 +408,7 @@ void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
    memset ( &pData->tsDurationMetTime, 0, sizeof(pData->tsDurationMetTime) );
    memset ( &pData->tsEndTime, 0, sizeof(pData->tsEndTime) );
 
-   pData->endType = EVENT_NO_END;
+   pData->endType       = EVENT_NO_END;
 
    // Re-init the sensor summary data for the event
    SensorResetSummaryArray (pData->sensor, pData->nTotalSensors);

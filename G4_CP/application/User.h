@@ -17,7 +17,7 @@
                   defines for user data access (ie. USER_RO)
 
     VERSION
-    $Revision: 45 $  $Date: 12-11-01 1:46p $
+    $Revision: 46 $  $Date: 12/12/12 4:31p $
 
 ******************************************************************************/
 
@@ -277,6 +277,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 4:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review
  *
  * *****************  Version 45  *****************
  * User: Melanie Jutras Date: 12-11-01   Time: 1:46p

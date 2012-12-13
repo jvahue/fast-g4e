@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 118 $  $Date: 12/04/12 6:00p $
+   $Revision: 119 $  $Date: 12/11/12 8:33p $
 
 
 ******************************************************************************/
@@ -194,7 +194,7 @@ static void FAST_UpdateSysAnnuciation ( DIO_OUT_OP Blink );
  *****************************************************************************/
 void FAST_Init(void)
 {
-  TCB TaskInfo;
+  TCB task_info;
 
   User_AddRootCmd(&RootMsg);
 
@@ -227,88 +227,88 @@ void FAST_Init(void)
   PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &m_IsRecordBusy);
   PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &FASTStatus.LogTransferToGSActive);
 
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST Manager",_TRUNCATE);
-  TaskInfo.TaskID         = FAST_Manager;
-  TaskInfo.Function       = FAST_Task;
-  TaskInfo.Priority       = taskInfo[FAST_Manager].priority;
-  TaskInfo.Type           = taskInfo[FAST_Manager].taskType;
-  TaskInfo.modes          = taskInfo[FAST_Manager].modes;
-  TaskInfo.MIFrames       = taskInfo[FAST_Manager].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[FAST_Manager].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[FAST_Manager].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST Manager",_TRUNCATE);
+  task_info.TaskID         = FAST_Manager;
+  task_info.Function       = FAST_Task;
+  task_info.Priority       = taskInfo[FAST_Manager].priority;
+  task_info.Type           = taskInfo[FAST_Manager].taskType;
+  task_info.modes          = taskInfo[FAST_Manager].modes;
+  task_info.MIFrames       = taskInfo[FAST_Manager].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[FAST_Manager].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[FAST_Manager].MIFrate;
+  task_info.Enabled        = TRUE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
   //Watchdog Tasks
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST WDOG1",_TRUNCATE);
-  TaskInfo.TaskID         = FAST_WDOG1;
-  TaskInfo.Function       = FAST_WatchdogTask1;
-  TaskInfo.Priority       = taskInfo[FAST_WDOG1].priority;
-  TaskInfo.Type           = taskInfo[FAST_WDOG1].taskType;
-  TaskInfo.modes          = taskInfo[FAST_WDOG1].modes;
-  TaskInfo.MIFrames       = taskInfo[FAST_WDOG1].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[FAST_WDOG1].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[FAST_WDOG1].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST WDOG1",_TRUNCATE);
+  task_info.TaskID         = FAST_WDOG1;
+  task_info.Function       = FAST_WatchdogTask1;
+  task_info.Priority       = taskInfo[FAST_WDOG1].priority;
+  task_info.Type           = taskInfo[FAST_WDOG1].taskType;
+  task_info.modes          = taskInfo[FAST_WDOG1].modes;
+  task_info.MIFrames       = taskInfo[FAST_WDOG1].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[FAST_WDOG1].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[FAST_WDOG1].MIFrate;
+  task_info.Enabled        = TRUE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
   //Watchdog Tasks
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST WDOG2",_TRUNCATE);
-  TaskInfo.TaskID         = FAST_WDOG2;
-  TaskInfo.Function       = FAST_WatchdogTask2;
-  TaskInfo.Priority       = taskInfo[FAST_WDOG2].priority;
-  TaskInfo.Type           = taskInfo[FAST_WDOG2].taskType;
-  TaskInfo.modes          = taskInfo[FAST_WDOG2].modes;
-  TaskInfo.MIFrames       = taskInfo[FAST_WDOG2].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[FAST_WDOG2].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[FAST_WDOG2].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST WDOG2",_TRUNCATE);
+  task_info.TaskID         = FAST_WDOG2;
+  task_info.Function       = FAST_WatchdogTask2;
+  task_info.Priority       = taskInfo[FAST_WDOG2].priority;
+  task_info.Type           = taskInfo[FAST_WDOG2].taskType;
+  task_info.modes          = taskInfo[FAST_WDOG2].modes;
+  task_info.MIFrames       = taskInfo[FAST_WDOG2].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[FAST_WDOG2].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[FAST_WDOG2].MIFrate;
+  task_info.Enabled        = TRUE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
   //Auto-upload task
   // Performs timing based on frames, should be highish priority
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
+  memset(&task_info, 0, sizeof(task_info));
   memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST U/L Chk",_TRUNCATE);
-  TaskInfo.TaskID         = FAST_UL_Chk;
-  TaskInfo.Function       = FAST_UploadCheckTask;
-  TaskInfo.Priority       = taskInfo[FAST_UL_Chk].priority;
-  TaskInfo.Type           = taskInfo[FAST_UL_Chk].taskType;
-  TaskInfo.modes          = taskInfo[FAST_UL_Chk].modes;
-  TaskInfo.MIFrames       = taskInfo[FAST_UL_Chk].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[FAST_UL_Chk].InitialMif; //run every second
-  TaskInfo.Rmt.MifRate    = taskInfo[FAST_UL_Chk].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = &AutoUploadTaskData;
-  TmTaskCreate (&TaskInfo);
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST U/L Chk",_TRUNCATE);
+  task_info.TaskID         = FAST_UL_Chk;
+  task_info.Function       = FAST_UploadCheckTask;
+  task_info.Priority       = taskInfo[FAST_UL_Chk].priority;
+  task_info.Type           = taskInfo[FAST_UL_Chk].taskType;
+  task_info.modes          = taskInfo[FAST_UL_Chk].modes;
+  task_info.MIFrames       = taskInfo[FAST_UL_Chk].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[FAST_UL_Chk].InitialMif; //run every second
+  task_info.Rmt.MifRate    = taskInfo[FAST_UL_Chk].MIFrate;
+  task_info.Enabled        = TRUE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = &AutoUploadTaskData;
+  TmTaskCreate (&task_info);
 
   //FAST TxTest Task
   // Performs timing based on frames, should be highish priority
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
+  memset(&task_info, 0, sizeof(task_info));
   memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FAST TxTest",_TRUNCATE);
-  TaskInfo.TaskID         = FAST_TxTestID;
-  TaskInfo.Function       = FAST_TxTestTask;
-  TaskInfo.Priority       = taskInfo[FAST_TxTestID].priority;
-  TaskInfo.Type           = taskInfo[FAST_TxTestID].taskType;
-  TaskInfo.modes          = taskInfo[FAST_TxTestID].modes;
-  TaskInfo.MIFrames       = taskInfo[FAST_TxTestID].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[FAST_TxTestID].InitialMif; //run every second
-  TaskInfo.Rmt.MifRate    = taskInfo[FAST_TxTestID].MIFrate;
-  TaskInfo.Enabled        = FALSE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST TxTest",_TRUNCATE);
+  task_info.TaskID         = FAST_TxTestID;
+  task_info.Function       = FAST_TxTestTask;
+  task_info.Priority       = taskInfo[FAST_TxTestID].priority;
+  task_info.Type           = taskInfo[FAST_TxTestID].taskType;
+  task_info.modes          = taskInfo[FAST_TxTestID].modes;
+  task_info.MIFrames       = taskInfo[FAST_TxTestID].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[FAST_TxTestID].InitialMif; //run every second
+  task_info.Rmt.MifRate    = taskInfo[FAST_TxTestID].MIFrate;
+  task_info.Enabled        = FALSE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
   //Setup events for recording/not recording status change.
   TH_SetRecStateChangeEvt(FAST_REC_EVENTS_TIME_HIST,FAST_OnRecordingChange);
@@ -1569,10 +1569,15 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, INT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 119  *****************
+ * User: Jim Mood     Date: 12/11/12   Time: 8:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 118  *****************
  * User: Jim Mood     Date: 12/04/12   Time: 6:00p
  * Updated in $/software/control processor/code/application
- * SCR #1131 Application busy 
+ * SCR #1131 Application busy
  *
  * *****************  Version 117  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:29p

@@ -8,7 +8,7 @@
     Description:  Contains all functions and data related to the Arinc429.
 
 VERSION
-     $Revision: 107 $  $Date: 12-12-04 7:56p $
+     $Revision: 109 $  $Date: 12/12/12 7:06p $
 
 ******************************************************************************/
 
@@ -34,10 +34,10 @@ VERSION
 /* Local Defines                                                             */
 /*****************************************************************************/
 #ifndef WIN32
-   #define PAUSE(x) StartTime = TTMR_GetHSTickCount();         \
-           while((TTMR_GetHSTickCount() - StartTime) < (x))
+   #define PAUSE(x) startTime = TTMR_GetHSTickCount();         \
+           while((TTMR_GetHSTickCount() - startTime) < (x));
 #else
-   #define PAUSE
+   #define PAUSE(x)
 #endif
 
 // Uncomment define to enable ARINC429 register output for testing
@@ -62,7 +62,7 @@ typedef enum
 /*****************************************************************************/
 UINT16 m_FPGA_StatusReg;
 
-ARINC429_DRV_STATUS m_Arinc429HW;
+static ARINC429_DRV_STATUS m_Arinc429HW;
 
 static BOOLEAN fpgaLogged;  // TRUE if fpga registers have been logged on PBIT fail
 
@@ -199,7 +199,7 @@ const FPGA_RX_REG fpgaRxReg[FPGA_MAX_RX_CHAN] =
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-static RESULT Arinc429DrvTest_FIFO     ( UINT8 *pdest, UINT16 *psize );
+static RESULT Arinc429DrvTest_FIFO     ( void *pdest, UINT16 *psize );
 
 static RESULT Arinc429DrvTest_Rx_FIFO  ( ARINC429_CHAN_ENUM ch,
                                          ARINC429_FIFO_TEST_TYPE testType,
@@ -209,9 +209,9 @@ static RESULT Arinc429DrvTest_Tx_FIFO  ( FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CH
                                          ARINC429_FIFO_TEST_TYPE testType,
                                          ARINC_DRV_PBIT_FAIL_DATA *failData );
 
-static RESULT Arinc429DrvTest_LFR      ( UINT8 *pdest, UINT16 *psize );
+static RESULT Arinc429DrvTest_LFR      ( void *pdest, UINT16 *psize );
 
-static RESULT Arinc429DrvTest_LoopBack ( UINT8 *pdest, UINT16 *psize );
+static RESULT Arinc429DrvTest_LoopBack ( void *pdest, UINT16 *psize );
 
 static void   Arinc429DrvRestoreStartupCfg ( void );
 
@@ -251,16 +251,14 @@ RESULT Arinc429DrvInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
    RESULT result;
    RESULT result_fifo;
    RESULT result_loopback;
-   UINT8 *pdest;
 
    // Initialize Local Data
    result_loopback = DRV_OK;
-   pdest           = (UINT8 *) pdata;
    result          = DRV_OK;
    *psize          = 0;       // No Result Data returned by Arinc429 PBIT
    fpgaLogged      = FALSE;
 
-    memset ( (void *) pdest, 0, sizeof(ARINC_DRV_PBIT_TEST_RESULT) );  // Init clear pdest
+    memset ( pdata, 0, sizeof(ARINC_DRV_PBIT_TEST_RESULT) );  // Init clear pdata
     memset ( &m_Arinc429HW, 0, sizeof(ARINC429_DRV_STATUS) );
 
     // Set Default Arinc 429 Startup Configuration
@@ -273,73 +271,73 @@ RESULT Arinc429DrvInitialize (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
       *SysLogId = DRV_ID_A429_PBIT_FPGA_FAIL;
 
       // Return Arinc429 Result code DRV_A429_FPGA_BAD_STATE
-      memcpy ( pdest, &result, sizeof(RESULT));
+      memcpy ( pdata, &result, sizeof(RESULT));
       *psize = sizeof(RESULT);
    }
 
    if (result == DRV_OK)
    {
      // Read Status to clear any residual receive errors
-     UINT32 i;
+     UINT8 i;
      for (i = 0; i < FPGA_MAX_RX_CHAN; i++)
      {
        UINT32 parityErrCnt = 0;
        UINT32 framingErrCnt = 0;
        UINT32 intCount = 0;
-       UINT16 FPGA_Status = 0;
+       UINT16 nFPGA_Status = 0;
 
        // dummy read to clear errors
-       Arinc429DrvCheckBITStatus ( &parityErrCnt, &framingErrCnt, &intCount, &FPGA_Status, i );
-       FPGA_Status = FPGA_R(fpgaRxReg[i].FIFO_Status);
+       Arinc429DrvCheckBITStatus( &parityErrCnt, &framingErrCnt, &intCount, &nFPGA_Status, i );
+       nFPGA_Status = FPGA_R(fpgaRxReg[i].FIFO_Status);
      }
 
-      // PBIT tests Arinc429_Test_LFR()
-      result = Arinc429DrvTest_LFR( pdest, psize );
+     // PBIT tests Arinc429_Test_LFR()
+     result = Arinc429DrvTest_LFR( pdata, psize );
 
-      // PBIT tests Arinc429_Test_FIFO()
-      result_fifo = Arinc429DrvTest_FIFO( pdest, psize );
+     // PBIT tests Arinc429_Test_FIFO()
+     result_fifo = Arinc429DrvTest_FIFO( pdata, psize );
 
-      // PBIT tests Arinc429_Test_LoopBack()
+     // PBIT tests Arinc429_Test_LoopBack()
 #ifdef SUPPORT_FPGA_BELOW_V12
 /*vcast_dont_instrument_start*/
-      if ( FPGA_GetStatus()->Version >= FPGA_VER_12 )
-      {
-         result_loopback = Arinc429DrvTest_LoopBack ( pdest, psize );
-      }
+     if ( FPGA_GetStatus()->Version >= FPGA_VER_12 )
+     {
+        result_loopback = Arinc429DrvTest_LoopBack ( pdata, psize );
+     }
 /*vcast_dont_instrument_end*/
 #else
-      result_loopback = Arinc429DrvTest_LoopBack ( pdest, psize );
+     result_loopback = Arinc429DrvTest_LoopBack ( pdata, psize );
 #endif
 
-      // SCR #383, Only return one DRV Result code.  Priority is _LFR, _FIFO then _LoopBack.
-      if ( result == DRV_OK )
-      {
-         if ( result_fifo == DRV_OK )
-         {
-            result = result_loopback;
-         }
-         else
-         {
-            result = result_fifo;
-         }
-      }
+     // SCR #383, Only return one DRV Result code.  Priority is _LFR, _FIFO then _LoopBack.
+     if ( result == DRV_OK )
+     {
+        if ( result_fifo == DRV_OK )
+        {
+           result = result_loopback;
+        }
+        else
+        {
+           result = result_fifo;
+        }
+     }
 
-      // Note: If ->result == DRV_OK, then this value is ignored.
-      *SysLogId = DRV_ID_A429_PBIT_TEST_FAIL;
+     // Note: If ->result == DRV_OK, then this value is ignored.
+     *SysLogId = DRV_ID_A429_PBIT_TEST_FAIL;
 
-      // NOTE: if _Test_LFR and _Test_FIFO both fails then result = "OR" of the two result
-      //       codes DRV_A429_RX_LFR_FIFO_TEST_FAIL, as of SCR #383 this is not the case
-      //       anymore.
+     // NOTE: if _Test_LFR and _Test_FIFO both fails then result = "OR" of the two result
+     //       codes DRV_A429_RX_LFR_FIFO_TEST_FAIL, as of SCR #383 this is not the case
+     //       anymore.
 
-      // NOTE: m_Arinc429MgrBlock.status.Rx[i].Status set to ARINC429_STATUS_DISABLED
-      //       on Arinc429_Test() failure for each Rx Ch
+     // NOTE: m_Arinc429MgrBlock.status.Rx[i].Status set to ARINC429_STATUS_DISABLED
+     //       on Arinc429_Test() failure for each Rx Ch
 
-      // NOTE: pdest updated with RESULT data on test failure
-      //       psize updated with RSULT data size on test failure
+     // NOTE: pdest updated with RESULT data on test failure
+     //       psize updated with RSULT data size on test failure
 
-  }
+   }
 
-  return (result);
+   return (result);
 }
 
 /******************************************************************************
@@ -364,17 +362,17 @@ void Arinc429DrvProcessISR_Rx( UINT16 IntStatus )
    // Local Data
    FPGA_RX_REG_PTR         pfpgaRxReg;
    ARINC429_DRV_RX_STATUS *pArincRxStatus;
-   UINT16                  IntRxStatus;
-   UINT32                  Channel;
+   UINT16                  intRxStatus;
+   UINT32                  channel;
 
    // Process all Rx Ch interrupts
-   for ( Channel = 0; Channel < FPGA_MAX_RX_CHAN; Channel++)
+   for ( channel = 0; channel < FPGA_MAX_RX_CHAN; channel++)
    {
-      pfpgaRxReg     = (FPGA_RX_REG_PTR) &fpgaRxReg[Channel];
-      pArincRxStatus = &m_Arinc429HW.Rx[Channel];
-      IntRxStatus    = (IntStatus >> pfpgaRxReg->isr_mask) & ISR_429_RX_TX_INT_BITS;
+      pfpgaRxReg     = (FPGA_RX_REG_PTR) &fpgaRxReg[channel];
+      pArincRxStatus = &m_Arinc429HW.Rx[channel];
+      intRxStatus    = (IntStatus >> pfpgaRxReg->isr_mask) & ISR_429_RX_TX_INT_BITS;
 
-      switch (IntRxStatus)
+      switch (intRxStatus)
       {
          case ISR_429_RX_NO_IRQ_VAL:
             // nothing to do here
@@ -391,12 +389,12 @@ void Arinc429DrvProcessISR_Rx( UINT16 IntStatus )
 
          default:
             // Unrecognized/Unused statuses are FATAL Asserts.
-            FATAL("Unrecognized IntRxStatus = %d", IntRxStatus);
+            FATAL("Unrecognized IntRxStatus = %d", intRxStatus);
             break;
       } // End of switch (IntRxStatus)
-  } // End of for i Loop thru FPGA_MAX_RX_CHAN
+   } // End of for i Loop thru FPGA_MAX_RX_CHAN
 
-  m_Arinc429HW.InterruptCnt++;
+   m_Arinc429HW.InterruptCnt++;
 
 }
 
@@ -418,31 +416,31 @@ void Arinc429DrvProcessISR_Tx( UINT16 IntStatus )
    // Local Data
    FPGA_TX_REG_PTR        pfpgaTxReg;
    ARINC429_DRV_TX_STATUS_PTR pArincTxStatus;
-   UINT16                 IntTxStatus;
-   UINT32                 Channel;
+   UINT16                 intTxStatus;
+   UINT32                 channel;
 
    // Process all Tx Ch interrupts
-   for ( Channel = 0 ; Channel < FPGA_MAX_TX_CHAN; Channel++)
+   for ( channel = 0 ; channel < FPGA_MAX_TX_CHAN; channel++)
    {
 #ifdef SUPPORT_FPGA_BELOW_V12
 /*vcast_dont_instrument_start*/
       if ( FPGA_GetStatus()->Version >= FPGA_VER_12 )
       {
-         pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v12[Channel];
+         pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v12[channel];
       }
       else
       {
-         pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v9[Channel];
+         pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v9[channel];
       }
 /*vcast_dont_instrument_end*/
 #else
-      pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v12[Channel];
+      pfpgaTxReg = (FPGA_TX_REG_PTR) &fpgaTxReg_v12[channel];
 #endif
 
-      pArincTxStatus = (ARINC429_DRV_TX_STATUS_PTR) &m_Arinc429HW.Tx[Channel];
-      IntTxStatus = (IntStatus >> pfpgaTxReg->isr_mask) & ISR_429_RX_TX_INT_BITS;
+      pArincTxStatus = (ARINC429_DRV_TX_STATUS_PTR) &m_Arinc429HW.Tx[channel];
+      intTxStatus = (IntStatus >> pfpgaTxReg->isr_mask) & ISR_429_RX_TX_INT_BITS;
 
-      switch (IntTxStatus)
+      switch (intTxStatus)
       {
          case ISR_429_TX_NO_IRQ_VAL:
             // nothing to do here
@@ -457,7 +455,7 @@ void Arinc429DrvProcessISR_Tx( UINT16 IntStatus )
             pArincTxStatus->FIFO_EmptyCnt++;
             break;
          default:
-            FATAL("Unrecognized IntTxStatus = %d", IntTxStatus);
+            FATAL("Unrecognized IntTxStatus = %d", intTxStatus);
             break;
       } // End of switch (IntRxStatus)
    } // End of for i Loop thru FPGA_MAX_TX_CHAN
@@ -479,17 +477,17 @@ void Arinc429DrvProcessISR_Tx( UINT16 IntStatus )
 void Arinc429DrvFlushHWFIFO (void)
 {
    // Local Data
-   UINT32 Arinc429Msg;
-   UINT32 LoopLimit;
-   UINT32 Channel;
+   UINT32 arinc429Msg;
+   UINT32 loopLimit;
+   UINT32 channel;
 
    // Loop through all the channels
-   for ( Channel = 0; Channel < ARINC_RX_CHAN_MAX; Channel++ )
+   for ( channel = 0; channel < ARINC_RX_CHAN_MAX; channel++ )
    {
       // Loop
-      for ( LoopLimit = 0; LoopLimit < FPGA_MAX_RX_FIFO_SIZE; LoopLimit++ )
+      for ( loopLimit = 0; loopLimit < FPGA_MAX_RX_FIFO_SIZE; loopLimit++ )
       {
-         if (FALSE == Arinc429DrvRead( &Arinc429Msg, (ARINC429_CHAN_ENUM)Channel ))
+         if (FALSE == Arinc429DrvRead( &arinc429Msg, (ARINC429_CHAN_ENUM)channel ))
          {
             break;
          }
@@ -856,7 +854,7 @@ void Arinc429DrvCfgTxChan ( ARINC429_SPEED Speed, ARINC429_PARITY Parity,
    FPGA_SHADOW_ARINC429_TX_CFG_PTR pShadowTxCfg;
 
    // Set a local transmit mode value based on the enable flag.
-   UINT8 Lbr429TxValue = Enable ? LBR_429_TX_NORMAL_VAL : LBR_429_TX_QUIET_VAL;
+   UINT8 nLbr429TxValue = Enable ? LBR_429_TX_NORMAL_VAL : LBR_429_TX_QUIET_VAL;
 
    // Initialize Local Data
    pShadowTxCfg = &FPGA_GetShadowRam()->Tx[Channel];
@@ -868,14 +866,14 @@ void Arinc429DrvCfgTxChan ( ARINC429_SPEED Speed, ARINC429_PARITY Parity,
                                      | (CCR_429_TX1_RATE * Speed);
 
          FPGA_GetShadowRam()->LBR = (FPGA_GetShadowRam()->LBR & ~LBR_429_TX1_DRIVE)
-                                     | (LBR_429_TX1_DRIVE * Lbr429TxValue);
+                                     | (LBR_429_TX1_DRIVE * nLbr429TxValue);
          break;
       case 1:
          FPGA_GetShadowRam()->CCR = (FPGA_GetShadowRam()->CCR & ~CCR_429_TX2_RATE)
                                      | (CCR_429_TX2_RATE * Speed);
 
          FPGA_GetShadowRam()->LBR = (FPGA_GetShadowRam()->LBR & ~LBR_429_TX2_DRIVE)
-                                     | (LBR_429_TX2_DRIVE * Lbr429TxValue);
+                                     | (LBR_429_TX2_DRIVE * nLbr429TxValue);
          break;
       default:
          FATAL("Invalid ARINC429 TX Channel = %d", Channel );
@@ -1031,46 +1029,46 @@ ARINC429_DRV_TX_STATUS_PTR Arinc429DrvTxGetCounts (UINT8 Channel)
 /*vcast_dont_instrument_start*/
 static void Arinc429DrvDumpRegs (void)
 {
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
       "\r\nArinc429DrvDumpRegs: CCR 0x%04x, LBR 0x%04x",
       FPGA_R( FPGA_429_COMMON_CONTROL ), FPGA_R( FPGA_429_LOOPBACK_CONTROL ) );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     RX1: CR 0x%04x, SR 0x%04x, FF 0x%04x, LSW 0x%04x, MSW 0x%04x",
             FPGA_R( FPGA_429_RX1_CONFIG ),
             FPGA_R( FPGA_429_RX1_STATUS ), FPGA_R( FPGA_429_RX1_FIFO_STATUS ),
             FPGA_R( FPGA_429_RX1_LSW ),    FPGA_R( FPGA_429_RX1_MSW )       );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     RX2: CR 0x%04x, SR 0x%04x, FF 0x%04x, LSW 0x%04x, MSW 0x%04x",
             FPGA_R( FPGA_429_RX2_CONFIG ),
             FPGA_R( FPGA_429_RX2_STATUS ), FPGA_R( FPGA_429_RX2_FIFO_STATUS ),
             FPGA_R( FPGA_429_RX2_LSW ),    FPGA_R( FPGA_429_RX2_MSW )       );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     RX3: CR 0x%04x, SR 0x%04x, FF 0x%04x, LSW 0x%04x, MSW 0x%04x",
             FPGA_R( FPGA_429_RX3_CONFIG ),
             FPGA_R( FPGA_429_RX3_STATUS ), FPGA_R( FPGA_429_RX3_FIFO_STATUS ),
             FPGA_R( FPGA_429_RX3_LSW ),    FPGA_R( FPGA_429_RX3_MSW )       );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     RX4: CR 0x%04x, SR 0x%04x, FF 0x%04x, LSW 0x%04x, MSW 0x%04x",
             FPGA_R( FPGA_429_RX4_CONFIG ),
             FPGA_R( FPGA_429_RX4_STATUS ), FPGA_R( FPGA_429_RX4_FIFO_STATUS ),
             FPGA_R( FPGA_429_RX4_LSW ),    FPGA_R( FPGA_429_RX4_MSW )       );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     TX1: CR 0x%04x, SR 0x%04x, FF 0x%04x",
             FPGA_R( FPGA_429_TX1_CONFIG ),
             FPGA_R( FPGA_429_TX1_STATUS ), FPGA_R( FPGA_429_TX1_FIFO_STATUS ) );
   GSE_PutLine(GSE_OutLine);
 
-  sprintf (GSE_OutLine,
+  snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\n     TX2: CR 0x%04x, SR 0x%04x, FF 0x%04x",
             FPGA_R( FPGA_429_TX2_CONFIG ),
             FPGA_R( FPGA_429_TX2_STATUS ), FPGA_R( FPGA_429_TX2_FIFO_STATUS ) );
@@ -1138,28 +1136,28 @@ static void Arinc429DrvLogFpgaRegs (ARINC_DRV_PBIT_FAIL_DATA *pDest)
 static void Arinc429DrvRestoreStartupCfg (void)
 {
    // Local Data
-   UINT8  Channel;
-   UINT16 Label;
+   UINT8  channel;
+   UINT16 label;
 
    Arinc429DrvSetIMR1_2 ();
 
    // Set Default Arinc 429 Rx Channel
-   for ( Channel = 0; Channel < FPGA_MAX_RX_CHAN; Channel++)
+   for ( channel = 0; channel < FPGA_MAX_RX_CHAN; channel++)
    {
       Arinc429DrvCfgRxChan ( ARINC429_SPEED_HIGH, ARINC429_PARITY_ODD,
-                             ARINC429_RX_SWAP_LABEL, FALSE, Channel );
+                             ARINC429_RX_SWAP_LABEL, FALSE, channel );
 
-      for ( Label = 0; Label < ARINC429_MAX_LABELS; Label++ )
+      for ( label = 0; label < ARINC429_MAX_LABELS; label++ )
       {
-         Arinc429DrvCfgLFR ( 0x0F, Channel, (UINT8)Label, FALSE );
+         Arinc429DrvCfgLFR ( 0x0F, channel, (UINT8)label, FALSE );
       }
    }
 
    // Set Default Arinc 429 Tx Channel
-   for ( Channel = 0; Channel < FPGA_MAX_TX_CHAN; Channel++)
+   for ( channel = 0; channel < FPGA_MAX_TX_CHAN; channel++)
    {
       Arinc429DrvCfgTxChan ( ARINC429_SPEED_HIGH, ARINC429_PARITY_ODD,
-                             ARINC429_TX_SWAP_LABEL, FALSE, Channel );
+                             ARINC429_TX_SWAP_LABEL, FALSE, channel );
    }
 }
 
@@ -1205,28 +1203,28 @@ static void Arinc429DrvRestoreStartupCfg (void)
  *     both LFR and FIFO test results
  *
  *****************************************************************************/
-static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
+static RESULT Arinc429DrvTest_FIFO (void *pdest, UINT16 *psize)
 {
   RESULT status_test;           // Status of each FIFO test of each Rx Ch
   RESULT status;                // Overall status of the Arinc429_Test_FIFO()
   FPGA_TX_REG_PTR pfpgaTxReg;   // Current Tx Ch being tested
-  ARINC_DRV_PBIT_RX_FIFO_TEST_RESULT FIFOTestRx;  // Summary of FIFO test of all Rx Ch.  To
-                                                  //   be returned if at least one FIFO
-                                                  //   test fails
+  ARINC_DRV_PBIT_RX_FIFO_TEST_RESULT m_FIFOTestRx;  // Summary of FIFO test of all Rx Ch.  To
+                                                    //   be returned if at least one FIFO
+                                                    //   test fails
 
-  ARINC_DRV_PBIT_TX_FIFO_TEST_RESULT FIFOTestTx;  // Summary of FIFO test of all Tx Ch.  To
-                                                  //   be returned if at least one FIFO test
-                                                  //   fails
+  ARINC_DRV_PBIT_TX_FIFO_TEST_RESULT m_FIFOTestTx;  // Summary of FIFO test of all Tx Ch.  To
+                                                    //   be returned if at least one FIFO test
+                                                    //   fails
 
-  ARINC_DRV_PBIT_TEST_RESULT *OverAllTest_Result_ptr;
+  ARINC_DRV_PBIT_TEST_RESULT *pOverAllTest_Result;
   UINT32 i;
 
-  OverAllTest_Result_ptr = (ARINC_DRV_PBIT_TEST_RESULT *) pdest;
+  pOverAllTest_Result = (ARINC_DRV_PBIT_TEST_RESULT *) pdest;
 
-  memset ( &FIFOTestRx, 0, sizeof(ARINC_DRV_PBIT_RX_FIFO_TEST_RESULT) );
-  memset ( &FIFOTestTx, 0, sizeof(ARINC_DRV_PBIT_TX_FIFO_TEST_RESULT) );
-  FIFOTestRx.ResultCode = DRV_OK;   // Init Overall status of all FIFO test of all Rx Ch
-  FIFOTestTx.ResultCode = DRV_OK;   // Init Overall status of all FIFO test of all Tx Ch
+  memset ( &m_FIFOTestRx, 0, sizeof(ARINC_DRV_PBIT_RX_FIFO_TEST_RESULT) );
+  memset ( &m_FIFOTestTx, 0, sizeof(ARINC_DRV_PBIT_TX_FIFO_TEST_RESULT) );
+  m_FIFOTestRx.ResultCode = DRV_OK;   // Init Overall status of all FIFO test of all Rx Ch
+  m_FIFOTestTx.ResultCode = DRV_OK;   // Init Overall status of all FIFO test of all Tx Ch
   // *psize = 0;   // Init to 0 to indicate no FIFO test failures
 
   // Loop and test all Arinc Rx Ch and keep track of test result for each ch.
@@ -1236,39 +1234,39 @@ static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
   {
     // Test FIFO Empty
     status_test = Arinc429DrvTest_Rx_FIFO ( (ARINC429_CHAN_ENUM) i, FIFO_EMPTY_TEST,
-                                            &OverAllTest_Result_ptr->failData);
+                                            &pOverAllTest_Result->failData);
 
     if (status_test == DRV_OK)
     {
       // Indicate FIFO Empty Test Pass
-      FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_EMPTY][i] = TRUE;
+      m_FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_EMPTY][i] = TRUE;
       // Test FIFO Half Full
       status_test = Arinc429DrvTest_Rx_FIFO ((ARINC429_CHAN_ENUM) i, FIFO_HALF_FULL_TEST,
-                                              &OverAllTest_Result_ptr->failData);
+                                              &pOverAllTest_Result->failData);
     }
 
     if (status_test == DRV_OK)
     {
       // Indicates FIFO Half Full Pass
-      FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_HALF_FULL][i] = TRUE;
+      m_FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_HALF_FULL][i] = TRUE;
       // Test FIFO Full
       status_test = Arinc429DrvTest_Rx_FIFO ( (ARINC429_CHAN_ENUM) i, FIFO_FULL_TEST,
-                                              &OverAllTest_Result_ptr->failData);
+                                              &pOverAllTest_Result->failData);
     }
 
     if (status_test == DRV_OK)
     {
       // Indicates FIFO Full Pass
-      FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_FULL][i] = TRUE;
+      m_FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_FULL][i] = TRUE;
       // Test Over Run for HW.
       status_test = Arinc429DrvTest_Rx_FIFO ( (ARINC429_CHAN_ENUM) i, FIFO_OVERRUN_TEST,
-                                              &OverAllTest_Result_ptr->failData);
+                                              &pOverAllTest_Result->failData);
     }
 
     if (status_test == DRV_OK)
     {
       // Indicates FIFO Overrun Pass
-      FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_OVERRUN][i] = TRUE;
+      m_FIFOTestRx.bTestPass[A429_RX_FIFO_TEST_OVERRUN][i] = TRUE;
     }
 
     if (status_test != DRV_OK)
@@ -1278,7 +1276,7 @@ static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
     }
 
     // Update overall FIFO Test status
-    FIFOTestRx.ResultCode |= status_test;
+    m_FIFOTestRx.ResultCode |= status_test;
   }
 
   // Loop and test all Arinc Tx Ch and keep track of test result for each ch.
@@ -1291,42 +1289,42 @@ static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
 
       status_test = Arinc429DrvTest_Tx_FIFO ( pfpgaTxReg, (ARINC429_CHAN_ENUM) i,
                                               FIFO_EMPTY_TEST,
-                                              &OverAllTest_Result_ptr->failData);
+                                              &pOverAllTest_Result->failData);
 
       if (status_test == DRV_OK)
       {
         // Indicates FIFO Half Full Pass
-        FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_EMPTY][i] = TRUE;
+        m_FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_EMPTY][i] = TRUE;
         // Test FIFO Half Full
         status_test = Arinc429DrvTest_Tx_FIFO ( pfpgaTxReg, (ARINC429_CHAN_ENUM) i,
                                                 FIFO_HALF_FULL_TEST,
-                                                &OverAllTest_Result_ptr->failData);
+                                                &pOverAllTest_Result->failData);
       }
 
       if (status_test == DRV_OK)
       {
         // Indicates FIFO Half Full Pass
-        FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_HALF_FULL][i] = TRUE;
+        m_FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_HALF_FULL][i] = TRUE;
         // Test FIFO Full
         status_test = Arinc429DrvTest_Tx_FIFO ( pfpgaTxReg, (ARINC429_CHAN_ENUM) i,
                                                 FIFO_FULL_TEST,
-                                                &OverAllTest_Result_ptr->failData);
+                                                &pOverAllTest_Result->failData);
       }
 
       if (status_test == DRV_OK)
       {
         // Indicates FIFO Full Pass
-        FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_FULL][i] = TRUE;
+        m_FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_FULL][i] = TRUE;
         // Test Over Run for HW.
         status_test = Arinc429DrvTest_Tx_FIFO ( pfpgaTxReg, (ARINC429_CHAN_ENUM) i,
                                                 FIFO_OVERRUN_TEST,
-                                                &OverAllTest_Result_ptr->failData);
+                                                &pOverAllTest_Result->failData);
       }
 
       if (status_test == DRV_OK)
       {
         // Indicates FIFO Overrun Pass
-        FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_OVERRUN][i] = TRUE;
+        m_FIFOTestTx.bTestPass[A429_TX_FIFO_TEST_OVERRUN][i] = TRUE;
       }
 
       if (status_test != DRV_OK)
@@ -1336,21 +1334,21 @@ static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
       }
 
       // Update overall FIFO Test status
-      FIFOTestTx.ResultCode |= status_test;
+      m_FIFOTestTx.ResultCode |= status_test;
     } // End for loop FPGA_MAX_TX_CHAN
   } // End if (FPGA_GetStatus()->Version >= FPGA_VER_12)
 
   // Always return current results
-  memcpy ( &OverAllTest_Result_ptr->bTestPassFIFORx[0][0], &FIFOTestRx.bTestPass[0][0],
+  memcpy ( &pOverAllTest_Result->bTestPassFIFORx[0][0], &m_FIFOTestRx.bTestPass[0][0],
                    sizeof(BOOLEAN) * FPGA_MAX_RX_CHAN * A429_RX_FIFO_TEST_MAX);
-  memcpy ( &OverAllTest_Result_ptr->bTestPassFIFOTx[0][0], &FIFOTestTx.bTestPass[0][0],
+  memcpy ( &pOverAllTest_Result->bTestPassFIFOTx[0][0], &m_FIFOTestTx.bTestPass[0][0],
                    sizeof(BOOLEAN) * FPGA_MAX_TX_CHAN * A429_TX_FIFO_TEST_MAX);
 
-  if ( (FIFOTestRx.ResultCode != DRV_OK) || (FIFOTestTx.ResultCode != DRV_OK) )
+  if ( (m_FIFOTestRx.ResultCode != DRV_OK) || (m_FIFOTestTx.ResultCode != DRV_OK) )
   {
 
     // Will OR in the ResultCode to Overall Testing
-    OverAllTest_Result_ptr->ResultCode |= (FIFOTestRx.ResultCode | FIFOTestTx.ResultCode);
+    pOverAllTest_Result->ResultCode |= (m_FIFOTestRx.ResultCode | m_FIFOTestTx.ResultCode);
 
     // Set Return Data Size
     *psize = sizeof(ARINC_DRV_PBIT_TEST_RESULT);
@@ -1360,13 +1358,13 @@ static RESULT Arinc429DrvTest_FIFO (UINT8 *pdest, UINT16 *psize)
   // Can only return one result code and not BIT OR of the two tests as
   //    the startup GSE PBIT display can not handle BIT OR result.
   //    Rx FIFO Test has higher priority.
-  if ( FIFOTestRx.ResultCode != DRV_OK )
+  if ( m_FIFOTestRx.ResultCode != DRV_OK )
   {
-    status = FIFOTestRx.ResultCode;
+    status = m_FIFOTestRx.ResultCode;
   }
-  else if ( FIFOTestTx.ResultCode != DRV_OK )
+  else if ( m_FIFOTestTx.ResultCode != DRV_OK )
   {
-    status = FIFOTestTx.ResultCode;
+    status = m_FIFOTestTx.ResultCode;
   }
   else
   {
@@ -1413,11 +1411,11 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
   ARINC429_DRV_RX_STATUS_PTR pArincRxStatus;
   ARINC429_DRV_STATUS_PTR pArincStatus;
 
-  UINT32 StartTime;
+  UINT32 startTime;
   UINT16 nCntTx, nCntRx;
 
   UINT16 fifoFlag;
-  UINT16 XmitSize;
+  UINT16 xmitSize;
   UINT32 *flagCnt;
 
   UINT16 nTestVal;
@@ -1436,7 +1434,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
   {
     case FIFO_EMPTY_TEST:
       fifoFlag = RFSR_429_FIFO_EMPTY;
-      XmitSize = 1;
+      xmitSize = 1;
       int_mask_val = ( fpgaRxReg[ch].imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_not_empty_bit * IMR1_UNMAK_IRQ_VAL );
@@ -1445,7 +1443,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
 
     case FIFO_HALF_FULL_TEST:
       fifoFlag = RFSR_429_FIFO_HALF_FULL;
-      XmitSize = (FPGA_MAX_RX_FIFO_SIZE/2);
+      xmitSize = (FPGA_MAX_RX_FIFO_SIZE/2);
       int_mask_val = ( fpgaRxReg[ch].imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_halffull_bit * IMR1_UNMAK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_not_empty_bit * IMR1_MASK_IRQ_VAL );
@@ -1454,7 +1452,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
 
     case FIFO_FULL_TEST:
       fifoFlag = RFSR_429_FIFO_FULL;
-      XmitSize = FPGA_MAX_RX_FIFO_SIZE;
+      xmitSize = FPGA_MAX_RX_FIFO_SIZE;
       int_mask_val = ( fpgaRxReg[ch].imr_full_bit *  IMR1_UNMAK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_not_empty_bit * IMR1_MASK_IRQ_VAL );
@@ -1463,13 +1461,14 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
 
     case FIFO_OVERRUN_TEST:
       fifoFlag = RFSR_429_FIFO_OVERRUN;
-      XmitSize = FPGA_MAX_RX_FIFO_SIZE + 1;
+      xmitSize = FPGA_MAX_RX_FIFO_SIZE + 1;
       int_mask_val = ( fpgaRxReg[ch].imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                      ( fpgaRxReg[ch].imr_not_empty_bit * IMR1_MASK_IRQ_VAL );
       flagCnt = &pArincRxStatus->FIFO_OverRunCnt;
       break;
 
+    case FIFO_MAX_TEST:
     default:
       FATAL("Arinc429 Rx Test FIFO Failed ch = %d", ch);
       break;
@@ -1494,7 +1493,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
   // SCR #1115 Dummy write to "flush" internal FPGA registers
   FPGA_W( fpgaRxReg[ch].lsw_test, 0xAAAA);
   FPGA_W( fpgaRxReg[ch].msw_test, 0x5555);
-  PAUSE( TICKS_PER_uSec * 5);
+  PAUSE( TICKS_PER_uSec * 5)
 
   // Might want to read FIFO until empty !
   nFIFOCnt = 0;
@@ -1519,7 +1518,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
     MCF_INTC_IMRL &= ~(MCF_INTC_IMRL_INT_MASK6|MCF_INTC_IMRL_MASKALL);
 
     // Wait for INT
-    PAUSE( TICKS_PER_500nSec);
+    PAUSE( TICKS_PER_500nSec)
 
     pArincRxStatus->FIFO_HalfFullCnt = 0;
     pArincRxStatus->FIFO_FullCnt = 0;
@@ -1528,8 +1527,8 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
     pArincStatus->InterruptCnt = 0;
 
     // Ensure that no INT occurs
-    StartTime = TTMR_GetHSTickCount();
-    while ( ( (TTMR_GetHSTickCount() - StartTime) < TICKS_PER_100msec) &&
+    startTime = TTMR_GetHSTickCount();
+    while ( ( (TTMR_GetHSTickCount() - startTime) < TICKS_PER_100msec) &&
               (pArincStatus->InterruptCnt == 0) )
     {
     }
@@ -1545,7 +1544,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
         *flagCnt = 0;
 
         //Transmit Until FIFO flag condition reached or XmitSize is reached
-        while ( (nCntTx < XmitSize) &&
+        while ( (nCntTx < xmitSize) &&
                 (((FPGA_R(fpgaRxReg[ch].FIFO_Status) & fifoFlag) != fifoFlag) ||
                  (testType == FIFO_EMPTY_TEST)) )
         {
@@ -1557,20 +1556,20 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
           //FPGA_W( pfpgaRxReg->msw_test, (0xFFFF - nCntTx));
 
           // Wait for status flag change
-          PAUSE( TICKS_PER_uSec * 5);
+          PAUSE( TICKS_PER_uSec * 5)
           nCntTx++;
         }
 
         // For Over Run condition INT does not occur and _OverRunCnt need to be manually
         // generated
-        if ( (testType == FIFO_OVERRUN_TEST) && (nCntTx == XmitSize) )
+        if ( (testType == FIFO_OVERRUN_TEST) && (nCntTx == xmitSize) )
         {
           *flagCnt = 1;
         }
 
         // Verify cnt value AND INT occurs AND Fifo Flag has transition correctly if not
         // EMPTY test.
-        if ( (nCntTx == XmitSize) &&
+        if ( (nCntTx == xmitSize) &&
              (*flagCnt != 0)      &&
              ( (testType == FIFO_EMPTY_TEST) ||
                ((FPGA_R(fpgaRxReg[ch].FIFO_Status) & fifoFlag) == fifoFlag) )
@@ -1614,8 +1613,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
           {
             // For empty test OR other test ensure flag has reset
             if ( ( testType == FIFO_EMPTY_TEST ) ||
-                 (( testType != FIFO_EMPTY_TEST) &&
-                  ((FPGA_R(fpgaRxReg[ch].FIFO_Status) & fifoFlag) != fifoFlag) ) )
+                 ((FPGA_R(fpgaRxReg[ch].FIFO_Status) & fifoFlag) != fifoFlag) )
             {
               status = DRV_OK;
             }
@@ -1629,9 +1627,9 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
 
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-              sprintf (GSE_OutLine,
-                  "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO Fail ch %d, type %d, txcnt=%d, rxcnt=%d",
-                  i, testType, nCntTx, nCntRx);
+              snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO Fail ch %d, type %d, txcnt=%d, rxcnt=%d",
+                i, testType, nCntTx, nCntRx);
               GSE_PutLine(GSE_OutLine);
               Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -1649,10 +1647,10 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
           failData->ffFullCnt     = pArincRxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-          sprintf (GSE_OutLine,
+          snprintf (GSE_OutLine, sizeof(GSE_OutLine),
               "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO Fail"
               " ch %d, type %d, txsize=%d, txcnt=%d, rxcnt=%d, flagcnt=%d",
-              i, testType, XmitSize, nCntTx, nCntRx, flagCnt);
+              i, testType, xmitSize, nCntTx, nCntRx, flagCnt);
           GSE_PutLine(GSE_OutLine);
           Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -1688,7 +1686,7 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
       failData->ffFullCnt     = pArincRxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-      sprintf (GSE_OutLine,
+      snprintf (GSE_OutLine, sizeof (GSE_OutLine),
           "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO type %d ch %d Fail: INT Error", testType, ch);
       GSE_PutLine(GSE_OutLine);
       Arinc429DrvDumpRegs();
@@ -1706,8 +1704,8 @@ static RESULT Arinc429DrvTest_Rx_FIFO ( ARINC429_CHAN_ENUM ch,
     failData->ffFullCnt     = pArincRxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-    sprintf (GSE_OutLine,
-        "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO type %d ch %d Fail: FIFO Not Empty", testType, ch);
+    snprintf (GSE_OutLine, sizeof (GSE_OutLine),
+      "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO type %d ch %d Fail: FIFO Not Empty", testType, ch);
     GSE_PutLine(GSE_OutLine);
     Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -1790,12 +1788,12 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
    ARINC429_DRV_TX_STATUS_PTR pArincTxStatus;
    ARINC429_DRV_STATUS_PTR pArincStatus;
 
-   UINT32 StartTime;
+   UINT32 startTime;
    UINT16 nCntTx, nCntRx;
-   volatile UINT16 *IMR_TX;
+   volatile UINT16 *pIMR_TX;
 
    UINT16 fifoFlag;
-   UINT16 XmitSize;
+   UINT16 xmitSize;
    UINT32 *flagCnt;
 
    UINT16 nTestVal;
@@ -1806,11 +1804,11 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
 
    if ( ch == ARINC_CHAN_0 )
    {
-      IMR_TX = FPGA_IMR1;
+      pIMR_TX = FPGA_IMR1;
    }
    else
    {
-      IMR_TX = FPGA_IMR2;
+      pIMR_TX = FPGA_IMR2;
    }
 
    pArincStatus = (ARINC429_DRV_STATUS_PTR) &m_Arinc429HW;
@@ -1820,7 +1818,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
    {
       case FIFO_EMPTY_TEST:
          fifoFlag = TSR_429_FIFO_EMPTY;
-         XmitSize = 1;
+         xmitSize = 1;
          int_mask_val = ( pfpgaTxReg->imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_empty_bit * IMR1_UNMAK_IRQ_VAL );
@@ -1828,7 +1826,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
          break;
       case FIFO_HALF_FULL_TEST:
          fifoFlag = TSR_429_FIFO_HALF_FULL;
-         XmitSize = (FPGA_MAX_TX_FIFO_SIZE/2);
+         xmitSize = (FPGA_MAX_TX_FIFO_SIZE/2);
          int_mask_val = ( pfpgaTxReg->imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_halffull_bit * IMR1_UNMAK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_empty_bit * IMR1_MASK_IRQ_VAL );
@@ -1836,7 +1834,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
          break;
       case FIFO_FULL_TEST:
          fifoFlag = TSR_429_FIFO_FULL;
-         XmitSize = FPGA_MAX_TX_FIFO_SIZE;
+         xmitSize = FPGA_MAX_TX_FIFO_SIZE;
          int_mask_val = ( pfpgaTxReg->imr_full_bit *  IMR1_UNMAK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_empty_bit * IMR1_MASK_IRQ_VAL );
@@ -1844,12 +1842,13 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
          break;
       case FIFO_OVERRUN_TEST:
          fifoFlag = TSR_429_FIFO_OVERRUN;
-         XmitSize = FPGA_MAX_TX_FIFO_SIZE + 1;
+         xmitSize = FPGA_MAX_TX_FIFO_SIZE + 1;
          int_mask_val = ( pfpgaTxReg->imr_full_bit *  IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_halffull_bit * IMR1_MASK_IRQ_VAL ) |
                         ( pfpgaTxReg->imr_empty_bit * IMR1_MASK_IRQ_VAL );
          flagCnt = &pArincTxStatus->FIFO_OverRunCnt;
          break;
+      case FIFO_MAX_TEST:
       default:
          FATAL("Arinc429 Tx Test FIFO Failed ch = %d, type = %d", ch, testType);
          break;
@@ -1863,7 +1862,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
    // SCR #1115 Dummy Write to flush internal FPGA register before test
    FPGA_W( pfpgaTxReg->lsw, 0xAAAA);
    FPGA_W( pfpgaTxReg->msw, 0x5555);
-   PAUSE( TICKS_PER_uSec * 5);
+   PAUSE( TICKS_PER_uSec * 5)
 
    // Might want to read FIFO until empty !
    nFIFOCnt = 0;
@@ -1882,13 +1881,13 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
       int_mask_bits =  pfpgaTxReg->imr_full_bit | pfpgaTxReg->imr_halffull_bit |
                        pfpgaTxReg->imr_empty_bit;
 
-      FPGA_W(IMR_TX, ((FPGA_R(IMR_TX) & ~int_mask_bits) | int_mask_val));
+      FPGA_W(pIMR_TX, ((FPGA_R(pIMR_TX) & ~int_mask_bits) | int_mask_val));
 
       // Unmask CPU INT Level 6 for FPGA
       MCF_INTC_IMRL &= ~(MCF_INTC_IMRL_INT_MASK6|MCF_INTC_IMRL_MASKALL);
 
       // Wait for INT
-      PAUSE( TICKS_PER_uSec * 5);
+      PAUSE( TICKS_PER_uSec * 5)
 
       pArincTxStatus->FIFO_HalfFullCnt = 0;
       pArincTxStatus->FIFO_FullCnt = 0;
@@ -1897,8 +1896,8 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
       pArincStatus->InterruptCnt = 0;
 
       // Ensure that no INT occurs
-      StartTime = TTMR_GetHSTickCount();
-      while ( ( (TTMR_GetHSTickCount() - StartTime) < TICKS_PER_100msec) &&
+      startTime = TTMR_GetHSTickCount();
+      while ( ( (TTMR_GetHSTickCount() - startTime) < TICKS_PER_100msec) &&
                 (pArincStatus->InterruptCnt == 0) )
       {
       }
@@ -1915,7 +1914,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
             *flagCnt = 0;
 
             //Transmit Until FIFO flag condition reached or expected XmitSize reached
-            while ( (nCntTx < XmitSize) &&
+            while ( (nCntTx < xmitSize) &&
                     (((FPGA_R(pfpgaTxReg->FIFO_Status) & fifoFlag) != fifoFlag)  ||
                     (testType == FIFO_EMPTY_TEST)) )
             {
@@ -1924,20 +1923,20 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
                FPGA_W( pfpgaTxReg->msw, nTestVal);
 
                // Wait for status flag change
-               PAUSE( TICKS_PER_uSec * 5);
+               PAUSE( TICKS_PER_uSec * 5)
                nCntTx++;
             }
 
             // For Over Run condition INT does not occur and _OverRunCnt need to be manually
             // generated
-            if ( (testType == FIFO_OVERRUN_TEST) && (nCntTx == XmitSize) )
+            if ( (testType == FIFO_OVERRUN_TEST) && (nCntTx == xmitSize) )
             {
                *flagCnt = 1;
             }
 
             // Verify cnt value AND
             // INT occurs and fifoFlag set appropriately if not testing FIFO Empty AND
-            if ( (nCntTx == XmitSize) &&
+            if ( (nCntTx == xmitSize) &&
                  ( (testType == FIFO_EMPTY_TEST) || ( (*flagCnt != 0) &&
                  ((FPGA_R(pfpgaTxReg->FIFO_Status) & fifoFlag) == fifoFlag) ) ) )
             {
@@ -1993,8 +1992,9 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
                     failData->ffFullCnt     = pArincTxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-                    sprintf (GSE_OutLine,
-                        "\r\nArinc429DrvTest_Tx_FIFO: TX FIFO Fail ch %d, type %d, txcnt=%d, rxcnt=%d",
+                    snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                        "\r\nArinc429DrvTest_Tx_FIFO: TX FIFO Fail"
+                        "ch %d, type %d, txcnt=%d, rxcnt=%d",
                         i, testType, nCntTx, nCntRx);
                     GSE_PutLine(GSE_OutLine);
                     Arinc429DrvDumpRegs();
@@ -2013,10 +2013,10 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
               failData->ffFullCnt     = pArincTxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-              sprintf (GSE_OutLine,
+              snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                   "\r\nArinc429DrvTest_Tx_FIFO: TX FIFO Fail"
                   " ch %d, type %d, txsize=%d, txcnt=%d, rxcnt=%d, flagcnt=%d",
-                  i, testType, XmitSize, nCntTx, nCntRx, flagCnt);
+                  i, testType, xmitSize, nCntTx, nCntRx, flagCnt);
               GSE_PutLine(GSE_OutLine);
               Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -2050,7 +2050,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
         failData->ffFullCnt     = pArincTxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-        sprintf (GSE_OutLine,
+        snprintf (GSE_OutLine, sizeof(GSE_OutLine),
           "\r\nArinc429DrvTest_Rx_FIFO: RX FIFO type %d ch %d Fail: INT Error", testType, ch);
         GSE_PutLine(GSE_OutLine);
         Arinc429DrvDumpRegs();
@@ -2067,8 +2067,9 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
      failData->ffFullCnt     = pArincTxStatus->FIFO_FullCnt;
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-     sprintf (GSE_OutLine,
-         "\r\nArinc429DrvTest_Tx_FIFO: TX FIFO type %d ch %d: Fail FIFO Not Empty", testType, ch);
+     snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+         "\r\nArinc429DrvTest_Tx_FIFO: TX FIFO type %d ch %d: Fail FIFO Not Empty",
+         testType, ch);
      GSE_PutLine(GSE_OutLine);
      Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -2100,7 +2101,7 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
    int_mask_bits =  pfpgaTxReg->imr_full_bit | pfpgaTxReg->imr_halffull_bit |
                     pfpgaTxReg->imr_empty_bit;
 
-   FPGA_W(IMR_TX, ((FPGA_R(IMR_TX) & ~int_mask_bits) | int_mask_val));
+   FPGA_W(pIMR_TX, ((FPGA_R(pIMR_TX) & ~int_mask_bits) | int_mask_val));
 
    // Mask CPU Level 6 INT for the FPGA
    MCF_INTC_IMRL |= MCF_INTC_IMRL_INT_MASK6;
@@ -2150,27 +2151,27 @@ static RESULT Arinc429DrvTest_Tx_FIFO (FPGA_TX_REG_PTR pfpgaTxReg, ARINC429_CHAN
  *     both LFR and FIFO test results
  *
  *****************************************************************************/
-static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
+static RESULT Arinc429DrvTest_LFR (void *pdest, UINT16 *psize)
 {
    // Local Data
    FPGA_RX_REG_PTR pfpgaRxReg;   // Current Rx Ch being tested
-   ARINC_DRV_PBIT_RX_LFR_TEST_RESULT LFRTest; // Summary of FIFO test of all Rx Ch.  To
-                                              //   be returned if at least one FIFO test
-                                              //   fails
-   ARINC_DRV_PBIT_TEST_RESULT *OverAllTest_Result_ptr;
+   ARINC_DRV_PBIT_RX_LFR_TEST_RESULT m_LFRTest; // Summary of FIFO test of all Rx Ch.  To
+                                                //   be returned if at least one FIFO test
+                                                //   fails
+   ARINC_DRV_PBIT_TEST_RESULT *pOverAllTest_Result;
    ARINC_DRV_PBIT_FAIL_DATA   *pFailData;
-   UINT16 i;
+   UINT8  i;
    UINT16 k;
    UINT16 *pLFR;
 
-   OverAllTest_Result_ptr = (ARINC_DRV_PBIT_TEST_RESULT *) pdest;
-   pFailData = &OverAllTest_Result_ptr->failData;
-   memset ( &LFRTest, 0, sizeof(ARINC_DRV_PBIT_RX_LFR_TEST_RESULT) );
+   pOverAllTest_Result = (ARINC_DRV_PBIT_TEST_RESULT *) pdest;
+   pFailData = &pOverAllTest_Result->failData;
+   memset ( &m_LFRTest, 0, sizeof(ARINC_DRV_PBIT_RX_LFR_TEST_RESULT) );
 
-   LFRTest.ResultCode = DRV_OK;  // Init Overall status of all LFR test of all Rx Ch
+   m_LFRTest.ResultCode = DRV_OK;  // Init Overall status of all LFR test of all Rx Ch
    for ( i = 0; i < FPGA_MAX_RX_CHAN; i++ )
    {
-      LFRTest.bTestPass[i] = TRUE;   // Init All Test to Pass for all Ch
+      m_LFRTest.bTestPass[i] = TRUE;   // Init All Test to Pass for all Ch
    }
 
    for (i = 0; i < FPGA_MAX_RX_CHAN; i++)
@@ -2194,8 +2195,8 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
       {
          if ( (*(pLFR + k) != STPU((k & 0x000F), eTp429Lfr1) ) )
          {
-            LFRTest.bTestPass[i] = FALSE;
-            LFRTest.ResultCode = DRV_A429_RX_LFR_FIFO_TEST_FAIL;
+            m_LFRTest.bTestPass[i] = FALSE;
+            m_LFRTest.ResultCode = DRV_A429_RX_LFR_FIFO_TEST_FAIL;
             m_Arinc429HW.Rx[i].Status = ARINC429_DRV_STATUS_FAULTED_PBIT;
             if (!fpgaLogged)
             {
@@ -2207,7 +2208,8 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
 
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-            sprintf (GSE_OutLine, "\r\nArinc429DrvTest_LFR: LFR FIFO Fail cnt up lbl %d", k);
+            snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                      "\r\nArinc429DrvTest_LFR: LFR FIFO Fail cnt up lbl %d", k);
             GSE_PutLine(GSE_OutLine);
             Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -2218,7 +2220,7 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
 
       // Peform a count down - SCR 495 Additional processing request by HW
       // Ok.. This test could be combined with above, later.
-      if ( LFRTest.bTestPass[i] == TRUE )
+      if ( m_LFRTest.bTestPass[i] == TRUE )
       {
          // Get current Ch LFR Address
          pLFR = (UINT16 *) pfpgaRxReg->lfr;
@@ -2235,8 +2237,8 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
          {
             if ( (*(pLFR + k) != STPU( ((~k) & 0x000F), eTp429Lfr2) ))
             {
-               LFRTest.bTestPass[i] = FALSE;
-               LFRTest.ResultCode = DRV_A429_RX_LFR_FIFO_TEST_FAIL;
+               m_LFRTest.bTestPass[i] = FALSE;
+               m_LFRTest.ResultCode = DRV_A429_RX_LFR_FIFO_TEST_FAIL;
                m_Arinc429HW.Rx[i].Status = ARINC429_DRV_STATUS_FAULTED_PBIT;
                if (!fpgaLogged)
                {
@@ -2248,7 +2250,8 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
 
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-               sprintf (GSE_OutLine, "\r\nArinc429DrvTest_LFR: LFR FIFO Fail cnt dn lbl %d", k);
+               snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                         "\r\nArinc429DrvTest_LFR: LFR FIFO Fail cnt dn lbl %d", k);
                GSE_PutLine(GSE_OutLine);
                Arinc429DrvDumpRegs();
 /*vcast_dont_instrument_end*/
@@ -2266,19 +2269,19 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
    } // End of i loop thru all Independent Rx Ch
 
    // Always return current results
-   memcpy ( &OverAllTest_Result_ptr->bTestPassLFR[0], &LFRTest.bTestPass[0],
+   memcpy ( &pOverAllTest_Result->bTestPassLFR[0], &m_LFRTest.bTestPass[0],
             sizeof(BOOLEAN) * FPGA_MAX_RX_CHAN);
 
-   if (LFRTest.ResultCode != DRV_OK)
+   if (m_LFRTest.ResultCode != DRV_OK)
    {
       // Will OR in the ResultCode to Overall Testing
-      OverAllTest_Result_ptr->ResultCode |= LFRTest.ResultCode;
+      pOverAllTest_Result->ResultCode |= m_LFRTest.ResultCode;
 
       // Set Return Data Size
       *psize = sizeof(ARINC_DRV_PBIT_TEST_RESULT);
    }
 
-   return (LFRTest.ResultCode);
+   return (m_LFRTest.ResultCode);
 }
 
 /******************************************************************************
@@ -2298,26 +2301,28 @@ static RESULT Arinc429DrvTest_LFR (UINT8 *pdest, UINT16 *psize)
  *      updated to invert data before compare !
  *
  *****************************************************************************/
-static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
+static RESULT Arinc429DrvTest_LoopBack (void *pdest, UINT16 *psize)
 {
    // Local Data
    FPGA_TX_REG_PTR pfpgaTxReg[FPGA_MAX_TX_CHAN];
-   UINT32 i, j;
-   UINT16 startOrder, endOrder;
+   UINT8  i;
+   UINT32 j;
+   UINT8  startOrder;
+   UINT16 endOrder;
    UINT16 lsw, msw;
    BOOLEAN bStatusOk;
 
-   UINT16 testOrder[FPGA_MAX_RX_CHAN];
+   ARINC429_CHAN_ENUM testOrder[FPGA_MAX_RX_CHAN];
 
-   ARINC_DRV_PBIT_LOOPBACK_TEST_RESULT LoopBackTest;
+   ARINC_DRV_PBIT_LOOPBACK_TEST_RESULT loopBackTest;
                                               // Summary of FIFO test of all Rx Ch.  To
                                               //   be returned if at least one FIFO test
                                               //   fails
 
-   ARINC_DRV_PBIT_TEST_RESULT *OverAllTest_Result_ptr;
+   ARINC_DRV_PBIT_TEST_RESULT *pOverAllTest_Result;
    ARINC_DRV_PBIT_FAIL_DATA *pFailData;
-   OverAllTest_Result_ptr = (ARINC_DRV_PBIT_TEST_RESULT *) pdest;
-   pFailData = &OverAllTest_Result_ptr->failData;
+   pOverAllTest_Result = (ARINC_DRV_PBIT_TEST_RESULT *)pdest;
+   pFailData = &pOverAllTest_Result->failData;
 
 #define TX1_LSW 0xFFFF
 #define TX1_MSW 0x3333
@@ -2327,9 +2332,9 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
    testOrder[2] = ARINC_CHAN_0;
    testOrder[3] = ARINC_CHAN_1;
 
-   memset ( &LoopBackTest, 0, sizeof(ARINC_DRV_PBIT_LOOPBACK_TEST_RESULT) );
+   memset ( &loopBackTest, 0, sizeof(ARINC_DRV_PBIT_LOOPBACK_TEST_RESULT) );
 
-   LoopBackTest.ResultCode = DRV_A429_TX_RX_LOOP_FAIL;
+   loopBackTest.ResultCode = DRV_A429_TX_RX_LOOP_FAIL;
                                      // Init to fail.  See logic below to minimize
                                      //    code coverage required.
 
@@ -2338,11 +2343,11 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 
    for ( i = 0; i < FPGA_MAX_TX_CHAN; i++ )
    {
-      LoopBackTest.bTestPassTxLoopBack[i] = TRUE;
+      loopBackTest.bTestPassTxLoopBack[i] = TRUE;
    }
    for ( i = 0; i < FPGA_MAX_RX_CHAN; i++ )
    {
-      LoopBackTest.bTestPassRxLoopBack[i] = TRUE;
+      loopBackTest.bTestPassRxLoopBack[i] = TRUE;
    }
 
    // Set speed for all chan
@@ -2408,14 +2413,14 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
    pfpgaTxReg[ARINC_CHAN_1] = (FPGA_TX_REG_PTR) &fpgaTxReg_v12[ARINC_CHAN_1];
 
    // Peform dummy write and then read of each Rx channel to "FLUSH" internal FPGA registers
-     FPGA_W(pfpgaTxReg[ARINC_CHAN_0]->lsw, 0xAAAA);
-     FPGA_W(pfpgaTxReg[ARINC_CHAN_0]->msw, 0x5555);
+   FPGA_W(pfpgaTxReg[ARINC_CHAN_0]->lsw, 0xAAAA);
+   FPGA_W(pfpgaTxReg[ARINC_CHAN_0]->msw, 0x5555);
 
-     FPGA_W(pfpgaTxReg[ARINC_CHAN_1]->lsw, 0xAAAA);
-     FPGA_W(pfpgaTxReg[ARINC_CHAN_1]->msw, 0x5555);
+   FPGA_W(pfpgaTxReg[ARINC_CHAN_1]->lsw, 0xAAAA);
+   FPGA_W(pfpgaTxReg[ARINC_CHAN_1]->msw, 0x5555);
 
-     // Wait for data to be looped back worst case 12.5 kHz one 32 bit word
-     TTMR_Delay(TICKS_PER_10msec);
+   // Wait for data to be looped back worst case 12.5 kHz one 32 bit word
+   TTMR_Delay(TICKS_PER_10msec);
 
    // Read Status to clear any errors
    for (i = 0; i < FPGA_MAX_RX_CHAN; i++)
@@ -2423,27 +2428,28 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
      UINT32 parityErrCnt = 0;
      UINT32 framingErrCnt = 0;
      UINT32 intCount = 0;
-     UINT16 FPGA_Status = 0;
+     UINT16 nFPGA_Status = 0;
 
      // SCR #1193
      // dummy read from dummy write
      msw = (UINT16) (FPGA_R(fpgaRxReg[i].msw));
 
      // dummy read to clear
-     Arinc429DrvCheckBITStatus ( &parityErrCnt, &framingErrCnt, &intCount, &FPGA_Status, i );
+     Arinc429DrvCheckBITStatus ( &parityErrCnt, &framingErrCnt, &intCount, &nFPGA_Status, i );
      msw = FPGA_R(fpgaRxReg[i].FIFO_Status);
 
      // add returned error counts to total
-     pFailData->parityErr += parityErrCnt;
-     pFailData->frameErr  += framingErrCnt;
+     pFailData->parityErr += (UINT8)parityErrCnt;
+     pFailData->frameErr  += (UINT8)framingErrCnt;
 
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
      if ( (parityErrCnt != 0) || (framingErrCnt != 0) )
      {
-       sprintf (GSE_OutLine,
-            "\r\nArinc429DrvTest_LoopBack: Clear Read ch %d: SR=0x%04x, FF=0x%04x, PE=%d, FE=%d",
-             i, FPGA_Status, msw, parityErrCnt, framingErrCnt);
+       snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                 "\r\nArinc429DrvTest_LoopBack: Clear Read"
+                 " ch %d: SR=0x%04x, FF=0x%04x, PE=%d, FE=%d",
+                 i, nFPGA_Status, msw, parityErrCnt, framingErrCnt);
        GSE_PutLine(GSE_OutLine);
      }
 /*vcast_dont_instrument_end*/
@@ -2455,7 +2461,7 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 
    for ( j = ARINC_CHAN_0; j < FPGA_MAX_TX_CHAN; j++ )
    {
-      LoopBackTest.bTestPassTxLoopBack[j] = FALSE;
+      loopBackTest.bTestPassTxLoopBack[j] = FALSE;
       if ( (FPGA_R(pfpgaTxReg[j]->FIFO_Status) & TSR_429_FIFO_EMPTY) == TSR_429_FIFO_EMPTY )
       {
          // Perform loop back
@@ -2468,7 +2474,7 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
          // Check Ch 2 and 3
          for ( i = startOrder; i <= endOrder; i++ )
          {
-            LoopBackTest.bTestPassRxLoopBack[testOrder[i]] = FALSE;
+            loopBackTest.bTestPassRxLoopBack[testOrder[i]] = FALSE;
             if ( (FPGA_R(fpgaRxReg[testOrder[i]].FIFO_Status) & RFSR_429_FIFO_EMPTY) !=
                   RFSR_429_FIFO_EMPTY )
             {
@@ -2477,13 +2483,13 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 
                if ( (lsw == TX1_LSW) && (msw == (UINT16)STPU( TX1_MSW, eTp429Rx1633)) )
                {
-                  LoopBackTest.bTestPassRxLoopBack[testOrder[i]] = TRUE;
+                  loopBackTest.bTestPassRxLoopBack[testOrder[i]] = TRUE;
                }
                else
                {
                  if (!fpgaLogged)
                  {
-                   pFailData->chan = testOrder[i];
+                   pFailData->chan = (UINT8)testOrder[i];
                    pFailData->expLsw = TX1_LSW;
                    pFailData->expMsw = TX1_MSW;
                    pFailData->rcvdLsw = lsw;
@@ -2492,7 +2498,7 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
                  }
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-                 sprintf (GSE_OutLine,
+                 snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                     "\r\nArinc429DrvTest_LoopBack: LoopBack RX Fail"
                     " ch %d: wrl=0x%04x, rdl=0x%04x, wrm=0x%04x, rdm=0x%04x",
                         testOrder[i], TX1_LSW, lsw, TX1_MSW, msw);
@@ -2508,7 +2514,7 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
               Arinc429DrvLogFpgaRegs(pFailData);
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-              sprintf (GSE_OutLine,
+              snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                   "\r\nArinc429DrvTest_LoopBack: LoopBack RX Fail ch %d: FIFO is Empty",
                   testOrder[i]);
               GSE_PutLine(GSE_OutLine);
@@ -2518,20 +2524,20 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
             }
          }
 
-         if ( ( LoopBackTest.bTestPassRxLoopBack[testOrder[startOrder]] ==
+         if ( ( loopBackTest.bTestPassRxLoopBack[testOrder[startOrder]] ==
                 (BOOLEAN)STPU( TRUE, eTp429Tx3106 )) &&
-              ( LoopBackTest.bTestPassRxLoopBack[testOrder[endOrder]] == TRUE ) )
+              ( loopBackTest.bTestPassRxLoopBack[testOrder[endOrder]] == TRUE ) )
          {
-            LoopBackTest.bTestPassTxLoopBack[j] = TRUE;
+            loopBackTest.bTestPassTxLoopBack[j] = TRUE;
          }
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
          else
          {
-           sprintf (GSE_OutLine,
+           snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                "\r\nArinc429DrvTest_LoopBack: LoopBack TX Fail: RX ch %d: %d, RX ch %d: %d",
-               testOrder[startOrder], LoopBackTest.bTestPassRxLoopBack[testOrder[startOrder]],
-               testOrder[endOrder],   LoopBackTest.bTestPassRxLoopBack[testOrder[endOrder]]);
+               testOrder[startOrder], loopBackTest.bTestPassRxLoopBack[testOrder[startOrder]],
+               testOrder[endOrder],   loopBackTest.bTestPassRxLoopBack[testOrder[endOrder]]);
            GSE_PutLine(GSE_OutLine);
            Arinc429DrvDumpRegs();
          }
@@ -2544,7 +2550,7 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
         Arinc429DrvLogFpgaRegs(pFailData);
 #ifdef A429_TEST_OUTPUT
 /*vcast_dont_instrument_start*/
-        sprintf (GSE_OutLine,
+        snprintf (GSE_OutLine, sizeof(GSE_OutLine),
             "\r\nArinc429DrvTest_LoopBack: LoopBack ch %d: FAIL NOT TSR_429_FIFO_EMPTY", j);
         GSE_PutLine(GSE_OutLine);
         Arinc429DrvDumpRegs();
@@ -2557,25 +2563,25 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
    }
 
    // Update return data.
-   memcpy ( &OverAllTest_Result_ptr->bTestPassTxLoopBack[0],
-              &LoopBackTest.bTestPassTxLoopBack[0], sizeof(BOOLEAN) * FPGA_MAX_TX_CHAN);
-   memcpy ( &OverAllTest_Result_ptr->bTestPassRxLoopBack[0],
-              &LoopBackTest.bTestPassRxLoopBack[0], sizeof(BOOLEAN) * FPGA_MAX_RX_CHAN);
+   memcpy ( &pOverAllTest_Result->bTestPassTxLoopBack[0],
+              &loopBackTest.bTestPassTxLoopBack[0], sizeof(BOOLEAN) * FPGA_MAX_TX_CHAN);
+   memcpy ( &pOverAllTest_Result->bTestPassRxLoopBack[0],
+              &loopBackTest.bTestPassRxLoopBack[0], sizeof(BOOLEAN) * FPGA_MAX_RX_CHAN);
 
    // Update return value.  Use following logic to minimize code coverage.
    bStatusOk = TRUE;
    for ( i = 0; i < FPGA_MAX_RX_CHAN; i++ )
    {
-      bStatusOk &= LoopBackTest.bTestPassRxLoopBack[i];
-      if ( LoopBackTest.bTestPassRxLoopBack[i] == FALSE )
+      bStatusOk &= loopBackTest.bTestPassRxLoopBack[i];
+      if ( loopBackTest.bTestPassRxLoopBack[i] == FALSE )
       {
         m_Arinc429HW.Rx[i].Status = ARINC429_DRV_STATUS_FAULTED_PBIT;
       }
    }
    for ( i = 0; i < FPGA_MAX_TX_CHAN; i++ )
    {
-      bStatusOk &= LoopBackTest.bTestPassTxLoopBack[i];
-      if ( LoopBackTest.bTestPassTxLoopBack[i] == FALSE )
+      bStatusOk &= loopBackTest.bTestPassTxLoopBack[i];
+      if ( loopBackTest.bTestPassTxLoopBack[i] == FALSE )
       {
         m_Arinc429HW.Tx[i].Status = ARINC429_DRV_STATUS_FAULTED_PBIT;
       }
@@ -2593,11 +2599,11 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
 
    if (bStatusOk == TRUE )
    {
-      LoopBackTest.ResultCode = DRV_OK;
+      loopBackTest.ResultCode = DRV_OK;
    }
 
    // Update overall result code for Arinc429 PBIT
-   OverAllTest_Result_ptr->ResultCode |= LoopBackTest.ResultCode;
+   pOverAllTest_Result->ResultCode |= loopBackTest.ResultCode;
 
    // Wait for data to be looped back worst case 12.5 kHz one 32 bit word
    //   at 12.5 kHz 32 bit + 4 bit gap -> 2.8 msec
@@ -2606,17 +2612,27 @@ static RESULT Arinc429DrvTest_LoopBack (UINT8 *pdest, UINT16 *psize)
    // Reconfigure ARINC FPGA with startup defaults
    Arinc429DrvRestoreStartupCfg();
 
-   return (LoopBackTest.ResultCode);
+   return (loopBackTest.ResultCode);
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: arinc429.c $
  * 
+ * *****************  Version 109  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 7:06p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 Fixed macro for G4E build
+ *
+ * *****************  Version 108  *****************
+ * User: John Omalley Date: 12-12-11   Time: 1:38p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 107  *****************
  * User: Peter Lee    Date: 12-12-04   Time: 7:56p
  * Updated in $/software/control processor/code/drivers
- * SCR 1115 and 1193 Fix 'false' PBIT failures. 
+ * SCR 1115 and 1193 Fix 'false' PBIT failures.
  *
  * *****************  Version 106  *****************
  * User: Melanie Jutras Date: 12-11-09   Time: 1:20p

@@ -11,7 +11,7 @@
                   the aircraft Bus or Battery power supplies.
 
     VERSION
-    $Revision: 34 $  $Date: 12/04/12 5:59p $
+    $Revision: 35 $  $Date: 12/11/12 8:31p $
 
 ******************************************************************************/
 
@@ -243,7 +243,6 @@ typedef enum
   PM_MAX_BUSY
 } PM_BUSY_INDEX;
 
-typedef INT16 BUSY_INDEX;
 
 
 /******************************************************************************
@@ -281,7 +280,7 @@ EXPORT void PmInsertAppShutDownQuick( APPSHUTDOWN_FUNC func );
 EXPORT void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func );
 EXPORT void PmSetPowerOnTime( TIMESTAMP *pPtr );
 EXPORT BOOLEAN PmFileInit(void);
-EXPORT void PmRegisterAppBusyFlag(BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag );
+EXPORT void PmRegisterAppBusyFlag(PM_BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag );
 EXPORT BOOLEAN PmFSMAppBusyGetState(INT32 param);
 EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
 
@@ -296,6 +295,11 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
  *  MODIFICATIONS
  *    $History: PowerManager.h $
  * 
+ * *****************  Version 35  *****************
+ * User: Jim Mood     Date: 12/11/12   Time: 8:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review update
+ *
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 12/04/12   Time: 5:59p
  * Updated in $/software/control processor/code/system

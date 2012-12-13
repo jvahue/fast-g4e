@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 43 $  $Date: 12/05/12 8:07p $
+      $Revision: 45 $  $Date: 12-12-11 4:27p $
 ******************************************************************************/
 
 
@@ -35,12 +35,12 @@
 #define DEBOUNCE_PERIOD_MS 50
 #ifndef WIN32
     #define DIO_R(a) *(a)
-    #define DIO_W(a,m,o) *(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m))
-    #define DIO_S(a,v) *(a) = (v)
+    #define DIO_W(a,m,o) (*(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m)))
+    #define DIO_S(a,v) (*(a) = (v))
 
     #define DIO_R16(a) *(a)
-    #define DIO_W16(a,m,o) *(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m))
-    #define DIO_S16(a,v) *(a) = (v)
+    #define DIO_W16(a,m,o) (*(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m)))
+    #define DIO_S16(a,v) (*(a) = (v))
 #else
     #define DIO_R(a) hw_DioRead(a)
     #define DIO_W(a,m,o) hw_DioWrite(a,m,o)
@@ -248,7 +248,6 @@ typedef struct {
                              Package Exports Functions
 ******************************************************************************/
 EXPORT  RESULT  DIO_Init     ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize );
-EXPORT  BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig );
 EXPORT  void    DIO_SetPin   ( DIO_OUTPUT Pin, DIO_OUT_OP Op) ;
 EXPORT  BOOLEAN DIO_ReadPin  ( DIO_INPUT Pin);
 EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
@@ -262,6 +261,16 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 12-12-11   Time: 4:27p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
+ * 
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 12-12-11   Time: 2:07p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 43  *****************
  * User: Jim Mood     Date: 12/05/12   Time: 8:07p

@@ -256,7 +256,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
     //Copy data into the packet data field
     if(0 != size)
     {
-       memcpy(packet->data,data,size);
+      memcpy(packet->data,data,size);
     }
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
@@ -945,12 +945,12 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
  * User: Melanie Jutras Date: 12-11-30   Time: 1:08p
  * Updated in $/software/control processor/code/system
  * SCR #1142 File Format Changes
- * 
+ *
  * *****************  Version 66  *****************
  * User: John Omalley Date: 12-11-16   Time: 10:32p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 65  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:14a
  * Updated in $/software/control processor/code/system
@@ -1176,4 +1176,4 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
  *
  *
  ***************************************************************************/
- 
+
