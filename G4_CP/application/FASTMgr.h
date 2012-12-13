@@ -13,7 +13,7 @@
                   events.
 
     VERSION
-    $Revision: 29 $  $Date: 11/09/12 6:16p $
+    $Revision: 30 $  $Date: 12/13/12 2:56p $
 
 ******************************************************************************/
 
@@ -45,14 +45,14 @@
 ******************************************************************************/
 typedef struct
 {
-  BITARRAY128  RecordTriggers;
-  BITARRAY128  OnGroundTriggers;
-  UINT32 AutoULPer_s;
-  TIME_SOURCE_ENUM TimeSource;
-  UINT32 TxTestMsRdyTO;
-  UINT32 TxTestSIMRdyTO;
-  UINT32 TxTestGSMRdyTO;
-  UINT32 TxTestVPNRdyTO;
+  BITARRAY128  record_triggers;
+  BITARRAY128  on_ground_triggers;
+  UINT32 auto_ul_per_s;
+  TIME_SOURCE_ENUM time_source;
+  UINT32 tx_test_msrdy_to;
+  UINT32 tx_test_SIM_rdy_to;
+  UINT32 tx_test_GSM_rdy_to;
+  UINT32 tx_test_VPN_rdy_to;
 }FASTMGR_CONFIG;
 
 #define FASTMGR_CONFIG_DEFAULT {0,0,0,0},{0,0,0,0},300,TIME_SOURCE_LOCAL,120,180,300,300
@@ -72,7 +72,7 @@ typedef struct
                              Package Exports Variables
 ******************************************************************************/
 #if !defined ( FASTMGR_BODY )
-EXPORT USER_ENUM_TBL TimeSourceStrs[];
+EXPORT USER_ENUM_TBL time_source_strs[];
 #endif
 /******************************************************************************
                              Package Exports Functions
@@ -80,8 +80,8 @@ EXPORT USER_ENUM_TBL TimeSourceStrs[];
 EXPORT void                 FAST_Init                ( void );
 EXPORT TIME_SOURCE_ENUM     FAST_TimeSourceCfg       ( void );
 EXPORT void                 FAST_GetSoftwareVersion  ( INT8* SwVerStr );
-EXPORT void                 FAST_SignalUploadComplete( void);
-EXPORT void                 FAST_TurnOffFASTControl  ( void);
+EXPORT void                 FAST_SignalUploadComplete( void );
+EXPORT void                 FAST_TurnOffFASTControl  ( void );
 EXPORT BOOLEAN              FAST_FSMRfGetState       (INT32 param);
 EXPORT void                 FAST_FSMRfRun            (BOOLEAN Run,INT32 param);
 EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
@@ -92,6 +92,11 @@ EXPORT BOOLEAN              FAST_FSMRecordGetState   (INT32 param);
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
  * 
+ * *****************  Version 30  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 2:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197
+ *
  * *****************  Version 29  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:16p
  * Updated in $/software/control processor/code/application
