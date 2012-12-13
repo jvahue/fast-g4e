@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 28 $  $Date: 12-12-08 11:44a $
+      $Revision: 29 $  $Date: 12/13/12 3:08p $
 
 ******************************************************************************/
 
@@ -84,7 +84,6 @@ typedef enum
 {
   ER_LOG_STOPPED,
   ER_LOG_ERROR,
-  ER_LOG_RUNNING,
   ER_LOG_SHUTDOWN
 } ER_REASON;
 
@@ -92,29 +91,20 @@ typedef enum
 
 typedef struct
 {
-  ENGRUN_INDEX erIndex;             /* Which engine run object this came from          */
-  ER_REASON    reason;              /* reason for creating this start log              */
-  TIMESTAMP    startTime;           /* Timestamp EngineRun entered the START state     */
-  TIMESTAMP    endTime;             /* Timestamp EngineRun exited  the RUNNING state   */
-  UINT32       startingDuration_ms; /* Time from STARTED until transition to RUNNING   */
-  SENSOR_INDEX maxStartSensorId;    /* Sensor Id of the item monitored for max start   */
-  BOOLEAN      maxValueValid;       /* was the max value valid through the start       */
-  FLOAT32      monMaxValue;         /* Max Monitored value during start                */
-  SENSOR_INDEX minStartSensorId;    /* Sensor Id of the item  monitored for min start  */
-  BOOLEAN      minValueValid;       /* was the min value valid through the start       */
-  FLOAT32      monMinValue;         /* Min monitored value throughout EngineRun        */
-}ENGRUN_STARTLOG;
-
-typedef struct
-{
-  ENGRUN_INDEX erIndex;                         /* Which engine run object this came from  */
-  ER_REASON    reason;                          /* why did the Engine run end              */
-  TIMESTAMP    startTime;                       /* Time EngineRun entered the START state  */
-  TIMESTAMP    endTime;                         /* Time EngineRun ended  the RUNNING state */
-  UINT32       startingDuration_ms;             /* Time in ER_STATE_STARTING state         */
-  UINT32       erDuration_ms;                   /* Time in ER_STATE_RUNNING state          */
-  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries          */
-  UINT32       cycleCounts[MAX_CYCLES];         /* Array of cycle counts */
+  ENGRUN_INDEX erIndex;                 /* Which engine run object this came from  */
+  ER_REASON    reason;                  /* why did the Engine run end              */
+  TIMESTAMP    startTime;               /* Time EngineRun entered the START state  */
+  TIMESTAMP    endTime;                 /* Time EngineRun ended  the RUNNING state */
+  UINT32       startingDuration_ms;     /* Time in ER_STATE_STARTING state         */
+  UINT32       erDuration_ms;           /* Time in ER_STATE_RUNNING state          */
+  SENSOR_INDEX minMonSensorID;          /* Sensor Id of the item  monitored for min start    */
+  BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
+  FLOAT32      minMonValue;             /* minimum monitored value recorded during start     */
+  SENSOR_INDEX maxMonSensorID;          /* Sensor Id of the item monitored for max start     */
+  BOOLEAN      maxValueValid;           /* Was the max value sensor valid through stop/start */
+  FLOAT32      maxMonValue;             /* Maximum monitored value recorded while starting   */
+  SNSR_SUMMARY snsrSummary[MAX_ENGRUN_SENSORS]; /* Collection of Sensor summaries            */
+  UINT32       cycleCounts[MAX_CYCLES]; /* Array of cycle counts */
 } ENGRUN_RUNLOG;
 
 typedef struct
@@ -148,10 +138,12 @@ typedef struct
   UINT32       startingTime_ms;         /* tick time when EngineRun entered the START state  */
   UINT32       startingDuration_ms;     /* Time EngRun was in START state                    */
   UINT32       erDuration_ms;           /* Time from entering START until end of RUNNING     */
-  BOOLEAN      maxValueValid;           /* Was the max value sensor valid through stop/start */
-  FLOAT32      monMaxValue;             /* Maximum monitored value recorded while starting   */
+  SENSOR_INDEX minMonSensorID;        /* Sensor Id of the item  monitored for min start    */
   BOOLEAN      minValueValid;           /* Was the min value valid through the start         */
-  FLOAT32      monMinValue;             /* minimum monitored value recorded during start     */
+  FLOAT32      minMonValue;             /* minimum monitored value recorded during start     */
+  SENSOR_INDEX maxMonSensorID;        /* Sensor Id of the item monitored for max start     */
+  BOOLEAN      maxValueValid;           /* Was the max value sensor valid through stop/start */
+  FLOAT32      maxMonValue;             /* Maximum monitored value recorded while starting   */
   UINT16       nRateCounts;             /* Count of cycles until this engine run is executed */
   UINT16       nRateCountdown;          /* Number cycles remaining until next execution.     */
   UINT16       nTotalSensors;           /* Count of sensors actively defined in snsrSummary  */
@@ -167,8 +159,8 @@ typedef struct
   TRIGGER_INDEX  stopTrigID;              /* Index into Trig array - stop criteria          */
   ENGRUN_RATE    erRate;                  /* Hz at which this ER and it's cycles are run.   */
   UINT32         nOffset_ms;              /* Offset in ms this object runs within it's MIF  */
-  SENSOR_INDEX   monMaxSensorID;          /* Sensor ID for monitored max                    */
-  SENSOR_INDEX   monMinSensorID;          /* Sensor ID for monitored min                    */
+  SENSOR_INDEX   minMonSensorID;          /* Sensor ID for monitored min                    */
+  SENSOR_INDEX   maxMonSensorID;          /* Sensor ID for monitored max                    */
   BITARRAY128    sensorMap;    /* Bit map of flags of sensors managed by this ER 0-127      */
 } ENGRUN_CFG, *ENGRUN_CFG_PTR;
 
@@ -218,6 +210,11 @@ EXPORT BOOLEAN          EngReInitFile              ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1205 - Remove ER Start Log
  * 
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
