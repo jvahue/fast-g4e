@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
     
     VERSION
-      $Revision: 47 $  $Date: 12-11-28 2:08p $     
+      $Revision: 48 $  $Date: 12-12-13 4:35p $     
 
 ******************************************************************************/
 
@@ -37,6 +37,11 @@
 /*****************************************************************************/
 #define UARTMGR_RAW_BUF_SIZE 256 // Worst case 115.2 kbps. At 10 msec 115 bytes worst case. 
 
+#define UART_SENSOR_CHAN_SHIFT         8
+#define UART_SENSOR_CHAN_MASK          0x7
+#define UART_SENSOR_INDEX_MASK         UINT8MAX
+#define UART_SENSOR_DEFAULT_MSB        15
+#define UART_SENSOR_DEFAULT_WORD_SIZE  16
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -63,7 +68,7 @@ static UINT8 m_UartMgr_RawBuffer[UART_NUM_OF_UARTS][UARTMGR_RAW_BUF_SIZE];
 
 static UARTMGR_STORE_BUFF m_UartMgr_StoreBuffer[UART_NUM_OF_UARTS]; 
 
-static char GSE_OutLine[128]; 
+static CHAR GSE_OutLine[128]; 
 
 static UARTMGR_DEBUG m_UartMgr_Debug; 
 
@@ -682,12 +687,11 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
   UINT16 val; 
   SINT16 sval; 
   
-  
   fval = 0.0f; 
-
+  
   // Get channel for this sensor and Index into Word Info Data 
-  ch = (nIndex >> 8) & 0x7; 
-  wIndex = (nIndex & 0xFF); 
+  ch     = (nIndex >> UART_SENSOR_CHAN_SHIFT) & UART_SENSOR_CHAN_MASK; 
+  wIndex = (nIndex & UART_SENSOR_INDEX_MASK); 
   
   word_info_ptr = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[ch][wIndex]; 
   *tickCount = 0;   
@@ -696,25 +700,33 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
   {
     data_ptr = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][word_info_ptr->nIndex]; 
     runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &data_ptr->runtime_data; 
-    *tickCount = runtime_data_ptr->rxTime;     
+    *tickCount = runtime_data_ptr->rxTime;
     
+    // Protect against negative value when shifting val position
+    ASSERT_MESSAGE( (word_info_ptr->msb_position <= UART_SENSOR_DEFAULT_MSB),
+                    "Sensor GPA msb_position %d greater than %d", 
+                    word_info_ptr->msb_position, UART_SENSOR_DEFAULT_MSB );
+
     switch ( word_info_ptr->type  ) 
     {
       case UART_DATA_TYPE_BNR:
         // Interpret RAW Data as 2's complement 16 bit data 
         // Parse the data based on user sensor setting 
         // Normally msb_pos = 15 and word_size = 16 to return entire 16 bit
-        val = (runtime_data_ptr->val_raw << (15 - word_info_ptr->msb_position)); 
-        sval = (SINT16) (val >> (16 - word_info_ptr->word_size)); 
+        val  = ((runtime_data_ptr->val_raw << 
+                (UART_SENSOR_DEFAULT_MSB - word_info_ptr->msb_position)) 
+                & 0x0000FFFFUL); 
+        sval = (SINT16) (val >> (UART_SENSOR_DEFAULT_WORD_SIZE - word_info_ptr->word_size)); 
         fval = (FLOAT32) sval; 
         break; 
         
       case UART_DATA_TYPE_DISC:
         // Parse Data Bits before the param (could be param with multiple params embedded). 
-        val = ((runtime_data_ptr->val_raw << (15 - (word_info_ptr->msb_position))) 
-               & 0x0000FFFFUL);
+        val  = ((runtime_data_ptr->val_raw << 
+                (UART_SENSOR_DEFAULT_MSB - word_info_ptr->msb_position)) 
+                & 0x0000FFFFUL);
         // Parse Data Bits after the param (could be param with multiple params embedded). 
-        val = (val >> (16 - word_info_ptr->word_size)); 
+        val  = (val >> (UART_SENSOR_DEFAULT_WORD_SIZE - word_info_ptr->word_size)); 
         // return float32
         fval = (FLOAT32) val; 
         break; 
@@ -1932,6 +1944,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 48  *****************
+ * User: John Omalley Date: 12-12-13   Time: 4:35p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 47  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:08p
