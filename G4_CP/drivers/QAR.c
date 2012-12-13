@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 102 $  $Date: 12-12-03 3:54p $
+      $Revision: 103 $  $Date: 12/13/12 1:51p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -317,7 +317,7 @@ void QAR_Init_Tasks (void)
     // Create QAR Read Sub Frame Task
     memset(&TaskInfo, 0, sizeof(TaskInfo));
     strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Read Sub Frame",_TRUNCATE);
-    TaskInfo.TaskID         = (INT16)QAR_Read_Sub_Frame;
+    TaskInfo.TaskID         = QAR_Read_Sub_Frame;
     TaskInfo.Function       = QAR_ReadSubFrameTask;
     TaskInfo.Priority       = taskInfo[QAR_Read_Sub_Frame].priority;
     TaskInfo.Type           = taskInfo[QAR_Read_Sub_Frame].taskType;
@@ -333,7 +333,7 @@ void QAR_Init_Tasks (void)
     // Create QAR Monitor Task
     memset(&TaskInfo, 0, sizeof(TaskInfo));
     strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Monitor",_TRUNCATE);
-    TaskInfo.TaskID         = (INT16)QAR_Monitor;
+    TaskInfo.TaskID         = QAR_Monitor;
     TaskInfo.Function       = QAR_MonitorTask;
     TaskInfo.Priority       = taskInfo[QAR_Monitor].priority;
     TaskInfo.Type           = taskInfo[QAR_Monitor].taskType;
@@ -515,7 +515,7 @@ void QAR_ReadSubFrameTask( void *pParam )
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      QAR_ReadSubFrameTaskShutdown();
-     TmTaskEnable((INT16)QAR_Read_Sub_Frame, FALSE);
+     TmTaskEnable(QAR_Read_Sub_Frame, FALSE);
    }
    else // Normal task execution.
    {
@@ -2276,6 +2276,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
  *  MODIFICATIONS
  *    $History: QAR.c $
  * 
+ * *****************  Version 103  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 1:51p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 102  *****************
  * User: John Omalley Date: 12-12-03   Time: 3:54p
  * Updated in $/software/control processor/code/drivers
