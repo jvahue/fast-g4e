@@ -9,7 +9,7 @@
     Description: This file provides the standard data types for all Altair Software systems.
  
  VERSION
-      $Revision: 19 $  $Date: 12-12-01 10:14a $ 
+      $Revision: 20 $  $Date: 12/12/12 7:06p $ 
  
 ******************************************************************************/
 
@@ -125,6 +125,7 @@ typedef double             FLOAT64;
 typedef  UINT32 BITARRAY128[4];
 
 #if defined( WIN32)
+    #define STATIC 
     #define __interrupt
     #define __EI()
     #define __DI()
@@ -140,7 +141,7 @@ typedef  UINT32 BITARRAY128[4];
     typedef signed char   INT8;
 
 #else
-
+    #define STATIC static
     typedef char          BOOLEAN;
     typedef char          INT8;
 
@@ -164,6 +165,11 @@ typedef  UINT32 BITARRAY128[4];
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: alt_stdtypes.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 7:06p
+ * Updated in $/software/control processor/code/drivers
+ * Code Review  add STATIC macron for G4E
  * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-12-01   Time: 10:14a

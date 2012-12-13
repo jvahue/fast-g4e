@@ -9,7 +9,7 @@
 	-DVCAST_USE_STATIC_MEMORY
 	-DVCAST_COVERAGE_IO_BUFFERED
 	-DVCAST_CUSTOM_OUTPUT
-	
+
 	-DRELEASE
 	-object_dir=.\obj
 	-I..\drivers\hwdef
@@ -28,14 +28,19 @@
     -nostartfiles
     -o fast.elf
     -OI=VCAST_SAVE_STATEMENT_REALTIME
-#Debugger RAM RUN at 0x30000000.ld	
+#Debugger RAM RUN at 0x30000000.ld
 FASTII.ld
 ..\application\AircraftConfigMgr.c
+..\application\EngineRun.c
 ..\application\FASTMgr.c
 ..\application\FASTStateMgr.c
 ..\application\MSFileXfr.c
 ..\application\UploadMgr.c
 ..\application\User.c
+..\application\Event.c
+..\application\Timehistory.c
+..\application\trend.c
+..\application\Creep.c
 ..\drivers\ADC.c
 ..\drivers\Assert.c
 ..\drivers\BusTO.c
@@ -44,6 +49,7 @@ FASTII.ld
 ..\drivers\DPRAM.c
 ..\drivers\EEPROM.c
 ..\drivers\Exception.s
+..\drivers\Evaluator.c
 ..\drivers\FIFO.c
 ..\drivers\FPGA.c
 ..\drivers\PBIT.s
@@ -62,11 +68,13 @@ FASTII.ld
 ..\drivers\vectors.s
 ..\ghs_crt\crt0.68
 ..\ghs_crt\ind_crt0.c
+..\system\actionmanager.c
 ..\system\arinc429mgr.c
 ..\system\Box.c
 ..\system\CBITManager.c
 ..\system\CfgManager.c
 ..\system\ClockMgr.c
+..\system\Cycle.c
 ..\system\DIOMgr.c
 ..\system\DataManager.c
 ..\system\FPGAManager.c
@@ -95,8 +103,8 @@ FASTII.ld
 ..\system\EMU150Protocol.c
 ..\system\WatchDog.c
 ..\test\etm.c
-D:\FAST_Testing\dev\CP_Coverage\CP_Cov1\c_cover_ioPWES.c
-D:\FAST_Testing\dev\CP\test\TestPoints.c
+D:\knowlogic\FAST\dev\CP_Coverage\CP_Cov1\c_cover_ioPWES.c
+D:\knowlogic\FAST\dev\CP\test\TestPoints.c
 
 :postexecShell=..\build\ELFtoDLD.bat
 

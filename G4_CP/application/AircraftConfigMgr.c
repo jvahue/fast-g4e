@@ -9,7 +9,7 @@
   Description:   Aircraft Auto Re-Configuration Routines
 
   VERSION
-      $Revision: 55 $  $Date: 12-11-05 1:20p $
+      $Revision: 56 $  $Date: 12/11/12 7:16p $
 
 ******************************************************************************/
 
@@ -1444,15 +1444,20 @@ static void AC_Error(INT8* Str)
  * Notes:       2561,2909,2552,2562,2565,2595,2644
  *
  *****************************************************************************/
-static void AC_SetCfgStatus(INT8* Str)
+static void AC_SetCfgStatus(INT8* str)
 {
+  INT8 str_buf[AC_CFG_STS_LOG_SIZE];
+
   if(0 != strncmp(m_CfgStatusStr,"ERR",3))
   {
     memset(m_CfgStatusStr,0,sizeof(m_CfgStatusStr));
-    strncpy_safe(m_CfgStatusStr,sizeof(m_CfgStatusStr),Str,_TRUNCATE);
+    strncpy_safe(m_CfgStatusStr,sizeof(m_CfgStatusStr),str,_TRUNCATE);
   }
+  memset(str_buf,0,sizeof(str_buf));
+  strncpy_safe(str_buf,sizeof(str_buf),str,_TRUNCATE);
+
   LogWriteSystem(APP_AT_INFO_CFG_STATUS, LOG_PRIORITY_LOW,
-        Str, AC_CFG_STS_LOG_SIZE,NULL);
+        str_buf, AC_CFG_STS_LOG_SIZE,NULL);
 }
 
 
@@ -1743,13 +1748,18 @@ static void AC_CopyACCfgToPackedACCfg( AIRCRAFT_CONFIG_PACKED *ACCfg_Packed )
  *  MODIFICATIONS
  *    $History: AircraftConfigMgr.c $
  * 
+ * *****************  Version 56  *****************
+ * User: Jim Mood     Date: 12/11/12   Time: 7:16p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1197 code review changes
+ *
  * *****************  Version 55  *****************
  * User: Melanie Jutras Date: 12-11-05   Time: 1:20p
  * Updated in $/software/control processor/code/application
  * SCR #1172 PCLint 546 found during code review. Attempting to take the
  * address of a function name with &.  Removed the & because names of
  * functions themselves are promoted to an address so it is redundant.
- * 
+ *
  * *****************  Version 54  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 2:02p
  * Updated in $/software/control processor/code/application

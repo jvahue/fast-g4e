@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 27 $  $Date: 12-12-08 11:44a $
+  $Revision: 28 $  $Date: 12/12/12 6:25p $
 
 ******************************************************************************/
 
@@ -1113,6 +1113,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Contractor V&v Date: 12/12/12   Time: 6:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1107 Code Review  reset cydlesat begiin 
  * 
  * *****************  Version 27  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a

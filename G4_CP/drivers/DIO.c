@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 54 $  $Date: 12/05/12 8:07p $
+   $Revision: 55 $  $Date: 12-12-11 4:27p $
 
 
 ******************************************************************************/
@@ -69,7 +69,7 @@
 /*****************************************************************************/
 typedef struct
 {
-  UINT32 DioRegAddr;
+  UINT32 dioRegAddr;
 } DIO_SHADOW_REG;
 
 typedef struct
@@ -83,8 +83,8 @@ typedef struct
 // corresponding input pin.
 typedef struct
 {
-  DIO_OUTPUT OutputPin;
-  DIO_INPUT  InputPin;
+  DIO_OUTPUT outputPin;
+  DIO_INPUT  inputPin;
 } WRAP_AROUND_MAP;
 
 // The following enum must match the DioShadowReg[] one for one.
@@ -103,7 +103,7 @@ typedef enum
   DIO_ENUM_MAX
 } DIO_ENUM;
 
-const DIO_SHADOW_REG DioShadowReg[DIO_ENUM_MAX] =
+static const DIO_SHADOW_REG dioShadowReg[DIO_ENUM_MAX] =
 {
   (UINT32) &MCF_GPIO_PODR_FEC0L,
   (UINT32) &MCF_GPIO_PODR_FEC1H,
@@ -122,14 +122,14 @@ const DIO_SHADOW_REG DioShadowReg[DIO_ENUM_MAX] =
 #pragma ghs section bss=".pbss"
 #endif
 
-static DIO_SHADOW_DATA DioShadowData_PDDR[DIO_ENUM_MAX];
-static DIO_SHADOW_DATA DioShadowData_PODR[DIO_ENUM_MAX];
-static DIO_SHADOW_DATA DioShadowData_PPDSDR[DIO_ENUM_MAX];
-static DIO_SHADOW_DATA DioShadowData_GMS2;
-static DIO_SHADOW_DATA DioShadowData_FPGA;
+static DIO_SHADOW_DATA dioShadowData_PDDR[DIO_ENUM_MAX];
+static DIO_SHADOW_DATA dioShadowData_PODR[DIO_ENUM_MAX];
+static DIO_SHADOW_DATA dioShadowData_PPDSDR[DIO_ENUM_MAX];
+static DIO_SHADOW_DATA dioShadowData_GMS2;
+static DIO_SHADOW_DATA dioShadowData_FPGA;
 
 // Associate Reg Pin to enum for quicker access
-static DIO_ENUM DioShadowOutputPinReg[DIO_MAX_OUTPUTS];
+static DIO_ENUM dioShadowOutputPinReg[DIO_MAX_OUTPUTS];
 
 #ifndef WIN32
 #pragma ghs section bss=default
@@ -148,25 +148,25 @@ static BOOLEAN bDebounceActive;
 //Set the list macro to stringify the enumerated list
 #define DIO_PIN(Name,Dir,State,Periph,AccMethod,Addr,Bm)\
         {#Name,Dir,State,Periph,AccMethod,Addr,Bm},
-DIO_CONFIG DIO_OutputPins[DIO_MAX_OUTPUTS] = { DIO_OUTPUTS_LIST };
+STATIC DIO_CONFIG dio_OutputPins[DIO_MAX_OUTPUTS] = { DIO_OUTPUTS_LIST };
 
-DIO_CONFIG DIO_InputPins[DIO_MAX_INPUTS]   = { DIO_INPUTS_LIST };
+STATIC DIO_CONFIG dio_InputPins[DIO_MAX_INPUTS]   = { DIO_INPUTS_LIST };
 
 #undef DIO_PIN
 
-BOOLEAN DIO_OutputShadow[DIO_MAX_OUTPUTS];
+static BOOLEAN bDIO_OutputShadow[DIO_MAX_OUTPUTS];
 
 #ifndef WIN32
 #pragma ghs section bss=default
 #endif
 
 // Array of "filtered" output pins
-DIO_DEBOUNCED Dio_FilteredPins[DIO_MAX_INPUTS];
+static DIO_DEBOUNCED dio_FilteredPins[DIO_MAX_INPUTS];
 
 // Fast-lookup table for getting the 8-bit value at a specific port.
-DIO_PORT_DATA DioInputStore[DIO_ENUM_MAX];
+static DIO_PORT_DATA dioInputStore[DIO_ENUM_MAX];
 
-const REG_SETTING defDIORegData =
+static const REG_SETTING defDIORegData =
 {
   NULL,            // Pointer to HW Register
   NULL,            // Value to set
@@ -181,7 +181,7 @@ const REG_SETTING defDIORegData =
 };
 
 // Wrap Around Testing
-const WRAP_AROUND_MAP WrapAround[MAX_WRAPAROUNDS] = {
+static const WRAP_AROUND_MAP wrapAround[MAX_WRAPAROUNDS] = {
   {LSS0, LSS0_WA},
   {LSS1, LSS1_WA},
   {LSS2, LSS2_WA},
@@ -203,6 +203,7 @@ static void DIO_DebounceState(DIO_INPUT Pin, BOOLEAN State,
                                           UINT32 currentTimeMs);
 static DIO_PORT_DATA* DIO_AddPortToList(volatile UINT8* addr);
 static void DIO_CheckWrapAround( void );
+static BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig );
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -247,7 +248,7 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   memset ( pdest, 0, sizeof(DIO_DRV_PBIT_LOG) );
   pdest->result = DRV_OK;
 
-  memset(DioInputStore, 0, sizeof(DioInputStore) );
+  memset(dioInputStore, 0, sizeof(dioInputStore) );
 
   *psize = sizeof(DIO_DRV_PBIT_LOG);
 
@@ -259,11 +260,11 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   for(i = 0; i < DIO_MAX_OUTPUTS; i++)
   {
-    setup_pin_result = DIO_InitPin(&DIO_OutputPins[i]) ? 1 : 0;
+    setup_pin_result = DIO_InitPin(&dio_OutputPins[i]) ? 1 : 0;
     //NOTE: The ordering in DIO_OutputPins determine the bit ordering in
     //      PinResultSummary.  See DIO.h
     pin_result_summary |= (setup_pin_result << i);
-    DIO_OutputShadow[i] = DIO_OutputPins[i].bInitialState;
+    bDIO_OutputShadow[i] = dio_OutputPins[i].bInitialState;
   }
   // Set Return Structure Here
   pdest->dioOutResults = pin_result_summary;
@@ -278,7 +279,7 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   //Initialize discrete inputs
   for(i = 0; i < DIO_MAX_INPUTS; i++)
   {
-    setup_pin_result = DIO_InitPin(&DIO_InputPins[i]) ? 1 : 0;
+    setup_pin_result = DIO_InitPin(&dio_InputPins[i]) ? 1 : 0;
     //NOTE: The ordering in DIO_InputPins determine the bit ordering in
     //      PinResultSummary.  See DIO.h
     pin_result_summary |= (setup_pin_result << i);
@@ -286,16 +287,16 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
     // If the initialization was successful, set the initial state
     if (setup_pin_result == 0)
     {
-      Dio_FilteredPins[i].timeStampMs    = CM_GetTickCount();
+      dio_FilteredPins[i].timeStampMs    = CM_GetTickCount();
 
       // Add this port to the array of PODRs and store the returned ptr.
       // DIO_AddPortToList will only add addresses not already added to list.
-      Dio_FilteredPins[i].portData       = DIO_AddPortToList( DIO_InputPins[i].dataReg );
+      dio_FilteredPins[i].portData       = DIO_AddPortToList( dio_InputPins[i].dataReg );
 
       // Read DIN for initial state.
-      DIO_InputPins[i].bInitialState      = DIO_ReadPin((DIO_INPUT)i);
-      Dio_FilteredPins[i].filteredState  = DIO_InputPins[i].bInitialState;
-      Dio_FilteredPins[i].lastRecvdState = DIO_InputPins[i].bInitialState;
+      dio_InputPins[i].bInitialState      = DIO_ReadPin((DIO_INPUT)i);
+      dio_FilteredPins[i].filteredState  = dio_InputPins[i].bInitialState;
+      dio_FilteredPins[i].lastRecvdState = dio_InputPins[i].bInitialState;
     }
   }
   // Set Return Structure Here
@@ -311,6 +312,252 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   return  pdest->result;
 }
+
+
+
+/*****************************************************************************
+ * Function:    DIO_SetPin
+ *
+ * Description: Sets the pin and the shadow value.  This is
+ *              only way an output pin should be set, because bypassing this
+ *              routine can leave the shadow and pin state out of sync causing
+ *              a CBIT error.
+ *
+ * Parameters:  Pin: The pin to modify (see DIO_OUTPUT enumeration)
+ *              Op:  The type of modification, either DIO_SetHigh, DIO_SetLow
+ *
+ *
+ *
+ *
+ * Returns:
+ *
+ * Notes:       MSRst pin is handled as a special case because it's GPIO
+ *              pin is not actually included in the GPIO peripheral.  It is
+ *              controlled by the General Purpose Timer 2 peripheral.
+ *
+ ****************************************************************************/
+void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
+{
+  UINT32 value;
+  INT32 intrLevel;
+
+  // Sanity check on the pin index
+  ASSERT_MESSAGE (Pin < DIO_MAX_OUTPUTS, "Invalid DIO_OUTPUT Pin: %d", Pin);
+
+
+  intrLevel = __DIR();
+  bDIO_OutputShadow[Pin] = Op == DIO_SetHigh ? ON : OFF;
+  if(dio_OutputPins[Pin].peripheral == DIO_TMR2)
+  {
+      value = Op == DIO_SetHigh ?
+                   (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) :
+                   (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_LO));
+
+      DIO_S( &MCF_GPT_GMS2, value);
+
+      // Update Shadow copies
+      DIO_S( &dioShadowData_GMS2.value1, value);
+      DIO_S( &dioShadowData_GMS2.value2, value);
+
+  }
+  else if(dio_OutputPins[Pin].peripheral == DIO_GPIO)
+  {
+      DIO_W((dio_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET),
+             dio_OutputPins[Pin].pinMask,
+             Op);
+
+      // Update Shadow copies
+      DIO_W((UINT32 *)&dioShadowData_PODR[dioShadowOutputPinReg[Pin]].value1,
+            dio_OutputPins[Pin].pinMask,
+            Op);
+      DIO_W((UINT32 *)&dioShadowData_PODR[dioShadowOutputPinReg[Pin]].value2,
+            dio_OutputPins[Pin].pinMask,
+            Op);
+      DIO_W((UINT32 *)&dioShadowData_PPDSDR[dioShadowOutputPinReg[Pin]].value1,
+            dio_OutputPins[Pin].pinMask,
+            Op);
+      DIO_W((UINT32 *)&dioShadowData_PPDSDR[dioShadowOutputPinReg[Pin]].value2,
+            dio_OutputPins[Pin].pinMask,
+            Op);
+
+  }
+  else if(dio_OutputPins[Pin].peripheral == DIO_FPGA)
+  {
+      DIO_W16( (UINT16 *) dio_OutputPins[Pin].dataReg, dio_OutputPins[Pin].pinMask, Op);
+  }
+  __RIR(intrLevel);
+
+  //return DRV_OK;
+
+}
+
+
+/*****************************************************************************
+ * Function:    DIO_ReadPin
+ *
+ * Description: Retrieves the current state of a pin from the DIO_DEBOUNCED
+ *              array or directly from the discrete input register depending on
+ *              ACCESS_METHOD set for the specified Pin param
+ *
+ * Parameters:  [in] Pin:   The pin to read (see DIO_INPUT enumeration)
+ *
+ * Returns:     the state of the PIN
+ *
+ * Notes:
+ *
+ ****************************************************************************/
+BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
+{
+  BOOLEAN bState;
+  UINT8 value;
+  UINT16 value16;
+  DIO_ACC_METHOD access;
+
+
+  ASSERT_MESSAGE(Pin < DIO_MAX_INPUTS, "Invalid DIO_INPUT Pin: %d", Pin);
+
+  access = bDebounceActive ? dio_InputPins[Pin].accessMethod : DIO_RAW;
+
+  // Retrieve the bit according to the configured access method
+  switch (access)
+  {
+    case DIO_FILTERED:
+      bState = dio_FilteredPins[Pin].filteredState;
+      break;
+
+    case DIO_NOT_APPLIC: //DIN discrete access method not set, handle as RAW
+
+      // Currently the DIO_NOT_APPLIC case not used.  In future if this setting is used,
+      //   code below should be re-enabled. Comment out for coverage issues.
+      // GSE_DebugStr(NORMAL,TRUE,"AccessMethod for %s  not set, defaulting to RAW",
+      // DIO_InputPins[Pin].Name);
+      // No break. Deliberate Fall through.
+
+    case DIO_RAW:   //Read the value directly off the register and mask the bit
+      if(dio_InputPins[Pin].peripheral == DIO_FPGA)
+      {
+        value16 = DIO_R16( (UINT16 *)dio_FilteredPins[Pin].portData->portAddr );
+        bState = ( value16 & dio_InputPins[Pin].pinMask) ? ON : OFF;
+      }
+      else
+      {
+        value = DIO_R( dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
+        bState = ( value & dio_InputPins[Pin].pinMask) ? ON : OFF;
+      }
+      break;
+
+    default:
+      FATAL("Invalid AccessMethod: %d", dio_InputPins[Pin].accessMethod);
+      break;
+  }
+
+
+  return bState;
+}
+
+/*****************************************************************************
+ * Function:    DIO_GetValue
+ *
+ * Description: Used to get the pin value for the sensor object.
+ *
+ *
+ * Parameters:  Pin: The pin to read (see DIO_INPUT enumeration)
+ *              *null: Not used.  Add to support common i/f.
+ *
+ * Returns:     FLOAT32 - The state of the Pin returned from DIO_ReadPin
+ *
+ * Notes:
+ *
+ ****************************************************************************/
+FLOAT32 DIO_GetValue (UINT16 Pin, UINT32 *null)
+{
+   // Local Data
+   BOOLEAN bState;
+   FLOAT32 fValue;
+
+   bState = DIO_ReadPin ((DIO_INPUT)Pin);
+
+   fValue = (FLOAT32)bState;
+
+   return fValue;
+}
+
+
+/*****************************************************************************
+* Function:    DIO_UpdateDiscreteInputs
+*
+* Description: Reads each GPIO pin state register and
+*              de-bounce / filter the state of each Pin.
+*              Compares the current state of the pin with the previous state and
+*              uses time to determine whether the state is in a different, stable
+*              state.
+*
+* Parameters:  none
+*
+*
+* Returns:     none
+*
+* Notes:       none
+*
+****************************************************************************/
+void DIO_UpdateDiscreteInputs(void)
+{
+  UINT32 i = 0;
+  UINT32 pin = 0;
+  BOOLEAN state;
+  UINT32  currentTimeMs;
+
+  // Read each of the GPIO pin state registers
+  // This allows each port to be read once, rather than
+  // re-reading the same port for each discrete bit associated with the port.
+  while (dioInputStore[i].portAddr != NULL)
+  {
+    dioInputStore[i].value =
+      DIO_R( dioInputStore[i].portAddr + DIO_GPIO_PPDSDR_OFFSET );
+    ++i;
+  }
+
+  // Process the input discretes.
+  // Each discrete entry holds a pointer to the DioInputStore[i].value
+  // containing it's bit.
+
+  currentTimeMs = CM_GetTickCount();
+  // Debounce/filter the state of the pin
+  for(pin = 0; pin < DIO_MAX_INPUTS; ++pin)
+  {
+    state = dio_FilteredPins[pin].portData->value & dio_InputPins[pin].pinMask ? ON : OFF;
+    // De-bounce/filter the state of this pin
+    DIO_DebounceState  ((DIO_INPUT)pin, state, currentTimeMs);
+  }
+
+  // verify the Discrete outputs wraparounds match the output
+  DIO_CheckWrapAround();
+}
+
+/*****************************************************************************
+* Function:    DIO_GetOutputPin
+*
+* Description: Returns the state of the passed Output pin
+*
+*
+* Parameters:  [in]  Pin - Discrete Output value to be returned.
+*              [out] PinState - Boolean value of the output pin
+*
+*
+* Returns:     None
+*
+* Notes:
+****************************************************************************/
+void DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState )
+{
+  ASSERT(Pin < DIO_MAX_OUTPUTS );
+
+  *PinState = bDIO_OutputShadow[Pin];
+}
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /*****************************************************************************
  * Function:    DIO_InitPin
@@ -337,6 +584,7 @@ RESULT DIO_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *          In either cases an ASSERT should be the appropriate err handling processing.
  *
  ****************************************************************************/
+static
 BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig)
 {
   BOOLEAN bFailed;
@@ -538,251 +786,6 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig)
 }
 
 
-
-/*****************************************************************************
- * Function:    DIO_SetPin
- *
- * Description: Sets the pin and the shadow value.  This is
- *              only way an output pin should be set, because bypassing this
- *              routine can leave the shadow and pin state out of sync causing
- *              a CBIT error.
- *
- * Parameters:  Pin: The pin to modify (see DIO_OUTPUT enumeration)
- *              Op:  The type of modification, either DIO_SetHigh, DIO_SetLow
- *
- *
- *
- *
- * Returns:
- *
- * Notes:       MSRst pin is handled as a special case because it's GPIO
- *              pin is not actually included in the GPIO peripheral.  It is
- *              controlled by the General Purpose Timer 2 peripheral.
- *
- ****************************************************************************/
-void DIO_SetPin(DIO_OUTPUT Pin, DIO_OUT_OP Op)
-{
-  UINT32 value;
-  UINT32 intrLevel;
-
-  // Sanity check on the pin index
-  ASSERT_MESSAGE (Pin < DIO_MAX_OUTPUTS, "Invalid DIO_OUTPUT Pin: %d", Pin);
-
-
-  intrLevel = __DIR();
-  DIO_OutputShadow[Pin] = Op == DIO_SetHigh ? ON : OFF;
-  if(DIO_OutputPins[Pin].peripheral == DIO_TMR2)
-  {
-      value = Op == DIO_SetHigh ?
-                   (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) :
-                   (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_LO));
-
-      DIO_S( &MCF_GPT_GMS2, value);
-
-      // Update Shadow copies
-      DIO_S( &DioShadowData_GMS2.value1, value);
-      DIO_S( &DioShadowData_GMS2.value2, value);
-
-  }
-  else if(DIO_OutputPins[Pin].peripheral == DIO_GPIO)
-  {
-      DIO_W((DIO_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET),
-             DIO_OutputPins[Pin].pinMask,
-             Op);
-
-      // Update Shadow copies
-      DIO_W((UINT32 *)&DioShadowData_PODR[DioShadowOutputPinReg[Pin]].value1,
-            DIO_OutputPins[Pin].pinMask,
-            Op);
-      DIO_W((UINT32 *)&DioShadowData_PODR[DioShadowOutputPinReg[Pin]].value2,
-            DIO_OutputPins[Pin].pinMask,
-            Op);
-      DIO_W((UINT32 *)&DioShadowData_PPDSDR[DioShadowOutputPinReg[Pin]].value1,
-            DIO_OutputPins[Pin].pinMask,
-            Op);
-      DIO_W((UINT32 *)&DioShadowData_PPDSDR[DioShadowOutputPinReg[Pin]].value2,
-            DIO_OutputPins[Pin].pinMask,
-            Op);
-
-  }
-  else if(DIO_OutputPins[Pin].peripheral == DIO_FPGA)
-  {
-      DIO_W16( (UINT16 *) DIO_OutputPins[Pin].dataReg, DIO_OutputPins[Pin].pinMask, Op);
-  }
-  __RIR(intrLevel);
-
-  //return DRV_OK;
-
-}
-
-
-/*****************************************************************************
- * Function:    DIO_ReadPin
- *
- * Description: Retrieves the current state of a pin from the DIO_DEBOUNCED
- *              array or directly from the discrete input register depending on
- *              ACCESS_METHOD set for the specified Pin param
- *
- * Parameters:  [in] Pin:   The pin to read (see DIO_INPUT enumeration)
- *
- * Returns:     the state of the PIN
- *
- * Notes:
- *
- ****************************************************************************/
-BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
-{
-  BOOLEAN bState;
-  UINT8 value;
-  UINT16 value16;
-  DIO_ACC_METHOD access;
-
-
-  ASSERT_MESSAGE(Pin < DIO_MAX_INPUTS, "Invalid DIO_INPUT Pin: %d", Pin);
-
-  access = bDebounceActive ? DIO_InputPins[Pin].accessMethod : DIO_RAW;
-
-  // Retrieve the bit according to the configured access method
-  switch (access)
-  {
-    case DIO_FILTERED:
-      bState = Dio_FilteredPins[Pin].filteredState;
-      break;
-
-    case DIO_NOT_APPLIC: //DIN discrete access method not set, handle as RAW
-
-      // Currently the DIO_NOT_APPLIC case not used.  In future if this setting is used,
-      //   code below should be re-enabled. Comment out for coverage issues.
-      // GSE_DebugStr(NORMAL,TRUE,"AccessMethod for %s  not set, defaulting to RAW",
-      // DIO_InputPins[Pin].Name);
-      // No break. Deliberate Fall through.
-
-    case DIO_RAW:   //Read the value directly off the register and mask the bit
-      if(DIO_InputPins[Pin].peripheral == DIO_FPGA)
-      {
-        value16 = DIO_R16( (UINT16 *)Dio_FilteredPins[Pin].portData->portAddr );
-        bState = ( value16 & DIO_InputPins[Pin].pinMask) ? ON : OFF;
-      }
-      else
-      {
-        value = DIO_R( Dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
-        bState = ( value & DIO_InputPins[Pin].pinMask) ? ON : OFF;
-      }
-      break;
-
-    default:
-      FATAL("Invalid AccessMethod: %d", DIO_InputPins[Pin].accessMethod);
-      break;
-  }
-
-
-  return bState;
-}
-
-/*****************************************************************************
- * Function:    DIO_GetValue
- *
- * Description: Used to get the pin value for the sensor object.
- *
- *
- * Parameters:  Pin: The pin to read (see DIO_INPUT enumeration)
- *              *null: Not used.  Add to support common i/f.
- *
- * Returns:     FLOAT32 - The state of the Pin returned from DIO_ReadPin
- *
- * Notes:
- *
- ****************************************************************************/
-FLOAT32 DIO_GetValue (UINT16 Pin, UINT32 *null)
-{
-   // Local Data
-   BOOLEAN bState;
-   FLOAT32 fValue;
-
-   bState = DIO_ReadPin ((DIO_INPUT)Pin);
-
-   fValue = (FLOAT32)bState;
-
-   return fValue;
-}
-
-
-/*****************************************************************************
-* Function:    DIO_UpdateDiscreteInputs
-*
-* Description: Reads each GPIO pin state register and
-*              de-bounce / filter the state of each Pin.
-*              Compares the current state of the pin with the previous state and
-*              uses time to determine whether the state is in a different, stable
-*              state.
-*
-* Parameters:  none
-*
-*
-* Returns:     none
-*
-* Notes:       none
-*
-****************************************************************************/
-void DIO_UpdateDiscreteInputs(void)
-{
-  UINT32 i = 0;
-  UINT32 Pin = 0;
-  BOOLEAN State;
-  UINT32  currentTimeMs;
-
-  // Read each of the GPIO pin state registers
-  // This allows each port to be read once, rather than
-  // re-reading the same port for each discrete bit associated with the port.
-  while (DioInputStore[i].portAddr != NULL)
-  {
-    DioInputStore[i].value =
-      DIO_R( DioInputStore[i].portAddr + DIO_GPIO_PPDSDR_OFFSET );
-    ++i;
-  }
-
-  // Process the input discretes.
-  // Each discrete entry holds a pointer to the DioInputStore[i].value
-  // containing it's bit.
-
-  currentTimeMs = CM_GetTickCount();
-  // Debounce/filter the state of the pin
-  for(Pin = 0; Pin < DIO_MAX_INPUTS; ++Pin)
-  {
-    State = Dio_FilteredPins[Pin].portData->value & DIO_InputPins[Pin].pinMask ? ON : OFF;
-    // De-bounce/filter the state of this pin
-    DIO_DebounceState  ((DIO_INPUT)Pin, State, currentTimeMs);
-  }
-
-  // verify the Discrete outputs wraparounds match the output
-  DIO_CheckWrapAround();
-}
-
-/*****************************************************************************
-* Function:    DIO_GetOutputPin
-*
-* Description: Returns the state of the passed Output pin
-*
-*
-* Parameters:  [in]  Pin - Discrete Output value to be returned.
-*              [out] PinState - Boolean value of the output pin
-*
-*
-* Returns:     None
-*
-* Notes:
-****************************************************************************/
-void DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState )
-{
-  ASSERT(Pin < DIO_MAX_OUTPUTS );
-
-  *PinState = DIO_OutputShadow[Pin];
-}
-
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
-
 /*****************************************************************************
  * Function:    DIO_InitShadowReg
  *
@@ -803,16 +806,16 @@ void DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState )
 static
 void DIO_InitShadowReg( void *pRegAddr, UINT16 RegOffset, UINT32 mask, UINT32 value )
 {
-  DIO_ENUM DioReg;
+  DIO_ENUM dioReg;
   DIO_SHADOW_DATA *pDioShadowData;
   const DIO_SHADOW_REG *pDioShadowReg;
   UINT32 i;
 
-  pDioShadowReg = &DioShadowReg[0];
+  pDioShadowReg = &dioShadowReg[0];
 
   for (i = 0; i < (UINT32)DIO_ENUM_MAX; i++)
   {
-    if ( pDioShadowReg->DioRegAddr == (UINT32) pRegAddr )
+    if ( pDioShadowReg->dioRegAddr == (UINT32) pRegAddr )
     {
       break;
     }
@@ -825,20 +828,20 @@ void DIO_InitShadowReg( void *pRegAddr, UINT16 RegOffset, UINT32 mask, UINT32 va
   // if i is not less than DIO_ENUM_MAX then we have an unknown register address
   ASSERT_MESSAGE( i < DIO_ENUM_MAX, "Unknown DioRegAddr : %d", i);
 
-  DioReg = (DIO_ENUM) i;
+  dioReg = (DIO_ENUM) i;
 
   switch (RegOffset)
   {
     case DIO_GPIO_PDDR_OFFSET:
-      pDioShadowData = &DioShadowData_PDDR[DioReg];
+      pDioShadowData = &dioShadowData_PDDR[dioReg];
       break;
 
     case DIO_GPIO_PODR_OFFSET:
-      pDioShadowData = &DioShadowData_PODR[DioReg];
+      pDioShadowData = &dioShadowData_PODR[dioReg];
       break;
 
     case DIO_GPIO_PPDSDR_OFFSET:
-      pDioShadowData = &DioShadowData_PPDSDR[DioReg];
+      pDioShadowData = &dioShadowData_PPDSDR[dioReg];
       break;
 
     default:
@@ -882,11 +885,11 @@ void DIO_InitShadowRegGMS2( UINT32 mask, UINT32 value )
 {
 
   // Update Mask
-  DioShadowData_GMS2.mask = mask;
+  dioShadowData_GMS2.mask = mask;
 
   // Update value
-  DioShadowData_GMS2.value1 = value;
-  DioShadowData_GMS2.value2 = value;
+  dioShadowData_GMS2.value1 = value;
+  dioShadowData_GMS2.value2 = value;
 
 }
 
@@ -909,11 +912,11 @@ void DIO_InitShadowRegFPGA( UINT32 mask, UINT32 value )
 {
 
   // Update Mask
-  DioShadowData_FPGA.mask |= mask;
+  dioShadowData_FPGA.mask |= mask;
 
   // Update value
-  DIO_W( (UINT32 *) &DioShadowData_FPGA.value1, mask, (DIO_OUT_OP) value);
-  DIO_W( (UINT32 *) &DioShadowData_FPGA.value2, mask, (DIO_OUT_OP) value);
+  DIO_W( (UINT32 *) &dioShadowData_FPGA.value1, mask, (DIO_OUT_OP) value);
+  DIO_W( (UINT32 *) &dioShadowData_FPGA.value2, mask, (DIO_OUT_OP) value);
 
 }
 
@@ -938,11 +941,11 @@ void DioRegCheck_Init( void )
   UINT32 i;
   UINT32 j;
   BOOLEAN bInitOk;
-  REG_SETTING RegData;
-  const DIO_CONFIG *PinConfig;
+  REG_SETTING regData;
+  const DIO_CONFIG *pPinConfig;
 
-  pDioShadowReg = &DioShadowReg[0];
-  RegData = defDIORegData;
+  pDioShadowReg = &dioShadowReg[0];
+  regData = defDIORegData;
 
   bInitOk = TRUE;
 
@@ -950,63 +953,63 @@ void DioRegCheck_Init( void )
   for (i = 0; i < (UINT32)DIO_ENUM_MAX; i++)
   {
     // Register PDDR
-    RegData.ptrReg = (void *) (pDioShadowReg->DioRegAddr + DIO_GPIO_PDDR_OFFSET);
-    RegData.value = DioShadowData_PDDR[i].mask;
-    RegData.Addr1 = (void *) &DioShadowData_PDDR[i].value1;
-    RegData.Addr2 = (void *) &DioShadowData_PDDR[i].value2;
-    bInitOk &= RegSet ( &RegData );
+    regData.ptrReg = (void *) (pDioShadowReg->dioRegAddr + DIO_GPIO_PDDR_OFFSET);
+    regData.value = dioShadowData_PDDR[i].mask;
+    regData.Addr1 = (void *) &dioShadowData_PDDR[i].value1;
+    regData.Addr2 = (void *) &dioShadowData_PDDR[i].value2;
+    bInitOk &= RegSet ( &regData );
 
     // Register PODR
-    RegData.ptrReg = (void *) (pDioShadowReg->DioRegAddr + DIO_GPIO_PODR_OFFSET);
-    RegData.value = DioShadowData_PODR[i].mask;
-    RegData.Addr1 = (void *) &DioShadowData_PODR[i].value1;
-    RegData.Addr2 = (void *) &DioShadowData_PODR[i].value2;
-    bInitOk &= RegSet ( &RegData );
+    regData.ptrReg = (void *) (pDioShadowReg->dioRegAddr + DIO_GPIO_PODR_OFFSET);
+    regData.value = dioShadowData_PODR[i].mask;
+    regData.Addr1 = (void *) &dioShadowData_PODR[i].value1;
+    regData.Addr2 = (void *) &dioShadowData_PODR[i].value2;
+    bInitOk &= RegSet ( &regData );
 
     // Register PPDSDR
-    RegData.ptrReg = (void *) (pDioShadowReg->DioRegAddr + DIO_GPIO_PPDSDR_OFFSET);
-    RegData.value = DioShadowData_PPDSDR[i].mask;
-    RegData.Addr1 = (void *) &DioShadowData_PPDSDR[i].value1;
-    RegData.Addr2 = (void *) &DioShadowData_PPDSDR[i].value2;
-    bInitOk &= RegSet ( &RegData );
+    regData.ptrReg = (void *) (pDioShadowReg->dioRegAddr + DIO_GPIO_PPDSDR_OFFSET);
+    regData.value = dioShadowData_PPDSDR[i].mask;
+    regData.Addr1 = (void *) &dioShadowData_PPDSDR[i].value1;
+    regData.Addr2 = (void *) &dioShadowData_PPDSDR[i].value2;
+    bInitOk &= RegSet ( &regData );
 
     pDioShadowReg++;
   }
 
   // Register DIO GMS2 registers with UtilRegCheck.
-  RegData = defDIORegData;
-  RegData.ptrReg = (void *) &MCF_GPT_GMS2;
-  RegData.value = DioShadowData_GMS2.mask;
-  RegData.Addr1 = &DioShadowData_GMS2.value1;
-  RegData.Addr2 = &DioShadowData_GMS2.value2;
-  RegData.size = sizeof(UINT32);
-  bInitOk &= RegSet ( &RegData );
+  regData = defDIORegData;
+  regData.ptrReg = (void *) &MCF_GPT_GMS2;
+  regData.value = dioShadowData_GMS2.mask;
+  regData.Addr1 = &dioShadowData_GMS2.value1;
+  regData.Addr2 = &dioShadowData_GMS2.value2;
+  regData.size = sizeof(UINT32);
+  bInitOk &= RegSet ( &regData );
 
 
   // Register DIO FPGA registers with UtilRegCheck, but do not check as FPGA init
   //   probably not completed yet.
-  RegData = defDIORegData;
-  RegData.ptrReg = (void *) FPGA_GPIO_0;
-  RegData.value = DioShadowData_FPGA.mask;
-  RegData.Addr1 = &DioShadowData_FPGA.value1;
-  RegData.Addr2 = &DioShadowData_FPGA.value2;
-  RegData.size = sizeof(UINT16);
-  bInitOk &= RegAdd ( &RegData );
+  regData = defDIORegData;
+  regData.ptrReg = (void *) FPGA_GPIO_0;
+  regData.value = dioShadowData_FPGA.mask;
+  regData.Addr1 = &dioShadowData_FPGA.value1;
+  regData.Addr2 = &dioShadowData_FPGA.value2;
+  regData.size = sizeof(UINT16);
+  bInitOk &= RegAdd ( &regData );
 
 
   // Setup DioShadowOutputPinReg[] for quicker run time access
-  PinConfig = &DIO_OutputPins[0];
+  pPinConfig = &dio_OutputPins[0];
 
   for (i = 0; i < DIO_MAX_OUTPUTS; i++)
   {
-    pDioShadowReg = &DioShadowReg[0];
+    pDioShadowReg = &dioShadowReg[0];
 
     // Loop thru and find Reg
     for (j = 0; j < (UINT32)DIO_ENUM_MAX; j++)
     {
-      if ( pDioShadowReg->DioRegAddr == (UINT32) PinConfig->dataReg )
+      if ( pDioShadowReg->dioRegAddr == (UINT32) pPinConfig->dataReg )
       {
-        DioShadowOutputPinReg[i] = (DIO_ENUM) j;
+        dioShadowOutputPinReg[i] = (DIO_ENUM) j;
         break;
       }
       else
@@ -1016,7 +1019,7 @@ void DioRegCheck_Init( void )
       }
     } // End for loop j
 
-    PinConfig++;
+    pPinConfig++;
 
   } // End for loop i
 
@@ -1047,29 +1050,29 @@ static void DIO_DebounceState(DIO_INPUT Pin, BOOLEAN recvdState,
   // Set to true after first call(at runtime)
   bDebounceActive = TRUE;
 
-  if(recvdState != Dio_FilteredPins[Pin].filteredState)
+  if(recvdState != dio_FilteredPins[Pin].filteredState)
   {
-    if(recvdState == Dio_FilteredPins[Pin].lastRecvdState)
+    if(recvdState == dio_FilteredPins[Pin].lastRecvdState)
     {
       // Same value as last sampled.
       // If it has been stable, designate it as the valid state, otherwise wait
-      if(currentTimeMs - Dio_FilteredPins[Pin].timeStampMs > DEBOUNCE_PERIOD_MS)
+      if(currentTimeMs - dio_FilteredPins[Pin].timeStampMs > DEBOUNCE_PERIOD_MS)
       {
-        Dio_FilteredPins[Pin].filteredState = recvdState;
+        dio_FilteredPins[Pin].filteredState = recvdState;
         GSE_DebugStr(VERBOSE,TRUE,"DIO Input %s, FilteredState Change: %d",
-                                DIO_InputPins[Pin].name,
-                                Dio_FilteredPins[Pin].filteredState);
+                                dio_InputPins[Pin].name,
+                                dio_FilteredPins[Pin].filteredState);
       }
     }
     else // The state has changed. Store state and time-of-change.
     {
-      Dio_FilteredPins[Pin].lastRecvdState = recvdState;
-      Dio_FilteredPins[Pin].timeStampMs    = currentTimeMs;
+      dio_FilteredPins[Pin].lastRecvdState = recvdState;
+      dio_FilteredPins[Pin].timeStampMs    = currentTimeMs;
     }
   }
   else // no change from filtered value. Update the last received.
   {
-    Dio_FilteredPins[Pin].lastRecvdState = recvdState;
+    dio_FilteredPins[Pin].lastRecvdState = recvdState;
   }
 }
 
@@ -1100,12 +1103,12 @@ static DIO_PORT_DATA* DIO_AddPortToList( volatile UINT8* addr)
 
   while (i < DIO_ENUM_MAX && bFoundInList == FALSE)
   {
-    if( DioInputStore[i].portAddr == addr)
+    if( dioInputStore[i].portAddr == addr)
     {
       bFoundInList = TRUE; // Address already in list
-      ptr = &DioInputStore[i];
+      ptr = &dioInputStore[i];
     }
-    else if (DioInputStore[i].portAddr == NULL )
+    else if (dioInputStore[i].portAddr == NULL )
     {
       break; // Reached end of used entries.. break and add this entry
     }
@@ -1119,8 +1122,8 @@ static DIO_PORT_DATA* DIO_AddPortToList( volatile UINT8* addr)
   // finding the address... add it.
   if( i < DIO_ENUM_MAX && bFoundInList == FALSE)
   {
-    DioInputStore[i].portAddr = addr;
-    ptr = &DioInputStore[i];
+    dioInputStore[i].portAddr = addr;
+    ptr = &dioInputStore[i];
   }
 
   // Check if we didn't find the port in the list and didn't have room to
@@ -1156,10 +1159,10 @@ static void DIO_CheckWrapAround( void)
   // value as this input pin.
   for ( i = 0; i < MAX_WRAPAROUNDS; ++i )
   {
-    logEntry.dinPin        = WrapAround[i].InputPin;
+    logEntry.dinPin        = wrapAround[i].inputPin;
     logEntry.inputWAState  = TPU( DIO_ReadPin( logEntry.dinPin), eTpDio2481);
-    logEntry.doutPin       = WrapAround[i].OutputPin;
-    logEntry.outputState   = DIO_OutputShadow[logEntry.doutPin];
+    logEntry.doutPin       = wrapAround[i].outputPin;
+    logEntry.outputState   = bDIO_OutputShadow[logEntry.doutPin];
 
     if ( logEntry.inputWAState != logEntry.outputState)
     {
@@ -1167,9 +1170,9 @@ static void DIO_CheckWrapAround( void)
       {
         snprintf(logBuffer, sizeof(logBuffer),
                 "Discrete Wrap Around Mismatch, %s: %d, %s: %d",
-                 DIO_InputPins[logEntry.dinPin].name,
+                 dio_InputPins[logEntry.dinPin].name,
                  logEntry.inputWAState,
-                 DIO_OutputPins[logEntry.doutPin].name,
+                 dio_OutputPins[logEntry.doutPin].name,
                  logEntry.outputState);
 
         LogWriteSystem(SYS_DIO_DISCRETE_WRAP_FAIL, LOG_PRIORITY_LOW,
@@ -1188,7 +1191,12 @@ static void DIO_CheckWrapAround( void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
- * 
+ *
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 12-12-11   Time: 4:27p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1197 - Code Review Updates
+ *
  * *****************  Version 54  *****************
  * User: Jim Mood     Date: 12/05/12   Time: 8:07p
  * Updated in $/software/control processor/code/drivers

@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 61 $  $Date: 11/19/12 8:29p $
+      $Revision: 62 $  $Date: 12/11/12 8:32p $
 
 ******************************************************************************/
 
@@ -131,7 +131,7 @@ void MSSC_Init(void)
 
   // Register flag indicating file transfering MS -> GRND.
   m_MsFileXfer = FALSE;
-  PmRegisterAppBusyFlag((BUSY_INDEX)PM_MS_FILE_XFR_BUSY, &m_MsFileXfer);
+  PmRegisterAppBusyFlag(PM_MS_FILE_XFR_BUSY, &m_MsFileXfer);
 
   memset(&m_GetMSInfoRsp,0,sizeof(m_GetMSInfoRsp));
 
@@ -1039,6 +1039,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
  * 
+ * *****************  Version 62  *****************
+ * User: Jim Mood     Date: 12/11/12   Time: 8:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 61  *****************
  * User: Jim Mood     Date: 11/19/12   Time: 8:29p
  * Updated in $/software/control processor/code/system

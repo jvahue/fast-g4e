@@ -19,8 +19,8 @@ extern "C"
 #define DIO_GPT_OUT_LO      2   //For timer GPIO, sets the GPIO field of GSMn
     //register to output low
 
-extern DIO_CONFIG DIO_OutputPins[DIO_MAX_OUTPUTS];
-extern DIO_CONFIG DIO_InputPins[DIO_MAX_INPUTS]; 
+extern DIO_CONFIG dio_OutputPins[DIO_MAX_OUTPUTS];
+extern DIO_CONFIG dio_InputPins[DIO_MAX_INPUTS];
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ void DioEmulation::Reset()
     {
       *m_ODR[i] = 0xFF;
     }
-      
+
     SetDio( HWPFEN_Sta,      1);
     SetDio( LSS_OvI,         0);
     SetDio( SW_PFEN_Sta,     1);
@@ -151,24 +151,24 @@ void DioEmulation::Wraparounds()
 //Used by G4E UI
 void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
 {
-    if(DIO_InputPins[Pin].peripheral == DIO_TMR2)
+    if(dio_InputPins[Pin].peripheral == DIO_TMR2)
     {
-        UINT32 value = state ? 
-            (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) : 
+        UINT32 value = state ?
+            (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_HI)) :
             (MCF_GPT_GMS_TMS_GPIO | MCF_GPT_GMS_GPIO(DIO_GPT_OUT_LO));
 
         MCF_GPT_GMS2 = value;
     }
-    else if(DIO_InputPins[Pin].peripheral == DIO_GPIO)
+    else if(dio_InputPins[Pin].peripheral == DIO_GPIO)
     {
-        DIO_W((DIO_InputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET), 
-              DIO_InputPins[Pin].pinMask,
+        DIO_W((dio_InputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET),
+              dio_InputPins[Pin].pinMask,
               state);
     }
-    else if(DIO_InputPins[Pin].peripheral == DIO_FPGA)
+    else if(dio_InputPins[Pin].peripheral == DIO_FPGA)
     {
-        DIO_W16( (volatile UINT16*)DIO_InputPins[Pin].dataReg, 
-                 (UINT16)DIO_InputPins[Pin].pinMask, 
+        DIO_W16( (volatile UINT16*)dio_InputPins[Pin].dataReg,
+                 (UINT16)dio_InputPins[Pin].pinMask,
                  state);
     }
 }
@@ -177,9 +177,9 @@ void DioEmulation::SetDio( DIO_INPUT Pin, UINT8 state)
 //Used by G4E UI
 UINT8 DioEmulation::GetDio( DIO_OUTPUT Pin)
 {
-    if (DIO_OutputPins[Pin].dataReg != NULL)
+    if (dio_OutputPins[Pin].dataReg != NULL)
     {
-        return (*(DIO_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET)) & DIO_OutputPins[Pin].pinMask;
+        return (*(dio_OutputPins[Pin].dataReg+DIO_GPIO_PODR_OFFSET)) & dio_OutputPins[Pin].pinMask;
     }
     else
     {
