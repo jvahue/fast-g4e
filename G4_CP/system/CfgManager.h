@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 51 $  $Date: 12-11-13 11:10a $
+ $Revision: 52 $  $Date: 12/13/12 3:02p $
 
 ******************************************************************************/
 
@@ -140,7 +140,7 @@ typedef struct
     // TREND Configuration
     TREND_CONFIGS           TrendConfigs;
     // CREEP Configuration
-    CREEP_CFG               CreepConfig; 
+    CREEP_CFG               CreepConfig;
 #ifdef ENV_TEST
     TestControl             etm;
 #endif
@@ -180,7 +180,7 @@ typedef struct
 ******************************************************************************/
 EXPORT void CfgMgr_Init( BOOLEAN degraded );
 EXPORT BOOLEAN CfgMgr_FileInit( void );
-EXPORT BOOLEAN CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason );
+EXPORT void CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason );
 EXPORT CFGMGR_NVRAM* CfgMgr_ConfigPtr(void);
 EXPORT CFGMGR_NVRAM* CfgMgr_RuntimeConfigPtr(void);
 
@@ -200,21 +200,26 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
  *  MODIFICATIONS
  *    $History: CfgManager.h $
  * 
+ * *****************  Version 52  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 3:02p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 51  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Code Review Formatting Issues
- * 
+ *
  * *****************  Version 50  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 49  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:58p
  * Updated in $/software/control processor/code/system
  * SCR #1190 Creep Requirements
- * 
+ *
  * *****************  Version 48  *****************
  * User: Contractor V&v Date: 9/14/12    Time: 4:49p
  * Updated in $/software/control processor/code/system
@@ -224,7 +229,7 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
  * User: John Omalley Date: 12-09-11   Time: 2:09p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Added Binary ETM Header Logic
- * 
+ *
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system

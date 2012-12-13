@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 30 $  $Date: 12-11-15 1:28p $
+   $Revision: 31 $  $Date: 12/13/12 2:56p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -31,7 +31,7 @@
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
-USER_ENUM_TBL TimeSourceStrs[] =
+USER_ENUM_TBL time_source_strs[] =
 {
   {"LOCAL", TIME_SOURCE_LOCAL},
   {"MS",    TIME_SOURCE_MS},
@@ -39,7 +39,7 @@ USER_ENUM_TBL TimeSourceStrs[] =
   {NULL,0}
 };
 
-USER_ENUM_TBL FastTxTestEnum[] =
+static USER_ENUM_TBL fast_txtest_enum[] =
 {
   {"",      FAST_TXTEST_INIT},
   {"PASS",  FAST_TXTEST_PASS},
@@ -51,7 +51,7 @@ USER_ENUM_TBL FastTxTestEnum[] =
   {NULL,0}
 };
 
-USER_ENUM_TBL FastTxTestStatusEnum[] =
+static USER_ENUM_TBL fast_txtest_status_enum[] =
 {
   {"Stopped",   FAST_TXTEST_STATE_STOPPED},
   {"InProgress",FAST_TXTEST_STATE_SYSCON},
@@ -79,32 +79,32 @@ USER_ENUM_TBL FastTxTestStatusEnum[] =
 /*****************************************************************************/
 //Prototypes for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
-USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
                                  const void *SetPtr,
                                  void **GetPtr);
-USER_HANDLER_RESULT FAST_ResetNVConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_ResetNVConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
                                        const void *SetPtr,
                                        void **GetPtr);
-USER_HANDLER_RESULT FAST_VersionCmd(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_VersionCmd(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
-USER_HANDLER_RESULT FAST_ShowConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_ShowConfig(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
-USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
-USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
@@ -113,27 +113,27 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static FASTMGR_CONFIG FASTConfigTemp;
+static FASTMGR_CONFIG fast_cfg_temp;
 
-static USER_MSG_TBL CfgFlagsCmd [] =
-{  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                         IndexRange   DataLimit          EnumTbl*/
-  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.RecordTriggers,   -1,-1,       0,MAX_TRIGGERS,    NULL },
-  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    &FASTConfigTemp.OnGroundTriggers, -1,-1,       0,MAX_TRIGGERS,    NULL },
-  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.AutoULPer_s,      -1,-1,       NO_LIMIT,          NULL },
-  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &FASTConfigTemp.TimeSource,       -1,-1,       NO_LIMIT,          TimeSourceStrs },
-  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                             -1,-1,       NO_LIMIT,          NULL },
-  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,      USER_RW,    NULL,                             -1,-1,       INSTALL_STR_LIMIT, NULL },
-  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestMsRdyTO,    -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestSIMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestGSMRdyTO,   -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &FASTConfigTemp.TxTestVPNRdyTO,   -1,-1,       NO_LIMIT,          NULL },
+static USER_MSG_TBL cfg_flags_cmd [] =
+{  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                          IndexRange   DataLimit          EnumTbl*/
+  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.record_triggers,    -1,-1,       0,MAX_TRIGGERS,    NULL },
+  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.on_ground_triggers, -1,-1,       0,MAX_TRIGGERS,    NULL },
+  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.auto_ul_per_s,     -1,-1,       NO_LIMIT,          NULL },
+  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &fast_cfg_temp.time_source,       -1,-1,       NO_LIMIT,          time_source_strs },
+  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                              -1,-1,       NO_LIMIT,          NULL },
+  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,      USER_RW,    NULL,                              -1,-1,       INSTALL_STR_LIMIT, NULL },
+  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_msrdy_to,  -1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_SIM_rdy_to,-1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_GSM_rdy_to,-1,-1,       NO_LIMIT,          NULL },
+  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_VPN_rdy_to,-1,-1,       NO_LIMIT,          NULL },
   { NULL,              NULL,          NULL,               NO_HANDLER_DATA }
 };
 
 
-static USER_MSG_TBL StatusFlagsCmd [] =
+static USER_MSG_TBL status_flags_cmd [] =
 {  /*Str           Next Tbl Ptr     Handler Func.         Data Type          Access      Parameter                   IndexRange   DataLimit   EnumTbl*/
-  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    &SwVersion,                 -1,-1,       NO_LIMIT,   NULL },
+  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    SwVersion,                 -1,-1,       NO_LIMIT,   NULL },
   { "RECORDING",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &FASTStatus.Recording,      -1,-1,       NO_LIMIT,   NULL },
   { "ON_GROUND",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &FASTStatus.OnGround,       -1,-1,       NO_LIMIT,   NULL },
   { "RF_GSM",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &FASTStatus.RfGsmEnable,    -1,-1,       NO_LIMIT,   NULL },
@@ -142,38 +142,38 @@ static USER_MSG_TBL StatusFlagsCmd [] =
   { NULL,          NULL,            NULL,                 NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL TxTestTable [] =
+static USER_MSG_TBL tx_test_table [] =
 {  /*Str               Next Tbl Ptr     Handler Func.         Data Type          Access      Parameter                IndexRange    DataLimit  EnumTbl*/
   { "START",           NO_NEXT_TABLE,   FAST_StartTxTest,     USER_TYPE_ACTION,  USER_RO,    NULL,                    -1,-1,        NO_LIMIT,  NULL },
-  { "STATUS",          NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.State,     -1,-1,        NO_LIMIT,  FastTxTestStatusEnum },
-  { "SYS_CONDITION",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SysCon,    -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "WOW_DISCRETE",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.WowDisc,   -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "ON_GROUND_TRIG",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.OnGround,  -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "RECORD_DATA_TRIG",NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.Record,    -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "MS_READY",        NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.MsReady,   -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "GSM_SIM_CARD",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SIMReady,  -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "GSM_SIGNAL_DB",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.GSMSignal, -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "VPN_CONNECTION",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.VPNStatus, -1,-1,        NO_LIMIT,  FastTxTestEnum},
-  { "UPLOAD_STATUS",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.ULStatus,  -1,-1,        NO_LIMIT,  FastTxTestEnum},
+  { "STATUS",          NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.State,     -1,-1,        NO_LIMIT,  fast_txtest_status_enum },
+  { "SYS_CONDITION",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SysCon,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "WOW_DISCRETE",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.WowDisc,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "ON_GROUND_TRIG",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.OnGround,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "RECORD_DATA_TRIG",NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.Record,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "MS_READY",        NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.MsReady,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "GSM_SIM_CARD",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SIMReady,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "GSM_SIGNAL_DB",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.GSMSignal, -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "VPN_CONNECTION",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.VPNStatus, -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "UPLOAD_STATUS",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.ULStatus,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
    { NULL,          NULL,            NULL,                 NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL FastCmd [] =
+static USER_MSG_TBL fast_cmd [] =
 {  /*Str           Next Tbl Ptr     Handler Func.         Data Type          Access                        Parameter        IndexRange    DataLimit  EnumTbl*/
-  { "CFG",       CfgFlagsCmd,       NULL,                 NO_HANDLER_DATA},
-  { "STATUS",    StatusFlagsCmd,    NULL,                 NO_HANDLER_DATA},
+  { "CFG",       cfg_flags_cmd,       NULL,                 NO_HANDLER_DATA},
+  { "STATUS",    status_flags_cmd,    NULL,                 NO_HANDLER_DATA},
   { "WLAN_OVR",  NO_NEXT_TABLE,     User_GenericAccessor, USER_TYPE_ONOFF, (USER_RW|USER_GSE),             &wlanOverride,   -1,-1,        NO_LIMIT,  NULL },
   { "GSM_OVR",   NO_NEXT_TABLE,     User_GenericAccessor, USER_TYPE_ONOFF, (USER_RW|USER_GSE),             &gsmOverride,    -1,-1,        NO_LIMIT,  NULL },
   { "RESET",     NO_NEXT_TABLE,     FAST_ResetNVConfig,   USER_TYPE_STR,   (USER_WO)         ,             NULL,            -1,-1,        NO_LIMIT,  NULL },
-  { "TXTEST",    TxTestTable,       NULL,                 NO_HANDLER_DATA},
+  { "TXTEST",    tx_test_table,       NULL,                 NO_HANDLER_DATA},
   { DISPLAY_CFG, NO_NEXT_TABLE,     FAST_ShowConfig,      USER_TYPE_ACTION,(USER_RO|USER_NO_LOG|USER_GSE), NULL,            -1,-1,        NO_LIMIT,  NULL},
   { NULL,        NULL,              NULL,                 NO_HANDLER_DATA}
 };
 
-USER_MSG_TBL RootMsg = {"FAST", FastCmd, NULL, NO_HANDLER_DATA};
+static USER_MSG_TBL root_msg = {"FAST", fast_cmd, NULL, NO_HANDLER_DATA};
 
 /*****************************************************************************/
-/* Public Functions                                                          */ 
+/* Public Functions                                                          */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -205,7 +205,7 @@ USER_MSG_TBL RootMsg = {"FAST", FastCmd, NULL, NO_HANDLER_DATA};
  * Notes:
  *
  *****************************************************************************/
-USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
                                  const void *SetPtr,
@@ -216,21 +216,21 @@ USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
   //Load trigger structure into the temporary location based on index param
   //Param.Ptr points to the struct member to be read/written
   //in the temporary location
-  memcpy(&FASTConfigTemp,
+  memcpy(&fast_cfg_temp,
          &CfgMgr_ConfigPtr()->FASTCfg,
-         sizeof(FASTConfigTemp));
+         sizeof(fast_cfg_temp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
     memcpy(&CfgMgr_ConfigPtr()->FASTCfg,
-      &FASTConfigTemp,
-      sizeof(FASTConfigTemp));
+      &fast_cfg_temp,
+      sizeof(fast_cfg_temp));
 
     //Store the modified temporary structure in the EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
       &CfgMgr_ConfigPtr()->FASTCfg,
-      sizeof(FASTConfigTemp));
+      sizeof(fast_cfg_temp));
   }
 
   return result;
@@ -261,7 +261,7 @@ USER_HANDLER_RESULT FAST_UserCfg(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-USER_HANDLER_RESULT FAST_ResetNVConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_ResetNVConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
                                        const void *SetPtr,
@@ -316,32 +316,32 @@ USER_HANDLER_RESULT FAST_ResetNVConfig(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-USER_HANDLER_RESULT FAST_VersionCmd(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_VersionCmd(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
                                        const void *SetPtr,
                                        void **GetPtr)
 {
-  UINT16 Ver;
+  UINT16 ver;
   //Load Version Id into the temporary location
   //Param.Ptr points to the struct member to be read/written
   //in the temporary location
-  memcpy(&Ver,
+  memcpy(&ver,
          &CfgMgr_ConfigPtr()->VerId,
-         sizeof(Ver));
+         sizeof(ver));
 
   //If "get" command, point the GetPtr to the element defined by Param
   if( SetPtr == NULL )
   {
-    **(UINT16**)GetPtr = Ver;
+    **(UINT16**)GetPtr = ver;
   }
   else
   {
-    Ver = *(UINT16*)SetPtr;
+    ver = *(UINT16*)SetPtr;
   }
 
   memcpy(&CfgMgr_ConfigPtr()->VerId,
-    &Ver,
+    &ver,
     sizeof(CfgMgr_ConfigPtr()->VerId));
 
   //Store the modified temporary structure in the EEPROM.
@@ -376,26 +376,26 @@ USER_HANDLER_RESULT FAST_VersionCmd(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT FAST_ShowConfig(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_ShowConfig(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
                                       void **GetPtr)
 {
-  static const CHAR  LabelStem[] = "\r\n\r\nFAST.CFG";
+  static const CHAR  label_stem[] = "\r\n\r\nFAST.CFG";
 
   USER_HANDLER_RESULT result = USER_RESULT_OK;
   USER_MSG_TBL*  pCfgTable;
 
   //Top-level name is a single indented space
-  CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+  CHAR branch_name[USER_MAX_MSG_STR_LEN] = " ";
 
-  pCfgTable = CfgFlagsCmd;  // Get pointer to config entry
+  pCfgTable = cfg_flags_cmd;  // Get pointer to config entry
 
   result = USER_RESULT_ERROR;
-  if (User_OutputMsgString( LabelStem, FALSE ) )
+  if (User_OutputMsgString( label_stem, FALSE ) )
   {
-    result = User_DisplayConfigTree(BranchName, pCfgTable, 0, 0, NULL);
+    result = User_DisplayConfigTree(branch_name, pCfgTable, 0, 0, NULL);
   }
   return result;
 }
@@ -424,39 +424,39 @@ USER_HANDLER_RESULT FAST_ShowConfig(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
                                       void **GetPtr)
 {
-  USER_HANDLER_RESULT UserResult = USER_RESULT_ERROR;
+  USER_HANDLER_RESULT user_result = USER_RESULT_ERROR;
 
   // If "get", set the get ptr to the address of the Installation id string
   // in the config manager structure.
   if( SetPtr == NULL )
   {
-    *GetPtr = &CfgMgr_ConfigPtr()->Id;
-    UserResult = USER_RESULT_OK;
+    *GetPtr = CfgMgr_ConfigPtr()->Id;
+    user_result = USER_RESULT_OK;
   }
   else
   {
     // If "set", copy the string at SetPtr to the Installation id string in
     // config mgr structure.
-    memcpy(&CfgMgr_ConfigPtr()->Id,
+    memcpy(CfgMgr_ConfigPtr()->Id,
            SetPtr,
            sizeof(CfgMgr_ConfigPtr()->Id) );
 
     //Store the modified temporary structure in the EEPROM.
-    UserResult = USER_RESULT_ERROR;
+    user_result = USER_RESULT_ERROR;
     if ( TRUE == CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
-                                        &CfgMgr_ConfigPtr()->Id,
+                                        CfgMgr_ConfigPtr()->Id,
                                         sizeof(CfgMgr_ConfigPtr()->Id)))
     {
-        UserResult = USER_RESULT_OK;
+        user_result = USER_RESULT_OK;
     }
   }
-  return UserResult;
+  return user_result;
 }
 
 
@@ -485,7 +485,7 @@ USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
@@ -507,16 +507,21 @@ USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
  * 
+ * *****************  Version 31  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 2:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197
+ *
  * *****************  Version 30  *****************
  * User: Melanie Jutras Date: 12-11-15   Time: 1:28p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Errors
- * 
+ *
  * *****************  Version 29  *****************
  * User: Melanie Jutras Date: 12-11-15   Time: 12:37p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Errors
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 11/13/12   Time: 4:18p
  * Updated in $/software/control processor/code/application

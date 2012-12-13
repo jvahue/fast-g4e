@@ -8,7 +8,7 @@
     Description:
 
     VERSION
-    $Revision: 29 $  $Date: 8/28/12 1:43p $
+    $Revision: 30 $  $Date: 12/13/12 3:02p $
 
 
 ******************************************************************************/
@@ -149,24 +149,24 @@ USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-    
-// box.status implements an "aggregate" command which displays a subset of values from 
+
+// box.status implements an "aggregate" command which displays a subset of values from
 // system, Config, Fast, Aircraft, Log, Fault and Ms.
 static USER_MSG_TBL BoxStatusMsgs[] =
 { /*Str                Next Tbl Ptr   Handler Func.         Data Type          Access    Parameter                                   IndexRange  DataLimit          EnumTbl*/
   // Box status values
   {"SERIAL",           NO_NEXT_TABLE, Box_BoxUserMsg,       USER_TYPE_STR,     USER_RO,  &Box_Info.SN,                               -1, -1,     BOX_STR_LIMIT,     NULL},
   {"TIME",             NO_NEXT_TABLE, Box_SysTimeMsg,       USER_TYPE_STR,     USER_RO,  NULL,                                       -1, -1,     NO_LIMIT,          NULL},
-  {"TIME_SOURCE",      NO_NEXT_TABLE, Box_FastUserCfg,      USER_TYPE_ENUM,    USER_RO,  &FASTConfigTemp.TimeSource,                -1, -1,      NO_LIMIT,          TimeSourceStrs },
+  {"TIME_SOURCE",      NO_NEXT_TABLE, Box_FastUserCfg,      USER_TYPE_ENUM,    USER_RO,  &FASTConfigTemp.time_source,               -1, -1,      NO_LIMIT,          time_source_strs },
   {"CP_VER",           NO_NEXT_TABLE, Box_GetFastSwVer,     USER_TYPE_STR,     USER_RO,  NULL,                                      -1, -1,      NO_LIMIT,          NULL },
   {"CP_CRC",           NO_NEXT_TABLE, User_GenericAccessor, USER_TYPE_HEX32,   USER_RO,  &__CRC_END,                                -1, -1,      NO_LIMIT,          NULL },
-  {"CFG_INSTALL_ID",   NO_NEXT_TABLE, Box_InstallIdCmd,     USER_TYPE_STR,     USER_RO,  NULL,                                      -1, -1,      INSTALL_STR_LIMIT, NULL },  
+  {"CFG_INSTALL_ID",   NO_NEXT_TABLE, Box_InstallIdCmd,     USER_TYPE_STR,     USER_RO,  NULL,                                      -1, -1,      INSTALL_STR_LIMIT, NULL },
   {"CFG_VER",          NO_NEXT_TABLE, Box_VersionCmd,       USER_TYPE_UINT16,  USER_RO,  NULL,                                      -1, -1,      NO_LIMIT,          NULL },
   {"POWER_ON_COUNT"  , NO_NEXT_TABLE, Box_PowerOnMsg,       USER_TYPE_UINT32,  USER_RO,  &Box_PowerOn_RunTime.PowerOnCount,          -1, -1,     NO_LIMIT,          NULL },
   {"POWER_ON_TIME_S",  NO_NEXT_TABLE, Box_PowerOnMsg,       USER_TYPE_UINT32,  USER_RO,  &Box_PowerOn_RunTime.ElapsedPowerOnUsage_s, -1, -1,     NO_LIMIT,          NULL },
   {"PW_VER",           NO_NEXT_TABLE, Box_GetMsPwVer,       USER_TYPE_STR,     USER_RO,  NULL,                                      -1, -1,      NO_LIMIT,          NULL },
   //aircraft.cfg
-  {"AC_TAIL_NUMBER",   NO_NEXT_TABLE, Box_AircraftUserCfg,  USER_TYPE_STR,     USER_RO,  &AircraftConfigTemp.TailNumber,            -1, -1,      AC_STR_LIMIT,      NULL }, 
+  {"AC_TAIL_NUMBER",   NO_NEXT_TABLE, Box_AircraftUserCfg,  USER_TYPE_STR,     USER_RO,  &AircraftConfigTemp.TailNumber,            -1, -1,      AC_STR_LIMIT,      NULL },
   {"AC_OPERATOR",      NO_NEXT_TABLE, Box_AircraftUserCfg,  USER_TYPE_STR,     USER_RO,  &AircraftConfigTemp.Operator,              -1, -1,      AC_STR_LIMIT,      NULL },
   {"AC_OWNER",         NO_NEXT_TABLE, Box_AircraftUserCfg,  USER_TYPE_STR,     USER_RO,  &AircraftConfigTemp.Owner,                 -1, -1,      AC_STR_LIMIT,      NULL },
    //log.status
@@ -233,19 +233,19 @@ USER_HANDLER_RESULT Box_BoxUserMsg(USER_DATA_TYPE DataType,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr)
-{ 
+{
   if(SetPtr == NULL)
   {
     //Read into the global structure from NV memory, Return the parameter
     //to user manager.
-    NV_Read(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));    
-    *GetPtr = Param.Ptr;    
+    NV_Read(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));
+    *GetPtr = Param.Ptr;
   }
   else
   {
     //Copy the new data into the global struct and write it to NV memory
     strncpy_safe(Param.Ptr,BOX_INFO_STR_LEN, SetPtr, _TRUNCATE );
-    NV_Write(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));       
+    NV_Write(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));
   }
 
   return USER_RESULT_OK;
@@ -256,7 +256,7 @@ USER_HANDLER_RESULT Box_BoxUserMsg(USER_DATA_TYPE DataType,
 /******************************************************************************
  * Function:    Box_BoardUserMsg
  *
- * Description: Handles user manager requests for BOX_UNIT_INFO's 
+ * Description: Handles user manager requests for BOX_UNIT_INFO's
  *              BOX_BOARD_INFO member.
  *
  * Parameters:  USER_DATA_TYPE DataType
@@ -285,8 +285,8 @@ USER_HANDLER_RESULT Box_BoardUserMsg(USER_DATA_TYPE DataType,
   {
     //Read into the global structure from NV memory, Return the parameter
     //to user manager.
-    NV_Read(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));    
-    *GetPtr = Param.Ptr;   
+    NV_Read(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));
+    *GetPtr = Param.Ptr;
   }
   else
   {
@@ -294,7 +294,7 @@ USER_HANDLER_RESULT Box_BoardUserMsg(USER_DATA_TYPE DataType,
     //Offsets of each member of .Board is relative to Box_Info.Board[0].
     //Offset by the user's entered index to get the .Board[Index]
     strncpy_safe(Param.Ptr,BOX_INFO_STR_LEN, SetPtr, _TRUNCATE );
-    NV_Write(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));    
+    NV_Write(NV_BOX_CFG,0,&Box_Info,sizeof(Box_Info));
   }
   return USER_RESULT_OK;
 }
@@ -460,7 +460,7 @@ USER_HANDLER_RESULT Box_PowerOnMsg(USER_DATA_TYPE DataType,
 
       // Update UserSetAdjustment so when "box.poweronusage" is read again, it will be =
       //    user set value + time since user updated box.poweronusage.
-      Box_PowerOn_RunTime.UserSetAdjustment = TickCount + 
+      Box_PowerOn_RunTime.UserSetAdjustment = TickCount +
                                               Box_PowerOn_RunTime.CPU_StartupBeforeClockInit;
 
       // Update the non-volatile versions (and indirectly .ElapsedPowerOnUsage var),
@@ -482,11 +482,11 @@ USER_HANDLER_RESULT Box_PowerOnMsg(USER_DATA_TYPE DataType,
 
 /******************************************************************************
  * Function:    Box_VersionCmd()
- *  
+ *
  * Description:  Handles User Manager request to access the Version ID
- *               setting. 
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               setting.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -499,7 +499,7 @@ USER_HANDLER_RESULT Box_PowerOnMsg(USER_DATA_TYPE DataType,
  *                               this to the location of the data requested.
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
  * Notes: Same as FAST_VersionCmd modified to only implement "get" behavior
  *
@@ -511,7 +511,7 @@ USER_HANDLER_RESULT Box_VersionCmd(USER_DATA_TYPE DataType,
                                     void **GetPtr)
 {
   UINT16 Ver;
-  
+
   //Load Version Id into the temporary location
   memcpy(&Ver, &CfgMgr_ConfigPtr()->VerId,  sizeof(Ver));
 
@@ -526,12 +526,12 @@ USER_HANDLER_RESULT Box_VersionCmd(USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
- * Function: Box_InstallIdCmd    
+ * Function: Box_InstallIdCmd
  *
  * Description:  Handles User Manager request to access the Installation ID
- *               setting. 
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               setting.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -544,9 +544,9 @@ USER_HANDLER_RESULT Box_VersionCmd(USER_DATA_TYPE DataType,
  *                               this to the location of the data requested.
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
- * Notes:     Same as FAST_InstallIdCmd modified to only implement "get" behavior   
+ * Notes:     Same as FAST_InstallIdCmd modified to only implement "get" behavior
  *****************************************************************************/
 USER_HANDLER_RESULT Box_InstallIdCmd(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
@@ -554,7 +554,7 @@ USER_HANDLER_RESULT Box_InstallIdCmd(USER_DATA_TYPE DataType,
                                      const void *SetPtr,
                                      void **GetPtr)
 {
-  USER_HANDLER_RESULT UserResult = USER_RESULT_ERROR;  
+  USER_HANDLER_RESULT UserResult = USER_RESULT_ERROR;
 
   // If "get", set the get ptr to the address of the Installation id string
   // in the config manager structure.
@@ -562,17 +562,17 @@ USER_HANDLER_RESULT Box_InstallIdCmd(USER_DATA_TYPE DataType,
   {
     *GetPtr = &CfgMgr_ConfigPtr()->Id;
     UserResult = USER_RESULT_OK;
-  }  
+  }
   return UserResult;
 }
 
 /******************************************************************************
  * Function:    Box_FastUserCfg()
- *  
+ *
  * Description:  Handles User Manager request to access the Fast config
- *               settings. 
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               settings.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -585,7 +585,7 @@ USER_HANDLER_RESULT Box_InstallIdCmd(USER_DATA_TYPE DataType,
  *                               this to the location of the data requested.
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
  * Notes: Same as FAST_UserCfg modified to only implement "get" behavior
  *
@@ -606,16 +606,16 @@ USER_HANDLER_RESULT Box_FastUserCfg(USER_DATA_TYPE DataType,
   {
     result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   }
-  return result;  
+  return result;
 }
 
 /******************************************************************************
  * Function:     Box_AircraftUserCfg
  *
  * Description:  Handles User Manager request to access the Fast config
- *               settings. 
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               settings.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -628,7 +628,7 @@ USER_HANDLER_RESULT Box_FastUserCfg(USER_DATA_TYPE DataType,
  *                               this to the location of the data requested.
  *
  * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Error processing command.       
+ *              USER_RESULT_ERROR: Error processing command.
  *
  * Notes: Same as AircraftUserCfg modified to only implement "get" behavior
  *
@@ -643,8 +643,8 @@ USER_HANDLER_RESULT Box_AircraftUserCfg(USER_DATA_TYPE DataType,
 
   memcpy(&AircraftConfigTemp, &CfgMgr_ConfigPtr()->Aircraft, sizeof(AircraftConfigTemp));
 
-  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);  
-  
+  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+
   return result;
 }
 
@@ -652,9 +652,9 @@ USER_HANDLER_RESULT Box_AircraftUserCfg(USER_DATA_TYPE DataType,
  * Function:     Box_LogGetStatus
  *
  * Description:  Handles User Manager requests to retrieve the log
- *               status.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               status.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -678,7 +678,7 @@ USER_HANDLER_RESULT Box_LogGetStatus (USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result = USER_RESULT_ERROR;
   memcpy(&LogConfigTemp, LogGetConfigPtr(), sizeof(LogConfigTemp) );
-  
+
   if(SetPtr == NULL)
   {
     //Set the GetPtr to the Cfg member referenced in the table
@@ -694,9 +694,9 @@ USER_HANDLER_RESULT Box_LogGetStatus (USER_DATA_TYPE DataType,
  * Function:     Box_GetSystemStatus
  *
  * Description:  Handles User Manager requests to retrieve the log
- *               status.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *               status.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                                or changed
@@ -710,7 +710,7 @@ USER_HANDLER_RESULT Box_LogGetStatus (USER_DATA_TYPE DataType,
  *
  * Returns:      USER_HANDLER_RESULT - USER_RESULT_ERROR or USER_RESULT_OK
  *
- * Notes:         
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT Box_GetSystemStatus (USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
@@ -725,8 +725,8 @@ USER_HANDLER_RESULT Box_GetSystemStatus (USER_DATA_TYPE DataType,
   {
     // Get the sys condition to the param variable
     FaultSystemStatusTemp = Flt_GetSystemStatus();
-    
-    //Set the GetPtr to the temp variable.     
+
+    //Set the GetPtr to the temp variable.
     *GetPtr = &FaultSystemStatusTemp;
     result = USER_RESULT_OK;
   }
@@ -738,9 +738,9 @@ USER_HANDLER_RESULT Box_GetSystemStatus (USER_DATA_TYPE DataType,
 * Function:     Box_GetMssimStatus
 *
 * Description:  Handles User Manager requests to retrieve the MSSMIM connect status
-*               status.  
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               status.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                                or changed
@@ -754,7 +754,7 @@ USER_HANDLER_RESULT Box_GetSystemStatus (USER_DATA_TYPE DataType,
 *
 * Returns:      USER_HANDLER_RESULT - USER_RESULT_ERROR or USER_RESULT_OK
 *
-* Notes:         
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT Box_GetMssimStatus(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
@@ -764,13 +764,13 @@ USER_HANDLER_RESULT Box_GetMssimStatus(USER_DATA_TYPE DataType,
 {
   static MSSC_MSSIM_STATUS MssimStatusTemp;
   USER_HANDLER_RESULT result = USER_RESULT_ERROR;
- 
+
   if(SetPtr == NULL)
   {
     // Set the mssim status to the temp variable
     MssimStatusTemp = MSSC_GetMsStatus();
 
-    //Set the GetPtr to the var referenced in the table     
+    //Set the GetPtr to the var referenced in the table
     *GetPtr = &MssimStatusTemp;
     result = USER_RESULT_OK;
   }
@@ -781,9 +781,9 @@ USER_HANDLER_RESULT Box_GetMssimStatus(USER_DATA_TYPE DataType,
 /******************************************************************************
  * Function:     Box_GetFastSwVer
  *
- * Description:  Handles User Manager requests to retrieve the software version.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ * Description:  Handles User Manager requests to retrieve the software version.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                                or changed
@@ -797,7 +797,7 @@ USER_HANDLER_RESULT Box_GetMssimStatus(USER_DATA_TYPE DataType,
  *
  * Returns:      USER_HANDLER_RESULT - USER_RESULT_ERROR or USER_RESULT_OK
  *
- * Notes:         
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT Box_GetFastSwVer(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
@@ -812,7 +812,7 @@ USER_HANDLER_RESULT Box_GetFastSwVer(USER_DATA_TYPE DataType,
   {
     // Get the software version string
     FAST_GetSoftwareVersion(SwVersionTemp);
-    //Set the GetPtr to the var referenced in the table     
+    //Set the GetPtr to the var referenced in the table
     *GetPtr = &SwVersionTemp;
     result = USER_RESULT_OK;
   }
@@ -823,9 +823,9 @@ USER_HANDLER_RESULT Box_GetFastSwVer(USER_DATA_TYPE DataType,
 /******************************************************************************
  * Function:     Box_GetMsPwVer
  *
- * Description:  Handles User Manager requests to retrieve the MS PW version.  
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ * Description:  Handles User Manager requests to retrieve the MS PW version.
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                                or changed
@@ -839,7 +839,7 @@ USER_HANDLER_RESULT Box_GetFastSwVer(USER_DATA_TYPE DataType,
  *
  * Returns:      USER_HANDLER_RESULT - USER_RESULT_ERROR or USER_RESULT_OK
  *
- * Notes:         
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT Box_GetMsPwVer(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
@@ -854,7 +854,7 @@ USER_HANDLER_RESULT Box_GetMsPwVer(USER_DATA_TYPE DataType,
   {
     // Get the PW version string
     MSSC_GetMsPwVer(MsPwVersion);
-    //Set the GetPtr to the var referenced in the table     
+    //Set the GetPtr to the var referenced in the table
     *GetPtr = &MsPwVersion;
     result = USER_RESULT_OK;
   }
@@ -866,8 +866,8 @@ USER_HANDLER_RESULT Box_GetMsPwVer(USER_DATA_TYPE DataType,
  * Function:     Box_GetUlFilesPending
  *
  * Description:  Handles User Manager requests to retrieve number of files pending transmission.
- *               
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                                or changed
@@ -881,7 +881,7 @@ USER_HANDLER_RESULT Box_GetMsPwVer(USER_DATA_TYPE DataType,
  *
  * Returns:      USER_HANDLER_RESULT - USER_RESULT_ERROR or USER_RESULT_OK
  *
- * Notes:         
+ * Notes:
  *****************************************************************************/
 USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
@@ -904,83 +904,88 @@ USER_HANDLER_RESULT Box_GetUlFilesPending(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: BoxUserTables.c $
  * 
+ * *****************  Version 30  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 3:02p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 7/26/12    Time: 2:10p
  * Updated in $/software/control processor/code/system
  * SCR 1076 Code review changes
- * 
+ *
  * *****************  Version 27  *****************
  * User: John Omalley Date: 10/11/11   Time: 4:58p
  * Updated in $/software/control processor/code/system
  * SCR 1078 - Code Review Updates
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor2  Date: 6/29/11    Time: 3:20p
  * Updated in $/software/control processor/code/system
  * SCR #1031 Enhancement: Add PW_Version to box.status
  * Moved variables from file to function scope
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor2  Date: 5/23/11    Time: 1:02p
  * Updated in $/software/control processor/code/system
  * SCR #862 Enhancement: Box Status Information
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor2  Date: 5/18/11    Time: 2:38p
  * Updated in $/software/control processor/code/system
  * SCR #1031 Enhancement: Add PW_Version to box.status
- * 
+ *
  * *****************  Version 23  *****************
  * User: Peter Lee    Date: 8/30/10    Time: 4:02p
  * Updated in $/software/control processor/code/system
  * SCR #806 Code Review Updates
- * 
+ *
  * *****************  Version 22  *****************
  * User: Jeff Vahue   Date: 8/18/10    Time: 6:22p
  * Updated in $/software/control processor/code/system
  * SCR# 801 - Add NL to error message for bad box time
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:13a
  * Updated in $/software/control processor/code/system
  * SCR #703 - Fixes for code review findings.
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 7/27/10    Time: 6:55p
  * Updated in $/software/control processor/code/system
  * SCR 260 - Corrected the User commands to match the GSE.
- * 
+ *
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 7/22/10    Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR #582   Update Power On Usage to better measure processor init time.
- * Fix bug when transitioning to use CM_GetClock(). 
- * 
+ * Fix bug when transitioning to use CM_GetClock().
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:16p
  * Updated in $/software/control processor/code/system
  * SCR #260 SCR #538
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor3  Date: 6/10/10    Time: 11:14a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Code Review changes
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor3  Date: 6/10/10    Time: 10:44a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Changes based on Code Review
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:09p
  * Updated in $/software/control processor/code/system
  * SCR #70 Store/Restore interrupt level
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 3/29/10    Time: 6:17p
  * Updated in $/software/control processor/code/system

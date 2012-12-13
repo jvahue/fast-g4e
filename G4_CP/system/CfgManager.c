@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 72 $  $Date: 12-11-13 11:10a $
+    $Revision: 73 $  $Date: 12/13/12 3:02p $
 
 ******************************************************************************/
 
@@ -252,15 +252,13 @@ BOOLEAN CfgMgr_FileInit(void)
  *                    FALSE- Reset NV_CFG_MGR only.
  *               [in] reason the default config has been loaded see RESET_REASON
  *
- * Returns:      SUCCESS or FAIL
+ * Returns:      none
  *
  * Notes:
  *
  *****************************************************************************/
-BOOLEAN CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason )
+void CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason )
 {
-  BOOLEAN status = TRUE;
-
   if(bResetAll)
   {
     NV_ResetConfig();
@@ -273,7 +271,6 @@ BOOLEAN CfgMgr_ResetConfig( BOOLEAN bResetAll, RESET_REASON reason )
   }
   // Create a log entry that the Default NVCfg is loaded and the reason.
   Flt_SetStatus(STA_FAULT, SYS_CFG_RESET_TO_DEFAULT, &reason, sizeof(reason));
-  return status;
 }
 
 
@@ -740,6 +737,11 @@ void CfgMgr_GenerateDebugLogs(void)
  *  MODIFICATIONS
  *    $History: CfgManager.c $
  * 
+ * *****************  Version 73  *****************
+ * User: Jim Mood     Date: 12/13/12   Time: 3:02p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 72  *****************
  * User: John Omalley Date: 12-11-13   Time: 11:10a
  * Updated in $/software/control processor/code/system
@@ -749,7 +751,7 @@ void CfgMgr_GenerateDebugLogs(void)
  * User: John Omalley Date: 12-11-09   Time: 4:01p
  * Updated in $/software/control processor/code/system
  * SCR 1107 and 1190 Code Review Updates
- * 
+ *
  * *****************  Version 70  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:58p
  * Updated in $/software/control processor/code/system
