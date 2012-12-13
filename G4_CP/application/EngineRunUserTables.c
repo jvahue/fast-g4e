@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 25 $  $Date: 12-12-08 11:44a $
+$Revision: 26 $  $Date: 12/13/12 3:08p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -170,8 +170,8 @@ static USER_MSG_TBL engRunStatusCmd [] =
   {"STARTINGTIME_MS", NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingTime_ms,     0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"START_DUR_MS",    NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.startingDuration_ms, 0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"RUN_DUR_MS",      NO_NEXT_TABLE,  EngRunState, USER_TYPE_UINT32, USER_RO,  &m_DataTemp.erDuration_ms,       0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MINVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.monMinValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
-  {"MAXVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.monMaxValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MINVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT,  USER_RO,  &m_DataTemp.minMonValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
+  {"MAXVALUE",        NO_NEXT_TABLE,  EngRunState, USER_TYPE_FLOAT, USER_RO,   &m_DataTemp.maxMonValue,         0,(MAX_ENGINES-1),     NO_LIMIT,   NULL              },
   {"SENSOR",          engRunSensrTbl, NULL,        NO_HANDLER_DATA,                                                                                                  },
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
@@ -185,8 +185,8 @@ static USER_MSG_TBL engRunCfgCmd[] =
   {"STOPTRIGID",     NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.stopTrigID,     0,(MAX_ENGINES-1), NO_LIMIT,             triggerIndexType},
   {"RATE",           NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.erRate,         0,(MAX_ENGINES-1), NO_LIMIT,             engRunRateType  },
   {"RATEOFFSET_MS",  NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_UINT32,  USER_RW,  &m_CfgTemp.nOffset_ms,     0,(MAX_ENGINES-1), NO_LIMIT,             NULL            },
-  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMaxSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
-  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.monMinSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"MINSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.minMonSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
+  {"MAXSENSORID",    NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_ENUM,    USER_RW,  &m_CfgTemp.maxMonSensorID, 0,(MAX_ENGINES-1), NO_LIMIT,             SensorIndexType },
   {"SENSORS",        NO_NEXT_TABLE, EngRunUserCfg, USER_TYPE_SNS_LIST,USER_RW,  m_CfgTemp.sensorMap,       0,(MAX_ENGINES-1), 0,MAX_ENGRUN_SENSORS, NULL            },
   { NULL,            NULL,          NULL, NO_HANDLER_DATA}
 };
@@ -482,6 +482,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1205 - Remove ER Start Log
  * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a

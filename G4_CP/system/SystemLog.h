@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 109 $  $Date: 12-11-28 2:04p $
+      $Revision: 110 $  $Date: 12/13/12 3:07p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -58,7 +58,6 @@ SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
 SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
 SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
 \
-SYS_LOG_ID(APP_ID_ENGINERUN_STARTED                 ,0xB300 ,0)\
 SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
 SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
 \
@@ -280,6 +279,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 110  *****************
+ * User: Jeff Vahue   Date: 12/13/12   Time: 3:07p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1205 - Remove ER Start Log
  * 
  * *****************  Version 109  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:04p
