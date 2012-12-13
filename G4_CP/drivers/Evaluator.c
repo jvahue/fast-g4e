@@ -1337,7 +1337,8 @@ static INT32 EvalAddConst(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
 /******************************************************************************
  * Function: EvalAddFuncCall
  *
- * Description: Add a "load const bool FALSE" to the expression cmd list.
+ * Description: Add a "fetch return value" of the configured function
+ *              to the expression cmd list.
  *
  * Parameters:    [in]  tblIdx - table index ( not used in this function)
  *                [in]  str    - pointer  to the string containing the const.
@@ -1787,11 +1788,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
- * 
+ *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:23p
  * Updated in $/software/control processor/code/drivers
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:34p
