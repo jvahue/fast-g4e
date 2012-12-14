@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 21 $  $Date: 12/12/12 4:30p $
+ $Revision: 22 $  $Date: 12/14/12 5:01p $
 
 ******************************************************************************/
 
@@ -1056,6 +1056,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 12/14/12   Time: 5:01p
+ * Updated in $/software/control processor/code/application
+ * SCR 1107 - Code review
  *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:30p
