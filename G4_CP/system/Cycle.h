@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 20 $  $Date: 12-12-08 11:44a $
+      $Revision: 21 $  $Date: 12/14/12 5:02p $
 
 ******************************************************************************/
 
@@ -264,6 +264,11 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 12/14/12   Time: 5:02p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
