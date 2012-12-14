@@ -576,7 +576,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
       pLog->cycleCounts[i].cycIndex =pCfg->cycle[i];
       if (CYCLE_UNUSED != pCfg->cycle[i])
       {
-        pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(pCfg->cycle[i]);
+        pLog->cycleCounts[i].cycleCount = CycleGetCount(pCfg->cycle[i]);
       }
       else
       {

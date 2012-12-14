@@ -254,7 +254,7 @@ EXPORT void    CycleUpdateAll          ( ENGRUN_INDEX erIndex );
 EXPORT void    CycleFinishEngineRun    ( ENGRUN_INDEX erID );
 EXPORT void    CycleResetEngineRun     ( ENGRUN_INDEX erID );
 EXPORT UINT16  CycleGetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
-EXPORT UINT32  CycleGetPersistentCount ( CYCLE_INDEX nCycle );
+EXPORT UINT32  CycleGetCount ( CYCLE_INDEX nCycle );
 EXPORT void    CycleCollectCounts      ( UINT32 counts[], ENGRUN_INDEX erIdx);
 EXPORT BOOLEAN CycleEEFileInit         ( void );
 EXPORT BOOLEAN CycleRTCFileInit        ( void );

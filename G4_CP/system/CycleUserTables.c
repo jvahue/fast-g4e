@@ -38,7 +38,8 @@ $Revision: 16 $  $Date: 12/05/12 4:16p $
 
 static CYCLE_CFG   m_CfgTemp;     // Temp buffer for config data
 
-static CYCLE_DATA  m_DataTemp;    // Temp buffer for runtime data
+static CYCLE_DATA   m_DataTemp;    // Temp buffer for runtime data
+static UINT32       m_CountsTemp;  // Single unsigned int to store currentcount data.
 
 static CYCLE_ENTRY m_persistTemp; // Temp buffer for persisted counts info.
 
@@ -91,7 +92,7 @@ static USER_MSG_TBL cycleStatusCmd [] =
   /*Str               Next Tbl Ptr    Handler Func           Data Type          Access    Parameter                     IndexRange         DataLimit   EnumTbl*/
   {"CYCLE_ACTIVE",    NO_NEXT_TABLE,  CycleState,            USER_TYPE_BOOLEAN, USER_RO,  &m_DataTemp.cycleActive,      0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   {"CYCLE_LAST_TIME", NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.cycleLastTime_ms, 0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
-  {"COUNT",           NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_DataTemp.currentCount,     0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
+  {"COUNT",           NO_NEXT_TABLE,  CycleState,            USER_TYPE_UINT32,  USER_RO,  &m_CountsTemp,                0,(MAX_CYCLES-1),  NO_LIMIT,   NULL},
   { NULL,             NULL,           NULL, NO_HANDLER_DATA}
 };
 
@@ -167,8 +168,15 @@ static USER_HANDLER_RESULT CycleState(USER_DATA_TYPE DataType,
   USER_HANDLER_RESULT result;
 
   result = USER_RESULT_ERROR;
+  if (Param.Ptr == &m_CountsTemp)
+  {
+    m_CountsTemp = m_CountsCurrent[Index];
+  }
+  else
+  {
+    memcpy(&m_DataTemp, &m_Data[Index], sizeof(m_DataTemp));
+  }
 
-  memcpy(&m_DataTemp, &m_Data[Index], sizeof(m_DataTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
@@ -353,16 +361,16 @@ static USER_HANDLER_RESULT CycleShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: CycleUserTables.c $
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
- * 
+ * SCR #1107 Code Review
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/12/12   Time: 6:40p
