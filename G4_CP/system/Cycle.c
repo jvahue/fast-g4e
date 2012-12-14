@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 28 $  $Date: 12/12/12 6:25p $
+  $Revision: 29 $  $Date: 12/14/12 5:02p $
 
 ******************************************************************************/
 
@@ -1105,6 +1105,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Contractor V&v Date: 12/14/12   Time: 5:02p
+ * Updated in $/software/control processor/code/system
+ * SCR 1107 - Code Review
  *
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:25p
