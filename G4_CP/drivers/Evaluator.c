@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 26 $  $Date: 12/12/12 6:23p $
+  $Revision: 27 $  $Date: 12/14/12 5:00p $
 
 ******************************************************************************/
 
@@ -1788,6 +1788,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 12/14/12   Time: 5:00p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1107 Code Review 
  *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:23p
