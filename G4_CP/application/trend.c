@@ -576,7 +576,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
       pLog->cycleCounts[i].cycIndex =pCfg->cycle[i];
       if (CYCLE_UNUSED != pCfg->cycle[i])
       {
-        pLog->cycleCounts[i].cycleCount = CycleGetPersistentCount(pCfg->cycle[i]);
+        pLog->cycleCounts[i].cycleCount = CycleGetCount(pCfg->cycle[i]);
       }
       else
       {
@@ -1056,11 +1056,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- * 
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:30p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:34p
