@@ -253,7 +253,7 @@ UINT16 CycleGetBinaryHeader ( void *pDest, UINT16 nMaxByteSize )
  * Parameters:   UINT8 nCycle - Cycle Index of the value to return
  *
  *
- * Returns:      UINT32 - Value of cycle as persisted to RTCRam
+ * Returns:      UINT32 - The current value of the Cycle
  *
  * Notes:        None
  *
@@ -294,42 +294,6 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
         m_Cfg[cyc].type != CYC_TYPE_NONE_CNT )
     {
       counts[cyc] = m_CountsCurrent[cyc];
-      #if 0
-      pData = &m_Data[cyc];
-      pCfg  = &m_Cfg[cyc];
-
-      // Act on the different types of cycles
-      // Return the aggregate count from EEPROM for persisted cycles.
-      // Return the count from from m_Data for non-persisted cycles.
-      switch (pCfg->type)
-      {
-        case CYC_TYPE_SIMPLE_CNT:
-          // Get the incremental count from local data
-          counts[cyc] = m_CountsCurrent->currentCount;
-          break;
-
-        case CYC_TYPE_PERSIST_SIMPLE_CNT:
-          // Get the accumulated incremental from EEPROM
-          counts[cyc] = m_CountsEEProm.data[cyc].count.n;
-          break;
-
-        case CYC_TYPE_DURATION_CNT:
-          // Non-persisted duration are stored in millisecs. Convert to seconds.
-          counts[cyc] = pData->currentCount * (UINT32)(1.0f /(FLOAT32)MILLISECONDS_PER_SECOND);
-          break;
-
-        case CYC_TYPE_PERSIST_DURATION_CNT:
-          // Persisted Duration are stored in seconds...no need to convert
-          counts[cyc] = m_CountsEEProm.data[cyc].count.n;
-          break;
-
-        case CYC_TYPE_NONE_CNT:
-		    case MAX_CYC_TYPE:
-		    default:
-          FATAL ("Unrecognized Cycle Type Value: %d" ,pCfg->type);
-          break;
-      }
-      #endif
     }
   }
 }
@@ -343,7 +307,7 @@ void CycleCollectCounts( UINT32 counts[], ENGRUN_INDEX erIdx )
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with
+ * Notes:       Standard Initialization format to be compatible with
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -365,7 +329,7 @@ BOOLEAN CycleEEFileInit(void)
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with
+ * Notes:       Standard Initialization format to be compatible with
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -480,8 +444,10 @@ static void CycleInitPersistent(void)
         bUpdateRTCRAM = TRUE;  /* for simplicity update both */
       }
 
-      // Copy the value of EEPROM to the CountCurrent entry
-      m_CountsCurrent[i] = m_CountsEEProm.data[i].count.n;
+      // At this point the EEPROM and RTC have been synchronized.
+      // EEPROM values are used as the baseline so use them to
+      // set the current-counts
+       m_CountsCurrent[i] = m_CountsEEProm.data[i].count.n;
     }
   }
 
@@ -675,10 +641,6 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       nowTimeMs = CM_GetTickCount();
       pCycleData->currentCount     += nowTimeMs - pCycleData->cycleLastTime_ms;
       pCycleData->cycleLastTime_ms =  nowTimeMs;
-
-
-
-
     }
     // Update the cycle active status.
     pCycleData->cycleActive = ( TriggerIsActive( trigMask ) ) ? TRUE : FALSE;
@@ -723,6 +685,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
     } // End of if cycle has Started
   } //End of else prev cycle was inactive
 
+  // Update the count for this cycle and write it to RTC if persistent type
   CycleUpdateCount(cycIndex, CYC_BKUP_RTC);
 }
 
@@ -755,15 +718,14 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
   CYCLE_DATA_PTR pCycleData = &m_Data[nCycle];
   temp_value.n = 0;
 
-  // Update persistent count
-  // The copy in EEPROM acts as the baseline since 'start of ER' against which the
-  // incrementation are calculated. The updated total is stored in RTC memory.
-  // When the engrun ends, this function will be called with updateFlag == CYC_WRITE_EE and
-  // the EEPROM memory will be synced to match RTC.
+  // Update count and persist if configured.
+  // The copy in EEPROM acts as the baseline since the start of ER, against which the
+  // incrementations are calculated. For persisted cycles, the updated total is stored in
+  // RTC memory. When the engrun ends, this function will be called with
+  // updateFlag == CYC_WRITE_EE and EEPROM memory will be synced to match RTC.
 
   switch (pCycleCfg->type)
   {
-
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
       bIsPersistent = TRUE;
       bDataChanged = TRUE;
@@ -825,7 +787,7 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
         sizeof(m_CountsEEProm.data[nCycle].count.n) );
       #pragma ghs endnowarning
 
-#ifdef DEBUG_CYCLE
+      #ifdef DEBUG_CYCLE
       /*vcast_dont_instrument_start*/
       if ( 0 != memcmp(&m_CountsEEProm, &m_CountsRTC, sizeof(CYCLE_COUNTS)) )
       {
@@ -842,7 +804,7 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
         }
       }
       /*vcast_dont_instrument_end*/
-#endif
+      #endif
       GSE_DebugStr(NORMAL,TRUE, "Cycle: Cycle[%d] EEPROM Updated P-Count: %d", nCycle,
                                   m_CountsEEProm.data[nCycle].count.n);
 

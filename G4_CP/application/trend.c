@@ -142,7 +142,7 @@ void TrendInitialize( void )
     pData->nSamplesPerPeriod = pCfg->nSamplePeriod_s * (INT16)pCfg->rate;
 
     pData->nTotalSensors = SensorInitSummaryArray ( pData->snsrSummary,
-                                                    MAX_TRENDS,
+                                                    MAX_TREND_SENSORS,
                                                     pCfg->sensorMap,
                                                     sizeof(pCfg->sensorMap) );
 
