@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 84 $  $Date: 12-12-08 1:32p $
+  $Revision: 85 $  $Date: 12-12-13 5:42p $
 
 ******************************************************************************/
 
@@ -471,7 +471,7 @@ static void TriggerUpdateTask( void *pParam )
    if (Tm.systemMode == SYS_SHUTDOWN_ID)
    {
      TriggersEnd();
-     TmTaskEnable( (TASK_INDEX)Trigger_Task, FALSE );
+     TmTaskEnable( Trigger_Task, FALSE );
    }
    else // Normal task execution.
    {
@@ -1028,7 +1028,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
   INT32   bytesMoved;
   INT32   strToBinResult;
   CHAR    logicalOp;
-  CHAR    exprString[255];
+  CHAR    exprString[EVAL_MAX_EXPR_STR_LEN];
   CHAR*   pStr;
   FLOAT32 tempFloat;
 
@@ -1153,6 +1153,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 85  *****************
+ * User: John Omalley Date: 12-12-13   Time: 5:42p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p
