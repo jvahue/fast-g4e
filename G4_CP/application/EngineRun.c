@@ -215,8 +215,11 @@ void EngRunInitialize(void)
     {
       // Initialize the common fields in the EngineRun data structure
       pErData->erIndex = (ENGRUN_INDEX)i;
+
+      // copy these to simplify life
       pErData->minMonSensorID = pErCfg->minMonSensorID;
       pErData->maxMonSensorID = pErCfg->maxMonSensorID;
+
       EngRunReset( pErData);
 
       // these are handled here as they are monitored in stop mode and not done in EngRunReset
@@ -595,6 +598,9 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
             // Ensure we don't collected any false start data while invalid
             // reset this engine run and its cycles.
             EngRunReset(pErData);
+            // don't forget these special ones
+            pErData->minValueValid = TRUE;
+            pErData->minMonValue   = FLT_MAX;
           }
         }
         break;
