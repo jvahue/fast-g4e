@@ -872,7 +872,7 @@ BOOLEAN strncpy_safe(CHAR* dest, INT32 sizeDest, const CHAR* source, INT32 count
   BOOLEAN  status = TRUE;
   const CHAR* pSource = source;
   CHAR* pDest = dest;
-
+  ASSERT((source != NULL) && (dest != NULL));
   //Determine size restrictions based on mode.
 
   // If caller has not requested to truncated the copy,
@@ -916,7 +916,7 @@ BOOLEAN strncpy_safe(CHAR* dest, INT32 sizeDest, const CHAR* source, INT32 count
   pDest   = dest;
   // Copy characters until destination size is reached or dest has been
   // assigned a null character.
-  while ( status && copiedCount <= numberOfBytesToMove && NULL != (*pDest++ = *pSource++) )
+  while ( status && copiedCount <= numberOfBytesToMove && (*pDest++ = *pSource++) )
   {
     ++copiedCount;
   }
@@ -994,7 +994,7 @@ BOOLEAN SuperStrcat(INT8* dest, const INT8* source, UINT32 len)
 BOOLEAN GetBit(INT32 bitOffset, UINT32 array[], INT32 arraySizeBytes)
 {
   UINT32 result;
-
+  ASSERT (array != NULL);
   ASSERT (bitOffset >= 0 && bitOffset < (arraySizeBytes * 8));
   result = array[bitOffset / 32] & ( 1U << (bitOffset % 32) );
 
