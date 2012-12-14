@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 48 $  $Date: 12/13/12 3:08p $
+      $Revision: 49 $  $Date: 12/13/12 9:26p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -957,6 +957,12 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 49  *****************
+ * User: Jeff Vahue   Date: 12/13/12   Time: 9:26p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1205 - Ensure Min Sensor in ER gets a chance to be valid at
+ * startup.
  * 
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p
