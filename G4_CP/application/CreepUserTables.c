@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 4 $  $Date: 12-12-09 6:39p $
+    $Revision: 5 $  $Date: 12-12-13 7:20p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -35,85 +35,98 @@
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Status(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Sensor(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
                                  const void *SetPtr,
                                  void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
                                  const void *SetPtr,
                                  void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
                                  const void *SetPtr,
                                  void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Table(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
                                    UINT32 Index,
                                    const void *SetPtr,
                                    void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Object(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_ObjRow(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_ObjCol(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
                                    UINT32 Index,
                                    const void *SetPtr,
                                    void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
                                     const void *SetPtr,
                                     void **GetPtr);
 
-
+static
 USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
                                       void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
                                                   USER_MSG_PARAM Param,
                                                   UINT32 Index,
                                                   const void *SetPtr,
                                                   void **GetPtr);
 
+static
 USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
                                                      USER_MSG_PARAM Param,
                                                      UINT32 Index,
@@ -135,12 +148,13 @@ static CREEP_DEBUG creepDebugTemp;
 static CREEP_SENSOR_VAL creepSensorTemp;
 
 // Debug Timing
-UINT32 startHSTick, endHSTick, diffHSTick;
+static UINT32 startHSTick, endHSTick, diffHSTick;
 
 
 /*****************************************************************************/
 /* Local Constants                                                           */
 /*****************************************************************************/
+static
 USER_ENUM_TBL creepStatusStrs[] =
 {
   {"OK",          CREEP_STATUS_OK},
@@ -149,6 +163,7 @@ USER_ENUM_TBL creepStatusStrs[] =
   { NULL,          0}
 };
 
+static
 USER_ENUM_TBL creepStateStrs[] =
 {
   {"IDLE",         CREEP_STATE_IDLE},
@@ -158,6 +173,7 @@ USER_ENUM_TBL creepStateStrs[] =
   { NULL,           0}
 };
 
+/*
 USER_ENUM_TBL creepRateTypes[] =
 {
   { "1HZ"    , CREEP_1HZ    },
@@ -170,14 +186,15 @@ USER_ENUM_TBL creepRateTypes[] =
   { "100HZ"  , CREEP_100HZ  },
   { NULL     , 0            }
 };
-
+*/
 
 // Level 2
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+static
 USER_MSG_TBL creepTableTbl[] =
 {
   {"NAME", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_STR,  USER_RW,
-               (void *) &creepCfgTblTemp.name,  0, CREEP_MAX_TBL-1, 0, CREEP_MAX_NAME, NULL},
+           (void *) &creepCfgTblTemp.name[0],  0, CREEP_MAX_TBL-1, 0, CREEP_MAX_NAME, NULL},
 
 // Row Values
   {"ROW_VAL0", NO_NEXT_TABLE, CreepMsg_Table, USER_TYPE_FLOAT64,  USER_RW,
@@ -338,10 +355,11 @@ USER_MSG_TBL creepTableTbl[] =
 
 
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+static
 USER_MSG_TBL creepObjectSenRowTbl[] =
 {
-  {"NAME",    NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_STR,  USER_RW,
-             (void *) &creepCfgObjSenTemp.name,  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
+  {"NAME", NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_STR,  USER_RW,
+           (void *) &creepCfgObjSenTemp.name[0], 0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
   {"ID",      NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_UINT16,  USER_RW,
              (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -364,10 +382,11 @@ USER_MSG_TBL creepObjectSenRowTbl[] =
 
 
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+static
 USER_MSG_TBL creepObjectSenColTbl[] =
 {
-  {"NAME",   NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_STR,  USER_RW,
-             (void *) &creepCfgObjSenTemp.name,  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
+  {"NAME", NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_STR,  USER_RW,
+         (void *) &creepCfgObjSenTemp.name[0],  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
   {"ID",     NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
              (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -390,10 +409,11 @@ USER_MSG_TBL creepObjectSenColTbl[] =
 
 
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+static
 USER_MSG_TBL creepObjectTbl[] =
 {
-  {"NAME",    NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_STR, USER_RW,
-              (void *) &creepCfgObjTemp.name,  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
+  {"NAME", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_STR, USER_RW,
+           (void *) &creepCfgObjTemp.name[0],  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
 
   {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
               (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -418,7 +438,7 @@ USER_MSG_TBL creepObjectTbl[] =
 };
 #pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
-
+static
 USER_MSG_TBL creepSensorTbl[] =
 {
   {"ROW_FAULTED",   NO_NEXT_TABLE, CreepMsg_Sensor, USER_TYPE_BOOLEAN,  USER_RO,
@@ -455,7 +475,7 @@ USER_MSG_TBL creepSensorTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-
+static
 USER_MSG_TBL creepCntTbl[] =
 {
   {"MISSION",     NO_NEXT_TABLE, CreepMsg_Cnt, USER_TYPE_FLOAT64,  USER_RW,
@@ -485,7 +505,7 @@ USER_MSG_TBL creepCntTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-
+static
 USER_MSG_TBL creepValTbl[] =
 {
   {"ACCUM_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RW,
@@ -507,6 +527,7 @@ USER_MSG_TBL creepValTbl[] =
 // Level 1
 
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
+static
 USER_MSG_TBL creepCfgTbl[] =
 {
   {"PBITSYSCOND", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_ENUM,  USER_RW,
@@ -535,7 +556,7 @@ USER_MSG_TBL creepCfgTbl[] =
 };
 #pragma ghs endnowarning // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned.
 
-
+static
 USER_MSG_TBL creepStatusTbl[] =
 {
   {"FAULT",  NO_NEXT_TABLE, CreepMsg_Status, USER_TYPE_ENUM,  USER_RO,
@@ -555,6 +576,7 @@ USER_MSG_TBL creepStatusTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
+static
 USER_MSG_TBL creepPersistTbl[] =
 {
   {"CNT",     creepCntTbl,     NULL,  NO_HANDLER_DATA},
@@ -562,7 +584,7 @@ USER_MSG_TBL creepPersistTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-
+static
 USER_MSG_TBL creepDebugTbl[] =
 {
   {"EXP_CRC", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_HEX16,  USER_RW,
@@ -580,7 +602,7 @@ USER_MSG_TBL creepDebugTbl[] =
 
 
 // Root Level
-
+static
 USER_MSG_TBL creepRoot[] =
 {
   {"STATUS",  creepStatusTbl,  NULL,  NO_HANDLER_DATA},
@@ -600,14 +622,14 @@ USER_MSG_TBL creepRoot[] =
   {NULL,      NULL,            NULL,  NO_HANDLER_DATA}
 };
 
-
+static
 USER_MSG_TBL creepRootTblPtr = {"CREEP",creepRoot,NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-void CreepMsg_UpdateCfg ( void );
+static void CreepMsg_UpdateCfg ( void );
 
 
 /*****************************************************************************/
@@ -645,6 +667,7 @@ void CreepMsg_UpdateCfg ( void );
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Status(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -655,7 +678,7 @@ USER_HANDLER_RESULT CreepMsg_Status(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  creepStatusTemp = *Creep_GetStatus(Index);
+  creepStatusTemp = *Creep_GetStatus( (UINT8) Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -689,6 +712,7 @@ USER_HANDLER_RESULT CreepMsg_Status(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Sensor(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -699,7 +723,7 @@ USER_HANDLER_RESULT CreepMsg_Sensor(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  creepSensorTemp = *Creep_GetSensor(Index);
+  creepSensorTemp = *Creep_GetSensor( (UINT8) Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -733,6 +757,7 @@ USER_HANDLER_RESULT CreepMsg_Sensor(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
@@ -743,7 +768,7 @@ USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  creepStatusTemp = *Creep_GetStatus(Index);
+  creepStatusTemp = *Creep_GetStatus( (UINT8) Index);
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -756,20 +781,20 @@ USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
   if (SetPtr != NULL && USER_RESULT_OK == result)
   {
     // Update Status counts only
-    Creep_GetStatus(Index)->data = creepStatusTemp.data;
+    Creep_GetStatus( (UINT8) Index)->data = creepStatusTemp.data;
 
     // Update EEPROM APP Data
-    Creep_UpdateCreepXAppData(Index);
+    Creep_UpdateCreepXAppData( (UINT16) Index);
 
     // Update the Data Percent here.  Normally Data precent update in init(), and @ end of ER.
     //    But if the cnt values are updated, should update % here
-    Creep_GetStatus(Index)->data_percent.accumCnt = creepStatusTemp.data.creepAccumCnt
+    Creep_GetStatus( (UINT8) Index)->data_percent.accumCnt = creepStatusTemp.data.creepAccumCnt
                                                     / m_Creep_100_pcnt;
 
-    Creep_GetStatus(Index)->data_percent.accumCntTrashed =
+    Creep_GetStatus( (UINT8) Index)->data_percent.accumCntTrashed =
                           creepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
 
-    Creep_GetStatus(Index)->data_percent.lastMissionCnt =
+    Creep_GetStatus( (UINT8) Index)->data_percent.lastMissionCnt =
                           creepStatusTemp.data.creepLastMissionCnt / m_Creep_100_pcnt;
   }
 
@@ -803,6 +828,7 @@ USER_HANDLER_RESULT CreepMsg_Cnt(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
@@ -815,7 +841,7 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
 
-  creepStatusTemp = *Creep_GetStatus(Index);
+  creepStatusTemp = *Creep_GetStatus( (UINT8) Index);
   creepPercentPrev = creepStatusTemp.data_percent;
 
 
@@ -840,8 +866,8 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
 
       // Recompute percentage.  Note: this value might be different than the val entered due
       //    to error assoc with DOUBLE representation of real numbers.
-      Creep_GetStatus(Index)->data_percent.accumCnt = creepStatusTemp.data.creepAccumCnt /
-                                                         m_Creep_100_pcnt;
+      Creep_GetStatus( (UINT8) Index)->data_percent.accumCnt =
+                        creepStatusTemp.data.creepAccumCnt / m_Creep_100_pcnt;
     }
 
     if ( fabs (creepPercentPrev.accumCntTrashed -
@@ -853,15 +879,15 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
 
       // Recompute percentage.  Note: this value might be different than the val entered due
       //    to error assoc with DOUBLE representation of real numbers.
-      Creep_GetStatus(Index)->data_percent.accumCntTrashed =
+      Creep_GetStatus( (UINT8) Index)->data_percent.accumCntTrashed =
                creepStatusTemp.data.creepAccumCntTrashed / m_Creep_100_pcnt;
     }
 
     // Update Status counts only
-    Creep_GetStatus(Index)->data = creepStatusTemp.data;
+    Creep_GetStatus( (UINT8) Index)->data = creepStatusTemp.data;
 
     // Update EEPROM APP Data
-    Creep_UpdateCreepXAppData(Index);
+    Creep_UpdateCreepXAppData((UINT16) Index);
   }
 
   return result;
@@ -896,6 +922,7 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
@@ -946,6 +973,7 @@ USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Table(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
                                    UINT32 Index,
@@ -998,6 +1026,7 @@ USER_HANDLER_RESULT CreepMsg_Table(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Object(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -1050,6 +1079,7 @@ USER_HANDLER_RESULT CreepMsg_Object(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_ObjRow(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -1102,6 +1132,7 @@ USER_HANDLER_RESULT CreepMsg_ObjRow(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_ObjCol(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -1154,6 +1185,7 @@ USER_HANDLER_RESULT CreepMsg_ObjCol(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
                                    USER_MSG_PARAM Param,
                                    UINT32 Index,
@@ -1177,7 +1209,7 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
     // Clear all Creep Object EEPROM APP Data
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
-      Creep_GetStatus(i)->data = creepStatusTemp.data;
+      Creep_GetStatus( (UINT8) i)->data = creepStatusTemp.data;
       Creep_UpdateCreepXAppData(i);    // Commit to EE APP
       // Writes, need to update EEPROM APP Data.  Should exe this cmd  when CREEP not active.
       // NOTE: Normally m_Creep_AppData is updated after ER where Data in Status (RunTime ver)
@@ -1188,9 +1220,9 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
 
       // Update the Data Percent.  Normally Data precent update in init(), and @ end of ER.
       //    But if the cnt values are updated, should update % here
-      Creep_GetStatus(i)->data_percent.accumCnt = 0;
-      Creep_GetStatus(i)->data_percent.accumCntTrashed = 0;
-      Creep_GetStatus(i)->data_percent.lastMissionCnt = 0;
+      Creep_GetStatus((UINT8) i)->data_percent.accumCnt = 0;
+      Creep_GetStatus((UINT8) i)->data_percent.accumCntTrashed = 0;
+      Creep_GetStatus((UINT8) i)->data_percent.lastMissionCnt = 0;
     }
 
     CM_GetTimeAsTimestamp((TIMESTAMP *) &ts);
@@ -1209,7 +1241,7 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
       // Get Current values
-      creepStatusTemp.data = Creep_GetStatus(i)->data;
+      creepStatusTemp.data = Creep_GetStatus( (UINT8) i)->data;
 
       // Update diagnostic counts only
       creepStatusTemp.data.creepAccumCntTrashed = 0;
@@ -1217,7 +1249,7 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
       creepStatusTemp.data.creepFailures = 0;
 
       // Update modified values
-      Creep_GetStatus(i)->data = creepStatusTemp.data;
+      Creep_GetStatus( (UINT8) i)->data = creepStatusTemp.data;
       Creep_UpdateCreepXAppData(i);  // Commit to EE APP
     }
 
@@ -1257,6 +1289,7 @@ USER_HANDLER_RESULT CreepMsg_Clear(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
                                     UINT32 Index,
@@ -1285,7 +1318,7 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
     ptr = msg;
     i = 0;
     strCount[i++] = strtok( ptr, "," );
-    while ( (strCount != NULL) && (i < CREEP_MAX_COLS) )
+    while ( (i < CREEP_MAX_COLS) && (strCount[i-1] != NULL) )
     {
       strCount[i] = strtok(NULL, ",");
       i++;
@@ -1393,6 +1426,7 @@ USER_HANDLER_RESULT CreepMsg_DCount(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
                                                   USER_MSG_PARAM Param,
                                                   UINT32 Index,
@@ -1469,6 +1503,7 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentAll(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+static
 USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
                                                      USER_MSG_PARAM Param,
                                                      UINT32 Index,
@@ -1526,11 +1561,11 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
-USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
-                                      USER_MSG_PARAM Param,
-                                      UINT32 Index,
-                                      const void *SetPtr,
-                                      void **GetPtr)
+static USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
+                                             USER_MSG_PARAM Param,
+                                             UINT32 Index,
+                                             const void *SetPtr,
+                                             void **GetPtr)
 {
   USER_HANDLER_RESULT result ;
 
@@ -1555,7 +1590,7 @@ USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
-void CreepMsg_UpdateCfg ( void )
+static void CreepMsg_UpdateCfg ( void )
 {
   *Creep_GetCfg() = creepCfgTemp;     // Update current cfg to new setting
 
@@ -1573,29 +1608,29 @@ void CreepMsg_UpdateCfg ( void )
 *
 * Description:  Returns the selected Fault Entry from the non-volatile memory
 *
-* Parameters:   [in] index:     Index parameter selecting specified entry
+* Parameters:   [in] index_obj: Index parameter selecting specified entry
 *
 * Returns:      [out] ptr to RecentLogStr[] containing decoded entry
 *
 * Notes:        none
 *
 *****************************************************************************/
-static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
+static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index_obj )
 {
   CHAR *pStr;
   TIMESTRUCT ts;
   static CHAR  recentLogStr[256];
 
 
-  if ( index < m_creepHistory.cnt )
+  if ( index_obj < m_creepHistory.cnt )
   {
-    CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.buff[index].ts, &ts);
+    CM_ConvertTimeStamptoTimeStruct( &m_creepHistory.buff[index_obj].ts, &ts);
 
     // Stringify the Log data
     snprintf( recentLogStr, 80, "%02d:%s(%x) at %02d:%02d:%02d %02d/%02d/%4d\r\n",
-        index+1,
-        SystemLogIDString( m_creepHistory.buff[index].id),
-        m_creepHistory.buff[index].id,
+        index_obj+1,
+        SystemLogIDString( m_creepHistory.buff[index_obj].id),
+        m_creepHistory.buff[index_obj].id,
         ts.Hour,
         ts.Minute,
         ts.Second,
@@ -1608,7 +1643,7 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
   }
   else
   {
-    snprintf( recentLogStr, 80, "%02d:Fault entry empty\r\n", index );
+    snprintf( recentLogStr, 80, "%02d:Fault entry empty\r\n", index_obj );
     pStr = recentLogStr;
   }
 
@@ -1620,6 +1655,11 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index )
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 12-12-13   Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 12-12-09   Time: 6:39p
  * Updated in $/software/control processor/code/application

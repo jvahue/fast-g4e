@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 5 $  $Date: 12-12-10 8:29p $
+      $Revision: 7 $  $Date: 12-12-13 7:41p $
 
 ******************************************************************************/
 
@@ -51,19 +51,19 @@
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-CREEP_STATUS m_Creep_Status[CREEP_MAX_OBJ];
-CREEP_APP_DATA m_Creep_AppData;
-CREEP_CFG m_Creep_Cfg;
-CREEP_SENSOR_VAL m_Creep_Sensors[CREEP_MAX_OBJ];
-CREEP_APP_DATA_RTC m_Creep_AppDataRTC;
-CREEP_DEBUG m_Creep_Debug;
+static CREEP_STATUS m_Creep_Status[CREEP_MAX_OBJ];
+static CREEP_APP_DATA m_Creep_AppData;
+static CREEP_CFG m_Creep_Cfg;
+static CREEP_SENSOR_VAL m_Creep_Sensors[CREEP_MAX_OBJ];
+static CREEP_APP_DATA_RTC m_Creep_AppDataRTC;
+static CREEP_DEBUG m_Creep_Debug;
 
-FLOAT64 m_Creep_100_pcnt;
-UINT32 m_Creep_SensorStartTimeout_ms;
+static FLOAT64 m_Creep_100_pcnt;
+static UINT32 m_Creep_SensorStartTimeout_ms;
 
 static CHAR gse_OutLine[128];
 
-CREEP_FAULT_HISTORY m_creepHistory;
+static CREEP_FAULT_HISTORY m_creepHistory;
 
 // Test Timing
 #ifdef CREEP_TIMING_TEST
@@ -110,6 +110,12 @@ static void Creep_AddToFaultBuff ( SYS_APP_ID id );
 static void Creep_FailAllObjects ( UINT16 index );
 static void Creep_InitPersistentPcnt ( void );
 
+static void Creep_UpdateCreepXAppData (UINT16 index_obj);
+static void Creep_ClearFaultFile (TIMESTAMP *pTs);
+static CREEP_DEBUG_PTR Creep_GetDebug (void);
+static CREEP_CFG_PTR Creep_GetCfg (void);
+static CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index);
+static CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
 
 #include "CreepUserTables.c"
 
@@ -171,7 +177,7 @@ typedef struct {
 } CREEP_TYPE_TO_SYSLOG_ID;
 
 // NOTE: Changes to PBIT_FAIL_TYPE enum list will affect the item below.
-const CREEP_TYPE_TO_SYSLOG_ID creep_PBIT_TypeToSysLog[PBIT_FAIL_MAX] =
+static const CREEP_TYPE_TO_SYSLOG_ID creep_PBIT_TypeToSysLog[PBIT_FAIL_MAX] =
 {
   SYS_ID_NULL_LOG,
   APP_ID_CREEP_PBIT_CFG_CRC,
@@ -180,7 +186,7 @@ const CREEP_TYPE_TO_SYSLOG_ID creep_PBIT_TypeToSysLog[PBIT_FAIL_MAX] =
 };
 
 // NOTE: Changes to CREEP_FAULT_TYPE enum list will affect the item below.
-const CREEP_TYPE_TO_SYSLOG_ID creep_CBIT_TypeToSysLog[CREEP_FAULT_TYPE_MAX] =
+static const CREEP_TYPE_TO_SYSLOG_ID creep_CBIT_TypeToSysLog[CREEP_FAULT_TYPE_MAX] =
 {
   SYS_ID_NULL_LOG,
   APP_ID_CREEP_CBIT_FAULT_ER,
@@ -285,7 +291,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
   // Setup Creep Processing Task
   memset(&task, 0, sizeof(task));
   strncpy_safe(task.Name, sizeof(task.Name), "Creep Task", _TRUNCATE);
-  task.TaskID         = (INT16) Creep;
+  task.TaskID         = (TASK_INDEX) Creep;
   task.Function       = Creep_Task;
   task.Priority       = taskInfo[Creep].priority;
   task.Type           = taskInfo[Creep].taskType;
@@ -615,78 +621,6 @@ static void Creep_Task ( void *pParam )
    m_CreepTiming_Index = (++m_CreepTiming_Index) % CREEP_TIMING_BUFF_MAX;
 #endif
 
-}
-
-
-/******************************************************************************
- * Function:    Creep_GetStatus
- *
- * Description: Utility function to request current Creep[index] status
- *
- * Parameters:  index_obj of Creep Object
- *
- * Returns:     Ptr to Creep Status data
- *
- * Notes:       None
- *
- *****************************************************************************/
-CREEP_STATUS_PTR Creep_GetStatus (UINT8 index_obj)
-{
-  return ( (CREEP_STATUS_PTR) &m_Creep_Status[index_obj] );
-}
-
-
-/******************************************************************************
- * Function:    Creep_GetSensor
- *
- * Description: Utility function to request current Creep[index] Sensor
- *
- * Parameters:  index_obj of Sensor Object
- *
- * Returns:     Ptr to Creep Sensor data
- *
- * Notes:       None
- *
- *****************************************************************************/
-CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index_obj)
-{
-  return ( (CREEP_SENSOR_VAL_PTR) &m_Creep_Sensors[index_obj] );
-}
-
-
-/******************************************************************************
- * Function:    Creep_GetCfg
- *
- * Description: Utility function to request current Creep Cfg
- *
- * Parameters:  None
- *
- * Returns:     Ptr to Creep Cfg
- *
- * Notes:       None
- *
- *****************************************************************************/
-CREEP_CFG_PTR Creep_GetCfg ( void )
-{
-  return ( (CREEP_CFG_PTR) &m_Creep_Cfg );
-}
-
-
-/******************************************************************************
- * Function:    Creep_GetDebug
- *
- * Description: Utility function to request current Creep Debug
- *
- * Parameters:  None
- *
- * Returns:     Ptr to Creep Debug
- *
- * Notes:       None
- *
- *****************************************************************************/
-CREEP_DEBUG_PTR Creep_GetDebug ( void )
-{
-  return ( (CREEP_DEBUG_PTR) &m_Creep_Debug );
 }
 
 
@@ -1163,7 +1097,7 @@ BOOLEAN Creep_RestoreAppData( void )
   // If open failed or eeprom reset to 0xFFFF, re-init app data
   if ( ( result != SYS_OK ) || (m_Creep_AppData.crc16 == 0xFFFF) )
   {
-    Creep_FileInit();
+    bOk = Creep_FileInit();
     bOk = FALSE;  // Always return fail if we have to re-init File
   }
 
@@ -1188,9 +1122,12 @@ static
 void Creep_RestoreFaultHistory( void )
 {
   RESULT result;
+  BOOLEAN bOk;
 
 
   result = NV_Open(NV_CREEP_HISTORY);
+  bOk = TRUE;
+
   if ( result == SYS_OK )
   {
     NV_Read(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(CREEP_FAULT_HISTORY));
@@ -1199,7 +1136,12 @@ void Creep_RestoreFaultHistory( void )
   // If open failed, re-init app data
   if (result != SYS_OK)
   {
-    Creep_FaultFileInit();
+    bOk = Creep_FaultFileInit();
+    if (bOk == TRUE)
+    {
+      // Init App data
+      m_creepHistory.cnt = 0;  // dummy write to fix lint warning
+    }
   }
 
   m_Creep_Debug.nCreepFailBuffCnt = m_creepHistory.cnt;
@@ -1239,6 +1181,131 @@ BOOLEAN Creep_RestoreAppDataRTC( void )
   }
 
   return (bOk);
+}
+
+/******************************************************************************
+ * Function:     Creep_UpdateCreepXAppData
+ *
+ * Description:  Updates a specific Creep Obj App Data.
+ *
+ * Parameters:   index_obj Index of Creep Obj to update
+ *
+ * Returns:      none
+ *
+ * Notes:        Support CreepUserTable.c to update App Data
+ *
+ *****************************************************************************/
+static
+void Creep_UpdateCreepXAppData (UINT16 index_obj)
+{
+  // Copy from m_Creep_Status[] into m_Creep_AppData[creep_index]
+  memcpy ( (void *) &m_Creep_AppData.data[index_obj], (void *) &m_Creep_Status[index_obj].data,
+           sizeof(CREEP_DATA) );
+
+  // Update NV EEPROM
+  NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
+}
+
+
+/******************************************************************************
+ * Function:     Creep_ClearFaultFile
+ *
+ * Description:  Clears the Recent Fault File
+ *
+ * Parameters:   *pTs ptr to TimeStamp value to set
+ *
+ * Returns:      none
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static
+void Creep_ClearFaultFile(TIMESTAMP *pTs)
+{
+  // Init App data
+  memset ( (void *) &m_creepHistory, 0, sizeof(m_creepHistory) );
+
+  m_creepHistory.ts = *pTs;
+
+  // Update App data
+  NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
+
+}
+
+
+/******************************************************************************
+ * Function:    Creep_GetDebug
+ *
+ * Description: Utility function to request current Creep Debug
+ *
+ * Parameters:  None
+ *
+ * Returns:     Ptr to Creep Debug
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+CREEP_DEBUG_PTR Creep_GetDebug ( void )
+{
+  return ( (CREEP_DEBUG_PTR) &m_Creep_Debug );
+}
+
+
+/******************************************************************************
+ * Function:    Creep_GetCfg
+ *
+ * Description: Utility function to request current Creep Cfg
+ *
+ * Parameters:  None
+ *
+ * Returns:     Ptr to Creep Cfg
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+CREEP_CFG_PTR Creep_GetCfg ( void )
+{
+  return ( (CREEP_CFG_PTR) &m_Creep_Cfg );
+}
+
+
+/******************************************************************************
+ * Function:    Creep_GetSensor
+ *
+ * Description: Utility function to request current Creep[index] Sensor
+ *
+ * Parameters:  index_obj of Sensor Object
+ *
+ * Returns:     Ptr to Creep Sensor data
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index_obj)
+{
+  return ( (CREEP_SENSOR_VAL_PTR) &m_Creep_Sensors[index_obj] );
+}
+
+
+/******************************************************************************
+ * Function:    Creep_GetStatus
+ *
+ * Description: Utility function to request current Creep[index] status
+ *
+ * Parameters:  index_obj of Creep Object
+ *
+ * Returns:     Ptr to Creep Status data
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static
+CREEP_STATUS_PTR Creep_GetStatus (UINT8 index_obj)
+{
+  return ( (CREEP_STATUS_PTR) &m_Creep_Status[index_obj] );
 }
 
 
@@ -1296,55 +1363,6 @@ BOOLEAN Creep_FaultFileInit(void)
   NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
 
   return TRUE;
-}
-
-
-/******************************************************************************
- * Function:     Creep_ClearFaultFile
- *
- * Description:  Clears the Recent Fault File
- *
- * Parameters:   TIMESTAMP time function was called
- *
- * Returns:      none
- *
- * Notes:        none
- *
- *****************************************************************************/
-void Creep_ClearFaultFile(TIMESTAMP *pTs)
-{
-  // Init App data
-  memset ( (void *) &m_creepHistory, 0, sizeof(m_creepHistory) );
-
-  m_creepHistory.ts = *pTs;
-
-  // Update App data
-  NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
-
-}
-
-
-/******************************************************************************
- * Function:     Creep_UpdateCreepXAppData
- *
- * Description:  Updates a specific Creep Obj App Data.
- *
- * Parameters:   index_obj Index of Creep Obj to update
- *
- * Returns:      none
- *
- * Notes:        Support CreepUserTable.c to update App Data
- *
- *****************************************************************************/
-//static
-void Creep_UpdateCreepXAppData (UINT16 index_obj)
-{
-  // Copy from m_Creep_Status[] into m_Creep_AppData[creep_index]
-  memcpy ( (void *) &m_Creep_AppData.data[index_obj], (void *) &m_Creep_Status[index_obj].data,
-           sizeof(CREEP_DATA) );
-
-  // Update NV EEPROM
-  NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
 }
 
 
@@ -1596,6 +1614,7 @@ void Creep_RestoreCfg ( void )
 {
   // Restore Creep Cfg
   memcpy(&m_Creep_Cfg, &(CfgMgr_RuntimeConfigPtr()->CreepConfig), sizeof(m_Creep_Cfg));
+  m_Creep_Cfg.pads[0] = 0;  // Dummy Call to fix LINT warning
 }
 
 
@@ -1730,7 +1749,8 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   {
     for (i=0;i<CREEP_MAX_OBJ;i++)
     {
-      if ( ( m_Creep_AppDataRTC.creepMissionCnt[i] != 0 ) || ( m_Creep_AppDataRTC.creepInProgress[i] == TRUE) )
+      if ( ( m_Creep_AppDataRTC.creepMissionCnt[i] != 0 ) ||
+           ( m_Creep_AppDataRTC.creepInProgress[i] == TRUE) )
       {
         m_Creep_AppData.data[i].creepAccumCntTrashed += m_Creep_AppDataRTC.creepMissionCnt[i];
         m_Creep_AppData.data[i].creepFailures += 1;
@@ -1919,6 +1939,16 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 12-12-13   Time: 7:41p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 12-12-13   Time: 7:20p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 12-12-10   Time: 8:29p
  * Updated in $/software/control processor/code/application
