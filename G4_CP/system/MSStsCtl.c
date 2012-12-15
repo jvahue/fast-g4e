@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 62 $  $Date: 12/11/12 8:32p $
+      $Revision: 63 $  $Date: 12/14/12 8:05p $
 
 ******************************************************************************/
 
@@ -476,20 +476,20 @@ BOOLEAN MSSC_GetMSTimeSynced( void )
  *****************************************************************************/
 void MSSC_SendGSMCfgCmd(void)
 {
- MSCP_GSM_CONFIG_CMD Cmd;
+ MSCP_GSM_CONFIG_CMD cmd;
 
   memcpy(&m_GsmCfgTemp, &CfgMgr_RuntimeConfigPtr()->GsmConfig, sizeof(m_GsmCfgTemp));
 
-  strncpy_safe(Cmd.Phone, MSCP_MAX_STRING_SIZE,m_GsmCfgTemp.sPhone,_TRUNCATE);
-  Cmd.Mode = m_GsmCfgTemp.mode;
-  strncpy_safe(Cmd.APN, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sAPN,_TRUNCATE);
-  strncpy_safe(Cmd.User, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sUser,_TRUNCATE);
-  strncpy_safe(Cmd.Password, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sPassword,_TRUNCATE);
-  strncpy_safe(Cmd.Carrier, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sCarrier,_TRUNCATE);
-  strncpy_safe(Cmd.MCC, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sMCC,_TRUNCATE);
-  strncpy_safe(Cmd.MNC, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sMNC,_TRUNCATE);
+  strncpy_safe(cmd.Phone, MSCP_MAX_STRING_SIZE,m_GsmCfgTemp.sPhone,_TRUNCATE);
+  cmd.Mode = (UINT16)m_GsmCfgTemp.mode;
+  strncpy_safe(cmd.APN, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sAPN,_TRUNCATE);
+  strncpy_safe(cmd.User, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sUser,_TRUNCATE);
+  strncpy_safe(cmd.Password, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sPassword,_TRUNCATE);
+  strncpy_safe(cmd.Carrier, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sCarrier,_TRUNCATE);
+  strncpy_safe(cmd.MCC, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sMCC,_TRUNCATE);
+  strncpy_safe(cmd.MNC, MSCP_MAX_STRING_SIZE, m_GsmCfgTemp.sMNC,_TRUNCATE);
 
-  MSI_PutCommand(CMD_ID_SETUP_GSM,&Cmd,sizeof(Cmd),1000,MSSC_MSICallback_GSMCmd);
+  MSI_PutCommand(CMD_ID_SETUP_GSM,&cmd,sizeof(cmd),1000,MSSC_MSICallback_GSMCmd);
 }
 
 
@@ -659,7 +659,7 @@ void MSSC_SendHeartbeatCmd(void)
   //Send the heartbeat message.  If it is sent successfully, switch "send" off
   //until a response is received. Else, switch send on to try again the next
   //time the task runs.
-  if(SYS_OK == MSI_PutCommandEx((UINT16)CMD_ID_HEARTBEAT,
+  if(SYS_OK == MSI_PutCommandEx(CMD_ID_HEARTBEAT,
                              &cmd,
                              sizeof(cmd),
                              1000,
@@ -786,6 +786,9 @@ BOOLEAN MSSC_MSGetCPInfoCmdHandler(void* Data, UINT16 Size,
 
   Box_GetSerno(msRsp.SN);
   msRsp.Pri4DirMaxSizeMB = CfgMgr_ConfigPtr()->MsscConfig.pri4DirMaxSizeMB;
+
+  //Return value deliberatly ignored.  If the response cannot be sent, the
+  //micro-server must timeout and re-request CP info.
   MSI_PutResponse((UINT16)CMD_ID_GET_CP_INFO,
                   msRsp.SN,
                   (UINT16)MSCP_RSP_STATUS_SUCCESS,
@@ -848,7 +851,7 @@ void MSSC_MSICallback_ShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
   if(Status == MSI_RSP_SUCCESS)
   {
     //Copy buffers up to the size.
-    m_MSShellRsp.Len = MIN(rsptemp->Len+1,sizeof(m_MSShellRsp.Str));
+    m_MSShellRsp.Len = MIN(rsptemp->Len,sizeof(m_MSShellRsp.Str));
     rsptemp->Str[m_MSShellRsp.Len] ='\0';
 
     /* Convert /n to /r/n for serial terminal *
@@ -856,8 +859,7 @@ void MSSC_MSICallback_ShellCmd(UINT16 Id, void* PacketData, UINT16 Size,
        2. append the final string segment after the last /n
           at the loop exit*/
     m_MSShellRsp.Str[0] = '\0';
-    str_start = rsptemp->Str;  //TODO: Re-examine correctness of this,
-                               //      extra char sometimes appears on ms.cmd rsp
+    str_start = rsptemp->Str;
     while(NULL != (str_end = strchr(str_start,'\n')))
     {
       *str_end = '\0';   //NULL terminate segment
@@ -921,7 +923,7 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
       }
       //Get initial MS Info on connect. Return value deliberatly ignored, if command fails,
       //then the next HB will automatically re-execute this call.
-      MSI_PutCommandEx((UINT16)CMD_ID_GET_MSSIM_INFO, NULL, 0, 5000,
+      MSI_PutCommandEx(CMD_ID_GET_MSSIM_INFO, NULL, 0, 5000,
                        MSSC_GetMSInfoRspHandler,TRUE);
     }
 
@@ -1039,6 +1041,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
  * 
+ * *****************  Version 63  *****************
+ * User: Jim Mood     Date: 12/14/12   Time: 8:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197
+ *
  * *****************  Version 62  *****************
  * User: Jim Mood     Date: 12/11/12   Time: 8:32p
  * Updated in $/software/control processor/code/system
