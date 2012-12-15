@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 166 $  $Date: 11/29/12 9:38a $
+   $Revision: 167 $  $Date: 12/14/12 8:05p $
 
 ******************************************************************************/
 
@@ -304,7 +304,7 @@ static void    UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status);
 static BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
                              UINT32 Sequence);
-static BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 Timeout, void* Data, UINT32 Size);
+static BOOLEAN UploadMgr_SendMSCmd(MSCP_CMD_ID Id, INT32 Timeout, void* Data, UINT32 Size);
 static void    UploadMgr_VerifyMSCmdsCallback(UINT16 Id, void* PacketData,
                              UINT16 Size, MSI_RSP_STATUS Status);
 
@@ -3181,7 +3181,7 @@ void UploadMgr_PrintUploadStats(UINT32 BytesSent)
  *
  *****************************************************************************/
 static
-BOOLEAN UploadMgr_SendMSCmd(UINT16 Id, INT32 TO, void* Data, UINT32 Size)
+BOOLEAN UploadMgr_SendMSCmd(MSCP_CMD_ID Id, INT32 TO, void* Data, UINT32 Size)
 {
   BOOLEAN result = FALSE;
   BOOLEAN gotResponseSave = m_GotResponse;
@@ -3483,6 +3483,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 167  *****************
+ * User: Jim Mood     Date: 12/14/12   Time: 8:05p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197
+ *
  * *****************  Version 166  *****************
  * User: Jim Mood     Date: 11/29/12   Time: 9:38a
  * Updated in $/software/control processor/code/application

@@ -13,7 +13,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 68 $  $Date: 12/07/12 8:22p $
+      $Revision: 69 $  $Date: 12/14/12 8:05p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -171,7 +171,7 @@ void MSI_Init(void)
  *             callers.
  *
  *****************************************************************************/
-RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+RESULT MSI_PutCommand(MSCP_CMD_ID Id,const void* data,UINT32 size,INT32 TOmS,
                       MSI_RSP_CALLBACK RspHandler)
 {
   return MSI_PutCommandEx(Id,data,size,TOmS,RspHandler,FALSE);
@@ -215,7 +215,7 @@ RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
  *             callers.
  *
  *****************************************************************************/
-RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+RESULT MSI_PutCommandEx(MSCP_CMD_ID Id,const void* data,UINT32 size,INT32 TOmS,
                       MSI_RSP_CALLBACK RspHandler, BOOLEAN NoCheck)
 {
   CHAR resultStr[RESULTCODES_MAX_STR_LEN];
@@ -246,7 +246,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
     dpramBlock.size       = (INT32)(size + sizeof(*packet) - sizeof(packet->data));
 
     //Build the MS-CP packet
-    packet->id             = Id;
+    packet->id             = (UINT16)Id;
     packet->nDataSize      = (UINT16)size;
     packet->UmRspSource    = (UINT8)MSCP_MS;
     packet->type           = (UINT16)MSCP_PACKET_COMMAND;
@@ -270,7 +270,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
 
     //Add pending response and put data in the queue.  If DPRAM call fails,
     //remove pending response from the queue.
-    if(MSI_AddPendingRsp(Id,thisCmdSeqNum,RspHandler,TOmS))
+    if(MSI_AddPendingRsp((UINT16)Id,thisCmdSeqNum,RspHandler,TOmS))
     {
       result = DPRAM_WriteBlock(&dpramBlock);
       if(result != DRV_OK)
@@ -280,7 +280,7 @@ RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
           Rsp Table.  If the entry is not in the table for some reason
           (ret == FALSE), this is okay because it is intended that it
           should be removed anyway. */
-        MSI_FindAndRemovePendingRsp(Id,thisCmdSeqNum);
+        MSI_FindAndRemovePendingRsp((UINT16)Id,thisCmdSeqNum);
       }
     }
 
@@ -936,6 +936,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
  *  MODIFICATIONS
  *    $History: MSInterface.c $
  * 
+ * *****************  Version 69  *****************
+ * User: Jim Mood     Date: 12/14/12   Time: 8:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197
+ *
  * *****************  Version 68  *****************
  * User: Jim Mood     Date: 12/07/12   Time: 8:22p
  * Updated in $/software/control processor/code/system

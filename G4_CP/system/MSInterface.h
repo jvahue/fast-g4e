@@ -2,21 +2,21 @@
 #define SYS_MSINTERFACE_H
 
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:          MSInterface.h
- 
-  Description: 
-  
+
+  Description:
+
   VERSION
-      $Revision: 22 $  $Date: 12-11-13 2:22p $ 
- 
+      $Revision: 23 $  $Date: 12/14/12 8:05p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/ 
+/*****************************************************************************/
 #include "mcf548x.h"
 #include "DPRAM.h"
 #include "MSCPInterface.h"
@@ -58,9 +58,9 @@ typedef void (*MSI_RSP_CALLBACK)(UINT16 Id, void* PacketData, UINT16 Size,
                                  MSI_RSP_STATUS Status);
 
 //MSI_CMD_CALLBACK processes a command originating from the micro-server.
-//The command handling function shall process the command, then return a 
+//The command handling function shall process the command, then return a
 //response packet to the microserver by calling MSI_PutResponse.  The function
-//must hold the return the "Sequence" value to MSI_PutResponse. 
+//must hold the return the "Sequence" value to MSI_PutResponse.
 //
 //Parameters:
 //            PacketData: Pointer to the data returned from the microserver.
@@ -76,9 +76,9 @@ typedef BOOLEAN (*MSI_CMD_CALLBACK)(void* PacketData, UINT16 Size, UINT32 Sequen
 
 // DPRAM interface interrupt failure log
 typedef struct {
-  UINT32  minIntrTime; 
-  UINT32  maxExeTime; 
-} DPRAM_INTR_FAIL_LOG; 
+  UINT32  minIntrTime;
+  UINT32  maxExeTime;
+} DPRAM_INTR_FAIL_LOG;
 
 #pragma pack()
 
@@ -100,15 +100,15 @@ typedef struct {
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
-EXPORT RESULT MSI_PutCommand(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+EXPORT RESULT MSI_PutCommand(MSCP_CMD_ID Id,const void* data,UINT32 size,INT32 TOmS,
                       MSI_RSP_CALLBACK RspHandler);
 EXPORT RESULT MSI_PutResponse(UINT16 Id, const void* data, UINT16 status, UINT32 size,
                        UINT32 seq );
 EXPORT RESULT MSI_AddCmdHandler(UINT16 Id, MSI_CMD_CALLBACK CmdHandler);
 
-EXPORT void MSI_Init(void); 
+EXPORT void MSI_Init(void);
 
-EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS,
+EXPORT RESULT MSI_PutCommandEx(MSCP_CMD_ID Id,const void* data,UINT32 size,INT32 TOmS,
                                MSI_RSP_CALLBACK RspHandler, BOOLEAN NoCheck);
 
 #endif // SYS_MSINTERFACE_H
@@ -116,61 +116,66 @@ EXPORT RESULT MSI_PutCommandEx(UINT16 Id,const void* data,UINT32 size,INT32 TOmS
  *  MODIFICATIONS
  *    $History: MSInterface.h $
  * 
+ * *****************  Version 23  *****************
+ * User: Jim Mood     Date: 12/14/12   Time: 8:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197
+ *
  * *****************  Version 22  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:22p
  * Updated in $/software/control processor/code/system
  * SCR #1142 File Format Error
- * 
+ *
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor2  Date: 7/09/10    Time: 4:32p
  * Updated in $/software/control processor/code/system
  * SCR #8 Implementation: External Interrupt Monitors
- * 
+ *
  * *****************  Version 16  *****************
  * User: Contractor3  Date: 7/06/10    Time: 10:38a
  * Updated in $/software/control processor/code/system
  * SCR #672 - Changes based on Code Review.
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 7/02/10    Time: 4:06p
  * Updated in $/software/control processor/code/system
  * SCR 671 Added "busy" status to the MS-CP response packet
- * 
+ *
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 10/01/09   Time: 10:11a
  * Updated in $/software/control processor/code/system
  * SCR #283 Misc Code Review Updates
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 9/11/09    Time: 10:50a
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 3:47p
  * Updated in $/control processor/code/system
  * SCR #87 Function Prototype
- * 
  *
- ***************************************************************************/ 
+ *
+ ***************************************************************************/
 
 

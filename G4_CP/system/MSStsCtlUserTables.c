@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 25 $  $Date: 12-11-16 10:32p $
+    $Revision: 26 $  $Date: 12/14/12 8:05p $
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -273,7 +273,7 @@ USER_HANDLER_RESULT MSSC_ShellCmd(USER_DATA_TYPE DataType,
   {
     cmd.Len = strlen(str);
     strncpy_safe(cmd.Str,sizeof(cmd.Str),str,_TRUNCATE);
-    if(SYS_OK == MSI_PutCommand((UINT16)CMD_ID_SHELL_CMD,&cmd,
+    if(SYS_OK == MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
         sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,30000,MSSC_MSICallback_ShellCmd))
     {
       userResult = USER_RESULT_OK;
@@ -490,6 +490,11 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
  * 
+ * *****************  Version 26  *****************
+ * User: Jim Mood     Date: 12/14/12   Time: 8:05p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-16   Time: 10:32p
  * Updated in $/software/control processor/code/system
