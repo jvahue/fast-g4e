@@ -370,7 +370,7 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with
+ * Notes:       Standard Initialization format to be compatible with
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -612,7 +612,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // While in START state - Update the Engine Run-log data
       EngRunUpdateRunData(pErData);
 
-      // STARTING -> STOP
+      // STARTING ->(State-trigger(s) failed) -> STOP
       // Error Detected
       // If we have a problem determining the EngineRun state,
       // write the engine run-log and transition to STOPPED state
@@ -655,11 +655,6 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // RUNNING -> (error) -> STOP
       if ( EngRunIsError(pErCfg))
       {
-        // Add additional 1 second to close of ER due to ERROR.  Normally
-        // UpdateEngineRunLog() updates ->Duration, which is only called
-		    // on !EngineRunIsError()
-        pErData->erDuration_ms += (UINT32)pErCfg->erRate;
-
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErData);
         pErData->erState = ER_STATE_STOPPED;
