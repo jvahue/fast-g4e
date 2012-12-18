@@ -234,7 +234,7 @@ void EngRunInitialize(void)
       pErData->nTotalSensors  = SensorInitSummaryArray ( pErData->snsrSummary,
                                                          MAX_ENGRUN_SENSORS,
                                                          pErCfg->sensorMap,
-                                                         sizeof(pErCfg->sensorMap) );      
+                                                         sizeof(pErCfg->sensorMap) );
     }
     else // Invalid config...
     {
@@ -370,7 +370,7 @@ void EngRunSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with 
+ * Notes:       Standard Initiliazation format to be compatible with
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -395,7 +395,7 @@ BOOLEAN EngReInitFile ( void )
   }
 
   NV_Write( NV_ENGINE_ID, 0, &m_EngineInfo, sizeof(m_EngineInfo));
-  
+
   return TRUE;
 }
 
@@ -609,24 +609,21 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // Always update the ER Starter parameters.
       EngRunUpdateStartData(pErData, TRUE);
 
+      // While in START state - Update the Engine Run-log data
+      EngRunUpdateRunData(pErData);
+
       // STARTING -> STOP
       // Error Detected
       // If we have a problem determining the EngineRun state,
-      // write the engine run start-log and transition to STOPPED state
+      // write the engine run-log and transition to STOPPED state
       if ( EngRunIsError(pErCfg))
       {
-        pErData->erDuration_ms += (UINT32)pErCfg->erRate;
-
         // Finish the engine run log
         EngRunWriteRunLog( ER_LOG_ERROR, pErData);
         pErData->erState = ER_STATE_STOPPED;
       }
       else
       {
-        // Normal processing while in START state.
-        // Update the Engine Run-log data
-        EngRunUpdateRunData(pErData);
-
         // STARTING -> RUNNING
         if ( TriggerGetState( pErCfg->runTrigID) )
         {
@@ -752,7 +749,7 @@ static void EngRunStartLog( ENGRUN_DATA* pErData )
 /******************************************************************************
  * Function:     EngRunWriteRunLog
  *
- * Description:  This function write the log that saves all of the Engine run 
+ * Description:  This function write the log that saves all of the Engine run
  *               data.
  *
  * Parameters:   [in] reason for logging
@@ -957,23 +954,23 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
- * 
+ *
  * *****************  Version 49  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 9:26p
  * Updated in $/software/control processor/code/application
  * SCR# 1205 - Ensure Min Sensor in ER gets a chance to be valid at
  * startup.
- * 
+ *
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p
  * Updated in $/software/control processor/code/application
  * SCR# 1205 - Remove ER Start Log
- * 
+ *
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:23p
  * Updated in $/software/control processor/code/application
  * SCR #1107 Code Review  BB #87 and reset before start/run
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 2:13p
  * Updated in $/software/control processor/code/application
@@ -983,16 +980,16 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
  * User: John Omalley Date: 12-12-08   Time: 1:33p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
  * Updated in $/software/control processor/code/application
  * SCR 1162 - NV MGR File Init function
- * 
+ *
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:32p
