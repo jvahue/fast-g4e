@@ -23,7 +23,7 @@
                  "transmitted" with one command.
 
     VERSION
-    $Revision: 29 $  $Date: 11/29/12 7:44p $
+    $Revision: 30 $  $Date: 12/18/12 4:58p $
 
 ******************************************************************************/
 
@@ -227,7 +227,7 @@ void MSFX_Init(void)
 
   m_TaskState = TASK_STOPPED;
 
-  User_AddRootCmd(&RootUserTbl);
+  User_AddRootCmd(&root_user_table);
 
   /*Setup a data queue for file blocks received from the microserver*/
   FIFO_Init(&m_FileXfrData.Q,m_FileDataQBuf,sizeof(m_FileDataQBuf));
@@ -2072,6 +2072,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
  * 
+ * *****************  Version 30  *****************
+ * User: Jim Mood     Date: 12/18/12   Time: 4:58p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1197 Code Review
+ *
  * *****************  Version 29  *****************
  * User: Jim Mood     Date: 11/29/12   Time: 7:44p
  * Updated in $/software/control processor/code/application
