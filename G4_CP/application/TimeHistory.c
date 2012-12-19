@@ -33,7 +33,7 @@
                  solution was the least complex.
 
     VERSION
-    $Revision: 14 $  $Date: 11/29/12 3:59p $
+    $Revision: 15 $  $Date: 12/18/12 7:44p $
 
 ******************************************************************************/
 
@@ -262,7 +262,7 @@ void TH_Init ( void )
  ********************************************************************************************/
 void TH_Open(UINT32 pre_s)
 {
-  UINT32 records;
+  INT32 records;
   INT32 int_save;
 
   m_OpenCnt++;
@@ -281,7 +281,7 @@ void TH_Open(UINT32 pre_s)
      m_THDataBuf.cwrite_ptr - m_THDataBuf.cread_ptr;
 
   //Re-set read pointer posistion if the new position is earlier in time than the current
-  if( records < TH_SENSOR_REC_PER_SEC(pre_s) )
+  if( records < TH_SENSOR_REC_PER_SEC((INT32)pre_s) )
   {
     //set the location to move back to (with or without wrap)
     //Wrap Case Explained:
@@ -290,11 +290,11 @@ void TH_Open(UINT32 pre_s)
     m_THDataBuf.cread_ptr = (m_THDataBuf.cwrite_ptr - TH_SENSOR_REC_PER_SEC(pre_s)) <
       m_THDataBuf.ctrl ?
       &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT-1] -
-      (((INT32)TH_SENSOR_REC_PER_SEC(pre_s) - (m_THDataBuf.cwrite_ptr - m_THDataBuf.ctrl))) :
-      m_THDataBuf.cwrite_ptr - TH_SENSOR_REC_PER_SEC(pre_s);
+      ((TH_SENSOR_REC_PER_SEC((INT32)pre_s) - (m_THDataBuf.cwrite_ptr - m_THDataBuf.ctrl))) :
+      m_THDataBuf.cwrite_ptr - TH_SENSOR_REC_PER_SEC((INT32)pre_s);
 
     //set the count of records to write
-    m_THDataBuf.write_cnt = (INT32)TH_SENSOR_REC_PER_SEC(pre_s);
+    m_THDataBuf.write_cnt = TH_SENSOR_REC_PER_SEC((INT32)pre_s);
   }
   __RIR(int_save);
 }
@@ -441,7 +441,7 @@ static void TH_Task ( void* pParam )
   BOOLEAN                   is_busy;
 
   if (   (  (frame_cnt++ - ( m_Cfg.sample_offset_ms/MIF_PERIOD_mS )) %
-            (MIFs_PER_SECOND/m_Cfg.sample_rate)  )              == 0  )
+            (MIFs_PER_SECOND/(INT32)m_Cfg.sample_rate)  )              == 0  )
   {
     //For # of sensors, read value/validity and build TH record
     rec_buf = TH_GetDataBufPtr(TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt));
@@ -716,9 +716,9 @@ static void TH_BuildRec(BYTE *rec)
   //Add timestamp and size to header, the checksum and record time
   //will be added later if this record is recorded to FLASH.
   CM_GetTimeAsTimestamp(&hdr->ts_recorded);
-  hdr->size = (TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt) - (UINT16)sizeof(*hdr)) +
-    (UINT16)sizeof(hdr->ts_recorded);
-  hdr->id   = APP_ID_TIMEHISTORY_ETM_LOG;
+  hdr->size = ( (TH_SENSOR_CT_TO_REC_SZ(m_SensorCnt) - sizeof(*hdr)) +
+    sizeof(hdr->ts_recorded) );
+  hdr->id   = (UINT16)APP_ID_TIMEHISTORY_ETM_LOG;
 
   //Read sensor values/validity and build the rest of the buffer
   //TEST: Check buffer pointer math for the number of bit field bytes,
@@ -816,6 +816,11 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
  * 
+ * *****************  Version 15  *****************
+ * User: Jim Mood     Date: 12/18/12   Time: 7:44p
+ * Updated in $/software/control processor/code/application
+ * SC# 1197 Code Review Updates
+ *
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 11/29/12   Time: 3:59p
  * Updated in $/software/control processor/code/application

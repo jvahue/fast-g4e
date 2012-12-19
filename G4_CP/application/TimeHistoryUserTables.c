@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 6 $  $Date: 11/29/12 3:59p $
+$Revision: 7 $  $Date: 12/18/12 7:47p $
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -40,22 +40,22 @@ static TIMEHISTORY_CONFIG   cfg_temp;// Configuration temp Storage
 /*****************************************************************************/
 //Prototype for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
-USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
-USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
                                              USER_MSG_PARAM Param,
                                              UINT32 Index,
                                              const void *SetPtr,
@@ -63,18 +63,18 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-USER_ENUM_TBL time_history_rate_type[]   =  { { "OFF"  , TH_OFF          },
-                                              { "1HZ"  , TH_1HZ          },
-                                              { "2HZ"  , TH_2HZ          },
-                                              { "4HZ"  , TH_4HZ          },
-                                              { "5HZ"  , TH_5HZ          },
-                                              { "10HZ" , TH_10HZ         },
-                                              { "20HZ" , TH_20HZ         },
-                                              { NULL , 0               }
-                                            };
+static USER_ENUM_TBL time_history_rate_type[]   =  {  { "OFF"  , TH_OFF          },
+                                                      { "1HZ"  , TH_1HZ          },
+                                                      { "2HZ"  , TH_2HZ          },
+                                                      { "4HZ"  , TH_4HZ          },
+                                                      { "5HZ"  , TH_5HZ          },
+                                                      { "10HZ" , TH_10HZ         },
+                                                      { "20HZ" , TH_20HZ         },
+                                                      { NULL , 0               }
+                                                   };
 
 // Events - EVENT User and Configuration Table
-static USER_MSG_TBL time_history_cmd [] =
+static USER_MSG_TBL time_history_cfg [] =
 {
   /* Str              Next Tbl Ptr    Handler Func.  Data Type          Access     Parameter                                 IndexRange  DataLimit EnumTbl*/
   { "RATE",           NO_NEXT_TABLE,  TH_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &cfg_temp.sample_rate,       -1,-1,      NO_LIMIT, time_history_rate_type },
@@ -100,7 +100,7 @@ static USER_MSG_TBL time_history_debug [] =
 
 static USER_MSG_TBL time_history_root [] =
 { /* Str            Next Tbl Ptr         Handler Func.  Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
-   { "CFG",         time_history_cmd,    NULL,          NO_HANDLER_DATA},
+   { "CFG",         time_history_cfg,    NULL,          NO_HANDLER_DATA},
    { "STATUS",      time_history_status, NULL,          NO_HANDLER_DATA},
    { "DEBUG",       time_history_debug,  NULL,          NO_HANDLER_DATA},
    { "SHOW_CFG",    NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
@@ -139,7 +139,7 @@ static USER_MSG_TBL time_history_root [] =
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
@@ -195,25 +195,22 @@ USER_HANDLER_RESULT TH_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
                                              USER_MSG_PARAM Param,
                                              UINT32 Index,
                                              const void *SetPtr,
                                              void **GetPtr )
 {
-   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
    USER_HANDLER_RESULT result = USER_RESULT_OK;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR branch_name[USER_MAX_MSG_STR_LEN] = " ";
 
-   // Display element info above each set of data.
-   sprintf(Label, "%s", "\r\n\r\nTH.CFG", 0 );
 
    result = USER_RESULT_ERROR;
-   if (User_OutputMsgString( Label, FALSE ) )
+   if (User_OutputMsgString( "\r\n\r\nTH.CFG", FALSE ) )
    {
-      result = User_DisplayConfigTree(BranchName, time_history_cmd, 0, 0, NULL);
+      result = User_DisplayConfigTree(branch_name, time_history_cfg, 0, 0, NULL);
    }
 
    return result;
@@ -245,7 +242,7 @@ USER_HANDLER_RESULT TH_ShowConfig ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
@@ -254,7 +251,7 @@ USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    if(SetPtr != NULL)
    {
-     TH_Open(*(INT32*)SetPtr);
+     TH_Open(*(UINT32*)SetPtr);
    }
    return result;
 }
@@ -284,7 +281,7 @@ USER_HANDLER_RESULT TH_FOpen  ( USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
-USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
+static USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
@@ -294,10 +291,11 @@ USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
   USER_HANDLER_RESULT result = USER_RESULT_OK;
   if(SetPtr != NULL)
   {
-    TH_Close(*(INT32*)SetPtr);
+    TH_Close(*(UINT32*)SetPtr);
   }
   return result;
 }
+
 
 
 
@@ -305,6 +303,11 @@ USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
  * 
+ * *****************  Version 7  *****************
+ * User: Jim Mood     Date: 12/18/12   Time: 7:47p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 6  *****************
  * User: Jim Mood     Date: 11/29/12   Time: 3:59p
  * Updated in $/software/control processor/code/application
