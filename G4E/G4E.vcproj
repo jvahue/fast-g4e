@@ -1056,10 +1056,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\G4_CP\drivers\EvaluatorInterface.h"
-					>
-				</File>
-				<File
 					RelativePath="..\G4_CP\drivers\Exception.h"
 					>
 				</File>
