@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 49 $  $Date: 12/13/12 9:26p $
+      $Revision: 50 $  $Date: 12/18/12 12:38p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -949,6 +949,11 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 50  *****************
+ * User: Contractor V&v Date: 12/18/12   Time: 12:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 BitBucket  #48
  *
  * *****************  Version 49  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 9:26p
