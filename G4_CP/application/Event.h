@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 32 $  $Date: 12-11-28 2:25p $
+  $Revision: 33 $  $Date: 12-12-19 5:56p $
 
 ******************************************************************************/
 
@@ -125,8 +125,8 @@
                                    EVENT_TABLE_REGION,    /* Region B                   */\
                                    EVENT_TABLE_REGION,    /* Region C                   */\
                                    EVENT_TABLE_REGION,    /* Region D                   */\
-                                   EVENT_TABLE_REGION,    /* Region F                   */\
-                                   EVENT_TABLE_REGION     /* Region G                   */
+                                   EVENT_TABLE_REGION,    /* Region E                   */\
+                                   EVENT_TABLE_REGION     /* Region F                   */
 
 #define EVENT_TABLE_CFG_DEFAULT    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
@@ -448,6 +448,11 @@ EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12-12-19   Time: 5:56p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:25p

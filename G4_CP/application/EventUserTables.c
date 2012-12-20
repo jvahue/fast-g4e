@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 33 $  $Date: 12-12-05 8:17a $
+$Revision: 34 $  $Date: 12-12-19 6:03p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1267,7 +1267,7 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 
     strncpy_safe(str, sizeof(str), SetPtr, _TRUNCATE);
 
-    strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_PARSE, Index, str,
+    strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_PARSE, (INT32)Index, str,
                                        (EVAL_EXPR*) Param.Ptr, MAX_EVENT_EXPR_OPRNDS );
 
     if(strToBinResult >= 0)
@@ -1295,6 +1295,11 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 34  *****************
+ * User: John Omalley Date: 12-12-19   Time: 6:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-12-05   Time: 8:17a

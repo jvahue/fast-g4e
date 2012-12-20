@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 38 $  $Date: 12-12-08 1:33p $
+ $Revision: 39 $  $Date: 12-12-19 5:53p $
 
 ******************************************************************************/
 
@@ -101,7 +101,7 @@ static BOOLEAN        EventCheckStart        ( const EVENT_CFG *pConfig,
                                                BOOLEAN *isValid );
 static EVENT_END_TYPE EventCheckEnd          ( const EVENT_CFG *pConfig,
                                                const EVENT_DATA *pData );
-static void           EventResetData         ( EVENT_CFG  *pConfig, EVENT_DATA *pData   );
+static void           EventResetData         ( EVENT_DATA *pData   );
 static void           EventUpdateData        ( EVENT_DATA *pData  );
 static void           EventLogStart          ( EVENT_CFG  *pConfig, const EVENT_DATA *pData  );
 static void           EventLogUpdate         ( EVENT_DATA *pData  );
@@ -208,7 +208,7 @@ void EventsInitialize ( void )
                                                               sizeof(pEventCfg->sensorMap) );
          #pragma ghs endnowarning
          // Reset the events run time data
-         EventResetData ( pEventCfg, pEventData );
+         EventResetData ( pEventData );
       }
    }
 
@@ -398,7 +398,7 @@ void EventsEnableTask ( BOOLEAN bEnable )
  *
  *****************************************************************************/
 static
-void EventResetData ( EVENT_CFG *pConfig, EVENT_DATA *pData )
+void EventResetData ( EVENT_DATA *pData )
 {
    // Reinit the Event data
    pData->state         = EVENT_START;
@@ -730,7 +730,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          // reset the event data so we can start collecting it again
          // If we do this at the end we cannot view the status after the
          // event has ended using GSE commands.
-         EventResetData( pConfig, pData );
+         EventResetData( pData );
       }
       // Since we just started begin collecting data
       EventUpdateData ( pData );
@@ -1757,6 +1757,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 39  *****************
+ * User: John Omalley Date: 12-12-19   Time: 5:53p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:33p
