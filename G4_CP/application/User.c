@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 110 $  $Date: 12/12/12 4:31p $
+   $Revision: 112 $  $Date: 12/20/12 5:36p $
 
 ******************************************************************************/
 
@@ -129,7 +129,7 @@ static UINT16           checkSum;                 // Running checksum value.
 static BOOLEAN          rspBuffOverflowDetected;  // The micro-server response msg is too long
 static USER_MSG_SOURCES msgSource;                // source of the current command.
 static UINT32           msgTag;                   // tag passed by caller of current command.
-static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs
+static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs 
                                                             // to Micro-server
 
 
@@ -137,17 +137,17 @@ static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for buildi
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static void          User_ProcMsgTask             ( void *pBlock );
-static BOOLEAN       User_PutMsg                  ( const INT8* Msg, USER_MSG_SOURCES Source,
+static BOOLEAN       User_PutMsg                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
                                                     UINT32 Tag);
-static void          User_PutRsp                  ( const INT8* Msg, USER_MSG_SOURCES Source,
+static void          User_PutRsp                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
                                                     UINT32 Tag );
-static void          User_ExecuteCmdMsg           ( INT8* msg, USER_MSG_SOURCES source,
+static void          User_ExecuteCmdMsg           ( INT8* msg, USER_MSG_SOURCES source, 
                                                     UINT32 tag );
 static INT32         User_ExtractIndex            ( INT8* msg );
 static INT8*         User_ExtractAssign           ( INT8* msg );
-static USER_MSG_TBL* User_TraverseCmdTables       ( INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl,
+static USER_MSG_TBL* User_TraverseCmdTables       ( INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, 
                                                     INT8* TokPtr );
-static BOOLEAN       User_CvtSetStr               ( USER_DATA_TYPE Type, INT8* SetStr,
+static BOOLEAN       User_CvtSetStr               ( USER_DATA_TYPE Type, INT8* SetStr, 
                                                     void **SetPtr, USER_ENUM_TBL* MsgEnumTbl,
                                                     USER_RANGE *Min, USER_RANGE *Max );
 static BOOLEAN       User_ExecuteSingleMsg        ( USER_MSG_TBL* MsgTbl,
@@ -155,17 +155,17 @@ static BOOLEAN       User_ExecuteSingleMsg        ( USER_MSG_TBL* MsgTbl,
                                                     INT32 Index, INT8* SetStr, INT8* RspStr,
                                                     UINT32 RspLen );
 static void          User_ExecuteMultipleGetMsg   ( USER_MSG_TBL* MsgTblPtr,
-                                                    USER_MSG_SOURCES source,
+                                                    USER_MSG_SOURCES source, 
                                                     INT32 Index, INT8* rsp, UINT32 len );
 static BOOLEAN       User_ValidateChecksum        ( INT8 *str );
 static void          User_AppendChecksum          ( INT8 *str );
-static BOOLEAN       User_ValidateMessage         ( USER_MSG_TBL* UserMsg,
+static BOOLEAN       User_ValidateMessage         ( USER_MSG_TBL* UserMsg, 
                                                     USER_MSG_SOURCES source,
-                                                    INT32 Index, INT8* RspStr, INT8* SetStr,
+                                                    INT32 Index, INT8* RspStr, INT8* SetStr, 
                                                     UINT32 Len );
 static BOOLEAN       User_GSEMessageHandler       ( INT8* msg );
 static BOOLEAN       User_MSMessageHandler        ( void* Data, UINT16 Size, UINT32 Sequence );
-static void          User_SetMinMax               ( USER_RANGE *Min, USER_RANGE *Max,
+static void          User_SetMinMax               ( USER_RANGE *Min, USER_RANGE *Max, 
                                                     USER_DATA_TYPE Type );
 static void          User_ConversionErrorResponse ( INT8* RspStr,USER_RANGE Min,
                                                     USER_RANGE Max, USER_DATA_TYPE Type,
@@ -177,19 +177,19 @@ static BOOLEAN       User_ShowAllConfig           ( void );
 static BOOLEAN       User_GetParamValue           ( USER_MSG_TBL* MsgTbl,
                                                     USER_MSG_SOURCES source,
                                                     INT32 Index, INT8* RspStr, UINT32 Len );
-static void          User_LogUserActivity         ( CHAR* cmdString, CHAR* valuePrev,
+static void          User_LogUserActivity         ( CHAR* cmdString, CHAR* valuePrev, 
                                                     CHAR* valueNew );
 static BOOLEAN       User_AuthenticateModeRequest ( const INT8* msg, UINT8 mode );
 
-static BOOLEAN       User_SetBitArrayFromHexString( USER_DATA_TYPE Type, INT8* SetStr,
-                                                    void **SetPtr,
+static BOOLEAN       User_SetBitArrayFromHexString( USER_DATA_TYPE Type, INT8* SetStr, 
+                                                    void **SetPtr, 
                                                     USER_RANGE *Min, USER_RANGE *Max );
 
 static BOOLEAN       User_CvtGetBitListStr         ( USER_DATA_TYPE Type, INT8* GetStr,
                                                      UINT32 Len, void* GetPtr );
 
-static BOOLEAN       User_SetBitArrayFromList      ( USER_DATA_TYPE Type, INT8* SetStr,
-                                                     void **SetPtr,
+static BOOLEAN       User_SetBitArrayFromList      ( USER_DATA_TYPE Type, INT8* SetStr, 
+                                                     void **SetPtr, 
                                                      USER_RANGE *Min, USER_RANGE *Max );
 
 static BOOLEAN       User_SetBitArrayFromIntegerValue ( USER_DATA_TYPE Type,
@@ -308,7 +308,7 @@ void User_AddRootCmd(USER_MSG_TBL* NewRootPtr)
  * Notes:
  *
  *****************************************************************************/
-static
+static 
 BOOLEAN User_GSEMessageHandler(INT8* msg)
 {
   return User_PutMsg(msg,USER_MSG_SOURCE_GSE,0);
@@ -419,7 +419,7 @@ BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
  * Notes:
  *
  *****************************************************************************/
-static
+static 
 void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
   CHAR chkstr[32];
@@ -834,7 +834,7 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
  * Notes:
  *
  *****************************************************************************/
-static
+static 
 BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                               INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
   {
@@ -1262,7 +1262,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   //For numerical types, test the sign and base
   switch(Type)
   {
-    case USER_TYPE_HEX8:
+    //case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
     case USER_TYPE_HEX16:
     case USER_TYPE_UINT16:
@@ -1282,20 +1282,20 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
 
     // Unhandled USER types for this operation
 	//lint -fallthrough
-    case USER_TYPE_128_LIST:
-    case USER_TYPE_ACTION:
-    case USER_TYPE_ACT_LIST:
-    case USER_TYPE_BOOLEAN:
-    case USER_TYPE_END:
-    case USER_TYPE_ENUM:
-    case USER_TYPE_FLOAT:
-    case USER_TYPE_FLOAT64:
-    case USER_TYPE_INT32:
-    case USER_TYPE_NONE:
-    case USER_TYPE_ONOFF:
-    case USER_TYPE_SNS_LIST:
-    case USER_TYPE_STR:
-    case USER_TYPE_YESNO:
+    case USER_TYPE_128_LIST:		 
+    case USER_TYPE_ACTION:		 
+    case USER_TYPE_ACT_LIST:		 
+    case USER_TYPE_BOOLEAN:		 
+    case USER_TYPE_END:	
+    case USER_TYPE_ENUM:	
+    case USER_TYPE_FLOAT:	
+    case USER_TYPE_FLOAT64:	
+    case USER_TYPE_INT32:	
+    case USER_TYPE_NONE:	
+    case USER_TYPE_ONOFF:	
+    case USER_TYPE_SNS_LIST:	
+    case USER_TYPE_STR:	
+    case USER_TYPE_YESNO:	
     default:
       // Do nothing, these types are ignored!
       break;
@@ -1308,7 +1308,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     table*/
   switch(Type)
   {
-    case USER_TYPE_HEX8:
+    //case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
       /*UINT8 type, check min/max bounds incl. the max value a uint8 can
         represent.  Value also must be positive*/
@@ -1631,9 +1631,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     //  sprintf(GetStr,"%d",*(UINT8*)GetPtr);
     //  break;
 
-    case USER_TYPE_HEX8:
-      snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
-      break;
+    //case USER_TYPE_HEX8:
+    //  snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
+    //  break;
 
     case USER_TYPE_HEX16:
       snprintf(GetStr, (INT32)Len, "0x%04X",*(UINT16*)GetPtr);
@@ -1754,7 +1754,7 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
   switch(Type)
   {
     case USER_TYPE_UINT8:
-    case USER_TYPE_HEX8:
+    //case USER_TYPE_HEX8:
       Min->Uint = noLimit ? 0          : Min->Uint;
       Max->Uint = noLimit ? UINT8_MAX  : MIN(UINT8_MAX,Max->Uint);
       break;
@@ -1868,7 +1868,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
               Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
-    case USER_TYPE_HEX8:
+    //case USER_TYPE_HEX8:
     case USER_TYPE_HEX16:
     case USER_TYPE_HEX32:
       snprintf(RspStr,sizeof(RspStr),
@@ -2356,7 +2356,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr;
 
       //lint -fallthrough
-	  case USER_TYPE_ENUM:
+	  case USER_TYPE_ENUM: 
       case USER_TYPE_UINT32:
       case USER_TYPE_HEX32:
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
@@ -2371,7 +2371,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
-
+      
 	  // lint -fallthrough
       case USER_TYPE_BOOLEAN:
       case USER_TYPE_YESNO:
@@ -2386,9 +2386,9 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_ENUM16:
      */
 
-      case USER_TYPE_HEX8:
-        *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
-        break;
+      //case USER_TYPE_HEX8:
+      //  *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
+      //  break;
 
       case USER_TYPE_INT32:
         *(INT32*)Param.Ptr = *(INT32*)SetPtr;
@@ -2406,7 +2406,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_END:
         // lint -fallthrough
       default:
-        ASSERT_MESSAGE(  DataType < USER_TYPE_END,
+        ASSERT_MESSAGE(  DataType < USER_TYPE_END, 
                          "Unrecognized USER_DATA_TYPE: %d", DataType);
         break;
     } // End of switch (DataType)
@@ -3092,11 +3092,21 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- *
+ * 
+ * *****************  Version 112  *****************
+ * User: Contractor V&v Date: 12/20/12   Time: 5:36p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 CR  remove USER_TYPE_HEX8
+ * 
+ * *****************  Version 111  *****************
+ * User: John Omalley Date: 12-12-20   Time: 4:57p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Update
+ * 
  * *****************  Version 110  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:31p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review
+ * SCR #1107 Code Review 
  *
  * *****************  Version 109  *****************
  * User: Contractor V&v Date: 12/10/12   Time: 7:08p
