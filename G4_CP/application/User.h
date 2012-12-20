@@ -17,7 +17,7 @@
                   defines for user data access (ie. USER_RO)
 
     VERSION
-    $Revision: 46 $  $Date: 12/12/12 4:31p $
+    $Revision: 47 $  $Date: 12/20/12 5:36p $
 
 ******************************************************************************/
 
@@ -111,7 +111,7 @@ typedef enum{
   //USER_TYPE_INT8,
   //USER_TYPE_INT16,
   USER_TYPE_INT32,
-  USER_TYPE_HEX8,
+  //USER_TYPE_HEX8,
   USER_TYPE_HEX16,
   USER_TYPE_HEX32,
   //USER_TYPE_ENUM8,
@@ -278,6 +278,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
  *  MODIFICATIONS
  *    $History: User.h $
  * 
+ * *****************  Version 47  *****************
+ * User: Contractor V&v Date: 12/20/12   Time: 5:36p
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 CR  remove USER_TYPE_HEX8
+ *
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:31p
  * Updated in $/software/control processor/code/application
