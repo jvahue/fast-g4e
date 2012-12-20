@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 167 $  $Date: 12/14/12 8:05p $
+   $Revision: 168 $  $Date: 12/20/12 6:26p $
 
 ******************************************************************************/
 
@@ -160,6 +160,7 @@ typedef struct
 }UPLOADMGR_UPLOAD_ORDER_TBL;
 
 //State enumeration for the file verification table
+//NOTE: Enum assigned to INT8, limit max value to 128.
 typedef enum
 {
   VFY_STA_STARTED      = 0, //File transfer started, but not completed.
@@ -319,7 +320,7 @@ static void    UploadMgr_FinishFileUpload(INT32 Row, UINT32 CRC, UINT32 LogOffse
 static void    UploadMgr_PrintUploadStats(UINT32 BytesSent);
 static INT32   UploadMgr_MaintainFileTable(BOOLEAN Start);
 static void    UploadMgr_PrintInstallationInfo(void);
-
+static void    UploadMgr_VfyDeleteIncomplete(void);
 
 // Include cmd tables & function definitions here so that referenced functions
 // in this module have already been forward declared.
@@ -347,18 +348,18 @@ static void    UploadMgr_PrintInstallationInfo(void);
  *****************************************************************************/
 void UploadMgr_Init(void)
 {
-  TCB TaskInfo;
+  TCB task_info;
   INT32 i;
-  UPLOADMGR_FILE_VFY VfyRow;
+  UPLOADMGR_FILE_VFY vfy_row;
 
-  User_AddRootCmd(&RootMsg);
-  MSI_AddCmdHandler(CMD_ID_VALIDATE_CRC,UploadMgr_MSCRCCmdHandler);
+  User_AddRootCmd(&root_msg);
+  ASSERT(SYS_OK == MSI_AddCmdHandler((UINT16)CMD_ID_VALIDATE_CRC,UploadMgr_MSCRCCmdHandler));
 
   //For the user cmd to get total rows,
   m_TotalVerifyRows = UPLOADMGR_VFY_TBL_MAX_ROWS;
 
-  VfyLookupFN[0]    = '\0';
-  VfyLookupIdx      = -1;
+  m_vfy_lookup_fn[0]    = '\0';
+  m_vfy_lookup_idx      = -1;
 
   m_MSCrcResult = MS_CRC_RESULT_NONE;
   m_CheckLogRow = -1;
@@ -366,58 +367,58 @@ void UploadMgr_Init(void)
   m_MaintainFileTableRunning = FALSE;
 
   //Log Collection Task
-  memset(&TaskInfo,  0, sizeof(TaskInfo));
+  memset(&task_info,  0, sizeof(task_info));
   memset(&ULTaskData,0, sizeof(ULTaskData));
   memset(&LCTaskData,0, sizeof(LCTaskData));
 
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"UL Log Collection",_TRUNCATE);
-  TaskInfo.TaskID         = UL_Log_Collection;
-  TaskInfo.Function       = UploadMgr_FileCollectionTask;
-  TaskInfo.Priority       = taskInfo[UL_Log_Collection].priority;
-  TaskInfo.Type           = taskInfo[UL_Log_Collection].taskType;
-  TaskInfo.modes          = taskInfo[UL_Log_Collection].modes;
-  TaskInfo.MIFrames       = taskInfo[UL_Log_Collection].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[UL_Log_Collection].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[UL_Log_Collection].MIFrate;
-  TaskInfo.Enabled        = FALSE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = &LCTaskData;
-  TmTaskCreate (&TaskInfo);
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"UL Log Collection",_TRUNCATE);
+  task_info.TaskID         = UL_Log_Collection;
+  task_info.Function       = UploadMgr_FileCollectionTask;
+  task_info.Priority       = taskInfo[UL_Log_Collection].priority;
+  task_info.Type           = taskInfo[UL_Log_Collection].taskType;
+  task_info.modes          = taskInfo[UL_Log_Collection].modes;
+  task_info.MIFrames       = taskInfo[UL_Log_Collection].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[UL_Log_Collection].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[UL_Log_Collection].MIFrate;
+  task_info.Enabled        = FALSE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = &LCTaskData;
+  TmTaskCreate (&task_info);
 
   // Register the File-collection-In-Progress flag with the Power Manager.
   PmRegisterAppBusyFlag(PM_UPLOAD_LOG_COLLECTION_BUSY, &LCTaskData.InProgress );
 
   //Log Upload Task
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"UL Log File Upload",_TRUNCATE);
-  TaskInfo.TaskID         = UL_Log_File_Upload;
-  TaskInfo.Function       = UploadMgr_FileUploadTask;
-  TaskInfo.Priority       = taskInfo[UL_Log_File_Upload].priority;
-  TaskInfo.Type           = taskInfo[UL_Log_File_Upload].taskType;
-  TaskInfo.modes          = taskInfo[UL_Log_File_Upload].modes;
-  TaskInfo.MIFrames       = taskInfo[UL_Log_File_Upload].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[UL_Log_File_Upload].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[UL_Log_File_Upload].MIFrate;
-  TaskInfo.Enabled        = FALSE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = &ULTaskData;
-  TmTaskCreate (&TaskInfo);
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"UL Log File Upload",_TRUNCATE);
+  task_info.TaskID         = UL_Log_File_Upload;
+  task_info.Function       = UploadMgr_FileUploadTask;
+  task_info.Priority       = taskInfo[UL_Log_File_Upload].priority;
+  task_info.Type           = taskInfo[UL_Log_File_Upload].taskType;
+  task_info.modes          = taskInfo[UL_Log_File_Upload].modes;
+  task_info.MIFrames       = taskInfo[UL_Log_File_Upload].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[UL_Log_File_Upload].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[UL_Log_File_Upload].MIFrate;
+  task_info.Enabled        = FALSE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = &ULTaskData;
+  TmTaskCreate (&task_info);
 
   //Ground Verify confirmation
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"UL Log Check",_TRUNCATE);
-  TaskInfo.TaskID         = UL_Log_Check;
-  TaskInfo.Function       = UploadMgr_CheckLogMoved;
-  TaskInfo.Priority       = taskInfo[UL_Log_Check].priority;
-  TaskInfo.Type           = taskInfo[UL_Log_Check].taskType;
-  TaskInfo.modes          = taskInfo[UL_Log_Check].modes;
-  TaskInfo.MIFrames       = taskInfo[UL_Log_Check].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[UL_Log_Check].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[UL_Log_Check].MIFrate;
-  TaskInfo.Enabled        = FALSE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name, sizeof(task_info.Name),"UL Log Check",_TRUNCATE);
+  task_info.TaskID         = UL_Log_Check;
+  task_info.Function       = UploadMgr_CheckLogMoved;
+  task_info.Priority       = taskInfo[UL_Log_Check].priority;
+  task_info.Type           = taskInfo[UL_Log_Check].taskType;
+  task_info.modes          = taskInfo[UL_Log_Check].modes;
+  task_info.MIFrames       = taskInfo[UL_Log_Check].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[UL_Log_Check].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[UL_Log_Check].MIFrate;
+  task_info.Enabled        = FALSE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
   FIFO_Init(&FileDataFIFO,FileDataBuffer,sizeof(FileDataBuffer));
   UploadMgr_OpenFileVfyTbl();
@@ -430,10 +431,10 @@ void UploadMgr_Init(void)
   {
     NV_Read(NV_UPLOAD_VFY_TBL,
             VFY_ROW_TO_OFFSET(i),
-            &VfyRow,
-            sizeof(VfyRow));
+            &vfy_row,
+            sizeof(vfy_row));
 
-    if( VFY_STA_DELETED == VfyRow.State )
+    if( VFY_STA_DELETED == vfy_row.State )
     {
       m_FreeFVTRows += 1;
     }
@@ -570,8 +571,8 @@ void UploadMgr_WriteVfyTblRowsLog(void)
 {
   UPLOAD_VFY_TABLE_ROWS_LOG VfyRowsLog;
 
-  VfyRowsLog.Total = UPLOADMGR_VFY_TBL_MAX_ROWS;
-  VfyRowsLog.Free  = m_FreeFVTRows;
+  VfyRowsLog.total = UPLOADMGR_VFY_TBL_MAX_ROWS;
+  VfyRowsLog.free  = m_FreeFVTRows;
 
   LogWriteSystem(APP_UPM_INFO_VFY_TBL_ROWS,LOG_PRIORITY_LOW,
       &VfyRowsLog,sizeof(VfyRowsLog),NULL);
@@ -580,7 +581,7 @@ void UploadMgr_WriteVfyTblRowsLog(void)
 
 
 /******************************************************************************
- * Function:    UploadMgr_GetFilesPendingRoundTrip
+ * Function:    UploadMgr_GetFilesPendingRT
  *
  * Description: Return the number of files still in the FVT table waiting
  *              for round-trip verification to the ground server
@@ -646,18 +647,18 @@ BOOLEAN UploadMgr_DeleteFVTEntry(const INT8* FN)
  *****************************************************************************/
 INT32 UploadMgr_GetNumFilesPendingRT(void)
 {
-  INT32 i;
+  UINT32 i;
   INT32 msvfy = 0;
-  UPLOADMGR_FILE_VFY VfyRow;
+  UPLOADMGR_FILE_VFY vfy_row;
 
   for(i = 0; i < UPLOADMGR_VFY_TBL_MAX_ROWS; i++)
   {
     NV_Read(NV_UPLOAD_VFY_TBL,
             VFY_ROW_TO_OFFSET(i),
-            &VfyRow,
-            sizeof(VfyRow));
+            &vfy_row,
+            sizeof(vfy_row));
 
-    if( VFY_STA_MSVFY == VfyRow.State )
+    if( VFY_STA_MSVFY == vfy_row.State )
     {
       msvfy++;
     }
@@ -683,17 +684,17 @@ INT32 UploadMgr_GetNumFilesPendingRT(void)
 BOOLEAN UploadMgr_InitFileVfyTbl(void)
 {
   UINT32 i;
-  UINT32 MagicNumber = VFY_MAGIC_NUM;
+  UINT32 magic_number = VFY_MAGIC_NUM;
   UINT32 startup_Id = 500000;
-  UPLOADMGR_FILE_VFY VfyRow;
+  UPLOADMGR_FILE_VFY vfy_row;
 
   //Clear the row structure.  Init non-zero members.
-  memset(&VfyRow,0,sizeof(VfyRow));
-  VfyRow.State      = VFY_STA_DELETED;
-  VfyRow.LogDeleted = FALSE;
-  VfyRow.Type       = LOG_TYPE_DONT_CARE;
-  VfyRow.Source.acs = ACS_DONT_CARE;
-  VfyRow.Priority   = LOG_PRIORITY_DONT_CARE;
+  memset(&vfy_row,0,sizeof(vfy_row));
+  vfy_row.State      = VFY_STA_DELETED;
+  vfy_row.LogDeleted = FALSE;
+  vfy_row.Type       = LOG_TYPE_DONT_CARE;
+  vfy_row.Source.acs = ACS_DONT_CARE;
+  vfy_row.Priority   = LOG_PRIORITY_DONT_CARE;
 
   //First, write the table.  Then, once that is valid, write the magic number
   for(i = 0; i < UPLOADMGR_VFY_TBL_MAX_ROWS; i++)
@@ -701,14 +702,14 @@ BOOLEAN UploadMgr_InitFileVfyTbl(void)
     STARTUP_ID(startup_Id++);
     NV_Write(NV_UPLOAD_VFY_TBL,
              VFY_ROW_TO_OFFSET(i),
-             &VfyRow,
-             sizeof(VfyRow));
+             &vfy_row,
+             sizeof(vfy_row));
   }
 
   NV_Write(NV_UPLOAD_VFY_TBL,
            VFY_MAGIC_NUM_OFFSET,
-           &MagicNumber,
-           sizeof(MagicNumber));
+           &magic_number,
+           sizeof(magic_number));
 
 
   GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table re-initialized");
@@ -742,8 +743,8 @@ void UploadMgr_GenerateDebugLogs(void)
   UPLOAD_VFY_TABLE_ROWS_LOG VfyRowsLog;
   UPLOAD_START_SOURCE StartSource = UPLOAD_START_UNKNOWN;
 
-  VfyRowsLog.Total = UPLOADMGR_VFY_TBL_MAX_ROWS;
-  VfyRowsLog.Free  = 100;
+  VfyRowsLog.total = UPLOADMGR_VFY_TBL_MAX_ROWS;
+  VfyRowsLog.free  = 100;
 
   LogWriteSystem(APP_UPM_INFO_VFY_TBL_ROWS,LOG_PRIORITY_LOW,
       &VfyRowsLog,sizeof(VfyRowsLog),NULL);
@@ -854,7 +855,7 @@ BOOLEAN UploadMgr_FSMGetState( INT32 param )
  *              Compact Flash card.
  *
  *
- * Parameters:  none
+ * Parameters:  [in] param: Not used, to match FSM call signature.
  *
  * Returns:     BOOLEAN: TRUE: Files are pending round-trip verification
  *                       FALSE: There are no files pending round-trip
@@ -888,17 +889,17 @@ BOOLEAN UploadMgr_FSMGetFilesPendingRT( INT32 param )
 static
 void UploadMgr_OpenFileVfyTbl(void)
 {
-  UINT32 MagicNumber = (UINT32)~VFY_MAGIC_NUM; //Setup read location to NEQ MAGIC_NUM
+  UINT32 magic_number = (UINT32)~VFY_MAGIC_NUM; //Setup read location to NEQ MAGIC_NUM
 
   //Open the file and test the NVMgr result
   if(SYS_OK == NV_Open(NV_UPLOAD_VFY_TBL))
   {
     NV_Read(NV_UPLOAD_VFY_TBL,
             VFY_MAGIC_NUM_OFFSET,
-            &MagicNumber,
-            sizeof(MagicNumber));
+            &magic_number,
+            sizeof(magic_number));
 
-    if(VFY_MAGIC_NUM == MagicNumber)
+    if(VFY_MAGIC_NUM == magic_number)
     {
       //File is initialized
       GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: File Verification Table read OK!");
@@ -907,7 +908,7 @@ void UploadMgr_OpenFileVfyTbl(void)
     {
       //File is not initialized
       GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table, bad magic number %08x",
-               MagicNumber);
+               magic_number);
 
       UploadMgr_InitFileVfyTbl() ? 0 : 0, GSE_DebugStr(NORMAL,TRUE,"Upload: re-init failed");
     }
@@ -916,7 +917,7 @@ void UploadMgr_OpenFileVfyTbl(void)
   {
     //NV_Open failed, file not initialized
     GSE_DebugStr(NORMAL,TRUE,"UploadMgr: File Verification Table, NV_Open() failed",
-             MagicNumber);
+             magic_number);
     UploadMgr_InitFileVfyTbl() ? 0 : 0, GSE_DebugStr(NORMAL,TRUE,"Upload: re-init failed");
   }
 }
@@ -936,8 +937,7 @@ void UploadMgr_OpenFileVfyTbl(void)
  * Notes:
  *
  *****************************************************************************/
-static
-void UploadMgr_VfyDeleteIncomplete(void)
+static void UploadMgr_VfyDeleteIncomplete(void)
 {
   // Local Data
   UINT32             i;
@@ -1096,38 +1096,38 @@ static
 void UploadMgr_UpdateFileVfy(INT32 Row,UPLOADMGR_VFY_STATE NewState,
                               UINT32 CRC, UINT32 End)
 {
-  UPLOADMGR_FILE_VFY  VfyRow;
-  INT8 PrevState;
+  UPLOADMGR_FILE_VFY  vfy_row;
+  INT8 prev_state;
 
   ASSERT((Row < UPLOADMGR_VFY_TBL_MAX_ROWS) && (Row >= 0));
 
-  NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));
-  PrevState    = VfyRow.State;
+  NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&vfy_row,sizeof(vfy_row));
+  prev_state    = vfy_row.State;
 
   //If new state is higher priority, write the new state
-  if(NewState > VfyRow.State)
+  if(NewState > vfy_row.State)
   {
-    VfyRow.State = NewState;
+    vfy_row.State = NewState;
     NV_Write(NV_UPLOAD_VFY_TBL,
         VFY_ROW_TO_OFFSET(Row),
-        &VfyRow,
-        sizeof(VfyRow));
+        &vfy_row,
+        sizeof(vfy_row));
   }
   //If the new state is COMPLETED, write the file CRC and end offset.
   if(VFY_STA_COMPLETED == NewState)
   {
-    VfyRow.CRC = CRC;
-    VfyRow.End = End;
+    vfy_row.CRC = CRC;
+    vfy_row.End = End;
     NV_Write(NV_UPLOAD_VFY_TBL,
         VFY_ROW_TO_OFFSET(Row),
-        &VfyRow,
-        sizeof(VfyRow));
+        &vfy_row,
+        sizeof(vfy_row));
   }
   /*Update free rows.
     If a row is !deleted->deleted, increment free rows
     Rows only go from deleted->!deleted in UploadMgr_StartFileVfy*/
 
-  if((PrevState != VFY_STA_DELETED) && (NewState == VFY_STA_DELETED))
+  if((prev_state != VFY_STA_DELETED) && (NewState == VFY_STA_DELETED))
   {
     m_FreeFVTRows += 1;
   }
@@ -1381,7 +1381,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
           case LOG_FOUND:
             //For the first round through, print out a message that indicates
             //a new file is being started
-            if(Task->FileHeader.nLogCnt == 0)
+            if(Task->FileHeader.log_cnt == 0)
             {
               GSE_StatusStr(NORMAL,"\r\n");
               GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Calculating log file header...");
@@ -1394,8 +1394,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //UTIL_MinuteTimerDisplay(FALSE);
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_FIND_LOG-FindRec=FOUND@ %x %db",
                Task->LogOffset,Task->LogSize);
-            Task->FileHeader.nLogCnt += 1;
-            Task->FileHeader.nDataSize += Task->LogSize;
+            Task->FileHeader.log_cnt += 1;
+            Task->FileHeader.data_size += Task->LogSize;
             //Found log, try reading it
             ReadLogResult = LogRead(Task->LogOffset,(LOG_BUF *) Task->LogBuf);
 
@@ -1408,7 +1408,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             {
 
               GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_FIND_LOG-LogRead=SUCCESS");
-              Task->FileHeader.CheckSum += ChecksumBuffer( Task->LogBuf,
+              Task->FileHeader.check_sum += ChecksumBuffer( Task->LogBuf,
                                                            Task->LogSize,
                                                            0xFFFFFFFF );
               Task->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
@@ -1447,7 +1447,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       else if(LOG_READ_SUCCESS == ReadLogResult)
       {
         GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_READ_LOG-ReadLog=SUCCESS");
-        Task->FileHeader.CheckSum += ChecksumBuffer( Task->LogBuf,
+        Task->FileHeader.check_sum += ChecksumBuffer( Task->LogBuf,
                                                      Task->LogSize,
                                                      0xFFFFFFFF );
         Task->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
@@ -1463,7 +1463,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
 
     case LOG_COLLECTION_START_LOG_UPLOAD:
       //If no logs were collected for this file, move onto the next file
-      if(0 == Task->FileHeader.nLogCnt)
+      if(0 == Task->FileHeader.log_cnt)
       {
         Task->State = LOG_COLLECTION_NEXTFILE;
       }
@@ -1516,12 +1516,12 @@ void UploadMgr_FileCollectionTask(void *pParam)
           FIFO_PushBlock(&FileDataFIFO,&Task->FileHeader,
               sizeof(Task->FileHeader));
 
-          FIFO_PushBlock(&FileDataFIFO, BinarySubHdr.Buf, BinarySubHdr.SizeUsed);
+          FIFO_PushBlock(&FileDataFIFO, BinarySubHdr.buf, BinarySubHdr.size_used);
 
           CRC32(&Task->FileHeader,sizeof(Task->FileHeader),&Task->VfyCRC,
                 CRC_FUNC_START);
 
-          CRC32(BinarySubHdr.Buf, BinarySubHdr.SizeUsed, &Task->VfyCRC,
+          CRC32(BinarySubHdr.buf, BinarySubHdr.size_used, &Task->VfyCRC,
                 CRC_FUNC_NEXT);
 
           //The next task state will transfer the log data for this file
@@ -1532,8 +1532,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
           GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Uploading %s...",Task->FN);
 
           GSE_DebugStr(NORMAL,FALSE,"  %d logs, %d B, Vfy Tbl Row %d",
-                   Task->FileHeader.nLogCnt,
-                   Task->FileHeader.nDataSize,
+                   Task->FileHeader.log_cnt,
+                   Task->FileHeader.data_size,
                    Task->VfyRow);
         }
         else
@@ -1601,7 +1601,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                 //Ensure the number of logs in this file is the same as indicated
                 //in the header.  If a log is written while uploading, this will
                 //ensure it is put in a different file.
-                if(--Task->FileHeader.nLogCnt != 0)
+                if(--Task->FileHeader.log_cnt != 0)
                 {
                   Task->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
                 }
@@ -1667,7 +1667,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //Ensure the number of logs in this file is the same as indicated
             //in the header.  If a log is written while uploading, this will
             //ensure it is put in a different file.
-            if(--Task->FileHeader.nLogCnt != 0)
+            if(--Task->FileHeader.log_cnt != 0)
             {
               Task->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
             }
@@ -2222,7 +2222,7 @@ void UploadMgr_CheckLogCmdCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status)
 {
   MSCP_CHECK_FILE_RSP *rsp  = PacketData;
-  UPLOADMGR_FILE_VFY  VfyRow;
+  UPLOADMGR_FILE_VFY  vfy_row;
 
   if((MSI_RSP_SUCCESS == Status) && (Size == sizeof(*rsp)) )
   {
@@ -2231,8 +2231,8 @@ void UploadMgr_CheckLogCmdCallback(UINT16 Id, void* PacketData, UINT16 Size,
       //Read the row from Verify Table File.
       //Change the entry status as deleted/free-to-use or,
       //flagged for deletion.
-      NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(m_CheckLogRow),&VfyRow,sizeof(VfyRow));
-      if(VfyRow.LogDeleted)
+      NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(m_CheckLogRow),&vfy_row,sizeof(vfy_row));
+      if(vfy_row.LogDeleted)
       {
         UploadMgr_UpdateFileVfy(m_CheckLogRow,VFY_STA_DELETED,0,0);
       }
@@ -2283,11 +2283,11 @@ void UploadMgr_CheckLogCmdCallback(UINT16 Id, void* PacketData, UINT16 Size,
 static
 void UploadMgr_CheckLogMoved(void *pParam)
 {
-  static INT32        Row = 0;
-  static INT32        RowRetry = 0;
+  static INT32        row = 0;
+  static INT32        row_retry = 0;
   MSCP_CHECK_FILE_CMD cmd;
-  UPLOADMGR_FILE_VFY  VfyRow;
-  BOOLEAN             bFileFound;
+  UPLOADMGR_FILE_VFY  vfy_row;
+  BOOLEAN             file_found = FALSE;
 
   //While the task is running, search for any files that may be in the
   //ground verify state so that we can deal multiple Ground Verify
@@ -2296,19 +2296,19 @@ void UploadMgr_CheckLogMoved(void *pParam)
   //by the Maintenance Task.
   if(m_MaintainFileTableRunning)
   {
-    Row = 0;
+    row = 0;
     m_CheckLogRow = -1;
     TmTaskEnable(UL_Log_Check,FALSE);
   }
   else
   {
-    while((Row < UPLOADMGR_VFY_TBL_MAX_ROWS) && m_CheckLogRow < 0)
+    while((row < UPLOADMGR_VFY_TBL_MAX_ROWS) && m_CheckLogRow < 0)
     {
       //-2 means do the same row again until the max retry count
       if(m_CheckLogRow == -2)
       {
         m_CheckLogRow = -1;
-        if(RowRetry++ < UPLOADMGR_CHECK_FILE_CNT)
+        if(row_retry++ < UPLOADMGR_CHECK_FILE_CNT)
         {
           // Response indicates file did not move yet, retry it.
           GSE_StatusStr(NORMAL,".");
@@ -2317,16 +2317,16 @@ void UploadMgr_CheckLogMoved(void *pParam)
         {
           // We've exceeded the retry count for this pass.
 		  // Reset retry count and continue to next row.
-          RowRetry = 0;
-          Row++;
+          row_retry = 0;
+          row++;
         }
       }
       else
       {
         // Response indicates file moved, reset retry counter,
 		// move on to next table entry.
-        RowRetry = 0;
-        Row++;
+        row_retry = 0;
+        row++;
       }
 
       // Read next row (or re-Read current row) for status.
@@ -2334,20 +2334,20 @@ void UploadMgr_CheckLogMoved(void *pParam)
       // The result is processed on a subsequent call to this function once the
       // callback we provided has been invoked to update the status.
 
-      NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));
-      if(VFY_STA_GROUNDVFY == VfyRow.State)
+      NV_Read(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(row),&vfy_row,sizeof(vfy_row));
+      if(VFY_STA_GROUNDVFY == vfy_row.State)
       {
         //Need to consider preemption here. If interrupted after PutCommand,
         //Row must be set already for when CHECK_FILE callback executes. If
         //PutCmd fails, set row to -2 and this task will re-try up to CHECK_FILE_CNT
-        m_CheckLogRow = Row;
-        strncpy_safe(cmd.FN,sizeof(cmd.FN),VfyRow.Name,_TRUNCATE);
+        m_CheckLogRow = row;
+        strncpy_safe(cmd.FN,sizeof(cmd.FN),vfy_row.Name,_TRUNCATE);
         m_CheckLogRow = MSI_PutCommand(CMD_ID_CHECK_FILE,
                                        &cmd,
                                        sizeof(cmd),
                                        5000,
-                                       UploadMgr_CheckLogCmdCallback) == SYS_OK ? Row : -2;
-        bFileFound = TRUE;
+                                       UploadMgr_CheckLogCmdCallback) == SYS_OK ? row : -2;
+        file_found = TRUE;
         m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0;
       }
     } // while Row remaining...
@@ -2355,13 +2355,13 @@ void UploadMgr_CheckLogMoved(void *pParam)
     //If no file found after looping through entire table, decrement
     //CheckCnt to prevent getting stuck in this table should another
     //process (ex. user mgr) delete the entry while in this process
-    !bFileFound ? m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0 : 0;
+    !file_found ? m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0 : 0;
   }
 
   //When all rows checked, reset row back to zero and kill task
-  if(Row == UPLOADMGR_VFY_TBL_MAX_ROWS)
+  if(row == UPLOADMGR_VFY_TBL_MAX_ROWS)
   {
-    Row = 0;
+    row = 0;
     m_CheckLogRow = -1;
     TmTaskEnable(UL_Log_Check,m_CheckLogFileCnt == 0 ?FALSE:TRUE);
   }
@@ -2446,8 +2446,8 @@ void UploadMgr_VerifyMSCmdsCallback(UINT16 Id, void* PacketData, UINT16 Size,
 static
 LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
 {
-  UINT32 LogSize;
-  UINT32 ReadOffset = *FlightStart;
+  UINT32 log_size;
+  UINT32 read_offset = *FlightStart;
   LOG_SOURCE source;
   LOG_FIND_STATUS result = LOG_NOT_FOUND;
   UINT32 endOffset = LogGetLastAddress();
@@ -2462,20 +2462,20 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
                                LOG_TYPE_DONT_CARE,
                                source,
                                LOG_PRIORITY_DONT_CARE,
-                               &ReadOffset,
+                               &read_offset,
                                endOffset,
                                FlightStart,
-                               &LogSize);
+                               &log_size);
     if(result != LOG_BUSY)
     {
       result = LogFindNextRecord(LOG_DONT_CARE,
                                  LOG_TYPE_DONT_CARE,
                                  source,
                                  LOG_PRIORITY_DONT_CARE,
-                                 &ReadOffset,
+                                 &read_offset,
                                  endOffset,
                                  FlightStart,
-                                 &LogSize);
+                                 &log_size);
     }
   }
   if(result != LOG_BUSY)
@@ -2487,25 +2487,25 @@ LOG_FIND_STATUS UploadMgr_FindFlight(UINT32 *FlightStart,UINT32* FlightEnd)
                                LOG_TYPE_SYSTEM,
                                source,
                                LOG_PRIORITY_DONT_CARE,
-                               &ReadOffset,
+                               &read_offset,
                                endOffset,
                                FlightEnd,
-                               &LogSize);
+                               &log_size);
 
     //If no more "end of flight" logs are found, search for any logs after
     //the current position.
     if(LOG_NOT_FOUND == result)
     {
-      ReadOffset = *FlightStart;
+      read_offset = *FlightStart;
       source.nNumber = LOG_SOURCE_DONT_CARE;
       result = LogFindNextRecord(LOG_NEW,
                                  LOG_TYPE_DONT_CARE,
                                  source,
                                  LOG_PRIORITY_DONT_CARE,
-                                 &ReadOffset,
+                                 &read_offset,
                                  endOffset,
                                  FlightEnd,
-                                 &LogSize);
+                                 &log_size);
 
       if(LOG_FOUND == result)
       {
@@ -2545,174 +2545,174 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
                               TIMESTAMP* Timestamp)
 {
   UINT32 dataChecksum;
-  INT8   BoxStr[BOX_INFO_STR_LEN];
+  INT8   box_str[BOX_INFO_STR_LEN];
   CHAR   swVerStr[32];
   BINARY_DATA_HDR *pBinSubHdr;
 
   pBinSubHdr = &BinarySubHdr;
 
-  strncpy_safe(FileHeader->FileType,sizeof(FileHeader->FileType),"FAST",_TRUNCATE);
-  FileHeader->FileVersion = FILE_HEADER_VER;
+  strncpy_safe(FileHeader->file_type,sizeof(FileHeader->file_type),"FAST",_TRUNCATE);
+  FileHeader->file_version = FILE_HEADER_VER;
 
   //UINT16 DTU version ID
-  FileHeader->ConfigVersion = CfgMgr_RuntimeConfigPtr()->VerId;
+  FileHeader->config_version = CfgMgr_RuntimeConfigPtr()->VerId;
 
   //INT8 DTU installation identification
-  strncpy_safe(FileHeader->Id, sizeof(FileHeader->Id),
+  strncpy_safe(FileHeader->id, sizeof(FileHeader->id),
                 CfgMgr_RuntimeConfigPtr()->Id, _TRUNCATE);
 
   //DTU Serial Number
-  Box_GetSerno(BoxStr);
-  strncpy_safe(FileHeader->SerialNumber,sizeof(FileHeader->SerialNumber),BoxStr,_TRUNCATE);
+  Box_GetSerno(box_str);
+  strncpy_safe(FileHeader->serial_number,sizeof(FileHeader->serial_number),box_str,_TRUNCATE);
 
   // Box Manufacture Date
-  Box_GetMfg(BoxStr);
-  strncpy_safe(FileHeader->MfgDate,sizeof(FileHeader->MfgDate),BoxStr,_TRUNCATE);
+  Box_GetMfg(box_str);
+  strncpy_safe(FileHeader->mfg_date,sizeof(FileHeader->mfg_date),box_str,_TRUNCATE);
 
   // Box Manufacture Revision
-  Box_GetRev(BoxStr);
-  strncpy_safe(FileHeader->MfgRev,sizeof(FileHeader->MfgRev),BoxStr,_TRUNCATE);
+  Box_GetRev(box_str);
+  strncpy_safe(FileHeader->mfg_rev,sizeof(FileHeader->mfg_rev),box_str,_TRUNCATE);
 
   // Software Version
   FAST_GetSoftwareVersion(swVerStr);
-  strncpy_safe(FileHeader->SwVersion,sizeof(FileHeader->SwVersion),swVerStr,_TRUNCATE);
+  strncpy_safe(FileHeader->sw_version,sizeof(FileHeader->sw_version),swVerStr,_TRUNCATE);
 
   // TimeSource
-  FileHeader->TimeSource = FAST_TimeSourceCfg();
+  FileHeader->time_source = FAST_TimeSourceCfg();
 
   // Current System Condition
-  FileHeader->SysCondition = Flt_GetSystemStatus();
+  FileHeader->sys_condition = Flt_GetSystemStatus();
 
   //UINT32 DTU time
-  FileHeader->Time = Timestamp->Timestamp;
+  FileHeader->time = Timestamp->Timestamp;
 
   //UINT16 DTU time in ms
-  FileHeader->TimeMs = Timestamp->MSecond;
+  FileHeader->time_ms = Timestamp->MSecond;
 
   //UINT32 Power-on Count
-  FileHeader->PoweronCnt = Box_GetPowerOnCount();
+  FileHeader->poweron_cnt = Box_GetPowerOnCount();
 
   //UINT32 Power-on Time
-  FileHeader->PoweronTime = Box_GetPowerOnTime();
+  FileHeader->poweron_time = Box_GetPowerOnTime();
 
   //Log type, system or application
-  FileHeader->LogType = Type;
+  FileHeader->log_type = Type;
 
   //UINT16 number of log count of this ACS
   //FileHeader->nLogCnt = 0;   //This field is populated by the Log Collector
   //UINT16 priority of log data of this ACS
-  FileHeader->Priority = Priority;
+  FileHeader->priority = Priority;
 
   //UINT16 which ACS is connected.  see ACS_SOURCE
-  FileHeader->AcsSource = (UINT16)ACS.nNumber;
+  FileHeader->acs_source = (UINT16)ACS.nNumber;
 
   //INT8 ACS model id
-  strncpy_safe(FileHeader->AcsModel,sizeof(FileHeader->AcsModel),
+  strncpy_safe(FileHeader->acs_model,sizeof(FileHeader->acs_model),
               &(DataMgrGetACSDataSet(ACS.acs).sModel[0]),_TRUNCATE);
 
   //INT8  ACS version information
-  strncpy_safe(FileHeader->AcsVerId,sizeof(FileHeader->AcsVerId),
+  strncpy_safe(FileHeader->acs_ver_id,sizeof(FileHeader->acs_ver_id),
                &(DataMgrGetACSDataSet(ACS.acs).sID[0]),_TRUNCATE);
 
   //UINT16 which ACS is connected.  see ACS_SOURCE
-  FileHeader->AcsSource = (UINT16)ACS.nNumber;
+  FileHeader->acs_source = (UINT16)ACS.nNumber;
 
   //INT8 ACS model id
-  strncpy_safe(FileHeader->AcsModel,sizeof(FileHeader->AcsModel),
+  strncpy_safe(FileHeader->acs_model,sizeof(FileHeader->acs_model),
               &(DataMgrGetACSDataSet(ACS.acs).sModel[0]),_TRUNCATE);
   //INT8  ACS version information
-  strncpy_safe(FileHeader->AcsVerId,sizeof(FileHeader->AcsVerId),
+  strncpy_safe(FileHeader->acs_ver_id,sizeof(FileHeader->acs_ver_id),
               &(DataMgrGetACSDataSet(ACS.acs).sID[0]),_TRUNCATE);
   // Port Type
-  FileHeader->PortType = (UINT8)DataMgrGetACSDataSet(ACS.acs).portType;
+  FileHeader->port_type = (UINT8)DataMgrGetACSDataSet(ACS.acs).portType;
 
   // Port Index
-  FileHeader->PortIndex = (UINT8)DataMgrGetACSDataSet(ACS.acs).nPortIndex;
+  FileHeader->port_index = (UINT8)DataMgrGetACSDataSet(ACS.acs).nPortIndex;
 
   //Config Status
-  AC_GetConfigStatus(FileHeader->ConfigStatus);
+  AC_GetConfigStatus(FileHeader->config_status);
 
   //INT8 Tail Number of Aircraft
-  strncpy_safe(FileHeader->TailNumber,sizeof(FileHeader->TailNumber),
+  strncpy_safe(FileHeader->tail_number,sizeof(FileHeader->tail_number),
       CfgMgr_RuntimeConfigPtr()->Aircraft.TailNumber,_TRUNCATE);
 
   //INT8 Airline
-  strncpy_safe(FileHeader->Operator,sizeof(FileHeader->Operator),
+  strncpy_safe(FileHeader->operator,sizeof(FileHeader->operator),
                 CfgMgr_RuntimeConfigPtr()->Aircraft.Operator,_TRUNCATE);
 
   //INT8 Aircraft Style (i.e. 737-300)
-  strncpy_safe(FileHeader->Style,sizeof(FileHeader->Style),
+  strncpy_safe(FileHeader->style,sizeof(FileHeader->style),
       CfgMgr_RuntimeConfigPtr()->Aircraft.Style,_TRUNCATE);
 
   //INT8
-  strncpy_safe(FileHeader->ConfigFile_QARPartNum,sizeof(FileHeader->ConfigFile_QARPartNum),
+  strncpy_safe(FileHeader->config_file_QAR_pn,sizeof(FileHeader->config_file_QAR_pn),
                 "",_TRUNCATE);
 
   //UINT16
-  FileHeader->ConfigVer_QARVer = 0;
+  FileHeader->config_ver_qar_ver = 0;
 
   // Engine Identification
-  strncpy_safe(FileHeader->servicePlan, sizeof(FileHeader->servicePlan),
+  strncpy_safe(FileHeader->service_plan, sizeof(FileHeader->service_plan),
                EngRunGetFileHeader()->servicePlan,_TRUNCATE);
 
-  strncpy_safe(FileHeader->snEngine1, sizeof(FileHeader->snEngine1),
+  strncpy_safe(FileHeader->sn_engine1, sizeof(FileHeader->sn_engine1),
                EngRunGetFileHeader()->engine[0].serialNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->modelEngine1, sizeof(FileHeader->modelEngine1),
+  strncpy_safe(FileHeader->model_engine1, sizeof(FileHeader->model_engine1),
                EngRunGetFileHeader()->engine[0].modelNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->snEngine2, sizeof(FileHeader->snEngine2),
+  strncpy_safe(FileHeader->sn_engine2, sizeof(FileHeader->sn_engine2),
                EngRunGetFileHeader()->engine[1].serialNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->modelEngine2, sizeof(FileHeader->modelEngine2),
+  strncpy_safe(FileHeader->model_engine2, sizeof(FileHeader->model_engine2),
                EngRunGetFileHeader()->engine[1].modelNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->snEngine3, sizeof(FileHeader->snEngine3),
+  strncpy_safe(FileHeader->sn_engine3, sizeof(FileHeader->sn_engine3),
                EngRunGetFileHeader()->engine[2].serialNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->modelEngine3, sizeof(FileHeader->modelEngine3),
+  strncpy_safe(FileHeader->model_engine3, sizeof(FileHeader->model_engine3),
                EngRunGetFileHeader()->engine[2].modelNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->snEngine4, sizeof(FileHeader->snEngine4),
+  strncpy_safe(FileHeader->sn_engine4, sizeof(FileHeader->sn_engine4),
                EngRunGetFileHeader()->engine[3].serialNumber,_TRUNCATE);
 
-  strncpy_safe(FileHeader->modelEngine4, sizeof(FileHeader->modelEngine4),
+  strncpy_safe(FileHeader->model_engine4, sizeof(FileHeader->model_engine4),
                EngRunGetFileHeader()->engine[3].modelNumber,_TRUNCATE);
 
   memset(&BinarySubHdr,0,sizeof(BinarySubHdr));
 
   if (LOG_TYPE_SYSTEM == Type)
   {
-     pBinSubHdr->SizeUsed = CfgMgr_GetSystemBinaryHdr (pBinSubHdr->Buf,
-                                                       sizeof(pBinSubHdr->Buf));
+     pBinSubHdr->size_used = CfgMgr_GetSystemBinaryHdr (pBinSubHdr->buf,
+                                                       sizeof(pBinSubHdr->buf));
   }
   else if (LOG_TYPE_ETM == Type)
   {
-     pBinSubHdr->SizeUsed = CfgMgr_GetETMBinaryHdr (pBinSubHdr->Buf, sizeof(pBinSubHdr->Buf));
+     pBinSubHdr->size_used = CfgMgr_GetETMBinaryHdr (pBinSubHdr->buf, sizeof(pBinSubHdr->buf));
   }
   else // Get the Binary Data Header
   {
-     pBinSubHdr->SizeUsed = DataMgrGetHeader(pBinSubHdr->Buf, ACS.acs,
-                                              sizeof(pBinSubHdr->Buf));
+     pBinSubHdr->size_used = DataMgrGetHeader(pBinSubHdr->buf, ACS.acs,
+                                              sizeof(pBinSubHdr->buf));
 
   }
 
   // where log data starts.  Note, ACS headers are
   // always at the beginning of data block.
-  FileHeader->nDataOffset = (sizeof(*FileHeader) + pBinSubHdr->SizeUsed);
+  FileHeader->data_offset = (sizeof(*FileHeader) + pBinSubHdr->size_used);
 
 
   //Save and zero-out existing header checksum so that it won't
   //be added into the
-  dataChecksum = FileHeader->CheckSum;
-  FileHeader->CheckSum = 0;
+  dataChecksum = FileHeader->check_sum;
+  FileHeader->check_sum = 0;
 
   //Add checksum of the header data into the existing checksum value
   dataChecksum += ChecksumBuffer(FileHeader,sizeof(*FileHeader),0xFFFFFFFF);
-  dataChecksum += ChecksumBuffer(pBinSubHdr->Buf, pBinSubHdr->SizeUsed, 0xFFFFFFFF);
+  dataChecksum += ChecksumBuffer(pBinSubHdr->buf, pBinSubHdr->size_used, 0xFFFFFFFF);
 
   //Finally, copy the checksum back into the header
-  FileHeader->CheckSum = dataChecksum;
+  FileHeader->check_sum = dataChecksum;
 }
 
 
@@ -3049,16 +3049,16 @@ BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op)
   static union  {
     MSCP_FILE_PACKET_INFO FileInfo;
     INT8 FileDataBuf[MSCP_CMDRSP_MAX_DATA_SIZE];
-  } DataBuf;
+  } data_buf;
   static UINT32 txSize;
 
   //For the first data block sent, initialize the static file header information
   switch(Op)
   {
     case UPLOAD_BLOCK_FIRST:
-      DataBuf.FileInfo.id  = 0x1234;
-      DataBuf.FileInfo.seq = 0;
-      //break intentionally omitted
+      data_buf.FileInfo.id  = 0x1234;
+      data_buf.FileInfo.seq = 0;
+      //lint -fallthrough
 
     case UPLOAD_BLOCK_NEXT:
       //If no data to upload, take no action and wait for the next
@@ -3067,27 +3067,27 @@ BOOLEAN UploadMgr_UploadFileBlock(UPLOADMGR_UPLOAD_BLOCK_OP Op)
       {
         //Seq number starts at 1 and increments by one for every
         //subsequent block.
-        DataBuf.FileInfo.seq += 1;
+        data_buf.FileInfo.seq += 1;
         //Compute how much data to send.  Either lesser of the following:
         // 1 .The maximum size that can be transmitted
         //    DataBuf size - FileInfo header
         // 2. The number of bytes remaining to be transmitted in the log data
         //    array
-        txSize = MIN((sizeof(DataBuf) - sizeof(DataBuf.FileInfo)),
+        txSize = MIN((sizeof(data_buf) - sizeof(data_buf.FileInfo)),
                       FileDataFIFO.CmpltCnt);
         FIFO_PopBlock(&FileDataFIFO,
-                      &DataBuf.FileDataBuf[sizeof(DataBuf.FileInfo)],
+                      &data_buf.FileDataBuf[sizeof(data_buf.FileInfo)],
                       txSize);
-        result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&DataBuf,
-                                     txSize+sizeof(DataBuf.FileInfo));
+        result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&data_buf,
+                                     txSize+sizeof(data_buf.FileInfo));
         UploadMgr_PrintUploadStats(txSize);
       }
       break;
 
     case UPLOAD_BLOCK_LAST:
       //Re-upload the same block.
-      result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&DataBuf,
-                                        txSize+sizeof(DataBuf.FileInfo));
+      result = UploadMgr_SendMSCmd(CMD_ID_LOG_DATA,5000,&data_buf,
+                                        txSize+sizeof(data_buf.FileInfo));
       break;
 
     default:
@@ -3269,7 +3269,7 @@ BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
           UploadMgr_UpdateFileVfy(row,VFY_STA_GROUNDVFY,0,0);
 
           // log system message
-          strncpy_safe(gsCrcPassLog.Filename, sizeof(gsCrcPassLog.Filename),
+          strncpy_safe(gsCrcPassLog.filename, sizeof(gsCrcPassLog.filename),
               vfyCmdData->FN, _TRUNCATE);
           LogWriteSystem(APP_UPM_GS_TRANSMIT_SUCCESS, LOG_PRIORITY_LOW,
               &gsCrcPassLog, sizeof(gsCrcPassLog), NULL);
@@ -3305,9 +3305,9 @@ BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
           m_MSCrcResult = MS_CRC_RESULT_FAIL;
 
           // log system message
-          crcFailLog.FvtCrc = vfyRow.CRC;
-          crcFailLog.SrcCrc = vfyCmdData->CRC;
-          strncpy_safe(crcFailLog.Filename, sizeof(crcFailLog.Filename),
+          crcFailLog.fvt_crc = vfyRow.CRC;
+          crcFailLog.src_crc = vfyCmdData->CRC;
+          strncpy_safe(crcFailLog.filename, sizeof(crcFailLog.filename),
               vfyCmdData->FN, _TRUNCATE);
           LogWriteSystem(APP_UPM_MS_CRC_FAIL, LOG_PRIORITY_LOW,
               &crcFailLog, sizeof(crcFailLog), NULL);
@@ -3320,9 +3320,9 @@ BOOLEAN UploadMgr_MSCRCCmdHandler(void* Data,UINT16 Size,
 
         case MSCP_CRC_SRC_GS:   //CRC from the ground server
           // log system message
-          crcFailLog.FvtCrc = vfyRow.CRC;
-          crcFailLog.SrcCrc = vfyCmdData->CRC;
-          strncpy_safe(crcFailLog.Filename, sizeof(crcFailLog.Filename),
+          crcFailLog.fvt_crc = vfyRow.CRC;
+          crcFailLog.src_crc = vfyCmdData->CRC;
+          strncpy_safe(crcFailLog.filename, sizeof(crcFailLog.filename),
               vfyCmdData->FN, _TRUNCATE);
           LogWriteSystem(APP_UPM_GS_CRC_FAIL, LOG_PRIORITY_LOW,
               &crcFailLog, sizeof(crcFailLog), NULL);
@@ -3388,7 +3388,7 @@ static
 void UploadMgr_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
                              MSI_RSP_STATUS Status)
 {
-  static const INT8* statusStrs[MSI_RSP_TIMEOUT+1] =
+  const INT8* statusStrs[MSI_RSP_TIMEOUT+1] =
     {"Success", "Busy", "Failed", "Timeout"};
 
   ResponseStatusSuccess = MSI_RSP_SUCCESS == Status;
@@ -3483,6 +3483,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 168  *****************
+ * User: Jim Mood     Date: 12/20/12   Time: 6:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Changes
+ *
  * *****************  Version 167  *****************
  * User: Jim Mood     Date: 12/14/12   Time: 8:05p
  * Updated in $/software/control processor/code/application
