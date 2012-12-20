@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 31 $  $Date: 12/13/12 2:56p $
+   $Revision: 32 $  $Date: 12-12-20 4:12p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -44,10 +44,10 @@ static USER_ENUM_TBL fast_txtest_enum[] =
   {"",      FAST_TXTEST_INIT},
   {"PASS",  FAST_TXTEST_PASS},
   {"FAIL",  FAST_TXTEST_FAIL},
-  {m_FastTxTest.InProgressStr,  FAST_TXTEST_INPROGRESS},
-  {m_FastTxTest.GSMPassStr,     FAST_TXTEST_GSMPASS},
+  {m_FastTxTest.inProgressStr,  FAST_TXTEST_INPROGRESS},
+  {m_FastTxTest.gsmPassStr,     FAST_TXTEST_GSMPASS},
   {"MoveLogsToMS",              FAST_TXTEST_MOVELOGSTOMS},
-  {m_FastTxTest.MoveLogsStr,    FAST_TXTEST_MOVELOGSTOGROUND},
+  {m_FastTxTest.moveLogsStr,    FAST_TXTEST_MOVELOGSTOGROUND},
   {NULL,0}
 };
 
@@ -64,7 +64,7 @@ static USER_ENUM_TBL fast_txtest_status_enum[] =
   {"InProgress",FAST_TXTEST_STATE_VPN},
   {"InProgress",FAST_TXTEST_STATE_UL},
   {"Pass",      FAST_TXTEST_STATE_PASS},
-  {m_FastTxTest.FailReason,FAST_TXTEST_STATE_FAIL},
+  {m_FastTxTest.failReason,FAST_TXTEST_STATE_FAIL},
   {NULL,0}
 };
 
@@ -133,11 +133,11 @@ static USER_MSG_TBL cfg_flags_cmd [] =
 
 static USER_MSG_TBL status_flags_cmd [] =
 {  /*Str           Next Tbl Ptr     Handler Func.         Data Type          Access      Parameter                   IndexRange   DataLimit   EnumTbl*/
-  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    SwVersion,                 -1,-1,       NO_LIMIT,   NULL },
-  { "RECORDING",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &FASTStatus.Recording,      -1,-1,       NO_LIMIT,   NULL },
-  { "ON_GROUND",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &FASTStatus.OnGround,       -1,-1,       NO_LIMIT,   NULL },
-  { "RF_GSM",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &FASTStatus.RfGsmEnable,    -1,-1,       NO_LIMIT,   NULL },
-  { "WLAN_POWER",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &FASTStatus.WlanPowerEnable,-1,-1,       NO_LIMIT,   NULL },
+  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    swVersion,                 -1,-1,       NO_LIMIT,   NULL },
+  { "RECORDING",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &fastStatus.recording,      -1,-1,       NO_LIMIT,   NULL },
+  { "ON_GROUND",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &fastStatus.onGround,       -1,-1,       NO_LIMIT,   NULL },
+  { "RF_GSM",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &fastStatus.rfGsmEnable,    -1,-1,       NO_LIMIT,   NULL },
+  { "WLAN_POWER",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &fastStatus.wlanPowerEnable,-1,-1,       NO_LIMIT,   NULL },
   { "BUSY_FLAGS",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_HEX32,   USER_RO,    &m_RecordBusyFlags,         -1,-1,       NO_LIMIT,   NULL },
   { NULL,          NULL,            NULL,                 NO_HANDLER_DATA}
 };
@@ -145,16 +145,16 @@ static USER_MSG_TBL status_flags_cmd [] =
 static USER_MSG_TBL tx_test_table [] =
 {  /*Str               Next Tbl Ptr     Handler Func.         Data Type          Access      Parameter                IndexRange    DataLimit  EnumTbl*/
   { "START",           NO_NEXT_TABLE,   FAST_StartTxTest,     USER_TYPE_ACTION,  USER_RO,    NULL,                    -1,-1,        NO_LIMIT,  NULL },
-  { "STATUS",          NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.State,     -1,-1,        NO_LIMIT,  fast_txtest_status_enum },
-  { "SYS_CONDITION",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SysCon,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "WOW_DISCRETE",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.WowDisc,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "ON_GROUND_TRIG",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.OnGround,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "RECORD_DATA_TRIG",NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.Record,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "MS_READY",        NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.MsReady,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "GSM_SIM_CARD",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.SIMReady,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "GSM_SIGNAL_DB",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.GSMSignal, -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "VPN_CONNECTION",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.VPNStatus, -1,-1,        NO_LIMIT,  fast_txtest_enum},
-  { "UPLOAD_STATUS",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.ULStatus,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "STATUS",          NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.state,     -1,-1,        NO_LIMIT,  fast_txtest_status_enum },
+  { "SYS_CONDITION",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.sysCon,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "WOW_DISCRETE",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.wowDisc,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "ON_GROUND_TRIG",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.onGround,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "RECORD_DATA_TRIG",NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.record,    -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "MS_READY",        NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.msReady,   -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "GSM_SIM_CARD",    NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.simReady,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "GSM_SIGNAL_DB",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.gsmSignal, -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "VPN_CONNECTION",  NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.vpnStatus, -1,-1,        NO_LIMIT,  fast_txtest_enum},
+  { "UPLOAD_STATUS",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ENUM,    USER_RO,    &m_FastTxTest.ulStatus,  -1,-1,        NO_LIMIT,  fast_txtest_enum},
    { NULL,          NULL,            NULL,                 NO_HANDLER_DATA}
 };
 
@@ -493,7 +493,7 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 {
   //Clear data structure
   memset(&m_FastTxTest, 0, sizeof(m_FastTxTest));
-  m_FastTxTest.State = FAST_TXTEST_STATE_SYSCON;
+  m_FastTxTest.state = FAST_TXTEST_STATE_SYSCON;
 
   //Enable Task
   TmTaskEnable(FAST_TxTestID, TRUE);
@@ -506,6 +506,11 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 12-12-20   Time: 4:12p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 2:56p

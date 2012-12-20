@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 121 $  $Date: 12/13/12 2:56p $
+   $Revision: 123 $  $Date: 12-12-20 5:00p $
 
 
 ******************************************************************************/
@@ -92,52 +92,52 @@ typedef enum{
 } FAST_TXTEST_TEST_STATUS;
 
 typedef struct {
-  FAST_TXTEST_TASK_STATE State;
-  FAST_TXTEST_TEST_STATUS SysCon;
-  FAST_TXTEST_TEST_STATUS WowDisc;
-  FAST_TXTEST_TEST_STATUS OnGround;
-  FAST_TXTEST_TEST_STATUS Record;
-  FAST_TXTEST_TEST_STATUS MsReady;
-  FAST_TXTEST_TEST_STATUS SIMReady;
-  FAST_TXTEST_TEST_STATUS GSMSignal;
-  FAST_TXTEST_TEST_STATUS VPNStatus;
-  FAST_TXTEST_TEST_STATUS ULStatus;
-  CHAR InProgressStr[TXTEST_DATA_STR_LEN];
-  CHAR GSMPassStr[TXTEST_DATA_STR_LEN];
-  CHAR FailReason[TXTEST_DATA_STR_LEN];
-  CHAR MoveLogsStr[TXTEST_DATA_STR_LEN];
+  FAST_TXTEST_TASK_STATE state;
+  FAST_TXTEST_TEST_STATUS sysCon;
+  FAST_TXTEST_TEST_STATUS wowDisc;
+  FAST_TXTEST_TEST_STATUS onGround;
+  FAST_TXTEST_TEST_STATUS record;
+  FAST_TXTEST_TEST_STATUS msReady;
+  FAST_TXTEST_TEST_STATUS simReady;
+  FAST_TXTEST_TEST_STATUS gsmSignal;
+  FAST_TXTEST_TEST_STATUS vpnStatus;
+  FAST_TXTEST_TEST_STATUS ulStatus;
+  CHAR inProgressStr[TXTEST_DATA_STR_LEN];
+  CHAR gsmPassStr[TXTEST_DATA_STR_LEN];
+  CHAR failReason[TXTEST_DATA_STR_LEN];
+  CHAR moveLogsStr[TXTEST_DATA_STR_LEN];
 }FAST_TXTEST_DATA;
 
 typedef struct {
-  BOOLEAN InFlight;
-  BOOLEAN Recording;
-  BOOLEAN OnGround;
-  BOOLEAN CommandedRfEnb;         //Desired state of the RF before factoring in override,
+  BOOLEAN inFlight;
+  BOOLEAN recording;
+  BOOLEAN onGround;
+  BOOLEAN commandedRfEnb;         //Desired state of the RF before factoring in override,
                                   //WOW, and system condition
-  BOOLEAN MssimRunning;
-  BOOLEAN IsVPNConnected;
-  BOOLEAN RfGsmEnable;            //Actual state of the RF output
-  BOOLEAN WlanPowerEnable;
-  BOOLEAN LogTransferToGSActive;  //Transfering logs to the ground server
-  UINT32  LogTransferToGSNoVPNTO; //Timeout if no VPN connection after upload
-  BOOLEAN DownloadStarted;
-  BOOLEAN AutoDownload;           // Flag that Auto download performed once
+  BOOLEAN mssimRunning;
+  BOOLEAN isVPNConnected;
+  BOOLEAN rfGsmEnable;            //Actual state of the RF output
+  BOOLEAN wlanPowerEnable;
+  BOOLEAN logTransferToGSActive;  //Transfering logs to the ground server
+  UINT32  logTransferToGSNoVPNTO; //Timeout if no VPN connection after upload
+  BOOLEAN downloadStarted;
+  BOOLEAN autoDownload;           // Flag that Auto download performed once
 } FASTMGR_STATUS;
 
 typedef struct{
-  UINT32 TimeElapsedS;
+  UINT32 timeElapsedS;
 }FASTMGR_AUTO_UL_TASK_DATA;
 
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static FASTMGR_AUTO_UL_TASK_DATA AutoUploadTaskData;
+static FASTMGR_AUTO_UL_TASK_DATA autoUploadTaskData;
 static FAST_TXTEST_DATA m_FastTxTest;
-static FASTMGR_STATUS FASTStatus;
+static FASTMGR_STATUS fastStatus;
 
 static BOOLEAN wlanOverride;
 static BOOLEAN gsmOverride;
-static CHAR    SwVersion[SW_VERSION_LEN];
+static CHAR    swVersion[SW_VERSION_LEN];
 static BOOLEAN m_FASTControlEnb;
 static INT32   m_RecordBusyFlags;
 static BOOLEAN m_IsRecordBusy;
@@ -167,7 +167,7 @@ static void FAST_DioControl(void);
 static void FAST_RfGsmEnable(void);
 static void FAST_WlanPowerEnable(void);
 static void FAST_TxTestTask(void* pParam);
-static void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, UINT32 StartTime_s,
+static void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
       FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest,
       CHAR* FailStr );
 static void FAST_OnRecordingChange(INT32 tag, BOOLEAN is_busy);
@@ -199,14 +199,14 @@ void FAST_Init(void)
   User_AddRootCmd(&root_msg);
 
   //State flags for FAST system status
-  FASTStatus.InFlight               = FALSE;
-  FASTStatus.Recording              = FALSE;
-  FASTStatus.MssimRunning           = FALSE;
-  FASTStatus.IsVPNConnected         = FALSE;
-  FASTStatus.LogTransferToGSActive  = FALSE;
-  FASTStatus.LogTransferToGSNoVPNTO = 0;
-  FASTStatus.DownloadStarted        = FALSE;
-  FASTStatus.AutoDownload           = FALSE;
+  fastStatus.inFlight               = FALSE;
+  fastStatus.recording              = FALSE;
+  fastStatus.mssimRunning           = FALSE;
+  fastStatus.isVPNConnected         = FALSE;
+  fastStatus.logTransferToGSActive  = FALSE;
+  fastStatus.logTransferToGSNoVPNTO = 0;
+  fastStatus.downloadStarted        = FALSE;
+  fastStatus.autoDownload           = FALSE;
   m_RecordBusyFlags                 = 0;
   m_IsRecordBusy                    = FALSE;
 
@@ -218,14 +218,14 @@ void FAST_Init(void)
   gsmOverride      = FALSE;
   m_FASTControlEnb = TRUE;
 
-  strncpy_safe(SwVersion,  sizeof(SwVersion), PRODUCT_VERSION, _TRUNCATE);
+  strncpy_safe(swVersion,  sizeof(swVersion), PRODUCT_VERSION, _TRUNCATE);
 
   //FAST Manager Task
 
   // Register the application busy flag with the Power Manager.
-  PmRegisterAppBusyFlag(PM_FAST_REC_TRIG_BUSY, &FASTStatus.Recording);
+  PmRegisterAppBusyFlag(PM_FAST_REC_TRIG_BUSY, &fastStatus.recording);
   PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &m_IsRecordBusy);
-  PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &FASTStatus.LogTransferToGSActive);
+  PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &fastStatus.logTransferToGSActive);
 
   memset(&task_info, 0, sizeof(task_info));
   strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST Manager",_TRUNCATE);
@@ -277,7 +277,7 @@ void FAST_Init(void)
   //Auto-upload task
   // Performs timing based on frames, should be highish priority
   memset(&task_info, 0, sizeof(task_info));
-  memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
+  memset(&autoUploadTaskData,0,sizeof(autoUploadTaskData));
   strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST U/L Chk",_TRUNCATE);
   task_info.TaskID         = FAST_UL_Chk;
   task_info.Function       = FAST_UploadCheckTask;
@@ -289,13 +289,13 @@ void FAST_Init(void)
   task_info.Rmt.MifRate    = taskInfo[FAST_UL_Chk].MIFrate;
   task_info.Enabled        = TRUE;
   task_info.Locked         = FALSE;
-  task_info.pParamBlock    = &AutoUploadTaskData;
+  task_info.pParamBlock    = &autoUploadTaskData;
   TmTaskCreate (&task_info);
 
   //FAST TxTest Task
   // Performs timing based on frames, should be highish priority
   memset(&task_info, 0, sizeof(task_info));
-  memset(&AutoUploadTaskData,0,sizeof(AutoUploadTaskData));
+  memset(&autoUploadTaskData,0,sizeof(autoUploadTaskData));
   strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST TxTest",_TRUNCATE);
   task_info.TaskID         = FAST_TxTestID;
   task_info.Function       = FAST_TxTestTask;
@@ -350,7 +350,7 @@ TIME_SOURCE_ENUM FAST_TimeSourceCfg( void )
  *****************************************************************************/
 void FAST_GetSoftwareVersion(INT8* SwVerStr)
 {
-  strncpy_safe(SwVerStr,sizeof(SwVersion),SwVersion,_TRUNCATE);
+  strncpy_safe(SwVerStr,sizeof(swVersion),swVersion,_TRUNCATE);
 }
 
 /******************************************************************************
@@ -374,8 +374,8 @@ void FAST_SignalUploadComplete( void)
   //Do not start LogTransfer timer if the
   if(m_FASTControlEnb )
   {
-    FASTStatus.LogTransferToGSActive = TRUE;
-    FASTStatus.LogTransferToGSNoVPNTO = CM_GetTickCount()+CM_DELAY_IN_SECS(NO_VPN_TO);
+    fastStatus.logTransferToGSActive = TRUE;
+    fastStatus.logTransferToGSNoVPNTO = CM_GetTickCount()+CM_DELAY_IN_SECS(NO_VPN_TO);
   }
 }
 
@@ -473,7 +473,7 @@ void FAST_FSMRfRun(BOOLEAN Run, INT32 param)
  *****************************************************************************/
 BOOLEAN FAST_FSMRfGetState(INT32 param)
 {
-  return FASTStatus.RfGsmEnable;
+  return fastStatus.rfGsmEnable;
 }
 
 
@@ -585,37 +585,37 @@ void FAST_Task(void* pParam)
   /*ON GROUND
     Transition into the on ground state*/
   if( TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.on_ground_triggers) &&
-      !FASTStatus.OnGround)
+      !fastStatus.onGround)
   {
     LogWriteSystem(APP_ID_FAST_WOWSTART, LOG_PRIORITY_LOW, 0, 0, NULL);
     GSE_DebugStr(VERBOSE,TRUE,"FAST: On ground");
     FAST_AtStartOnGround();
-    FASTStatus.OnGround = TRUE;
+    fastStatus.onGround = TRUE;
   }
   /*Transition out of the on ground state
     Could be in air or sensor went invalid, so don't assume "in air"*/
   else if(!TriggerIsActive(CfgMgr_RuntimeConfigPtr()->FASTCfg.on_ground_triggers)
-           && FASTStatus.OnGround)
+           && fastStatus.onGround)
   {
     LogWriteSystem(APP_ID_FAST_WOWEND, LOG_PRIORITY_LOW, 0, 0, NULL);
     GSE_DebugStr(VERBOSE,TRUE,"FAST: Not on ground");
     FAST_AtEndOnGround();
-    FASTStatus.OnGround = FALSE;
+    fastStatus.onGround = FALSE;
   }
 
   /*RECORDING
     Transition into the recording state*/
   if(TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.record_triggers) &&
-     !FASTStatus.Recording)
+     !fastStatus.recording)
   {
     LogWriteSystem(APP_ID_START_OF_RECORDING, LOG_PRIORITY_LOW, 0, 0, NULL);
-    FASTStatus.Recording = TRUE;
+    fastStatus.recording = TRUE;
     GSE_DebugStr(VERBOSE,TRUE,"FAST: Start Record");
     FAST_AtStartOfRecord();
   }
   //Transition out of the recording state
   else if(!TriggerIsActive(CfgMgr_RuntimeConfigPtr()->FASTCfg.record_triggers) &&
-          FASTStatus.Recording)
+          fastStatus.recording)
   {
     DataMgrRecord(FALSE);                      //Signal Data Mgr and wait for
     if(!m_IsRecordBusy)                        //acknowledge
@@ -623,7 +623,7 @@ void FAST_Task(void* pParam)
        LogWriteSystem(APP_ID_END_OF_RECORDING, LOG_PRIORITY_LOW, 0, 0, NULL);
        GSE_DebugStr(VERBOSE,TRUE,"FAST: End Record");
        FAST_AtEndOfRecord();
-       FASTStatus.Recording = FALSE;
+       fastStatus.recording = FALSE;
     }
   }
 
@@ -631,16 +631,16 @@ void FAST_Task(void* pParam)
     Transition into the start engine run or flight state*/
 
   // Save current flight state to test-for-change later.
-  prevFlightState = FASTStatus.InFlight;
+  prevFlightState = fastStatus.inFlight;
 
-  if(FASTStatus.Recording  && !FASTStatus.InFlight)
+  if(fastStatus.recording  && !fastStatus.inFlight)
   {
     GSE_DebugStr(VERBOSE,TRUE,"FAST: Start of Flight/Engine Run");
     FAST_AtStartOfFlight();
-    FASTStatus.InFlight = TRUE;
+    fastStatus.inFlight = TRUE;
   }
   //Transition out of the flight state
-  else if(FASTStatus.OnGround && !FASTStatus.Recording && FASTStatus.InFlight )
+  else if(fastStatus.onGround && !fastStatus.recording && fastStatus.inFlight )
   {
      // Write EOF Log and tell LogMgr to register the returned index so we can perform
      // completion-monitoring.
@@ -649,10 +649,10 @@ void FAST_Task(void* pParam)
                      );
 
      GSE_DebugStr(NORMAL,TRUE,"FAST: End of Flight/Engine Run");
-     FASTStatus.InFlight = FALSE;
+     fastStatus.inFlight = FALSE;
 
-     FASTStatus.DownloadStarted = DataMgrStartDownload();
-     if (FASTStatus.DownloadStarted == TRUE)
+     fastStatus.downloadStarted = DataMgrStartDownload();
+     if (fastStatus.downloadStarted == TRUE)
      {
         LogWriteSystem(APP_ID_START_OF_DOWNLOAD, LOG_PRIORITY_LOW, 0, 0, NULL);
         GSE_DebugStr(NORMAL,TRUE,"FAST: Start ACS Download");
@@ -666,55 +666,55 @@ void FAST_Task(void* pParam)
   /*DOWNLOAD ACS(s)
     Transition into the download state */
   if (!TriggerIsActive( CfgMgr_RuntimeConfigPtr()->FASTCfg.record_triggers) &&
-      !FASTStatus.Recording && FASTStatus.DownloadStarted && FASTStatus.OnGround &&
+      !fastStatus.recording && fastStatus.downloadStarted && fastStatus.onGround &&
       (FALSE == DataMgrDownloadingACS()))
   {
      LogWriteSystem(APP_ID_END_OF_DOWNLOAD, LOG_PRIORITY_LOW, 0, 0, NULL);
      GSE_DebugStr(NORMAL,TRUE,"FAST: End ACS Download");
-     FASTStatus.DownloadStarted = FALSE;
+     fastStatus.downloadStarted = FALSE;
      // Since a flight was detected and a normal download was performed
      // reset the flag so the auto-upload will initiate this at least once
-     FASTStatus.AutoDownload    = FALSE;
+     fastStatus.autoDownload    = FALSE;
      FAST_AtEndOfDownload();
   }
 
 
   // On change of flight state, notify CBIT Mgr.
-  if (prevFlightState != FASTStatus.InFlight)
+  if (prevFlightState != fastStatus.inFlight)
   {
-    CBITMgr_UpdateFlightState(FASTStatus.InFlight);
+    CBITMgr_UpdateFlightState(fastStatus.inFlight);
   }
 
   /*MSSIM running
     Transition into the MSSIM running state*/
-  if(MSSC_GetIsAlive() && !FASTStatus.MssimRunning)
+  if(MSSC_GetIsAlive() && !fastStatus.mssimRunning)
   {
     GSE_DebugStr(NORMAL, TRUE, "FAST: MSSIM is alive");
     FAST_AtMSSIMRunning();
-    FASTStatus.MssimRunning = TRUE;
+    fastStatus.mssimRunning = TRUE;
   }
   //Transition out of the MSSIM running state
-  else if(!MSSC_GetIsAlive() && FASTStatus.MssimRunning)
+  else if(!MSSC_GetIsAlive() && fastStatus.mssimRunning)
   {
     GSE_DebugStr(NORMAL, TRUE, "FAST: MSSIM not detected");
     FAST_AtMSSIMLost();
-    FASTStatus.MssimRunning = FALSE;
+    fastStatus.mssimRunning = FALSE;
   }
 
   /*VPN Connected
     Transition into the VPN*/
-  if(MSSC_GetIsVPNConnected() && !FASTStatus.IsVPNConnected)
+  if(MSSC_GetIsVPNConnected() && !fastStatus.isVPNConnected)
   {
     GSE_DebugStr(NORMAL,TRUE,"FAST: VPN connected");
     FAST_AtVPNConnected();
-    FASTStatus.IsVPNConnected = TRUE;
+    fastStatus.isVPNConnected = TRUE;
   }
   //Transition out of the VPN connected
-  else if(!MSSC_GetIsVPNConnected() && FASTStatus.IsVPNConnected)
+  else if(!MSSC_GetIsVPNConnected() && fastStatus.isVPNConnected)
   {
     GSE_DebugStr(NORMAL,TRUE,"FAST: VPN disconnected");
     FAST_AtVPNNotConnected();
-    FASTStatus.IsVPNConnected = FALSE;
+    fastStatus.isVPNConnected = FALSE;
   }
 
   /*Declare log file transfer active and hold the battery latch if:
@@ -723,10 +723,10 @@ void FAST_Task(void* pParam)
     2: There are files not verified on the Ground Server, and the VPN
        connection has been established.
   */
-  FASTStatus.LogTransferToGSActive =
-    ( (!FASTStatus.IsVPNConnected &&
-       (CM_GetTickCount() < FASTStatus.LogTransferToGSNoVPNTO) ) ||
-      (FASTStatus.IsVPNConnected && (UploadMgr_GetFilesPendingRT() != 0) ) );
+  fastStatus.logTransferToGSActive =
+    ( (!fastStatus.isVPNConnected &&
+       (CM_GetTickCount() < fastStatus.logTransferToGSNoVPNTO) ) ||
+      (fastStatus.isVPNConnected && (UploadMgr_GetFilesPendingRT() != 0) ) );
 
     FAST_DioControl();
 }
@@ -797,33 +797,36 @@ void FAST_WatchdogTask2(void* pParam)
  *              between this task and the FAST Mgr task.
  *
  *****************************************************************************/
+static
 void FAST_UploadCheckTask(void* pParam)
 {
   FASTMGR_AUTO_UL_TASK_DATA* task = pParam;
   static BOOLEAN upload_immediate_after_download = FALSE;
   INT32 int_level;
 
-  task->TimeElapsedS += 1;
+  task->timeElapsedS += 1;
 
   //If auto upload is enabled
   if(0 != CfgMgr_RuntimeConfigPtr()->FASTCfg.auto_ul_per_s)
   {
-    if((CfgMgr_RuntimeConfigPtr()->FASTCfg.auto_ul_per_s <= task->TimeElapsedS) ||
+    if((CfgMgr_RuntimeConfigPtr()->FASTCfg.auto_ul_per_s <= task->timeElapsedS) ||
         upload_immediate_after_download )
     {
       // Start an auto-download only if the system is not already downloading,
       // not recording, not already uploading and has not tried to auto-download before
-      if (!FASTStatus.AutoDownload && !DataMgrDownloadingACS() &&
+      if (!fastStatus.autoDownload && !DataMgrDownloadingACS() &&
           !m_IsRecordBusy    && !UploadMgr_IsUploadInProgress())
       {
-        FASTStatus.AutoDownload = DataMgrStartDownload();
-        upload_immediate_after_download = FASTStatus.AutoDownload;
+        upload_immediate_after_download = DataMgrStartDownload();
+        int_level = __DIR();
+        fastStatus.autoDownload = upload_immediate_after_download;
+        __RIR(int_level);
       }
 
-      task->TimeElapsedS = 0;
+      task->timeElapsedS = 0;
 
       int_level = __DIR();
-      if(!FASTStatus.Recording && !UploadMgr_IsUploadInProgress() &&
+      if(!fastStatus.recording && !UploadMgr_IsUploadInProgress() &&
          !DataMgrDownloadingACS() && MSSC_GetIsAlive())
       {
         UploadMgr_StartUpload(UPLOAD_START_AUTO);
@@ -836,7 +839,7 @@ void FAST_UploadCheckTask(void* pParam)
   {
     //Clear time elapsed while configuration has the
     //auto-upload disabled.
-    task->TimeElapsedS = 0;
+    task->timeElapsedS = 0;
   }
 }
 
@@ -910,7 +913,7 @@ void FAST_DioControl(void)
     //LED off states
     case MSSC_STS_NOT_VLD:    //OFF
       // Use local RF Power State SRS-3186
-      DIO_SetPin( LED_STS, FASTStatus.RfGsmEnable ? DIO_SetHigh : DIO_SetLow);
+      DIO_SetPin( LED_STS, fastStatus.rfGsmEnable ? DIO_SetHigh : DIO_SetLow);
       break;
 
     case MSSC_STS_OFF:        //OFF
@@ -1057,10 +1060,11 @@ void FAST_AtStartOfFlight(void)
  * Notes:
  *
  *****************************************************************************/
+static
 void FAST_AtEndOfFlight(void)
 {
   UploadMgr_SetUploadEnable(TRUE);
-  AutoUploadTaskData.TimeElapsedS = 0;  //Reset seconds count for auto-ul
+  autoUploadTaskData.timeElapsedS = 0;  //Reset seconds count for auto-ul
   TmTaskEnable(FAST_UL_Chk, TRUE);      //re-enable auto upload task
   UploadMgr_StartUpload(UPLOAD_START_POST_FLIGHT);
 }
@@ -1097,6 +1101,7 @@ void FAST_AtStartOfRecord(void)
  * Notes:
  *
  *****************************************************************************/
+static
 void FAST_AtEndOfRecord(void)
 {
 }
@@ -1113,6 +1118,7 @@ void FAST_AtEndOfRecord(void)
  * Notes:
  *
  *****************************************************************************/
+static
 void FAST_AtEndOfDownload(void)
 {
   UploadMgr_SetUploadEnable(TRUE);
@@ -1137,7 +1143,7 @@ void FAST_AtStartOnGround(void)
 {
   //Tell wireless mgr FAST is on the ground
   MSSC_SetIsOnGround(TRUE);
-  FASTStatus.CommandedRfEnb = TRUE;
+  fastStatus.commandedRfEnb = TRUE;
 }
 
 /******************************************************************************
@@ -1158,7 +1164,7 @@ void FAST_AtEndOnGround(void)
 {
   //Tell wireless mgr FAST is not on the ground
   MSSC_SetIsOnGround(FALSE);
-  FASTStatus.CommandedRfEnb = FALSE;
+  fastStatus.commandedRfEnb = FALSE;
   // Cancel any downloads in progress
   DataMgrStopDownload();
 }
@@ -1262,12 +1268,12 @@ void FAST_RfGsmEnable(void)
   BOOLEAN sysCondOk = (BOOLEAN)Flt_GetSystemStatus() != STA_FAULT;
   BOOLEAN wow = DIO_ReadPin( WOW);
 
-  FASTStatus.RfGsmEnable = (gsmOverride || sysCondOk) &&
-                           FASTStatus.CommandedRfEnb &&
+  fastStatus.rfGsmEnable = (gsmOverride || sysCondOk) &&
+                           fastStatus.commandedRfEnb &&
                            wow;
 
   // Output the computed value to the Dout Pin
-  DIO_SetPin(GSMEnb, FASTStatus.RfGsmEnable ? DIO_SetHigh : DIO_SetLow);
+  DIO_SetPin(GSMEnb, fastStatus.rfGsmEnable ? DIO_SetHigh : DIO_SetLow);
 }
 
 /******************************************************************************
@@ -1289,13 +1295,13 @@ void FAST_WlanPowerEnable(void)
   BOOLEAN wow = DIO_ReadPin( WOW);
   BOOLEAN wowOverride = DIO_ReadPin( WLAN_WOW_Enb);
 
-  FASTStatus.WlanPowerEnable = ((wlanOverride || sysCondOk) &&
-                                FASTStatus.CommandedRfEnb &&
+  fastStatus.wlanPowerEnable = ((wlanOverride || sysCondOk) &&
+                                fastStatus.commandedRfEnb &&
                                 wow) ||
                                 wowOverride;
 
   // Output the computed value to the Dout Pin
-  DIO_SetPin(WLANEnb, FASTStatus.WlanPowerEnable ? DIO_SetHigh : DIO_SetLow);
+  DIO_SetPin(WLANEnb, fastStatus.wlanPowerEnable ? DIO_SetHigh : DIO_SetLow);
 }
 
 
@@ -1332,7 +1338,7 @@ void FAST_TxTestTask(void* pParam)
   static INT32 numFilesPendingRoundTrip;
   CHAR  gsm_str[MSCP_MAX_STRING_SIZE];
 
-  switch(m_FastTxTest.State)
+  switch(m_FastTxTest.state)
   {
     case FAST_TXTEST_STATE_STOPPED:
       break;
@@ -1342,7 +1348,7 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((Flt_GetSystemStatus() != STA_FAULT),//Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.SysCon,               //Test Result loc.
+                        &m_FastTxTest.sysCon,               //Test Result loc.
                         FAST_TXTEST_STATE_WOWDISC,          //Next test after pass
                         FAST_TXTEST_SYSCON_FAIL_STR );      //Fail desc if test fails
       break;
@@ -1351,16 +1357,16 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((DIO_ReadPin( WOW) == TRUE),        //Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.WowDisc,              //Test Result loc.
+                        &m_FastTxTest.wowDisc,              //Test Result loc.
                         FAST_TXTEST_STATE_ONGND,            //Next test after pass
                         FAST_TXTEST_WOWDIS_FAIL_STR );      //Fail desc if test fails
       break;
 
     case FAST_TXTEST_STATE_ONGND:
-      FAST_DoTxTestTask((FASTStatus.CommandedRfEnb == TRUE),//Test Condition
+      FAST_DoTxTestTask((fastStatus.commandedRfEnb == TRUE),//Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.OnGround,             //Test Result loc.
+                        &m_FastTxTest.onGround,             //Test Result loc.
                         FAST_TXTEST_STATE_REC,              //Next test after pass
                         FAST_TXTEST_ONGRND_FAIL_STR );      //Fail desc if test fails
       break;
@@ -1369,7 +1375,7 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((DataMgrRecordFinished() == TRUE),  //Test Condition
                         0,                                  //Test Timeout
                         0,                                  //Test Start time
-                        &m_FastTxTest.Record,               //Test Result loc.
+                        &m_FastTxTest.record,               //Test Result loc.
                         FAST_TXTEST_STATE_MSRDY,            //Next test after pass
                         FAST_TXTEST_RECORD_FAIL_STR );      //Fail desc if test fails
       break;
@@ -1378,7 +1384,7 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((MSSC_GetIsAlive() == TRUE),        //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.tx_test_msrdy_to, //Test Timeout
                         testStart,                          //Test Start time
-                        &m_FastTxTest.MsReady,              //Test Result loc.
+                        &m_FastTxTest.msReady,              //Test Result loc.
                         FAST_TXTEST_STATE_SIMRDY,           //Next test after pass
                         FAST_TXTEST_MSREDY_FAIL_STR );      //Fail desc if test fails
       break;
@@ -1390,7 +1396,7 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((UINT32_MAX == strtoul(gsm_str,NULL,10)) ,//Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.tx_test_SIM_rdy_to, //Test Timeout
                         testStart,                        //Test Start time
-                        &m_FastTxTest.SIMReady,           //Test Result loc.
+                        &m_FastTxTest.simReady,           //Test Result loc.
                         FAST_TXTEST_STATE_GSM,            //Next test after pass
                         FAST_TXTEST_SIMCRD_FAIL_STR );    //Fail desc if test fails
       break;
@@ -1404,15 +1410,15 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((NULL != strstr(gsm_str,"dB)")),  //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.tx_test_GSM_rdy_to, //Test Timeout
                         testStart,                        //Test Start time
-                        &m_FastTxTest.GSMSignal,          //Test Result loc.
+                        &m_FastTxTest.gsmSignal,          //Test Result loc.
                         FAST_TXTEST_STATE_VPN,            //Next test after pass
                         FAST_TXTEST_GSMSIG_FAIL_STR );    //Fail desc if test fails
       //After test passes, change test status to show special GSM pass message
-      if(m_FastTxTest.State == FAST_TXTEST_STATE_VPN)
+      if(m_FastTxTest.state == FAST_TXTEST_STATE_VPN)
       {
-        snprintf(m_FastTxTest.GSMPassStr,sizeof(m_FastTxTest.GSMPassStr)
+        snprintf(m_FastTxTest.gsmPassStr,sizeof(m_FastTxTest.gsmPassStr)
             ,"PASS %s",strchr(gsm_str,'('));
-        m_FastTxTest.GSMSignal = FAST_TXTEST_GSMPASS;
+        m_FastTxTest.gsmSignal = FAST_TXTEST_GSMPASS;
       }
       break;
 
@@ -1420,15 +1426,15 @@ void FAST_TxTestTask(void* pParam)
       FAST_DoTxTestTask((MSSC_GetIsVPNConnected()),       //Test Condition
                         CfgMgr_RuntimeConfigPtr()->FASTCfg.tx_test_VPN_rdy_to, //Test Timeout
                         testStart,                        //Test Start time
-                        &m_FastTxTest.VPNStatus,          //Test Result loc.
+                        &m_FastTxTest.vpnStatus,          //Test Result loc.
                         FAST_TXTEST_STATE_UL,             //Next test after pass
                         FAST_TXTEST_VPNSTA_FAIL_STR );    //Fail desc if test fails
 
       //After test passes, start file upload.
-      if(m_FastTxTest.State == FAST_TXTEST_STATE_UL)
+      if(m_FastTxTest.state == FAST_TXTEST_STATE_UL)
       {
         numFilesPendingRoundTrip = -1;
-        m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOMS;
+        m_FastTxTest.ulStatus = FAST_TXTEST_MOVELOGSTOMS;
         UploadMgr_StartUpload(UPLOAD_START_TXTEST);
       }
       break;
@@ -1446,7 +1452,7 @@ void FAST_TxTestTask(void* pParam)
       break;
 
     default:
-      FATAL("Unknown TxTaskState %d",m_FastTxTest.State);
+      FATAL("Unknown TxTaskState %d",m_FastTxTest.state);
       break;
   }
 }
@@ -1482,27 +1488,27 @@ void FAST_TxTestStateUL (INT32 *num_files_pending_round_trip)
       if(!UploadMgr_IsUploadInProgress())
       {
          //After upload, record the number of files waiting for round trip
-         snprintf(m_FastTxTest.MoveLogsStr,sizeof(m_FastTxTest.MoveLogsStr),
+         snprintf(m_FastTxTest.moveLogsStr,sizeof(m_FastTxTest.moveLogsStr),
                   "MoveLogsToGround 00%%");
          *num_files_pending_round_trip = UploadMgr_GetNumFilesPendingRT();
          //Preventing div/0
          *num_files_pending_round_trip = *num_files_pending_round_trip == 0 ?
                                     1 : *num_files_pending_round_trip;
-         m_FastTxTest.ULStatus = FAST_TXTEST_MOVELOGSTOGROUND;
+         m_FastTxTest.ulStatus = FAST_TXTEST_MOVELOGSTOGROUND;
       }
    }
    else
    {
       numFilesStillPendingRoundTrip = UploadMgr_GetNumFilesPendingRT();
-      snprintf(m_FastTxTest.MoveLogsStr,sizeof(m_FastTxTest.MoveLogsStr),
+      snprintf(m_FastTxTest.moveLogsStr,sizeof(m_FastTxTest.moveLogsStr),
                "MoveLogsToGround %02d%%",
                PERCENT_CONST - (numFilesStillPendingRoundTrip * PERCENT_CONST)/
                *num_files_pending_round_trip);
 
       if(numFilesStillPendingRoundTrip == 0)
       {
-         m_FastTxTest.ULStatus = FAST_TXTEST_PASS;
-         m_FastTxTest.State = FAST_TXTEST_STATE_PASS;
+         m_FastTxTest.ulStatus = FAST_TXTEST_PASS;
+         m_FastTxTest.state = FAST_TXTEST_STATE_PASS;
       }
    }
 }
@@ -1516,7 +1522,7 @@ void FAST_TxTestStateUL (INT32 *num_files_pending_round_trip)
 *
 *
 * Parameters:  BOOLEAN  Condition
-*              UINT32   Timeout
+*              UINT32   timeout
 *              INT32    StartTime_s
 *              FAST_TXTEST_TEST_STATUS* TestStatus
 *              FAST_TXTEST_TASK_STATE   NextTest
@@ -1528,7 +1534,7 @@ void FAST_TxTestStateUL (INT32 *num_files_pending_round_trip)
 *
 *****************************************************************************/
 static
-void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, UINT32 StartTime_s,
+void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
       FAST_TXTEST_TEST_STATUS* TestStatus, FAST_TXTEST_TASK_STATE NextTest,
       CHAR* FailStr )
 {
@@ -1536,36 +1542,36 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, UINT32 StartTime_s,
   //If the test condition is not true, check timeout
   if(!Condition)
   {  //Timeout not zero, then check timeout
-    if(Timeout != 0)
+    if(timeout != 0)
     {
       elapsed_s = (CM_GetTickCount()/TICKS_PER_SEC)-StartTime_s;
-      if(elapsed_s > Timeout)
+      if(elapsed_s > timeout)
       {
         //Timeout elapsed, fail.
-        strncpy_safe(m_FastTxTest.FailReason,
-          sizeof(m_FastTxTest.FailReason),FailStr,_TRUNCATE);
+        strncpy_safe(m_FastTxTest.failReason,
+          sizeof(m_FastTxTest.failReason),FailStr,_TRUNCATE);
         *TestStatus = FAST_TXTEST_FAIL;
-        m_FastTxTest.State = FAST_TXTEST_STATE_FAIL;
+        m_FastTxTest.state = FAST_TXTEST_STATE_FAIL;
       }
       else
       {  //Compute percentage of timeout elapsed and set this test to InProgress
         *TestStatus = FAST_TXTEST_INPROGRESS;
-        snprintf(m_FastTxTest.InProgressStr,sizeof(m_FastTxTest.InProgressStr),
-                 "InProgress %02d%%",(elapsed_s * PERCENT_CONST)/Timeout);
+        snprintf(m_FastTxTest.inProgressStr,sizeof(m_FastTxTest.inProgressStr),
+                 "InProgress %02d%%",(elapsed_s * PERCENT_CONST)/timeout);
       }
     }
     else
     {  //No timeout specified, and condition is not true so this test fails
-      strncpy_safe(m_FastTxTest.FailReason,
-        sizeof(m_FastTxTest.FailReason),FailStr,_TRUNCATE);
+      strncpy_safe(m_FastTxTest.failReason,
+        sizeof(m_FastTxTest.failReason),FailStr,_TRUNCATE);
       *TestStatus = FAST_TXTEST_FAIL;
-      m_FastTxTest.State = FAST_TXTEST_STATE_FAIL;
+      m_FastTxTest.state = FAST_TXTEST_STATE_FAIL;
     }
   }
   else
   { //Condition true, test passes
     *TestStatus = FAST_TXTEST_PASS;
-    m_FastTxTest.State = NextTest;
+    m_FastTxTest.state = NextTest;
   }
 
 }
@@ -1574,6 +1580,16 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 Timeout, UINT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 123  *****************
+ * User: John Omalley Date: 12-12-20   Time: 5:00p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Update
+ * 
+ * *****************  Version 122  *****************
+ * User: John Omalley Date: 12-12-20   Time: 4:12p
+ * Updated in $/software/control processor/code/application
+ * SCR 1197 - Code Review Updates
  * 
  * *****************  Version 121  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 2:56p
