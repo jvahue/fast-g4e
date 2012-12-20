@@ -86,8 +86,16 @@
 
 #define USER_ACTION_TOKEN "<USR_ACTION>"
 
-#define MIN_HEX_STRING  3
-#define MAX_HEX_STRING 34
+#define BITS_PER_WORD       32
+#define HEX_STRING_PREF_LEN 2  // skip over leading "0x"
+#define HEX_CHARS_PER_WORD  8  // number of hex char per UINT32 ("00000000" -> "FFFFFFFF")
+
+#define HEX_STR_BUFFER_SIZE (HEX_STRING_PREF_LEN + HEX_CHARS_PER_WORD)
+#define MIN_HEX_STRING      (HEX_STRING_PREF_LEN + 1)
+#define MAX_HEX_STRING      (HEX_STRING_PREF_LEN + (4*HEX_CHARS_PER_WORD))
+
+#define BASE_10 10
+#define BASE_16 16
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -121,7 +129,7 @@ static UINT16           checkSum;                 // Running checksum value.
 static BOOLEAN          rspBuffOverflowDetected;  // The micro-server response msg is too long
 static USER_MSG_SOURCES msgSource;                // source of the current command.
 static UINT32           msgTag;                   // tag passed by caller of current command.
-static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs 
+static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs
                                                             // to Micro-server
 
 
@@ -129,17 +137,17 @@ static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for buildi
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static void          User_ProcMsgTask             ( void *pBlock );
-static BOOLEAN       User_PutMsg                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
+static BOOLEAN       User_PutMsg                  ( const INT8* Msg, USER_MSG_SOURCES Source,
                                                     UINT32 Tag);
-static void          User_PutRsp                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
+static void          User_PutRsp                  ( const INT8* Msg, USER_MSG_SOURCES Source,
                                                     UINT32 Tag );
-static void          User_ExecuteCmdMsg           ( INT8* msg, USER_MSG_SOURCES source, 
+static void          User_ExecuteCmdMsg           ( INT8* msg, USER_MSG_SOURCES source,
                                                     UINT32 tag );
 static INT32         User_ExtractIndex            ( INT8* msg );
 static INT8*         User_ExtractAssign           ( INT8* msg );
-static USER_MSG_TBL* User_TraverseCmdTables       ( INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, 
+static USER_MSG_TBL* User_TraverseCmdTables       ( INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl,
                                                     INT8* TokPtr );
-static BOOLEAN       User_CvtSetStr               ( USER_DATA_TYPE Type, INT8* SetStr, 
+static BOOLEAN       User_CvtSetStr               ( USER_DATA_TYPE Type, INT8* SetStr,
                                                     void **SetPtr, USER_ENUM_TBL* MsgEnumTbl,
                                                     USER_RANGE *Min, USER_RANGE *Max );
 static BOOLEAN       User_ExecuteSingleMsg        ( USER_MSG_TBL* MsgTbl,
@@ -147,17 +155,17 @@ static BOOLEAN       User_ExecuteSingleMsg        ( USER_MSG_TBL* MsgTbl,
                                                     INT32 Index, INT8* SetStr, INT8* RspStr,
                                                     UINT32 RspLen );
 static void          User_ExecuteMultipleGetMsg   ( USER_MSG_TBL* MsgTblPtr,
-                                                    USER_MSG_SOURCES source, 
+                                                    USER_MSG_SOURCES source,
                                                     INT32 Index, INT8* rsp, UINT32 len );
 static BOOLEAN       User_ValidateChecksum        ( INT8 *str );
 static void          User_AppendChecksum          ( INT8 *str );
-static BOOLEAN       User_ValidateMessage         ( USER_MSG_TBL* UserMsg, 
+static BOOLEAN       User_ValidateMessage         ( USER_MSG_TBL* UserMsg,
                                                     USER_MSG_SOURCES source,
-                                                    INT32 Index, INT8* RspStr, INT8* SetStr, 
+                                                    INT32 Index, INT8* RspStr, INT8* SetStr,
                                                     UINT32 Len );
 static BOOLEAN       User_GSEMessageHandler       ( INT8* msg );
 static BOOLEAN       User_MSMessageHandler        ( void* Data, UINT16 Size, UINT32 Sequence );
-static void          User_SetMinMax               ( USER_RANGE *Min, USER_RANGE *Max, 
+static void          User_SetMinMax               ( USER_RANGE *Min, USER_RANGE *Max,
                                                     USER_DATA_TYPE Type );
 static void          User_ConversionErrorResponse ( INT8* RspStr,USER_RANGE Min,
                                                     USER_RANGE Max, USER_DATA_TYPE Type,
@@ -169,19 +177,19 @@ static BOOLEAN       User_ShowAllConfig           ( void );
 static BOOLEAN       User_GetParamValue           ( USER_MSG_TBL* MsgTbl,
                                                     USER_MSG_SOURCES source,
                                                     INT32 Index, INT8* RspStr, UINT32 Len );
-static void          User_LogUserActivity         ( CHAR* cmdString, CHAR* valuePrev, 
+static void          User_LogUserActivity         ( CHAR* cmdString, CHAR* valuePrev,
                                                     CHAR* valueNew );
 static BOOLEAN       User_AuthenticateModeRequest ( const INT8* msg, UINT8 mode );
 
-static BOOLEAN       User_SetBitArrayFromHexString( USER_DATA_TYPE Type, INT8* SetStr, 
-                                                    void **SetPtr, 
+static BOOLEAN       User_SetBitArrayFromHexString( USER_DATA_TYPE Type, INT8* SetStr,
+                                                    void **SetPtr,
                                                     USER_RANGE *Min, USER_RANGE *Max );
 
 static BOOLEAN       User_CvtGetBitListStr         ( USER_DATA_TYPE Type, INT8* GetStr,
                                                      UINT32 Len, void* GetPtr );
 
-static BOOLEAN       User_SetBitArrayFromList      ( USER_DATA_TYPE Type, INT8* SetStr, 
-                                                     void **SetPtr, 
+static BOOLEAN       User_SetBitArrayFromList      ( USER_DATA_TYPE Type, INT8* SetStr,
+                                                     void **SetPtr,
                                                      USER_RANGE *Min, USER_RANGE *Max );
 
 static BOOLEAN       User_SetBitArrayFromIntegerValue ( USER_DATA_TYPE Type,
@@ -300,7 +308,7 @@ void User_AddRootCmd(USER_MSG_TBL* NewRootPtr)
  * Notes:
  *
  *****************************************************************************/
-static 
+static
 BOOLEAN User_GSEMessageHandler(INT8* msg)
 {
   return User_PutMsg(msg,USER_MSG_SOURCE_GSE,0);
@@ -411,7 +419,7 @@ BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
  * Notes:
  *
  *****************************************************************************/
-static 
+static
 void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
   CHAR chkstr[32];
@@ -826,7 +834,7 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
  * Notes:
  *
  *****************************************************************************/
-static 
+static
 BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                               INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
   {
@@ -1274,20 +1282,20 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
 
     // Unhandled USER types for this operation
 	//lint -fallthrough
-    case USER_TYPE_128_LIST:		 
-    case USER_TYPE_ACTION:		 
-    case USER_TYPE_ACT_LIST:		 
-    case USER_TYPE_BOOLEAN:		 
-    case USER_TYPE_END:	
-    case USER_TYPE_ENUM:	
-    case USER_TYPE_FLOAT:	
-    case USER_TYPE_FLOAT64:	
-    case USER_TYPE_INT32:	
-    case USER_TYPE_NONE:	
-    case USER_TYPE_ONOFF:	
-    case USER_TYPE_SNS_LIST:	
-    case USER_TYPE_STR:	
-    case USER_TYPE_YESNO:	
+    case USER_TYPE_128_LIST:
+    case USER_TYPE_ACTION:
+    case USER_TYPE_ACT_LIST:
+    case USER_TYPE_BOOLEAN:
+    case USER_TYPE_END:
+    case USER_TYPE_ENUM:
+    case USER_TYPE_FLOAT:
+    case USER_TYPE_FLOAT64:
+    case USER_TYPE_INT32:
+    case USER_TYPE_NONE:
+    case USER_TYPE_ONOFF:
+    case USER_TYPE_SNS_LIST:
+    case USER_TYPE_STR:
+    case USER_TYPE_YESNO:
     default:
       // Do nothing, these types are ignored!
       break;
@@ -2348,7 +2356,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr;
 
       //lint -fallthrough
-	  case USER_TYPE_ENUM: 
+	  case USER_TYPE_ENUM:
       case USER_TYPE_UINT32:
       case USER_TYPE_HEX32:
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
@@ -2363,7 +2371,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
-      
+
 	  // lint -fallthrough
       case USER_TYPE_BOOLEAN:
       case USER_TYPE_YESNO:
@@ -2398,7 +2406,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_END:
         // lint -fallthrough
       default:
-        ASSERT_MESSAGE(  DataType < USER_TYPE_END, 
+        ASSERT_MESSAGE(  DataType < USER_TYPE_END,
                          "Unrecognized USER_DATA_TYPE: %d", DataType);
         break;
     } // End of switch (DataType)
@@ -2677,7 +2685,7 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
   UINT32 i;
   UINT32 arraySizeWords;
   UINT32 displayHexStart;
-  CHAR   numStr[5];
+  CHAR   numStr[5];  // max of 5 digits for an integer numbers
   CHAR   tempOutput[GSE_GET_LINE_BUFFER_SIZE];
   CHAR   bufHex128[16 * 2 + 3 ]; // 16 bytes x 2 chars per byte + "0x"  + null
 
@@ -2689,13 +2697,13 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 
   if (Type == USER_TYPE_ACT_LIST)
   {
-    arraySizeWords  = 1;
-    displayHexStart = 0;
+    arraySizeWords  = 1;  // size of array for USER_TYPE_ACT_LIST
+    displayHexStart = 0;  // start of string offset
   }
   else
   {
     arraySizeWords = sizeof(BITARRAY128) / sizeof(UINT32);
-    displayHexStart = 3;
+    displayHexStart = HEX_STRING_PREF_LEN + 1; // hex string digits begins after leading "0x"
   }
 
   // Display a string containing both the hex and enumeration string:
@@ -2711,8 +2719,8 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 
   // DISPLAY THE HEX STRING
   destPtr = bufHex128;
-  strncpy_safe(destPtr, 3, "0x", _TRUNCATE);
-  destPtr += 2;
+  strncpy_safe(destPtr, HEX_STRING_PREF_LEN + 1, "0x", _TRUNCATE);
+  destPtr += HEX_STRING_PREF_LEN;
 
   // Display order: 127...0
   // Read the array from back to front and convert each word
@@ -2722,7 +2730,7 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
   {
     tempWord = word32Ptr[displayHexStart];
     snprintf( destPtr, sizeof(bufHex128), "%08X", tempWord );
-    destPtr += 8;
+    destPtr += HEX_CHARS_PER_WORD;
     displayHexStart -= 1;
   }
   strncpy_safe(tempOutput, sizeof(tempOutput), bufHex128, _TRUNCATE);
@@ -2736,6 +2744,8 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
   destPtr = tempOutput + strlen(tempOutput);
 
   SuperStrcat(destPtr, " [", sizeof(tempOutput));
+
+  // Move ptr after " [" to fill with the converted string
   destPtr += 2;
 
   if ( bEmptyArray )
@@ -2747,7 +2757,7 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
   else
   {
     // Display a list of integer values, one for each "on" bit.
-    for( i = 0; i < (arraySizeWords*32); ++i )
+    for( i = 0; i < (arraySizeWords * BITS_PER_WORD); ++i )
     {
       if (GetBit((INT32)i, (UINT32*)GetPtr, sizeof(BITARRAY128) ))
       {
@@ -2796,9 +2806,8 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   CHAR*   ptr;
   CHAR*   end;
   INT32   copyLen;
-  INT32   base = 16;
-  CHAR    hexStrBuffer[11];             // Size: "0x" + 8 Hex digits + '\0'
-  CHAR    reverseBuffer[11];
+  CHAR    hexStrBuffer[HEX_STR_BUFFER_SIZE+1];
+  CHAR    reverseBuffer[HEX_STR_BUFFER_SIZE+1];
   UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
   INT16   offset = 0;                   // word-offset index into output buffer
   UINT32  inputLen  = strlen( SetStr ); // length of the input string.
@@ -2810,27 +2819,30 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
   {
     // Set a pointer to the end of the input 'SetStr',
     // Skip leading '0x' prefix.
-    inputLen -= 2;
-    ptr = &SetStr[2] + inputLen;
+    inputLen -= HEX_STRING_PREF_LEN;
+    ptr = &SetStr[HEX_STRING_PREF_LEN] + inputLen;
 
     // Process the hex string in R->L order, using up to 8 characters at a time to fill
     // a single 32 bit word of the HEX128 array.
     // (i.e. Big-Endian, the right-most char in string represents bits 0-3 in array entry [0])
     do
     {
-      copyLen = MIN( (ptr - &SetStr[2]),8);
+      copyLen = MIN( (ptr - &SetStr[HEX_STRING_PREF_LEN]), HEX_CHARS_PER_WORD);
       ptr -= copyLen;
 
       // Prepend '0x' into buffer for strtoul, then copy up to 8 chars of hex digits
       // and convert to UINT32.
-      strncpy_safe(hexStrBuffer,sizeof(hexStrBuffer),"0X",2);
-      strncpy_safe(&hexStrBuffer[2], sizeof(hexStrBuffer) - 2, ptr, copyLen);
+      strncpy_safe(hexStrBuffer,sizeof(hexStrBuffer),"0X",HEX_STRING_PREF_LEN);
+      strncpy_safe(&hexStrBuffer[HEX_STRING_PREF_LEN],
+                   sizeof(hexStrBuffer) - HEX_STRING_PREF_LEN,
+                   ptr, copyLen);
 
-      uint_temp = (UINT32)strtoul(hexStrBuffer, &end, base);
+      uint_temp = (UINT32)strtoul(hexStrBuffer, &end, BASE_16);
 
       // Reverse calculated value to verify conversion.
       // need to deal with len of input string in hex case as "0X00FF1234" != "0XFF1234"
-      snprintf( reverseBuffer, 11, "0X%0*X", strlen(hexStrBuffer)-2, uint_temp);
+      snprintf( reverseBuffer, sizeof(reverseBuffer),
+                "0X%0*X", strlen(hexStrBuffer)-HEX_STRING_PREF_LEN, uint_temp);
       if (strcmp( hexStrBuffer, reverseBuffer) == 0)
       {
         destPtr[offset++] = uint_temp;
@@ -2880,12 +2892,12 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
 {
   BOOLEAN bResult;
   UINT32  decValue;
-  CHAR    hexString[11]; // "0X" + 8 hex-chars + 1 null
+  CHAR    hexString[HEX_STR_BUFFER_SIZE+1]; // "0X" + 8 hex-chars + 1 null
   CHAR*   leftOver;
 
   // Convert the input string to decimal integer if possible.
   errno = 0;
-  decValue = strtoul(SetStr, &leftOver, 10);
+  decValue = strtoul(SetStr, &leftOver, BASE_10);
 
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
   // isn't very helpful since that is a also a valid value for a bitarray. Therefore
@@ -2934,10 +2946,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
   INT32   nIndex;
   UINT32  inputLen = strlen( SetStr ); // length of the input string.
 
-  const INT16   base = 10;
-
-  // Verify the string starts with '[' and ends with ']'
-  // and the CSV list is not empty.
+  // Verify the string starts with '[' and ends with ']' and the CSV list is not empty.
   if (SetStr[0] == '[' && SetStr[inputLen - 1] == ']' && inputLen >= 3 )
   {
     // Skip the '[' and Loop until null-terminator is found.
@@ -2958,7 +2967,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
       {
         // Attempt to convert to a base 10 integer and
         // verify within range for this entry.
-        nIndex = strtol(ptr, &end, base );
+        nIndex = strtol(ptr, &end, BASE_10 );
         if (nIndex >= 0 && nIndex < MAX_SENSORS)
         {
           SetBit(nIndex, destPtr, sizeof(BITARRAY128));
@@ -3083,11 +3092,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
- * 
+ *
  * *****************  Version 110  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:31p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 109  *****************
  * User: Contractor V&v Date: 12/10/12   Time: 7:08p
