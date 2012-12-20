@@ -96,8 +96,8 @@
 //This message header is attached to the top of every message
 //added to the message queue.
 typedef struct{
-  USER_MSG_SOURCES Source; // Source of the message (enumeration)
-  UINT32 Tag;              // Allows the caller to "tag" a message with a
+  USER_MSG_SOURCES source; // Source of the message (enumeration)
+  UINT32 tag;              // Allows the caller to "tag" a message with a
                            // 32-bit number that is returned to the PutRsp
                            // routine.
   CHAR cmd[GSE_GET_LINE_BUFFER_SIZE];
@@ -106,83 +106,94 @@ typedef struct{
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-INT32    UserRequest;                        // Messages waiting for processing
-INT32    UserProcessed;                      // Messages processed
-USER_MSG_HEADER userMsgQ[USER_CMD_Q_SIZE];   // queue to hold cmd requests
+static INT32           userRequest;                       // Messages waiting for processing
+static INT32           userProcessed;                     // Messages processed
+static USER_MSG_HEADER userMsgQ[USER_CMD_Q_SIZE];         // queue to hold cmd requests
 
-INT8     UserMsgBuf[USER_MESSAGE_BUF_SIZE];  //FIFO variables to create an
-FIFO     UserMsgQueue;                       // incoming message queue
-USER_MSG_TBL RootCmdTbl[USER_MAX_ROOT_CMDS]; //Starting table for matching user
-                                             //command messages.
+static INT8            userMsgBuf[USER_MESSAGE_BUF_SIZE]; //FIFO variables to create an
+static FIFO            userMsgQueue;                      // incoming message queue
+static USER_MSG_TBL    rootCmdTbl[USER_MAX_ROOT_CMDS];    //Starting table for matching user
+                                                          //command messages.
+static BOOLEAN         userPrivilegedMode;
+static BOOLEAN         userFactoryMode;
 
-BOOLEAN   UserPrivilegedMode;
-BOOLEAN   UserFactoryMode;
-
-static UINT16  CheckSum;                     // Running checksum value.
-static BOOLEAN RspBuffOverflowDetected;      // The micro-server response msg is too long
-static USER_MSG_SOURCES MsgSource;           // source of the current command.
-static UINT32 MsgTag;                        // tag passed by caller of current command.
-static CHAR msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs to Micro-server
+static UINT16           checkSum;                 // Running checksum value.
+static BOOLEAN          rspBuffOverflowDetected;  // The micro-server response msg is too long
+static USER_MSG_SOURCES msgSource;                // source of the current command.
+static UINT32           msgTag;                   // tag passed by caller of current command.
+static CHAR             msBuffer[USER_SINGLE_MSG_MAX_SIZE]; // buffer for building rsp msgs 
+                                                            // to Micro-server
 
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-void      User_ProcMsgTask(void *pBlock);
-BOOLEAN   User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag);
-void      User_ExecuteCmdMsg(INT8* msg, USER_MSG_SOURCES source, UINT32 tag );
-INT32     User_ExtractIndex(INT8* msg);
-INT8*     User_ExtractAssign(INT8* msg);
-USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, INT8* TokPtr);
-BOOLEAN   User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-          USER_ENUM_TBL* MsgEnumTbl,USER_RANGE *Min, USER_RANGE *Max);
-BOOLEAN   User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
-                          INT32 Index,INT8* SetStr,INT8* RspStr,UINT32 RspLen);
-void      User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
-                  USER_MSG_SOURCES source, INT32 Index, INT8* rsp, UINT32 len);
-BOOLEAN   User_ValidateChecksum( INT8 *str );
-void      User_AppendChecksum( INT8 *str );
-BOOLEAN   User_ValidateMessage(USER_MSG_TBL* UserMsg,USER_MSG_SOURCES source,
-                               INT32 Index, INT8* RspStr, INT8* SetStr, UINT32 Len);
-BOOLEAN   User_GSEMessageHandler(INT8* msg);
-BOOLEAN   User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence);
-void      User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type);
-void      User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,
-                                       USER_RANGE Max, USER_DATA_TYPE Type,
-                                       const USER_ENUM_TBL *Enum, UINT32 Len);
+static void          User_ProcMsgTask             ( void *pBlock );
+static BOOLEAN       User_PutMsg                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
+                                                    UINT32 Tag);
+static void          User_PutRsp                  ( const INT8* Msg, USER_MSG_SOURCES Source, 
+                                                    UINT32 Tag );
+static void          User_ExecuteCmdMsg           ( INT8* msg, USER_MSG_SOURCES source, 
+                                                    UINT32 tag );
+static INT32         User_ExtractIndex            ( INT8* msg );
+static INT8*         User_ExtractAssign           ( INT8* msg );
+static USER_MSG_TBL* User_TraverseCmdTables       ( INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, 
+                                                    INT8* TokPtr );
+static BOOLEAN       User_CvtSetStr               ( USER_DATA_TYPE Type, INT8* SetStr, 
+                                                    void **SetPtr, USER_ENUM_TBL* MsgEnumTbl,
+                                                    USER_RANGE *Min, USER_RANGE *Max );
+static BOOLEAN       User_ExecuteSingleMsg        ( USER_MSG_TBL* MsgTbl,
+                                                    USER_MSG_SOURCES source,
+                                                    INT32 Index, INT8* SetStr, INT8* RspStr,
+                                                    UINT32 RspLen );
+static void          User_ExecuteMultipleGetMsg   ( USER_MSG_TBL* MsgTblPtr,
+                                                    USER_MSG_SOURCES source, 
+                                                    INT32 Index, INT8* rsp, UINT32 len );
+static BOOLEAN       User_ValidateChecksum        ( INT8 *str );
+static void          User_AppendChecksum          ( INT8 *str );
+static BOOLEAN       User_ValidateMessage         ( USER_MSG_TBL* UserMsg, 
+                                                    USER_MSG_SOURCES source,
+                                                    INT32 Index, INT8* RspStr, INT8* SetStr, 
+                                                    UINT32 Len );
+static BOOLEAN       User_GSEMessageHandler       ( INT8* msg );
+static BOOLEAN       User_MSMessageHandler        ( void* Data, UINT16 Size, UINT32 Sequence );
+static void          User_SetMinMax               ( USER_RANGE *Min, USER_RANGE *Max, 
+                                                    USER_DATA_TYPE Type );
+static void          User_ConversionErrorResponse ( INT8* RspStr,USER_RANGE Min,
+                                                    USER_RANGE Max, USER_DATA_TYPE Type,
+                                                    const USER_ENUM_TBL *Enum, UINT32 Len );
 
-BOOLEAN   User_CheckForLeafArray(CHAR* UserTableName, CHAR* MsgStr);
-BOOLEAN   User_ShowAllConfig(void);
+static BOOLEAN       User_CheckForLeafArray       ( CHAR* UserTableName, CHAR* MsgStr );
+static BOOLEAN       User_ShowAllConfig           ( void );
 
-BOOLEAN   User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
-                                 INT32 Index, INT8* RspStr, UINT32 Len);
-void      User_LogUserActivity(CHAR* cmdString, CHAR* valuePrev, CHAR* valueNew);
-BOOLEAN   User_AuthenticateModeRequest(const INT8* msg, UINT8 mode);
+static BOOLEAN       User_GetParamValue           ( USER_MSG_TBL* MsgTbl,
+                                                    USER_MSG_SOURCES source,
+                                                    INT32 Index, INT8* RspStr, UINT32 Len );
+static void          User_LogUserActivity         ( CHAR* cmdString, CHAR* valuePrev, 
+                                                    CHAR* valueNew );
+static BOOLEAN       User_AuthenticateModeRequest ( const INT8* msg, UINT8 mode );
 
-static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                             USER_ENUM_TBL* MsgEnumTbl,
-                                             USER_RANGE *Min,USER_RANGE *Max);
+static BOOLEAN       User_SetBitArrayFromHexString( USER_DATA_TYPE Type, INT8* SetStr, 
+                                                    void **SetPtr, 
+                                                    USER_RANGE *Min, USER_RANGE *Max );
 
-static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Len,void* GetPtr);
+static BOOLEAN       User_CvtGetBitListStr         ( USER_DATA_TYPE Type, INT8* GetStr,
+                                                     UINT32 Len, void* GetPtr );
 
-static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                        USER_ENUM_TBL* MsgEnumTbl,
-                                        USER_RANGE *Min,USER_RANGE *Max);
+static BOOLEAN       User_SetBitArrayFromList      ( USER_DATA_TYPE Type, INT8* SetStr, 
+                                                     void **SetPtr, 
+                                                     USER_RANGE *Min, USER_RANGE *Max );
 
-static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                                USER_ENUM_TBL* MsgEnumTbl,
-                                                USER_RANGE *Min,USER_RANGE *Max);
+static BOOLEAN       User_SetBitArrayFromIntegerValue ( USER_DATA_TYPE Type,
+                                                        INT8* SetStr, void **SetPtr,
+                                                        USER_RANGE *Min, USER_RANGE *Max );
 
-static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
-                                  USER_RANGE *Min, USER_RANGE *Max);
-
-
-
+static BOOLEAN       User_BitSetIsValid           ( USER_DATA_TYPE Type, UINT32* destPtr,
+                                                    USER_RANGE *Min, USER_RANGE *Max);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
-
 
 /******************************************************************************
  * Function:    User_Init
@@ -197,14 +208,14 @@ static BOOLEAN User_BitSetIsValid(USER_DATA_TYPE Type, UINT32* destPtr,
  *****************************************************************************/
 void User_Init(void)
 {
-  TCB TaskInfo;
+  TCB tcbTaskInfo;
 
-  UserPrivilegedMode = FALSE;
-  UserFactoryMode    = FALSE;
+  userPrivilegedMode = FALSE;
+  userFactoryMode    = FALSE;
 
 
   //Setup a FIFO queue to hold messages for processing
-  FIFO_Init(&UserMsgQueue,UserMsgBuf,USER_MESSAGE_BUF_SIZE);
+  FIFO_Init(&userMsgQueue,userMsgBuf,USER_MESSAGE_BUF_SIZE);
 
   //Hook into the system-level Monitor unit to receive data
   //from the GSE port.
@@ -213,27 +224,27 @@ void User_Init(void)
   //Hook into micro-server interface for the "User Mgr Cmd"
   MSI_AddCmdHandler(CMD_ID_USER_MGR_MS,User_MSMessageHandler);
 
-  memset(RootCmdTbl, 0, sizeof(RootCmdTbl));
+  memset(rootCmdTbl, 0, sizeof(rootCmdTbl));
 
-  UserRequest = 0;                        //Messages waiting for processing
-  UserProcessed = 0;                      // Messages processed
+  userRequest = 0;                        //Messages waiting for processing
+  userProcessed = 0;                      // Messages processed
   memset( userMsgQ, 0, sizeof(userMsgQ)); // queue to hold cmd requests
 
   //Setup the User task to process new messages
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name), "User Msg Proc", _TRUNCATE);
-  TaskInfo.TaskID         = User_Msg_Proc;
-  TaskInfo.Function       = User_ProcMsgTask;
-  TaskInfo.Priority       = taskInfo[User_Msg_Proc].priority;
-  TaskInfo.Type           = taskInfo[User_Msg_Proc].taskType;
-  TaskInfo.MIFrames       = taskInfo[User_Msg_Proc].MIFframes;
-  TaskInfo.modes          = taskInfo[User_Msg_Proc].modes;
-  TaskInfo.Rmt.InitialMif = taskInfo[User_Msg_Proc].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[User_Msg_Proc].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+  strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name), "User Msg Proc", _TRUNCATE);
+  tcbTaskInfo.TaskID         = User_Msg_Proc;
+  tcbTaskInfo.Function       = User_ProcMsgTask;
+  tcbTaskInfo.Priority       = taskInfo[User_Msg_Proc].priority;
+  tcbTaskInfo.Type           = taskInfo[User_Msg_Proc].taskType;
+  tcbTaskInfo.MIFrames       = taskInfo[User_Msg_Proc].MIFframes;
+  tcbTaskInfo.modes          = taskInfo[User_Msg_Proc].modes;
+  tcbTaskInfo.Rmt.InitialMif = taskInfo[User_Msg_Proc].InitialMif;
+  tcbTaskInfo.Rmt.MifRate    = taskInfo[User_Msg_Proc].MIFrate;
+  tcbTaskInfo.Enabled        = TRUE;
+  tcbTaskInfo.Locked         = FALSE;
+  tcbTaskInfo.pParamBlock    = NULL;
+  TmTaskCreate (&tcbTaskInfo);
 }
 
 /******************************************************************************
@@ -261,15 +272,19 @@ void User_AddRootCmd(USER_MSG_TBL* NewRootPtr)
   UINT32 i = 0;
 
   //Search for an empty slot in the root cmd table
-  while(( i < USER_MAX_ROOT_CMDS ) && (RootCmdTbl[i].MsgStr != NULL))
+  while(( i < USER_MAX_ROOT_CMDS ) && (rootCmdTbl[i].MsgStr != NULL))
   {
     i++;
   }
 
   ASSERT( i < USER_MAX_ROOT_CMDS);
 
-  memcpy( &RootCmdTbl[i], NewRootPtr, sizeof( RootCmdTbl[0]));
+  memcpy( &rootCmdTbl[i], NewRootPtr, sizeof( rootCmdTbl[0]));
 }
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
 
 /******************************************************************************
  * Function:    User_GSEMessageHandler
@@ -285,6 +300,7 @@ void User_AddRootCmd(USER_MSG_TBL* NewRootPtr)
  * Notes:
  *
  *****************************************************************************/
+static 
 BOOLEAN User_GSEMessageHandler(INT8* msg)
 {
   return User_PutMsg(msg,USER_MSG_SOURCE_GSE,0);
@@ -297,7 +313,9 @@ BOOLEAN User_GSEMessageHandler(INT8* msg)
  *              them into the User command queue.  This function matches the MS
  *              Interface command handler callback type.
  *
- * Parameters:
+ * Parameters:  [in] Data
+ *              [in] Size
+ *              [in] Sequence
  *
  * Returns:     TRUE: Message added successfully
  *              FALSE: Could not add message, queue is full or message not
@@ -306,6 +324,7 @@ BOOLEAN User_GSEMessageHandler(INT8* msg)
  * Notes:
  *
  *****************************************************************************/
+static
 BOOLEAN User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence)
 {
   MSCP_USER_MGR_CMD* msg = Data;
@@ -324,10 +343,6 @@ BOOLEAN User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence)
 }
 
 //Define additional message handlers (for messages from other sources here)
-
-/*****************************************************************************/
-/* Local Functions                                                           */
-/*****************************************************************************/
 
 /******************************************************************************
  * Function:    User_PutMsg
@@ -349,25 +364,26 @@ BOOLEAN User_MSMessageHandler(void* Data, UINT16 Size, UINT32 Sequence)
  * Notes:
  *
  *****************************************************************************/
+static
 BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
   UINT8 x;
   BOOLEAN result = TRUE;
-  UINT32 IntrLevel;
+  INT32 intrLevel;
 
   // if there is room in the Q, allocate it
-  IntrLevel = __DIR();
-  ASSERT_MESSAGE((UserRequest - UserProcessed) <= USER_CMD_Q_SIZE,
-                 "Rqst:%d Proc:%d", UserRequest, UserProcessed);
-  x = UserRequest & Q_INDEX_MASK;
-  ++UserRequest;
-  __RIR(IntrLevel);
+  intrLevel = __DIR();
+  ASSERT_MESSAGE((userRequest - userProcessed) <= USER_CMD_Q_SIZE,
+                 "Rqst:%d Proc:%d", userRequest, userProcessed);
+  x = userRequest & Q_INDEX_MASK;
+  ++userRequest;
+  __RIR(intrLevel);
 
   if (TRUE == result)
   {
       // fill in the queue entry info
-      userMsgQ[x].Source = Source;
-      userMsgQ[x].Tag = Tag;
+      userMsgQ[x].source = Source;
+      userMsgQ[x].tag = Tag;
       strncpy_safe( userMsgQ[x].cmd, GSE_GET_LINE_BUFFER_SIZE, Msg, _TRUNCATE );
   }
 
@@ -395,33 +411,34 @@ BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
  * Notes:
  *
  *****************************************************************************/
+static 
 void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
   CHAR chkstr[32];
-  CHAR WriteBuffer[USER_SINGLE_MSG_MAX_SIZE];
+  CHAR writeBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
-  UINT16 msgSize = strlen(Msg) + strlen(chkstr) + 1;
+  INT32 msgSize = strlen(Msg) + strlen(chkstr) + 1;
 
   // We should never have a single msg-part which is too big for the
   // USER_SINGLE_MSG_MAX_SIZE + checksum!
   ASSERT_MESSAGE( (msgSize < USER_SINGLE_MSG_MAX_SIZE),
        "Output msg exceeds buffer size: %d", msgSize);
 
-  strncpy_safe(WriteBuffer,USER_SINGLE_MSG_MAX_SIZE,Msg, strlen(Msg) );
+  strncpy_safe(writeBuffer,USER_SINGLE_MSG_MAX_SIZE,Msg, strlen(Msg) );
 
-  User_AppendChecksum(WriteBuffer);
+  User_AppendChecksum(writeBuffer);
 
   switch(Source)
   {
     case USER_MSG_SOURCE_GSE:
-      GSE_PutLine(WriteBuffer);
+      GSE_PutLine(writeBuffer);
       GSE_PutLine(GSE_PROMPT);
       break;
 
     case USER_MSG_SOURCE_MS:
       //Ignore errors, MS should timeout if the response fails.
-      MSI_PutResponse(CMD_ID_USER_MGR_MS,WriteBuffer,MSCP_RSP_STATUS_SUCCESS,
-                               strlen(WriteBuffer), Tag);
+      MSI_PutResponse(CMD_ID_USER_MGR_MS,writeBuffer,MSCP_RSP_STATUS_SUCCESS,
+                               strlen(writeBuffer), Tag);
       break;
 
 
@@ -448,21 +465,22 @@ void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
  * Notes:
  *
  *****************************************************************************/
+static
 void User_ProcMsgTask(void *pBlock)
 {
-  CHAR Msg[USER_SINGLE_MSG_MAX_SIZE];
+  CHAR msg[USER_SINGLE_MSG_MAX_SIZE];
 
   //If data is available in the message FIFO queue, read it out.
-  if(UserRequest > UserProcessed)
+  if(userRequest > userProcessed)
   {
     UINT32 tag;
     USER_MSG_SOURCES source;
-    UINT8 x = UserProcessed++ & Q_INDEX_MASK;
+    UINT8 x = userProcessed++ & Q_INDEX_MASK;
 
-    source = userMsgQ[x].Source;
-    tag = userMsgQ[x].Tag;
-    strncpy_safe( Msg, GSE_GET_LINE_BUFFER_SIZE, userMsgQ[x].cmd, _TRUNCATE );
-    User_ExecuteCmdMsg( Msg, source, tag);
+    source = userMsgQ[x].source;
+    tag = userMsgQ[x].tag;
+    strncpy_safe( msg, GSE_GET_LINE_BUFFER_SIZE, userMsgQ[x].cmd, _TRUNCATE );
+    User_ExecuteCmdMsg( msg, source, tag);
   }
 }
 
@@ -490,11 +508,11 @@ void User_ProcMsgTask(void *pBlock)
  *               5. The data associated with the command(s) is/are
  *                  returned to the source in ASCII format.
  *
- * Parameters:    [in/out] message string from the source.  The same buffer
+ * Parameters:    [in/out] msg: message string from the source.  The same buffer
  *                        is also reused to format the response.
  *                [in] source: Source of the message, indicates where to route
  *                    the message response
- *                [in] Tag: Caller defined 32-bit value that is returned
+ *                [in] tag: Caller defined 32-bit value that is returned
  *                     to the PutRsp routine.  This allows the message source
  *                     to assign a unique identifier to each message.
  *
@@ -504,13 +522,14 @@ void User_ProcMsgTask(void *pBlock)
  * Notes:
  *
  *****************************************************************************/
+static
 void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
 {
-  INT8* SetTokPtr = NULL;
-  INT8* MsgTokPtr = NULL;
-  CHAR *TokPtr = NULL;
-  USER_MSG_TBL* CmdTblPtr;
-  INT32 Index;
+  INT8* setTokPtr = NULL;
+  INT8* msgTokPtr = NULL;
+  CHAR *tokPtr = NULL;
+  USER_MSG_TBL* cmdTblPtr;
+  INT32 nIndex;
   CHAR  oldValue[SYSTEM_LOG_DATA_SIZE];
   CHAR  newValue[SYSTEM_LOG_DATA_SIZE];
   CHAR  origCmdString[SYSTEM_LOG_DATA_SIZE];
@@ -521,10 +540,10 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
   rspString[0] = '\0';
 
   // Initialize the output and checksum variables.
-  MsgSource = source;
-  MsgTag    = tag;
-  CheckSum  = 0;
-  RspBuffOverflowDetected = FALSE;
+  msgSource = source;
+  msgTag    = tag;
+  checkSum  = 0;
+  rspBuffOverflowDetected = FALSE;
   msBuffer[0] = '\0';
 
 
@@ -547,21 +566,21 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
   // Validate Factory mode command
   else if(User_AuthenticateModeRequest(msg, USER_FACT) )
   {
-    UserFactoryMode    = TRUE;
+    userFactoryMode    = TRUE;
     // Factory mode contains implicit priv mode.
-    UserPrivilegedMode = TRUE;
+    userPrivilegedMode = TRUE;
     User_OutputMsgString(USER_MSG_FACTORY_MODE, TRUE);
   }
   // Validate Privileged mode command
   else if(User_AuthenticateModeRequest(msg, USER_PRIV))
   {
-    UserPrivilegedMode = TRUE;
+    userPrivilegedMode = TRUE;
     User_OutputMsgString(USER_MSG_PRIVILEGED, TRUE);
   }
   else
   {
     //Search for assignment (=) to determine if this is a set or get cmd
-    SetTokPtr = User_ExtractAssign(msg);
+    setTokPtr = User_ExtractAssign(msg);
 
     //The variable "msg" now contains the command string to the left of any "="
     //Before "msg" is parsed into pieces, store a copy of it
@@ -569,13 +588,13 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     strncpy_safe( origCmdString, sizeof(origCmdString), msg, _TRUNCATE);
 
     //Search for index ([]) delimiters in the message
-    Index = User_ExtractIndex(msg);
+    nIndex = User_ExtractIndex(msg);
     //Convert tokens to upper case for string comparison.
     Supper( msg );
 
     //Get ready to search the command message tables, setup the initial
     //table pointer and get the first message token
-    MsgTokPtr = strtok_r(msg,".",&TokPtr);
+    msgTokPtr = strtok_r(msg,".",&tokPtr);
 
 
     // Check for global-scope commands. These are not associated with a specific command table.
@@ -583,7 +602,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     // ===============
     // SHOWCFG command
     // ===============
-    if (strncmp(MsgTokPtr, DISPLAY_CFG, strlen(DISPLAY_CFG) ) == 0)
+    if (strncmp(msgTokPtr, DISPLAY_CFG, strlen(DISPLAY_CFG) ) == 0)
     {
       // Only GSE can issue this command
       if ( USER_MSG_SOURCE_GSE != source )
@@ -607,22 +626,22 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     {
       // Search command tables
 
-      CmdTblPtr = User_TraverseCmdTables(MsgTokPtr,&RootCmdTbl[0],TokPtr);
+      cmdTblPtr = User_TraverseCmdTables(msgTokPtr,&rootCmdTbl[0],tokPtr);
 
-      if(CmdTblPtr == NULL)
+      if(cmdTblPtr == NULL)
       {
         //Message not found
         User_OutputMsgString("\r\n"USER_MSG_INVALID_CMD, TRUE );
       }
-      else if(CmdTblPtr->pNext != NULL)
+      else if(cmdTblPtr->pNext != NULL)
       {
         //Message incomplete, if this is a "get" cmd, print multiple responses
         // =====================
         // EXECUTE MULTIPLE CMDS
         // =====================
-        if(SetTokPtr == NULL)
+        if(setTokPtr == NULL)
         {
-          User_ExecuteMultipleGetMsg(CmdTblPtr,source,Index,msg, USER_SINGLE_MSG_MAX_SIZE);
+          User_ExecuteMultipleGetMsg(cmdTblPtr,source,nIndex,msg, USER_SINGLE_MSG_MAX_SIZE);
           // finalize the output
           rspString[0] = '\0';
           User_OutputMsgString(rspString, TRUE);
@@ -633,7 +652,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
           User_OutputMsgString(USER_MSG_WRITE_NOT_COMPLETE, TRUE);
         }
       }
-      else if(CmdTblPtr->MsgHandler != NULL)
+      else if(cmdTblPtr->MsgHandler != NULL)
       {
         //Handler found, execute the command and return a response
 
@@ -646,16 +665,16 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
         // If all test are met, get the current value so before-and-after values can be logged.
         // Note: Call to User_ValidateMessage() is used to check for read only target.
         // Function will be called again and response string used by User_ExecuteSingleMsg().
-        if( !(CmdTblPtr->MsgAccess & USER_NO_LOG) && (USER_MSG_SOURCE_GSE == source) &&
-             ( ((USER_TYPE_ACTION == CmdTblPtr->MsgType) || (SetTokPtr != NULL)) &&
-                 User_ValidateMessage(CmdTblPtr, source, Index, rspString,
-                                      SetTokPtr, USER_SINGLE_MSG_MAX_SIZE) ) )
+        if( !(cmdTblPtr->MsgAccess & USER_NO_LOG) && (USER_MSG_SOURCE_GSE == source) &&
+             ( ((USER_TYPE_ACTION == cmdTblPtr->MsgType) || (setTokPtr != NULL)) &&
+                 User_ValidateMessage(cmdTblPtr, source, nIndex, rspString,
+                                      setTokPtr, USER_SINGLE_MSG_MAX_SIZE) ) )
 
         {
           // Get the current value of the param (if applicable) and whether this command
           // is log-able
           bLogThisChange =
-            User_GetParamValue(CmdTblPtr, source, Index, oldValue, sizeof(oldValue));
+            User_GetParamValue(cmdTblPtr, source, nIndex, oldValue, sizeof(oldValue));
         }
 
         // ==================
@@ -666,8 +685,8 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
 
         User_OutputMsgString("\r\n", FALSE);
         rspString[0] = '\0';
-        bExecutionResult = User_ExecuteSingleMsg(CmdTblPtr, source, Index,
-                                                 SetTokPtr, rspString,
+        bExecutionResult = User_ExecuteSingleMsg(cmdTblPtr, source, nIndex,
+                                                 setTokPtr, rspString,
                                                  USER_SINGLE_MSG_MAX_SIZE);
 
         // Output the results and finalize the display with CS and fast prompt
@@ -680,7 +699,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
           // Bypass logging if "newvalue == oldvalue"
           if (0 != (strncmp(oldValue, USER_ACTION_TOKEN, sizeof(USER_ACTION_TOKEN)) ))
           {
-            User_GetParamValue(CmdTblPtr, source, Index, newValue, sizeof(newValue));
+            User_GetParamValue(cmdTblPtr, source, nIndex, newValue, sizeof(newValue));
 
             // Compare old and new for length of longest value.
             if( 0 == strncmp(oldValue, newValue, sizeof(oldValue)))
@@ -721,12 +740,13 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
  *              3. A token matches a table entry that has an "action"
  *                 function
  *
- * Parameters:  [in/out] TokPtr: Message string containing "." delimited
+ * Parameters:  [in/out] MsgTokPtr
+ *              [in]     CmdMsgTbl: Pointer to the root command table
+ *              [in/out] TokPtr: Message string containing "." delimited
  *                        commands (strtok function is used, which writes "."
  *                        to '\0'
- *              [in]     CmdMsgTbl: Pointer to the root command table
  *
- * Returns:     USER_MSG* A pointer to the cmd that caused the search to
+ * Returns:     USER_MSG_TBL* A pointer to the cmd that caused the search to
  *                        terminate
  *                        1. If Return_val.MsgHandler != NULL, the function
  *                           was found, the caller should call the MsgHandler
@@ -739,6 +759,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
  * Notes:
  *
  *****************************************************************************/
+static
 USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, INT8* TokPtr)
 {
   //Traverse the command tables, token by token.
@@ -805,13 +826,14 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
  * Notes:
  *
  *****************************************************************************/
-  BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
-                           INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
+static 
+BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
+                              INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
   {
-    UINT32 TempInt[4];  // Size of tempInt must be large enough to accommodate multi-word objs.
-    void* SetPtr = TempInt;
-    void* GetPtr = TempInt;
-    USER_RANGE Min,Max;
+    UINT32 tempInt[4];  // Size of tempInt must be large enough to accommodate multi-word objs.
+    void* setPtr = tempInt;
+    void* getPtr = tempInt;
+    USER_RANGE min,max;
     BOOLEAN bSuccess = FALSE;
 
     if (User_ValidateMessage(MsgTbl,source,Index,RspStr,SetStr, Len))
@@ -820,17 +842,17 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
       //this is a "set" command to write a value.
       if(SetStr != NULL)
       {
-        memcpy(&Min,&MsgTbl->MsgRangeMin,sizeof(Min));
-        memcpy(&Max,&MsgTbl->MsgRangeMax,sizeof(Max));
-        if(User_CvtSetStr(MsgTbl->MsgType,SetStr,&SetPtr,MsgTbl->MsgEnumTbl, &Min,&Max))
+        memcpy(&min,&MsgTbl->MsgRangeMin,sizeof(min));
+        memcpy(&max,&MsgTbl->MsgRangeMax,sizeof(max));
+        if(User_CvtSetStr(MsgTbl->MsgType,SetStr,&setPtr,MsgTbl->MsgEnumTbl, &min,&max))
         {
           if( USER_RESULT_OK != MsgTbl->MsgHandler(MsgTbl->MsgType,
                                                    MsgTbl->MsgParam,
                                                    Index,
-                                                   SetPtr,
+                                                   setPtr,
                                                    NULL))
           {
-            strncpy_safe(RspStr,Len, USER_MSG_INVALID_CMD_FUNC,_TRUNCATE);
+            strncpy_safe(RspStr,(INT32)Len, USER_MSG_INVALID_CMD_FUNC,_TRUNCATE);
           }
           else
           {
@@ -839,7 +861,7 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
         }
         else
         {
-          User_ConversionErrorResponse(RspStr,Min,Max,MsgTbl->MsgType,
+          User_ConversionErrorResponse(RspStr,min,max,MsgTbl->MsgType,
                                        MsgTbl->MsgEnumTbl,Len);
         }
       }
@@ -854,17 +876,17 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
                                                  MsgTbl->MsgParam,
                                                  Index,
                                                  NULL,
-                                                 &GetPtr) )
+                                                 &getPtr) )
         {
-          strncpy_safe(RspStr, Len, USER_MSG_INVALID_CMD_FUNC, _TRUNCATE);
+          strncpy_safe(RspStr, (INT32)Len, USER_MSG_INVALID_CMD_FUNC, _TRUNCATE);
         }
         else
         {
-          if(!User_CvtGetStr(MsgTbl->MsgType,RspStr,Len,GetPtr,
+          if(!User_CvtGetStr(MsgTbl->MsgType,RspStr,Len,getPtr,
                              MsgTbl->MsgEnumTbl))
           {
             //Conversion error
-            strncpy_safe(RspStr,Len, USER_MSG_RSP_CONVERSION_ERR, _TRUNCATE);
+            strncpy_safe(RspStr,(INT32)Len, USER_MSG_RSP_CONVERSION_ERR, _TRUNCATE);
           }
           else
           {
@@ -900,11 +922,12 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
  * Notes:
  *
  *****************************************************************************/
+static
 void User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
                                 USER_MSG_SOURCES source, INT32 Index,
                                 INT8* rsp, UINT32 Len)
 {
-  INT8 TempStr[256];
+  INT8 tempStr[256];
   if(MsgTblPtr->pNext)
   {
     *rsp = '\0';
@@ -913,11 +936,11 @@ void User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
     //execute each message in the command table
     while(MsgTblPtr->MsgStr != NULL)
     {
-      sprintf(TempStr,"\r\n %s =",MsgTblPtr->MsgStr);
-      PadString(TempStr,USER_MAX_MSG_STR_LEN+6);
+      snprintf(tempStr,sizeof(tempStr),"\r\n %s =",MsgTblPtr->MsgStr);
+      PadString(tempStr,USER_MAX_MSG_STR_LEN+6);
 
       //Append MsgStr to message, exit loop if rsp buffer is full
-      if(!User_OutputMsgString(TempStr, FALSE))
+      if(!User_OutputMsgString(tempStr, FALSE))
       {
         break;
       }
@@ -926,20 +949,19 @@ void User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
       if( MsgTblPtr->MsgHandler != NULL &&
           MsgTblPtr->MsgType    != USER_TYPE_ACTION)
       {
-        User_ExecuteSingleMsg(MsgTblPtr,source,Index,NULL, TempStr, sizeof(TempStr));
+        User_ExecuteSingleMsg(MsgTblPtr,source,Index,NULL, tempStr, sizeof(tempStr));
       }
       else if(MsgTblPtr->MsgType == USER_TYPE_ACTION)
       {
-        strncpy_safe(TempStr,sizeof(TempStr),"Action function",_TRUNCATE);
+        strncpy_safe(tempStr,sizeof(tempStr),"Action function",_TRUNCATE);
       }
       else
       {
-        strncpy_safe(TempStr, sizeof(TempStr), "More...",_TRUNCATE);
+        strncpy_safe(tempStr, sizeof(tempStr), "More...",_TRUNCATE);
       }
 
-
       //Append response to message, exit loop if rsp buffer is full
-      if(!User_OutputMsgString(TempStr, FALSE))
+      if(!User_OutputMsgString(tempStr, FALSE))
       {
         break;
       }
@@ -976,11 +998,13 @@ void User_ExecuteMultipleGetMsg(USER_MSG_TBL* MsgTblPtr,
  *                            a descriptive error string if validation fails
  *              [in] SetStr:  Pointer to the set string for write command
  *                            messages.
+ *              [in] Len
  * Returns:     TRUE - when all checks are ok, FALSE otherwise
  *
  * Notes:
  *
  *****************************************************************************/
+static
 BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                              INT32 Index, INT8* RspStr, INT8* SetStr, UINT32 Len)
 {
@@ -1006,7 +1030,7 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
     //Report the valid index range if needed
     else
     {
-      sprintf(RspStr,"%s (%d-%d)", USER_MSG_INDEX_OUT_OF_RANGE,
+      snprintf(RspStr,sizeof(RspStr),"%s (%d-%d)", USER_MSG_INDEX_OUT_OF_RANGE,
               MsgTbl->MsgIndexMin,
               MsgTbl->MsgIndexMax);
       result = FALSE;
@@ -1033,13 +1057,13 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
     }
 
     // Priv Mode is ok if we are in priv mode or doing a read
-    pmOk  = (MsgTbl->MsgAccess & USER_PRIV) ? (UserPrivilegedMode || !isWr) : TRUE;
+    pmOk  = (MsgTbl->MsgAccess & USER_PRIV) ? (userPrivilegedMode || !isWr) : TRUE;
 
     // Fact Mode is ok if we are in fact mode or doing a read
-    fmOk  = (MsgTbl->MsgAccess & USER_FACT) ? (UserFactoryMode || !isWr)    : TRUE;
+    fmOk  = (MsgTbl->MsgAccess & USER_FACT) ? (userFactoryMode || !isWr)    : TRUE;
 
     // GSE is ok if the source was the GSE, or it is a read from the Ms
-    gseOk = (MsgTbl->MsgAccess & USER_GSE)  ? ((source == USER_MSG_SOURCE_GSE) || !isWr) : TRUE;
+    gseOk = (MsgTbl->MsgAccess & USER_GSE) ? ((source == USER_MSG_SOURCE_GSE) || !isWr) : TRUE;
 
     // action types must be RO - this is a coding standard so we assert
     if (MsgTbl->MsgType == USER_TYPE_ACTION)
@@ -1051,27 +1075,27 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
     // All constraints must be true
     if (!gseOk)
     {
-      strncpy_safe(RspStr,Len, USER_MSG_GSE_ONLY, _TRUNCATE);
+      strncpy_safe(RspStr,(INT32)Len, USER_MSG_GSE_ONLY, _TRUNCATE);
       result = FALSE;
     }
     else if ( !pmOk)
     {
-      strncpy_safe(RspStr,Len, USER_MSG_ACCESS_LEVEL, _TRUNCATE);
+      strncpy_safe(RspStr,(INT32)Len, USER_MSG_ACCESS_LEVEL, _TRUNCATE);
       result = FALSE;
     }
     else if ( !fmOk)
     {
-      strncpy_safe(RspStr, Len, USER_MSG_ACCESS_LEVEL, _TRUNCATE);
+      strncpy_safe(RspStr, (INT32)Len, USER_MSG_ACCESS_LEVEL, _TRUNCATE);
       result = FALSE;
     }
     else if ( !roOk)
     {
-      strncpy_safe(RspStr,Len, USER_MSG_READ_ONLY, _TRUNCATE);
+      strncpy_safe(RspStr,(INT32)Len, USER_MSG_READ_ONLY, _TRUNCATE);
       result = FALSE;
     }
     else if ( !woOk)
     {
-      strncpy_safe(RspStr,Len, USER_MSG_WRITE_ONLY, _TRUNCATE);
+      strncpy_safe(RspStr,(INT32)Len, USER_MSG_WRITE_ONLY, _TRUNCATE);
       result = FALSE;
     }
   }
@@ -1103,6 +1127,7 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
  * Notes:
  *
  *****************************************************************************/
+static
 INT8* User_ExtractAssign(INT8* msg)
 {
   INT8* ptr = NULL;
@@ -1141,46 +1166,47 @@ INT8* User_ExtractAssign(INT8* msg)
  * Notes:       Max index allowed is 4 digits (9999)
  *
  *****************************************************************************/
+static
 INT32 User_ExtractIndex(INT8* msg)
 {
-  INT32 i,index = -1;
-  INT8* OpenBktPtr;
-  INT8* CloseBktPtr;
+  INT32 i,nIndex = -1;
+  INT8* openBktPtr;
+  INT8* closeBktPtr;
 
   //search for index delimiters
-  OpenBktPtr = strchr(msg,'[');
-  CloseBktPtr = strchr(msg,']');
+  openBktPtr = strchr(msg,'[');
+  closeBktPtr = strchr(msg,']');
 
   //Sanity check on bracket index length.  Space between the open and
   //close bracket should be between 1 and 4 characters
-  if((CloseBktPtr-OpenBktPtr > 1) && (CloseBktPtr-OpenBktPtr < 6))
+  if((closeBktPtr-openBktPtr > 1) && (closeBktPtr-openBktPtr < 6))
   {
     //verify every character between the [] are numbers
-    for(i = 0;i < CloseBktPtr-OpenBktPtr-1; i++)
+    for(i = 0;i < ((closeBktPtr-openBktPtr)-1); i++)
     {
-      if(!isdigit(OpenBktPtr[i+1]))
+      if(!isdigit(openBktPtr[i+1]))
       {
-        OpenBktPtr = NULL;
-        CloseBktPtr = NULL;
+        openBktPtr = NULL;
+        closeBktPtr = NULL;
       }
     }
   }
   else
   {
-    OpenBktPtr = NULL;
-    CloseBktPtr = NULL;
+    openBktPtr = NULL;
+    closeBktPtr = NULL;
   }
 
   //If both pointers are found and the string valid
   //convert the index string to integer. Null terminate
   //the string before the index
-  if(OpenBktPtr != NULL && CloseBktPtr != NULL)
+  if(openBktPtr != NULL && closeBktPtr != NULL)
   {
-    index = atoi(OpenBktPtr+1);
-    strncpy_safe(OpenBktPtr,USER_SINGLE_MSG_MAX_SIZE, CloseBktPtr+1,_TRUNCATE);
+    nIndex = atoi(openBktPtr+1);
+    strncpy_safe(openBktPtr,USER_SINGLE_MSG_MAX_SIZE, closeBktPtr+1,_TRUNCATE);
   }
 
-  return index;
+  return nIndex;
 }
 
 /******************************************************************************
@@ -1206,6 +1232,7 @@ INT32 User_ExtractIndex(INT8* msg)
  *               FALSE: If unable to convert the set string
  * Notes:
 ******************************************************************************/
+static
 BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     USER_ENUM_TBL* MsgEnumTbl,USER_RANGE *Min,USER_RANGE *Max)
 {
@@ -1216,7 +1243,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   INT32  int_temp;
   FLOAT32 float_temp;
   FLOAT64 float64_temp;
-  UINT32 base = 10;
+  INT32 base = 10;
   BOOLEAN result = FALSE;
 
   if ( Type != USER_TYPE_STR)
@@ -1342,17 +1369,17 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       // e.g.: [ 2,6,23, 56,127 ]
       if (0 != strstr(SetStr, "[") && 0 != strstr(SetStr, "]") )
       {
-        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+        result = User_SetBitArrayFromList(Type, SetStr, SetPtr, Min, Max);
       }
       // Bit list defined as a Hex string?
       else if (0 != strstr(SetStr, "0X"))
       {
-        result = User_SetBitArrayFromHexString(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+        result = User_SetBitArrayFromHexString(Type, SetStr, SetPtr, Min, Max);
       }
       // Bit list defined as a decimal integer
       else if ( isdigit(*SetStr) )
       {
-        result = User_SetBitArrayFromIntegerValue(Type, SetStr, SetPtr, MsgEnumTbl, Min, Max);
+        result = User_SetBitArrayFromIntegerValue(Type, SetStr, SetPtr, Min, Max);
       }
       // ... if nothing in the set string, the user just wants to clear all  bits.
       else if (0 == strlen(SetStr))
@@ -1704,9 +1731,10 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
  *
  * Notes:
 ******************************************************************************/
+static
 void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
 {
-  BOOLEAN NoLimit = (Min->Sint == 0 && Max->Sint == 0) ? TRUE : FALSE;
+  BOOLEAN noLimit = (Min->Sint == 0 && Max->Sint == 0) ? TRUE : FALSE;
 
   /*Switch differentiates and bounds 8 different types:
     Signed 8,16, and 32 bit
@@ -1719,20 +1747,20 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
   {
     case USER_TYPE_UINT8:
     case USER_TYPE_HEX8:
-      Min->Uint = NoLimit ? 0          : Min->Uint;
-      Max->Uint = NoLimit ? UINT8_MAX  : MIN(UINT8_MAX,Max->Uint);
+      Min->Uint = noLimit ? 0          : Min->Uint;
+      Max->Uint = noLimit ? UINT8_MAX  : MIN(UINT8_MAX,Max->Uint);
       break;
 
     case USER_TYPE_UINT16:
     case USER_TYPE_HEX16:
-      Min->Uint = NoLimit ? 0          : Min->Uint;
-      Max->Uint = NoLimit ? UINT16_MAX : MIN(UINT16_MAX,Max->Uint);
+      Min->Uint = noLimit ? 0          : Min->Uint;
+      Max->Uint = noLimit ? UINT16_MAX : MIN(UINT16_MAX,Max->Uint);
       break;
 
     case USER_TYPE_UINT32:
     case USER_TYPE_HEX32:
-      Min->Uint = NoLimit ? 0          : Min->Uint;
-      Max->Uint = NoLimit ? UINT32_MAX : MIN(UINT32_MAX,Max->Uint);
+      Min->Uint = noLimit ? 0          : Min->Uint;
+      Max->Uint = noLimit ? UINT32_MAX : MIN(UINT32_MAX,Max->Uint);
       break;
 
     //case USER_TYPE_INT8:
@@ -1746,37 +1774,45 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
     //  break;
 
     case USER_TYPE_INT32:
-      Min->Sint = NoLimit ? INT32_MIN  : MAX(INT32_MIN,Min->Sint);
-      Max->Sint = NoLimit ? INT32_MAX  : MIN(INT32_MAX,Max->Sint);
+      Min->Sint = noLimit ? INT32_MIN  : MAX(INT32_MIN,Min->Sint);
+      Max->Sint = noLimit ? INT32_MAX  : MIN(INT32_MAX,Max->Sint);
       break;
 
     case USER_TYPE_FLOAT:
-      Min->Float = NoLimit ? -FLT_MAX  : MAX(-FLT_MAX,Min->Float);
-      Max->Float = NoLimit ? FLT_MAX  : MIN(FLT_MAX,Max->Float);
+      Min->Float = noLimit ? -FLT_MAX  : MAX(-FLT_MAX,Min->Float);
+      Max->Float = noLimit ? FLT_MAX  : MIN(FLT_MAX,Max->Float);
       break;
 
     case USER_TYPE_FLOAT64:
-      Min->Float64 = NoLimit ? -DBL_MAX  : MAX(-DBL_MAX,Min->Float64);
-      Max->Float64 = NoLimit ? DBL_MAX  : MIN(DBL_MAX,Max->Float64);
+      Min->Float64 = noLimit ? -DBL_MAX  : MAX(-DBL_MAX,Min->Float64);
+      Max->Float64 = noLimit ? DBL_MAX  : MIN(DBL_MAX,Max->Float64);
       break;
 
       //String length limit to half of the command string.
       //This allows ample room for the command, and should be sufficient
       //for any string value that needs to be set.
     case USER_TYPE_STR:
-      Min->Uint = NoLimit ? 0          : Min->Uint;
-      Max->Uint = NoLimit ? USER_SINGLE_MSG_MAX_SIZE/2 :
+      Min->Uint = noLimit ? 0          : Min->Uint;
+      Max->Uint = noLimit ? USER_SINGLE_MSG_MAX_SIZE/2 :
                                     MIN(USER_SINGLE_MSG_MAX_SIZE/2, Max->Uint);
       break;
 
     case USER_TYPE_128_LIST:
-        Min->Uint = NoLimit ? 0 : Min->Uint;
+        Min->Uint = noLimit ? 0 : Min->Uint;
 
-        Max->Uint = NoLimit ? 127 :
+        Max->Uint = noLimit ? 127 :
                     MIN(127, Max->Uint);
         break;
-
-
+    //lint -fallthrough
+    case USER_TYPE_NONE:
+    case USER_TYPE_ENUM:
+    case USER_TYPE_ACT_LIST:
+    case USER_TYPE_SNS_LIST:
+    case USER_TYPE_BOOLEAN:
+    case USER_TYPE_YESNO:
+    case USER_TYPE_ONOFF:
+    case USER_TYPE_ACTION:
+    case USER_TYPE_END:
     default:
       /* Other types are not limit checked, they will default to here
          and no action is taken,  DO NOT PUT AN ASSERT HERE! */
@@ -1792,86 +1828,90 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
  *               the data type of the value and the range that the value
  *               can be set to.
  *
- *
- *
  * Parameters:   [out] RspStr: Pointer to a location that will receive the
  *                             help string
- *               [in]  Min,Max:Min/Max range limit for the value
- *               [in]  Type:   Data type for the value
- *               [in]  Enum:   Pointer to the list of discrete values for
+ *               [in]  Min     Min range limit for the value
+ *               [in]  Max     Max range limit for the value
+ *               [in]  Type    Data type for the value
+ *               [in]  Enum    Pointer to the list of discrete values for
  *                             Enum types.  Should be NULL if the Type is not
  *                             USER_TYPE_ENUM
- *               [in]  Enum:
+ *               [in]  Len     Length
  *
  * Returns:    none
  *
  * Notes:
-******************************************************************************/
+ ******************************************************************************/
+static
 void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
                                   USER_DATA_TYPE Type,
                                   const USER_ENUM_TBL *Enum, UINT32 Len)
 {
- INT32 i;
- // Calculate available dest-length(size of the buffer - strlen already in use.)
- INT32 destLength = Len - strlen(RspStr);
+  INT32 i;
+  // Calculate available dest-length(size of the buffer - strlen already in use.)
+  UINT32 destLength = Len - strlen(RspStr);
 
   switch(Type)
   {
     case USER_TYPE_UINT8:
     case USER_TYPE_UINT16:
     case USER_TYPE_UINT32:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %u to %u.%s",
+      snprintf(RspStr,sizeof(RspStr),USER_MSG_CMD_CONVERSION_ERR"valid range is %u to %u.%s",
               Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
     case USER_TYPE_HEX8:
     case USER_TYPE_HEX16:
     case USER_TYPE_HEX32:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is 0x%x to 0x%x.%s",
-              Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
+      snprintf(RspStr,sizeof(RspStr),
+               USER_MSG_CMD_CONVERSION_ERR"valid range is 0x%x to 0x%x.%s",
+               Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
     //case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     case USER_TYPE_INT32:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %d to %d.%s",
-              Min.Sint,Max.Sint, USER_MSG_VFY_FORMAT);
+      snprintf(RspStr,sizeof(RspStr),USER_MSG_CMD_CONVERSION_ERR"valid range is %d to %d.%s",
+               Min.Sint,Max.Sint, USER_MSG_VFY_FORMAT);
       break;
 
     case USER_TYPE_FLOAT:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
-              Min.Float,Max.Float, NEWLINE, "Floating point number formats only.");
+      snprintf(RspStr,sizeof(RspStr),
+               USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
+               Min.Float,Max.Float, NEWLINE, "Floating point number formats only.");
       break;
 
     case USER_TYPE_FLOAT64:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
-              Min.Float64,Max.Float64, NEWLINE, "Floating64 point number formats only.");
+      snprintf(RspStr,sizeof(RspStr),
+               USER_MSG_CMD_CONVERSION_ERR"valid range is %.7g to %.7g.%s%s",
+               Min.Float64,Max.Float64, NEWLINE, "Floating64 point number formats only.");
       break;
 
     case USER_TYPE_STR:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR"length must be %u to %u characters",
-              Min.Uint,Max.Uint-1);
+      snprintf(RspStr,sizeof(RspStr),
+               USER_MSG_CMD_CONVERSION_ERR"length must be %u to %u characters",
+               Min.Uint,Max.Uint-1);
       break;
 
     case USER_TYPE_BOOLEAN:
-      strncpy_safe(RspStr,destLength,
+      strncpy_safe(RspStr,(INT32)destLength,
              USER_MSG_CMD_CONVERSION_ERR"valid set is [TRUE,FALSE]",_TRUNCATE);
       break;
 
     case USER_TYPE_YESNO:
-      strncpy_safe(RspStr,destLength,
+      strncpy_safe(RspStr,(INT32)destLength,
              USER_MSG_CMD_CONVERSION_ERR"valid set is [YES,NO]",_TRUNCATE);
       break;
 
     case USER_TYPE_ONOFF:
-      strncpy_safe(RspStr,destLength,
+      strncpy_safe(RspStr,(INT32)destLength,
              USER_MSG_CMD_CONVERSION_ERR"valid set is [ON,OFF]",_TRUNCATE);
       break;
 
     case USER_TYPE_ENUM:
       if(Enum != NULL)
       {
-        strncpy_safe(RspStr,destLength,
+        strncpy_safe(RspStr,(INT32)destLength,
                USER_MSG_CMD_CONVERSION_ERR"valid set is [",_TRUNCATE);
         for(i = 0; Enum[i].Str != NULL; i++)
         {
@@ -1886,27 +1926,32 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
       break;
 
     case USER_TYPE_ACT_LIST:
-      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR
+      snprintf(RspStr,sizeof(RspStr), USER_MSG_CMD_CONVERSION_ERR
               "Valid Action bits are 0-7(When met), 12-19(On duration), 27(Latch) "
               "and 31(Acknowledge)."NEW_LINE
               "Set via number list or hex value.");
       break;
 
     case USER_TYPE_SNS_LIST:
-      sprintf(RspStr, USER_MSG_CMD_CONVERSION_ERR
+      snprintf(RspStr,sizeof(RspStr), USER_MSG_CMD_CONVERSION_ERR
               "Accepts sensor numbers 0-%d or a hex value of up to %d bits."NEW_LINE
               "Allows for %u..%u sensors to be selected.",
               MAX_SENSORS-1, MAX_SENSORS, Min.Uint, Max.Uint);
       break;
 
     case USER_TYPE_128_LIST:
-      sprintf(RspStr,USER_MSG_CMD_CONVERSION_ERR\
+      snprintf(RspStr,sizeof(RspStr), USER_MSG_CMD_CONVERSION_ERR\
               "Accepts a number list consisting of values in the range %u-%u, "NEW_LINE
               "a hex string where only bits %u-%u are allowed on."NEW_LINE
               "or an integer where only bits %u-%u are allowed on.",
               Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1 );
       break;
-
+    case USER_TYPE_ACTION:
+      // lint -fallthrough
+    case USER_TYPE_END:
+      // lint -fallthrough
+    case USER_TYPE_NONE:
+       //lint -fallthrough
     default:
       FATAL("Unsupported USER_DATA_TYPE = %d", Type );
       break;
@@ -1931,15 +1976,16 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
  *
  * Notes:
 ******************************************************************************/
+static
 BOOLEAN User_ValidateChecksum( INT8 *str )
 {
   UINT16 chksum = 0;
   INT8* chkstr;
   BOOLEAN result;
-  CHAR* TokPtr = NULL;
+  CHAR* tokPtr = NULL;
 
-  strtok_r( str, "$", &TokPtr);
-  chkstr = strtok_r( NULL, "$", &TokPtr);
+  strtok_r( str, "$", &tokPtr);
+  chkstr = strtok_r( NULL, "$", &tokPtr);
 
   // If "$" found, compute and verify the checksum
   if(chkstr != NULL)
@@ -1989,10 +2035,11 @@ BOOLEAN User_ValidateChecksum( INT8 *str )
  *        outputted.
  *
 ******************************************************************************/
+static
 void User_AppendChecksum( INT8 *str )
 {
   INT8   chkstr[16];
-  sprintf(chkstr,"\r\n$%04x\r\n", CheckSum);
+  snprintf(chkstr, sizeof(chkstr),"\r\n$%04x\r\n", checkSum);
   strcat(str,chkstr);
 }
 
@@ -2008,10 +2055,11 @@ void User_AppendChecksum( INT8 *str )
 *
 * Notes:
 *****************************************************************************/
+static
 BOOLEAN User_ShowAllConfig(void)
 {
-  UINT32 TempInt;
-  void* GetPtr = &TempInt;
+  UINT32 tempInt;
+  void* getPtr = &tempInt;
   UINT32 i = 0;
   USER_MSG_TBL* pCmdMsgTbl;
   USER_HANDLER_RESULT result = USER_RESULT_OK;
@@ -2019,14 +2067,14 @@ BOOLEAN User_ShowAllConfig(void)
   // Loop thru the the Root cmd Table
   while( ( result == USER_RESULT_OK ) &&
          ( i < USER_MAX_ROOT_CMDS )   &&
-         ( RootCmdTbl[i].MsgStr != NULL ) )
+         ( rootCmdTbl[i].MsgStr != NULL ) )
   {
     // By design, each show config command is implemented in the
     // respective root table;(i.e. <table>.<show-cmd> )
     // There is no need to walk the branches if not found at root.
 
     // Point into the command table
-    pCmdMsgTbl = RootCmdTbl[i].pNext;
+    pCmdMsgTbl = rootCmdTbl[i].pNext;
 
     while(pCmdMsgTbl != NULL && pCmdMsgTbl->MsgStr != NULL && result == USER_RESULT_OK )
     {
@@ -2035,7 +2083,7 @@ BOOLEAN User_ShowAllConfig(void)
                      pCmdMsgTbl->MsgType == USER_TYPE_ACTION )
       {
          result = pCmdMsgTbl->MsgHandler(pCmdMsgTbl->MsgType, pCmdMsgTbl->MsgParam,
-                                         0, NULL, &GetPtr);
+                                         0, NULL, &getPtr);
          break;
       }
       else
@@ -2054,18 +2102,11 @@ BOOLEAN User_ShowAllConfig(void)
 * Description:  Recursively called function to display the contents of a cfg
 *               tree
 *
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used
-*                               for casting the data pointers
-*               [in/out] Param: Pointer to the configuration item to be read
-*                               or changed
-*               [in] Index:     Index parameter is used to reference the
-*                               specific sensor to change.  Range is validated
-*                               by the user manager
-*               [in] SetPtr:    For write commands, a pointer to the data to
-*                               write to the configuration.
-*               [out] GetPtr:   For read commands, UserCfg function will set
-*                               this to the location of the data requested.
-
+* Parameters:   BranchName
+*               MsgTbl
+*               SensorIdx
+*               RecursionCount
+*               UserTableName
 *
 * Returns:     USER_HANDLER_RESULT
 *
@@ -2076,16 +2117,16 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
                                           INT16 SensorIdx, UINT16 RecursionCount,
                                           CHAR* UserTableName)
 {
-  UINT32 TempInt;
-  void* GetPtr = &TempInt;
+  UINT32 tempInt;
+  void* getPtr = &tempInt;
 
   USER_HANDLER_RESULT result;
-  CHAR NextBranchName[USER_MAX_MSG_STR_LEN * 4 ];
-  CHAR Key[USER_MAX_MSG_STR_LEN * 3];
-  CHAR Value[32];
+  CHAR nextBranchName[USER_MAX_MSG_STR_LEN * 4 ];
+  CHAR key[USER_MAX_MSG_STR_LEN * 3];
+  CHAR value[32];
   USER_MSG_TBL*  pMsgTbl;
-  INT16 index;
-  INT16 LeafElementIndex = -1; // Init as disabled
+  INT32 nIndex;
+  INT16 leafElementIndex = -1; // Init as disabled
 
   result = USER_RESULT_OK;
 
@@ -2112,45 +2153,43 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
       if (UserTableName != NULL && User_CheckForLeafArray(UserTableName, pMsgTbl->MsgStr) )
       {
         // Activate/increment the LeafArrayElementIndex
-        ++LeafElementIndex;
+        ++leafElementIndex;
       }
 
       // If leaf element is active ( > -1 ) display the entry as an
       // array element of the leaf
-      if (LeafElementIndex > -1)
+      if (leafElementIndex > -1)
       {
-        sprintf(Key,"\r\n%s%s[%d] =", BranchName, pMsgTbl->MsgStr, LeafElementIndex);
-        index = LeafElementIndex;
+        snprintf(key,sizeof(key),"\r\n%s%s[%d] =",BranchName,pMsgTbl->MsgStr,leafElementIndex);
+        nIndex = leafElementIndex;
       }
       else // Just a single element
       {
-        sprintf(Key,"\r\n%s%s =", BranchName, pMsgTbl->MsgStr);
-        index = SensorIdx;
+        snprintf(key, sizeof(key), "\r\n%s%s =", BranchName, pMsgTbl->MsgStr);
+        nIndex = SensorIdx;
       }
 
-      PadString(Key, USER_MAX_MSG_STR_LEN + 15);
+      PadString(key, USER_MAX_MSG_STR_LEN + 15);
 
-      if (!User_OutputMsgString(Key, FALSE) )
+      if (!User_OutputMsgString(key, FALSE) )
       {
         result = USER_RESULT_ERROR;
         break;
       }
 
-      if( pMsgTbl->MsgHandler != NULL          &&
-          pMsgTbl->MsgType != USER_TYPE_ACTION &&
-          USER_RESULT_OK == result )
+      if( pMsgTbl->MsgHandler != NULL && USER_RESULT_OK == result )
       {
         if( USER_RESULT_OK != pMsgTbl->MsgHandler(pMsgTbl->MsgType, pMsgTbl->MsgParam,
-                                                  index, NULL, &GetPtr))
+                                                  nIndex, NULL, &getPtr))
         {
           User_OutputMsgString( USER_MSG_INVALID_CMD_FUNC, FALSE);
         }
         else
         {
-          if(User_CvtGetStr(pMsgTbl->MsgType, Value, sizeof(Value),
-                            GetPtr, pMsgTbl->MsgEnumTbl))
+          if(User_CvtGetStr(pMsgTbl->MsgType, value, sizeof(value),
+                            getPtr, pMsgTbl->MsgEnumTbl))
           {
-            if (!User_OutputMsgString( Value, FALSE) )
+            if (!User_OutputMsgString( value, FALSE) )
             {
               result = USER_RESULT_ERROR;
               break;
@@ -2168,22 +2207,22 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
     {
       // Setup branch label info, then // Descend into the subtree by
       // calling myself with the next recursion level.
-      sprintf(NextBranchName,"%s%s.", BranchName, pMsgTbl->MsgStr);
+      snprintf(nextBranchName, sizeof(nextBranchName), "%s%s.", BranchName, pMsgTbl->MsgStr);
 
-      result = User_DisplayConfigTree(NextBranchName, pMsgTbl->pNext,
+      result = User_DisplayConfigTree(nextBranchName, pMsgTbl->pNext,
                                     SensorIdx, RecursionCount + 1, UserTableName);
     }
 
     // If LeafElementIndex is being used and we have processed the last entry
     // of an array-leaf, clear the flag.
-    if (LeafElementIndex != -1 && LeafElementIndex == pMsgTbl->MsgIndexMax)
+    if (leafElementIndex != -1 && leafElementIndex == pMsgTbl->MsgIndexMax)
     {
-       LeafElementIndex = -1;
+       leafElementIndex = -1;
     }
 
     // If not iterating through the subscripts of a leaf's array,
     // move on to the next leaf/node.
-    if (LeafElementIndex == -1)
+    if (leafElementIndex == -1)
     {
        pMsgTbl++;
     }
@@ -2206,21 +2245,20 @@ USER_HANDLER_RESULT User_DisplayConfigTree(CHAR* BranchName, USER_MSG_TBL* MsgTb
 *               [in] MsgStr:    Pointer to a string containing the name of
 *                               leaf item being processed
 *
-*
-*
 * Returns:     BOOLEAN          True if the current leaf is identified by
 *                               UserTableName.MsgStr should be treated as a array.
 *
 * Notes:
 *****************************************************************************/
+static
 BOOLEAN User_CheckForLeafArray(CHAR* UserTableName, CHAR* MsgStr)
 {
    typedef struct{
-      CHAR* TableName;    //User Cmd Table name
-      CHAR* LeafNames;
+      CHAR* tableName;    //User Cmd Table name
+      CHAR* leafNames;
    }ASYMMETRIC_LEAF_TABLE;
 
-   ASYMMETRIC_LEAF_TABLE AsymmetricTable[] =
+   ASYMMETRIC_LEAF_TABLE asymmetricTable[] =
    {
       {"QAR",  "|BARKER|"},
       // Add other tables with entries here as indicated...
@@ -2234,13 +2272,13 @@ BOOLEAN User_CheckForLeafArray(CHAR* UserTableName, CHAR* MsgStr)
    // Check the ResultBuffer to see if the table currently being processed
    // is in the list as containing asymmetric entries.
    i = 0;
-   while (AsymmetricTable[i].TableName != NULL)
+   while (asymmetricTable[i].tableName != NULL)
    {
-      if (NULL != strstr(UserTableName, AsymmetricTable[i].TableName))
+      if (NULL != strstr(UserTableName, asymmetricTable[i].tableName))
       {
          // This table has has asymmetric entries.
          // Check if the current MsgStr is in the list.
-         if (NULL != strstr(AsymmetricTable[i].LeafNames, MsgStr))
+         if (NULL != strstr(asymmetricTable[i].leafNames, MsgStr))
          {
             result = TRUE;
             break;
@@ -2256,17 +2294,19 @@ BOOLEAN User_CheckForLeafArray(CHAR* UserTableName, CHAR* MsgStr)
 *
 * Description:  Universal Accessor function for all data user types
 *
-* Parameters:   [in] UserTableName:  Pointer to a string containing the name
-*                                    of the table
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific sensor to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
 *
-*               [in] MsgStr:    Pointer to a string containing the name of
-*                               leaf item being processed
-*
-*
-*
-* Returns:     USER_HANDLER_RESULT True if the current leaf identified by
-*                                  UserTableName.MsgStr should be treated
-*                                  as a array.
+* Returns:     USER_RESULT_OK
 *
 * Notes:
 *****************************************************************************/
@@ -2307,7 +2347,8 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_FLOAT64:
         *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr;
 
-      case USER_TYPE_ENUM:
+      //lint -fallthrough
+	  case USER_TYPE_ENUM: 
       case USER_TYPE_UINT32:
       case USER_TYPE_HEX32:
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
@@ -2317,11 +2358,13 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         memcpy(Param.Ptr, SetPtr, sizeof(UINT32));
         break;
 
-      case USER_TYPE_SNS_LIST:
+      // lint -fallthrough
+	  case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
-
+      
+	  // lint -fallthrough
       case USER_TYPE_BOOLEAN:
       case USER_TYPE_YESNO:
       case USER_TYPE_ONOFF:
@@ -2350,9 +2393,14 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
       case USER_TYPE_ACTION: // Do nothing
         break;
 
-    default:
-      ASSERT_MESSAGE(  DataType < USER_TYPE_END, "Unrecognized USER_DATA_TYPE: %d", DataType);
-      break;
+      case USER_TYPE_NONE:
+        // lint -fallthrough
+      case USER_TYPE_END:
+        // lint -fallthrough
+      default:
+        ASSERT_MESSAGE(  DataType < USER_TYPE_END, 
+                         "Unrecognized USER_DATA_TYPE: %d", DataType);
+        break;
     } // End of switch (DataType)
   }
   return result;
@@ -2376,6 +2424,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
 *
 * Notes:        Detects if the entry is associated with an action
 *****************************************************************************/
+static
 BOOLEAN User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source, INT32 Index,
                                 INT8* RspStr, UINT32 Len)
 {
@@ -2388,7 +2437,7 @@ BOOLEAN User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source, INT32 I
   if ( (USER_TYPE_ACTION == MsgTbl->MsgType ) ||
        ( NULL != MsgTbl->MsgHandler  && MsgTbl->MsgParam.Ptr == NULL) )
   {
-    strncpy_safe(RspStr,Len, USER_ACTION_TOKEN, _TRUNCATE);
+    strncpy_safe(RspStr,(INT32)Len, USER_ACTION_TOKEN, _TRUNCATE);
     logThisChange = TRUE;
   }
   else
@@ -2399,7 +2448,7 @@ BOOLEAN User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source, INT32 I
     tblEntry.MsgAccess = USER_RO;
     if (!User_ExecuteSingleMsg(&tblEntry,source,Index,NULL,RspStr,Len ))
     {
-       strncpy_safe(RspStr,Len, "VALUE-NOT-READ",_TRUNCATE);
+       strncpy_safe(RspStr,(INT32)Len, "VALUE-NOT-READ",_TRUNCATE);
     }
     else
     {
@@ -2415,12 +2464,13 @@ BOOLEAN User_GetParamValue(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source, INT32 I
 * Description:  Log a command or param change event.
 *
 * Parameters:   cmdString entered by user
-*               prevValue of the param if applicable,
-*               currentValue of the param if applicable
+*               valuePrev of the param if applicable,
+*               valueNew of the param if applicable
 * Returns:      None
 *
 * Notes:        Detects if the entry is associated with an action
 *****************************************************************************/
+static
 void User_LogUserActivity(CHAR* cmdString, CHAR* valuePrev, CHAR* valueNew)
 {
   CHAR logBuffer[SYSTEM_LOG_DATA_SIZE];
@@ -2440,7 +2490,7 @@ void User_LogUserActivity(CHAR* cmdString, CHAR* valuePrev, CHAR* valueNew)
              cmdString,valuePrev,valueNew );
   }
 
-  LogWriteSystem(loggingId, LOG_PRIORITY_LOW, logBuffer, strlen(logBuffer), NULL);
+  LogWriteSystem(loggingId, LOG_PRIORITY_LOW, logBuffer, (UINT16)strlen(logBuffer), NULL);
 
   //GSE_DebugStr(NORMAL,TRUE, "Logged: %s",logBuffer);
 }
@@ -2468,6 +2518,7 @@ void User_LogUserActivity(CHAR* cmdString, CHAR* valuePrev, CHAR* valueNew)
 *
 * Notes:        Detects if the entry is associated with an action
 *****************************************************************************/
+static
 BOOLEAN User_AuthenticateModeRequest(const INT8* msg, UINT8 mode)
 {
 
@@ -2542,9 +2593,9 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
   BOOLEAN statusFlag = TRUE;
 
   // Update checksum
-  CheckSum += ChecksumBuffer(string,strlen(string),0xFFFF);
+  checkSum += (UINT16)ChecksumBuffer(string,strlen(string),UINT16MAX);
 
-  switch(MsgSource)
+  switch(msgSource)
   {
     case USER_MSG_SOURCE_GSE:
 
@@ -2555,7 +2606,7 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
       else
       {
         // write out the final string with appended checksum and 'FAST>' prompt
-        User_PutRsp(string, MsgSource, MsgTag );
+        User_PutRsp(string, msgSource, msgTag );
       }
       break;
 
@@ -2563,35 +2614,35 @@ BOOLEAN User_OutputMsgString( const CHAR* string, BOOLEAN finalize)
 
       // If the buffer hasn't been flagged as overflowed, concatenate
       // the string to the end of the buffer.
-      if (!RspBuffOverflowDetected)
+      if (!rspBuffOverflowDetected)
       {
-        RspBuffOverflowDetected = !SuperStrcat(msBuffer, string, sizeof(msBuffer));
+        rspBuffOverflowDetected = !SuperStrcat(msBuffer, string, sizeof(msBuffer));
 
-        if ( RspBuffOverflowDetected )
+        if ( rspBuffOverflowDetected )
         {
           GSE_DebugStr(NORMAL,TRUE,"Micro Server buffer overflow. Size: %d", strlen(msBuffer));
 
           MSI_PutResponse(CMD_ID_USER_MGR_MS, USER_MSG_RESP_OVERFLOW, MSCP_RSP_STATUS_FAIL,
-            strlen(USER_MSG_RESP_OVERFLOW), MsgTag);
+            strlen(USER_MSG_RESP_OVERFLOW), msgTag);
           statusFlag = FALSE;
         }
 
         // If the stream is finalized, call to write the entire msg buffer back to MS
         if (finalize)
         {
-          User_PutRsp(msBuffer, MsgSource, MsgTag );
+          User_PutRsp(msBuffer, msgSource, msgTag );
         }
       }
       break;
 
     default:
-      FATAL("Unrecognized msg source: %d", MsgSource);
+      FATAL("Unrecognized msg source: %d", msgSource);
       break;
   }
 
   if (finalize)
   {
-    CheckSum = 0;
+    checkSum = 0;
     msBuffer[0] = '\0';
   }
 
@@ -2730,8 +2781,6 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 *                                converted result.  Needs to point to a
 *                                32-bit location on entry for number
 *                                conversions
-*               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
-*                                the string to enum table
 *               [in/out] Min,Max: Minimum and Maximum range the value can
 *                                 be set to.  See User_SetMinMax.
 *
@@ -2740,20 +2789,19 @@ static BOOLEAN User_CvtGetBitListStr(USER_DATA_TYPE Type, INT8* GetStr,UINT32 Le
 * Notes:
 ******************************************************************************/
 static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                             USER_ENUM_TBL* MsgEnumTbl,
                                              USER_RANGE *Min,USER_RANGE *Max)
 {
   BOOLEAN bResult = TRUE;
   UINT32  uint_temp;
   CHAR*   ptr;
   CHAR*   end;
-  INT16   copyLen;
-  INT16   base = 16;
+  INT32   copyLen;
+  INT32   base = 16;
   CHAR    hexStrBuffer[11];             // Size: "0x" + 8 Hex digits + '\0'
   CHAR    reverseBuffer[11];
   UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
   INT16   offset = 0;                   // word-offset index into output buffer
-  INT16   inputLen  = strlen( SetStr ); // length of the input string.
+  UINT32  inputLen  = strlen( SetStr ); // length of the input string.
 
   // Input can be empty otherwise
   // s/b "0x0" -> "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
@@ -2778,7 +2826,7 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
       strncpy_safe(hexStrBuffer,sizeof(hexStrBuffer),"0X",2);
       strncpy_safe(&hexStrBuffer[2], sizeof(hexStrBuffer) - 2, ptr, copyLen);
 
-      uint_temp = strtoul(hexStrBuffer, &end, base);
+      uint_temp = (UINT32)strtoul(hexStrBuffer, &end, base);
 
       // Reverse calculated value to verify conversion.
       // need to deal with len of input string in hex case as "0X00FF1234" != "0XFF1234"
@@ -2828,7 +2876,6 @@ static BOOLEAN User_SetBitArrayFromHexString(USER_DATA_TYPE Type,INT8* SetStr,vo
 *
 ******************************************************************************/
 static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                                USER_ENUM_TBL* MsgEnumTbl,
                                                 USER_RANGE *Min,USER_RANGE *Max)
 {
   BOOLEAN bResult;
@@ -2846,8 +2893,8 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
 
   if (errno != ERANGE && *leftOver == '\0')
   {
-    sprintf(hexString,"0x%08X", decValue);
-    bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, MsgEnumTbl, Min, Max);
+    snprintf(hexString, sizeof(hexString), "0x%08X", decValue);
+    bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, Min, Max);
   }
   else
   {
@@ -2870,8 +2917,6 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
 *                                converted result.  Needs to point to a
 *                                32-bit location on entry for number
 *                                conversions
-*               [in] MsgEnumTbl: For ENUM classes of data only, pointer to
-*                                the string to enum table
 *               [in/out] Min,Max: Minimum and Maximum range the value can
 *                                 be set to.  See User_SetMinMax.
 *
@@ -2880,15 +2925,14 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
 * Notes:
 ******************************************************************************/
 static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
-                                        USER_ENUM_TBL* MsgEnumTbl,
                                         USER_RANGE *Min,USER_RANGE *Max)
 {
   BOOLEAN bResult = TRUE;
   CHAR*   ptr;
   CHAR*   end;
   UINT32* destPtr = (UINT32*)*SetPtr;   // convenience ptr to output buffer
-  INT32   index;
-  INT16   inputLen = strlen( SetStr ); // length of the input string.
+  INT32   nIndex;
+  UINT32  inputLen = strlen( SetStr ); // length of the input string.
 
   const INT16   base = 10;
 
@@ -2914,10 +2958,10 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
       {
         // Attempt to convert to a base 10 integer and
         // verify within range for this entry.
-        index = strtol(ptr, &end, base );
-        if (index >= 0 && index < MAX_SENSORS)
+        nIndex = strtol(ptr, &end, base );
+        if (nIndex >= 0 && nIndex < MAX_SENSORS)
         {
-          SetBit(index, destPtr, sizeof(BITARRAY128));
+          SetBit(nIndex, destPtr, sizeof(BITARRAY128));
           ptr = end;
         }
         else
@@ -2935,7 +2979,7 @@ static BOOLEAN User_SetBitArrayFromList(USER_DATA_TYPE Type,INT8* SetStr,void **
 }
 
 /******************************************************************************
-* Function:     User_CheckBits
+* Function:     User_BitSetIsValid
 *
 * Description:  Verifies that only valid bits are set in the 128 bit structure
 *
