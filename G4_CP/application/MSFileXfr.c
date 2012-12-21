@@ -23,7 +23,7 @@
                  "transmitted" with one command.
 
     VERSION
-    $Revision: 30 $  $Date: 12/18/12 4:58p $
+    $Revision: 31 $  $Date: 12/21/12 4:20p $
 
 ******************************************************************************/
 
@@ -223,7 +223,7 @@ static void    MSFX_YMdmRcvrWaitForSndr(void);
  *****************************************************************************/
 void MSFX_Init(void)
 {
-  TCB TaskInfo;
+  TCB task_info;
 
   m_TaskState = TASK_STOPPED;
 
@@ -236,21 +236,21 @@ void MSFX_Init(void)
   ASSERT(SYS_OK == MSI_AddCmdHandler(CMD_ID_GET_FILE_DATA,MSFX_MSCmdFileData));
 
   /*Setup the task that manages micro-server communication and file transfer*/
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"MS<->GSE File XFR",_TRUNCATE);
-  TaskInfo.TaskID         = MS_GSE_File_XFR;
-  TaskInfo.Function       = MSFX_Task;
-  TaskInfo.Priority       = taskInfo[MS_GSE_File_XFR].priority;
-  TaskInfo.modes          = taskInfo[MS_GSE_File_XFR].modes;
-  TaskInfo.Type           = taskInfo[MS_GSE_File_XFR].taskType;
-  TaskInfo.MIFrames       = taskInfo[MS_GSE_File_XFR].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[MS_GSE_File_XFR].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[MS_GSE_File_XFR].MIFrate;  // Run once every frame
+  memset(&task_info, 0, sizeof(task_info));
+  strncpy_safe(task_info.Name,sizeof(task_info.Name),"MS<->GSE File XFR",_TRUNCATE);
+  task_info.TaskID         = MS_GSE_File_XFR;
+  task_info.Function       = MSFX_Task;
+  task_info.Priority       = taskInfo[MS_GSE_File_XFR].priority;
+  task_info.modes          = taskInfo[MS_GSE_File_XFR].modes;
+  task_info.Type           = taskInfo[MS_GSE_File_XFR].taskType;
+  task_info.MIFrames       = taskInfo[MS_GSE_File_XFR].MIFframes;
+  task_info.Rmt.InitialMif = taskInfo[MS_GSE_File_XFR].InitialMif;
+  task_info.Rmt.MifRate    = taskInfo[MS_GSE_File_XFR].MIFrate;  // Run once every frame
   // (max throughput for YMODEM)
-  TaskInfo.Enabled        = FALSE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  task_info.Enabled        = FALSE;
+  task_info.Locked         = FALSE;
+  task_info.pParamBlock    = NULL;
+  TmTaskCreate (&task_info);
 
 }
 
@@ -664,11 +664,11 @@ static void MSFX_ReqPri4TxdFileListState(void)
 
 
   //Set file name and path
-  sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
+  snprintf(m_FileXfrData.FN,sizeof(m_FileXfrData.FN), "/tmp/filelist.txt");
 
   //construct a command to create a formatted listing of the CP_SAVED
   //folder and pipe it to /tmp
-  sprintf(cmd.Str,"ls -lre [CP_PRI4] | grep [.]qc > %s",m_FileXfrData.FN);
+  snprintf(cmd.Str,sizeof(cmd.Str),"ls -lre [CP_PRI4] | grep [.]qc > %s",m_FileXfrData.FN);
 
   cmd.Len = strlen(cmd.Str) + 1;
 
@@ -677,7 +677,7 @@ static void MSFX_ReqPri4TxdFileListState(void)
             "MS returned fail for get file list");
 
   if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
-        sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
+        (sizeof(cmd)-sizeof(cmd.Str))+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
   {
     MSFX_Error("Could not send MS command, file list");
     m_TaskState = TASK_ERROR;
@@ -708,11 +708,11 @@ static void MSFX_ReqPri4NonTxdFileListState(void)
 
 
   //Set file name and path
-  sprintf(m_FileXfrData.FN,"/tmp/filelist.txt");
+  snprintf(m_FileXfrData.FN,sizeof(m_FileXfrData.FN),"/tmp/filelist.txt");
 
   //construct a command to create a formatted listing of the CP_FILES
   //folder and pipe it to /tmp
-  sprintf(cmd.Str,"ls -lre [CP_PRI4] | grep -v [.]qc > %s",
+  snprintf(cmd.Str,sizeof(cmd.Str),"ls -lre [CP_PRI4] | grep -v [.]qc > %s",
       m_FileXfrData.FN);
 
   cmd.Len = strlen(cmd.Str) + 1;
@@ -720,7 +720,7 @@ static void MSFX_ReqPri4NonTxdFileListState(void)
   MSFX_Wait(TASK_REQUEST_START_FILE,TASK_ERROR,
       "MS returned fail for get file list");
   if(SYS_OK != MSI_PutCommand(CMD_ID_SHELL_CMD,&cmd,
-        sizeof(cmd)-sizeof(cmd.Str)+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
+        (sizeof(cmd)-sizeof(cmd.Str))+cmd.Len,MSI_REQ_DATA_TIMEOUT,MSFX_MSRspShellCmd))
   {
     MSFX_Error("Could not send MS command, file list");
     m_TaskState = TASK_ERROR;
@@ -1421,8 +1421,8 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
   //Packet size depends on start character: SOH 128B, STX 1024B
   UINT32 size = YMdm->k1.Start == SOH ? YMODEM_128_SIZE : YMODEM_1024_SIZE;
   INT32 read;
-  UINT16 RcvdCRC;
-  UINT16 CalcCRC;
+  UINT16 rcvd_crc;
+  UINT16 calc_crc;
 
   read = GSE_read(&ptr[m_FileXfrData.SizeRcvd],size-m_FileXfrData.SizeRcvd);
 
@@ -1435,13 +1435,13 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
     {
       //Get received and computed CRC.  CRC location differs based on YMODEM
       //packet size.
-      CalcCRC = CRC_CCITT(YMdm->k1.Data,size-YMODEM_OVERHEAD_SIZE);
-      RcvdCRC = YMdm->k1.Start == SOH ? YMdm->B128.CRC : YMdm->k1.CRC;
+      calc_crc = CRC_CCITT(YMdm->k1.Data,size-YMODEM_OVERHEAD_SIZE);
+      rcvd_crc = YMdm->k1.Start == SOH ? YMdm->B128.CRC : YMdm->k1.CRC;
 
       if( m_FileXfrData.yMdmB0                               &&
          (YMdm->k1.Blk            == m_FileXfrData.ExpBlock) &&
          ((UINT8)~YMdm->k1.InvBlk == m_FileXfrData.ExpBlock) &&
-         (CalcCRC                 == RcvdCRC ) )
+         (calc_crc                 == rcvd_crc ) )
       {
         //Got a complete first block, open the file on the micro-server
         MSFX_SendStartPutFileToMS(YMdm);
@@ -1449,7 +1449,7 @@ static void MSFX_ReceiveDataPacket(MSFX_YMODEM_BLK* YMdm)
       }
       else if((YMdm->k1.Blk            == m_FileXfrData.ExpBlock) &&
               ((UINT8)~YMdm->k1.InvBlk == m_FileXfrData.ExpBlock) &&
-              (CalcCRC                 == RcvdCRC))
+              (calc_crc                 == rcvd_crc))
       {
         //Got a complete block
         MSFX_SendPutFileDataToMS(YMdm);
@@ -1726,7 +1726,7 @@ static void MSFX_Signal(BOOLEAN Success)
  * Description: Compute the CRC for the Data portion of a 1k YMODEM block and
  *              store the result in the CRC portion of the block.
  *
- * Parameters:  [in/out]: MdmBlock .Data portion read, result written to .CRC
+ * Parameters:  [in/out]: MdmBlk .Data portion read, result written to .CRC
  *
  * Returns:     none
  *
@@ -2072,6 +2072,11 @@ static void  MSFX_MSRspGenericPassFail(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSFileXfr.c $
  * 
+ * *****************  Version 31  *****************
+ * User: Jim Mood     Date: 12/21/12   Time: 4:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Changes
+ *
  * *****************  Version 30  *****************
  * User: Jim Mood     Date: 12/18/12   Time: 4:58p
  * Updated in $/software/control processor/code/application
