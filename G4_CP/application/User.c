@@ -1038,7 +1038,7 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
     //Report the valid index range if needed
     else
     {
-      snprintf(RspStr,sizeof(RspStr),"%s (%d-%d)", USER_MSG_INDEX_OUT_OF_RANGE,
+      snprintf(RspStr,(INT32)Len,"%s (%d-%d)", USER_MSG_INDEX_OUT_OF_RANGE,
               MsgTbl->MsgIndexMin,
               MsgTbl->MsgIndexMax);
       result = FALSE;
