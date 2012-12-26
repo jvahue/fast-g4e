@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 56 $  $Date: 11/27/12 8:35p $
+    $Revision: 57 $  $Date: 12/24/12 11:04a $
 
 ******************************************************************************/
 
@@ -124,6 +124,7 @@ typedef enum
    LOG_QUEUE_EMPTY      = 2
 } LOG_QUEUE_STATUS;
 
+//NOTE: LOG_TYPE stored in UINT16, limit to less than 65535
 typedef enum
 {
    LOG_TYPE_DONT_CARE   = 0,
@@ -424,6 +425,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
  *  MODIFICATIONS
  *    $History: LogManager.h $
  * 
+ * *****************  Version 57  *****************
+ * User: Jim Mood     Date: 12/24/12   Time: 11:04a
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 56  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:35p
  * Updated in $/software/control processor/code/system
