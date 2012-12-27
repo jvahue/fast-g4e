@@ -184,7 +184,7 @@ static USER_MSG_TBL trendCmd [] =
   { "CYCLEB",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[1],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[2],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
-  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
   { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
