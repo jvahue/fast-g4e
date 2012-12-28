@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 27 $  $Date: 12/14/12 5:00p $
+  $Revision: 28 $  $Date: 12/28/12 5:52p $
 
 ******************************************************************************/
 
@@ -253,6 +253,8 @@ static const EVAL_OPCODE_TBL_ENTRY m_OpCodeTable[EVAL_OPCODE_MAX] = {EVAL_OPCODE
            {OpCode##_DAI, IsConfigured, RetValueFunc, RetBoolFunc, ValidFunc}
 static const EVAL_DATAACCESS m_DataAccessTable[EVAL_DAI_MAX] = {EVAL_DAI_LIST};
 
+// Evaluator is not reentrant! see EvalExeExpression
+
 // Evaluation rpn stack used at runtime
 static EVAL_RPN_ENTRY rpn_stack[EVAL_EXPR_BIN_LEN];
 static INT32          rpn_stack_pos = 0;
@@ -336,7 +338,9 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
  *              1: Expression evaluates to TRUE
  *            < 0: see RPN_ERR in Evaluator.h for list of error codes.
  *
- * Notes:
+ * Notes:   This function SHOULD ONLY BE INVOKED by DT tasks as it is designed to be
+ *          non-reentrant(rpn_stack, rpn_stack_pos integrity,m_masterTbl and m_masterTblCnt)
+ *
  *
  *****************************************************************************/
 INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
@@ -1789,10 +1793,15 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
  *  MODIFICATIONS
  *    $History: Evaluator.c $
  * 
+ * *****************  Version 28  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 5:52p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1197 CR FIS finding comment
+ *
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 12/14/12   Time: 5:00p
  * Updated in $/software/control processor/code/drivers
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:23p

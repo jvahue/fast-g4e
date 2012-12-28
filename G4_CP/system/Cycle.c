@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 31 $  $Date: 12-12-27 3:57p $
+  $Revision: 32 $  $Date: 12/28/12 5:49p $
 
 ******************************************************************************/
 
@@ -159,15 +159,15 @@ void CycleInitialize(void)
  * Description:  Updates all cycles for EngineRun 'erIndex'
  *
  * Parameters:   erIndex - The index into the CYCLE_CFG and CYCLE_DATA object arrays.
+ *               erState - The current ER state.
  *
  * Returns:      None.
  *
  * Notes:        None.
  *
  *****************************************************************************/
-void CycleUpdateAll(ENGRUN_INDEX erIndex)
+void CycleUpdateAll(ENGRUN_INDEX erIndex, ER_STATE erState)
 {
-  UINT8  flags;
   UINT16 cycIndex;
 
   // Update all active cycles associated with this engine run
@@ -176,7 +176,7 @@ void CycleUpdateAll(ENGRUN_INDEX erIndex)
     if ( m_Cfg[cycIndex].type != CYC_TYPE_NONE_CNT &&
          m_Cfg[cycIndex].nEngineRunId == erIndex )
     {
-      if (ER_STATE_STOPPED == EngRunGetState(erIndex, &flags))
+      if (ER_STATE_STOPPED == erState )
       {
         m_Data[cycIndex].cycleActive = FALSE;
       }
@@ -1106,16 +1106,21 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
  *  MODIFICATIONS
  *    $History: Cycle.c $
  * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 5:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Pass eng state to cycle.
+ *
  * *****************  Version 31  *****************
  * User: Melanie Jutras Date: 12-12-27   Time: 3:57p
  * Updated in $/software/control processor/code/system
  * SCR #1172. Code Review Fixes: PCLint 545 and 539.
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 12/18/12   Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR #1107 cycle count code cleanup
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 12/14/12   Time: 5:02p
  * Updated in $/software/control processor/code/system

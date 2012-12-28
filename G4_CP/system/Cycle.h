@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 21 $  $Date: 12/14/12 5:02p $
+      $Revision: 22 $  $Date: 12/28/12 5:49p $
 
 ******************************************************************************/
 
@@ -24,6 +24,7 @@
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "EngineRunInterface.h"
+#include "EngineRun.h"
 #include "trigger.h"
 #include "NVMgr.h"
 /******************************************************************************
@@ -249,7 +250,7 @@ EXPORT USER_ENUM_TBL cycleEnumType[];
                              Package Exports Functions
 ******************************************************************************/
 EXPORT void    CycleInitialize         ( void );
-EXPORT void    CycleUpdateAll          ( ENGRUN_INDEX erIndex );
+EXPORT void    CycleUpdateAll          ( ENGRUN_INDEX erIndex, ER_STATE erState );
 
 EXPORT void    CycleFinishEngineRun    ( ENGRUN_INDEX erID );
 EXPORT void    CycleResetEngineRun     ( ENGRUN_INDEX erID );
@@ -265,20 +266,25 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  *  MODIFICATIONS
  *    $History: Cycle.h $
  * 
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 5:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Pass eng state to cycle.
+ *
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 12/14/12   Time: 5:02p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
  * Updated in $/software/control processor/code/system
  * SCR 1162 - NV MGR File Init function
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 18  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
