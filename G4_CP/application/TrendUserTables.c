@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 17 $  $Date: 12/05/12 4:16p $
+$Revision: 18 $  $Date: 12/28/12 11:36a $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -184,7 +184,7 @@ static USER_MSG_TBL trendCmd [] =
   { "CYCLEB",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[1],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "CYCLEC",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[2],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
-  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
+  { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
   { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
@@ -375,6 +375,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 11:36a
+ * Updated in $/software/control processor/code/application
+ * Add AutoTrend count to GSE
  *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p
