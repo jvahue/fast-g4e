@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 19 $  $Date: 12-12-08 11:44a $
+ $Revision: 20 $  $Date: 12-12-28 2:49p $
 
 ******************************************************************************/
 
@@ -1010,6 +1010,8 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
 static
 void ActionResetNVPersist ( void )
 {
+   INT32 intLevel;
+    
    // Log the Reset of the non volatile persist data
    LogWriteETM ( SYS_ID_ACTION_PERSIST_RESET,
                  LOG_PRIORITY_3,
@@ -1020,15 +1022,16 @@ void ActionResetNVPersist ( void )
    memset((void *)&m_RTC_Copy, 0, sizeof(m_RTC_Copy));
    memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
 
-   m_ActionData.bNVStored = FALSE;
-
    NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
    NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
 
+   intLevel = __DIR();
+   m_ActionData.bNVStored         = FALSE;
    m_ActionData.bUpdatePersistOut = TRUE;
    m_ActionData.persist.bLatch    = FALSE;
    m_ActionData.persist.bState    = OFF;
    m_ActionData.persist.actionNum = ACTION_NONE;
+   __RIR( intLevel);
 
    ActionClearLatch ( &m_ActionData );
 }
@@ -1036,6 +1039,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 12-12-28   Time: 2:49p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a
