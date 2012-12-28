@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 57 $  $Date: 12/24/12 11:04a $
+    $Revision: 58 $  $Date: 12/27/12 5:00p $
 
 ******************************************************************************/
 
@@ -134,6 +134,7 @@ typedef enum
    LOG_TYPE_NONE        = 0xffff     // indicates unused flash area
 } LOG_TYPE;
 
+//NOTE: LOG_Priority stored in UINT16, limit to less than 65535
 typedef enum
 {
    LOG_PRIORITY_1       = 1,
@@ -424,6 +425,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 58  *****************
+ * User: Jim Mood     Date: 12/27/12   Time: 5:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Changes
  * 
  * *****************  Version 57  *****************
  * User: Jim Mood     Date: 12/24/12   Time: 11:04a

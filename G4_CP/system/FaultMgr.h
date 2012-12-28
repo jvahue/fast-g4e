@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 33 $  $Date: 12-11-13 5:46p $
+    $Revision: 34 $  $Date: 12/27/12 4:54p $
 
 ******************************************************************************/
 
@@ -40,6 +40,8 @@
                                  Package Typedefs
 ******************************************************************************/
 // Note: Updates to FLT_STATUS has dependency to Flt_UserEnumStatus[]
+// Warning - target type for this enum may be as small as UINT16.
+// Do not make enum larger than 65536
 typedef enum {
   STA_NORMAL,
   STA_CAUTION,
@@ -142,6 +144,11 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
+ * 
+ * *****************  Version 34  *****************
+ * User: Jim Mood     Date: 12/27/12   Time: 4:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1197 Code Review Updates
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p

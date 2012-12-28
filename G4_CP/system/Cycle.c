@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 30 $  $Date: 12/18/12 3:36p $
+  $Revision: 31 $  $Date: 12-12-27 3:57p $
 
 ******************************************************************************/
 
@@ -377,7 +377,7 @@ static void CycleInitPersistent(void)
   BOOLEAN bRestored = CycleRestoreCntsFromPersistFiles();
 
   // Init the array used to display current values of cycles, persist and simple.
-  memset( &m_CountsCurrent, 0, sizeof(m_CountsCurrent) );
+  memset( m_CountsCurrent, 0, sizeof(m_CountsCurrent) );
 
 
   /* If both sets of persistent data is corrupted reset to 0 */
@@ -447,7 +447,7 @@ static void CycleInitPersistent(void)
       // At this point the EEPROM and RTC have been synchronized.
       // EEPROM values are used as the baseline so use them to
       // set the current-counts
-       m_CountsCurrent[i] = m_CountsEEProm.data[i].count.n;
+      m_CountsCurrent[i] = m_CountsEEProm.data[i].count.n;
     }
   }
 
@@ -1105,6 +1105,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: Melanie Jutras Date: 12-12-27   Time: 3:57p
+ * Updated in $/software/control processor/code/system
+ * SCR #1172. Code Review Fixes: PCLint 545 and 539.
  * 
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 12/18/12   Time: 3:36p
