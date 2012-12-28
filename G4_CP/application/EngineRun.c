@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 50 $  $Date: 12/18/12 12:38p $
+      $Revision: 51 $  $Date: 12/28/12 5:51p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -556,6 +556,7 @@ static void EngRunReset(ENGRUN_DATA* pErData)
 static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
 {
   ER_STATE curState;
+  BOOLEAN  bStateTriggerFailed;
 
   // Is it time for this EngineRun to run?
   if (--pErData->nRateCountdown == 0)
@@ -563,45 +564,42 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     // Reset the countdown counter for the next engine run.
     pErData->nRateCountdown = pErData->nRateCounts;
 
+    // Check for validity errors in the STOP, START, and RUN triggers.
+    bStateTriggerFailed = EngRunIsError( pErCfg);
+
     // Process the current engine run state
     curState = pErData->erState;
 
     switch ( pErData->erState)
     {
       case ER_STATE_STOPPED:
+        // Monitor configured min/max sensors, set flag
+        // FALSE to prevent update start duration.
+        EngRunUpdateStartData( pErData, FALSE);
 
-        // If the the engine-run is not-configured or unused,
-        // hold in the STOP state.
-        if (ENGRUN_UNUSED != pErData->erIndex)
+        // Check that all transition-trigger are valid,
+        // then see if engine start/running is occurring
+        // if the engine is running ( ex: system restart in-air),
+        // we still go thru START to set up initialization and logs
+        if ( !bStateTriggerFailed )
         {
-          // Monitor configured min/max sensors, set flag
-          // FALSE to prevent update start duration.
-          EngRunUpdateStartData( pErData, FALSE);
-
-          // Check that all transition-trigger are valid,
-          // then see if engine start/running is occurring
-          // if the engine is running ( ex: system restart in-air),
-          // we still go thru START to set up initialization and logs
-          if ( !EngRunIsError( pErCfg) )
+          if ( TriggerGetState( pErCfg->startTrigID) ||
+               TriggerGetState( pErCfg->runTrigID  ) )
           {
-            if ( TriggerGetState( pErCfg->startTrigID) ||
-                 TriggerGetState( pErCfg->runTrigID  ) )
-            {
-              // init the start-log entry and set start-time
-              // clear the cycle counts for this engine run
-              EngRunStartLog( pErData);
-              pErData->erState = ER_STATE_STARTING;
-            }
+            // init the start-log entry and set start-time
+            // clear the cycle counts for this engine run
+            EngRunStartLog( pErData);
+            pErData->erState = ER_STATE_STARTING;
           }
-          else
-          {
-            // Ensure we don't collected any false start data while invalid
-            // reset this engine run and its cycles.
-            EngRunReset(pErData);
-            // don't forget these special ones
-            pErData->minValueValid = TRUE;
-            pErData->minMonValue   = FLT_MAX;
-          }
+        }
+        else
+        {
+          // Ensure we don't collected any false start data while invalid
+          // reset this engine run and its cycles.
+          EngRunReset(pErData);
+          // don't forget these special ones
+          pErData->minValueValid = TRUE;
+          pErData->minMonValue   = FLT_MAX;
         }
         break;
 
@@ -616,7 +614,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // Error Detected
       // If we have a problem determining the EngineRun state,
       // write the engine run-log and transition to STOPPED state
-      if ( EngRunIsError(pErCfg))
+      if ( bStateTriggerFailed )
       {
         // Finish the engine run log
         EngRunWriteRunLog( ER_LOG_ERROR, pErData);
@@ -653,7 +651,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
       // end the engine run log, and transition to error mode
 
       // RUNNING -> (error) -> STOP
-      if ( EngRunIsError(pErCfg))
+      if ( bStateTriggerFailed )
       {
         // Finish the engine run log
         EngRunWriteRunLog(ER_LOG_ERROR, pErData);
@@ -679,7 +677,7 @@ static void EngRunUpdate( ENGRUN_CFG* pErCfg, ENGRUN_DATA* pErData)
     }
 
     // Update the cycles state and data for this engine run
-    CycleUpdateAll(pErData->erIndex);
+    CycleUpdateAll( pErData->erIndex, pErData->erState );
 
     // General State Transition processing
     if ( pErData->erState != curState )
@@ -949,6 +947,11 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 51  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 5:51p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Pass eng state to cycle.
  *
  * *****************  Version 50  *****************
  * User: Contractor V&v Date: 12/18/12   Time: 12:38p

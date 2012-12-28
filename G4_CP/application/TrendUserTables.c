@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 18 $  $Date: 12/28/12 11:36a $
+$Revision: 19 $  $Date: 12/28/12 5:51p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -96,7 +96,7 @@ static USER_ENUM_TBL trendEngRunIdEnum[] =
   { "1"     , ENGRUN_ID_1  },
   { "2"     , ENGRUN_ID_2  },
   { "3"     , ENGRUN_ID_3  },
-//{ "100"   , ENGRUN_ID_ANY},
+  { "ANY"   , ENGRUN_ID_ANY},
   { "UNUSED", ENGRUN_UNUSED},
   { NULL, 0 }
 };
@@ -376,6 +376,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
  * 
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 12/28/12   Time: 5:51p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Pass eng state to cycle.
+ *
  * *****************  Version 18  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 11:36a
  * Updated in $/software/control processor/code/application
