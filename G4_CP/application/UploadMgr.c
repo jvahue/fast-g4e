@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 168 $  $Date: 12/20/12 6:26p $
+   $Revision: 169 $  $Date: 12/27/12 4:50p $
 
 ******************************************************************************/
 
@@ -116,13 +116,10 @@ typedef enum
 {
   TBL_MAINT_SRCH_STARTED_MSFAIL,//Search for "Started" or "MS Failed"
   TBL_MAINT_WT_RM_LOG_RSP,      //Wait for an MSSIM command response
-  TBL_MAINT_SRCH_COMPLETED,     //Search for "Completed"
-  TBL_MAINT_WT_CHECK_RSP1,      //Wait for the "Check File" response
   TBL_MAINT_SRCH_LOG_DELETED,   //Search for files that need mark for deletion
   TBL_MAINT_WT_MARK_DELETE,     //Wait for Log Manager "MarkForDeletion" task
   TBL_MAINT_SRCH_GROUNDVFY,     //Search for files marked GroundVfy
   TBL_MAINT_WT_CHECK_RSP2,      //Wait for "Check File" response again
-  TBL_MAINT_SRCH_DELAY,         //Delay between task switches
   TBL_MAINT_ERROR,              //Indicates an error occurred while processing
   TBL_MAINT_FINISHED            //File Verification Maintenance is completed
 }UPLOADMGR_TBL_MAINT_STATE;
@@ -160,7 +157,7 @@ typedef struct
 }UPLOADMGR_UPLOAD_ORDER_TBL;
 
 //State enumeration for the file verification table
-//NOTE: Enum assigned to INT8, limit max value to 128.
+//NOTE: Enum assigned to INT8, limit max value to 127.
 typedef enum
 {
   VFY_STA_STARTED      = 0, //File transfer started, but not completed.
@@ -1554,7 +1551,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       //Read logs until all logs are read, or the FIFO is full
       while(Task->State == LOG_COLLECTION_LOG_UPLOAD_FIND_LOG)
       {
-      (ULTaskData.State == FILE_UL_ERROR) ?
+        (ULTaskData.State == FILE_UL_ERROR) ?
            UploadMgr_UpdateFileVfy(Task->VfyRow, VFY_STA_DELETED, 0, 0),
            Task->State = LOG_COLLECTION_FILE_UL_ERROR : 0;
 
@@ -3483,6 +3480,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 169  *****************
+ * User: Jim Mood     Date: 12/27/12   Time: 4:50p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Code Review Updates
+ *
  * *****************  Version 168  *****************
  * User: Jim Mood     Date: 12/20/12   Time: 6:26p
  * Updated in $/software/control processor/code/application
