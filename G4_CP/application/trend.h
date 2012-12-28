@@ -225,7 +225,7 @@ typedef struct
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
    BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
    CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/
-   UINT32        nAction;            /* Action to annunciate during the trend                */
+   UINT8         nAction;            /* Action to annunciate during the trend                */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG;
@@ -316,11 +316,11 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
- *
+ * 
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:30p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review
+ * SCR #1107 Code Review 
  *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/29/12   Time: 4:19p
