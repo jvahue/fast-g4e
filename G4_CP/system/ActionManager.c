@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 20 $  $Date: 12-12-28 2:49p $
+ $Revision: 21 $  $Date: 13-01-02 1:22p $
 
 ******************************************************************************/
 
@@ -392,6 +392,8 @@ BOOLEAN ActionEEFileInit(void)
  *****************************************************************************/
 BOOLEAN ActionRTCFileInit(void)
 {
+   INT32 intLevel;
+    
    memset((void *)&m_RTC_Copy,  0, sizeof(m_RTC_Copy ));
 	
    NV_Write( NV_ACT_STATUS_RTC,  0, &m_RTC_Copy,  sizeof(m_RTC_Copy ) );
@@ -399,11 +401,13 @@ BOOLEAN ActionRTCFileInit(void)
    // Since the RTC is the main storage for the persistent action, we need
    // to reinit the persistence flags and clear any existing latch.
    // This doesn't need to be done for the EEPROM copy
+   intLevel = __DIR();
    m_ActionData.bNVStored         = FALSE;
    m_ActionData.bUpdatePersistOut = TRUE;
    m_ActionData.persist.bLatch    = FALSE;
    m_ActionData.persist.bState    = OFF;
    m_ActionData.persist.actionNum = ACTION_NONE;
+   __RIR(intLevel);
    
    ActionClearLatch ( &m_ActionData );
   
@@ -742,8 +746,13 @@ void ActionCheckACK ( ACTION_DATA *pData )
  *
  * Returns:      None
  *
- * Notes:        None
- *
+ * Notes:        Super Trace Analysis
+ *               __DIR - Max Cycles from super trace
+ *               Test Bits  - 4753 cycles
+ *               Reset Bits - 3494 cycles * 2 
+ *               memset     - 1500 cycles
+ *               __RIR
+ *               Total      - 13241 * 5nS = 66.2 uS per iteration
  *****************************************************************************/
 static
 void ActionClearLatch ( ACTION_DATA *pData )
@@ -752,12 +761,14 @@ void ActionClearLatch ( ACTION_DATA *pData )
    ACTION_FLAGS *pFlags;
    UINT8         nActionIndex;
    BITARRAY128   maskAll = { 0xFFFF,0xFFFF,0xFFFF,0xFFFF };
+   INT32         intLevel;
 
    // Loop through all the Actions
    for ( nActionIndex = 0; nActionIndex < MAX_ACTION_DEFINES; nActionIndex++ )
    {
       pFlags = &pData->action[nActionIndex];
 
+      intLevel = __DIR();
       // Check if any ACK flag is set
       if ( TRUE == TestBits( maskAll, sizeof(maskAll),
                              pFlags->flagLatch, sizeof(pFlags->flagLatch), FALSE ) )
@@ -770,6 +781,7 @@ void ActionClearLatch ( ACTION_DATA *pData )
          // Clear the Latch for all IDs
          memset((void *)pFlags->flagLatch, 0, sizeof(pFlags->flagLatch));
       }
+      __RIR(intLevel);
    }
 }
 
@@ -1039,6 +1051,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 13-01-02   Time: 1:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1197 - Code Review Update
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-28   Time: 2:49p
