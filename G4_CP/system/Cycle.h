@@ -184,8 +184,6 @@ typedef struct
 }CYCLE_DATA, *CYCLE_DATA_PTR;
 
 #pragma pack(1)
-
-
 typedef struct
 {
   union
@@ -205,6 +203,13 @@ typedef struct
 
 
 #pragma pack(1)
+
+typedef struct
+{
+  UINT16 cycleId;
+  UINT32 rtcCount;
+  UINT32 eepromCount;
+}CYCLE_PERSIST_COUNTS_DIFF_LOG;
 
 typedef struct
 {
@@ -265,7 +270,7 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:49p
  * Updated in $/software/control processor/code/system
