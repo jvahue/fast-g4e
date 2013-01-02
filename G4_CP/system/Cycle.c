@@ -364,11 +364,9 @@ BOOLEAN CycleRTCFileInit(void)
  *****************************************************************************/
 static void CycleInitPersistent(void)
 {
-
-  BOOLEAN bUpdateEEPROM = FALSE;
-  BOOLEAN bUpdateRTCRAM = FALSE;
+  BOOLEAN bUpdatePersist = FALSE;
   UINT8   i;
-
+  CYCLE_PERSIST_COUNTS_DIFF_LOG persistDiffLog;
   CYCLE_ENTRY*   pCycCntsEE;
   CYCLE_ENTRY*   pCycCntsRTC;
 
@@ -396,22 +394,40 @@ static void CycleInitPersistent(void)
 
       if ( pCycCntsEE->count.n != pCycCntsRTC->count.n )
       {
+        // create sys log and flag that persist will need updating.
+        bUpdatePersist = TRUE;
+
+        persistDiffLog.cycleId     = i;
+        persistDiffLog.rtcCount    = pCycCntsRTC->count.n;
+        persistDiffLog.eepromCount = pCycCntsEE->count.n;
+
+        LogWriteSystem( SYS_ID_CYCLES_PERSIST_COUNTS_DIFF,
+                        LOG_PRIORITY_3,
+                        &persistDiffLog,
+                        sizeof(CYCLE_PERSIST_COUNTS_DIFF_LOG),
+                        NULL );
+
+        GSE_DebugStr(NORMAL, TRUE,
+                    "Cycle[%d] - Different Persist values RTC: %d, EEPROM: %d",
+                    persistDiffLog.cycleId,
+                    persistDiffLog.rtcCount,
+                    persistDiffLog.eepromCount);
+
         if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
         {
           pCycCntsRTC->count.n = pCycCntsEE->count.n;
-          bUpdateRTCRAM = TRUE;
         }
         else
         {
           pCycCntsEE->count.n = pCycCntsRTC->count.n;
-          bUpdateEEPROM = TRUE;
         }
       }
 
+      // Calc new checkId... a "TRUE" return signals that persist
+      // needs to be re-written.
       if ( CycleUpdateCheckId( i, LOGUPDATE_YES) )
       {
-        bUpdateEEPROM = TRUE;  /* for simplicity update both */
-        bUpdateRTCRAM = TRUE;  /* for simplicity update both */
+        bUpdatePersist = TRUE;  /* for simplicity update both */
       }
 
       // At this point the EEPROM and RTC have been synchronized.
@@ -423,7 +439,7 @@ static void CycleInitPersistent(void)
   } /* End of for MAX_CYCLES loop             */
 
 
-  if (bUpdateRTCRAM || bUpdateEEPROM)
+  if (bUpdatePersist)
   {
     CycleSyncPersistFiles(CYC_COUNT_UPDATE_NOW);
   }
@@ -1071,7 +1087,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:49p
  * Updated in $/software/control processor/code/system
