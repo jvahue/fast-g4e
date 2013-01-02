@@ -369,8 +369,6 @@ static void CycleInitPersistent(void)
   BOOLEAN bUpdateRTCRAM = FALSE;
   UINT8   i;
 
-  CYCLE_CFG*     pCycCfg;
-
   CYCLE_ENTRY*   pCycCntsEE;
   CYCLE_ENTRY*   pCycCntsRTC;
 
@@ -389,8 +387,6 @@ static void CycleInitPersistent(void)
   {
     if ( CycleIsPersistentType( i) )
     {
-      pCycCfg = &m_Cfg[i];
-
       // Set ptrs to areas containing files read from NVRAM
       pCycCntsEE  = &m_CountsEEProm.data[i];
       pCycCntsRTC = &m_CountsRTC.data[i];
