@@ -104,7 +104,7 @@ static void    CycleInitPersistent(void);
 static BOOLEAN CycleIsPersistentType ( UINT8 nCycle );
 
 static void    CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode );
-static BOOLEAN CycleRestoreCntsFromPersistFiles(void);
+static void    CycleRestoreCntsFromPersistFiles(void);
 static BOOLEAN CycleUpdateCheckId( UINT16 nCycle, BOOLEAN bLogUpdate);
 static UINT16  CycleCalcCheckID ( UINT16 nCycle );
 static void    CycleSyncPersistFiles(BOOLEAN bNow);
@@ -374,7 +374,7 @@ static void CycleInitPersistent(void)
   CYCLE_ENTRY*   pCycCntsEE;
   CYCLE_ENTRY*   pCycCntsRTC;
 
-  BOOLEAN bRestored = CycleRestoreCntsFromPersistFiles();
+  CycleRestoreCntsFromPersistFiles();
 
   // Init the array used to display current values of cycles, persist and simple.
   memset( m_CountsCurrent, 0, sizeof(m_CountsCurrent) );
@@ -385,7 +385,7 @@ static void CycleInitPersistent(void)
   // RTC and EEPROM copies of persist cycles have valid but different CRC's.
   // Determine which values are valid based on checkID and create a good list.
 
-  for ( i = 0; i < MAX_CYCLES && !bRestored; i++)
+  for ( i = 0; i < MAX_CYCLES; i++)
   {
     if ( CycleIsPersistentType( i) )
     {
@@ -400,44 +400,18 @@ static void CycleInitPersistent(void)
 
       if ( pCycCntsEE->count.n != pCycCntsRTC->count.n )
       {
-        if ( CYC_TYPE_PERSIST_DURATION_CNT == pCycCfg->type )
+        if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
         {
-          if ( pCycCntsEE->count.n > pCycCntsRTC->count.n )
-          {
-            pCycCntsRTC->count.n = pCycCntsEE->count.n;
-            bUpdateRTCRAM = TRUE;
-          }
-          else
-          {
-            pCycCntsEE->count.n = pCycCntsRTC->count.n;
-            bUpdateEEPROM = TRUE;
-          }
+          pCycCntsRTC->count.n = pCycCntsEE->count.n;
+          bUpdateRTCRAM = TRUE;
         }
         else
         {
-          if ( pCycCntsEE->count.f > pCycCntsRTC->count.f )
-          {
-            pCycCntsRTC->count.f = pCycCntsEE->count.f;
-            bUpdateRTCRAM = TRUE;
-          }
-          else
-          {
-            pCycCntsEE->count.f = pCycCntsRTC->count.f;
-            bUpdateEEPROM = TRUE;
-          }
-        } /* End of else != P_DURATION_COUNT   */
-      } /* End of if ( != )                  */
-    } /* End of if cycle->type is a persistent */
-  } /* End of for MAX_CYCLES loop             */
+          pCycCntsEE->count.n = pCycCntsRTC->count.n;
+          bUpdateEEPROM = TRUE;
+        }
+      }
 
-
-
-  /* Both PCycleData and RTC_RAMRunTime are good, and count == */
-  /* compare .checkId  */
-  for ( i = 0; i < MAX_CYCLES; i++)
-  {
-    if ( CycleIsPersistentType(i) )
-    {
       if ( CycleUpdateCheckId( i, LOGUPDATE_YES) )
       {
         bUpdateEEPROM = TRUE;  /* for simplicity update both */
@@ -448,8 +422,10 @@ static void CycleInitPersistent(void)
       // EEPROM values are used as the baseline so use them to
       // set the current-counts
       m_CountsCurrent[i] = m_CountsEEProm.data[i].count.n;
-    }
-  }
+
+    } /* End of if cycle->type is a persistent */
+  } /* End of for MAX_CYCLES loop             */
+
 
   if (bUpdateRTCRAM || bUpdateEEPROM)
   {
@@ -879,16 +855,15 @@ void CycleFinishEngineRun( ENGRUN_INDEX erID )
  *
  * Parameters:   [in] None
  *
- * Returns:      TRUE if restore was successful, otherwise FALSE.
+ * Returns:      None.
  *
  * Notes:        None.
  *
  *****************************************************************************/
-static BOOLEAN CycleRestoreCntsFromPersistFiles(void)
+static void CycleRestoreCntsFromPersistFiles(void)
 {
   RESULT resultEE;
   RESULT resultRTC;
-  BOOLEAN status = FALSE;
   UINT16   i;
   UINT32  size = sizeof(CYCLE_COUNTS);
 
@@ -927,7 +902,6 @@ static BOOLEAN CycleRestoreCntsFromPersistFiles(void)
     GSE_DebugStr(NORMAL,TRUE, "Cycle - Initialized counts copied to EEPROM...%s",
                               SYS_OK == resultRTC ? "SUCCESS":"FAILED");
 
-    status = ((resultRTC == SYS_OK) || (resultEE == SYS_OK)) ? TRUE : FALSE;
   }
   // else if RTC was bad, read from EE version.
   else if (resultRTC != SYS_OK)
@@ -937,7 +911,6 @@ static BOOLEAN CycleRestoreCntsFromPersistFiles(void)
     resultRTC = NV_WriteNow(NV_PCYCLE_CNTS_RTC, 0, &m_CountsRTC, size);
     GSE_DebugStr(NORMAL,TRUE, "Cycle - Persist Counts from EEPROM copied to RTCNVRAM...%s",
                                SYS_OK == resultRTC ? "SUCCESS":"FAILED");
-    status = TRUE;
   }
   // EEPROM bad, read from RTC version
   else if (resultEE != SYS_OK)
@@ -947,16 +920,13 @@ static BOOLEAN CycleRestoreCntsFromPersistFiles(void)
     resultEE = NV_WriteNow(NV_PCYCLE_CNTS_EE, 0, &m_CountsEEProm, size);
     GSE_DebugStr(NORMAL,TRUE, "Cycle - Persist Counts from RTCNVRAM copied to EEPROM... %s",
                  SYS_OK == resultEE ? "SUCCESS":"FAILED");
-    status = TRUE;
   }
   // Both RTC and EEPROM are good
   else
   {
     NV_Read(NV_PCYCLE_CNTS_RTC, 0, &m_CountsRTC,    size);
     NV_Read(NV_PCYCLE_CNTS_EE,  0, &m_CountsEEProm, size);
-    status = TRUE;
   }
-  return status;
 }
 
 /******************************************************************************
