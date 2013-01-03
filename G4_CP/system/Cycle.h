@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 22 $  $Date: 12/28/12 5:49p $
+      $Revision: 23 $  $Date: 1/02/13 5:54p $
 
 ******************************************************************************/
 
@@ -270,6 +270,12 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ *
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 1/02/13    Time: 5:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1213 Cycle needs to also check for difference on Init when
+ * RTC-EEPROM Open as valid
  *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:49p
