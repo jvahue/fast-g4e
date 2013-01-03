@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 110 $  $Date: 12/13/12 3:07p $
+      $Revision: 111 $  $Date: 1/02/13 5:54p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -280,6 +280,12 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ *
+ * *****************  Version 111  *****************
+ * User: Contractor V&v Date: 1/02/13    Time: 5:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1213 Cycle needs to also check for difference on Init when
+ * RTC-EEPROM Open as valid
  *
  * *****************  Version 110  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:07p
