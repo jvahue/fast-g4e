@@ -9,7 +9,7 @@
     Description: Public functions/defintions.  See header in TimeHistory.c
 
     VERSION
-    $Revision: 9 $  $Date: 11/15/12 7:18p $
+    $Revision: 10 $  $Date: 1/03/13 11:25a $
 
 ******************************************************************************/
 
@@ -102,7 +102,6 @@ typedef struct
 **********************************************************************************************/
 EXPORT void TH_Open(UINT32 pre_s);
 EXPORT void TH_Close(UINT32 time_s);
-EXPORT BOOLEAN TH_FSMAppBusyGetState(INT32 param);
 EXPORT UINT16  TH_GetBinaryHeader    ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void TH_Init(void);
 EXPORT void TH_SetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
@@ -111,10 +110,15 @@ EXPORT void TH_SetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
  *  MODIFICATIONS
  *    $History: TimeHistory.h $
  * 
+ * *****************  Version 10  *****************
+ * User: Jim Mood     Date: 1/03/13    Time: 11:25a
+ * Updated in $/software/control processor/code/application
+ * SCR #1107 Code Review Changes
+ *
  * *****************  Version 9  *****************
  * User: Jim Mood     Date: 11/15/12   Time: 7:18p
  * Updated in $/software/control processor/code/application
- * SCR 1107 (Time History Updates) 
+ * SCR 1107 (Time History Updates)
  * SCR 1131 (App Busy Updates)
  *
  * *****************  Version 8  *****************
