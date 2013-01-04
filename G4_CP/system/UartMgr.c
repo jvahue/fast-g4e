@@ -688,7 +688,7 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
   SINT16 sval; 
   
   fval = 0.0f; 
-  
+
   // Get channel for this sensor and Index into Word Info Data 
   ch     = (nIndex >> UART_SENSOR_CHAN_SHIFT) & UART_SENSOR_CHAN_MASK; 
   wIndex = (nIndex & UART_SENSOR_INDEX_MASK); 
@@ -700,7 +700,7 @@ FLOAT32 UartMgr_ReadWord (UINT16 nIndex, UINT32 *tickCount)
   {
     data_ptr = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][word_info_ptr->nIndex]; 
     runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &data_ptr->runtime_data; 
-    *tickCount = runtime_data_ptr->rxTime;
+    *tickCount = runtime_data_ptr->rxTime;     
     
     // Protect against negative value when shifting val position
     ASSERT_MESSAGE( (word_info_ptr->msb_position <= UART_SENSOR_DEFAULT_MSB),

@@ -1266,7 +1266,7 @@ QAR_CBIT_HEALTH_COUNTS QAR_CalcDiffCBITHealthStatus ( QAR_CBIT_HEALTH_COUNTS Pre
   diffCount.SystemStatus         = currentCount.SystemStatus;
   diffCount.bQAREnable           = currentCount.bQAREnable;
   diffCount.FrameState           = currentCount.FrameState;
-  diffCount.DataPresentLostCount = currentCount.DataPresentLostCount 
+  diffCount.DataPresentLostCount = currentCount.DataPresentLostCount
                                    - PrevCount.DataPresentLostCount;
   diffCount.LossOfFrameCount     = currentCount.LossOfFrameCount - PrevCount.LossOfFrameCount;
   diffCount.BarkerErrorCount     = currentCount.BarkerErrorCount - PrevCount.BarkerErrorCount;
@@ -2264,7 +2264,7 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
   {
      // No such case !
      FATAL("Unrecognized Sys QAR resultType = %d", resultType);
-  } 
+  }
 
   Flt_SetStatus(pQarCfg->ChannelSysCond, sysId, &timeoutLog, sizeof(QAR_TIMEOUT_LOG));
 
@@ -2285,28 +2285,28 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
  * User: John Omalley Date: 12-12-03   Time: 3:54p
  * Updated in $/software/control processor/code/drivers
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 101  *****************
  * User: John Omalley Date: 12-11-15   Time: 10:48a
  * Updated in $/software/control processor/code/drivers
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 100  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:13p
  * Updated in $/software/control processor/code/drivers
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 99  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 11:38a
  * Updated in $/software/control processor/code/drivers
  * SCR #1142 File Format Error - Dead Code
- * 
+ *
  * *****************  Version 98  *****************
  * User: Melanie Jutras Date: 12-11-06   Time: 4:00p
  * Updated in $/software/control processor/code/drivers
  * SCR #1196 Added casts for enums and warning comment to enum definitions
  * to avoid making enum too large.
- * 
+ *
  * *****************  Version 97  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:26p
  * Updated in $/software/control processor/code/drivers

@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 32 $  $Date: 12/28/12 5:49p $
+  $Revision: 33 $  $Date: 1/02/13 5:54p $
 
 ******************************************************************************/
 
@@ -1087,6 +1087,12 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: Contractor V&v Date: 1/02/13    Time: 5:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1213 Cycle needs to also check for difference on Init when
+ * RTC-EEPROM Open as valid
  *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:49p

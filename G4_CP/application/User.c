@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 113 $  $Date: 12-12-26 10:37a $
+   $Revision: 114 $  $Date: 1/04/13 3:13p $
 
 ******************************************************************************/
 
@@ -96,6 +96,8 @@
 
 #define BASE_10 10
 #define BASE_16 16
+
+#define MAX_GSE_SET_STR  256
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -2894,16 +2896,21 @@ static BOOLEAN User_SetBitArrayFromIntegerValue(USER_DATA_TYPE Type,INT8* SetStr
   UINT32  decValue;
   CHAR    hexString[HEX_STR_BUFFER_SIZE+1]; // "0X" + 8 hex-chars + 1 null
   CHAR*   leftOver;
+  CHAR    strDecValue[MAX_GSE_SET_STR];
+  INT32   setStrLen = strlen(SetStr);
 
-  // Convert the input string to decimal integer if possible.
-  errno = 0;
+  // Convert the input string to decimal integer (if possible).
   decValue = strtoul(SetStr, &leftOver, BASE_10);
 
+  // Convert the number back to integer string and compare to input string.
   // In the event of a range-error the stroul above will return a value of UINT_MAX which
-  // isn't very helpful since that is a also a valid value for a bitarray. Therefore
-  // test errno to see if ERANGE was flagged.
+  // IS NOT helpful since UINT_MAX is also a valid value for a bitarray. Therefore
+  // a comparison to the original input string for it's length is needed to be sure
+  // conversion was successful. If conversion was halted by invalid char, leftOver will be
+  // non-null.
+  snprintf(strDecValue, sizeof(strDecValue), "%0*u", setStrLen, decValue);
 
-  if (errno != ERANGE && *leftOver == '\0')
+  if ((0 == strncmp(strDecValue, SetStr, setStrLen)) && *leftOver == '\0')
   {
     snprintf(hexString, sizeof(hexString), "0x%08X", decValue);
     bResult = User_SetBitArrayFromHexString(Type, hexString, SetPtr, Min, Max);
@@ -3092,12 +3099,18 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 114  *****************
+ * User: Contractor V&v Date: 1/04/13    Time: 3:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #197 change User_SetBitArrayFromInteger to avoid using errno to
+ * detect conversion could not be performed.
  *
  * *****************  Version 113  *****************
  * User: John Omalley Date: 12-12-26   Time: 10:37a
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 112  *****************
  * User: Contractor V&v Date: 12/20/12   Time: 5:36p
  * Updated in $/software/control processor/code/application
