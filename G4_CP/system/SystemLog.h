@@ -287,12 +287,6 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  * SCR #1213 Cycle needs to also check for difference on Init when
  * RTC-EEPROM Open as valid
  *
- * *****************  Version 111  *****************
- * User: Contractor V&v Date: 1/02/13    Time: 5:54p
- * Updated in $/software/control processor/code/system
- * SCR #1213 Cycle needs to also check for difference on Init when
- * RTC-EEPROM Open as valid
- *
  * *****************  Version 110  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:07p
  * Updated in $/software/control processor/code/system
