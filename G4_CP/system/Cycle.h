@@ -277,12 +277,6 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  * SCR #1213 Cycle needs to also check for difference on Init when
  * RTC-EEPROM Open as valid
  *
- * *****************  Version 23  *****************
- * User: Contractor V&v Date: 1/02/13    Time: 5:54p
- * Updated in $/software/control processor/code/system
- * SCR #1213 Cycle needs to also check for difference on Init when
- * RTC-EEPROM Open as valid
- *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:49p
  * Updated in $/software/control processor/code/system
