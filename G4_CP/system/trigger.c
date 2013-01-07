@@ -201,10 +201,10 @@ void TriggerInitialize(void)
       }
 
       // Setup the sensor summary array based on whatever was set in the SensorMap above.
-      pTrigData->nTotalSensors = SensorInitSummaryArray ( pTrigData->snsrSummary,  
+      pTrigData->nTotalSensors = SensorInitSummaryArray ( pTrigData->snsrSummary,
                                                           MAX_TRIG_SENSORS,
                                                           pTrigData->sensorMap,
-                                                          sizeof(pTrigData->sensorMap) );        
+                                                          sizeof(pTrigData->sensorMap) );
     }
 
     // There should always be a configuration by the time we get here
@@ -410,7 +410,7 @@ BOOLEAN TriggerGetState( TRIGGER_INDEX trigIdx )
 
   if (trigIdx != TRIGGER_UNUSED)
   {
-    status = GetBit((INT32)trigIdx, m_triggerFlags ,sizeof(m_triggerFlags));
+    status = (TRIG_ACTIVE == m_triggerData[trigIdx].state);
   }
   return status;
 }
@@ -1153,21 +1153,21 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
- * 
+ *
  * *****************  Version 85  *****************
  * User: John Omalley Date: 12-12-13   Time: 5:42p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p
  * Updated in $/software/control processor/code/system
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 83  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p
  * Updated in $/software/control processor/code/system
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 82  *****************
  * User: Contractor V&v Date: 12/03/12   Time: 5:36p

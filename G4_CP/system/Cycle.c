@@ -609,15 +609,11 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
                                            UINT16      cycIndex )
 {
   BOOLEAN      cycleStart = FALSE;
-  BITARRAY128  trigMask;
   UINT32       nowTimeMs;
-
-  CLR_TRIGGER_FLAGS(trigMask);
-  SetBit(pCycleCfg->nTriggerId, trigMask, sizeof(BITARRAY128 ));
 
   if ( (pCycleData->cycleActive) )
   {
-    // Cycle was already active from a previous pass...
+    // Cycle is already active from a previous pass...
 
     // If a Duration Count, update duration every time through.
     if ( (pCycleCfg->type == CYC_TYPE_DURATION_CNT) ||
@@ -630,8 +626,9 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       pCycleData->currentCount     += nowTimeMs - pCycleData->cycleLastTime_ms;
       pCycleData->cycleLastTime_ms =  nowTimeMs;
     }
+
     // Update the cycle active status.
-    pCycleData->cycleActive = ( TriggerIsActive( trigMask ) ) ? TRUE : FALSE;
+    pCycleData->cycleActive = TriggerGetState(pCycleCfg->nTriggerId);
 
     // If cycle has ended, reset the start-time for the next duration.
     if(!pCycleData->cycleActive)
@@ -648,9 +645,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
   else
   {
     // Cycle is inactive - see if the start criteria are met
-    // Set up a bit-mask for querying the state of the trigger for this cycle
-
-    cycleStart = ( TriggerIsActive( trigMask ) )? TRUE : FALSE;
+    cycleStart = TriggerGetState(pCycleCfg->nTriggerId);
 
     // Cycle has started
     if (cycleStart)
@@ -1087,7 +1082,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 1/02/13    Time: 5:54p
  * Updated in $/software/control processor/code/system
