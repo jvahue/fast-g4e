@@ -22,7 +22,7 @@
    TmScheduleTask             Force a specific RMT task for dispatch ASAP
   
  VERSION
-      $Revision: 66 $  $Date: 12-12-04 5:10p $
+      $Revision: 67 $  $Date: 1/07/13 1:31p $
 
 ******************************************************************************/
 
@@ -431,13 +431,13 @@ void TmTick (UINT32 LastIntLvl)
                     Tm.pTaskList[Tm.nDtTaskInProgressID]->Name,_TRUNCATE);
                 LogWriteSystem( SYS_TASK_MAN_DT_OVERRUN, LOG_PRIORITY_LOW,
                     &dtOverrun, sizeof( dtOverrun), NULL);
-            }
 
-            // Display a debug message about the overrun
-            GSE_DebugStr(NORMAL, TRUE,
-              "DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
-              Tm.nDtOverRuns, Tm.currentMIF, Tm.nDtTaskInProgressID,
-              Tm.pTaskList[Tm.nDtTaskInProgressID]);
+                // Display a debug message about the overrun
+                GSE_DebugStr(NORMAL, TRUE,
+                  "DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
+                  Tm.nDtOverRuns, Tm.currentMIF, Tm.nDtTaskInProgressID,
+                  Tm.pTaskList[Tm.nDtTaskInProgressID]);
+            }
         }
         else
         {
@@ -1031,6 +1031,11 @@ void TmDispatchDtTasks (void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 67  *****************
+ * User: Jeff Vahue   Date: 1/07/13    Time: 1:31p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1214 - v2.0.0 Code Coverage Mods
  * 
  * *****************  Version 66  *****************
  * User: John Omalley Date: 12-12-04   Time: 5:10p
