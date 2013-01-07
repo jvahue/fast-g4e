@@ -460,14 +460,8 @@ static void CycleInitPersistent(void)
  *****************************************************************************/
 static BOOLEAN CycleIsPersistentType( UINT8 nCycle )
 {
-  return (
-          (m_Cfg[nCycle].type     == CYC_TYPE_PERSIST_DURATION_CNT )
-           || (m_Cfg[nCycle].type == CYC_TYPE_PERSIST_SIMPLE_CNT)
-#ifdef PEAK_CUM_PROCESSING
-           || (m_Cfg[nCycle].type == CYC_TYPE_PEAK_VAL_CNT)
-           || (m_Cfg[nCycle].type == CYC_TYPE_CUM_CNT)
-#endif
-       );
+  return ((m_Cfg[nCycle].type     == CYC_TYPE_PERSIST_DURATION_CNT ) ||
+          (m_Cfg[nCycle].type == CYC_TYPE_PERSIST_SIMPLE_CNT) );
 }
 
 /******************************************************************************
@@ -505,32 +499,6 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
     GSE_DebugStr(NORMAL,TRUE,"Cycle: %s CycleReset",pCycleCfg->Name);
 /*vcast_dont_instrument_end*/
 #endif
-
-#ifdef PEAK_CUM_PROCESSING
-    pCycle->ACrossed = FALSE;         /* not crossed threshold from above yet */
-    pCycle->BCrossed = FALSE;         /* not crossed threshold from above yet */
-
-    pCycle->MaxValueA = -FLT_MAX;
-    pCycle->MaxValueB = -FLT_MAX;
-    pCycle->MinValue = FLT_MAX;
-    pCycle->MaxSensorValueA = -FLT_MAX;
-    pCycle->MaxSensorValueB = -FLT_MAX;
-    pCycle->MinSensorValue = FLT_MAX;
-
-    /* check to see if cycle values are correclty ordered for those that need it */
-
-    if ( (pCycle->Type == PEAK_VALUE_COUNT)         ||
-      (pCycle->Type == CUMULATIVE_VALLEY_COUNT)  ||
-      (pCycle->Type == P_PEAK_COUNT)             ||
-      (pCycle->Type == P_CUMULATIVE_COUNT) )
-    {
-      pCycle->bTableOrdered = CheckCycleValues(&(pCycle->CycleValue[0]));
-    }
-#endif
-#ifdef RHL_PROCESSING
-    pCycle->RHLstate = RHL_ENABLED;
-    pCycle->RHLstableTicks = 0;
-#endif
   }
 }
 
@@ -555,31 +523,20 @@ static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cy
   switch (pCycleCfg->type)
   {
     case CYC_TYPE_SIMPLE_CNT:
+      //lint -fallthrough
     case CYC_TYPE_PERSIST_SIMPLE_CNT:
+      //lint -fallthrough
     case CYC_TYPE_DURATION_CNT:
+      //lint -fallthrough
     case CYC_TYPE_PERSIST_DURATION_CNT:
       CycleUpdateSimpleAndDuration( pCycleCfg, pCycleData, cycIndex );
       break;
 
-#ifdef PEAK_CUM_PROCESSING
-    case PEAK_VALUE_COUNT:
-    case P_PEAK_COUNT:
-      UpdateCyclePeak ( pCycleCfg );
-      break;
-
-    case CUMULATIVE_VALLEY_COUNT:
-    case P_CUMULATIVE_COUNT:
-      UpdateCycleCummulative ( pCycleCfg );
-      break;
-
-    case REPETITIVE_HEAVY_LIFT:
-      RHL( pCycleCfg);
-      break;
-#endif
     case CYC_TYPE_NONE_CNT:
       break;
 
-    case MAX_CYC_TYPE: // fallthru
+    case MAX_CYC_TYPE:
+      //lint -fallthrough
     default:
       FATAL ("Cycle[%d] %s has Unrecognized Cycle Type: %d",
              cycIndex, pCycleCfg->name,
@@ -657,7 +614,7 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
        GSE_DebugStr(NORMAL, TRUE,"Cycle: Cycle[%d] Started", cycIndex);
       #endif
 
-      pCycleData->cycleActive    = TRUE;
+      pCycleData->cycleActive      = TRUE;
       pCycleData->cycleLastTime_ms = CM_GetTickCount();
 
       if (( pCycleCfg->type == CYC_TYPE_SIMPLE_CNT ) ||
@@ -817,14 +774,10 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
       }
       break;
 
-
-
     default:
       FATAL("Unrecognized Persist backup mode requested: %d",mode);
     }
-
   }
-
 }
 
 /******************************************************************************
@@ -894,7 +847,7 @@ static void CycleRestoreCntsFromPersistFiles(void)
     for ( i = 0; i < MAX_CYCLES; i++)
     {
       /* Re-Initialize count to 0 */
-      m_CountsEEProm.data[i].count.n      = 0;
+      m_CountsEEProm.data[i].count.n = 0;
       CycleUpdateCheckId( i, LOGUPDATE_NO);
     }
 
@@ -1073,7 +1026,9 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
   }
 
 #ifdef DEBUG_CYCLE
+  /*vcast_dont_instrument_start*/
   GSE_DebugStr(NORMAL,TRUE, "Cycle: Updated Persisted Cnts to EEPROM and RTC");
+  /*vcast_dont_instrument_end*/
 #endif
 
 }
