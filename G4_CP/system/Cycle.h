@@ -19,7 +19,6 @@
 /*****************************************************************************/
 #include "alt_basic.h"
 
-
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
@@ -30,8 +29,6 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#undef PEAK_CUM_PROCESSING
-#undef RHL_PROCESSING
 
 #define CYCLE_DEFAULT  "Unused",           /* Name       */\
                        CYC_TYPE_NONE_CNT,  /* Type       */\
@@ -82,10 +79,6 @@
 ******************************************************************************/
 #define MAX_CYCLENAME        32
 
-#ifdef PEAK_CUM_PROCESSING
-#define CYCLEVALUE_COUNT 15
-#endif
-
 typedef enum
 {
   CYCLE_ID_0    = 0 ,  CYCLE_ID_1    = 1 ,  CYCLE_ID_2    = 2 ,  CYCLE_ID_3    = 3 ,
@@ -109,35 +102,20 @@ typedef enum
 {
   CYC_TYPE_SIMPLE_CNT              = 1,
   CYC_TYPE_DURATION_CNT            = 2,
-#ifdef PEAK_CUM_PROCESSING
   //----- Currently Unsupported --------------
   //CYC_TYPE_PEAK_VAL_CNT          = 3,
   //CYC_TYPE_CUM_VALLEY_CNT        = 4,
   //CYC_TYPE_REPETITIVE_HEAVY_LIFT = 5,
   //------------------------------------------
-#endif
   CYC_TYPE_NONE_CNT                = 6,
   CYC_TYPE_PERSIST_SIMPLE_CNT      = 7,
   CYC_TYPE_PERSIST_DURATION_CNT    = 8,
-#ifdef PEAK_CUM_PROCESSING
   //----- Currently Unsupported --------------
   //CYC_TYPE_PEAK_VAL_CNT          = 9,
   //CYC_TYPE_CUM_CNT               = 10,
   //------------------------------------------
-#endif
   MAX_CYC_TYPE
 }CYC_TYPE;
-
-// Cycle value is part of a table used to look up
-// fractional values for a Cumulative Valley Cycle
-#ifdef PEAK_CUM_PROCESSING
-typedef struct
-{
-  FLOAT32 cycleCount;   /* value to use for incrementing cycle */
-  FLOAT32 SensorValueA; /* fractional value for sensor A       */
-  FLOAT32 SensorValueB; /* fractional value for sensor B       */
-} CYCLEVALUE, *PCYCLEVALUE;
-#endif
 
 #pragma pack(1)
 // A cycle is counted when some sensor exceeds some threshold.
@@ -148,16 +126,6 @@ typedef struct
   UINT32        nCount;        /* value added for incrementing cycle                     */
   TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
   ENGRUN_INDEX  nEngineRunId;  /* which EngineRun this cycle is associated               */
-#ifdef PEAK_CUM_PROCESSING
-  CYCLEVALUE CycleValue[CYCLEVALUE_COUNT]; /* cycle values for fractional cycles    */
-#endif
-#ifdef RHL_PROCESSING
-  FLOAT32    RHLincrease;   /* minimum sensorA RHL % increase to start RHL            */
-  FLOAT32    RHLdecrease;   /* minimum sensorA RHL % decrease to end RHL              */
-  FLOAT32    RHLstableTime; /* minimum amount of time at stable sensorA before a RHL  */
-  FLOAT32    RHLstable;     /* maximum +/- sensorA deviation for stability            */
-#endif
-//  UINT32     MinDuration;   /* minimum duration required for incr and duration cycles */
 } CYCLE_CFG, *CYCLE_CFG_PTR;
 
 typedef struct
@@ -168,7 +136,6 @@ typedef struct
    TRIGGER_INDEX nTriggerId;    /* Index of the trigger defining this cycles start/end    */
    ENGRUN_INDEX  nEngineRunId;  /* which EngineRun this cycle is associated               */
 } CYCLE_HDR;
-
 #pragma pack()
 
 typedef CYCLE_CFG CYCLE_CFGS[MAX_CYCLES];
@@ -270,7 +237,7 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- * 
+ *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 1/02/13    Time: 5:54p
  * Updated in $/software/control processor/code/system
