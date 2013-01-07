@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 169 $  $Date: 12/27/12 4:50p $
+   $Revision: 170 $  $Date: 1/07/13 11:24a $
 
 ******************************************************************************/
 
@@ -2691,8 +2691,10 @@ void UploadMgr_MakeFileHeader(UPLOADMGR_FILE_HEADER* FileHeader,LOG_TYPE Type,
   {
      pBinSubHdr->size_used = DataMgrGetHeader(pBinSubHdr->buf, ACS.acs,
                                               sizeof(pBinSubHdr->buf));
-
   }
+
+  ASSERT_MESSAGE((pBinSubHdr->size_used <= sizeof(pBinSubHdr->buf)),
+                 "Binary Header too big, log type %x",Type);
 
   // where log data starts.  Note, ACS headers are
   // always at the beginning of data block.
@@ -3480,6 +3482,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 170  *****************
+ * User: Jim Mood     Date: 1/07/13    Time: 11:24a
+ * Updated in $/software/control processor/code/application
+ * SCR #1198 Assert if binary header is overfilled
+ *
  * *****************  Version 169  *****************
  * User: Jim Mood     Date: 12/27/12   Time: 4:50p
  * Updated in $/software/control processor/code/application
