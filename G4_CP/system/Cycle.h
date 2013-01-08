@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 23 $  $Date: 1/02/13 5:54p $
+      $Revision: 24 $  $Date: 13-01-08 11:04a $
 
 ******************************************************************************/
 
@@ -237,6 +237,12 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
+ *
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 13-01-08   Time: 11:04a
+ * Updated in $/software/control processor/code/system
+ * SCR #1213 FAST II Performance Enh GetTrigger, remove commented code for
+ * RHL & CUM PEAK
  *
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 1/02/13    Time: 5:54p

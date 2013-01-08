@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 85 $  $Date: 12-12-13 5:42p $
+  $Revision: 86 $  $Date: 13-01-08 11:04a $
 
 ******************************************************************************/
 
@@ -1153,6 +1153,12 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ *
+ * *****************  Version 86  *****************
+ * User: Contractor V&v Date: 13-01-08   Time: 11:04a
+ * Updated in $/software/control processor/code/system
+ * SCR #1213 FAST II Performance Enh GetTrigger, remove commented code for
+ * RHL & CUM PEAK
  *
  * *****************  Version 85  *****************
  * User: John Omalley Date: 12-12-13   Time: 5:42p
