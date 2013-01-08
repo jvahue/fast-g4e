@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 19 $  $Date: 12/28/12 5:51p $
+$Revision: 20 $  $Date: 13-01-08 12:00p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -347,6 +347,7 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
                                        void **GetPtr)
 {
    CHAR  labelStem[] = "\r\n\r\nTREND.CFG";
+   // Ensure buffer is lare enought for a long label. Factor of 3 is sufficient.
    CHAR  label[USER_MAX_MSG_STR_LEN * 3];
    INT16 i;
 
@@ -375,6 +376,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Contractor V&v Date: 13-01-08   Time: 12:00p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197  Added comment for magic 3
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:51p
