@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 23 $  $Date: 12/18/12 3:36p $
+ $Revision: 24 $  $Date: 13-01-08 1:58p $
 
 ******************************************************************************/
 
@@ -37,9 +37,9 @@
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define RESET_TRIGGER_ACTIVE(rst)  \
-  ((rst != TRIGGER_UNUSED)    &&  \
-    (TriggerIsConfigured(rst))  &&  \
-    (TriggerGetState(rst)))
+  (((TRIGGER_INDEX)rst != TRIGGER_UNUSED)     &&  \
+    (TriggerIsConfigured((TRIGGER_INDEX)rst)) &&  \
+    (TriggerGetState((TRIGGER_INDEX)rst)))
 
 
 /*****************************************************************************/
@@ -361,7 +361,7 @@ static void TrendProcess( TREND_CFG* pCfg, TREND_DATA* pData )
         pData->prevEngState = ER_STATE_RUNNING;
       }
       else if ( FALSE == pData->bEnabled &&
-                FALSE == RESET_TRIGGER_ACTIVE(pCfg->resetTrigger))
+                !(RESET_TRIGGER_ACTIVE(pCfg->resetTrigger)))
       {
         // In running state and active reset went clear... enable for next reset trigger.
         pData->bEnabled = TRUE;
@@ -1056,6 +1056,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 13-01-08   Time: 1:58p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197  PCLint 731 fix
  * 
  * *****************  Version 23  *****************
  * User: Contractor V&v Date: 12/18/12   Time: 3:36p
