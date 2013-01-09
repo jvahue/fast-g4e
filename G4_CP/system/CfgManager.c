@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 73 $  $Date: 12/13/12 3:02p $
+    $Revision: 74 $  $Date: 1/08/13 2:15p $
 
 ******************************************************************************/
 
@@ -651,7 +651,6 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
     UINT32 nOffset;
 
     UINT16 nChkSumSize;
-    void *pDest;
     void *pChkSumSrc;
 
     //For batch mode, ignore requests to write Store cfg item.  The batch
@@ -677,11 +676,6 @@ BOOLEAN CfgMgr_StoreConfigItem( void *pOffset, void *pSrc, UINT16 nSize )
       NV_Write(NV_CFG_MGR,nOffset,pSrc,nSize);
       status = TRUE;
 #endif
-
-      //Update shadow ram and checksum
-      nOffset = (UINT32)&(NVRAMShadow) + ( (UINT32)pSrc - (UINT32)pOffset );
-      pDest = (void *)nOffset;
-      memcpy( pDest, pSrc, nSize );
 
       // calculate and update checksum on shadow NVRAM
       NVRAMShadow.cs = CRC16(&NVRAMShadow.cfg,sizeof(NVRAMShadow.cfg));
@@ -737,6 +731,11 @@ void CfgMgr_GenerateDebugLogs(void)
  *  MODIFICATIONS
  *    $History: CfgManager.c $
  * 
+ * *****************  Version 74  *****************
+ * User: Jim Mood     Date: 1/08/13    Time: 2:15p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1215 StoreConfigItem remove extra memcpy
+ *
  * *****************  Version 73  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 3:02p
  * Updated in $/software/control processor/code/system
