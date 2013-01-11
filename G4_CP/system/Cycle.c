@@ -519,31 +519,19 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
  *****************************************************************************/
 static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cycIndex )
 {
-  // Act on the different types of cycles
-  switch (pCycleCfg->type)
-  {
-    case CYC_TYPE_SIMPLE_CNT:
-      //lint -fallthrough
-    case CYC_TYPE_PERSIST_SIMPLE_CNT:
-      //lint -fallthrough
-    case CYC_TYPE_DURATION_CNT:
-      //lint -fallthrough
-    case CYC_TYPE_PERSIST_DURATION_CNT:
-      CycleUpdateSimpleAndDuration( pCycleCfg, pCycleData, cycIndex );
-      break;
+  // Verify Cycle type is supported.
 
-    case CYC_TYPE_NONE_CNT:
-      break;
+  ASSERT_MESSAGE( ((pCycleCfg->type == CYC_TYPE_SIMPLE_CNT) ||
+                   (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT) ||
+                   (pCycleCfg->type == CYC_TYPE_DURATION_CNT) ||
+                   (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)),
+                   "Cycle[%d] %s has Unrecognized Cycle Type: %d",
+                   cycIndex, pCycleCfg->name,
+                   pCycleCfg->type);
 
-    case MAX_CYC_TYPE:
-      //lint -fallthrough
-    default:
-      FATAL ("Cycle[%d] %s has Unrecognized Cycle Type: %d",
-             cycIndex, pCycleCfg->name,
-             pCycleCfg->type);
-      pCycleCfg->type = CYC_TYPE_NONE_CNT;
-      break;
-   }
+  // At present simple are duration ( + persist)  are only supported types.
+
+  CycleUpdateSimpleAndDuration( pCycleCfg, pCycleData, cycIndex );
 }
 
 
@@ -611,7 +599,9 @@ static void CycleUpdateSimpleAndDuration ( CYCLE_CFG*  pCycleCfg,
       // value - count the cycle in the flight log and set the flag
       // that indicates that the cycle is active.
       #ifdef DEBUG_CYCLE
+      /*vcast_dont_instrument_start*/
        GSE_DebugStr(NORMAL, TRUE,"Cycle: Cycle[%d] Started", cycIndex);
+       /*vcast_dont_instrument_end*/
       #endif
 
       pCycleData->cycleActive      = TRUE;
