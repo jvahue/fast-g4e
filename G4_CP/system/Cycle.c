@@ -519,21 +519,16 @@ static void CycleReset( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData )
  *****************************************************************************/
 static void CycleUpdate( CYCLE_CFG* pCycleCfg, CYCLE_DATA* pCycleData, UINT16 cycIndex )
 {
-  // Verify Cycle type is supported.
+  // At present simple are duration ( w/wo persist) are only supported types.
 
-  ASSERT_MESSAGE( ((pCycleCfg->type == CYC_TYPE_SIMPLE_CNT) ||
-                   (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT) ||
-                   (pCycleCfg->type == CYC_TYPE_DURATION_CNT) ||
-                   (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT)),
-                   "Cycle[%d] %s has Unrecognized Cycle Type: %d",
-                   cycIndex, pCycleCfg->name,
-                   pCycleCfg->type);
-
-  // At present simple are duration ( + persist)  are only supported types.
-
-  CycleUpdateSimpleAndDuration( pCycleCfg, pCycleData, cycIndex );
+  if( ((pCycleCfg->type == CYC_TYPE_SIMPLE_CNT)          ||
+       (pCycleCfg->type == CYC_TYPE_PERSIST_SIMPLE_CNT)  ||
+       (pCycleCfg->type == CYC_TYPE_DURATION_CNT)        ||
+       (pCycleCfg->type == CYC_TYPE_PERSIST_DURATION_CNT) ) )
+  {
+    CycleUpdateSimpleAndDuration( pCycleCfg, pCycleData, cycIndex );
+  }
 }
-
 
 /******************************************************************************
  * Function:     CycleUpdateSimpleAndDuration
