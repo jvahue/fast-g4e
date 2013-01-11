@@ -2239,6 +2239,14 @@
 					RelativePath="..\G4_CP\test\c_cover_ioPWES.c"
 					>
 					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="Target|Win32"
 						ExcludedFromBuild="true"
 						>
