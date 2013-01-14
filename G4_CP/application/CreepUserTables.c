@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 5 $  $Date: 12-12-13 7:20p $
+    $Revision: 6 $  $Date: 13-01-14 3:39p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -29,8 +29,10 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define CREEP_MAX_STR_LEN 256
+#define CREEP_MAX_STR_LEN          256
 #define CREEP_MAX_RECENT_DATE_TIME 20  // "HH:MM:SS MM/DD/YYYY"
+#define CREEP_MAX_VALUE_CHAR_ARRAY 32
+#define CREEP_MAX_LABEL_CHAR_ARRAY 128
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -134,6 +136,12 @@ USER_HANDLER_RESULT CreepMsg_UserMessageRecentUpdate(USER_DATA_TYPE DataType,
                                                      void **GetPtr);
 
 static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index );
+
+static USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
+                                     USER_MSG_PARAM Param,
+                                     UINT32 Index,
+                                     const void *SetPtr,
+                                     void **GetPtr);
 
 
 /*****************************************************************************/
@@ -525,7 +533,8 @@ USER_MSG_TBL creepValTbl[] =
 
 
 // Level 1
-
+#define TABLE_STRING  "TABLE"
+#define OBJECT_STRING "OBJECT"
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
 static
 USER_MSG_TBL creepCfgTbl[] =
@@ -539,9 +548,9 @@ USER_MSG_TBL creepCfgTbl[] =
   {"ENABLED", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_BOOLEAN,  USER_RW,
                 (void *) &creepCfgTemp.bEnabled,      -1,   -1, NO_LIMIT, NULL},
 
-  {"TABLE",  creepTableTbl,  NULL,  NO_HANDLER_DATA},
-
-  {"OBJECT", creepObjectTbl, NULL,  NO_HANDLER_DATA},
+  {TABLE_STRING,  creepTableTbl,  NULL,  NO_HANDLER_DATA},
+            
+  {OBJECT_STRING, creepObjectTbl, NULL,  NO_HANDLER_DATA},
 
   {"BASEUNITS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
                (void *) &creepCfgTemp.baseUnits,      -1,   -1,   NO_LIMIT, NULL},
@@ -612,12 +621,14 @@ USER_MSG_TBL creepRoot[] =
   {"PERSIST", creepPersistTbl, NULL,  NO_HANDLER_DATA},
   {"DEBUG",   creepDebugTbl,   NULL,  NO_HANDLER_DATA},
 
-  {"CLEAR",      NO_NEXT_TABLE,  CreepMsg_Clear,                USER_TYPE_STR,
+  {"CLEAR",      NO_NEXT_TABLE,   CreepMsg_Clear,                USER_TYPE_STR,
                  USER_WO,               NULL,   -1, -1, NO_LIMIT,   NULL},
-  {"RECENTALL",  NO_NEXT_TABLE,  CreepMsg_UserMessageRecentAll, USER_TYPE_ACTION,
+  {"RECENTALL",  NO_NEXT_TABLE,   CreepMsg_UserMessageRecentAll, USER_TYPE_ACTION,
                  (USER_RO|USER_NO_LOG), NULL,   -1, -1, NO_LIMIT,   NULL},
-  {"RECENTUPDATE", NO_NEXT_TABLE,  CreepMsg_UserMessageRecentUpdate, USER_TYPE_STR,
+  {"RECENTUPDATE", NO_NEXT_TABLE, CreepMsg_UserMessageRecentUpdate, USER_TYPE_STR,
                  USER_RO,               NULL,   -1, -1, NO_LIMIT,   NULL},
+  { DISPLAY_CFG, NO_NEXT_TABLE,   Creep_ShowConfig,  USER_TYPE_ACTION, 
+                (USER_RO|USER_NO_LOG|USER_GSE), NULL,  -1,-1, NO_LIMIT, NULL},             
 
   {NULL,      NULL,            NULL,  NO_HANDLER_DATA}
 };
@@ -1650,10 +1661,136 @@ static CHAR *Creep_GetHistoryBuffEntry ( UINT8 index_obj )
   return pStr;
 }
 
+/******************************************************************************
+* Function:     Creep_ShowConfig
+*
+* Description:  Handles User Manager requests to retrieve the configuration
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific sensor to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
+*
+* Returns:     USER_RESULT_OK:    Processed successfully
+*              USER_RESULT_ERROR: Error processing command.
+*
+* Notes:
+*****************************************************************************/
+static
+USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr)
+{
+   // Local Data
+   USER_HANDLER_RESULT result;
+   UINT32              i;
+   CHAR                labelStem[CREEP_MAX_LABEL_CHAR_ARRAY] = "\r\n\r\nCREEP.CFG";   
+   CHAR                label[USER_MAX_MSG_STR_LEN * 3];
+   USER_MSG_TBL*       pCfgTable;
+   CHAR                value[CREEP_MAX_VALUE_CHAR_ARRAY];
+   CHAR                branchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR                nextBranchName[USER_MAX_MSG_STR_LEN] = "  ";
+   
+   // Declare a GetPtr to be used locally since
+   // the GetPtr passed in is "NULL" because this funct is a user-action.
+   UINT32              tempInt;
+   void*               localPtr = &tempInt;   
+  
+   // Local Initialization
+   pCfgTable = creepCfgTbl;     // Re-set the pointer to beginning of CFG table
+   result    = USER_RESULT_OK;
+   
+   User_OutputMsgString (labelStem, FALSE);
+
+   while ( pCfgTable->MsgStr  != NULL             && 
+           pCfgTable->MsgType != USER_TYPE_ACTION && 
+           result             == USER_RESULT_OK )
+   {
+      if (0 == strncmp(pCfgTable->MsgStr, TABLE_STRING, sizeof(pCfgTable->MsgStr)))
+      { 
+         for ( i = 0; i < CREEP_MAX_TBL && result == USER_RESULT_OK; i++ )
+         {
+            // Substruct name was the first entry to terminate the while-loop above
+            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);             
+            // Display element info above each set of data.
+            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);      
+            // Assume the worse, to terminate this for-loop 
+            result = USER_RESULT_ERROR;
+            if ( User_OutputMsgString( label, FALSE ) )
+            {
+               result = User_DisplayConfigTree(nextBranchName, creepTableTbl, i, 0, NULL);
+            }
+         }
+      }
+      else if (0 == strncmp(pCfgTable->MsgStr, OBJECT_STRING, sizeof(pCfgTable->MsgStr)))
+      {
+         for ( i = 0; i < CREEP_MAX_OBJ && result == USER_RESULT_OK; i++ )
+         {
+            // Substruct name was the first entry to terminate the while-loop above
+            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);             
+            // Display element info above each set of data.
+            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);      
+            // Assume the worse, to terminate this for-loop 
+            result = USER_RESULT_ERROR;
+            if ( User_OutputMsgString( label, FALSE ) )
+            {
+               result = User_DisplayConfigTree(nextBranchName, creepObjectTbl, i, 0, NULL);
+            }
+         }
+      }
+      else
+      {
+         snprintf ( label, sizeof(label), "\r\n%s%s =", branchName, pCfgTable->MsgStr );
+         User_OutputMsgString( label, FALSE );
+         result = USER_RESULT_ERROR;
+         // Call user function for the table entry
+         if( USER_RESULT_OK != pCfgTable->MsgHandler(pCfgTable->MsgType, pCfgTable->MsgParam,
+                 0, NULL, &localPtr))
+         {
+            User_OutputMsgString( USER_MSG_INVALID_CMD_FUNC, FALSE);
+         }
+         else
+         {
+            // Convert the param to string.
+            if( User_CvtGetStr(pCfgTable->MsgType, value, sizeof(value), 
+                               localPtr, pCfgTable->MsgEnumTbl))
+            {
+               if (User_OutputMsgString( value, FALSE ))
+               {
+                 result = USER_RESULT_OK; 
+               }
+            }
+            else
+            {
+               //Conversion error
+               User_OutputMsgString( USER_MSG_RSP_CONVERSION_ERR, FALSE );
+            }
+         }
+      }
+      pCfgTable++;  
+   }
+
+   return result;
+}
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 13-01-14   Time: 3:39p
+ * Updated in $/software/control processor/code/application
+ * SCR 1195 - Item #12 - Add showcfg
  * 
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 12-12-13   Time: 7:20p
