@@ -266,7 +266,6 @@ INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
 {
    // Local Data
    ACTION_REQUEST request;
-   ACTION_REQUEST oldestRecord;
 
    // Make sure this is a valid action request before queueing
    if ((0 != nAction) && (TRUE == m_ActionData.bInitialized))
@@ -282,14 +281,12 @@ INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
       request.bACK    = bACK;
       request.bLatch  = bLatch;
 
-      // Push the request into the Queue
-      while (FALSE == FIFO_PushBlock(&m_Request.recordFIFO, &request, sizeof(ACTION_REQUEST)))
-      {
-         // Couldn't fit anymore into the queue so set the overflow flag and pop the oldest
-         m_Request.bOverFlow = TRUE;
-         FIFO_PopBlock (&m_Request.recordFIFO, &oldestRecord, sizeof(ACTION_REQUEST));
-         m_Request.nRecordCnt--;
-      }
+      ASSERT_MESSAGE ( TRUE == FIFO_PushBlock(&m_Request.recordFIFO, 
+                                              &request, 
+                                              sizeof(ACTION_REQUEST)),
+                       "ActionRequest: FIFO Full ReqNum: %d ActionNum: %d",
+                       nReqNum, nAction );
+
       m_Request.nRecordCnt++;
    }
 
@@ -1003,6 +1000,7 @@ void ActionSetOutput ( UINT8 nLSS, DIO_OUT_OP state )
          DIO_SetPin(LSS3, state);
          break;
       default:
+         FATAL("ActionSetOutput: Invalid LSS = %d", nLSS );
          break;
    }
 }

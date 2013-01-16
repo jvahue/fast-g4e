@@ -28,8 +28,8 @@
 /******************************************************************************
                                  Package Defines                                           
 ******************************************************************************/
-#define MAX_ACTION_DEFINES           8
-#define MAX_ACTION_REQUESTS         32
+#define MAX_ACTION_DEFINES          8
+#define MAX_ACTION_REQUESTS         100
 /* Action Flags                                                          */
 #define ACTION0                     0x0000
 #define ACTION1                     0x0001
@@ -167,7 +167,6 @@ typedef struct
 {
    FIFO    recordFIFO;
    UINT32  nRecordCnt;
-   BOOLEAN bOverFlow;
 } ACTION_REQUEST_FIFO;
 
 /******************************************************************************
