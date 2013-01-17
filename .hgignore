@@ -17,6 +17,7 @@ syntax: regexp
 ^G4E/DEBUG_TP/.
 ^G4E/Release/.
 .lst1$
+^Persist/.
 syntax: glob
 G4E.exe
 G4E.ilk
@@ -30,3 +31,4 @@ G4_CP/build/fast.elf
 G4_CP/build/fast0.dld
 G4_CP/build/fastCRC.txt
 G4_CP/MyUnderstandProject.udb
+gse.log
