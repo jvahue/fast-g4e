@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 5 $  $Date: 12-12-13 7:20p $
+      $Revision: 7 $  $Date: 13-01-16 12:06p $
 
 ******************************************************************************/
 
@@ -438,6 +438,16 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  *  MODIFICATIONS
  *    $History: Creep.h $
  * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 13-01-16   Time: 12:06p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Item #17
+ *
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 13-01-16   Time: 9:39a
+ * Updated in $/software/control processor/code/application
+ * SCR #1195.  Item #17.  Set def ER_Trans_ms cfg to 0 ms.
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 12-12-13   Time: 7:20p
  * Updated in $/software/control processor/code/application
