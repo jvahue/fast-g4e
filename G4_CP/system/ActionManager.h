@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the action processing.
 
   VERSION
-  $Revision: 16 $  $Date: 12-12-08 11:44a $
+  $Revision: 17 $  $Date: 13-01-16 4:44p $
 
 ******************************************************************************/
 
@@ -198,6 +198,11 @@ EXPORT BOOLEAN ActionRTCFileInit    ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 13-01-16   Time: 4:44p
+ * Updated in $/software/control processor/code/system
+ * SCR 1220 - Misc Design Review Issues
  * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a

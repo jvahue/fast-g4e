@@ -8,7 +8,7 @@
          Description:
 
          VERSION
-         $Revision: 32 $  $Date: 12-11-16 8:40p $
+         $Revision: 33 $  $Date: 13-01-17 8:47a $
 ******************************************************************************/
 
 #ifndef FAULTMGR_BODY
@@ -98,7 +98,7 @@ static USER_ENUM_TBL flt_AnuncMode[] =
 static USER_MSG_TBL cfgCmd [] =
 {  /*Str                Next Tbl Ptr     Handler Func.    Data Type             Access     Parameter                             IndexRange     DataLimit    EnumTbl*/
   { "VERBOSITY"       , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.debugLevel,       -1,-1,         NO_LIMIT,    flt_UserEnumVerbosityTbl },
-  { "ANUNCIATION",      NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.mode,             -1,-1,         NO_LIMIT,    flt_AnuncMode },
+  { "ANNUNCIATION",     NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.mode,             -1,-1,         NO_LIMIT,    flt_AnuncMode },
   { "SYS_COND_OUTPUT" , NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_ENUM,       USER_RW,   &faultMgrConfigTemp.sysCondDioOutPin, -1,-1,         NO_LIMIT,    flt_SysCondOutPin},
   { "NORMAL_ACTION",    NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &faultMgrConfigTemp.action[0],        -1,-1,         NO_LIMIT,    NULL },
   { "CAUTION_ACTION",   NO_NEXT_TABLE,   Flt_UserCfg,     USER_TYPE_UINT8,      USER_RW,   &faultMgrConfigTemp.action[1],        -1,-1,         NO_LIMIT,    NULL },
@@ -395,6 +395,11 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 13-01-17   Time: 8:47a
+ * Updated in $/software/control processor/code/system
+ * SCR 1223 - Annunciation user command typo
  * 
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:40p
