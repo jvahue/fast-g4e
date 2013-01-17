@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 7 $  $Date: 12/18/12 7:47p $
+$Revision: 8 $  $Date: 1/17/13 2:44p $
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -93,8 +93,8 @@ static USER_MSG_TBL time_history_status [] =
 static USER_MSG_TBL time_history_debug [] =
 {
   /* Str            Next Tbl Ptr         Handler Func.  Data Type               Access     Parameter      IndexRange   DataLimit  EnumTbl*/
-   { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      NO_LIMIT,  NULL},
-   { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      0,TH_PRE_HISTORY_S,   NULL},
+   { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      0,TH_POST_HISTORY_S,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
 
@@ -103,7 +103,7 @@ static USER_MSG_TBL time_history_root [] =
    { "CFG",         time_history_cfg,    NULL,          NO_HANDLER_DATA},
    { "STATUS",      time_history_status, NULL,          NO_HANDLER_DATA},
    { "DEBUG",       time_history_debug,  NULL,          NO_HANDLER_DATA},
-   { "SHOW_CFG",    NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,   NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
 
@@ -303,6 +303,11 @@ static USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
  * 
+ * *****************  Version 8  *****************
+ * User: Jim Mood     Date: 1/17/13    Time: 2:44p
+ * Updated in $/software/control processor/code/application
+ * SCR #1218
+ *
  * *****************  Version 7  *****************
  * User: Jim Mood     Date: 12/18/12   Time: 7:47p
  * Updated in $/software/control processor/code/application
