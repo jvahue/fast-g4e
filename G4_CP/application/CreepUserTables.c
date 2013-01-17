@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 6 $  $Date: 13-01-14 3:39p $
+    $Revision: 7 $  $Date: 13-01-16 9:38a $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -540,7 +540,7 @@ static
 USER_MSG_TBL creepCfgTbl[] =
 {
   {"PBITSYSCOND", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_ENUM,  USER_RW,
-                (void *) &creepCfgTemp.sysCondCBIT,   -1,   -1, NO_LIMIT, Flt_UserEnumStatus},
+                (void *) &creepCfgTemp.sysCondPBIT,   -1,   -1, NO_LIMIT, Flt_UserEnumStatus},
 
   {"CBITSYSCOND", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_ENUM,  USER_RW,
                 (void *) &creepCfgTemp.sysCondCBIT,   -1,   -1, NO_LIMIT, Flt_UserEnumStatus},
@@ -1787,6 +1787,12 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
  * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 13-01-16   Time: 9:38a
+ * Updated in $/software/control processor/code/application
+ * SCR #1195.  Item #13.  "creep.cfg.pbitsyscond" pointing to wrong
+ * internal var. 
+ *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 13-01-14   Time: 3:39p
  * Updated in $/software/control processor/code/application
