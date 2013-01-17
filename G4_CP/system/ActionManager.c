@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 21 $  $Date: 13-01-02 1:22p $
+ $Revision: 22 $  $Date: 13-01-16 4:44p $
 
 ******************************************************************************/
 
@@ -1049,6 +1049,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 13-01-16   Time: 4:44p
+ * Updated in $/software/control processor/code/system
+ * SCR 1220 - Misc Design Review Issues
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 13-01-02   Time: 1:22p
