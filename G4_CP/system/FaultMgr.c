@@ -10,7 +10,7 @@
                  and the debug verbosity.
 
     VERSION
-      $Revision: 57 $  $Date: 12-11-16 8:40p $
+      $Revision: 58 $  $Date: 13-01-17 10:49a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -110,7 +110,7 @@ void Flt_PreInitFaultMgr(void)
   // Fault Action Flags
   m_Previous.nID     = ACTION_NO_REQ;
   m_Previous.state   = OFF;
-  m_Previous.sysCond = faultSystemStatus;
+  m_Previous.sysCond = STA_MAX;
 
   m_Current.nID     = ACTION_NO_REQ;
   m_Current.state   = OFF;
@@ -594,6 +594,12 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: John Omalley Date: 13-01-17   Time: 10:49a
+ * Updated in $/software/control processor/code/system
+ * SCR 1223 - Normal System condition not annuciated by Action Manager at
+ * startup.
  * 
  * *****************  Version 57  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:40p
