@@ -22,7 +22,7 @@
 
 
   VERSION
-  $Revision: 35 $  $Date: 1/14/13 11:27a $
+  $Revision: 36 $  $Date: 13-01-17 3:22p $
 
 ******************************************************************************/
 
@@ -1023,6 +1023,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
  *  MODIFICATIONS
  *    $History: Cycle.c $
  *
+ * *****************  Version 36  *****************
+ * User: John Omalley Date: 13-01-17   Time: 3:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1224 - Copied wrong file to RAM copy for Cycle EEPROM
+ * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 1/14/13    Time: 11:27a
  * Updated in $/software/control processor/code/system
