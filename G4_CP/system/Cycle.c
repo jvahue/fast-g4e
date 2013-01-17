@@ -860,7 +860,7 @@ static void CycleRestoreCntsFromPersistFiles(void)
   // EEPROM bad, read from RTC version
   else if (resultEE != SYS_OK)
   {
-    NV_Read( NV_PCYCLE_CNTS_RTC, 0, &m_CountsEEProm, size );
+    NV_Read( NV_PCYCLE_CNTS_RTC, 0, &m_CountsRTC, size );
     memcpy(&m_CountsEEProm, &m_CountsRTC, size);
     resultEE = NV_WriteNow(NV_PCYCLE_CNTS_EE, 0, &m_CountsEEProm, size);
     GSE_DebugStr(NORMAL,TRUE, "Cycle - Persist Counts from RTCNVRAM copied to EEPROM... %s",
