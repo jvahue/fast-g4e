@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 7 $  $Date: 13-01-16 12:06p $
+      $Revision: 8 $  $Date: 13-01-17 8:31p $
 
 ******************************************************************************/
 
@@ -86,21 +86,21 @@
 #define CREEP_DEFAULT_OBJ0 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
                             "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Row Sensor */\
                             "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Col Sensor */\
-                            ENGINERUN_UNUSED,    /* EngRun Id   */\
+                            ENGRUN_UNUSED,       /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
                             1000,                /* Interval Rate (ms)*/\
-                            1000,                   /* erTransFault_ms */\
+                            1000,                /* erTransFault_ms */\
                             "Unused Creep Object 0"
 
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
                             "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Row Sensor */\
                             "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Col Sensor */\
-                            ENGINERUN_UNUSED,    /* EngRun Id   */\
+                            ENGRUN_UNUSED,       /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
                             1000,                /* Interval Rate (ms)*/\
-                            1000,                   /* erTransFault_ms */\
+                            1000,                 /* erTransFault_ms */\
                             "Unused Creep Object 1"
 
 
@@ -127,13 +127,13 @@
 /*
 typedef enum
 {
-  CREEP_1HZ         =  1,  // 1Hz Rate 
-  CREEP_2HZ         =  2,  // 2Hz Rate 
+  CREEP_1HZ         =  1,  // 1Hz Rate
+  CREEP_2HZ         =  2,  // 2Hz Rate
   CREEP_4HZ         =  4,  // 4Hz Rate
-  CREEP_5HZ         =  5,  // 5Hz Rate 
-  CREEP_10HZ        = 10,  // 10Hz Rate 
-  CREEP_20HZ        = 20,  // 20Hz Rate 
-  CREEP_50HZ        = 50,  // 50Hz Rate 
+  CREEP_5HZ         =  5,  // 5Hz Rate
+  CREEP_10HZ        = 10,  // 10Hz Rate
+  CREEP_20HZ        = 20,  // 20Hz Rate
+  CREEP_50HZ        = 50,  // 50Hz Rate
   CREEP_100HZ       = 100  // 100Hz Rate
 } CREEP_RATE;
 */
@@ -189,7 +189,7 @@ typedef struct {
 
 typedef struct {
   CHAR name[CREEP_MAX_NAME];
-  UINT16 id;           // ID of sensor used for Row, Col
+  SENSOR_INDEX id;     // ID of sensor used for Row, Col
   FLOAT32 slope;       //  Slope conversion (if used) to convert Sensor
   FLOAT32 offset;      //  Offset conversion (if used) to convert Sensor
   UINT16 sampleCnt;    //  Expected sample count missed (at rate specified)
@@ -199,7 +199,7 @@ typedef struct {
 typedef struct {
   CREEP_SENSOR sensorRow;  // Creep Sensor Row Definition
   CREEP_SENSOR sensorCol;  // Creep Sensor Col Definition
-  UINT16 engId;            // Engine Run Id to assoc with this CREEP object
+  ENGRUN_INDEX engId;      // Engine Run Id to assoc with this CREEP object
   UINT16 creepTblId;       // Creep Table to use for calculating creep for this obj
   UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
   UINT32 intervalRate_ms;     // Creep interval exe frame/rate
@@ -295,7 +295,7 @@ typedef struct {
   CREEP_INTERVAL interval;  // Creep Interval Setting
   UINT32 lastIdleTime_ms;   // Tick time of when Creep State was IDLE.  Used to determine
                             //   ER going directly to ER on startup or sensor self heal.
-  UINT32 creepIncrement;    // Current 1 sec creep increment count, while creep mission 
+  UINT32 creepIncrement;    // Current 1 sec creep increment count, while creep mission
                             //   is ACTIVE
 } CREEP_STATUS, *CREEP_STATUS_PTR;
 
@@ -369,8 +369,8 @@ typedef struct {
 #pragma pack(1)
 typedef struct {
   CHAR name[CREEP_MAX_NAME];   // Creep Object Name
-  UINT16 rowSensorId;          // Creep Object Row Sensor Id
-  UINT16 colSensorId;          // Creep Object Col Sensor Id
+  SENSOR_INDEX rowSensorId;    // Creep Object Row Sensor Id
+  SENSOR_INDEX colSensorId;    // Creep Object Col Sensor Id
 } CREEP_OBJ_BINHDR, *CREEP_OBJ_BINHDR_PTR;
 
 typedef struct {
@@ -438,6 +438,11 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  *  MODIFICATIONS
  *    $History: Creep.h $
  * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 13-01-17   Time: 8:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 14, 18, 19
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 13-01-16   Time: 12:06p
  * Updated in $/software/control processor/code/application
@@ -452,7 +457,7 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  * User: Peter Lee    Date: 12-12-13   Time: 7:20p
  * Updated in $/software/control processor/code/application
  * Code Review Updates
- * 
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 12-12-09   Time: 6:39p
  * Updated in $/software/control processor/code/application

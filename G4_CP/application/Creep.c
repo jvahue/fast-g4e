@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 7 $  $Date: 12-12-13 7:41p $
+      $Revision: 8 $  $Date: 13-01-17 8:31p $
 
 ******************************************************************************/
 
@@ -26,14 +26,14 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "EngineRun.h"
+#include "Sensor.h"
+
 #include "Creep.h"
 #include "ClockMgr.h"
 #include "GSE.h"
 #include "NVMgr.h"
 #include "TaskManager.h"
-
-#include "Sensor.h"
-#include "EngineRun.h"
 
 #include "Assert.h"
 
@@ -273,10 +273,10 @@ void Creep_Initialize ( BOOLEAN degradedMode )
       m_Creep_Status[i].status = CREEP_STATUS_OK;
       // If any RowSensor/ColSensor/TableId/ERId is not defined or Creep Not enabled
       //   DISABLE this Obj
-      if ( (m_Creep_Cfg.creepObj[i].sensorRow.id == (INT16) SENSOR_UNUSED) ||
-           (m_Creep_Cfg.creepObj[i].sensorCol.id == (INT16) SENSOR_UNUSED) ||
+      if ( (m_Creep_Cfg.creepObj[i].sensorRow.id ==  SENSOR_UNUSED) ||
+           (m_Creep_Cfg.creepObj[i].sensorCol.id ==  SENSOR_UNUSED) ||
            (m_Creep_Cfg.creepObj[i].creepTblId == CREEP_TABLE_UNUSED) ||
-           (m_Creep_Cfg.creepObj[i].engId == ENGINERUN_UNUSED)||
+           (m_Creep_Cfg.creepObj[i].engId == ENGRUN_UNUSED)||
            ( m_Creep_Cfg.bEnabled == FALSE ) )
       {
         m_Creep_Status[i].status = CREEP_STATUS_OK_DISABLED;
@@ -1939,11 +1939,16 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 13-01-17   Time: 8:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 14, 18, 19
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 12-12-13   Time: 7:41p
  * Updated in $/software/control processor/code/application
  * Code Review Updates
- * 
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 12-12-13   Time: 7:20p
  * Updated in $/software/control processor/code/application
