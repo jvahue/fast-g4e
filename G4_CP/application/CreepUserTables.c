@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 7 $  $Date: 13-01-16 9:38a $
+    $Revision: 8 $  $Date: 13-01-17 8:31p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -29,7 +29,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define CREEP_MAX_STR_LEN          256
+#define CREEP_MAX_STR_LEN 256
 #define CREEP_MAX_RECENT_DATE_TIME 20  // "HH:MM:SS MM/DD/YYYY"
 #define CREEP_MAX_VALUE_CHAR_ARRAY 32
 #define CREEP_MAX_LABEL_CHAR_ARRAY 128
@@ -369,8 +369,8 @@ USER_MSG_TBL creepObjectSenRowTbl[] =
   {"NAME", NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_STR,  USER_RW,
            (void *) &creepCfgObjSenTemp.name[0], 0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
-  {"ID",      NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_UINT16,  USER_RW,
-             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"ID",      NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_ENUM,  USER_RW,
+             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, SensorIndexType},
 
   {"SLOPE",   NO_NEXT_TABLE, CreepMsg_ObjRow, USER_TYPE_FLOAT,  USER_RW,
               (void *) &creepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -396,8 +396,8 @@ USER_MSG_TBL creepObjectSenColTbl[] =
   {"NAME", NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_STR,  USER_RW,
          (void *) &creepCfgObjSenTemp.name[0],  0, CREEP_MAX_OBJ-1, 0, CREEP_MAX_NAME, NULL},
 
-  {"ID",     NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_UINT16,  USER_RW,
-             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"ID",     NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_ENUM,  USER_RW,
+             (void *) &creepCfgObjSenTemp.id,    0, CREEP_MAX_OBJ-1, NO_LIMIT, SensorIndexType},
 
   {"SLOPE",  NO_NEXT_TABLE, CreepMsg_ObjCol, USER_TYPE_FLOAT,  USER_RW,
              (void *) &creepCfgObjSenTemp.slope, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -423,8 +423,8 @@ USER_MSG_TBL creepObjectTbl[] =
   {"NAME", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_STR, USER_RW,
            (void *) &creepCfgObjTemp.name[0],  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
 
-  {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
-              (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
+              (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, engRunIdEnum},
 
   {"TBL_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
               (void *) &creepCfgObjTemp.creepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -549,11 +549,11 @@ USER_MSG_TBL creepCfgTbl[] =
                 (void *) &creepCfgTemp.bEnabled,      -1,   -1, NO_LIMIT, NULL},
 
   {TABLE_STRING,  creepTableTbl,  NULL,  NO_HANDLER_DATA},
-            
+
   {OBJECT_STRING, creepObjectTbl, NULL,  NO_HANDLER_DATA},
 
   {"BASEUNITS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
-               (void *) &creepCfgTemp.baseUnits,      -1,   -1,   NO_LIMIT, NULL},
+               (void *) &creepCfgTemp.baseUnits,      -1,   -1,   9,  15, NULL},
 
   {"SENSOR_START_MS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT32,  USER_RW,
                       (void *) &creepCfgTemp.sensorStartTime_ms,  -1,   -1,   NO_LIMIT, NULL},
@@ -596,13 +596,13 @@ USER_MSG_TBL creepPersistTbl[] =
 static
 USER_MSG_TBL creepDebugTbl[] =
 {
-  {"EXP_CRC", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_HEX16,  USER_RW,
+  {"EXP_CRC", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_HEX16,  USER_RO,
                   (void *) &creepDebugTemp.exp_crc, -1,  -1, NO_LIMIT, NULL},
 
-  {"SENSOR_LOG_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RW,
+  {"SENSOR_LOG_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RO,
                   (void *) &creepDebugTemp.nSensorFailedCnt, -1,  -1, NO_LIMIT, NULL},
 
-  {"CREEP_HISTORY_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RW,
+  {"CREEP_HISTORY_CNT", NO_NEXT_TABLE, CreepMsg_DebugTbl, USER_TYPE_UINT16,  USER_RO,
                   (void *) &creepDebugTemp.nCreepFailBuffCnt, -1,  -1, NO_LIMIT, NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -621,14 +621,14 @@ USER_MSG_TBL creepRoot[] =
   {"PERSIST", creepPersistTbl, NULL,  NO_HANDLER_DATA},
   {"DEBUG",   creepDebugTbl,   NULL,  NO_HANDLER_DATA},
 
-  {"CLEAR",      NO_NEXT_TABLE,   CreepMsg_Clear,                USER_TYPE_STR,
+  {"CLEAR",      NO_NEXT_TABLE,  CreepMsg_Clear,                USER_TYPE_STR,
                  USER_WO,               NULL,   -1, -1, NO_LIMIT,   NULL},
-  {"RECENTALL",  NO_NEXT_TABLE,   CreepMsg_UserMessageRecentAll, USER_TYPE_ACTION,
+  {"RECENTALL",  NO_NEXT_TABLE,  CreepMsg_UserMessageRecentAll, USER_TYPE_ACTION,
                  (USER_RO|USER_NO_LOG), NULL,   -1, -1, NO_LIMIT,   NULL},
-  {"RECENTUPDATE", NO_NEXT_TABLE, CreepMsg_UserMessageRecentUpdate, USER_TYPE_STR,
+  {"RECENTUPDATE", NO_NEXT_TABLE,  CreepMsg_UserMessageRecentUpdate, USER_TYPE_STR,
                  USER_RO,               NULL,   -1, -1, NO_LIMIT,   NULL},
-  { DISPLAY_CFG, NO_NEXT_TABLE,   Creep_ShowConfig,  USER_TYPE_ACTION, 
-                (USER_RO|USER_NO_LOG|USER_GSE), NULL,  -1,-1, NO_LIMIT, NULL},             
+  { DISPLAY_CFG, NO_NEXT_TABLE,   Creep_ShowConfig,  USER_TYPE_ACTION,
+                (USER_RO|USER_NO_LOG|USER_GSE), NULL,  -1,-1, NO_LIMIT, NULL},
 
   {NULL,      NULL,            NULL,  NO_HANDLER_DATA}
 };
@@ -1694,37 +1694,37 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
    // Local Data
    USER_HANDLER_RESULT result;
    UINT32              i;
-   CHAR                labelStem[CREEP_MAX_LABEL_CHAR_ARRAY] = "\r\n\r\nCREEP.CFG";   
+   CHAR                labelStem[CREEP_MAX_LABEL_CHAR_ARRAY] = "\r\n\r\nCREEP.CFG";
    CHAR                label[USER_MAX_MSG_STR_LEN * 3];
    USER_MSG_TBL*       pCfgTable;
    CHAR                value[CREEP_MAX_VALUE_CHAR_ARRAY];
    CHAR                branchName[USER_MAX_MSG_STR_LEN] = " ";
    CHAR                nextBranchName[USER_MAX_MSG_STR_LEN] = "  ";
-   
+
    // Declare a GetPtr to be used locally since
    // the GetPtr passed in is "NULL" because this funct is a user-action.
    UINT32              tempInt;
-   void*               localPtr = &tempInt;   
-  
+   void*               localPtr = &tempInt;
+
    // Local Initialization
    pCfgTable = creepCfgTbl;     // Re-set the pointer to beginning of CFG table
    result    = USER_RESULT_OK;
-   
+
    User_OutputMsgString (labelStem, FALSE);
 
-   while ( pCfgTable->MsgStr  != NULL             && 
-           pCfgTable->MsgType != USER_TYPE_ACTION && 
+   while ( pCfgTable->MsgStr  != NULL             &&
+           pCfgTable->MsgType != USER_TYPE_ACTION &&
            result             == USER_RESULT_OK )
    {
       if (0 == strncmp(pCfgTable->MsgStr, TABLE_STRING, sizeof(pCfgTable->MsgStr)))
-      { 
+      {
          for ( i = 0; i < CREEP_MAX_TBL && result == USER_RESULT_OK; i++ )
          {
             // Substruct name was the first entry to terminate the while-loop above
-            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);             
+            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);
             // Display element info above each set of data.
-            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);      
-            // Assume the worse, to terminate this for-loop 
+            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);
+            // Assume the worse, to terminate this for-loop
             result = USER_RESULT_ERROR;
             if ( User_OutputMsgString( label, FALSE ) )
             {
@@ -1737,10 +1737,10 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
          for ( i = 0; i < CREEP_MAX_OBJ && result == USER_RESULT_OK; i++ )
          {
             // Substruct name was the first entry to terminate the while-loop above
-            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);             
+            strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);
             // Display element info above each set of data.
-            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);      
-            // Assume the worse, to terminate this for-loop 
+            snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);
+            // Assume the worse, to terminate this for-loop
             result = USER_RESULT_ERROR;
             if ( User_OutputMsgString( label, FALSE ) )
             {
@@ -1762,12 +1762,12 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
          else
          {
             // Convert the param to string.
-            if( User_CvtGetStr(pCfgTable->MsgType, value, sizeof(value), 
+            if( User_CvtGetStr(pCfgTable->MsgType, value, sizeof(value),
                                localPtr, pCfgTable->MsgEnumTbl))
             {
                if (User_OutputMsgString( value, FALSE ))
                {
-                 result = USER_RESULT_OK; 
+                 result = USER_RESULT_OK;
                }
             }
             else
@@ -1777,7 +1777,7 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
             }
          }
       }
-      pCfgTable++;  
+      pCfgTable++;
    }
 
    return result;
@@ -1787,17 +1787,22 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
  * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 13-01-17   Time: 8:31p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Items 14, 18, 19
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 13-01-16   Time: 9:38a
  * Updated in $/software/control processor/code/application
  * SCR #1195.  Item #13.  "creep.cfg.pbitsyscond" pointing to wrong
- * internal var. 
+ * internal var.
  *
  * *****************  Version 6  *****************
  * User: John Omalley Date: 13-01-14   Time: 3:39p
  * Updated in $/software/control processor/code/application
  * SCR 1195 - Item #12 - Add showcfg
- * 
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 12-12-13   Time: 7:20p
  * Updated in $/software/control processor/code/application
