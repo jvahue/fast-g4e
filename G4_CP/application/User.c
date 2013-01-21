@@ -1473,7 +1473,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
          - check the entire string is consumed by the conversion
          - Note: strtod() returns double  */
       float64_temp= (FLOAT64)strtod(SetStr, &end);
-      if( *end == '\0' && float64_temp <= Max->Float64 && float64_temp >= Min->Float64)
+      if( *end == '\0' && float64_temp <= Max->Float64 && float64_temp >= Min->Float64 )
       {
         **(FLOAT64**)SetPtr = float64_temp;
         result = TRUE;
@@ -1790,12 +1790,12 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
 
     case USER_TYPE_FLOAT:
       Min->Float = noLimit ? -FLT_MAX  : MAX(-FLT_MAX,Min->Float);
-      Max->Float = noLimit ? FLT_MAX  : MIN(FLT_MAX,Max->Float);
+      Max->Float = noLimit ?  FLT_MAX  : MIN(FLT_MAX,Max->Float);
       break;
 
     case USER_TYPE_FLOAT64:
-      Min->Float64 = noLimit ? -DBL_MAX  : MAX(-DBL_MAX,Min->Float64);
-      Max->Float64 = noLimit ? DBL_MAX  : MIN(DBL_MAX,Max->Float64);
+      Min->Float64 = noLimit ? -DBL_MAX  : MAX(-DBL_MAX,(FLOAT64)Min->Float);
+      Max->Float64 = noLimit ?  DBL_MAX  : MIN(DBL_MAX,(FLOAT64)Max->Float);
       break;
 
       //String length limit to half of the command string.

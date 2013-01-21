@@ -181,6 +181,13 @@ USER_ENUM_TBL creepStateStrs[] =
   { NULL,           0}
 };
 
+static
+USER_ENUM_TBL creepTableIdEnum[] =
+{
+    {"0", 0},
+    {"1", 1},
+    {"UNUSED", 255 }
+};
 /*
 USER_ENUM_TBL creepRateTypes[] =
 {
@@ -424,16 +431,16 @@ USER_MSG_TBL creepObjectTbl[] =
            (void *) &creepCfgObjTemp.name[0],  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
 
   {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
-              (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, engRunIdEnum},
+            (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, engRunIdEnum},
 
-  {"TBL_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
-              (void *) &creepCfgObjTemp.creepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+  {"TBL_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
+        (void *) &creepCfgObjTemp.creepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, creepTableIdEnum},
 
   {"RATEOFFSET_MS", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT16,  USER_RW,
               (void *) &creepCfgObjTemp.cpuOffset_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
 
   {"RATE_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT32,  USER_RW,
-        (void *) &creepCfgObjTemp.intervalRate_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
+        (void *) &creepCfgObjTemp.intervalRate_ms, 0, CREEP_MAX_OBJ-1, 10,1000, NULL},
 
   {"ER_TRANS_ms", NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_UINT32,  USER_RW,
         (void *) &creepCfgObjTemp.erTransFault_ms, 0, CREEP_MAX_OBJ-1, NO_LIMIT, NULL},
@@ -518,11 +525,11 @@ USER_MSG_TBL creepValTbl[] =
 {
   {"ACCUM_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RW,
                   (void *) &creepStatusTemp.data_percent.accumCnt,       0, CREEP_MAX_OBJ-1,
-                  NO_LIMIT, NULL},
+                  0,0x43480000, NULL},
 
   {"ACCUM_REJECT_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RW,
                   (void *) &creepStatusTemp.data_percent.accumCntTrashed, 0, CREEP_MAX_OBJ-1,
-                  NO_LIMIT, NULL},
+                  0,0x43480000, NULL},
 
   {"LAST_MISSION_PCNT", NO_NEXT_TABLE, CreepMsg_Val, USER_TYPE_FLOAT64,  USER_RO,
                   (void *) &creepStatusTemp.data_percent.lastMissionCnt, 0, CREEP_MAX_OBJ-1,
@@ -558,6 +565,9 @@ USER_MSG_TBL creepCfgTbl[] =
   {"SENSOR_START_MS", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT32,  USER_RW,
                       (void *) &creepCfgTemp.sensorStartTime_ms,  -1,   -1,   NO_LIMIT, NULL},
 
+  {"MAX_SENSOR_LOG", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
+                      (void *) &creepCfgTemp.maxSensorLossRec,  -1,   -1,   NO_LIMIT, NULL},
+                  
   {"CRC", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_HEX16,  USER_RW,
                 (void *) &creepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
 
