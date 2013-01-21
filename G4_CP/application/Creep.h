@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 8 $  $Date: 13-01-17 8:31p $
+      $Revision: 9 $  $Date: 13-01-21 3:46p $
 
 ******************************************************************************/
 
@@ -437,6 +437,11 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 13-01-21   Time: 3:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1219 - Misc Creep User Table Updates
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
