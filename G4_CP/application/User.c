@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 114 $  $Date: 1/04/13 3:13p $
+   $Revision: 115 $  $Date: 13-01-21 3:46p $
 
 ******************************************************************************/
 
@@ -3099,6 +3099,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 115  *****************
+ * User: John Omalley Date: 13-01-21   Time: 3:46p
+ * Updated in $/software/control processor/code/application
+ * SCR 1219 - Misc Creep User Table Updates
  * 
  * *****************  Version 114  *****************
  * User: Contractor V&v Date: 1/04/13    Time: 3:13p
