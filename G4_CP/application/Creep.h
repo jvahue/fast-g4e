@@ -84,8 +84,8 @@
 
 
 #define CREEP_DEFAULT_OBJ0 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,  0,  0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 1.0f,   0.0f,  0,  0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 1.0f,   0.0f,  0,  0, /*Col Sensor */\
                             ENGRUN_UNUSED,       /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
@@ -94,8 +94,8 @@
                             "Unused Creep Object 0"
 
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Row Sensor */\
-                            "Unused", SENSOR_UNUSED, 0.0f,   0.0f,   0,   0, /*Col Sensor */\
+                            "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Row Sensor */\
+                            "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Col Sensor */\
                             ENGRUN_UNUSED,       /* EngRun Id   */\
                             CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
