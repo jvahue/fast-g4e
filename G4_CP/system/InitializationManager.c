@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 118 $  $Date: 12-11-16 9:10p $
+     $Revision: 119 $  $Date: 1/18/13 8:35p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -328,6 +328,7 @@ static void Im_Driver_Initialize(void)
   for (i = 0; i < INIT_MGR_MAX_DRV; i++)
   {
     pLog->ts = ts;
+    pLog->priority = LOG_PRIORITY_3;
     pLog++;
   }
 
@@ -769,6 +770,11 @@ void Im_StartupTickHandler(void)
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
  * 
+ * *****************  Version 119  *****************
+ * User: Jim Mood     Date: 1/18/13    Time: 8:35p
+ * Updated in $/software/control processor/code/system
+ * SCR # 1225, Driver log priority set to '3'
+ *
  * *****************  Version 118  *****************
  * User: John Omalley Date: 12-11-16   Time: 9:10p
  * Updated in $/software/control processor/code/system
@@ -788,7 +794,7 @@ void Im_StartupTickHandler(void)
  * User: John Omalley Date: 12-11-12   Time: 8:23a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 114  *****************
  * User: Peter Lee    Date: 12-10-27   Time: 4:59p
  * Updated in $/software/control processor/code/system
