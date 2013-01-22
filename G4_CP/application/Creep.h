@@ -103,7 +103,7 @@
                             "Unused Creep Object 1"
 
 
-#define CREEP_DEFAULT_CRC16   0x9C4C
+#define CREEP_DEFAULT_CRC16   0xDA66
 
 #define CREEP_DEFAULT_CFG  STA_NORMAL,  /* PBITSysCond */\
                            STA_NORMAL,  /* CBITSysCond */\
