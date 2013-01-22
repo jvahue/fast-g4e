@@ -103,7 +103,7 @@
                             "Unused Creep Object 1"
 
 
-#define CREEP_DEFAULT_CRC16   0x217C
+#define CREEP_DEFAULT_CRC16   0x9C4C
 
 #define CREEP_DEFAULT_CFG  STA_NORMAL,  /* PBITSysCond */\
                            STA_NORMAL,  /* CBITSysCond */\
@@ -123,19 +123,6 @@
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
-/*
-typedef enum
-{
-  CREEP_1HZ         =  1,  // 1Hz Rate
-  CREEP_2HZ         =  2,  // 2Hz Rate
-  CREEP_4HZ         =  4,  // 4Hz Rate
-  CREEP_5HZ         =  5,  // 5Hz Rate
-  CREEP_10HZ        = 10,  // 10Hz Rate
-  CREEP_20HZ        = 20,  // 20Hz Rate
-  CREEP_50HZ        = 50,  // 50Hz Rate
-  CREEP_100HZ       = 100  // 100Hz Rate
-} CREEP_RATE;
-*/
 typedef enum {
     CREEP_TBL_0,
     CREEP_TBL_1,
@@ -442,12 +429,12 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.h $
- * 
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
  * SCR 1219 - Misc Creep User Table Updates
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
  * Updated in $/software/control processor/code/application
