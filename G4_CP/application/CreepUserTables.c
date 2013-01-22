@@ -187,21 +187,8 @@ USER_ENUM_TBL creepTableIdEnum[] =
     {"0", CREEP_TBL_0},
     {"1", CREEP_TBL_1},
     {"UNUSED", CREEP_TBL_UNUSED }
+    { NULL,           0}
 };
-/*
-USER_ENUM_TBL creepRateTypes[] =
-{
-  { "1HZ"    , CREEP_1HZ    },
-  { "2HZ"    , CREEP_2HZ    },
-  { "4HZ"    , CREEP_4HZ    },
-  { "5HZ"    , CREEP_5HZ    },
-  { "10HZ"   , CREEP_10HZ   },
-  { "20HZ"   , CREEP_20HZ   },
-  { "50HZ"   , CREEP_50HZ   },
-  { "100HZ"  , CREEP_100HZ  },
-  { NULL     , 0            }
-};
-*/
 
 // Level 2
 #pragma ghs nowarning 1545  // Ignore alignment in Cfg.  ASSERT() elsewhere if not aligned
@@ -567,7 +554,7 @@ USER_MSG_TBL creepCfgTbl[] =
 
   {"MAX_SENSOR_LOG", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
                       (void *) &creepCfgTemp.maxSensorLossRec,  -1,   -1,   NO_LIMIT, NULL},
-                  
+
   {"CRC", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_HEX16,  USER_RW,
                 (void *) &creepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
 
@@ -1796,12 +1783,12 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
- * 
+ *
  * *****************  Version 9  *****************
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
  * SCR 1219 - Misc Creep User Table Updates
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
  * Updated in $/software/control processor/code/application
