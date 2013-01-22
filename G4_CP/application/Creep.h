@@ -10,7 +10,7 @@
     Description: Contains data structures related to the Creep Processing
 
     VERSION
-      $Revision: 9 $  $Date: 13-01-21 3:46p $
+      $Revision: 10 $  $Date: 1/22/13 1:47p $
 
 ******************************************************************************/
 
@@ -430,6 +430,11 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  *  MODIFICATIONS
  *    $History: Creep.h $
  *
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1219 - GSE Cleanup
+ * 
  * *****************  Version 9  *****************
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
