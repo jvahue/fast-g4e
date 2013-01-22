@@ -74,6 +74,11 @@ USER_HANDLER_RESULT TpUserMsg(USER_DATA_TYPE DataType,
                               const void *SetPtr,
                               void **GetPtr);
 
+USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
+                                USER_MSG_PARAM Param,
+                                UINT32 Index,
+                                const void *SetPtr,
+                                void **GetPtr);
 TEST_POINT_DATA tpEdit;
 
 extern void ReportCoverage(void);
@@ -94,8 +99,9 @@ static USER_MSG_TBL TestPointRoot[] =
     TP_USER("TGLMAX", USER_TYPE_UINT32, &tpEdit.toggleMax,   NULL),
     TP_USER("TGLLIM", USER_TYPE_UINT32, &tpEdit.toggleLim,   NULL),
     TP_USER("TGLCUR", USER_TYPE_UINT32, &tpEdit.toggleCur,   NULL),
+    { "INIT",    NO_NEXT_TABLE, TpInitTable,          USER_TYPE_ACTION, USER_RW|USER_NO_LOG, NULL, -1, -1, NO_LIMIT, NULL},
     { "SD_DUMP", NO_NEXT_TABLE, User_GenericAccessor, USER_TYPE_YESNO,  USER_RW|USER_NO_LOG, &enableSdDump, -1, -1, NO_LIMIT, NULL},
-    { "DUMPCOV", NO_NEXT_TABLE, DumpCoverage,         USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL,          -1, -1, NO_LIMIT, NULL},
+    { "DUMPCOV", NO_NEXT_TABLE, DumpCoverage,         USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL, -1, -1, NO_LIMIT, NULL},
     { NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -571,6 +577,29 @@ USER_HANDLER_RESULT DumpCoverage(USER_DATA_TYPE DataType,
 }
 
 #endif  // STE_TP
+
+/******************************************************************************
+* Function:    TpInitTable
+*
+* Description: This functions clears out all TP Data.
+*              
+*
+* Parameters:  The usual suspects
+*              
+* Returns:     Success         
+*
+* Notes:       
+*              
+*****************************************************************************/
+USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
+                                USER_MSG_PARAM Param,
+                                UINT32 Index,
+                                const void *SetPtr,
+                                void **GetPtr)
+{
+    memset( tpData, 0, sizeof(tpData));
+    return USER_RESULT_OK;
+}
 
 /*************************************************************************
  *  MODIFICATIONS

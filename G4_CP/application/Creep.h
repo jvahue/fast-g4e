@@ -40,7 +40,6 @@
 
 #define CREEP_MAX_OBJ 2
 #define CREEP_MAX_TBL 2
-#define CREEP_TABLE_UNUSED 255
 
 #define CREEP_MAX_SENSOR_VAL 100   // Worst case,
 
@@ -87,7 +86,7 @@
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,  0,  0, /*Row Sensor */\
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,  0,  0, /*Col Sensor */\
                             ENGRUN_UNUSED,       /* EngRun Id   */\
-                            CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
+                            CREEP_TBL_UNUSED,    /* Creep Tbl Id*/\
                             0,                   /* CPU Offset */\
                             1000,                /* Interval Rate (ms)*/\
                             1000,                /* erTransFault_ms */\
@@ -96,15 +95,15 @@
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Row Sensor */\
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Col Sensor */\
-                            ENGRUN_UNUSED,       /* EngRun Id   */\
-                            CREEP_TABLE_UNUSED,  /* Creep Tbl Id*/\
-                            0,                   /* CPU Offset */\
-                            1000,                /* Interval Rate (ms)*/\
+                            ENGRUN_UNUSED,        /* EngRun Id   */\
+                            CREEP_TBL_UNUSED,     /* Creep Tbl Id*/\
+                            0,                    /* CPU Offset */\
+                            1000,                 /* Interval Rate (ms)*/\
                             1000,                 /* erTransFault_ms */\
                             "Unused Creep Object 1"
 
 
-#define CREEP_DEFAULT_CRC16   0x041E
+#define CREEP_DEFAULT_CRC16   0x217C
 
 #define CREEP_DEFAULT_CFG  STA_NORMAL,  /* PBITSysCond */\
                            STA_NORMAL,  /* CBITSysCond */\
@@ -137,6 +136,12 @@ typedef enum
   CREEP_100HZ       = 100  // 100Hz Rate
 } CREEP_RATE;
 */
+typedef enum {
+    CREEP_TBL_0,
+    CREEP_TBL_1,
+    CREEP_TBL_UNUSED = 255
+} CREEP_TBL_ENUM;
+
 typedef enum
 {
   CREEP_STATUS_OK = 0,         // Creep Status is OK
@@ -197,17 +202,17 @@ typedef struct {
 } CREEP_SENSOR, *CREEP_SENSOR_PTR;
 
 typedef struct {
-  CREEP_SENSOR sensorRow;  // Creep Sensor Row Definition
-  CREEP_SENSOR sensorCol;  // Creep Sensor Col Definition
-  ENGRUN_INDEX engId;      // Engine Run Id to assoc with this CREEP object
-  UINT16 creepTblId;       // Creep Table to use for calculating creep for this obj
-  UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
+  CREEP_SENSOR sensorRow;     // Creep Sensor Row Definition
+  CREEP_SENSOR sensorCol;     // Creep Sensor Col Definition
+  ENGRUN_INDEX engId;         // Engine Run Id to assoc with this CREEP object
+  CREEP_TBL_ENUM creepTblId;  // Creep Table to use for calculating creep for this obj
+  UINT16 cpuOffset_ms;        // CPU Offset for calculating CREEP Interval
   UINT32 intervalRate_ms;     // Creep interval exe frame/rate
   UINT32 erTransFault_ms;     // Timeout used to determine fault if box reset during ER
                               //   or sensors selfed heal during ER.
   CHAR name[CREEP_MAX_NAME];  // Descriptive name for debug purposes
 } CREEP_OBJECT, *CREEP_OBJECT_PTR;
-// NOTE: For CESNA CARAVAN App, two creep obj will be defined. One for Ct and
+// NOTE: For CESSNA CARAVAN App, two creep obj will be defined. One for Ct and
 //       one for Pt Blade creep monitoring.
 
 typedef struct {
