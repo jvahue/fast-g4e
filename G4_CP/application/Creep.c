@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 8 $  $Date: 13-01-17 8:31p $
+      $Revision: 10 $  $Date: 1/22/13 1:47p $
 
 ******************************************************************************/
 
@@ -1950,6 +1950,16 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1219 - GSE Cleanup
+ * 
+ * *****************  Version 9  *****************
+ * User: Jeff Vahue   Date: 1/21/13    Time: 1:27p
+ * Updated in $/software/control processor/code/application
+ * SCR #1214: do not instrument test code
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
