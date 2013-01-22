@@ -186,7 +186,7 @@ USER_ENUM_TBL creepTableIdEnum[] =
 {
     {"0", CREEP_TBL_0},
     {"1", CREEP_TBL_1},
-    {"UNUSED", CREEP_TBL_UNUSED }
+    {"UNUSED", CREEP_TBL_UNUSED },
     { NULL,           0}
 };
 
