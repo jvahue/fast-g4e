@@ -184,9 +184,9 @@ USER_ENUM_TBL creepStateStrs[] =
 static
 USER_ENUM_TBL creepTableIdEnum[] =
 {
-    {"0", 0},
-    {"1", 1},
-    {"UNUSED", 255 }
+    {"0", CREEP_TBL_0},
+    {"1", CREEP_TBL_1},
+    {"UNUSED", CREEP_TBL_UNUSED }
 };
 /*
 USER_ENUM_TBL creepRateTypes[] =

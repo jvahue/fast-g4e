@@ -275,7 +275,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
       //   DISABLE this Obj
       if ( (m_Creep_Cfg.creepObj[i].sensorRow.id ==  SENSOR_UNUSED) ||
            (m_Creep_Cfg.creepObj[i].sensorCol.id ==  SENSOR_UNUSED) ||
-           (m_Creep_Cfg.creepObj[i].creepTblId == CREEP_TABLE_UNUSED) ||
+           (m_Creep_Cfg.creepObj[i].creepTblId == CREEP_TBL_UNUSED) ||
            (m_Creep_Cfg.creepObj[i].engId == ENGRUN_UNUSED)||
            ( m_Creep_Cfg.bEnabled == FALSE ) )
       {
@@ -310,6 +310,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
 
   // Test Debug
 #ifdef CREEP_TEST
+  /*vcast_dont_instrument_start*/
   m_er_state = ER_STATE_STOPPED;
   for (i=0;i<SIM_SENSORS;i++)
   {
@@ -319,10 +320,12 @@ void Creep_Initialize ( BOOLEAN degradedMode )
 
   m_er_state_timer = CM_GetTickCount() + ER_STATE_STARTUP_DELAY;
   m_er_test_state = ER_STATE_STARTUP_DELAY;
+  /*vcast_dont_instrument_end*/
 #endif
 
 
 #ifdef CREEP_TIMING_TEST
+  /*vcast_dont_instrument_start*/
   for (i=0;i<CREEP_TIMING_BUFF_MAX;i++)
   {
     m_CreepTiming_Buff[i] = 0;
@@ -330,6 +333,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
   m_CreepTiming_Index = 0;
   m_CreepTiming_Start = 0;
   m_CreepTiming_End = 0;
+  /*vcast_dont_instrument_end*/
 #endif
 
 }
@@ -368,7 +372,9 @@ static void Creep_Task ( void *pParam )
   pStatus = ((CREEP_STATUS_PTR) pParam);
 
 #ifdef CREEP_TIMING_TEST
+  /*vcast_dont_instrument_start*/
    m_CreepTiming_Start = TTMR_GetHSTickCount();
+   /*vcast_dont_instrument_end*/
 #endif
 
 
@@ -589,6 +595,7 @@ static void Creep_Task ( void *pParam )
 
   // Testing
 #ifdef CREEP_TEST
+  /*vcast_dont_instrument_start*/
   switch ( m_er_test_state )
   {
     case ER_STATE_STARTUP_DELAY:  // Wait about 10 sec
@@ -612,13 +619,16 @@ static void Creep_Task ( void *pParam )
     default:
       break;
   }
+  /*vcast_dont_instrument_end*/
   // Testing
 #endif
 
 #ifdef CREEP_TIMING_TEST
+  /*vcast_dont_instrument_start*/
    m_CreepTiming_End = TTMR_GetHSTickCount();
    m_CreepTiming_Buff[m_CreepTiming_Index] = (m_CreepTiming_End - m_CreepTiming_Start);
    m_CreepTiming_Index = (++m_CreepTiming_Index) % CREEP_TIMING_BUFF_MAX;
+   /*vcast_dont_instrument_end*/
 #endif
 
 }
@@ -629,8 +639,8 @@ static void Creep_Task ( void *pParam )
  *
  * Description: Function to return the Creep file hdr structure
  *
- * Parameters:  pDest - ptr to destination bufffer
- *              nMaxByteSize - max size of dest buffer
+ * Parameters:  pDest - ptr to destination buffer
+ *              nMaxByteSize - max size of destination buffer
  *
  * Returns:     byte count of data returned
  *
@@ -1903,6 +1913,7 @@ void Creep_AddToFaultBuff ( SYS_APP_ID id )
 
 // Debug Functions
 #ifdef CREEP_TEST
+/*vcast_dont_instrument_start*/
 static
 ER_STATE EngRunGetState_Sim (ENGRUN_INDEX idx, UINT8* EngRunFlags)
 {
@@ -1932,6 +1943,7 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
   sim_sensor_cnt[id] = ++sim_sensor_cnt[id] % SIM_SENSOR_MAX_VALUES;
   return (SIM_SENSOR[id][sim_sensor_cnt[id]]);
 }
+/*vcast_dont_instrument_end*/
 #endif
 
 
