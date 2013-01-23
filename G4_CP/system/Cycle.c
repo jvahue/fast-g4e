@@ -1022,7 +1022,7 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
- *
+ * 
  * *****************  Version 36  *****************
  * User: John Omalley Date: 13-01-17   Time: 3:22p
  * Updated in $/software/control processor/code/system
