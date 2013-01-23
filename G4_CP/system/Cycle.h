@@ -237,7 +237,7 @@ EXPORT BOOLEAN CycleRTCFileInit        ( void );
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.h $
- *
+ * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 11:04a
  * Updated in $/software/control processor/code/system

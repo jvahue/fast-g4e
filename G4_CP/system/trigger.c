@@ -1153,7 +1153,7 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
- *
+ * 
  * *****************  Version 86  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 11:04a
  * Updated in $/software/control processor/code/system

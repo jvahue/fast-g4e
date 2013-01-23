@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 10 $  $Date: 1/22/13 1:47p $
+      $Revision: 11 $  $Date: 13-01-22 2:13p $
 
 ******************************************************************************/
 
@@ -1899,10 +1899,11 @@ void Creep_AddToFaultBuff ( SYS_APP_ID id )
     pbuff = (CREEP_FAULT_BUFFER_PTR) &m_creepHistory.buff[m_creepHistory.cnt];
     pbuff->id = id;
     CM_GetTimeAsTimestamp(&pbuff->ts);
+
+    m_creepHistory.cnt++;
+    NV_Write( NV_CREEP_HISTORY, 0, (void *) &m_creepHistory.cnt, sizeof(CREEP_FAULT_HISTORY) );
+    m_Creep_Debug.nCreepFailBuffCnt = m_creepHistory.cnt;
   }
-  m_creepHistory.cnt++;
-  NV_Write( NV_CREEP_HISTORY, 0, (void *) &m_creepHistory.cnt, sizeof(CREEP_FAULT_HISTORY) );
-  m_Creep_Debug.nCreepFailBuffCnt = m_creepHistory.cnt;
 }
 
 
@@ -1951,16 +1952,21 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 13-01-22   Time: 2:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1195  Item #21, creep fault history buffer exceeds 75.
+ *
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p
  * Updated in $/software/control processor/code/application
  * SCR# 1219 - GSE Cleanup
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 1/21/13    Time: 1:27p
  * Updated in $/software/control processor/code/application
  * SCR #1214: do not instrument test code
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
  * Updated in $/software/control processor/code/application

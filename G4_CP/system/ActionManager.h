@@ -28,7 +28,7 @@
 /******************************************************************************
                                  Package Defines                                           
 ******************************************************************************/
-#define MAX_ACTION_DEFINES          8
+#define MAX_ACTION_DEFINES           8
 #define MAX_ACTION_REQUESTS         100
 /* Action Flags                                                          */
 #define ACTION0                     0x0000

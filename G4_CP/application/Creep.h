@@ -95,10 +95,10 @@
 #define CREEP_DEFAULT_OBJ1 /*SensorId,    slope, offset, sampleCnt, sampleRate */\
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Row Sensor */\
                             "Unused", SENSOR_UNUSED, 1.0f,   0.0f,   0,   0, /*Col Sensor */\
-                            ENGRUN_UNUSED,        /* EngRun Id   */\
+                            ENGRUN_UNUSED,       /* EngRun Id   */\
                             CREEP_TBL_UNUSED,     /* Creep Tbl Id*/\
-                            0,                    /* CPU Offset */\
-                            1000,                 /* Interval Rate (ms)*/\
+                            0,                   /* CPU Offset */\
+                            1000,                /* Interval Rate (ms)*/\
                             1000,                 /* erTransFault_ms */\
                             "Unused Creep Object 1"
 
@@ -189,11 +189,11 @@ typedef struct {
 } CREEP_SENSOR, *CREEP_SENSOR_PTR;
 
 typedef struct {
-  CREEP_SENSOR sensorRow;     // Creep Sensor Row Definition
-  CREEP_SENSOR sensorCol;     // Creep Sensor Col Definition
-  ENGRUN_INDEX engId;         // Engine Run Id to assoc with this CREEP object
+  CREEP_SENSOR sensorRow;  // Creep Sensor Row Definition
+  CREEP_SENSOR sensorCol;  // Creep Sensor Col Definition
+  ENGRUN_INDEX engId;      // Engine Run Id to assoc with this CREEP object
   CREEP_TBL_ENUM creepTblId;  // Creep Table to use for calculating creep for this obj
-  UINT16 cpuOffset_ms;        // CPU Offset for calculating CREEP Interval
+  UINT16 cpuOffset_ms;     // CPU Offset for calculating CREEP Interval
   UINT32 intervalRate_ms;     // Creep interval exe frame/rate
   UINT32 erTransFault_ms;     // Timeout used to determine fault if box reset during ER
                               //   or sensors selfed heal during ER.
@@ -429,7 +429,7 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.h $
- *
+ * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p
  * Updated in $/software/control processor/code/application
@@ -439,7 +439,7 @@ EXPORT BOOLEAN Creep_FaultFileInit(void);
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
  * SCR 1219 - Misc Creep User Table Updates
- *
+ * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
  * Updated in $/software/control processor/code/application

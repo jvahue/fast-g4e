@@ -187,7 +187,7 @@ USER_ENUM_TBL creepTableIdEnum[] =
     {"0", CREEP_TBL_0},
     {"1", CREEP_TBL_1},
     {"UNUSED", CREEP_TBL_UNUSED },
-    { NULL,           0}
+  { NULL     , 0            }
 };
 
 // Level 2
@@ -418,7 +418,7 @@ USER_MSG_TBL creepObjectTbl[] =
            (void *) &creepCfgObjTemp.name[0],  0, CREEP_MAX_OBJ-1,  0, CREEP_MAX_NAME, NULL},
 
   {"ENG_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
-            (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, engRunIdEnum},
+              (void *) &creepCfgObjTemp.engId,        0, CREEP_MAX_OBJ-1, NO_LIMIT, engRunIdEnum},
 
   {"TBL_ID",  NO_NEXT_TABLE, CreepMsg_Object, USER_TYPE_ENUM,  USER_RW,
         (void *) &creepCfgObjTemp.creepTblId,   0, CREEP_MAX_OBJ-1, NO_LIMIT, creepTableIdEnum},
@@ -554,7 +554,7 @@ USER_MSG_TBL creepCfgTbl[] =
 
   {"MAX_SENSOR_LOG", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
                       (void *) &creepCfgTemp.maxSensorLossRec,  -1,   -1,   NO_LIMIT, NULL},
-
+                  
   {"CRC", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_HEX16,  USER_RW,
                 (void *) &creepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
 
@@ -1783,7 +1783,7 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
- *
+ * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p
  * Updated in $/software/control processor/code/application
@@ -1793,7 +1793,7 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
  * SCR 1219 - Misc Creep User Table Updates
- *
+ * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 13-01-17   Time: 8:31p
  * Updated in $/software/control processor/code/application

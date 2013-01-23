@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 23 $  $Date: 12/08/12 1:56p $  
+    $Revision: 24 $  $Date: 1/19/13 2:20p $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -101,7 +101,7 @@ static USER_MSG_TBL TestPointRoot[] =
     TP_USER("TGLCUR", USER_TYPE_UINT32, &tpEdit.toggleCur,   NULL),
     { "INIT",    NO_NEXT_TABLE, TpInitTable,          USER_TYPE_ACTION, USER_RW|USER_NO_LOG, NULL, -1, -1, NO_LIMIT, NULL},
     { "SD_DUMP", NO_NEXT_TABLE, User_GenericAccessor, USER_TYPE_YESNO,  USER_RW|USER_NO_LOG, &enableSdDump, -1, -1, NO_LIMIT, NULL},
-    { "DUMPCOV", NO_NEXT_TABLE, DumpCoverage,         USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL, -1, -1, NO_LIMIT, NULL},
+    { "DUMPCOV", NO_NEXT_TABLE, DumpCoverage,         USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL,          -1, -1, NO_LIMIT, NULL},
     { NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -604,6 +604,11 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Jeff Vahue   Date: 1/19/13    Time: 2:20p
+ * Updated in $/software/control processor/code/test
+ * SCR# 1214: provide a method to clear out all TP Data
  * 
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 12/08/12   Time: 1:56p

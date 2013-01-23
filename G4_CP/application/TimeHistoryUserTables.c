@@ -76,7 +76,7 @@ static USER_ENUM_TBL time_history_rate_type[]   =  {  { "OFF"  , TH_OFF         
 // Events - EVENT User and Configuration Table
 static USER_MSG_TBL time_history_cfg [] =
 {
-  /* Str              Next Tbl Ptr    Handler Func.  Data Type          Access     Parameter                                 IndexRange  DataLimit EnumTbl*/
+  /* Str              Next Tbl Ptr    Handler Func.  Data Type          Access     Parameter                               IndexRange  DataLimit EnumTbl*/
   { "RATE",           NO_NEXT_TABLE,  TH_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &cfg_temp.sample_rate,       -1,-1,      NO_LIMIT, time_history_rate_type },
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,  TH_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &cfg_temp.sample_offset_ms,  -1,-1,      0,1000,   NULL                },
   { NULL,             NULL,           NULL,          NO_HANDLER_DATA }
@@ -92,7 +92,7 @@ static USER_MSG_TBL time_history_status [] =
 
 static USER_MSG_TBL time_history_debug [] =
 {
-  /* Str            Next Tbl Ptr         Handler Func.  Data Type               Access     Parameter      IndexRange   DataLimit  EnumTbl*/
+  /* Str            Next Tbl Ptr         Handler Func.  Data Type               Access     Parameter      IndexRange   DataLimit             EnumTbl*/
    { "OPEN",        NO_NEXT_TABLE,       TH_FOpen,      USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      0,TH_PRE_HISTORY_S,   NULL},
    { "CLOSE",       NO_NEXT_TABLE,       TH_FClose,     USER_TYPE_INT32,        USER_WO,   NULL,          -1, -1,      0,TH_POST_HISTORY_S,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
