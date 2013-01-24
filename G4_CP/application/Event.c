@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 39 $  $Date: 12-12-19 5:53p $
+ $Revision: 40 $  $Date: 13-01-24 2:07p $
 
 ******************************************************************************/
 
@@ -1636,7 +1636,7 @@ void EventLogUpdate( EVENT_DATA *pData )
   pLog->nTotalSensors      = pData->nTotalSensors;
 
   // Loop through all the sensors
-  for ( numSensor = 0; numSensor < pData->nTotalSensors; numSensor++ )
+  for ( numSensor = 0; numSensor < MAX_EVENT_SENSORS; numSensor++ )
   {
     // Set a pointer the summary
     pSummary = &(pData->sensor[numSensor]);
@@ -1757,6 +1757,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: John Omalley Date: 13-01-24   Time: 2:07p
+ * Updated in $/software/control processor/code/application
+ * SCR 1228 - SENSOR not Used issue for log summary
  * 
  * *****************  Version 39  *****************
  * User: John Omalley Date: 12-12-19   Time: 5:53p

@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 24 $  $Date: 13-01-08 1:58p $
+ $Revision: 25 $  $Date: 13-01-24 2:07p $
 
 ******************************************************************************/
 
@@ -542,7 +542,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
     pLog->nSamples = pData->masterSampleCnt;
 
     // Loop through all the sensors
-    for ( i = 0; i < pData->nTotalSensors; i++ )
+    for ( i = 0; i < MAX_TREND_SENSORS; i++ )
     {
       // Set a pointer the summary
       pSummary = &(pData->snsrSummary[i]);
@@ -1056,6 +1056,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: John Omalley Date: 13-01-24   Time: 2:07p
+ * Updated in $/software/control processor/code/application
+ * SCR 1228 - SENSOR not Used issue for log summary
  * 
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 1:58p
