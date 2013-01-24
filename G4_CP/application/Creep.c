@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 11 $  $Date: 13-01-22 2:13p $
+      $Revision: 12 $  $Date: 13-01-24 9:34a $
 
 ******************************************************************************/
 
@@ -243,6 +243,11 @@ void Creep_Initialize ( BOOLEAN degradedMode )
     m_Creep_Sensors[j].col.timeout_ms = CREEP_SENSOR_RATE_MINIMUM;
   }
 
+  // Did we get a PBIT error ? If no, then update status to OK.
+  //   Note: this logic help code coverage
+  // SCR #1195 Item #22 Must call _RestoreCfg() before initializing .nRateCountDown
+  Creep_RestoreCfg();
+
   for (i=0;i<CREEP_MAX_OBJ;i++)
   {
     // Initially set status to FAULTED for better code coverage below
@@ -256,9 +261,6 @@ void Creep_Initialize ( BOOLEAN degradedMode )
     m_Creep_Status[i].lastIdleTime_ms = CM_GetTickCount();
   }
 
-  // Did we get a PBIT error ? If no, then update status to OK.
-  //   Note: this logic help code coverage
-  Creep_RestoreCfg();
   bCheckDsbOk = TRUE;
   if (degradedMode != TRUE)
   {
@@ -1952,6 +1954,12 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 13-01-24   Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * SCR #1195 Item 22.  .nRateCountDown init from .cpuOffset_ms not
+ * correct. 
+ *
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 13-01-22   Time: 2:13p
  * Updated in $/software/control processor/code/application
