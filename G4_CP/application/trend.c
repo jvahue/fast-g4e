@@ -799,7 +799,8 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
   }
 
   // track our max stable count data
-  if (pData->curStability.stableCnt > pData->maxStability.stableCnt)
+  if (pData->curStability.stableCnt > pData->maxStability.stableCnt ||
+      pData->maxStability.stableCnt == 0)
   {
     memcpy(&pData->maxStability, &pData->curStability, sizeof(STABILITY_DATA));
   }
