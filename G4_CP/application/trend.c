@@ -756,7 +756,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
 
         // save our current value and validity
         pData->curStability.snsrValue[i] = fVal;
-        pData->curStability.validity = TRUE;
+        pData->curStability.validity[i] = TRUE;
 
         // Check absolute min/max values
         if ( (fVal >= pStabCrit->criteria.lower) && (fVal <= pStabCrit->criteria.upper) )
@@ -789,7 +789,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
       else
       {
         pData->curStability.status[i] = STAB_SNSR_INVALID;
-        pData->curStability.validity = FALSE;
+        pData->curStability.validity[i] = FALSE;
       }
     }
     else
