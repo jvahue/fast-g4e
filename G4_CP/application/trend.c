@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 26 $  $Date: 1/24/13 7:59p $
+ $Revision: 28 $  $Date: 1/24/13 10:37p $
 
 ******************************************************************************/
 
@@ -1057,6 +1057,16 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jeff Vahue   Date: 1/24/13    Time: 10:37p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1197: Fixes to Trend Logs
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 1/24/13    Time: 9:42p
+ * Updated in $/software/control processor/code/application
+ * Adding indexing
  * 
  * *****************  Version 26  *****************
  * User: Contractor V&v Date: 1/24/13    Time: 7:59p
