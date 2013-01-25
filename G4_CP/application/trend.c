@@ -769,6 +769,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
           if (delta > pStabCrit->criteria.variance)
           {
             pData->curStability.status[i] = STAB_SNSR_VARIANCE_ERROR;
+            pData->curStability.snsrValue[i] = delta;
           }
         }
         else
