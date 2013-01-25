@@ -754,16 +754,15 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         fVal       = SensorGetValue(pStabCrit->sensorIndex);
         fPrevValue = pData->curStability.snsrValue[i];
 
+        // save our current value and validity
+        pData->curStability.snsrValue[i] = fVal;
+        pData->curStability.validity = TRUE;
+
         // Check absolute min/max values
         if ( (fVal >= pStabCrit->criteria.lower) && (fVal <= pStabCrit->criteria.upper) )
         {
-          // save our current value
-          pData->curStability.snsrValue[i] = fVal;
-
           // Check the stability of the sensor value within a given variance
-          // ensure positive difference
-
-          // compute delta and adjust for processing rate
+          // ensure positive difference, compute delta and adjust for processing rate
           delta = ( fPrevValue > fVal) ? fPrevValue - fVal :  fVal - fPrevValue;
           delta *= (FLOAT32)pCfg->rate;
 
@@ -790,6 +789,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
       else
       {
         pData->curStability.status[i] = STAB_SNSR_INVALID;
+        pData->curStability.validity = FALSE;
       }
     }
     else
