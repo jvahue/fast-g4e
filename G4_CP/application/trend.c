@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 25 $  $Date: 13-01-24 2:07p $
+ $Revision: 26 $  $Date: 1/24/13 7:59p $
 
 ******************************************************************************/
 
@@ -1057,6 +1057,13 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 1/24/13    Time: 7:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1197 Max observed stability cnt should also be updated when the
+ * cnt is zero to ensure initial data has real values in case no sensor
+ * becomes stable.
  * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 13-01-24   Time: 2:07p
