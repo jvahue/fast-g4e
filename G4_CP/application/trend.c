@@ -774,7 +774,6 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
         else
         {
           pData->curStability.status[i] = STAB_SNSR_RANGE_ERROR;
-          pData->curStability.snsrValue[i] = FLT_MAX;
         }
 
         // If the sensor is in stable range and variance... increment the count
