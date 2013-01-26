@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 15 $  $Date: 12/12/12 4:30p $
+  $Revision: 16 $  $Date: 1/26/13 3:12p $
 
 *******************************************************************************/
 
@@ -174,13 +174,11 @@ typedef struct
 
 typedef struct
 {
-  UINT16           stableCnt;                   /* Count of stable sensors observed      */
-  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
-  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
-  STABILITY_STATUS status   [MAX_STAB_SENSORS];    /* The status of the stability sensor */
-}STABILITY_DATA;
-
-
+    UINT16           stableCnt;                   /* Count of stable sensors observed      */
+    FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
+    BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
+    STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor    */
+}STABILITY_DATA_LOG;
 
 //****************************
 // Logging structures
@@ -205,7 +203,7 @@ typedef struct
 {
   TREND_INDEX        trendIndex;              /* The Id of this trend                        */
   STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
-  STABILITY_DATA     data;                    /* The max observed stability data during      */
+  STABILITY_DATA_LOG data;                    /* The max observed stability data during      */
 }TREND_ERROR_LOG;                             /* the UNDETECTED OR FAILED TREND              */
 
 
@@ -250,6 +248,16 @@ typedef struct
 
 //****************************
 // TREND_DATA - Run Time Data
+
+typedef struct
+{
+    UINT16           stableCnt;                   /* Count of stable sensors observed      */
+    FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
+    FLOAT32          snsrVar  [MAX_STAB_SENSORS]; /* Variance value when variance exceeded */
+    BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
+    STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor    */
+}STABILITY_DATA;
+
 typedef struct
 {
   // Run control
@@ -316,6 +324,12 @@ EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 1/26/13    Time: 3:12p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1197 - proper handling of stability sensor variance failure
+ * reporting
  * 
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:30p

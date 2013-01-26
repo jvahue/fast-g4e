@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 28 $  $Date: 1/24/13 10:37p $
+ $Revision: 29 $  $Date: 1/26/13 3:12p $
 
 ******************************************************************************/
 
@@ -769,7 +769,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData )
           if (delta > pStabCrit->criteria.variance)
           {
             pData->curStability.status[i] = STAB_SNSR_VARIANCE_ERROR;
-            pData->curStability.snsrValue[i] = delta;
+            pData->curStability.snsrVar[i] = delta;
           }
         }
         else
@@ -885,10 +885,24 @@ static void TrendCheckResetTrigger( TREND_CFG* pCfg, TREND_DATA* pData )
 static void TrendWriteErrorLog(SYS_APP_ID logID, TREND_INDEX trendIdx,
                                STABILITY_CRITERIA stabCrit[], STABILITY_DATA* stabData)
 {
+  UINT8 i;
   TREND_ERROR_LOG trendLog;
 
+  // copy the trend stability criteria to the log
   memcpy(trendLog.crit,  stabCrit,  sizeof(trendLog.crit));
-  memcpy(&trendLog.data, stabData, sizeof(trendLog.data));
+
+  // copy the trend stability data to the log
+  trendLog.data.stableCnt = stabData->stableCnt;
+  for ( i=0; i < MAX_STAB_SENSORS; ++i)
+  {
+    trendLog.data.status[i] = stabData->status[i];
+    trendLog.data.validity[i] = stabData->validity[i];
+    trendLog.data.snsrValue[i] = stabData->snsrValue[i];
+    if (stabData->status[i] == STAB_SNSR_VARIANCE_ERROR)
+    {
+        trendLog.data.snsrValue[i] = stabData->snsrVar[i];
+    }
+  }
 
   trendLog.trendIndex = trendIdx;
   LogWriteETM(logID, LOG_PRIORITY_3, &trendLog, sizeof(trendLog), NULL);
@@ -1057,6 +1071,12 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 1/26/13    Time: 3:12p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1197 - proper handling of stability sensor variance failure
+ * reporting
  * 
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 1/24/13    Time: 10:37p

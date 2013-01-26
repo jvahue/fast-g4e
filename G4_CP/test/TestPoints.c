@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 24 $  $Date: 1/19/13 2:20p $  
+    $Revision: 25 $  $Date: 1/26/13 3:14p $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -576,8 +576,6 @@ USER_HANDLER_RESULT DumpCoverage(USER_DATA_TYPE DataType,
     return USER_RESULT_OK;
 }
 
-#endif  // STE_TP
-
 /******************************************************************************
 * Function:    TpInitTable
 *
@@ -601,9 +599,16 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
     return USER_RESULT_OK;
 }
 
+#endif  // STE_TP
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Jeff Vahue   Date: 1/26/13    Time: 3:14p
+ * Updated in $/software/control processor/code/test
+ * SCR# 1214 - exclude the entire file when STE_TP is undefined
  * 
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 1/19/13    Time: 2:20p
