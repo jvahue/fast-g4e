@@ -32,7 +32,7 @@
        wnd without ever meeting the duration and no log will be recorded.
 
   VERSION
-  $Revision: 86 $  $Date: 13-01-08 11:04a $
+  $Revision: 87 $  $Date: 1/30/13 4:03p $
 
 ******************************************************************************/
 
@@ -1124,27 +1124,19 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
     // Send it to the evaluator for encoding and a proof-run.
     strToBinResult = EvalExprStrToBin( EVAL_CALLER_TYPE_TRIGGER, trigIdx,
                                        exprString, pExpr, MAX_TRIG_EXPR_OPRNDS);
-    if ( strToBinResult >= 0)
-    {
-      // Update the local m_TriggerCfg working area ONLY. This change is not propagated to
-      // ShadowRAM/EEPROM
-      memcpy(&m_TriggerCfg[trigIdx], &configTriggerTemp, sizeof(configTriggerTemp));
 
-      GSE_DebugStr(NORMAL,FALSE,
-                   "Trigger: Trigger[%d] - %s Criteria expression successfully created.\r\n%s",
-                   trigIdx,
-                   critString[exprCnt], exprString);
-    }
-    else
-    {
-      GSE_DebugStr( NORMAL,FALSE,
-                    "Trigger: Trigger[%d] - %s Criteria expression failed: %s\r\n%s",
-                     trigIdx,
-                     critString[exprCnt],
-                     EvalGetMsgFromErrCode(strToBinResult), exprString);
-    }
+    // this verifies we are not under attack by gamma particles or their friend the neutrino.
+    // that is we can't build the expression incorrectly so we must have had an SEU
+    ASSERT( strToBinResult >= 0);
 
+    // Update the local m_TriggerCfg working area ONLY. This change is not propagated to
+    // ShadowRAM/EEPROM
+    memcpy(&m_TriggerCfg[trigIdx], &configTriggerTemp, sizeof(configTriggerTemp));
 
+    GSE_DebugStr(NORMAL,FALSE,
+                 "Trigger: Trigger[%d] - %s Criteria expression successfully created.\r\n%s",
+                 trigIdx,
+                 critString[exprCnt], exprString);
 
   } // for each criteria
 }
@@ -1153,6 +1145,11 @@ static void TriggerConvertLegacyCfg(INT32 trigIdx )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trigger.c $
+ * 
+ * *****************  Version 87  *****************
+ * User: Jeff Vahue   Date: 1/30/13    Time: 4:03p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1214 - modify for code coverage
  * 
  * *****************  Version 86  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 11:04a

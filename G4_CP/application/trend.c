@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 29 $  $Date: 1/26/13 3:12p $
+ $Revision: 30 $  $Date: 1/30/13 3:19p $
 
 ******************************************************************************/
 
@@ -642,13 +642,6 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
   UINT8 i;
   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
-  if (TREND_STATE_INACTIVE != pData->trendState)
-  {
-    GSE_DebugStr(NORMAL,TRUE, "Trend[%d] Reset from %s",
-                 pData->trendIndex,
-                 pData->trendState == TREND_STATE_AUTO ? "AUTO" : "MANUAL");
-  }
-
   pData->trendState           = TREND_STATE_INACTIVE;
   pData->bResetInProg         = FALSE;
   //pData->bEnabled             = FALSE;
@@ -1071,6 +1064,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: Jeff Vahue   Date: 1/30/13    Time: 3:19p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1214 - remove deadcode
  * 
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 1/26/13    Time: 3:12p

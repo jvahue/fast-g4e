@@ -12,7 +12,7 @@
 
      
    VERSION
-   $Revision: 20 $  $Date: 12-12-03 11:19a $
+   $Revision: 21 $  $Date: 1/30/13 1:47p $
 
 ******************************************************************************/
 
@@ -116,7 +116,7 @@ static void FSM_TaskFunc(void* pParam);
 /******************************************************************************
  * Function:    FSM_Init
  *
- * Description: Fast State Manager initilization.  Initalize global data,
+ * Description: Fast State Manager initialization.  Initialize global data,
  *              get configuration and register a User Manager command
  *
  * Parameters:  None
@@ -144,9 +144,11 @@ void FSM_Init(void)
 #ifndef WIN32
   CalcCRC = CRC16(&m_Cfg, sizeof(m_Cfg)-sizeof(m_Cfg.CRC));
 #else
+  /*vcast_dont_instrument_start*/
   // For G4E assume the configured CRC is valid, since the CalcCRC will not contain the
   // actual value except on FAST box.
   CalcCRC = m_Cfg.CRC;
+  /*vcast_dont_instrument_end*/
 #endif
 
   if((CalcCRC == m_Cfg.CRC) && m_Cfg.Enabled)
@@ -203,7 +205,7 @@ void FSM_Init(void)
  *
  * Returns:       .  
  *
- * Notes:         Binary form is assumed parseable, since it was checked when
+ * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
  *
  *****************************************************************************/
@@ -229,7 +231,7 @@ BOOLEAN FSM_GetIsTimerExpired(INT32 param)
  *
  * Returns:       FALSE: always returns false  
  *
- * Notes:         Binary form is assumed parseable, since it was checked when
+ * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
  *
  *****************************************************************************/
@@ -282,7 +284,7 @@ void FSM_TaskFunc(void* pParam)
         MILLISECONDS_PER_SECOND)        >= current->Timer;
   }
 
-  //Evaluate each transition critera that is assigned to this state
+  //Evaluate each transition criteria that is assigned to this state
   for( i = 0; i < FSM_NUM_OF_TC; i++)
   {
     if((m_Cfg.TCs[i].size != 0) &&  (m_Cfg.TCs[i].CurState == m_CurState))
@@ -472,12 +474,12 @@ void FSM_StartNextStateTasks(const FSM_STATE* current, const FSM_STATE* next)
  *
  *              The function evaluates the RPN boolean expression
  *
- *              Error checking is for use during system initlization/
+ *              Error checking is for use during system initialization/
  *              configuration.  If an error is detected at runtime the
  *              caller should assert
  *              
  *
- * Parameters:  [in] tc_desc: A Transition Critera to evaluate, must not be an 
+ * Parameters:  [in] tc_desc: A Transition Criteria to evaluate, must not be an 
  *                            empty set.
  *              [out] input_states: Optional, will be populated with the
  *                                  input states in the same order as
@@ -565,7 +567,7 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
  *              the function.  Currently returns 1 for inputs or 2 for inputs
  *              that have an additional numeration parameter.
  *
- * Parameters:  [in] data: Pointer to location contianing the 1 or 2 byte
+ * Parameters:  [in] data: Pointer to location containing the 1 or 2 byte
  *                         TC Input code
  *              [out] state: TRUE/FALSE State of the TC input
  *
@@ -580,7 +582,7 @@ INT32 FSM_EvaluateTCExprInput(const BYTE* data, BYTE* state)
   INT32 retval = 0;
 
   //Decode 2-byte input with number parameter, else decode 1-byte input
-  //with no number.  Input state must be stricly 1 or 0 to comply with
+  //with no number.  Input state must be strictly 1 or 0 to comply with
   //the byte-coded TC
   if(m_TransitionCriteria[data[0]].IsNumerated)
   {
@@ -609,7 +611,7 @@ INT32 FSM_EvaluateTCExprInput(const BYTE* data, BYTE* state)
  *                         form of "[4-char TC][Operator][4-char TC]....."
  *              [out] bin: a location to store the converted result
  *
- * Returns:     1 or 0  Parse sucessful
+ * Returns:     1 or 0  Parse successful
  *              -1 Unrecognized TC input name or name more than 4 chars
  *              -2 Extra operator
  *              -3 Extra TC input
@@ -706,7 +708,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
   INT32 retval = 0;
   CHAR* ptr;
 
-  //seach for an operator character 4 chars after str*
+  //search for an operator character 4 chars after str*
   //should be: LLLL[!&|] or LLnn[!&|]  
   //Compare string to list of known TC inputs
   for(i = 0; m_TransitionCriteria[i].Name[0] != '\0';i++)
@@ -718,7 +720,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
       break;
     }    
   }
-  //If found (found 4 characters), then check if it is follwed by a number
+  //If found (found 4 characters), then check if it is followed by a number
   if(m_TransitionCriteria[i].IsNumerated && (retval == 4))
   {
     //This task must be followed by a 3-digit number as:
@@ -747,7 +749,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
  * Description:   Convert a string type list of tasks to execute in a state to
  *                a byte coded list
  *
- * Parameters:    [in/out] Str: String of "," delmited task names to parse
+ * Parameters:    [in/out] Str: String of "," delimited task names to parse
  *                [out]    bin: Location of a state structure to store the
  *                              list of tasks into.
  *
@@ -828,17 +830,17 @@ INT32 FSM_TaskStrToBin(CHAR* str, FSM_STATE* bin)
 /******************************************************************************
  * Function:      FSM_TCBinToStr
  *
- * Description:   Convert the binary representation of a transition critera
+ * Description:   Convert the binary representation of a transition criteria
  *                to a string.  This would be done for reading the configuration
  *                data back to the user through User Manager
  *
  * Parameters:    [out]    str: Location to store the result.  Size must be
  *                              at least FSM_TC_STR_LEN
- *                [in]     bin: Binary transition critera expression
+ *                [in]     bin: Binary transition criteria expression
  *
  * Returns:        none.  
  *
- * Notes:         Binary form is assumed parseable, since it was checked when
+ * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
  *
  *****************************************************************************/
@@ -891,11 +893,11 @@ void FSM_TCBinToStr( CHAR* str, FSM_TC* bin )
  *
  * Parameters:    [out]    str: Location to store the result.  Size must be
  *                              at least FSM_TASK_LIST_STR_LEN
- *                [in]     bin: Binary transition critera expression
+ *                [in]     bin: Binary transition criteria expression
  *
  * Returns:       none.  
  *
- * Notes:         Binary form is assumed parseable, since it was checked when
+ * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
  *
  *****************************************************************************/
@@ -927,6 +929,11 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Jeff Vahue   Date: 1/30/13    Time: 1:47p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1214 - add vcast statements, fix typos
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-03   Time: 11:19a
