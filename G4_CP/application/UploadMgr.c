@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 170 $  $Date: 1/07/13 11:24a $
+   $Revision: 171 $  $Date: 2/06/13 3:36p $
 
 ******************************************************************************/
 
@@ -2280,7 +2280,7 @@ void UploadMgr_CheckLogCmdCallback(UINT16 Id, void* PacketData, UINT16 Size,
 static
 void UploadMgr_CheckLogMoved(void *pParam)
 {
-  static INT32        row = 0;
+  static INT32        row = -1;
   static INT32        row_retry = 0;
   MSCP_CHECK_FILE_CMD cmd;
   UPLOADMGR_FILE_VFY  vfy_row;
@@ -2293,7 +2293,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
   //by the Maintenance Task.
   if(m_MaintainFileTableRunning)
   {
-    row = 0;
+    row = -1;
     m_CheckLogRow = -1;
     TmTaskEnable(UL_Log_Check,FALSE);
   }
@@ -2358,7 +2358,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
   //When all rows checked, reset row back to zero and kill task
   if(row == UPLOADMGR_VFY_TBL_MAX_ROWS)
   {
-    row = 0;
+    row = -1;
     m_CheckLogRow = -1;
     TmTaskEnable(UL_Log_Check,m_CheckLogFileCnt == 0 ?FALSE:TRUE);
   }
@@ -3482,6 +3482,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 171  *****************
+ * User: Jim Mood     Date: 2/06/13    Time: 3:36p
+ * Updated in $/software/control processor/code/application
+ * SCR #1231 Modfix to SCR #1098
+ *
  * *****************  Version 170  *****************
  * User: Jim Mood     Date: 1/07/13    Time: 11:24a
  * Updated in $/software/control processor/code/application
