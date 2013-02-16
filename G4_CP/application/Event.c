@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 40 $  $Date: 13-01-24 2:07p $
+ $Revision: 41 $  $Date: 2/15/13 7:52p $
 
 ******************************************************************************/
 
@@ -851,8 +851,8 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
       if ((ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered) &&
           (EVENT_NO_END == pData->endType))
       {
-          pData->endType = EVENT_TABLE_END;
-      }
+            pData->endType = EVENT_TABLE_END;
+         }
 
       // Record the time the event ended
       CM_GetTimeAsTimestamp(&pData->tsEndTime);
@@ -1747,6 +1747,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 41  *****************
+ * User: Jeff Vahue   Date: 2/15/13    Time: 7:52p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1236 Dead Code removal
  * 
  * *****************  Version 40  *****************
  * User: John Omalley Date: 13-01-24   Time: 2:07p
