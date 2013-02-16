@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 22 $  $Date: 13-01-16 4:44p $
+ $Revision: 23 $  $Date: 2/15/13 7:51p $
 
 ******************************************************************************/
 
@@ -367,7 +367,7 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
 BOOLEAN ActionEEFileInit(void)
 {
    memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
-
+	
    // initialize to max value
    m_EE_Copy.actionNum = ACTION_NONE;
 	
@@ -396,7 +396,7 @@ BOOLEAN ActionRTCFileInit(void)
     
    memset((void *)&m_RTC_Copy,  0, sizeof(m_RTC_Copy ));
    m_RTC_Copy.actionNum = ACTION_NONE;
-
+	
    NV_Write( NV_ACT_STATUS_RTC,  0, &m_RTC_Copy,  sizeof(m_RTC_Copy ) );
    
    // Since the RTC is the main storage for the persistent action, we need
@@ -648,7 +648,7 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
 
             // If the persist action is enabled then the action is based on the
             // persistent output configuration, otherwise we should save the action
-            // that is latched so it can be restored after a power cycle
+            // that is latched so it can be restored after a powercycle
             if (FALSE == pCfg->persist.bEnabled)
             {
                // Check if this a higher priority action
@@ -1053,6 +1053,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 2/15/13    Time: 7:51p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1236 Deadcode elimination
  * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 13-01-16   Time: 4:44p

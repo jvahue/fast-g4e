@@ -174,10 +174,10 @@ typedef struct
 
 typedef struct
 {
-    UINT16           stableCnt;                   /* Count of stable sensors observed      */
-    FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
-    BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
-    STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor    */
+  UINT16           stableCnt;                   /* Count of stable sensors observed      */
+  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
+  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
+  STABILITY_STATUS status   [MAX_STAB_SENSORS];    /* The status of the stability sensor */
 }STABILITY_DATA_LOG;
 
 //****************************
