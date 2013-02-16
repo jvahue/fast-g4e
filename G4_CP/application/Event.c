@@ -1,6 +1,6 @@
 #define EVENT_BODY
 /******************************************************************************
-           Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+           Copyright (C) 2012-2013 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
 
    File:        event.c
@@ -68,7 +68,7 @@
 /* Local Variables                                                           */
 /*****************************************************************************/
 static EVENT_DATA        m_EventData      [MAX_EVENTS];     // Runtime event data
-static EVENT_TABLE_DATA  m_EventTableData [MAX_TABLES];     // Runtine event table data
+static EVENT_TABLE_DATA  m_EventTableData [MAX_TABLES];     // Runtime event table data
 
 static EVENT_END_LOG     m_EventEndLog    [MAX_EVENTS];     // Event Log Container
 
@@ -343,7 +343,7 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
 /**********************************************************************************************
  * Function:    EventSetRecStateChangeEvt
  *
- * Description: Set the callback fuction to call when the busy/not busy status of the
+ * Description: Set the callback function to call when the busy/not busy status of the
  *              for all events
   *
  * Parameters:  [in] tag:  Integer value to use when calling "func"
@@ -851,19 +851,9 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
       if ((ET_IN_TABLE != pData->tableState) && (TRUE == pData->bTableWasEntered) &&
           (EVENT_NO_END == pData->endType))
       {
-         if (pData->tableState == ET_SENSOR_INVALID)
-         {
-            pData->endType = EVENT_TABLE_SENSOR_INVALID;
-         }
-         else if (pData->tableState == ET_SENSOR_VALUE_LOW)
-         {
-            pData->endType = EVENT_TABLE_END;
-         }
-         else // ET_END_COMMANDED
-         {
-            pData->endType = EVENT_COMMANDED_END;
-         }
+          pData->endType = EVENT_TABLE_END;
       }
+
       // Record the time the event ended
       CM_GetTimeAsTimestamp(&pData->tsEndTime);
       // Log the End
@@ -928,7 +918,7 @@ BOOLEAN EventCheckStart ( const EVENT_CFG *pConfig, const EVENT_DATA *pData, BOO
 /******************************************************************************
  * Function:     EventCheckEnd
  *
- * Description:  Check if event end criterias are met
+ * Description:  Check if event end criteria are met
  *
  * Parameters:   [in] EVENT_CONFIG *pConfig
  *               [in] EVENT_DATA   *pData
@@ -1086,7 +1076,7 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
                            pTableData->fCurrentSensorValue, pTableData->nTotalDuration_ms );
             // Make sure this isn't the last confirmed region because we don't want to
             // Reset restart the duration calculation if we spiked into a region and
-            // came back before the transient allowance was execeeded.
+            // came back before the transient allowance was exceeded.
             if ( foundRegion != pTableData->confirmedRegion )
             {
                // We just entered this region record the time
@@ -1193,7 +1183,7 @@ EVENT_REGION EventTableFindRegion ( EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA
                                     (FLOAT32)pTableData->nTotalDuration_ms) + pConst->b);
 
             // If we haven't already entered or exceeded this region then add a positive
-            // Hysteresis Else we need a negetive Hysteresis to exit the region
+            // Hysteresis Else we need a negative Hysteresis to exit the region
             if ( (pTableData->currentRegion < (EVENT_REGION)nRegIndex) ||
                  (pTableData->currentRegion == REGION_NOT_FOUND) )
             {
