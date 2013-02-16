@@ -1,6 +1,6 @@
 #define ACTION_BODY
 /******************************************************************************
-           Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+           Copyright (C) 2012-2013 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
 
    File:        ActionManager.c
@@ -179,7 +179,7 @@ void ActionInitPersist ( void )
 
    m_ActionData.persist.actionNum = ACTION_NONE;
 
-   // Retrieves the stored counters from non-voltaile
+   // Retrieves the stored counters from non-volatile
    //  Note: NV_Open() performs checksum and creates sys log if checksum fails !
    //        This means we will have duplicate indication of the failure?
    resultEE  = NV_Open(NV_ACT_STATUS_EE);
@@ -243,7 +243,7 @@ void ActionInitPersist ( void )
  *                                        (-1 for init request - ACTION_NO_REQ)
  *               [in] UINT16 nAction    - Bit encoded action flags (b0 = act0, b1 = act1, etc.)
  *               [in] ACTION_TYPE state - State to place action into (ACTION_ON, ACTION_OFF)
- *               [in] BOOLEAN bACK      - TRUE if action is acknowledgable
+ *               [in] BOOLEAN bACK      - TRUE if action is acknowledgeable
  *               [in] BOOLEAN bLatch    - TRUE if action is latched.
  *
  * Returns:      INT8 - ID for the requested action
@@ -296,15 +296,15 @@ INT8 ActionRequest( INT8 nReqNum, UINT8 nAction, ACTION_TYPE state,
 /******************************************************************************
  * Function:     ActionAcknowledgable
  *
- * Description:  The Action Acknowledgable function allows others to determine if
- *               there are any acknowledgable actions active.
+ * Description:  The Action Acknowledgeable function allows others to determine if
+ *               there are any acknowledgeable actions active.
  *
  * Parameters:   INT32 nAction - Not Used but needed for evaluator
  *                               This could be used in the future if a specific
  *                               Action Acknowledge needed to be checked.
  *
- * Returns:      BOOLEAN [ TRUE  = Acknowledgable Actions Active,
- *                         FALSE = No acknowledgable actions ]
+ * Returns:      BOOLEAN [ TRUE  = Acknowledgeable Actions Active,
+ *                         FALSE = No acknowledgeable actions ]
  *
  * Notes:        None.
  *
@@ -360,13 +360,16 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with 
+ * Notes:       Standard Initialization format to be compatible with 
  *              NVMgr Interface.
  *
  *****************************************************************************/
 BOOLEAN ActionEEFileInit(void)
 {
    memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
+
+   // initialize to max value
+   m_EE_Copy.actionNum = ACTION_NONE;
 	
    NV_Write( NV_ACT_STATUS_EE,  0, &m_EE_Copy,  sizeof(m_EE_Copy ) );
 
@@ -383,7 +386,7 @@ BOOLEAN ActionEEFileInit(void)
  *
  * Returns:     TRUE
  *
- * Notes:       Standard Initiliazation format to be compatible with 
+ * Notes:       Standard Initialization format to be compatible with 
  *              NVMgr Interface.
  *
  *****************************************************************************/
@@ -392,7 +395,8 @@ BOOLEAN ActionRTCFileInit(void)
    INT32 intLevel;
     
    memset((void *)&m_RTC_Copy,  0, sizeof(m_RTC_Copy ));
-	
+   m_RTC_Copy.actionNum = ACTION_NONE;
+
    NV_Write( NV_ACT_STATUS_RTC,  0, &m_RTC_Copy,  sizeof(m_RTC_Copy ) );
    
    // Since the RTC is the main storage for the persistent action, we need
@@ -644,7 +648,7 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
 
             // If the persist action is enabled then the action is based on the
             // persistent output configuration, otherwise we should save the action
-            // that is latched so it can be restored after a powercycle
+            // that is latched so it can be restored after a power cycle
             if (FALSE == pCfg->persist.bEnabled)
             {
                // Check if this a higher priority action
@@ -671,7 +675,7 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
                   m_RTC_Copy.bLatch     = pData->persist.bLatch;
                   m_RTC_Copy.action     = pCfg->persist.output;
                   pData->persist.action = pCfg->persist.output;
-                  // Save the pesistent status to Non-Volatile Memory
+                  // Save the persistent status to Non-Volatile Memory
                   NV_Write( NV_ACT_STATUS_RTC, 0, &m_RTC_Copy, sizeof(m_RTC_Copy) );
                }
             }
