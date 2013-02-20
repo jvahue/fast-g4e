@@ -9,7 +9,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 64 $  $Date: 12-11-02 1:29p $
+      $Revision: 65 $  $Date: 13-01-30 4:19p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -66,6 +66,11 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 65  *****************
+ * User: John Omalley Date: 13-01-30   Time: 4:19p
+ * Updated in $/software/control processor/code/drivers
+ * v2.0.0
  * 
  * *****************  Version 64  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 1:29p
