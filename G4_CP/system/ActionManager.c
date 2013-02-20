@@ -367,7 +367,7 @@ BOOLEAN ActionAcknowledgable (  INT32 nAction )
 BOOLEAN ActionEEFileInit(void)
 {
    memset((void *)&m_EE_Copy,  0, sizeof(m_EE_Copy ));
-	
+
    // initialize to max value
    m_EE_Copy.actionNum = ACTION_NONE;
 	
@@ -396,7 +396,7 @@ BOOLEAN ActionRTCFileInit(void)
     
    memset((void *)&m_RTC_Copy,  0, sizeof(m_RTC_Copy ));
    m_RTC_Copy.actionNum = ACTION_NONE;
-	
+
    NV_Write( NV_ACT_STATUS_RTC,  0, &m_RTC_Copy,  sizeof(m_RTC_Copy ) );
    
    // Since the RTC is the main storage for the persistent action, we need
@@ -648,7 +648,7 @@ void ActionSetFlags ( const ACTION_CFG  *pCfg, ACTION_DATA *pData,
 
             // If the persist action is enabled then the action is based on the
             // persistent output configuration, otherwise we should save the action
-            // that is latched so it can be restored after a powercycle
+            // that is latched so it can be restored after a power cycle
             if (FALSE == pCfg->persist.bEnabled)
             {
                // Check if this a higher priority action
