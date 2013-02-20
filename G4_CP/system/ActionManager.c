@@ -12,7 +12,7 @@
    Note:        None
 
  VERSION
- $Revision: 22 $  $Date: 13-01-16 4:44p $
+ $Revision: 23 $  $Date: 2/15/13 7:51p $
 
 ******************************************************************************/
 
@@ -1053,6 +1053,11 @@ void ActionResetNVPersist ( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManager.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 2/15/13    Time: 7:51p
+ * Updated in $/software/control processor/code/system
+ * SCR# 1236 Deadcode elimination
  * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 13-01-16   Time: 4:44p

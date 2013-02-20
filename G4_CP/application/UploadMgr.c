@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 171 $  $Date: 2/06/13 3:36p $
+   $Revision: 172 $  $Date: 2/11/13 2:43p $
 
 ******************************************************************************/
 
@@ -622,6 +622,7 @@ BOOLEAN UploadMgr_DeleteFVTEntry(const INT8* FN)
   if(row > -1)
   {
     UploadMgr_UpdateFileVfy(row,VFY_STA_DELETED,0,0);
+    retval = TRUE;
   }
   return retval;
 }
@@ -3482,6 +3483,11 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
+ * *****************  Version 172  *****************
+ * User: Jim Mood     Date: 2/11/13    Time: 2:43p
+ * Updated in $/software/control processor/code/application
+ * SCR# 1233 UploadMgr_DeleteFVTEntry() improperly set return value
+ *
  * *****************  Version 171  *****************
  * User: Jim Mood     Date: 2/06/13    Time: 3:36p
  * Updated in $/software/control processor/code/application
