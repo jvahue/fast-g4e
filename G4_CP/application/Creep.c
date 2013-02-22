@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 12 $  $Date: 13-01-24 9:34a $
+      $Revision: 13 $  $Date: 2/20/13 4:20p $
 
 ******************************************************************************/
 
@@ -1106,8 +1106,8 @@ BOOLEAN Creep_RestoreAppData( void )
     NV_Read(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
   }
 
-  // If open failed or eeprom reset to 0xFFFF, re-init app data
-  if ( ( result != SYS_OK ) || (m_Creep_AppData.crc16 == 0xFFFF) )
+  // If open failed, re-init app data
+  if ( result != SYS_OK )
   {
     bOk = Creep_FileInit();
     bOk = FALSE;  // Always return fail if we have to re-init File
@@ -1954,11 +1954,16 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
  *  MODIFICATIONS
  *    $History: Creep.c $
  * 
+ * *****************  Version 13  *****************
+ * User: Jim Mood     Date: 2/20/13    Time: 4:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1237 EEPROM Data Restore issue
+ *
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 13-01-24   Time: 9:34a
  * Updated in $/software/control processor/code/application
  * SCR #1195 Item 22.  .nRateCountDown init from .cpuOffset_ms not
- * correct. 
+ * correct.
  *
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 13-01-22   Time: 2:13p

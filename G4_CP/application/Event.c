@@ -202,7 +202,7 @@ void EventsInitialize ( void )
       if ( (0 != pEventCfg->startExpr.size) && (0 != pEventCfg->endExpr.size) )
       {
          #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-         pEventData->nTotalSensors = SensorInitSummaryArray ( pEventData->sensor,  
+         pEventData->nTotalSensors = SensorInitSummaryArray ( pEventData->sensor,
                                                               MAX_EVENT_SENSORS,
                                                               pEventCfg->sensorMap,
                                                               sizeof(pEventCfg->sensorMap) );
@@ -1540,7 +1540,7 @@ void EventUpdateData ( EVENT_DATA *pData )
 {
    // Local Data
    UINT32           nCurrentTick;
-   
+
    // Initialize Local Data
    nCurrentTick = CM_GetTickCount();
 
@@ -1763,22 +1763,22 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  * User: John Omalley Date: 13-01-24   Time: 2:07p
  * Updated in $/software/control processor/code/application
  * SCR 1228 - SENSOR not Used issue for log summary
- * 
+ *
  * *****************  Version 39  *****************
  * User: John Omalley Date: 12-12-19   Time: 5:53p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 38  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:33p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 37  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:25p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:32p
  * Updated in $/software/control processor/code/application
