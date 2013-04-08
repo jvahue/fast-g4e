@@ -33,7 +33,7 @@
                  solution was the least complex.
 
     VERSION
-    $Revision: 15 $  $Date: 12/18/12 7:44p $
+    $Revision: 17 $  $Date: 3/18/13 10:20a $
 
 ******************************************************************************/
 
@@ -497,6 +497,7 @@ static void TH_Task ( void* pParam )
   }
   //Update TH recording busy/not busy status on change only.
   is_busy = (m_THDataBuf.write_cnt != 0) ||
+            (task_state != TH_TASK_SEARCH)  ||
             (m_OpenCnt != 0) || (m_StopTime >= CM_GetTickCount() );
 
   if(is_busy != is_busy_last)
@@ -558,7 +559,8 @@ static INT32 TH_FindRecToWriteToLog(TH_RECORD_CTL_BLK **start_blk)
     {
       for ( blk_cnt = 0;(blk_cnt < TH_MAX_LOG_WRITE_PER_FRAME) &&
                         (!m_THDataBuf.cread_ptr->written)      &&
-                        (m_THDataBuf.cread_ptr != &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT]);
+                        (m_THDataBuf.cread_ptr != &m_THDataBuf.ctrl[TH_PRE_HISTORY_REC_CNT]) &&
+                        (m_THDataBuf.write_cnt > 0);
                                                                     blk_cnt++ )
       {
         *start_blk = *start_blk == NULL ? m_THDataBuf.cread_ptr : *start_blk;
@@ -816,6 +818,15 @@ static BYTE* TH_GetDataBufPtr(INT32 size)
  *  MODIFICATIONS
  *    $History: TimeHistory.c $
  * 
+ * *****************  Version 17  *****************
+ * User: Jim Mood     Date: 3/18/13    Time: 10:20a
+ * Updated in $/software/control processor/code/application
+ * SCR# 1241 modfix
+ *
+ * *****************  Version 16  *****************
+ * User: Jim Mood     Date: 3/05/13    Time: 6:01p
+ * Updated in $/software/control processor/code/application
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 12/18/12   Time: 7:44p
  * Updated in $/software/control processor/code/application

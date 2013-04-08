@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 42 $  $Date: 2/19/13 6:07p $
+ $Revision: 43 $  $Date: 13-03-12 11:24a $
 
 ******************************************************************************/
 
@@ -715,6 +715,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          pData->bStarted = TRUE;
          // OR sequence number with the box power-on count stored during initialization
          nEventSeqCounter++;
+         pData->seqNumber &= 0xFFFF0000;
          pData->seqNumber |= (nEventSeqCounter & 0xFFFF);
 
          // SRS-4196 - Simple Event Action is mutually exclusive with Table processing
@@ -1748,6 +1749,11 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 13-03-12   Time: 11:24a
+ * Updated in $/software/control processor/code/application
+ * SCR 1242 - Event Sequence Number unique
  * 
  * *****************  Version 42  *****************
  * User: Jim Mood     Date: 2/19/13    Time: 6:07p

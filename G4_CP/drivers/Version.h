@@ -9,7 +9,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 65 $  $Date: 13-01-30 4:19p $
+      $Revision: 66 $  $Date: 4/03/13 1:35p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -25,7 +25,7 @@
 ******************************************************************************/
 #define VER_FUNC    "2"       // FN - Functional Build
 #define VER_MAJOR   "0"       // MJ - Major Functional Change
-#define VER_MINOR   "0"       // MN - Minor Functional Change
+#define VER_MINOR   "1"       // MN - Minor Functional Change
 #define DEV_BUILD   ""  // ER - Development Build = "" for release
 
 /******************************************************************************
@@ -66,6 +66,11 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 66  *****************
+ * User: John Omalley Date: 4/03/13    Time: 1:35p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1241 - Updated for v201
  * 
  * *****************  Version 65  *****************
  * User: John Omalley Date: 13-01-30   Time: 4:19p
