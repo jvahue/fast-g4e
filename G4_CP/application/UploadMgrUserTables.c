@@ -12,7 +12,7 @@ validate the files were received correctly by the
 micro-server and ground server.
 
 VERSION
-$Revision: 20 $  $Date: 12/20/12 6:32p $
+$Revision: 21 $  $Date: 3/06/13 6:20p $
 
 ******************************************************************************/
 #ifndef UPLOADMGR_BODY
@@ -261,10 +261,6 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyTbl(USER_DATA_TYPE DataType,
                                          const void *SetPtr,
                                          void **GetPtr)
 {
-  USER_HANDLER_RESULT result = USER_RESULT_ERROR;
-
-  //Convert 1 based to 0 based index
-
   NV_Read( NV_UPLOAD_VFY_TBL, VFY_ROW_TO_OFFSET(Index), &m_vfy_row_tmp, sizeof(m_vfy_row_tmp));
 
   // If the param value is 0, this is a delete command.  Else it is a command
@@ -279,13 +275,12 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyTbl(USER_DATA_TYPE DataType,
      {
         *GetPtr = Param.Ptr;
      }
-     result =  USER_RESULT_OK;
   }
   else
   {
     UploadMgr_UpdateFileVfy( Index, VFY_STA_DELETED, 0, 0);
   }
-  return result;
+  return USER_RESULT_OK;
 }
 
 
@@ -416,6 +411,11 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: UploadMgrUserTables.c $
  * 
+ * *****************  Version 21  *****************
+ * User: Jim Mood     Date: 3/06/13    Time: 6:20p
+ * Updated in $/software/control processor/code/application
+ * SCR # 1240 Upload.vfy.file[].delete always returns "Error:"
+ *
  * *****************  Version 20  *****************
  * User: Jim Mood     Date: 12/20/12   Time: 6:32p
  * Updated in $/software/control processor/code/application
