@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429
 
 VERSION
-     $Revision: 15 $  $Date: 12-11-16 8:12p $
+     $Revision: 16 $  $Date: 4/17/14 2:05p $
 
 ******************************************************************************/
 
@@ -277,7 +277,7 @@ typedef struct
    UINT8   Label;
    UINT32  GPA;
    UINT32  GPB;
-   UINT32  Scale;
+   FLOAT32 Scale;
    FLOAT32 Tolerance;
 } ARINC429_RX_PROTOCOL_CFG, *ARINC429_RX_PROTOCOL_CFG_PTR;
 
@@ -440,7 +440,7 @@ typedef struct
    UINT8   Label;
    UINT32  GPA;
    UINT32  GPB;
-   UINT32  Scale;
+   FLOAT32 Scale;
    FLOAT32 Tolerance;
 } ARINC429_RX_CFG_HDR;
 
@@ -693,6 +693,11 @@ EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthSts (
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 4/17/14    Time: 2:05p
+ * Updated in $/software/control processor/code/system
+ * SCR 1146 - Changed Arinc429 data reduction scale parameter to FLOAT
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:12p

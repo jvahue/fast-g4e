@@ -1,6 +1,6 @@
 #define LOGMNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        LogManager.c
@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 109 $  $Date: 12-11-30 11:51a $
+      $Revision: 112 $  $Date: 9/03/14 5:18p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -48,42 +48,40 @@
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static UINT32               LogBuffer[LOG_LOCAL_BUFFER_SIZE];
-static LOG_MNG_TASK_PARMS   LogMngBlock;
-static LOG_STATE_TASK_PARMS LogMarkBlock;
-static LOG_CMD_ERASE_PARMS  LogCmdEraseBlock;
-static LOG_REQ_STATUS       LogStatusTemp;
+static UINT32               logBuffer[LOG_LOCAL_BUFFER_SIZE];
+static LOG_MNG_TASK_PARMS   logMngBlock;
+static LOG_STATE_TASK_PARMS logMarkBlock;
+static LOG_CMD_ERASE_PARMS  logCmdEraseBlock;
+static LOG_REQ_STATUS       logStatusTemp;
 
-static LOG_EEPROM_CONFIG      LogEraseData;
-static LOG_CBIT_HEALTH_COUNTS LogHealthCounts;
+static LOG_EEPROM_CONFIG      logEraseData;
+static LOG_CBIT_HEALTH_COUNTS logHealthCounts;
 
-static BOOLEAN                LogSystemInit;
+static BOOLEAN                logSystemInit;
 
-static LOG_MON_ERASE_PARMS    LogMonEraseBlock;
-static LOG_REQ_QUEUE          LogQueue;
-static LOG_CONFIG             LogConfig;
-static LOG_ERROR_STATUS       LogError;
+static LOG_MON_ERASE_PARMS    logMonEraseBlock;
+static LOG_REQ_QUEUE          logQueue;
+static LOG_CONFIG             logConfig;
+static LOG_ERROR_STATUS       logError;
 
-static LOG_READ_FAIL_LOG      LogReadFailTemp;
-static LOG_ERASE_FAIL_LOG     LogEraseFailTemp;
+static LOG_READ_FAIL_LOG      logReadFailTemp;
+static LOG_ERASE_FAIL_LOG     logEraseFailTemp;
 
-static LOG_PAUSE_WRITE        LogManagerPause;
-static LOG_REQUEST            LogEraseRequest;
+static LOG_PAUSE_WRITE        logManagerPause;
+static LOG_REQUEST            logEraseRequest;
 
 // this table is sized four bigger than the queue so it can't
 // be filled with pending writes
 static SYSTEM_LOG systemTable[SYSTEM_TABLE_MAX_SIZE];
 
 // Log Erase Cleanup
-DO_CLEANUP DoCleanup;
+static DO_CLEANUP doCleanup;
 
 /*Busy/Not Busy event data*/
 static INT32 m_event_tag;
 static void (*m_event_func)(INT32 tag,BOOLEAN is_busy) = NULL;
 
 static BOOLEAN is_busy;
-
-#include "LogUserTables.c"
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -127,8 +125,11 @@ static void           LogEraseStatusWrite    ( LOG_CMD_ERASE_PARMS *pTCB );
 static void             LogQueueInit  ( void );
 static LOG_QUEUE_STATUS LogQueueGet   ( LOG_REQUEST *Entry );
 static void             LogUpdateWritePendingStatuses( void );
-/*****************************************************************************/
 
+static BOOLEAN          LogWriteIsPaused ( void );
+static LOG_QUEUE_STATUS LogQueuePut   ( LOG_REQUEST Entry );
+/*****************************************************************************/
+#include "LogUserTables.c"
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -174,57 +175,57 @@ void LogInitialize (void)
    // Open the log erase status file
    if( SYS_OK == NV_Open(NV_LOG_ERASE) )
    {
-     NV_Read(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+     NV_Read(NV_LOG_ERASE, 0, &logEraseData, sizeof(logEraseData));
    }
    else
    {
      // Reset the erase status into to default.
-     LogEraseData.inProgress       = FALSE;
-     LogEraseData.bChipErase       = FALSE;
-     LogEraseData.savedStartOffset = 0;
-     LogEraseData.savedSize        = 0;
-     resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+     logEraseData.inProgress       = FALSE;
+     logEraseData.bChipErase       = FALSE;
+     logEraseData.savedStartOffset = 0;
+     logEraseData.savedSize        = 0;
+     resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &logEraseData, sizeof(logEraseData));
      GSE_DebugStr(NORMAL,TRUE, "Log Initialize - Reset NV_LOG_ERASE...%s",
                   SYS_OK == resultNV ? "SUCCESS":"FAILED");
    }
 
-   memset(&LogConfig, 0, sizeof(LogConfig));
-   LogConfig.bEightyFiveExceeded = FALSE;
+   memset(&logConfig, 0, sizeof(logConfig));
+   logConfig.bEightyFiveExceeded = FALSE;
 
    // Open the log error counts file
    if( SYS_OK == NV_Open(NV_LOG_COUNTS) )
    {
       // Open Successfull now read the counts
-      NV_Read(NV_LOG_COUNTS, 0, &LogError.counts, sizeof(LogError.counts));
+      NV_Read(NV_LOG_COUNTS, 0, &logError.counts, sizeof(logError.counts));
       // Are there any counts from the previous run?
-      if ( (LogError.counts.nDiscarded != 0) || (LogError.counts.nErAccess != 0) ||
-           (LogError.counts.nRdAccess  != 0) )
+      if ( (logError.counts.nDiscarded != 0) || (logError.counts.nErAccess != 0) ||
+           (logError.counts.nRdAccess  != 0) )
       {
          // Record the counts in a system log
          Flt_SetStatus(STA_NORMAL, SYS_LOG_MEM_ERRORS,
-                       &LogError.counts, sizeof(LogError.counts));
+                       &logError.counts, sizeof(logError.counts));
       }
    }
    // Now Reset the counts back to "0"
-   memset(&LogError,  0, sizeof(LogError ));
-   if ( SYS_OK != NV_WriteNow(NV_LOG_COUNTS, 0, &LogError.counts, sizeof(LogError.counts)))
+   memset(&logError,  0, sizeof(logError ));
+   if ( SYS_OK != NV_WriteNow(NV_LOG_COUNTS, 0, &logError.counts, sizeof(logError.counts)))
    {
       GSE_DebugStr(NORMAL,TRUE, "Log Initialize - Reset NV_LOG_COUNTS...FAILED");
    }
 
    // Set the Fail flags to FALSE
-   LogError.bReadAccessFail   = FALSE;
-   LogError.bWriteAccessFail  = FALSE;
-   LogError.bEraseAccessFail  = FALSE;
+   logError.bReadAccessFail   = FALSE;
+   logError.bWriteAccessFail  = FALSE;
+   logError.bEraseAccessFail  = FALSE;
    // Clear the CBIT health counts
-   memset(&LogHealthCounts, 0, sizeof(LOG_CBIT_HEALTH_COUNTS));
+   memset(&logHealthCounts, 0, sizeof(LOG_CBIT_HEALTH_COUNTS));
    // Initialize the Log Write Pause storage object
-   LogManagerPause.enable       = FALSE;
-   LogManagerPause.delay_S      = 0;
-   LogManagerPause.startTime_ms = 0;
+   logManagerPause.enable       = FALSE;
+   logManagerPause.delay_S      = 0;
+   logManagerPause.startTime_ms = 0;
    // Initialize the erase request
-   LogEraseRequest.pStatus = NULL;
-   LogEraseRequest.reqType = LOG_REQ_ERASE;
+   logEraseRequest.pStatus = NULL;
+   logEraseRequest.reqType = LOG_REQ_ERASE;
 
    // Did Memory Manager Initialize correctly?
    if (SYS_OK == MemMgrStatus())
@@ -234,7 +235,7 @@ void LogInitialize (void)
 
       // Find the log pointers
       // First Log, Last Log, Next Write
-      LogConfig.nEndOffset   = MemGetBlockSize(MEM_BLOCK_LOG);
+      logConfig.nEndOffset   = MemGetBlockSize(MEM_BLOCK_LOG);
 
       // Check the Data Flash and find the next offset to write
       bValidFound = STPU( LogFindNextWriteOffset (&nOffset, &sysStatus), eTpLog1871);
@@ -243,14 +244,14 @@ void LogInitialize (void)
       if (TRUE == bValidFound)
       {
          // Store the write offset and percentage used
-         LogConfig.nWrOffset     = nOffset;
-         LogConfig.fPercentUsage = ((FLOAT32)LogConfig.nWrOffset/
-                                    (FLOAT32)LogConfig.nEndOffset)*100.0f;
+         logConfig.nWrOffset     = nOffset;
+         logConfig.fPercentUsage = ((FLOAT32)logConfig.nWrOffset/
+                                    (FLOAT32)logConfig.nEndOffset)*100.0f;
 
          // Check if we have exceeded the 85% usage.
-         if (LogConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX)
+         if (logConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX)
          {
-            LogConfig.bEightyFiveExceeded = TRUE;
+            logConfig.bEightyFiveExceeded = TRUE;
             GSE_DebugStr(NORMAL,TRUE, "LogInitialize: Log Memory > 85 percent Full");
             // Store the fault log data
             Flt_SetStatus(STA_CAUTION, SYS_LOG_85_PERCENT_FULL, NULL, 0);
@@ -320,21 +321,21 @@ void LogInitialize (void)
    tcbTaskInfo.Rmt.MifRate             = taskInfo[Log_Manage_Task].MIFrate;
    tcbTaskInfo.Enabled                 = TRUE;
    tcbTaskInfo.Locked                  = FALSE;
-   tcbTaskInfo.pParamBlock             = &LogMngBlock;
+   tcbTaskInfo.pParamBlock             = &logMngBlock;
 
-   LogMngBlock.state                = LOG_MNG_IDLE;
-   LogMngBlock.faultCount           = 0;
+   logMngBlock.state                = LOG_MNG_IDLE;
+   logMngBlock.faultCount           = 0;
 
    // Init all registered 'pending-write' entries to clear/unused.
    for ( i = 0; i < (UINT32)LOG_REGISTER_END; ++i)
    {
-     LogMngBlock.logWritePending[i] = LOG_INDEX_NOT_SET;
+     logMngBlock.logWritePending[i] = LOG_INDEX_NOT_SET;
    }
 
-   LogMngBlock.currentEntry.reqType = LOG_REQ_NONE;
-   LogMngBlock.currentEntry.pStatus = &LogStatusTemp;
-   memset (&LogMngBlock.currentEntry.request, 0,
-           sizeof(LogMngBlock.currentEntry.request));
+   logMngBlock.currentEntry.reqType = LOG_REQ_NONE;
+   logMngBlock.currentEntry.pStatus = &logStatusTemp;
+   memset (&logMngBlock.currentEntry.request, 0,
+           sizeof(logMngBlock.currentEntry.request));
    TmTaskCreate (&tcbTaskInfo);
 
    // Log Manager Mark Block Task
@@ -350,7 +351,7 @@ void LogInitialize (void)
    tcbTaskInfo.Rmt.MifRate             = taskInfo[Log_Mark_State_Task].MIFrate;
    tcbTaskInfo.Enabled                 = FALSE;
    tcbTaskInfo.Locked                  = FALSE;
-   tcbTaskInfo.pParamBlock             = &LogMarkBlock;
+   tcbTaskInfo.pParamBlock             = &logMarkBlock;
 
    TmTaskCreate (&tcbTaskInfo);
 
@@ -367,13 +368,13 @@ void LogInitialize (void)
    tcbTaskInfo.Rmt.MifRate             = taskInfo[Log_Command_Erase_Task].MIFrate;
    tcbTaskInfo.Enabled                 = FALSE;
    tcbTaskInfo.Locked                  = FALSE;
-   tcbTaskInfo.pParamBlock             = &LogCmdEraseBlock;
+   tcbTaskInfo.pParamBlock             = &logCmdEraseBlock;
 
-   LogCmdEraseBlock.nOffset         = 0;
-   LogCmdEraseBlock.type            = LOG_ERASE_NONE;
-   LogCmdEraseBlock.state           = LOG_ERASE_VERIFY_NONE;
-   LogCmdEraseBlock.bVerifyStarted  = FALSE;
-   LogCmdEraseBlock.bUpdatingStatusFile = FALSE;
+   logCmdEraseBlock.nOffset         = 0;
+   logCmdEraseBlock.type            = LOG_ERASE_NONE;
+   logCmdEraseBlock.state           = LOG_ERASE_VERIFY_NONE;
+   logCmdEraseBlock.bVerifyStarted  = FALSE;
+   logCmdEraseBlock.bUpdatingStatusFile = FALSE;
    TmTaskCreate (&tcbTaskInfo);
 
    // Log Manager Monitor Erase Task
@@ -390,7 +391,7 @@ void LogInitialize (void)
    tcbTaskInfo.Rmt.MifRate             = taskInfo[Log_Monitor_Erase_Task].MIFrate;
    tcbTaskInfo.Enabled                 = FALSE;
    tcbTaskInfo.Locked                  = FALSE;
-   tcbTaskInfo.pParamBlock             = &LogMonEraseBlock;
+   tcbTaskInfo.pParamBlock             = &logMonEraseBlock;
 
    TmTaskCreate (&tcbTaskInfo);
 
@@ -412,54 +413,10 @@ void LogInitialize (void)
    tcbTaskInfo.pParamBlock             = NULL;
 
    TmTaskCreate (&tcbTaskInfo);
-   LogSystemInit = TRUE;
+   logSystemInit = TRUE;
    is_busy       = FALSE;
 
 } // LogInitialize
-
-
-/*****************************************************************************
- * Function:    LogQueuePut
- *
- * Description: Function to add an Entry to the Log Queue. If the
- *              Queue is full then the function returns FULL, else the
- *              the function adds the entry to the Queue, increments the
- *              head and returns OK.
- *
- * Parameters:  LOG_REQUEST Entry - Request to be performed by the Log Mgr.
- *
- * Returns:     LOG_QUEUE_STATUS Status [LOG_QUEUE_OK, LOG_QUEUE_FULL]
- *
- * Notes:       None.
- *
- ****************************************************************************/
-LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
-{
-   // Local Data
-   INT32 intLevel;
-   LOG_REQ_QUEUE    *pQueue;
-   LOG_QUEUE_STATUS status;
-
-   // Initialize Local Data
-   pQueue = &LogQueue;
-
-   intLevel = __DIR();
-
-   if ((pQueue->head - pQueue->tail) >= LOG_QUEUE_SIZE)
-   {
-      status = LOG_QUEUE_FULL;
-   }
-   else
-   {
-      pQueue->buffer[pQueue->head & (LOG_QUEUE_SIZE - 1)] = Entry;
-      pQueue->head++;
-      status = LOG_QUEUE_OK;
-   }
-   __RIR( intLevel);
-
-   return status;
-}
-
 
 /******************************************************************************
  * Function:    LogPreInit()
@@ -499,7 +456,7 @@ void LogPreInit(void)
    }
 
    // indicate the system is in the Pre-Init state
-   LogSystemInit = FALSE;
+   logSystemInit = FALSE;
 }
 
 /******************************************************************************
@@ -518,59 +475,15 @@ void LogPreInit(void)
  *****************************************************************************/
 void LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S )
 {
-   if ( FALSE == LogManagerPause.enable )
+   if ( FALSE == logManagerPause.enable )
    {
-      LogManagerPause.startTime_ms = 0;
+      logManagerPause.startTime_ms = 0;
    }
 
-   LogManagerPause.enable   = Enable;
-   LogManagerPause.delay_S  = Delay_S;
+   logManagerPause.enable   = Enable;
+   logManagerPause.delay_S  = Delay_S;
 }
 
-/******************************************************************************
- * Function:    LogWriteIsPaused
- *
- * Description: Check if the Log Write is Paused.
- *
- * Parameters:  None
- *
- * Returns:     [TRUE  : Writes are paused]
- *              [FALSE : Writes are not paused]
- *
- * Notes:
- *
- *****************************************************************************/
-BOOLEAN LogWriteIsPaused ( void )
-{
-   // Local Data
-   BOOLEAN bPaused;
-
-   bPaused = FALSE; // Assumed it isn't commanded to Pause then set true if it is
-
-   // Check if Log Write has been commanded to pause
-   if ( TRUE == LogManagerPause.enable )
-   {
-      // Temporarily set the Pause to TRUE until the timeout is checked
-      bPaused = TRUE;
-
-      // Is this the first time checking this?
-      if ( 0 == LogManagerPause.startTime_ms )
-      {
-         // Set the Start Time
-         LogManagerPause.startTime_ms = CM_GetTickCount();
-      }
-      // We were already paused keep checking for the timeout
-      else if ( (CM_GetTickCount() - LogManagerPause.startTime_ms) >
-                (LogManagerPause.delay_S * MILLISECONDS_PER_SECOND) )
-      {
-         LogManagerPause.enable       = FALSE;
-         bPaused                       = FALSE;
-         LogManagerPause.startTime_ms = 0;
-      }
-   }
-
-   return (bPaused);
-}
 
 /******************************************************************************
  * Function:    LogRegisterEraseCleanup
@@ -589,7 +502,7 @@ void LogRegisterEraseCleanup ( DO_CLEANUP Func )
 {
    ASSERT (NULL != Func);
 
-   DoCleanup = Func;
+   doCleanup = Func;
 }
 
 /******************************************************************************
@@ -702,14 +615,14 @@ LOG_FIND_STATUS LogFindNextRecordEx(LOG_STATE State,      LOG_TYPE *Type, INT32 
       // the memory block is found.
       if (LOG_NEXT == EndOffset)
       {
-         EndOffset = LogConfig.nEndOffset;
+         EndOffset = logConfig.nEndOffset;
       }
 
       Timeout(TO_START,(tmout_ms *TICKS_PER_mSec),&timer_val);
 
       // Check the Read Offset has not exceeded end of block OR Last Offset
       while ((*pRdOffset <= EndOffset) &&
-             ((*pRdOffset + sizeof(hdr)) < LogConfig.nEndOffset))
+             ((*pRdOffset + sizeof(hdr)) < logConfig.nEndOffset))
       {
          //Check for timeout and exit the loop just after determining search is not
          //at the EndOffset yet.  This makes sure the timeout indication is correct
@@ -785,13 +698,13 @@ LOG_FIND_STATUS LogFindNextRecordEx(LOG_STATE State,      LOG_TYPE *Type, INT32 
             // The memory read cannot be performed
             findStatus = LOG_BUSY;
 
-            LogReadFailTemp.result = result;
-            LogReadFailTemp.offset = *pRdOffset;
+            logReadFailTemp.result = result;
+            logReadFailTemp.offset = *pRdOffset;
 
             LogCheckResult ( result, "LogFindNextRecord:",
                              SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
-                             &LogError.bReadAccessFail, &LogError.counts.nRdAccess,
-                             &LogReadFailTemp, sizeof(LogReadFailTemp));
+                             &logError.bReadAccessFail, &logError.counts.nRdAccess,
+                             &logReadFailTemp, sizeof(logReadFailTemp));
 
             // Exit the loop
             break;
@@ -866,13 +779,13 @@ LOG_READ_STATUS LogRead ( UINT32 nOffset, LOG_BUF *pBuf )
          {
             status = LOG_READ_BUSY;
 
-            LogReadFailTemp.result = result;
-            LogReadFailTemp.offset = nOffset - hdr.nSize;
+            logReadFailTemp.result = result;
+            logReadFailTemp.offset = nOffset - hdr.nSize;
 
             LogCheckResult ( result, "LogRead:",
                              SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
-                             &LogError.bReadAccessFail, &LogError.counts.nRdAccess,
-                             &LogReadFailTemp, sizeof(LogReadFailTemp)
+                             &logError.bReadAccessFail, &logError.counts.nRdAccess,
+                             &logReadFailTemp, sizeof(logReadFailTemp)
                            );
 
          }
@@ -883,13 +796,13 @@ LOG_READ_STATUS LogRead ( UINT32 nOffset, LOG_BUF *pBuf )
    {
       status = LOG_READ_BUSY;
 
-      LogReadFailTemp.result = result;
-      LogReadFailTemp.offset = nOffset - sizeof(LOG_HEADER);
+      logReadFailTemp.result = result;
+      logReadFailTemp.offset = nOffset - sizeof(LOG_HEADER);
 
       LogCheckResult ( result, "LogRead:",
                        SYS_LOG_MEM_READ_FAIL, STA_NORMAL,
-                       &LogError.bReadAccessFail, &LogError.counts.nRdAccess,
-                       &LogReadFailTemp, sizeof(LogReadFailTemp)
+                       &logError.bReadAccessFail, &logError.counts.nRdAccess,
+                       &logReadFailTemp, sizeof(logReadFailTemp)
                      );
    }
 
@@ -929,7 +842,6 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
 {
    // Local Data
    LOG_REQUEST new;
-   LOG_REQUEST old;
    UINT32      *pData = pBuf;
 
    ASSERT (NULL != pWrStatus);
@@ -947,26 +859,20 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    new.request.write.pData            = pData;
    new.request.write.nSize            = nSize;
 
-   // Place Request in Queue
-   while ( LOG_QUEUE_FULL == LogQueuePut(new) )
+   // Try to place Request in Queue
+   if (LOG_QUEUE_FULL == LogQueuePut(new))
    {
-      // The queue was full.. pop the oldest log
-      if ( LOG_QUEUE_EMPTY != LogQueueGet(&old) )
-      {
-         // Queue Shouldn't be empty because we just detected it was full.
-
-         // Update the status of the LOG to complete even though
-         // it wasn't recorded
-         *(old.pStatus) = LOG_REQ_COMPLETE;
-         // Count the log that was just discarded
-         LogError.counts.nDiscarded++;
-         // Store count to RTC RAM
-         NV_Write(NV_LOG_COUNTS,0,&LogError.counts,sizeof(LogError.counts));
-      }
+       // Log is full;
+       // set the return status as failed and update the Log Counts File
+       *pWrStatus = LOG_REQ_FAILED;
+       logError.counts.nDiscarded++;
+       // Store count to RTC RAM
+       NV_Write(NV_LOG_COUNTS,0,&logError.counts,sizeof(logError.counts));
    }
-
-   // Set the write status as pending
-   *pWrStatus = LOG_REQ_PENDING;
+   else
+   {
+       *pWrStatus = LOG_REQ_PENDING;
+   }
 
 } // LogWrite
 
@@ -1002,10 +908,10 @@ void LogErase ( UINT32 *pFoundLogOffset, LOG_REQ_STATUS *pErStatus )
    new.reqType                    = LOG_REQ_ERASE;
    new.pStatus                    = pErStatus;
    new.request.erase.pFoundOffset = pFoundLogOffset;
-   new.request.erase.nStartOffset = LogConfig.nStartOffset;
+   new.request.erase.nStartOffset = logConfig.nStartOffset;
    new.request.erase.type         = LOG_ERASE_NORMAL;
 
-   LogEraseRequest = new;
+   logEraseRequest = new;
 
    // Set the write status as pending
    *pErStatus = LOG_REQ_PENDING;
@@ -1038,16 +944,16 @@ void LogMarkState (LOG_STATE State, LOG_TYPE Type,
                    LOG_MARK_STATUS *pStatus)
 {
    // Local Data Initialization
-   LogMarkBlock.hdrCriteria.nState    = State;
-   LogMarkBlock.hdrCriteria.nType     = (UINT16)Type;
-   LogMarkBlock.hdrCriteria.nSource   = Source.nNumber;
-   LogMarkBlock.hdrCriteria.nPriority = (UINT16)Priority;
-   LogMarkBlock.nStartOffset          = StartOffset;
-   LogMarkBlock.nEndOffset            = EndOffset;
-   LogMarkBlock.nRdOffset             = StartOffset;
-   LogMarkBlock.pStatus               = pStatus;
+   logMarkBlock.hdrCriteria.nState    = State;
+   logMarkBlock.hdrCriteria.nType     = (UINT16)Type;
+   logMarkBlock.hdrCriteria.nSource   = Source.nNumber;
+   logMarkBlock.hdrCriteria.nPriority = (UINT16)Priority;
+   logMarkBlock.nStartOffset          = StartOffset;
+   logMarkBlock.nEndOffset            = EndOffset;
+   logMarkBlock.nRdOffset             = StartOffset;
+   logMarkBlock.pStatus               = pStatus;
 
-   *(LogMarkBlock.pStatus)            =  LOG_MARK_IN_PROGRESS;
+   *(logMarkBlock.pStatus)            =  LOG_MARK_IN_PROGRESS;
 
    TmTaskEnable ((TASK_INDEX)Log_Mark_State_Task, TRUE);
 
@@ -1143,7 +1049,7 @@ void LogWriteETM (SYS_APP_ID logID, LOG_PRIORITY priority,
 *****************************************************************************/
 BOOLEAN LogIsLogEmpty( void )
 {
-  return ( LogConfig.nLogCount == 0);
+  return ( logConfig.nLogCount == 0);
 }
 
 /******************************************************************************
@@ -1161,7 +1067,7 @@ BOOLEAN LogIsLogEmpty( void )
 *****************************************************************************/
 UINT32 LogGetLogCount( void )
 {
-  return  LogConfig.nLogCount;
+  return  logConfig.nLogCount;
 }
 
 /******************************************************************************
@@ -1180,7 +1086,7 @@ UINT32 LogGetLogCount( void )
 *****************************************************************************/
 BOOLEAN LogIsEraseInProgress( void )
 {
-  return LogEraseData.inProgress;
+  return logEraseData.inProgress;
 }
 /*****************************************************************************
  * Function:    LogGetConfigPtr
@@ -1196,7 +1102,7 @@ BOOLEAN LogIsEraseInProgress( void )
  ****************************************************************************/
  const LOG_CONFIG* LogGetConfigPtr(void)
  {
-   return (const LOG_CONFIG*)&LogConfig;
+   return (const LOG_CONFIG*)&logConfig;
  }
 
 
@@ -1214,7 +1120,7 @@ BOOLEAN LogIsEraseInProgress( void )
  *****************************************************************************/
 LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus ( void )
 {
-  return (LogHealthCounts);
+  return (logHealthCounts);
 }
 
 
@@ -1237,7 +1143,7 @@ LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS Prev
 {
   LOG_CBIT_HEALTH_COUNTS diffCount;
 
-  diffCount.nCorruptCnt = LogConfig.nCorrupt;
+  diffCount.nCorruptCnt = logConfig.nCorrupt;
 
   return (diffCount);
 }
@@ -1281,7 +1187,7 @@ LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS CurrC
  ****************************************************************************/
  UINT32 LogGetLastAddress(void)
  {
-   return LogConfig.nEndOffset;
+   return logConfig.nEndOffset;
  }
 
 /*****************************************************************************
@@ -1303,7 +1209,7 @@ LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS CurrC
 BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 {
   // Use the value of the index as indicator of write-complete
-  return (LogMngBlock.logWritePending[regType] == LOG_INDEX_NOT_SET);
+  return (logMngBlock.logWritePending[regType] == LOG_INDEX_NOT_SET);
 }
 
 /**********************************************************************************************
@@ -1411,14 +1317,14 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
    // Initialize Local Data
    result         = SYS_OK;
    bStarted       = FALSE;
-   pBuf           = (UINT8 *)&LogBuffer[0];
+   pBuf           = (UINT8 *)&logBuffer[0];
    bProcessRequest = FALSE;
 
    // Is an Erase Pending
-   if ( (NULL != LogEraseRequest.pStatus) && (LOG_REQ_PENDING == *(LogEraseRequest.pStatus)) )
+   if ( (NULL != logEraseRequest.pStatus) && (LOG_REQ_PENDING == *(logEraseRequest.pStatus)) )
    {
       // Copy the Request
-      pTCB->currentEntry = LogEraseRequest;
+      pTCB->currentEntry = logEraseRequest;
       bProcessRequest    = TRUE;
    }
    else // Check for a write
@@ -1440,7 +1346,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
          // log buffer.
          nLogSize = sizeof(LOG_HEADER) + pTCB->currentEntry.request.write.nSize;
 
-         if (nLogSize < sizeof(LogBuffer))
+         if (nLogSize < sizeof(logBuffer))
          {
             // The log fits. Now add the header and data together in the
             // local buffer
@@ -1452,10 +1358,10 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
                     pTCB->currentEntry.request.write.nSize);
 
             // Check if memory full
-            if ( ((LogConfig.nWrOffset + nLogSize) < LogConfig.nEndOffset) )
+            if ( ((logConfig.nWrOffset + nLogSize) < logConfig.nEndOffset) )
             {
                // Command the Write
-               bStarted = MemWrite ( MEM_BLOCK_LOG, &LogConfig.nWrOffset,
+               bStarted = MemWrite ( MEM_BLOCK_LOG, &logConfig.nWrOffset,
                                      pBuf, nLogSize, &result, FALSE);
 
                // Check if the write started successfully
@@ -1491,23 +1397,23 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
       else if ( LOG_REQ_ERASE == pTCB->currentEntry.reqType )
       {
          // Populate the TCB for the erase task
-         LogCmdEraseBlock.bDone   = FALSE;
-         LogCmdEraseBlock.result  = SYS_OK;
-         LogCmdEraseBlock.nOffset = pTCB->currentEntry.request.erase.nStartOffset;
-         LogCmdEraseBlock.type    = pTCB->currentEntry.request.erase.type;
-         LogCmdEraseBlock.nSize   = LogConfig.nWrOffset - LogConfig.nStartOffset;
+         logCmdEraseBlock.bDone   = FALSE;
+         logCmdEraseBlock.result  = SYS_OK;
+         logCmdEraseBlock.nOffset = pTCB->currentEntry.request.erase.nStartOffset;
+         logCmdEraseBlock.type    = pTCB->currentEntry.request.erase.type;
+         logCmdEraseBlock.nSize   = logConfig.nWrOffset - logConfig.nStartOffset;
          // If the erase is a normal system erase verify that all logs
          // are marked for deletion before starting the erase.
          if (LOG_ERASE_NORMAL == pTCB->currentEntry.request.erase.type)
          {
-            LogCmdEraseBlock.state  = LOG_VERIFY_DELETED;
-            LogCmdEraseBlock.pFound = pTCB->currentEntry.request.erase.pFoundOffset;
-            LogCmdEraseBlock.bVerifyStarted = FALSE;
+            logCmdEraseBlock.state  = LOG_VERIFY_DELETED;
+            logCmdEraseBlock.pFound = pTCB->currentEntry.request.erase.pFoundOffset;
+            logCmdEraseBlock.bVerifyStarted = FALSE;
          }
          else // This is a user commanded erase, erase all the sectors that
               // contain data.
          {
-            LogCmdEraseBlock.state = LOG_ERASE_STATUS_WRITE;
+            logCmdEraseBlock.state = LOG_ERASE_STATUS_WRITE;
          }
          // Request was started now monitor the operation
          // until it is complete.
@@ -1549,7 +1455,7 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
    UINT32  nSize;
 
    // Initialize Local Data
-   pBuf     = &LogBuffer[0];
+   pBuf     = &logBuffer[0];
    bStarted = FALSE;
 
    // Determine the type of request that needs to be processed
@@ -1559,10 +1465,10 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
       nSize = sizeof(LOG_HEADER) + pTCB->currentEntry.request.write.nSize;
 
       // Check if memory full
-      if ( TPU( (LogConfig.nWrOffset + nSize), eTpLogPend) < LogConfig.nEndOffset)
+      if ( TPU( (logConfig.nWrOffset + nSize), eTpLogPend) < logConfig.nEndOffset)
       {
          // Command the Write
-         bStarted = MemWrite (MEM_BLOCK_LOG, &LogConfig.nWrOffset,
+         bStarted = MemWrite (MEM_BLOCK_LOG, &logConfig.nWrOffset,
                               pBuf, nSize, &result, FALSE);
 
          // Check that the request was successfully started
@@ -1601,20 +1507,20 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
    else if (LOG_REQ_ERASE == pTCB->currentEntry.reqType)
    {
       // Need to reset Done and Result because this may be a retry.
-      LogCmdEraseBlock.bDone   = FALSE;
-      LogCmdEraseBlock.result  = SYS_OK;
+      logCmdEraseBlock.bDone   = FALSE;
+      logCmdEraseBlock.result  = SYS_OK;
       // If the erase is a normal system erase verify that all logs
       // are marked for deletion before starting the erase.
       if (LOG_ERASE_NORMAL == pTCB->currentEntry.request.erase.type)
       {
-         LogCmdEraseBlock.state          = LOG_VERIFY_DELETED;
-         LogCmdEraseBlock.bVerifyStarted = FALSE;
+         logCmdEraseBlock.state          = LOG_VERIFY_DELETED;
+         logCmdEraseBlock.bVerifyStarted = FALSE;
       }
       else // This is a user commanded erase, erase all the sectors that
            // contain data.
       {
-         LogCmdEraseBlock.state = LOG_ERASE_STATUS_WRITE;
-         LogCmdEraseBlock.nSize = LogConfig.nWrOffset - LogConfig.nStartOffset;
+         logCmdEraseBlock.state = LOG_ERASE_STATUS_WRITE;
+         logCmdEraseBlock.nSize = logConfig.nWrOffset - logConfig.nStartOffset;
       }
       // Request was started now monitor the operation
       // until it is complete.
@@ -1660,15 +1566,15 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
      if (bDone)
      {
         // Set the WrOffset to the new offset
-        LogConfig.nWrOffset     = nOffset;
-        LogConfig.nLogCount++;
-        LogConfig.fPercentUsage = ((FLOAT32)LogConfig.nWrOffset/
-                                   (FLOAT32)LogConfig.nEndOffset) * 100.0f;
+        logConfig.nWrOffset     = nOffset;
+        logConfig.nLogCount++;
+        logConfig.fPercentUsage = ((FLOAT32)logConfig.nWrOffset/
+                                   (FLOAT32)logConfig.nEndOffset) * 100.0f;
 
-        if ( (LogConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX) &&
-             (LogConfig.bEightyFiveExceeded == FALSE) )
+        if ( (logConfig.fPercentUsage > LOGMGR_PERCENTUSAGE_MAX) &&
+             (logConfig.bEightyFiveExceeded == FALSE) )
         {
-           LogConfig.bEightyFiveExceeded = TRUE;
+           logConfig.bEightyFiveExceeded = TRUE;
            // Create Log for 85% exceedence
            GSE_DebugStr(NORMAL,TRUE, "LogMngStatus: Log Memory > 85 percent Full");
            // Store the fault log data
@@ -1679,8 +1585,8 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
   else if ( LOG_REQ_ERASE == pTCB->currentEntry.reqType )
   {
      // Get the current erase status
-     bDone  = LogCmdEraseBlock.bDone;
-     result = LogCmdEraseBlock.result;
+     bDone  = logCmdEraseBlock.bDone;
+     result = logCmdEraseBlock.result;
   }
 
   // Check if the request has completed
@@ -1694,13 +1600,13 @@ void LogMngStatus (LOG_MNG_TASK_PARMS *pTCB)
         {
            if ( LOG_REQ_ERASE == pTCB->currentEntry.reqType )
            {
-              LogEraseFailTemp.result    = result;
-              LogEraseFailTemp.eraseData = pTCB->currentEntry.request.erase;
+              logEraseFailTemp.result    = result;
+              logEraseFailTemp.eraseData = pTCB->currentEntry.request.erase;
 
               LogCheckResult ( result, "LogMngStatus:",
                                SYS_LOG_MEM_ERASE_FAIL, STA_NORMAL,
-                               &LogError.bEraseAccessFail, &LogError.counts.nErAccess,
-                               &LogEraseFailTemp, sizeof(LogEraseFailTemp) );
+                               &logError.bEraseAccessFail, &logError.counts.nErAccess,
+                               &logEraseFailTemp, sizeof(logEraseFailTemp) );
            }
            else
            {
@@ -1779,7 +1685,7 @@ static void LogCheckResult ( RESULT Result, CHAR *FuncStr, SYS_APP_ID LogID,
       // Count the failure
       *pCnt += 1;
 
-      NV_Write(NV_LOG_COUNTS,0,&LogError.counts,sizeof(LogError.counts));
+      NV_Write(NV_LOG_COUNTS,0,&logError.counts,sizeof(logError.counts));
    }
 }
 
@@ -1821,7 +1727,7 @@ void LogMarkTask( void *pParam )
 
    // Check if writes are paused and the Log Manager is IDLE
    // This will avoid LOG_MARK_FAIL because Writes are being performed
-   if (LogWriteIsPaused() && (LOG_MNG_IDLE == LogMngBlock.state))
+   if (LogWriteIsPaused() && (LOG_MNG_IDLE == logMngBlock.state))
    {
       nStartTime     = TTMR_GetHSTickCount();
 
@@ -1860,8 +1766,8 @@ void LogMarkTask( void *pParam )
             }
             else
             {
-               LogConfig.nLogCount--;
-               LogConfig.nDeleted++;
+               logConfig.nLogCount--;
+               logConfig.nDeleted++;
             }
          }
          else if (LOG_BUSY == findStatus)
@@ -1936,7 +1842,7 @@ void LogCmdEraseTask ( void *pParam )
          // Search through the memory for any logs that are not
          // marked for erasure.
          bDone = LogVerifyAllDeleted ( &pTCB->nRdOffset,
-                                       LogConfig.nWrOffset,
+                                       logConfig.nWrOffset,
                                        pTCB->pFound );
 
          // Did the Log Verify complete?
@@ -1984,7 +1890,7 @@ void LogCmdEraseTask ( void *pParam )
             if (LOG_ERASE_QUICK == pTCB->type)
             {
                // Perform Any Cleanup - because this was commanded by the USER
-               DoCleanup();
+               doCleanup();
                // Start the erase monitor
                GSE_DebugStr(NORMAL,TRUE, "LogCmdEraseTask: Erase..");
                TmTaskEnable ((TASK_INDEX)Log_Monitor_Erase_Task, TRUE);
@@ -2016,19 +1922,19 @@ void LogCmdEraseTask ( void *pParam )
             if (SYS_OK == pTCB->result)
             {
                // Reset the read and write offsets
-               LogConfig.nWrOffset     = 0;
-               LogConfig.nLogCount     = 0;
-               LogConfig.nDeleted      = 0;
-               LogConfig.nCorrupt      = 0;
-               LogConfig.fPercentUsage = 0.0;
+               logConfig.nWrOffset     = 0;
+               logConfig.nLogCount     = 0;
+               logConfig.nDeleted      = 0;
+               logConfig.nCorrupt      = 0;
+               logConfig.fPercentUsage = 0.0;
 
                // If 85% Exceeded, must clear current system cond generated by th 85% sys
                //   cond detected.
-               if (LogConfig.bEightyFiveExceeded == TRUE)
+               if (logConfig.bEightyFiveExceeded == TRUE)
                {
                   Flt_ClrStatus( STA_CAUTION );
                }
-               LogConfig.bEightyFiveExceeded = FALSE;
+               logConfig.bEightyFiveExceeded = FALSE;
             }
             else
             {
@@ -2234,17 +2140,17 @@ static void LogSaveEraseData (UINT32 nOffset, UINT32 nSize,
    eraseData.savedSize        = nSize;
 
    // Update the EEPROM
-   memcpy(&LogEraseData, &eraseData, sizeof(eraseData));
+   memcpy(&logEraseData, &eraseData, sizeof(eraseData));
 
    if (TRUE == bWriteNow)
    {
-      resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &LogEraseData, sizeof(LogEraseData));
+      resultNV = NV_WriteNow(NV_LOG_ERASE, 0, &logEraseData, sizeof(logEraseData));
       GSE_DebugStr(NORMAL,TRUE, "LogSaveEraseData - NV_LOG_ERASE save...%s",
                    SYS_OK == resultNV ? "SUCCESS":"FAILED");
    }
    else
    {
-      NV_Write(NV_LOG_ERASE, 0, &LogEraseData, sizeof(eraseData));
+      NV_Write(NV_LOG_ERASE, 0, &logEraseData, sizeof(eraseData));
    }
 }
 
@@ -2285,7 +2191,7 @@ void LogCheckEraseInProgress ( void )
 
    // Retrieve Erase Data from EEPROM and RTC RAM
    // Perform Erase verification logic.
-   memcpy( &eraseData, &LogEraseData, sizeof(eraseData) );
+   memcpy( &eraseData, &logEraseData, sizeof(eraseData) );
 
    // Check there was a previous erase that did not complete
    if (TRUE == eraseData.inProgress)
@@ -2375,13 +2281,13 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
    bValidFound   = FALSE;
 
    // Check for the end of the block
-   while ((*pOffset + sizeof(LOG_HEADER)) < LogConfig.nEndOffset )
+   while ((*pOffset + sizeof(LOG_HEADER)) < logConfig.nEndOffset )
    {
       // Watchdog - Smack the DOG
       STARTUP_ID(startup_Id++);
 
       // read the log at the current read offset
-      bDone = MemRead(MEM_BLOCK_LOG, pOffset, (UINT32 *)&hdr,
+      bDone = MemRead(MEM_BLOCK_LOG, pOffset, &hdr,
                       sizeof(LOG_HEADER), Result);
 
       // Was the read successful?
@@ -2410,7 +2316,7 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
                                            source,
                                            LOG_PRIORITY_DONT_CARE) )
             {
-               LogConfig.nLogCount++;
+               logConfig.nLogCount++;
             }
             else if ( TRUE == LogHdrFilterMatch(hdr,
                                                 LOG_DELETED,
@@ -2419,7 +2325,7 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
                                                 source,
                                                 LOG_PRIORITY_DONT_CARE) )
             {
-               LogConfig.nDeleted++;
+               logConfig.nDeleted++;
             }
 
             // Move to the next log
@@ -2454,11 +2360,11 @@ BOOLEAN LogFindNextWriteOffset (UINT32 *pOffset, RESULT *Result)
                // Set the corrupt flag
                bCorruptFound  = TRUE;
                // Increment the corrupt count
-               LogConfig.nCorrupt++;
-               LogHealthCounts.nCorruptCnt++;
+               logConfig.nCorrupt++;
+               logHealthCounts.nCorruptCnt++;
 
                GSE_DebugStr(NORMAL,TRUE, "LogFindNextWriteOffset: Corruption at 0x%x (%d)",
-                        previousOffset, LogConfig.nCorrupt );
+                        previousOffset, logConfig.nCorrupt );
             }
             else // Already working on this corrupted area, advance by
                  // location or then by sector when the boundary is
@@ -2692,9 +2598,9 @@ void LogQueueInit(void)
     ASSERT((LOG_QUEUE_SIZE & (LOG_QUEUE_SIZE - 1)) == 0);
 
     // Initializes the Log Manager Queue
-    LogQueue.head = 0;
-    LogQueue.tail = 0;
-    memset(LogQueue.buffer, 0, sizeof(LogQueue.buffer));
+    logQueue.head = 0;
+    logQueue.tail = 0;
+    memset(logQueue.buffer, 0, sizeof(logQueue.buffer));
 }
 
 /*****************************************************************************
@@ -2721,7 +2627,7 @@ LOG_QUEUE_STATUS LogQueueGet(LOG_REQUEST *Entry)
    LOG_QUEUE_STATUS status;
 
    // Initialize Local Data
-   pQueue = &LogQueue;
+   pQueue = &logQueue;
    status = LOG_QUEUE_OK;
 
    intLevel = __DIR();
@@ -2831,7 +2737,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
                     &systemTable[i].wrStatus);
 
            // Enable the RMT Task
-           if ( LogSystemInit )
+           if ( logSystemInit )
            {
                TmTaskEnable ((TASK_INDEX)System_Log_Manage_Task, TRUE);
            }
@@ -2887,7 +2793,7 @@ void LogRegisterIndex ( LOG_REGISTER_TYPE regType, UINT32 SystemTableIndex)
 {
   ASSERT( SystemTableIndex < SYSTEM_TABLE_MAX_SIZE);
 
-  LogMngBlock.logWritePending[regType] = SystemTableIndex;
+  logMngBlock.logWritePending[regType] = SystemTableIndex;
   GSE_DebugStr(NORMAL,TRUE,"LogMgr: Log Type: %d registered SystemTable index registered: %u",
                SystemTableIndex);
 }
@@ -2916,21 +2822,110 @@ void LogUpdateWritePendingStatuses( void )
   // For each type of registered log, see if it is busy
   for ( i = 0; i < (INT32)LOG_REGISTER_END; ++i)
   {
-    if (LOG_INDEX_NOT_SET != LogMngBlock.logWritePending[i] )
+    if (LOG_INDEX_NOT_SET != logMngBlock.logWritePending[i] )
     {
-      if ( LOG_REQ_PENDING == systemTable[ LogMngBlock.logWritePending[i] ].wrStatus ||
-       LOG_REQ_INPROG  == systemTable[ LogMngBlock.logWritePending[i] ].wrStatus )
+      if ( LOG_REQ_PENDING == systemTable[ logMngBlock.logWritePending[i] ].wrStatus ||
+       LOG_REQ_INPROG  == systemTable[ logMngBlock.logWritePending[i] ].wrStatus )
       {
        // Still busy... do nothing.
       }
       else
       {
         // The write has finished. Show this by flagging the index as not used.
-        LogMngBlock.logWritePending[i] = LOG_INDEX_NOT_SET;
+        logMngBlock.logWritePending[i] = LOG_INDEX_NOT_SET;
         GSE_DebugStr(NORMAL,TRUE,"LogMgr: LOG_REGISTER_TYPE: %d - Write completed",i);
       }
     }// i is in-use
   }  // for i
+}
+
+/******************************************************************************
+ * Function:    LogWriteIsPaused
+ *
+ * Description: Check if the Log Write is Paused.
+ *
+ * Parameters:  None
+ *
+ * Returns:     [TRUE  : Writes are paused]
+ *              [FALSE : Writes are not paused]
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static
+BOOLEAN LogWriteIsPaused ( void )
+{
+   // Local Data
+   BOOLEAN bPaused;
+
+   bPaused = FALSE; // Assumed it isn't commanded to Pause then set true if it is
+
+   // Check if Log Write has been commanded to pause
+   if ( TRUE == logManagerPause.enable )
+   {
+      // Temporarily set the Pause to TRUE until the timeout is checked
+      bPaused = TRUE;
+
+      // Is this the first time checking this?
+      if ( 0 == logManagerPause.startTime_ms )
+      {
+         // Set the Start Time
+         logManagerPause.startTime_ms = CM_GetTickCount();
+      }
+      // We were already paused keep checking for the timeout
+      else if ( (CM_GetTickCount() - logManagerPause.startTime_ms) >
+                (logManagerPause.delay_S * MILLISECONDS_PER_SECOND) )
+      {
+         logManagerPause.enable       = FALSE;
+         bPaused                       = FALSE;
+         logManagerPause.startTime_ms = 0;
+      }
+   }
+
+   return (bPaused);
+}
+
+/*****************************************************************************
+ * Function:    LogQueuePut
+ *
+ * Description: Function to add an Entry to the Log Queue. If the
+ *              Queue is full then the function returns FULL, else the
+ *              the function adds the entry to the Queue, increments the
+ *              head and returns OK.
+ *
+ * Parameters:  LOG_REQUEST Entry - Request to be performed by the Log Mgr.
+ *
+ * Returns:     LOG_QUEUE_STATUS Status [LOG_QUEUE_OK, LOG_QUEUE_FULL]
+ *
+ * Notes:       None.
+ *
+ ****************************************************************************/
+static
+LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
+{
+   // Local Data
+   INT32 intLevel;
+   LOG_REQ_QUEUE    *pQueue;
+   LOG_QUEUE_STATUS status;
+
+   // Initialize Local Data
+   pQueue = &logQueue;
+
+   intLevel = __DIR();
+
+   if ((pQueue->head - pQueue->tail) >= LOG_QUEUE_SIZE)
+   {
+      status = LOG_QUEUE_FULL;
+   }
+   else
+   {
+      pQueue->buffer[pQueue->head & (LOG_QUEUE_SIZE - 1)] = Entry;
+      pQueue->head++;
+      status = LOG_QUEUE_OK;
+   }
+   __RIR( intLevel);
+
+   return status;
 }
 
 
@@ -2938,11 +2933,26 @@ void LogUpdateWritePendingStatuses( void )
  *  MODIFICATIONS
  *    $History: LogManager.c $
  * 
+ * *****************  Version 112  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - CR updates
+ *
+ * *****************  Version 111  *****************
+ * User: Contractor V&v Date: 8/26/14    Time: 2:59p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - Compliance cleanup
+ *
+ * *****************  Version 110  *****************
+ * User: Contractor V&v Date: 8/20/14    Time: 3:03p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - EMU150 Download Records Lost fix
+ *
  * *****************  Version 109  *****************
  * User: Melanie Jutras Date: 12-11-30   Time: 11:51a
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review File Format Fix
- * 
+ *
  * *****************  Version 108  *****************
  * User: Jim Mood     Date: 11/27/12   Time: 8:35p
  * Updated in $/software/control processor/code/system

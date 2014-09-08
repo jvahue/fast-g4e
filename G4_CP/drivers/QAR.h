@@ -2,7 +2,7 @@
 #define QAR_H
 
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        QAR.h      
@@ -11,7 +11,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 51 $  $Date: 12-11-06 4:00p $    
+      $Revision: 53 $  $Date: 9/03/14 5:12p $    
     
 ******************************************************************************/
 
@@ -475,8 +475,8 @@ EXPORT FLOAT32      QAR_ReadWord        (UINT16 nIndex, UINT32 *tickCount);
 
 EXPORT void         QAR_GetRegisters    (QAR_REGISTERS *Registers);
 EXPORT QAR_STATE_PTR QAR_GetState       (void);
-EXPORT QAR_CONFIGURATION_PTR QAR_GetCfg (void); 
-EXPORT void         QAR_SetCfg          (QAR_CONFIGURATION *Cfg);
+//EXPORT QAR_CONFIGURATION_PTR QAR_GetCfg (void); 
+//EXPORT void         QAR_SetCfg          (QAR_CONFIGURATION *Cfg);
 //EXPORT void         QAR_DisableAnyStreamingDebugOuput ( void );
 EXPORT BOOLEAN      QAR_SensorTest (UINT16 nIndex); 
 EXPORT BOOLEAN      QAR_InterfaceValid (UINT16 nIndex); 
@@ -506,6 +506,16 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:12p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1234 - Code Review cleanup
+ * 
+ * *****************  Version 52  *****************
+ * User: Contractor V&v Date: 8/14/14    Time: 4:04p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1234 - Removed Get/Set QarCfg function
  * 
  * *****************  Version 51  *****************
  * User: Melanie Jutras Date: 12-11-06   Time: 4:00p

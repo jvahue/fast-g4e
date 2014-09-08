@@ -1,6 +1,6 @@
 #define CREEP_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        CreepUserTables.c
@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 10 $  $Date: 1/22/13 1:47p $
+    $Revision: 12 $  $Date: 9/03/14 5:08p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -554,7 +554,7 @@ USER_MSG_TBL creepCfgTbl[] =
 
   {"MAX_SENSOR_LOG", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_UINT16,  USER_RW,
                       (void *) &creepCfgTemp.maxSensorLossRec,  -1,   -1,   NO_LIMIT, NULL},
-                  
+
   {"CRC", NO_NEXT_TABLE, CreepMsg_Cfg,  USER_TYPE_HEX16,  USER_RW,
                 (void *) &creepCfgTemp.crc16,         -1,   -1,   NO_LIMIT, NULL},
 
@@ -923,7 +923,7 @@ USER_HANDLER_RESULT CreepMsg_Val(USER_DATA_TYPE DataType,
  *               [out] GetPtr:   For read commands, UserCfg function will set
  *                               this to the location of the data requested.
  *
- * Returns:     USER_RESULT_OK:    Processed sucessfully
+ * Returns:     USER_RESULT_OK:    Processed successfully
  *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
  *                                 set.
  *
@@ -937,12 +937,14 @@ USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
                                  const void *SetPtr,
                                  void **GetPtr)
 {
-  USER_HANDLER_RESULT result ;
+  USER_HANDLER_RESULT result;
 
 
   result = USER_RESULT_OK;
 
-  creepCfgTemp = *Creep_GetCfg();
+  memcpy(&creepCfgTemp,
+       &CfgMgr_ConfigPtr()->CreepConfig,
+       sizeof(creepCfgTemp));
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -1600,14 +1602,12 @@ static USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
 *****************************************************************************/
 static void CreepMsg_UpdateCfg ( void )
 {
-  *Creep_GetCfg() = creepCfgTemp;     // Update current cfg to new setting
-
   memcpy(&CfgMgr_ConfigPtr()->CreepConfig, &creepCfgTemp,
-         sizeof(CREEP_CFG));         // Update EEPROM cfg version
+         sizeof(creepCfgTemp));         // Update EEPROM cfg version
 
   //Store the modified temporary structure in the EEPROM.
   CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),&CfgMgr_ConfigPtr()->CreepConfig,
-                         sizeof(CREEP_CFG));
+                         sizeof(creepCfgTemp));
 }
 
 
@@ -1783,6 +1783,16 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:08p
+ * Updated in $/software/control processor/code/application
+ * SCR #1234 - Code Review cleanup
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 8/14/14    Time: 4:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1234 - Configuration update of certain modules overwrites 
  * 
  * *****************  Version 10  *****************
  * User: Jeff Vahue   Date: 1/22/13    Time: 1:47p

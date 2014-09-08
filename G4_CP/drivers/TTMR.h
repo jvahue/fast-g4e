@@ -12,7 +12,7 @@
                description.
 
    VERSION
-   $Revision: 29 $  $Date: 12-11-09 1:59p $
+   $Revision: 30 $  $Date: 3/10/14 4:31p $
 
 ******************************************************************************/
 
@@ -69,6 +69,7 @@
   FPGA_W(FPGA_WD_TIMER_INV, FPGA_WD_TIMER_INV_VAL);  \
 }
 
+#define TTMR_HS_TIMEOUT(startTime, timeOut) ((TTMR_GetHSTickCount() - startTime) > timeOut)
 /******************************************************************************
                               Package Typedefs
 ******************************************************************************/
@@ -113,6 +114,11 @@ EXPORT UINT32           TTMR_Get10msTickCount      (void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TTMR.h $
+ * 
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 3/10/14    Time: 4:31p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1065 - Added a HS timer timeout MACRO
  * 
  * *****************  Version 29  *****************
  * User: Melanie Jutras Date: 12-11-09   Time: 1:59p

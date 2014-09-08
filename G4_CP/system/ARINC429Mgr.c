@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 60 $  $Date: 12-12-02 9:59a $
+     $Revision: 61 $  $Date: 4/17/14 2:04p $
 
 ******************************************************************************/
 
@@ -774,7 +774,7 @@ void Arinc429MgrBITTask ( void *pParam )
                pArincRxStatus->bChanActive = TRUE;
                // Output Debug Message on transition
                sprintf (GSE_OutLine,
-                        "\r\nArinc429_Monitor: Arinc429 Data Present Detected (Ch=%d)\r\n \0",
+                        "Arinc429_Monitor: Arinc429 Data Present Detected (Ch=%d)",
                         Channel );
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
 
@@ -818,7 +818,7 @@ void Arinc429MgrBITTask ( void *pParam )
                   {
                      // Output Debug Message on transition
                      sprintf (GSE_OutLine,
-                              "\r\nArinc429_Monitor: Arinc429 Data Present Lost (Ch=%d) !\r\n",
+                              "Arinc429_Monitor: Arinc429 Data Present Lost (Ch=%d)!",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                      Arinc429MgrCreateTimeOutSysLog(SYS_A429_DATA_LOSS_TIMEOUT, Channel);
@@ -827,7 +827,7 @@ void Arinc429MgrBITTask ( void *pParam )
                   {
                      // Output Debug Message on transition
                      sprintf (GSE_OutLine,
-                              "\r\nArinc429_Monitor: Arinc429 Startup Time Out (Ch=%d)!\r\n",
+                              "Arinc429_Monitor: Arinc429 Startup Time Out (Ch=%d)!",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                      Arinc429MgrCreateTimeOutSysLog(SYS_A429_STARTUP_TIMEOUT, Channel);
@@ -1430,7 +1430,7 @@ BOOLEAN Arinc429MgrSensorTest (UINT16 nIndex)
 #ifdef ARINC429_DEBUG_COMPILE
             /*vcast_dont_instrument_start*/
             // Debug testing
-            sprintf (GSE_OutLine, "\r\nArinc429_SensorTest: %s\r\n", SSMFailLog.FailMsg);
+            sprintf (GSE_OutLine, "Arinc429_SensorTest: %s", SSMFailLog.FailMsg);
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
             /*vcast_dont_instrument_end*/
 #endif
@@ -1834,10 +1834,17 @@ static void Arinc429MgrCfgReduction ( ARINC429_RX_CFG_PTR pRxChanCfg,
                // Store the parameter configuration for the label SDI combination
                pSdi->ProtocolStorage.ConversionData.WordInfoIndex =
                                                      pChanData->ReduceParamCount;
-               pSdi->ProtocolStorage.ConversionData.Scale         =
-                        (DISCRETE == pWordInfo->Format) ? 1.0f :
-                        (FLOAT32)(((FLOAT32)pRxChanCfg->Parameter[Index].Scale)
-                         / ((FLOAT32)(1 << pWordInfo->WordSize)));
+               pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;												 
+												 
+               if (BNR == pWordInfo->Format)
+               {
+                  pSdi->ProtocolStorage.ConversionData.Scale /= 
+                                                       (FLOAT32)(1 << pWordInfo->WordSize);
+               }
+               else if ( DISCRETE == pWordInfo->Format)
+               {
+                  pSdi->ProtocolStorage.ConversionData.Scale = 1.0f;
+               }
                pSdi->ProtocolStorage.ReduceData.Tol  = pRxChanCfg->Parameter[Index].Tolerance;
                pSdi->ProtocolStorage.bIgnoreSDI      = TRUE;
                pSdi->ProtocolStorage.bReduce         = TRUE;
@@ -1851,10 +1858,16 @@ static void Arinc429MgrCfgReduction ( ARINC429_RX_CFG_PTR pRxChanCfg,
             pSdi->Accept  = TRUE;
             // Store the parameter configuration for the label SDI combination
             pSdi->ProtocolStorage.ConversionData.WordInfoIndex = pChanData->ReduceParamCount;
-            pSdi->ProtocolStorage.ConversionData.Scale         =
-                        (DISCRETE == pWordInfo->Format) ? 1.0f :
-                        (FLOAT32)(((FLOAT32)pRxChanCfg->Parameter[Index].Scale)
-                        / ((FLOAT32)(1 << pWordInfo->WordSize)));
+            pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;												 
+            if (BNR == pWordInfo->Format)
+            {
+               pSdi->ProtocolStorage.ConversionData.Scale /= 
+                                                     (FLOAT32)(1 << pWordInfo->WordSize);
+            }
+            else if ( DISCRETE == pWordInfo->Format)
+            {
+               pSdi->ProtocolStorage.ConversionData.Scale = 1.0f;
+            }
             pSdi->ProtocolStorage.ReduceData.Tol   = pRxChanCfg->Parameter[Index].Tolerance;
             pSdi->ProtocolStorage.bReduce          = TRUE;
             pSdi->ProtocolStorage.bFailedOnce      = FALSE;
@@ -2110,7 +2123,7 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
             /*vcast_dont_instrument_start*/
             // Debug testing
             snprintf ( GSE_OutLine, sizeof(GSE_OutLine),
-            "\r\nArinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d\r\n",
+            "Arinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d",
                       raw,
             bcdData,
             digit);
@@ -2445,7 +2458,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
 
                   // Debug testing
                   snprintf (GSE_OutLine, sizeof(GSE_OutLine),
-                            "\r\nArinc429_ParameterTest: %s\r\n",
+                            "Arinc429_ParameterTest: %s",
                            SSMFailLog.FailMsg);
                   GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                   /*vcast_dont_instrument_end*/
@@ -2620,7 +2633,7 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                strcat(SSMFailLog.FailMsg, TempStr);
 
                // Debug testing
-               sprintf (GSE_OutLine, "\r\nArinc429_ParamTest: %s\r\n", SSMFailLog.FailMsg);
+               sprintf (GSE_OutLine, "Arinc429_ParamTest: %s", SSMFailLog.FailMsg);
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                /*vcast_dont_instrument_end*/
 #endif
@@ -3698,6 +3711,13 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 61  *****************
+ * User: John Omalley Date: 4/17/14    Time: 2:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1261 - Fixed Data Reduction for BCD parameters
+ * SCR 1168 - Fixed Debug messages with timestamp on same line
+ * SCR 1146 - Changed Arinc429 data reduction scale parameter to FLOAT
  * 
  * *****************  Version 60  *****************
  * User: John Omalley Date: 12-12-02   Time: 9:59a

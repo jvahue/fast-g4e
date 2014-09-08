@@ -1,6 +1,6 @@
 #define FASTMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        FastMgrUserTables.c
@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 32 $  $Date: 12-12-20 4:12p $
+   $Revision: 34 $  $Date: 9/03/14 5:10p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -35,7 +35,6 @@ USER_ENUM_TBL time_source_strs[] =
 {
   {"LOCAL", TIME_SOURCE_LOCAL},
   {"MS",    TIME_SOURCE_MS},
-  {"REMOTE",TIME_SOURCE_REMOTE},
   {NULL,0}
 };
 
@@ -507,11 +506,21 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
  * 
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:10p
+ * Updated in $/software/control processor/code/application
+ * SCR #1030 - Time Sync to REMOTE option CodeReview change
+ * 
+ * *****************  Version 33  *****************
+ * User: Contractor V&v Date: 7/28/14    Time: 6:50p
+ * Updated in $/software/control processor/code/application
+ * Removed support for TIME_SOURCE_REMOTE
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-12-20   Time: 4:12p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 31  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 2:56p
  * Updated in $/software/control processor/code/application

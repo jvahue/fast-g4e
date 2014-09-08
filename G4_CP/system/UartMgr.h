@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
     
     VERSION
-      $Revision: 15 $  $Date: 12-11-28 2:09p $     
+      $Revision: 17 $  $Date: 1/27/14 1:48p $     
 
 ******************************************************************************/
 
@@ -58,32 +58,27 @@
                          UARTMGR_CH_DEFAULT("UART 3")
 
 
-#define UARTMGR_MAX_PARAM_WORD 128
-
+#define UARTMGR_MAX_PARAM_WORD            128
 #define UART_WORD_TIMEOUT_FAIL_MSG_SIZE   128   // CBIT Word timeout failure 
                                                 //     message size 
-
-#define UART_CFG_NAME_SIZE 32 
-
-#define UART_DSB_TIMEOUT 0 
+#define UART_CFG_NAME_SIZE                 32 
+#define UART_DSB_TIMEOUT                    0 
 
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
-typedef BOOLEAN (*PROTOCOL_HNDL) ( UINT8 *data, UINT16 cnt, UINT16 ch, 
-                                   void *runtime_data_ptr, void *word_info_ptr);
-
-typedef UINT16 (*PROTOCOL_FILE_HDR) ( UINT8 *dest, const UINT16 max_size, UINT16 ch ); 
-
-typedef void (*PROTOCOL_DOWNLOAD_HNDL) ( UINT8 port, 
-                                         BOOLEAN *bStartDownload, 
-                                         BOOLEAN *bDownloadCompleted,
-                                         BOOLEAN *bWriteInProgress,
-                                         BOOLEAN *bWriteOk, 
-                                         BOOLEAN *bHalt,
-                                         BOOLEAN *bNewRec,
-                                         UINT32  **pSize,
-                                         UINT8   **pData ); 
+typedef BOOLEAN (*PROTOCOL_HNDL)          ( UINT8 *data, UINT16 cnt, UINT16 ch, 
+                                            void *runtime_data_ptr, void *word_info_ptr );
+typedef UINT16  (*PROTOCOL_FILE_HDR)      ( UINT8 *dest, const UINT16 max_size, UINT16 ch ); 
+typedef void    (*PROTOCOL_DOWNLOAD_HNDL) ( UINT8 port, 
+                                            BOOLEAN *bStartDownload, 
+                                            BOOLEAN *bDownloadCompleted,
+                                            BOOLEAN *bWriteInProgress,
+                                            BOOLEAN *bWriteOk, 
+                                            BOOLEAN *bHalt,
+                                            BOOLEAN *bNewRec,
+                                            UINT32  **pSize,
+                                            UINT8   **pData ); 
 
 
 /**********************************
@@ -128,30 +123,26 @@ typedef UARTMGR_CFG UARTMGR_CFGS[UART_NUM_OF_UARTS];
 **********************************/
 typedef struct 
 {
-  UINT16 id; 
-  UINT16 scale;  
-  FLOAT32 scale_lsb;   // lsb value (from scale) of the integer val for 
-                       //    conversion to and from eng val.  
-  UINT16 val_raw; 
-  UINT32 rxTime;    // Rx time in tick for run time "delta time" recording
-  TIMESTAMP rxTS;   // Rx time in TS format for snap shot recording
-  BOOLEAN bNewVal; 
-  BOOLEAN bValid; 
-  BOOLEAN bReInit;  // On transition from invalid to valid data should 
-                    //   Reinit data reduction. 
-  
-  UINT16  dataRed_val; 
-  UINT16  dataRed_TimeDelta; 
-  
-  UINT32  cfgTimeOut;   
-  
+  UINT16    id; 
+  UINT16    scale;  
+  FLOAT32   scale_lsb;          // lsb value (from scale) of the integer val for 
+                                //    conversion to and from eng val.  
+  UINT16    val_raw; 
+  UINT32    rxTime;             // Rx time in tick for run time "delta time" recording
+  TIMESTAMP rxTS;               // Rx time in TS format for snap shot recording
+  BOOLEAN   bNewVal; 
+  BOOLEAN   bValid; 
+  BOOLEAN   bReInit;            // On transition from invalid to valid data should 
+                                //   Reinit data reduction. 
+  UINT16    dataRed_val; 
+  UINT16    dataRed_TimeDelta; 
+  UINT32    cfgTimeOut;   
 } UARTMGR_RUNTIME_DATA, *UARTMGR_RUNTIME_DATA_PTR; 
 
 typedef struct 
 {
   UARTMGR_RUNTIME_DATA runtime_data; 
-  REDUCTIONDATASTRUCT reduction_data; 
-  
+  REDUCTIONDATASTRUCT  reduction_data; 
 } UARTMGR_PARAM_DATA, *UARTMGR_PARAM_DATA_PTR; 
 
 #define UARTMGR_TIMEDELTA_OUTOFSEQUENCE 0xFF
@@ -210,28 +201,28 @@ typedef struct
 #pragma pack(1)                                             
 typedef struct 
 {
-  UINT8  timeDelta; 
-  UINT8  paramId; 
-  UINT16 paramVal; 
+  UINT8   timeDelta; 
+  UINT8   paramId; 
+  UINT16  paramVal; 
   BOOLEAN bValidity; 
 } UARTMGR_STORE_DATA; 
 
 typedef struct 
 {
   TIMESTAMP  ts; 
-  UINT8  paramId; 
-  UINT16 paramVal; 
-  BOOLEAN bValidity; 
+  UINT8      paramId; 
+  UINT16     paramVal; 
+  BOOLEAN    bValidity; 
 } UARTMGR_STORE_SNAP_DATA; 
 #pragma pack()
 
 
 typedef struct 
 {
-  UINT8  data[UARTMGR_RAW_RX_BUFFER_SIZE];  // 3840 char * 5 (sizeof _STORE_DATA)
-  UINT32 readOffset; 
-  UINT32 writeOffset;
-  UINT32 cnt; 
+  UINT8   data[UARTMGR_RAW_RX_BUFFER_SIZE];  // 3840 char * 5 (sizeof _STORE_DATA)
+  UINT32  readOffset; 
+  UINT32  writeOffset;
+  UINT32  cnt; 
   BOOLEAN bOverFlow;  
 } UARTMGR_STORE_BUFF, *UARTMGR_STORE_BUFF_PTR; 
 
@@ -255,27 +246,24 @@ typedef enum
 
 typedef struct 
 {
-  UINT16 id;             // Parameter Id (specific to Protocol)
-                         //  0 == Not Used 
-  UINT16 word_size;      // Size of parameter to decode 
-  UINT16 msb_position;   // Start position of the MSB of the parameter
-  UINT32 dataloss_time;  // Data Loss timeout for param (in msec)
-  UINT16 nSensor;        // Sensor index requesting this entry 
-  
-  UINT16 nIndex;         // Index to the UartMgr Param Data struct 
-  
-  UART_DATA_TYPE type;   // "BNR" or "DISC" 
-  
-  BOOLEAN bFailed;       // This word param has failed its data loss timeout 
+  UINT16         id;             // Parameter Id (specific to Protocol)
+                                 //  0 == Not Used 
+  UINT16         word_size;      // Size of parameter to decode 
+  UINT16         msb_position;   // Start position of the MSB of the parameter
+  UINT32         dataloss_time;  // Data Loss timeout for param (in msec)
+  UINT16         nSensor;        // Sensor index requesting this entry 
+  UINT16         nIndex;         // Index to the UartMgr Param Data struct 
+  UART_DATA_TYPE type;           // "BNR" or "DISC" 
+  BOOLEAN         bFailed;       // This word param has failed its data loss timeout 
 } UARTMGR_WORD_INFO, *UARTMGR_WORD_INFO_PTR;
 
 
 typedef struct
 {
-  TASK_INDEX taskID;    // Task ID for UartMgr_Task from TM
-  UINT16     nChannel;  // UART channel index
-  PROTOCOL_HNDL exec_protocol; 
-  PROTOCOL_FILE_HDR get_protocol_fileHdr;
+  TASK_INDEX             taskID;    // Task ID for UartMgr_Task from TM
+  UINT16                 nChannel;  // UART channel index
+  PROTOCOL_HNDL          exec_protocol; 
+  PROTOCOL_FILE_HDR      get_protocol_fileHdr;
   PROTOCOL_DOWNLOAD_HNDL download_protocol_hndl;
 } UARTMGR_TASK_PARAMS, *UARTMGR_TASK_PARAMS_PTR;
 
@@ -300,7 +288,7 @@ typedef struct
 typedef struct 
 {
   RESULT result; // 0x002A1000, SYS_UART_DATA_LOSS_TIMEOUT
-  CHAR sFailMsg[UART_WORD_TIMEOUT_FAIL_MSG_SIZE];
+  CHAR   sFailMsg[UART_WORD_TIMEOUT_FAIL_MSG_SIZE];
 } SYS_UART_CBIT_FAIL_WORD_TIMEOUT_LOG; 
 
 typedef struct 
@@ -354,8 +342,8 @@ typedef struct
   
   BOOLEAN bNewRec; 
   
-  UINT32 *pSize; // Pointer to data size count 
-  UINT8  *pData; // Pointer to data buffer 
+  UINT32  *pSize; // Pointer to data size count 
+  UINT8   *pData; // Pointer to data buffer 
   
   BOOLEAN bHalt;  
   // Between UartMgr and Protocol
@@ -370,14 +358,14 @@ typedef struct
 #define UARTMGR_DEBUG_BUFFER_SIZE 1024
 typedef struct
 {
-  BOOLEAN bDebug;   // Enable debug display 
-  UINT16 ch;        // Channel to debug - default is firt UART (not GSE) 
-  UINT16 num_bytes; // Number of bytes to display every iteration. 
+  BOOLEAN bDebug;    // Enable debug display 
+  UINT16  ch;        // Channel to debug - default is firt UART (not GSE) 
+  UINT16  num_bytes; // Number of bytes to display every iteration. 
   
-  UINT8 data[UARTMGR_DEBUG_BUFFER_SIZE]; 
-  UINT32 readOffset;
-  UINT32 writeOffset;
-  UINT32 cnt; 
+  UINT8   data[UARTMGR_DEBUG_BUFFER_SIZE]; 
+  UINT32  readOffset;
+  UINT32  writeOffset;
+  UINT32  cnt; 
   
 } UARTMGR_DEBUG, *UARTMGR_DEBUG_PTR; 
 
@@ -411,33 +399,22 @@ typedef struct
                              Package Exports Functions
 ******************************************************************************/
 
-EXPORT void    UartMgr_Initialize       (void); 
-
-EXPORT BOOLEAN UartMgr_SensorTest       (UINT16 nIndex);
-EXPORT BOOLEAN UartMgr_InterfaceValid   (UINT16 nIndex);  
-EXPORT FLOAT32 UartMgr_ReadWord         (UINT16 nIndex, UINT32 *tickCount);
-
-EXPORT UINT16  UartMgr_SensorSetup      (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor);
-
-EXPORT UARTMGR_STATUS_PTR  UartMgr_GetStatus   ( UINT8 index ); 
-EXPORT UARTMGR_CFG_PTR     UartMgr_GetCfg      ( UINT8 index ); 
-
-EXPORT UINT16  UartMgr_ReadBuffer ( void *pDest, UINT32 chan, UINT16 nMaxByteSize); 
+EXPORT void    UartMgr_Initialize         ( void ); 
+EXPORT BOOLEAN UartMgr_SensorTest         ( UINT16 nIndex );
+EXPORT BOOLEAN UartMgr_InterfaceValid     ( UINT16 nIndex );  
+EXPORT FLOAT32 UartMgr_ReadWord           ( UINT16 nIndex, UINT32 *tickCount );
+EXPORT UINT16  UartMgr_SensorSetup        ( UINT32 gpA, UINT32 gpB, 
+                                            UINT8 param, UINT16 nSensor );
+EXPORT UINT16  UartMgr_ReadBuffer         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize ); 
 EXPORT UINT16  UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSize, 
                                             BOOLEAN bBeginSnapshot ); 
 EXPORT void    UartMgr_ResetBufferTimeCnt ( UINT32 chan ); 
-
-EXPORT UINT16  UartMgr_GetFileHdr    ( void *pDest, UINT32 chan, UINT16 nMaxByteSize ); 
-EXPORT UINT16  UartMgr_GetSystemHdr  ( void *pDest, UINT16 nMaxByteSize );
-
-EXPORT UARTMGR_DEBUG_PTR UartMgr_GetDebug (void); 
-EXPORT void UartMgr_FlushChannels (void); 
-
-EXPORT UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSize, 
-                                       DL_WRITE_STATUS *pDL_WrStatus ); 
-
-
-EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex ); 
+EXPORT UINT16  UartMgr_GetFileHdr         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize ); 
+EXPORT UINT16  UartMgr_GetSystemHdr       ( void *pDest, UINT16 nMaxByteSize );
+EXPORT void    UartMgr_FlushChannels      ( void ); 
+EXPORT UINT8*  UartMgr_DownloadRecord     ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSize, 
+                                            DL_WRITE_STATUS *pDL_WrStatus ); 
+EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex ); 
 
 #endif // UARTMGR_H               
 
@@ -445,6 +422,18 @@ EXPORT void UartMgr_DownloadStop ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 1/27/14    Time: 1:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1244 - UartMgr_Download Record unitialized variable, plus code
+ * review updates.
+ * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 7/23/13    Time: 4:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1244 - UartMgr_Download Record unitialized variable, plus code
+ * review updates.
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:09p

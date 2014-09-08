@@ -2,7 +2,7 @@
 #define POWERMANAGER_H
 
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         PowerManager.h
@@ -11,7 +11,7 @@
                   the aircraft Bus or Battery power supplies.
 
     VERSION
-    $Revision: 35 $  $Date: 12/11/12 8:31p $
+    $Revision: 37 $  $Date: 9/03/14 5:26p $
 
 ******************************************************************************/
 
@@ -77,8 +77,20 @@ typedef enum
     BATTERY_MAX_STATE
 } BATTERY_STATE;
 */
-typedef BOOLEAN (*APPSHUTDOWN_FUNC)(void);
 
+
+// Set of values used by AppShutdown (PmCallAppXXXXXXXX) functions to notify
+// the registered callback function as to the reason it is being called.
+// This allows a single callback function to be invoked for
+// multiple reasons (e.g. ShutdownNormal, ShutdownQuick, BusInterrupt, etc)
+// and modify its behavior accordingly
+typedef enum
+{
+  PM_APPSHUTDOWN_NORMAL = 0, // Normal Shutdown
+  PM_APPSHUTDOWN_QUICK,      // Quick Shutdown
+  PM_APPSHUTDOWN_BUS_INTR,   // Bus Interrupt/Glitch
+  PM_MAX_APPSHUTDOWN
+}PM_APPSHUTDOWN_REASON;
 
 // PM States
 typedef enum
@@ -90,6 +102,8 @@ typedef enum
     PM_HALT,                  // System halted due to power failure
     PM_MAX_STATE
 } PM_STATE;
+
+typedef BOOLEAN (*APPSHUTDOWN_FUNC)(PM_APPSHUTDOWN_REASON);
 
 // PM DATA Structure
 typedef struct
@@ -149,8 +163,6 @@ typedef struct
     BOOLEAN       bHaltCompleted;         // Flag to indicate HALT processing completed
                                           //   successfully.
 } PM_EEPROM_DATA;
-
-
 
 // PM_LOG_TYPES
 /*
@@ -229,6 +241,8 @@ typedef struct {
 
 #pragma pack()
 
+// Battery latching control variables
+
 // Busy Indicators used by: PmRegisterAppBusyFlag
 // Each entry represents an offset into the array of pointers
 // to busy tasks, activities.
@@ -240,9 +254,19 @@ typedef enum
   PM_WAIT_VPN_CONN,                // Wait for a VPN connection
   PM_MS_FILE_XFR_BUSY,             // MS is transferring to ground
   PM_FSM_BUSY,                     // Fast State Mgr indicates app busy
+  PM_NVMGR_BUSY,                   // NVM Mgr is direct-updating P/B to EEPROM
   PM_MAX_BUSY
 } PM_BUSY_INDEX;
 
+// This enum control when the Busy flag is
+typedef enum
+{
+  PM_BUSY_NONE   = 0,  // Initial state, unused.
+  PM_BUSY_LEGACY = 1,  // The busy flag at PM_BUSY_INDEX is used when in Legacy cfg mode
+  PM_BUSY_FSM    = 2,  // The busy flag at PM_BUSY_INDEX is used when in FSM cfg mode
+  PM_BUSY_ALL    = 3,  // The busy flag at PM_BUSY_INDEX is used when in legacy or FSM cfg
+  PM_MAX_BUSY_USAGE
+}PM_BUSY_USAGE;
 
 
 /******************************************************************************
@@ -273,6 +297,7 @@ EXPORT PM_EEPROM_DATA Pm_Eeprom;
 /******************************************************************************
                              Package Exports Functions
 ******************************************************************************/
+EXPORT void PmPreInit(void);
 EXPORT void PmInitializePowerManager(void);
 EXPORT __interrupt void PowerFailIsr (void);
 EXPORT void PmInsertAppShutDownNormal( APPSHUTDOWN_FUNC func );
@@ -280,9 +305,12 @@ EXPORT void PmInsertAppShutDownQuick( APPSHUTDOWN_FUNC func );
 EXPORT void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func );
 EXPORT void PmSetPowerOnTime( TIMESTAMP *pPtr );
 EXPORT BOOLEAN PmFileInit(void);
-EXPORT void PmRegisterAppBusyFlag(PM_BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag );
+EXPORT void PmRegisterAppBusyFlag(PM_BUSY_INDEX busyIndex,
+                                  BOOLEAN *pAppBusyFlag,
+                                  PM_BUSY_USAGE usage );
 EXPORT BOOLEAN PmFSMAppBusyGetState(INT32 param);
 EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
+EXPORT void PmSetFsmActive(void);
 
 #ifdef GENERATE_SYS_LOGS
   EXPORT void PmCreateAllInternalLogs ( void );
@@ -295,6 +323,17 @@ EXPORT void PmFSMAppBusyRun(BOOLEAN Run, INT32 param);
  *  MODIFICATIONS
  *    $History: PowerManager.h $
  * 
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:26p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
+ *
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 5:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1055 EEPROM Backup not updated before SHUTDOWN and SCR 1204 Legacy
+ * app busy input still latches battery when FSM enabled
+ *
  * *****************  Version 35  *****************
  * User: Jim Mood     Date: 12/11/12   Time: 8:31p
  * Updated in $/software/control processor/code/system

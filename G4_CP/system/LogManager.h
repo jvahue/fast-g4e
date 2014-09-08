@@ -1,7 +1,7 @@
 #ifndef LOGMNG_H
 #define LOGMNG_H
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:          LogManager.h
@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 58 $  $Date: 12/27/12 5:00p $
+    $Revision: 60 $  $Date: 9/03/14 5:18p $
 
 ******************************************************************************/
 
@@ -404,7 +404,6 @@ EXPORT void            LogWriteETM       ( SYS_APP_ID logID, LOG_PRIORITY priori
 EXPORT BOOLEAN         LogIsLogEmpty     ( void );
 EXPORT BOOLEAN         LogIsEraseInProgress( void );
 EXPORT void            LogPauseWrites ( BOOLEAN Enable, UINT16 Delay_S );
-EXPORT BOOLEAN         LogWriteIsPaused ( void );
 EXPORT LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus( void );
 EXPORT LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus(LOG_CBIT_HEALTH_COUNTS PrevCount);
 EXPORT LOG_CBIT_HEALTH_COUNTS LogAddPrevCBITHealthStatus(LOG_CBIT_HEALTH_COUNTS CurrCnt,
@@ -416,7 +415,6 @@ EXPORT BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType );
 EXPORT const LOG_CONFIG* LogGetConfigPtr         ( void );
 EXPORT void              LogRegisterEraseCleanup ( DO_CLEANUP Func );
 EXPORT UINT32            LogGetLastAddress       ( void );
-EXPORT LOG_QUEUE_STATUS  LogQueuePut             ( LOG_REQUEST Entry );
 EXPORT UINT32            LogGetLogCount          ( void );
 EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
 
@@ -426,11 +424,21 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
  *  MODIFICATIONS
  *    $History: LogManager.h $
  * 
+ * *****************  Version 60  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - CR updates
+ *
+ * *****************  Version 59  *****************
+ * User: Contractor V&v Date: 8/26/14    Time: 3:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - Compliance cleanup
+ *
  * *****************  Version 58  *****************
  * User: Jim Mood     Date: 12/27/12   Time: 5:00p
  * Updated in $/software/control processor/code/system
  * SCR #1197 Code Review Changes
- * 
+ *
  * *****************  Version 57  *****************
  * User: Jim Mood     Date: 12/24/12   Time: 11:04a
  * Updated in $/software/control processor/code/system

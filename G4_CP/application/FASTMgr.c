@@ -1,6 +1,6 @@
 #define FASTMGR_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTMgr.c
@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 123 $  $Date: 12-12-20 5:00p $
+   $Revision: 126 $  $Date: 9/03/14 5:09p $
 
 
 ******************************************************************************/
@@ -223,9 +223,9 @@ void FAST_Init(void)
   //FAST Manager Task
 
   // Register the application busy flag with the Power Manager.
-  PmRegisterAppBusyFlag(PM_FAST_REC_TRIG_BUSY, &fastStatus.recording);
-  PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY, &m_IsRecordBusy);
-  PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &fastStatus.logTransferToGSActive);
+  PmRegisterAppBusyFlag(PM_FAST_REC_TRIG_BUSY, &fastStatus.recording, PM_BUSY_LEGACY);
+  PmRegisterAppBusyFlag(PM_FAST_RECORDING_BUSY,&m_IsRecordBusy, PM_BUSY_LEGACY);
+  PmRegisterAppBusyFlag(PM_WAIT_VPN_CONN, &fastStatus.logTransferToGSActive, PM_BUSY_LEGACY);
 
   memset(&task_info, 0, sizeof(task_info));
   strncpy_safe(task_info.Name, sizeof(task_info.Name),"FAST Manager",_TRUNCATE);
@@ -1086,6 +1086,7 @@ void FAST_AtStartOfRecord(void)
 {
   UploadMgr_SetUploadEnable(FALSE);
   DataMgrRecord(TRUE);                     //Signal Data Mgr
+  CM_UpdateRecordingState(TRUE);           // Signal the Clock Mgr
 
 }
 
@@ -1104,6 +1105,7 @@ void FAST_AtStartOfRecord(void)
 static
 void FAST_AtEndOfRecord(void)
 {
+  CM_UpdateRecordingState(FALSE);   // Signal the Clock Mgr
 }
 
 /******************************************************************************
@@ -1581,16 +1583,31 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 126  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:09p
+ * Updated in $/software/control processor/code/application
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording - CR fixes
+ * 
+ * *****************  Version 125  *****************
+ * User: Contractor V&v Date: 8/26/14    Time: 4:20p
+ * Updated in $/software/control processor/code/application
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording
+ *
+ * *****************  Version 124  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 4:58p
+ * Updated in $/software/control processor/code/application
+ * Fix legacy Battery latch when FSM enabled
+ *
  * *****************  Version 123  *****************
  * User: John Omalley Date: 12-12-20   Time: 5:00p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 122  *****************
  * User: John Omalley Date: 12-12-20   Time: 4:12p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 121  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 2:56p
  * Updated in $/software/control processor/code/application
