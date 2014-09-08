@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 86 $  $Date: 12-12-08 1:32p $
+      $Revision: 87 $  $Date: 4/16/14 11:50a $
 
 ******************************************************************************/
 
@@ -1424,7 +1424,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    memset(str,0,sizeof(str));
    sprintf(str,"Sensor (%d) - %s",
             pSensor->nSensorIndex, sensorFailureNames[type] );
-   GSE_DebugStr(NORMAL,FALSE, str);
+   GSE_DebugStr(NORMAL, TRUE, str);
 
    // Determine the correct log ID to store
    switch (type)
@@ -2012,6 +2012,12 @@ static void SensorDumpASCIILiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 87  *****************
+ * User: John Omalley Date: 4/16/14    Time: 11:50a
+ * Updated in $/software/control processor/code/system
+ * SCR 1168 - Fixed specific complaint for debug message not having a
+ * timestamp on sensor failure.
  * 
  * *****************  Version 86  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p

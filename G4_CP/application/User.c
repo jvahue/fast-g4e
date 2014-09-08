@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 115 $  $Date: 13-01-21 3:46p $
+   $Revision: 116 $  $Date: 4/07/14 11:54a $
 
 ******************************************************************************/
 
@@ -1032,7 +1032,7 @@ BOOLEAN User_ValidateMessage(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
   {
     //Report the index is not applicable to this command
     if(MsgTbl->MsgIndexMin == USER_INDEX_NOT_DEFINED &&
-       MsgTbl->MsgIndexMin == USER_INDEX_NOT_DEFINED)
+       MsgTbl->MsgIndexMax == USER_INDEX_NOT_DEFINED)
     {
       strncpy_safe(RspStr,(INT32)Len, USER_MSG_NOT_INDEXABLE, _TRUNCATE);
       result = FALSE;
@@ -3099,6 +3099,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 116  *****************
+ * User: John Omalley Date: 4/07/14    Time: 11:54a
+ * Updated in $/software/control processor/code/application
+ * SCR 1212 - Fixed Range check in User_ValidateMessage() function
  * 
  * *****************  Version 115  *****************
  * User: John Omalley Date: 13-01-21   Time: 3:46p

@@ -1,6 +1,6 @@
 #define MSSC_BODY
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         MSStsCtl.c
@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 63 $  $Date: 12/14/12 8:05p $
+      $Revision: 65 $  $Date: 9/03/14 5:21p $
 
 ******************************************************************************/
 
@@ -131,7 +131,7 @@ void MSSC_Init(void)
 
   // Register flag indicating file transfering MS -> GRND.
   m_MsFileXfer = FALSE;
-  PmRegisterAppBusyFlag(PM_MS_FILE_XFR_BUSY, &m_MsFileXfer);
+  PmRegisterAppBusyFlag(PM_MS_FILE_XFR_BUSY, &m_MsFileXfer, PM_BUSY_LEGACY);
 
   memset(&m_GetMSInfoRsp,0,sizeof(m_GetMSInfoRsp));
 
@@ -1041,6 +1041,17 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
  * 
+ * *****************  Version 65  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
+ *
+ * *****************  Version 64  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 6:09p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery while FSM
+ * enabled
+ *
  * *****************  Version 63  *****************
  * User: Jim Mood     Date: 12/14/12   Time: 8:05p
  * Updated in $/software/control processor/code/system

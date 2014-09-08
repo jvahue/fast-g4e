@@ -1,6 +1,6 @@
 #define SYS_NVMGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:       NVMgr.c
@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 75 $  $Date: 12-11-13 5:46p $
+    $Revision: 78 $  $Date: 9/03/14 5:21p $
 
 
 ******************************************************************************/
@@ -177,6 +177,9 @@ static NV_RUNTIME_INFO NV_RuntimeInfo[NV_MAX_FILE];
 //at initialization time.
 static INT32 NV_DevSpaceUsed[NV_MAX_DEV];
 
+//
+static BOOLEAN m_directWriteBusy;
+
 //#define DEBUG_NVMGR_TASK
 
 /*****************************************************************************/
@@ -217,7 +220,7 @@ void  NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File);
  ****************************************************************************/
 void NV_Init(void)
 {
-  TCB     TaskInfo;
+  TCB     tcb;
   INT32   i;
   INT32   j;
   NV_DEVS_ID primary;
@@ -284,22 +287,27 @@ void NV_Init(void)
     }
   }
 
-  // Create the NV Manager Task
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strcpy(TaskInfo.Name, "NV Mem Manager");
-  TaskInfo.TaskID         = NV_Mem_Manager;
-  TaskInfo.Function       = NV_MgrTask;
-  TaskInfo.Priority       = taskInfo[NV_Mem_Manager].priority;
-  TaskInfo.Type           = taskInfo[NV_Mem_Manager].taskType;
-  TaskInfo.modes          = taskInfo[NV_Mem_Manager].modes;
-  TaskInfo.MIFrames       = taskInfo[NV_Mem_Manager].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[NV_Mem_Manager].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[NV_Mem_Manager].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
+  // Initialize the write-direct flag and register it with PM
+  m_directWriteBusy = FALSE;
+  // Register the directwrite busy flag to be used for Legacy and FSM
+  PmRegisterAppBusyFlag(PM_NVMGR_BUSY, &m_directWriteBusy, PM_BUSY_ALL);
 
-  TmTaskCreate(&TaskInfo);
+  // Create the NV Manager Task
+  memset(&tcb, 0, sizeof(tcb));
+  strcpy(tcb.Name, "NV Mem Manager");
+  tcb.TaskID         = NV_Mem_Manager;
+  tcb.Function       = NV_MgrTask;
+  tcb.Priority       = taskInfo[NV_Mem_Manager].priority;
+  tcb.Type           = taskInfo[NV_Mem_Manager].taskType;
+  tcb.modes          = taskInfo[NV_Mem_Manager].modes;
+  tcb.MIFrames       = taskInfo[NV_Mem_Manager].MIFframes;
+  tcb.Rmt.InitialMif = taskInfo[NV_Mem_Manager].InitialMif;
+  tcb.Rmt.MifRate    = taskInfo[NV_Mem_Manager].MIFrate;
+  tcb.Enabled        = TRUE;
+  tcb.Locked         = FALSE;
+  tcb.pParamBlock    = NULL;
+
+  TmTaskCreate(&tcb);
 }
 
 
@@ -688,7 +696,7 @@ void NV_Write(NV_FILE_ID FileID, UINT32 Offset, const void* Data, UINT32 Size)
     }
 
     //Find the first sector written to
-    FirstSector = (File->PrimaryOffset+Offset) / File->PrimaryDev->SectorSize;
+    FirstSector = (File->BackupOffset+Offset) / File->BackupDev->SectorSize;
 
     // Compute the number of times the written block crosses a sector boundary.
     // This will be the total number of sectors that need to be flagged.
@@ -764,6 +772,9 @@ RESULT NV_WriteNow(NV_FILE_ID FileID, UINT32 Offset, void* Data, UINT32 Size)
     "%s: write %d bytes beyond EOF",
     PromFileName[FileID], (File->Size-NV_CRC_SIZE) - (Offset+Size));
 
+  // Signal that the
+  m_directWriteBusy = TRUE;
+
   for(FileType = NV_PRIMARY; FileType < NV_FILE_TYPE_MAX; FileType++)
   {
     //Setup pointers to the requested device, either Primary or Backup
@@ -829,6 +840,8 @@ RESULT NV_WriteNow(NV_FILE_ID FileID, UINT32 Offset, void* Data, UINT32 Size)
       TotalWritten += SizeWritten;
     }
   }
+
+  m_directWriteBusy = FALSE;
 
   return result;
 }
@@ -1699,6 +1712,21 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  *  MODIFICATIONS
  *    $History: NVMgr.c $
  * 
+ * *****************  Version 78  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM Data- CR changes/ CR updates
+ *
+ * *****************  Version 77  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 5:09p
+ * Updated in $/software/control processor/code/system
+ * EEPROM Backup not updated before SHUTDOWN
+ *
+ * *****************  Version 76  *****************
+ * User: John Omalley Date: 3/31/14    Time: 10:43a
+ * Updated in $/software/control processor/code/system
+ * SCR 1208 - Changed Primary to Backup
+ *
  * *****************  Version 75  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
  * Updated in $/software/control processor/code/system
@@ -1708,7 +1736,7 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 73  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:05a
  * Updated in $/software/control processor/code/system

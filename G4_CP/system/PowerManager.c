@@ -1,6 +1,6 @@
 #define POWERMANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
    File:         PowerManager.c
@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 65 $  $Date: 12/11/12 8:31p $
+   $Revision: 68 $  $Date: 9/03/14 5:24p $
 
 
 ******************************************************************************/
@@ -56,6 +56,20 @@
 /* Local Typedefs                                                            */
 /*****************************************************************************/
 
+
+// PM_LATCH_CTRL Structure
+typedef struct
+{
+  BOOLEAN*       pBusyFlag; // Ptr to app-supplied flag indicating the task is busy
+  PM_BUSY_USAGE  usage;     // Indicates under which execution mode pBusyFlag is used.
+}PM_LATCH_ENTRY;
+
+typedef struct
+{
+  BOOLEAN bFsmActive;    // Indicates that FSM is configured.
+  PM_LATCH_ENTRY task[PM_MAX_BUSY];
+}PM_LATCH_CTRL;
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -67,7 +81,8 @@ static PM_INTERNAL_LOG pmInternalLog;
 
 // Array of pointers to tasks, activities, etc which constitute
 // app-busy status during shutdown
-static BOOLEAN* busyArray[PM_MAX_BUSY];
+static PM_LATCH_CTRL m_latchCtrl;    // Control structure for task busy flags
+
 static BOOLEAN  m_FSMAppBusy;
 POWERMANAGER_CFG m_PowerManagerCfg;
 
@@ -81,8 +96,6 @@ static BOOLEAN PmCallAppShutDownNormal (void);
 static void    PmCallAppBusInterrupt (void);
 
 static BOOLEAN PmUpdateAppBusyStatus(void);
-
-static void PmSetCfg( POWERMANAGER_CFG *Cfg );
 
 static void PmGlitchProcess ( void );
 static void PmBatteryProcess ( void );
@@ -190,15 +203,11 @@ void PmInitializePowerManager(void)
     Pm.battLatchTime = m_PowerManagerCfg.BatteryLatchTime * PM_MIF_PER_SEC;
     Pm.Battery = m_PowerManagerCfg.Battery;
 
-    // Init the array of ptrs-to-busy flags.
-    for (i = 0; i < (UINT32)PM_MAX_BUSY; ++i)
-    {
-      busyArray[i] = NULL;
-    }
+    // The m_latchCtrl structure was already init'ed
 
     //Register the FSM app busy flag that is internal to the PM.
     m_FSMAppBusy = FALSE;
-    PmRegisterAppBusyFlag(PM_FSM_BUSY,&m_FSMAppBusy);
+    PmRegisterAppBusyFlag(PM_FSM_BUSY,&m_FSMAppBusy, PM_BUSY_FSM);
 
 // Test Below
 
@@ -573,19 +582,23 @@ void PmInsertAppBusInterrupt( APPSHUTDOWN_FUNC func )
  * Function:     PmRegisterAppBusyFlag
  *
  * Description:  Register an application busy flag for the associated variable
+ *               and a indication that the busy flag's use should be locked
+ *               even when FSM is active
  *
  * Parameters:   busyIndex - BUSY_INDEX
- *               pAppBusyFlag - BOOLEAN
+ *               pAppBusyFlag - BOOLEAN*
+ *               usage       - PM_BUSY_USAGE
  *
  * Returns:      none
  *
  * Notes:        none
  *
  *****************************************************************************/
-void PmRegisterAppBusyFlag(PM_BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag )
+void PmRegisterAppBusyFlag(PM_BUSY_INDEX busyIndex, BOOLEAN *pAppBusyFlag, PM_BUSY_USAGE usage)
 {
   ASSERT(busyIndex < PM_MAX_BUSY);
-  busyArray[busyIndex] = pAppBusyFlag;
+  m_latchCtrl.task[busyIndex].pBusyFlag = pAppBusyFlag;
+  m_latchCtrl.task[busyIndex].usage     = usage;
 }
 
 
@@ -1200,11 +1213,25 @@ BOOLEAN PmUpdateAppBusyStatus(void)
 {
   INT32 busyCount = 0;
   INT32 i;
+  BOOLEAN bFlagUsable;
+  // check the de-referenced ptr for each registered entry and accumulate total IFF the system
+  // is in the correct usage mode for the associated task.
 
-  // check the de-referenced ptr for each registered entry and accumulate total.
   for(i = 0; i < (INT32)PM_MAX_BUSY; ++i)
   {
-    busyCount += (busyArray[i] != NULL && *busyArray[i] == TRUE) ? 1 : 0;
+    // Determine if the busy flag is valid/usable for use in the current mode
+    bFlagUsable = ( m_latchCtrl.bFsmActive &&
+                    (m_latchCtrl.task[i].usage == PM_BUSY_FSM ||
+                    m_latchCtrl.task[i].usage == PM_BUSY_ALL)) ||
+                  ( !m_latchCtrl.bFsmActive &&
+                    (m_latchCtrl.task[i].usage == PM_BUSY_LEGACY ||
+                     m_latchCtrl.task[i].usage == PM_BUSY_ALL)  )
+                    ? TRUE : FALSE;
+
+    busyCount += ( bFlagUsable                             &&
+                   m_latchCtrl.task[i].pBusyFlag  != NULL  &&
+                   *m_latchCtrl.task[i].pBusyFlag == TRUE)
+                   ? 1:0;
   }
   return (busyCount > 0);
 }
@@ -1239,7 +1266,7 @@ void PmCallAppBusInterrupt( void )
     // Loop thru all Bus Interrupt routines and only when all report TRUE will
     //  AppBusInterrupt() processing considered complete.
     func = Pm.AppBusInterrupt[i];
-    bResult &= func();
+    bResult &= func(PM_APPSHUTDOWN_BUS_INTR);
   }
 }
 
@@ -1270,34 +1297,75 @@ BOOLEAN PmCallAppShutDownNormal( void )
     // Loop thru all App Shut Down Routine and only when all report TRUE will
     //  AppShutDownNormal() processing considered complete.
     func = Pm.AppShutDownNormal[i];
-    bResult &= func();
+    bResult &= func(PM_APPSHUTDOWN_NORMAL);
   }
 
   return (bResult);
 }
 
 /******************************************************************************
- * Function:     PmSetCfg
+ * Function:     PmSetFsmActive
  *
- * Description:  Update local power manager configuration data
+ * Description:  Lock-out all un-authorized tasks from latching battery
+ *               when FSM is configured.
  *
- * Parameters:   POWERMANAGER_CFG *Cfg
+ * Parameters:   None
+ *
+ * Returns:      None
+ *
+ * Notes:        This function is called once by FASTStateMgr IFF cfg is avail.
+ *
+ *****************************************************************************/
+void PmSetFsmActive(void)
+{
+  m_latchCtrl.bFsmActive = TRUE;
+}
+
+/******************************************************************************
+ * Function:     PmPreInit
+ *
+ * Description:  Pre-initialization function to clear the latch-control structure
+ *               This is needed because System -level tasks will be making calls
+ *               before this tasks is initialized.
+ *
+ * Parameters:   None
  *
  * Returns:      None
  *
  * Notes:        None
  *
  *****************************************************************************/
-static
-void PmSetCfg (POWERMANAGER_CFG *Cfg)
+void PmPreInit(void)
 {
-  m_PowerManagerCfg = *Cfg;
+  UINT32  i;
+  // Init the latch controls
+  m_latchCtrl.bFsmActive = FALSE;
+  for (i = 0; i < (UINT32)PM_MAX_BUSY; ++i)
+  {
+    m_latchCtrl.task[i].pBusyFlag = NULL;
+    m_latchCtrl.task[i].usage     = PM_BUSY_NONE;
+  }
 }
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
  * 
+ * *****************  Version 68  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
+ *
+ * *****************  Version 67  *****************
+ * User: Contractor V&v Date: 8/14/14    Time: 4:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1234 - Configuration update of certain modules overwrites
+ *
+ * *****************  Version 66  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 5:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1055 EEPROM Backup not updated before SHUTDOWN and SCR 1204 Legacy
+ * app busy input still latches battery when FSM enabled
+ *
  * *****************  Version 65  *****************
  * User: Jim Mood     Date: 12/11/12   Time: 8:31p
  * Updated in $/software/control processor/code/system

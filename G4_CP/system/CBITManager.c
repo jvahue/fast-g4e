@@ -1,14 +1,14 @@
 #define CBIT_MANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:       CBITManager.c
 
     Description: File containing all functions related to Continuous Built In Test.
-    
+
     VERSION
-      $Revision: 59 $  $Date: 12-11-16 8:12p $     
+      $Revision: 61 $  $Date: 9/03/14 5:15p $
 
 ******************************************************************************/
 
@@ -21,7 +21,7 @@
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "CBITManager.h"
-#include "UtilRegSetCheck.h" 
+#include "UtilRegSetCheck.h"
 #include "GSE.h"
 #include "LogManager.h"
 #include "NVMgr.h"
@@ -35,7 +35,7 @@
 
 #include "TestPoints.h"
 
-#if defined(WIN32) 
+#if defined(WIN32)
     UINT32  __CRC_START = 0x00000000;
     UINT32  __CRC_END = 0xffffffff;
     UINT32  __ghs_ramstart[1024];
@@ -49,8 +49,8 @@
     extern UINT32  __ghs_allocatedramend;
     extern UINT32  __SP_INIT;
     extern UINT32  __SP_END;
-    #if defined(STE_TP) 
-        // For STE_TP we do not want to do the entire RAM as we are 
+    #if defined(STE_TP)
+        // For STE_TP we do not want to do the entire RAM as we are
         // executing coverage instructions while we run the RAM test
         // and that screws up the coverage pointer contents
         // so just set aside a little memory to run the test on
@@ -65,12 +65,12 @@
 /*****************************************************************************/
 #define RAM_TEST_SECTIONS 2
 
-// Will assume that for in air reset, that recording will restart again 
-//   < 10 seconds, otherwise this #define should be updated to reflect 
-//   worse case startup time. 
-#define PWEH_INTERRUPTED_STARTUP_DELAY_S  10 
+// Will assume that for in air reset, that recording will restart again
+//   < 10 seconds, otherwise this #define should be updated to reflect
+//   worse case startup time.
+#define PWEH_INTERRUPTED_STARTUP_DELAY_S  10
 
-#define MAX_REG_CHECK_LOGS                10 
+#define MAX_REG_CHECK_LOGS                10
 #define MAX_REG_ENTRIES                   10
 
 /*****************************************************************************/
@@ -81,47 +81,47 @@
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-static CBIT_HEALTH_COUNTS CBITHealthCounts; 
+static CBIT_HEALTH_COUNTS CBITHealthCounts;
 
 static RESET_HEALTH_COUNTS ResetHealthCounts;
 
 static PWEH_SEU_EEPROM_DATA PwehSeuEepromData;
 
-// Snapshot of current count value just as data recording begins.  Used to 
-//   subtract any count values accumulated before start of recording.  
-static PWEH_SEU_HEALTH_COUNTS PwehSeuCountsAtStartOfRec; 
+// Snapshot of current count value just as data recording begins.  Used to
+//   subtract any count values accumulated before start of recording.
+static PWEH_SEU_HEALTH_COUNTS PwehSeuCountsAtStartOfRec;
 static PWEH_SEU_HEALTH_COUNTS PwehSeuCountsPrevStored;
 
 // Boolean flag maintained by FAST of the current in-flight state
 static BOOLEAN InFlight;
 
 // has the port logged a failed Interrupt monitor
-static BOOLEAN IntFailLogged[UART_NUM_OF_UARTS];  
+static BOOLEAN IntFailLogged[UART_NUM_OF_UARTS];
 
 /*****************************************************************************/
 /* Local Constants                                                           */
 /*****************************************************************************/
 #ifdef GENERATE_SYS_LOGS
-  // CBIT REG Check Failure log 
-  static const CBIT_REG_CHECK_FAILED CbitRegCheckFailLog[] = 
+  // CBIT REG Check Failure log
+  static const CBIT_REG_CHECK_FAILED CbitRegCheckFailLog[] =
   {
-    { 0x100666, 0x66, 77 }  // RegAddr, enumReg, nFailures 
+    { 0x100666, 0x66, 77 }  // RegAddr, enumReg, nFailures
   };
-  
-  static const PWEH_SEU_HEALTH_COUNTS CbitPwehSeuCountLog[] = 
+
+  static const PWEH_SEU_HEALTH_COUNTS CbitPwehSeuCountLog[] =
   {
     { TRUE,
       {1, 2, 3},
       {FPGA_STATUS_FAULTED, 4, 5},
       {QAR_STATUS_FAULTED, TRUE, QAR_LOSF, 6, 7, 8},
-      { 
+      {
         10, 11, 12, 13, 14, 15, ARINC429_STATUS_FAULTED_PBIT,
         20, 21, 22, 23, 24, 25, ARINC429_STATUS_FAULTED_CBIT,
         30, 31, 32, 33, 34, 35, ARINC429_STATUS_DISABLED_OK,
         40, 41, 42, 43, 44, 45, ARINC429_STATUS_DISABLED_FAULTED,
       }
     }
-  }; 
+  };
 #endif
 
 static const UINT16  RamTestPattern = 0xa5a5;  // Initial Ram Test Pattern
@@ -130,8 +130,8 @@ static const UINT16  RamTestPattern = 0xa5a5;  // Initial Ram Test Pattern
 * The following is used to ensure the PBIT CRC test will pass
 * during development testing when the program is loaded via the
 * GHS tools.  The code is setup to accept the computed CRC or
-* 0xFFFFFFFF.  The expectation was that the FLASH would be 
-* erased leaving any unused memory at 0xFF, this is not the 
+* 0xFFFFFFFF.  The expectation was that the FLASH would be
+* erased leaving any unused memory at 0xFF, this is not the
 * case when using GHS tools.
 * This value will be over written by the actual CRC when a full
 * release build is made.
@@ -149,29 +149,29 @@ const UINT32  CRC_DEFAULT = 0xffffffff;     // Debug build default CRC
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
-static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void ); 
-static PWEH_SEU_STATE CBITMgr_PWEHSEU_WaitForRec ( void ); 
-static PWEH_SEU_STATE CBITMgr_PWEHSEU_ResumeRec ( void ); 
-static PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void ); 
+static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void );
+static PWEH_SEU_STATE CBITMgr_PWEHSEU_WaitForRec ( void );
+static PWEH_SEU_STATE CBITMgr_PWEHSEU_ResumeRec ( void );
+static PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void );
 
-static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void ); 
+static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void );
 static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals (
-                                                PWEH_SEU_HEALTH_COUNTS PrevCount); 
+                                                PWEH_SEU_HEALTH_COUNTS PrevCount);
 static PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals (
-                                                PWEH_SEU_HEALTH_COUNTS CurrCnt, 
-                                                PWEH_SEU_HEALTH_COUNTS PrevCnt ); 
+                                                PWEH_SEU_HEALTH_COUNTS CurrCnt,
+                                                PWEH_SEU_HEALTH_COUNTS PrevCnt );
 
-static void CBITMgrPWEHSEU_UpdateEepromData ( void ); 
+static void CBITMgrPWEHSEU_UpdateEepromData ( void );
 
 static CBIT_HEALTH_COUNTS CBITMgr_AddPrevCBITHealthStatus ( CBIT_HEALTH_COUNTS CurrCnt,
                                                             CBIT_HEALTH_COUNTS PrevCnt );
-static CBIT_HEALTH_COUNTS CBITMgr_CalcDiffCBITHealthStatus ( CBIT_HEALTH_COUNTS PrevCnt );  
-static CBIT_HEALTH_COUNTS CBITMgr_GetCBITHealthStatus ( void ); 
-static void CBITMgr_Task( void *pParam ); 
+static CBIT_HEALTH_COUNTS CBITMgr_CalcDiffCBITHealthStatus ( CBIT_HEALTH_COUNTS PrevCnt );
+static CBIT_HEALTH_COUNTS CBITMgr_GetCBITHealthStatus ( void );
+static void CBITMgr_Task( void *pParam );
 static void CBITMgr_CRC_Task(void* pParam);
 static void CBITMgr_Ram_Task(void* pParam);
-static void CBITMgr_PWEHSEU_Task ( void *pParam ); 
-static BOOLEAN CBITMgr_PWEHSEU_ShutDown ( void );
+static void CBITMgr_PWEHSEU_Task ( void *pParam );
+static BOOLEAN CBITMgr_PWEHSEU_ShutDown ( PM_APPSHUTDOWN_REASON reason );
 
 
 /*****************************************************************************/
@@ -181,25 +181,25 @@ static BOOLEAN CBITMgr_PWEHSEU_ShutDown ( void );
 /******************************************************************************
  * Function:     CBITMgr_Initialize
  *
- * Description:  Initializes CBIT Manager Processing 
+ * Description:  Initializes CBIT Manager Processing
  *
  * Parameters:   none
  *
  * Returns:      none
  *
- * Notes:        none 
+ * Notes:        none
  *
  *****************************************************************************/
 void CBITMgr_Initialize (void)
 {
   TCB TaskInfo;
 
-  memset ( (void *) &m_CbitMgrStatus, 0x00, sizeof(CBIT_MGR_STATUS)); 
+  memset ( (void *) &m_CbitMgrStatus, 0x00, sizeof(CBIT_MGR_STATUS));
   memset ( (void *) IntFailLogged,   0x00, sizeof(IntFailLogged));
 
   //Add an entry in the user message handler table
   User_AddRootCmd(&CbitMgrRootTblPtr);
-  
+
   // Creates the CBITMgr Task
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"CBIT Manager",_TRUNCATE);
@@ -215,7 +215,7 @@ void CBITMgr_Initialize (void)
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = NULL;
   TmTaskCreate (&TaskInfo);
-  
+
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"CBIT CRC",_TRUNCATE);
   TaskInfo.TaskID         = CRC_CBIT_Task;
@@ -230,7 +230,7 @@ void CBITMgr_Initialize (void)
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = NULL;
   TmTaskCreate (&TaskInfo);
-  
+
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"CBIT RAM",_TRUNCATE);
   TaskInfo.TaskID         = Ram_CBIT_Task;
@@ -251,23 +251,23 @@ void CBITMgr_Initialize (void)
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_Initialize
  *
- * Description:  Initializes the PWEH SEU Processing Task 
+ * Description:  Initializes the PWEH SEU Processing Task
  *
  * Parameters:   none
  *
  * Returns:      none
  *
- * Notes:        none 
+ * Notes:        none
  *
  *****************************************************************************/
 void CBITMgr_PWEHSEU_Initialize (void)
 {
   TCB TaskInfo;
 
-  memset ( (void *) &m_PWEHSEUStatus, 0x00, sizeof(PWEH_SEU_STATUS)); 
-  
-  m_PWEHSEUStatus.state = PWEH_SEU_STARTUP; 
-  
+  memset ( (void *) &m_PWEHSEUStatus, 0x00, sizeof(PWEH_SEU_STATUS));
+
+  m_PWEHSEUStatus.state = PWEH_SEU_STARTUP;
+
   // Creates the PWEHSEU Task
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"PWEHSEU Manager",_TRUNCATE);
@@ -283,13 +283,13 @@ void CBITMgr_PWEHSEU_Initialize (void)
   TaskInfo.Locked         = FALSE;
   TaskInfo.pParamBlock    = NULL;
   TmTaskCreate (&TaskInfo);
-  
-  // Register PWEHSEU shutdown task and bus interrupt task 
-  PmInsertAppBusInterrupt( CBITMgr_PWEHSEU_ShutDown ); 
-  PmInsertAppShutDownNormal( CBITMgr_PWEHSEU_ShutDown ); 
-  
-  // Retrieve From EPROM 
-  m_PWEHSEUStatus.EepromOpenResult = NV_Open( NV_PWEH_CNTS_SEU ); 
+
+  // Register PWEHSEU shutdown task and bus interrupt task
+  PmInsertAppBusInterrupt( CBITMgr_PWEHSEU_ShutDown );
+  PmInsertAppShutDownNormal( CBITMgr_PWEHSEU_ShutDown );
+
+  // Retrieve From EPROM
+  m_PWEHSEUStatus.EepromOpenResult = NV_Open( NV_PWEH_CNTS_SEU );
 }
 
 
@@ -309,14 +309,14 @@ void CBITMgr_PWEHSEU_Initialize (void)
 *****************************************************************************/
 BOOLEAN CBITMgr_PWEHSEU_FileInit(void)
 {
-  
-  // Reset count 
+
+  // Reset count
   memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) );
-  
-  // Set flag to indicate Lost Data.  Flag will be maintained until log is recorded.  
+
+  // Set flag to indicate Lost Data.  Flag will be maintained until log is recorded.
   PwehSeuEepromData.bEEPromDataCorrupted = TRUE;
 
-  // Make attempt to update EEPROM 
+  // Make attempt to update EEPROM
   NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
 
   return TRUE;
@@ -324,7 +324,7 @@ BOOLEAN CBITMgr_PWEHSEU_FileInit(void)
 
 
 /******************************************************************************
- * Function:     CBITMgr_UpdateFlightState 
+ * Function:     CBITMgr_UpdateFlightState
  *
  * Description:  Updates state of the inflight bool
  *
@@ -333,7 +333,7 @@ BOOLEAN CBITMgr_PWEHSEU_FileInit(void)
  * Returns:      none
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
 void CBITMgr_UpdateFlightState(BOOLEAN inFlight)
 {
@@ -343,30 +343,30 @@ void CBITMgr_UpdateFlightState(BOOLEAN inFlight)
 /******************************************************************************
  * Function:     CBIT_CreateAllInternalLogs
  *
- * Description:  Creates all CBIT internal logs for testing / debug of log 
- *               decode and structure. 
+ * Description:  Creates all CBIT internal logs for testing / debug of log
+ *               decode and structure.
  *
  * Parameters:   None.
  *
- * Returns:      None. 
+ * Returns:      None.
  *
- * Notes:        
+ * Notes:
  *  1) LogWriteSystem() queues up to a max of 16 logs.  Limit to 10 logs here
- * 
+ *
  *****************************************************************************/
 #ifdef GENERATE_SYS_LOGS
 /*vcast_dont_instrument_start*/
 void CBIT_CreateAllInternalLogs ( void )
 {
-  // 1 Create SYS_CBIT_REG_CHECK_FAIL 
-  LogWriteSystem( SYS_CBIT_REG_CHECK_FAIL, LOG_PRIORITY_LOW, 
-                  (void *) &CbitRegCheckFailLog, sizeof(CBIT_REG_CHECK_FAILED), 
-                  NULL ); 
-                           
+  // 1 Create SYS_CBIT_REG_CHECK_FAIL
+  LogWriteSystem( SYS_CBIT_REG_CHECK_FAIL, LOG_PRIORITY_LOW,
+                  (void *) &CbitRegCheckFailLog, sizeof(CBIT_REG_CHECK_FAILED),
+                  NULL );
+
   // 2 Create SYS_CBIT_PWEH_SEU_COUNT_LOG
-  LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW, 
-                  (void *) &CbitPwehSeuCountLog, sizeof(PWEH_SEU_HEALTH_COUNTS), 
-                  NULL ); 
+  LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW,
+                  (void *) &CbitPwehSeuCountLog, sizeof(PWEH_SEU_HEALTH_COUNTS),
+                  NULL );
 }
 /*vcast_dont_instrument_end*/
 #endif
@@ -380,58 +380,58 @@ void CBIT_CreateAllInternalLogs ( void )
 /******************************************************************************
  * Function:     CBITMgr_Task
  *
- * Description:  CBIT Mgr Processing 
+ * Description:  CBIT Mgr Processing
  *
  * Parameters:   void *pParam - not used
  *
  * Returns:      None
  *
- * Notes:        
- *  Performs CBIT that is not owned by any other module.   
- *  1) CBIT RAM Test 
- *  2) Program CRC check 
+ * Notes:
+ *  Performs CBIT that is not owned by any other module.
+ *  1) CBIT RAM Test
+ *  2) Program CRC check
  *
  *****************************************************************************/
 static void CBITMgr_Task( void *pParam )
 {
   UINT8  i;
-  UINT32 RegAddrFail; 
-  UINT32 enumRegFail; 
-  CBIT_REG_CHECK_FAILED RegCheckFailedLog; 
-  
-  // Get current number of Registers in Check list as this can change dynamically based on 
-  //    different App Settings. 
-  m_CbitMgrStatus.numReg = GetRegCheckNumReg(); 
-  
-  // Spread out RegCheck from 10 reg / _Task update time of 25 Hz (or 10 reg every 40 msec) 
+  UINT32 RegAddrFail;
+  UINT32 enumRegFail;
+  CBIT_REG_CHECK_FAILED RegCheckFailedLog;
+
+  // Get current number of Registers in Check list as this can change dynamically based on
+  //    different App Settings.
+  m_CbitMgrStatus.numReg = GetRegCheckNumReg();
+
+  // Spread out RegCheck from 10 reg / _Task update time of 25 Hz (or 10 reg every 40 msec)
   //    For 80 reg, this will be about 3.125 Hz, satisfying 2 Hz Req SRS-1817
-  //    Currently it takes about 20 usec to reg check a single Reg with Branch Cache 
-  //    enabled. 
-  RegCheckFailedLog.nFailures = RegCheck( MAX_REG_ENTRIES, 
+  //    Currently it takes about 20 usec to reg check a single Reg with Branch Cache
+  //    enabled.
+  RegCheckFailedLog.nFailures = RegCheck( MAX_REG_ENTRIES,
                                           (UINT32*)&RegAddrFail, (UINT32*)&enumRegFail );
-  
+
 #ifdef WIN32
 /*vcast_dont_instrument_start*/
   RegCheckFailedLog.nFailures = 0;
 /*vcast_dont_instrument_end*/
 #endif
 
-  if ( ( RegCheckFailedLog.nFailures > 0 ) && 
+  if ( ( RegCheckFailedLog.nFailures > 0 ) &&
         (m_CbitMgrStatus.RegCheckCnt < MAX_REG_CHECK_LOGS) )
   {
-    // Print Debug as indication 
-    GSE_DebugStr( NORMAL, TRUE, "CBITMgr_Task: Reg Check Failure (cnt=%d)\r\n", 
+    // Print Debug as indication
+    GSE_DebugStr( NORMAL, TRUE, "CBITMgr_Task: Reg Check Failure (cnt=%d)\r\n",
                   RegCheckFailedLog.nFailures);
-    
-    RegCheckFailedLog.RegAddr = RegAddrFail; 
-    RegCheckFailedLog.enumReg = enumRegFail; 
-    
+
+    RegCheckFailedLog.RegAddr = RegAddrFail;
+    RegCheckFailedLog.enumReg = enumRegFail;
+
     // Create Failure Log
-    Flt_SetStatus(STA_CAUTION, SYS_CBIT_REG_CHECK_FAIL, &RegCheckFailedLog, 
+    Flt_SetStatus(STA_CAUTION, SYS_CBIT_REG_CHECK_FAIL, &RegCheckFailedLog,
                   sizeof(CBIT_REG_CHECK_FAILED) );
-                  
+
     // Update cumulative fail cnt
-    m_CbitMgrStatus.RegCheckCnt += RegCheckFailedLog.nFailures; 
+    m_CbitMgrStatus.RegCheckCnt += RegCheckFailedLog.nFailures;
   }
 
   // check for UART Interrupt Monitor Failures
@@ -446,19 +446,19 @@ static void CBITMgr_Task( void *pParam )
       log.port = i;
       Flt_SetStatus( STA_NORMAL, DRV_ID_PSC_INTERRUPT_FAIL,
                      &log, sizeof(UART_INTR_FAIL_LOG));
-      GSE_DebugStr(NORMAL, TRUE, "Uart Interrupt Fail. Port %d Tx Interrupt Disabled\r\n", i); 
+      GSE_DebugStr(NORMAL, TRUE, "Uart Interrupt Fail. Port %d Tx Interrupt Disabled\r\n", i);
     }
   }
-} 
+}
 
 /*****************************************************************************
  * Function:      CBITMgr_CRC_Task | TASK
  *
  * Description:   Continuous CRC verification of program flash
- *                
+ *
  *
  * Parameters:    pParam - not used.  Generic header for system tasks
- *              
+ *
  * Returns:       none
  *
  * Notes:  The CRC test shall verify the program flash every 10 minutes.
@@ -466,11 +466,11 @@ static void CBITMgr_Task( void *pParam )
  *         a fault is detected.
  *         The CRC failure log shall contain the calculated and expected
  *         CRC when the error is recorded.
- *              
+ *
  ****************************************************************************/
 static void CBITMgr_CRC_Task(void* pParam)
 {
-  CBIT_CRC_CHECK_FAILED CrcCheckFailedLog; 
+  CBIT_CRC_CHECK_FAILED CrcCheckFailedLog;
   UINT32 computedCrc;
   UINT32* pFlashCrc = (UINT32*)TPU( (UINT32)&__CRC_END, eTpCrc1806);
   UINT32* pFlashBeg = &__CRC_START;
@@ -492,8 +492,8 @@ static void CBITMgr_CRC_Task(void* pParam)
 
   if ( (*pFlashCrc != computedCrc) && (*pFlashCrc != 0xffffffff) )
   {
-    GSE_DebugStr( NORMAL, TRUE, 
-                 "CRC_CBit: Program CRC Mismatch: Computed=0x%08x, Actual=0x%08x\r\n", 
+    GSE_DebugStr( NORMAL, TRUE,
+                 "CRC_CBit: Program CRC Mismatch: Computed=0x%08x, Actual=0x%08x\r\n",
                  computedCrc, *pFlashCrc);
 
     ++m_CbitMgrStatus.ProgramCRCErrCnt;
@@ -505,7 +505,7 @@ static void CBITMgr_CRC_Task(void* pParam)
       CrcCheckFailedLog.actualCrc = *pFlashCrc;
       CrcCheckFailedLog.computedCrc = computedCrc;
 
-      Flt_SetStatus(STA_FAULT, SYS_CBIT_CRC_CHECK_FAIL, &CrcCheckFailedLog, 
+      Flt_SetStatus(STA_FAULT, SYS_CBIT_CRC_CHECK_FAIL, &CrcCheckFailedLog,
                     sizeof(CBIT_CRC_CHECK_FAILED) );
       recorded = TRUE;
     }
@@ -524,15 +524,15 @@ static void CBITMgr_CRC_Task(void* pParam)
  * Description:   Continuous Ram verification test
   *
  * Parameters:    pParam - not used.  Generic header for system tasks
- *              
+ *
  * Returns:       none
  *
  * Notes:  The Ram test shall pattern test the used RAM every 10 minutes.
  *         The Ram test shall set the system status to FAULT if
  *         a fault is detected.
- *         The Ram failure log shall contain the failed address and the 
+ *         The Ram failure log shall contain the failed address and the
  *         written and read back data.
- *              
+ *
  ****************************************************************************/
 static void CBITMgr_Ram_Task(void* pParam)
 {
@@ -569,8 +569,8 @@ static void CBITMgr_Ram_Task(void* pParam)
 
   if (testFailed)
   {
-    GSE_DebugStr( NORMAL, TRUE, 
-                 "Ram_CBit: Walking 1 test failed: Written=0x%08x, Read=0x%08x\r\n", 
+    GSE_DebugStr( NORMAL, TRUE,
+                 "Ram_CBit: Walking 1 test failed: Written=0x%08x, Read=0x%08x\r\n",
                  writePattern, readPattern);
 
     ++m_CbitMgrStatus.RAMFailCnt;
@@ -580,7 +580,7 @@ static void CBITMgr_Ram_Task(void* pParam)
     RamCheckFailedLog.writePattern = writePattern;
     RamCheckFailedLog.readPattern = readPattern;
 
-    Flt_SetStatus(STA_FAULT, SYS_CBIT_RAM_CHECK_FAIL, &RamCheckFailedLog, 
+    Flt_SetStatus(STA_FAULT, SYS_CBIT_RAM_CHECK_FAIL, &RamCheckFailedLog,
                   sizeof(CBIT_RAM_CHECK_FAILED) );
   }
   else
@@ -645,7 +645,7 @@ static void CBITMgr_Ram_Task(void* pParam)
          }
 
          *pStart = dataSave;        // restore original location data
-    
+
          __RIR(intrLevel);          // enable interrupts
 
          if (!testFailed)
@@ -656,8 +656,8 @@ static void CBITMgr_Ram_Task(void* pParam)
          else
          {
            // memory test failed - report
-           GSE_DebugStr( NORMAL, TRUE, 
-              "Ram_CBit: Pattern test failed at addr 0x%08x  Written=0x%04x, Read=0x%04x\r\n", 
+           GSE_DebugStr( NORMAL, TRUE,
+              "Ram_CBit: Pattern test failed at addr 0x%08x  Written=0x%04x, Read=0x%04x\r\n",
                          (UINT32)pStart, (UINT16)writePattern, (UINT16)readPattern);
 
            ++m_CbitMgrStatus.RAMFailCnt;
@@ -667,7 +667,7 @@ static void CBITMgr_Ram_Task(void* pParam)
            RamCheckFailedLog.writePattern = writePattern;
            RamCheckFailedLog.readPattern = readPattern;
 
-           Flt_SetStatus(STA_FAULT, SYS_CBIT_RAM_CHECK_FAIL, &RamCheckFailedLog, 
+           Flt_SetStatus(STA_FAULT, SYS_CBIT_RAM_CHECK_FAIL, &RamCheckFailedLog,
                           sizeof(CBIT_RAM_CHECK_FAILED) );
          }
       }   // while ( (pStart < pEnd) && !testFailed)
@@ -685,115 +685,127 @@ static void CBITMgr_Ram_Task(void* pParam)
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_Task
  *
- * Description:  PWEH SEU Processing during data capture 
+ * Description:  PWEH SEU Processing during data capture
  *
  * Parameters:   void *pParam - not used
  *
  * Returns:      None
  *
- * Notes:        
+ * Notes:
  *
- * Logic 
- * On startup, if Recording was in progress, wait 10 sec. 
- *    If recording did not startup yet, then terminate current count 
- *    and record (to close out pending counting).  Otherwise continue 
+ * Logic
+ * On startup, if Recording was in progress, wait 10 sec.
+ *    If recording did not startup yet, then terminate current count
+ *    and record (to close out pending counting).  Otherwise continue
  *    with current count !
- * On startup, If interrupted flag was not set, but record in progress set, 
- *    then log this condition.  Will continue counting 
+ * On startup, If interrupted flag was not set, but record in progress set,
+ *    then log this condition.  Will continue counting
  *    from this point.  (Reset counts would be valid, but others most likely will
- *    be zero). 
- * Record start time.  Record End Time.  Interrupted Flag.   
- * We only record on power down to EEPROM, with flag to indicate 
- *    powering down ? Another flag Interrupted ! 
- * 
- * Close log when Data Recording stops.  
+ *    be zero).
+ * Record start time.  Record End Time.  Interrupted Flag.
+ * We only record on power down to EEPROM, with flag to indicate
+ *    powering down ? Another flag Interrupted !
+ *
+ * Close log when Data Recording stops.
  *
  *****************************************************************************/
 static void CBITMgr_PWEHSEU_Task( void *pParam )
 {
 
-  switch ( m_PWEHSEUStatus.state ) 
+  switch ( m_PWEHSEUStatus.state )
   {
     case PWEH_SEU_STARTUP:
-      // Retrieve from EEPROM 
-      // Is previous recording in progress ? 
+      // Retrieve from EEPROM
+      // Is previous recording in progress ?
       // If Yes, startup counter to wait 10 seconds to to _INTERRUPT_RECORDING
-      // If No, go to _WAITING_FOR_RECORDING  
-      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_Startup(); 
-      break; 
-      
+      // If No, go to _WAITING_FOR_RECORDING
+      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_Startup();
+      break;
+
     case PWEH_SEU_RESUME_RECORDING:
       // Wait 10 sec, if recording does not cont then close Health Count Logs
-      //   transition to _WAITING_FOR_RECORDING 
-      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_ResumeRec(); 
-      break; 
-      
+      //   transition to _WAITING_FOR_RECORDING
+      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_ResumeRec();
+      break;
+
     case PWEH_SEU_WAITING_FOR_RECORDING:
       // Pass in Recording flag and if recording on ->
       // Clear counts and then Update EEPROM data
-      //   transition to _RECORDING 
-      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_WaitForRec(); 
-      break; 
-      
+      //   transition to _RECORDING
+      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_WaitForRec();
+      break;
+
     case PWEH_SEU_RECORDING:
-      // If Recording completed, then determine when recording is completed. 
-      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_Rec(); 
-      break; 
-    
+      // If Recording completed, then determine when recording is completed.
+      m_PWEHSEUStatus.state = CBITMgr_PWEHSEU_Rec();
+      break;
+
     case PWEH_SEU_STATE_MAX:
     default:
-        FATAL("Unrecognized PWEH_SEU_STATE: %d", m_PWEHSEUStatus.state); 
-      break; 
+        FATAL("Unrecognized PWEH_SEU_STATE: %d", m_PWEHSEUStatus.state);
+      break;
   }
 
 
   // Resets
-  
+
   // Watchdog Resets
-  
+
   // Exceptions Resets (Bus Fault, etc)
-  
+
   // Internal Resets ( ASSERTS, FATAL )
-  
+
   // Task Over Runs
 
-} 
+}
 
 
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_ShutDown
  *
- * Description:  Store current Pweh Seu Data due to power interruption if 
- *               recording in progress.  
+ * Description:  Store current Pweh Seu Data due to power interruption if
+ *               recording in progress.
  *
- * Parameters:   none
+ * Parameters:   PM_APPSHUTDOWN_REASON The specific reason this function is being
+ *               called. This allows a single Shutdown handler to be called for
+ *               different reasons.
  *
- * Returns:      TRUE if update of Pweh Seu Count Data OK.  
+ * Returns:      TRUE if update of Pweh Seu Count Data OK.
  *
- * Notes:        
- * 1) .bIntSaveCntCompleted is cleared after 1/2 sec in the PWEH Rec Process. 
- *    If CBITMgr_PWEHSEU_ShutDown() is requested again before this time expiration, 
- *    the counts, if updated will not be saved.  (Prevents re-entrant call from 
+ * Notes:
+ * 1) .bIntSaveCntCompleted is cleared after 1/2 sec in the PWEH Rec Process.
+ *    If CBITMgr_PWEHSEU_ShutDown() is requested again before this time expiration,
+ *    the counts, if updated will not be saved.  (Prevents re-entrant call from
  *    PM -> Glitch and Shutdown)
  *
  *****************************************************************************/
-static BOOLEAN CBITMgr_PWEHSEU_ShutDown( void ) 
+static BOOLEAN CBITMgr_PWEHSEU_ShutDown( PM_APPSHUTDOWN_REASON reason )
 {
-  // If recording, we should attempt to save current SEU count values. 
+  // If recording, we should attempt to save current SEU count values.
   //  Also check if bIntSaveCntCompleted == FALSE.  This flag will be reset
-  //  1 sec after a Pm Glitch is detected.  If this 1 sec has not expired 
-  //  do not attempt to update EEPROM data.  If power shuts down, we could 
-  //  miss count values over this 1 sec, but should not be significant. 
-  if ( (m_PWEHSEUStatus.state == PWEH_SEU_RECORDING) && 
+  //  1 sec after a Pm Glitch is detected.  If this 1 sec has not expired
+  //  do not attempt to update EEPROM data.  If power shuts down, we could
+  //  miss count values over this 1 sec, but should not be significant.
+  if ( (m_PWEHSEUStatus.state == PWEH_SEU_RECORDING) &&
        (PwehSeuEepromData.bIntSaveCntCompleted == FALSE) )
   {
-    PwehSeuEepromData.bIntSaveCntCompleted = TRUE; 
+    PwehSeuEepromData.bIntSaveCntCompleted = TRUE;
 
-    CBITMgrPWEHSEU_UpdateEepromData(); 
-    
-    // Update EEPROM with current run time data 
-    NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-  }  
+    CBITMgrPWEHSEU_UpdateEepromData();
+
+    // Update EEPROM with current run time data
+
+    if (PM_APPSHUTDOWN_NORMAL == reason || PM_APPSHUTDOWN_QUICK == reason)
+    {
+      // For shutdown, use the WriteNow func to 'latch' into direct NVM writing mode.
+      NV_WriteNow( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
+    }
+    else
+    {
+      // If not signalled for SHUTDOWN, write normally.
+      NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
+    }
+  }
   return TRUE;
 }
 
@@ -801,54 +813,54 @@ static BOOLEAN CBITMgr_PWEHSEU_ShutDown( void )
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_Startup
  *
- * Description:  Initializes the PWEH SEU count processing 
+ * Description:  Initializes the PWEH SEU count processing
  *
  * Parameters:   none
  *
  * Returns:      PWEH_SEU_STATE
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void ) 
+static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void )
 {
-  PWEH_SEU_STATE nextState; 
-    
-  // Initialize Data Store 
-  memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) ); 
-  memset ( (void *) &PwehSeuCountsAtStartOfRec, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) ); 
-  memset ( (void *) &PwehSeuCountsPrevStored, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) ); 
+  PWEH_SEU_STATE nextState;
+
+  // Initialize Data Store
+  memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) );
+  memset ( (void *) &PwehSeuCountsAtStartOfRec, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) );
+  memset ( (void *) &PwehSeuCountsPrevStored, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) );
 
 
   // Read from EE version.
   NV_Read(NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-  
-  // Open of FILE failed both backup and primary  
+
+  // Open of FILE failed both backup and primary
   if ( m_PWEHSEUStatus.EepromOpenResult != SYS_OK )
   {
     CBITMgr_PWEHSEU_FileInit();
-    
-    // Reset counts
-    //memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) ); 
-    memset ( (void *) &ResetHealthCounts, 0x00, sizeof(ResetHealthCounts)); 
 
-    // Send debug msg. 
+    // Reset counts
+    //memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) );
+    memset ( (void *) &ResetHealthCounts, 0x00, sizeof(ResetHealthCounts));
+
+    // Send debug msg.
     GSE_DebugStr(NORMAL,TRUE,"PWEHSEU Task: Data Restore Failed");
-    
-    // Make attempt to update EEPROM 
+
+    // Make attempt to update EEPROM
     NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
   }
   else
   {
     // open OK - Get reset counts
-    ResetHealthCounts = PwehSeuEepromData.Counts.reset; 
+    ResetHealthCounts = PwehSeuEepromData.Counts.reset;
   }
-  
+
   // Is previous recording in progress  ?
-  if ( PwehSeuEepromData.bRecInProgress == TRUE ) 
+  if ( PwehSeuEepromData.bRecInProgress == TRUE )
   {
-    PwehSeuEepromData.bIntRecInProgress = TRUE; 
-    
+    PwehSeuEepromData.bIntRecInProgress = TRUE;
+
     // check type of restart and inc appropriate health count
     if (isWatchdogRestart)
     {
@@ -860,44 +872,44 @@ static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void )
     }
     // copy back to eeprom since this won't change til next interruption
     PwehSeuEepromData.Counts.reset = ResetHealthCounts;
-    
-    if ( PwehSeuEepromData.bIntSaveCntCompleted == FALSE ) 
-    {
-      // Counts not recorded on last shutdown ! 
-      PwehSeuEepromData.Counts.SEUCounts_Interrupted = TRUE; 
 
-      // Send debug msg. 
+    if ( PwehSeuEepromData.bIntSaveCntCompleted == FALSE )
+    {
+      // Counts not recorded on last shutdown !
+      PwehSeuEepromData.Counts.SEUCounts_Interrupted = TRUE;
+
+      // Send debug msg.
       GSE_DebugStr(NORMAL,TRUE,
         "PWEHSEU Task: Previous Rec In Progress Detected - SEU Data Not Saved");
     }
-    else 
+    else
     {
       PwehSeuEepromData.bIntSaveCntCompleted = FALSE;   // Reset this flag
-      
-      // Send debug msg. 
+
+      // Send debug msg.
       GSE_DebugStr(NORMAL,TRUE,
         "PWEHSEU Task: Previous Rec In Progress Detected - SEU Data Saved");
     }
-    
+
     // Make attempt to update EEPROM
     NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-    
-    nextState = PWEH_SEU_RESUME_RECORDING; 
+
+    nextState = PWEH_SEU_RESUME_RECORDING;
     m_PWEHSEUStatus.timer =
-      CM_GetTickCount() + CM_DELAY_IN_SECS(PWEH_INTERRUPTED_STARTUP_DELAY_S); 
-  }  
-  else 
-  {
-    nextState = PWEH_SEU_WAITING_FOR_RECORDING; 
+      CM_GetTickCount() + CM_DELAY_IN_SECS(PWEH_INTERRUPTED_STARTUP_DELAY_S);
   }
-  
-  PwehSeuCountsPrevStored = PwehSeuEepromData.Counts; 
-  
-  // Clear flag to indicate EEPROM data has been restored 
+  else
+  {
+    nextState = PWEH_SEU_WAITING_FOR_RECORDING;
+  }
+
+  PwehSeuCountsPrevStored = PwehSeuEepromData.Counts;
+
+  // Clear flag to indicate EEPROM data has been restored
   m_PWEHSEUStatus.EepromOpenResult = SYS_OK;
 
-  return ( nextState ); 
-  
+  return ( nextState );
+
 }
 
 
@@ -905,7 +917,7 @@ static PWEH_SEU_STATE CBITMgr_PWEHSEU_Startup( void )
  * Function:     CBITMgr_AddPrevCBITHealthStatus
  *
  * Description:  Add CBIT Health Counts to support PWEH SEU
- *               (Used to support determining SEU cnt during data capture) 
+ *               (Used to support determining SEU cnt during data capture)
  *
  * Parameters:   CurrCnt - Current count value
  *               PrevCnt - Prev count value
@@ -920,19 +932,19 @@ static
                                                      CBIT_HEALTH_COUNTS PrevCnt )
 {
   CBIT_HEALTH_COUNTS addCount;
-  
-  addCount.RAMFailCnt = CurrCnt.RAMFailCnt + PrevCnt.RAMFailCnt; 
-  addCount.ProgramCRCErrCnt = CurrCnt.ProgramCRCErrCnt + PrevCnt.ProgramCRCErrCnt; 
-  addCount.RegCheckCnt = CurrCnt.RegCheckCnt + PrevCnt.RegCheckCnt; 
 
-  return ( addCount ); 
+  addCount.RAMFailCnt = CurrCnt.RAMFailCnt + PrevCnt.RAMFailCnt;
+  addCount.ProgramCRCErrCnt = CurrCnt.ProgramCRCErrCnt + PrevCnt.ProgramCRCErrCnt;
+  addCount.RegCheckCnt = CurrCnt.RegCheckCnt + PrevCnt.RegCheckCnt;
+
+  return ( addCount );
 }
 
 /******************************************************************************
  * Function:     CBITMgr_CalcDiffCBITHealthStatus
  *
  * Description:  Calc the difference in CBIT Health Counts to support PWEH SEU
- *               (Used to support determining SEU cnt during data capture) 
+ *               (Used to support determining SEU cnt during data capture)
  *
  * Parameters:   PrevCnt - Initial count value
  *
@@ -944,22 +956,22 @@ static
 static CBIT_HEALTH_COUNTS CBITMgr_CalcDiffCBITHealthStatus ( CBIT_HEALTH_COUNTS PrevCnt )
 {
   CBIT_HEALTH_COUNTS diffCount;
-  CBIT_HEALTH_COUNTS *pCurrent; 
-  
-  pCurrent = &CBITHealthCounts; 
-  
-  diffCount.RAMFailCnt = pCurrent->RAMFailCnt - PrevCnt.RAMFailCnt; 
-  diffCount.ProgramCRCErrCnt = pCurrent->ProgramCRCErrCnt - PrevCnt.ProgramCRCErrCnt; 
-  diffCount.RegCheckCnt = pCurrent->RegCheckCnt - PrevCnt.RegCheckCnt; 
+  CBIT_HEALTH_COUNTS *pCurrent;
 
-  return ( diffCount ); 
+  pCurrent = &CBITHealthCounts;
+
+  diffCount.RAMFailCnt = pCurrent->RAMFailCnt - PrevCnt.RAMFailCnt;
+  diffCount.ProgramCRCErrCnt = pCurrent->ProgramCRCErrCnt - PrevCnt.ProgramCRCErrCnt;
+  diffCount.RegCheckCnt = pCurrent->RegCheckCnt - PrevCnt.RegCheckCnt;
+
+  return ( diffCount );
 }
 
 
 /******************************************************************************
  * Function:     CBITMgr_GetCBITHealthStatus
  *
- * Description:  Returns the current CBIT Health status of the CBIT Mgr 
+ * Description:  Returns the current CBIT Health status of the CBIT Mgr
  *
  * Parameters:   None
  *
@@ -970,225 +982,225 @@ static CBIT_HEALTH_COUNTS CBITMgr_CalcDiffCBITHealthStatus ( CBIT_HEALTH_COUNTS 
  *****************************************************************************/
 static CBIT_HEALTH_COUNTS CBITMgr_GetCBITHealthStatus ( void )
 {
-  return ( CBITHealthCounts ); 
+  return ( CBITHealthCounts );
 }
 
 
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_ResumeRec
  *
- * Description:  Data recording was interrupted by reset/shutdown, 
- *               wait 10 sec for start of data recording.  If time out, 
- *               and no data recording seen, mark as interrupted SEU 
- *               count, record and then transition to wait for new recording. 
+ * Description:  Data recording was interrupted by reset/shutdown,
+ *               wait 10 sec for start of data recording.  If time out,
+ *               and no data recording seen, mark as interrupted SEU
+ *               count, record and then transition to wait for new recording.
  *
  * Parameters:   none
  *
  * Returns:      PWEH_SEU_STATE
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
-PWEH_SEU_STATE CBITMgr_PWEHSEU_ResumeRec ( void ) 
+static
+PWEH_SEU_STATE CBITMgr_PWEHSEU_ResumeRec ( void )
 {
-  PWEH_SEU_STATE nextState; 
-  
-  
+  PWEH_SEU_STATE nextState;
+
+
   nextState = m_PWEHSEUStatus.state;
 
-  if ( InFlight ) 
+  if ( InFlight )
   {
-    // Transition to PWEH_SEU_RECORDING  
-    nextState = PWEH_SEU_RECORDING; 
+    // Transition to PWEH_SEU_RECORDING
+    nextState = PWEH_SEU_RECORDING;
   }
-  else 
+  else
   {
     if (CM_GetTickCount() > m_PWEHSEUStatus.timer)
     {
-      // No Recording encountered on startup, save current EEPROM data to 
-      //  a log, even though on shut down rec was in progress, we must 
-      //  not have seen the record ending. 
-      
-      // Note: PWEH_SEU_EEPROM_DATA -> Counts should contain count value  
-      //  as of last recording before reset / shutdown.  
-      
-      // Note: If this log is recorded here, there is a high possibility that 
-      //  we did not properly see end of recording, and thus these count 
-      //  numbers are not 100% accurate.  ->SEUCounts_Interrupted will 
-      //  be set to TRUE as an indication of this condition, if not 
+      // No Recording encountered on startup, save current EEPROM data to
+      //  a log, even though on shut down rec was in progress, we must
+      //  not have seen the record ending.
+
+      // Note: PWEH_SEU_EEPROM_DATA -> Counts should contain count value
+      //  as of last recording before reset / shutdown.
+
+      // Note: If this log is recorded here, there is a high possibility that
+      //  we did not properly see end of recording, and thus these count
+      //  numbers are not 100% accurate.  ->SEUCounts_Interrupted will
+      //  be set to TRUE as an indication of this condition, if not
       //  already set in CBITMgr_PWEHSEU_Startup()
-      PwehSeuEepromData.Counts.SEUCounts_Interrupted = TRUE; 
-      
-      // Log PWEH SEU here ! 
+      PwehSeuEepromData.Counts.SEUCounts_Interrupted = TRUE;
+
+      // Log PWEH SEU here !
       LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW,
-                      &PwehSeuEepromData.Counts, sizeof(PWEH_SEU_HEALTH_COUNTS), 
-                      NULL ); 
-      
+                      &PwehSeuEepromData.Counts, sizeof(PWEH_SEU_HEALTH_COUNTS),
+                      NULL );
+
       PwehSeuEepromData.bRecInProgress = FALSE;       // Reset RecInProgress flag
       PwehSeuEepromData.bIntSaveCntCompleted = FALSE; // Reset IntSaveCntCompleted flag
       PwehSeuEepromData.bEEPromDataCorrupted = FALSE; // Reset EEPromDataCorrupted flag
-      PwehSeuEepromData.bIntRecInProgress = FALSE;    // Reset IntRecInProgress flag 
-      
-      // Clear all my count values.  Values should have been clr, but 
-      //    will double clear again... 
+      PwehSeuEepromData.bIntRecInProgress = FALSE;    // Reset IntRecInProgress flag
+
+      // Clear all my count values.  Values should have been clr, but
+      //    will double clear again...
       // Clear EEPROM data and save to EEPROM
       memset ( &PwehSeuEepromData.Counts, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) );
       NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-      
-      nextState = PWEH_SEU_WAITING_FOR_RECORDING; 
-      
-      // Send debug msg. 
+
+      nextState = PWEH_SEU_WAITING_FOR_RECORDING;
+
+      // Send debug msg.
       GSE_DebugStr(NORMAL,TRUE,
         "PWEHSEU Task: Startup Data recording not detected, closing pending SEU Cnt log");
-      
-    } 
-    // else we do nothing and continue counting down ! 
-  } 
-  
-  return nextState; 
+
+    }
+    // else we do nothing and continue counting down !
+  }
+
+  return nextState;
 }
 
 
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_WaitForRec
  *
- * Description:  Wait for Data Recording trigger and start / reset SEU counts 
+ * Description:  Wait for Data Recording trigger and start / reset SEU counts
  *
  * Parameters:   none
  *
  * Returns:      PWEH_SEU_STATE
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
+static
 PWEH_SEU_STATE CBITMgr_PWEHSEU_WaitForRec ( void )
 {
-  PWEH_SEU_STATE nextState; 
-  
-  
+  PWEH_SEU_STATE nextState;
+
+
   nextState = m_PWEHSEUStatus.state;
 
   if ( InFlight )
   {
-    // Clear Counts.  This process gets current snapshot of all counts 
-    //   and will subtract it from the end count to determine 
+    // Clear Counts.  This process gets current snapshot of all counts
+    //   and will subtract it from the end count to determine
     // Update current count values PwehSeuCountsAtStartOfRec
-    PwehSeuCountsAtStartOfRec = CBITMgrPWEHSEU_GetAllCurrCntVals (); 
-    
-    // Update EEPROM data 
+    PwehSeuCountsAtStartOfRec = CBITMgrPWEHSEU_GetAllCurrCntVals ();
+
+    // Update EEPROM data
     PwehSeuEepromData.bRecInProgress = TRUE;
-    PwehSeuEepromData.bIntSaveCntCompleted = FALSE; 
-    PwehSeuEepromData.bEEPromDataCorrupted = FALSE; 
-    PwehSeuEepromData.bIntRecInProgress = FALSE; 
-    
-    // Clear all my count values.  Values should have been clr, but 
-    //    will double clear again... 
+    PwehSeuEepromData.bIntSaveCntCompleted = FALSE;
+    PwehSeuEepromData.bEEPromDataCorrupted = FALSE;
+    PwehSeuEepromData.bIntRecInProgress = FALSE;
+
+    // Clear all my count values.  Values should have been clr, but
+    //    will double clear again...
     memset ( &PwehSeuEepromData.Counts, 0x00, sizeof(PWEH_SEU_HEALTH_COUNTS) );
-    
-    // Update EEPROM 
+
+    // Update EEPROM
     NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-    
-    // Set next state as Recording 
-    nextState = PWEH_SEU_RECORDING; 
-    
+
+    // Set next state as Recording
+    nextState = PWEH_SEU_RECORDING;
+
   }
-  // else we do nothing and continue waiting 
-  
-  return ( nextState ); 
-  
+  // else we do nothing and continue waiting
+
+  return ( nextState );
+
 }
 
 
 /******************************************************************************
  * Function:     CBITMgr_PWEHSEU_Rec
  *
- * Description:  When data recording transitions to OFF, calc SEU counts 
- *               accumulated during data recording and store. 
+ * Description:  When data recording transitions to OFF, calc SEU counts
+ *               accumulated during data recording and store.
  *
  * Parameters:   none
  *
  * Returns:      PWEH_SEU_STATE
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
-PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void ) 
+static
+PWEH_SEU_STATE CBITMgr_PWEHSEU_Rec ( void )
 {
   PWEH_SEU_STATE nextState;
-  // PWEH_SEU_HEALTH_COUNTS CurrentCount; 
+  // PWEH_SEU_HEALTH_COUNTS CurrentCount;
 
 
   nextState = m_PWEHSEUStatus.state;
 
-  // Have we transitioned to stop recording 
-  // if (bSysRecording == FALSE) 
+  // Have we transitioned to stop recording
+  // if (bSysRecording == FALSE)
   if ( !InFlight )
   {
-    CBITMgrPWEHSEU_UpdateEepromData();      
-     
-    // Log PWEH Count Values 
-    LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW,
-                    &PwehSeuEepromData.Counts, sizeof(PWEH_SEU_HEALTH_COUNTS), 
-                    NULL ); 
+    CBITMgrPWEHSEU_UpdateEepromData();
 
-    // Update EEprom data 
-    memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) ); 
+    // Log PWEH Count Values
+    LogWriteSystem( SYS_CBIT_PWEH_SEU_COUNT_LOG, LOG_PRIORITY_LOW,
+                    &PwehSeuEepromData.Counts, sizeof(PWEH_SEU_HEALTH_COUNTS),
+                    NULL );
+
+    // Update EEprom data
+    memset ( (void *) &PwehSeuEepromData, 0x00, sizeof(PWEH_SEU_EEPROM_DATA) );
     NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-    
-    // Send debug msg. 
+
+    // Send debug msg.
     GSE_DebugStr(NORMAL,TRUE,"PWEHSEU Task: End flight detected.  Closing SEU count log");
-                       
-    nextState = PWEH_SEU_WAITING_FOR_RECORDING; 
+
+    nextState = PWEH_SEU_WAITING_FOR_RECORDING;
   }
-  else 
+  else
   {
     // Did we save current SEU counts due to Power Glitch or Battery Latch ?
-    if ( PwehSeuEepromData.bIntSaveCntCompleted == TRUE ) 
+    if ( PwehSeuEepromData.bIntSaveCntCompleted == TRUE )
     {
-      // Count down 500 msec before clearing the bIntSaveCntCompleted 
-      //   If power shutdown before this timer expires then worst case we would have missed 
+      // Count down 500 msec before clearing the bIntSaveCntCompleted
+      //   If power shutdown before this timer expires then worst case we would have missed
       //   < 0.5 sec of potential SEU count data.  The count values will be 99.9% up to date.
-      if ( m_PWEHSEUStatus.pmGlitchDetected == FALSE ) 
+      if ( m_PWEHSEUStatus.pmGlitchDetected == FALSE )
       {
-        m_PWEHSEUStatus.timer = CM_GetTickCount() + CM_DELAY_IN_MSEC(500); 
-        m_PWEHSEUStatus.pmGlitchDetected = TRUE; 
+        m_PWEHSEUStatus.timer = CM_GetTickCount() + CM_DELAY_IN_MSEC(500);
+        m_PWEHSEUStatus.pmGlitchDetected = TRUE;
       }
-      else 
+      else
       {
-        if ( m_PWEHSEUStatus.timer < CM_GetTickCount() ) 
+        if ( m_PWEHSEUStatus.timer < CM_GetTickCount() )
         {
-          // clear bIntSaveCntCompleted 
-          m_PWEHSEUStatus.pmGlitchDetected = FALSE; 
-          
-          PwehSeuEepromData.bIntSaveCntCompleted = FALSE; 
-          
-          // Update EEprom data 
+          // clear bIntSaveCntCompleted
+          m_PWEHSEUStatus.pmGlitchDetected = FALSE;
+
+          PwehSeuEepromData.bIntSaveCntCompleted = FALSE;
+
+          // Update EEprom data
           NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
         }
       }
     }
   }
 
-  return (nextState);   
+  return (nextState);
 }
 
 
 /******************************************************************************
  * Function:     CBITMgrPWEHSEU_GetAllCurrCntVals
  *
- * Description:  Get current SEU count value from all modules 
+ * Description:  Get current SEU count value from all modules
  *
  * Parameters:   none
  *
  * Returns:      PWEH_SEU_HEALTH_COUNTS
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
+static
 PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void )
 {
   PWEH_SEU_HEALTH_COUNTS countCurrent;
@@ -1196,76 +1208,76 @@ PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetAllCurrCntVals ( void )
   countCurrent.SEUCounts_Interrupted = FALSE;       // default value
 
   // CBIT_HEALTH_COUNTS
-  countCurrent.cbit = CBITMgr_GetCBITHealthStatus(); 
+  countCurrent.cbit = CBITMgr_GetCBITHealthStatus();
 
   // FPGA_CBIT_HEALTH_COUNTS
-  countCurrent.fpga = FPGAMgr_GetCBITHealthStatus(); 
-  
+  countCurrent.fpga = FPGAMgr_GetCBITHealthStatus();
+
   // QAR_CBIT_HEALTH_COUNTS
-  countCurrent.qar = QAR_GetCBITHealthStatus(); 
-  
+  countCurrent.qar = QAR_GetCBITHealthStatus();
+
   // ARINC429_CBIT_HEALTH_COUNTS
-  countCurrent.arinc429 = Arinc429MgrGetCBITHealthStatus(); 
-  
+  countCurrent.arinc429 = Arinc429MgrGetCBITHealthStatus();
+
   // Task Manager Health Counts
-  countCurrent.tm = Tm_GetTMHealthStatus(); 
-  
+  countCurrent.tm = Tm_GetTMHealthStatus();
+
   // Reset Health Counts
   countCurrent.reset = ResetHealthCounts;
-  
+
   // Log Data Flash Health Counts
   countCurrent.log = LogGetCBITHealthStatus();
 
   return ( countCurrent );
-  
+
 }
 
 
 /******************************************************************************
  * Function:     CBITMgrPWEHSEU_GetDiffCntVals
  *
- * Description:  Get the difference from current SEU count value from a previous 
- *               count point 
+ * Description:  Get the difference from current SEU count value from a previous
+ *               count point
  *
  * Parameters:   PWEH_SEU_HEALTH_COUNTS PrevCount
  *
  * Returns:      PWEH_SEU_HEALTH_COUNTS
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
+static
 PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals ( PWEH_SEU_HEALTH_COUNTS PrevCount )
 {
-  PWEH_SEU_HEALTH_COUNTS diffCount; 
+  PWEH_SEU_HEALTH_COUNTS diffCount;
 
-  diffCount.SEUCounts_Interrupted = PrevCount.SEUCounts_Interrupted; 
+  diffCount.SEUCounts_Interrupted = PrevCount.SEUCounts_Interrupted;
 
   // CBIT_HEALTH_COUNTS
-  diffCount.cbit = CBITMgr_CalcDiffCBITHealthStatus( PrevCount.cbit ); 
+  diffCount.cbit = CBITMgr_CalcDiffCBITHealthStatus( PrevCount.cbit );
 
   // FPGA_CBIT_HEALTH_COUNTS
-  diffCount.fpga = FPGAMgr_CalcDiffCBITHealthStatus( PrevCount.fpga ); 
-  
+  diffCount.fpga = FPGAMgr_CalcDiffCBITHealthStatus( PrevCount.fpga );
+
   // QAR_CBIT_HEALTH_COUNTS
-  diffCount.qar = QAR_CalcDiffCBITHealthStatus( PrevCount.qar ); 
-  
+  diffCount.qar = QAR_CalcDiffCBITHealthStatus( PrevCount.qar );
+
   // ARINC429_CBIT_HEALTH_COUNTS
-  diffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthSts( PrevCount.arinc429 ); 
-  
+  diffCount.arinc429 = Arinc429MgrCalcDiffCBITHealthSts( PrevCount.arinc429 );
+
   // Task Manager Health Counts
-  diffCount.tm = Tm_CalcDiffTMHealthStatus ( PrevCount.tm ); 
-  
-  // Reset Health Counts 
+  diffCount.tm = Tm_CalcDiffTMHealthStatus ( PrevCount.tm );
+
+  // Reset Health Counts
   // only updated on restart
   diffCount.reset.nWatchdogResets = 0;
   diffCount.reset.nReset = 0;
-  
+
   // Log Data Flash Health Counts
   diffCount.log = LogCalcDiffCBITHealthStatus( PrevCount.log );
 
   return ( diffCount );
-  
+
 }
 
 
@@ -1280,31 +1292,31 @@ PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_GetDiffCntVals ( PWEH_SEU_HEALTH_COUNTS Pr
  * Returns:      PWEH_SEU_HEALTH_COUNTS
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
-PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals ( PWEH_SEU_HEALTH_COUNTS CurrCnt, 
+static
+PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals ( PWEH_SEU_HEALTH_COUNTS CurrCnt,
                                                             PWEH_SEU_HEALTH_COUNTS PrevCnt )
 {
-  PWEH_SEU_HEALTH_COUNTS addCount; 
+  PWEH_SEU_HEALTH_COUNTS addCount;
 
-  addCount.SEUCounts_Interrupted = CurrCnt.SEUCounts_Interrupted; 
+  addCount.SEUCounts_Interrupted = CurrCnt.SEUCounts_Interrupted;
 
   // CBIT_HEALTH_COUNTS
-  addCount.cbit = CBITMgr_AddPrevCBITHealthStatus( CurrCnt.cbit, PrevCnt.cbit ); 
+  addCount.cbit = CBITMgr_AddPrevCBITHealthStatus( CurrCnt.cbit, PrevCnt.cbit );
 
   // FPGA_CBIT_HEALTH_COUNTS
-  addCount.fpga = FPGAMgr_AddPrevCBITHealthStatus( CurrCnt.fpga, PrevCnt.fpga ); 
-  
+  addCount.fpga = FPGAMgr_AddPrevCBITHealthStatus( CurrCnt.fpga, PrevCnt.fpga );
+
   // QAR_CBIT_HEALTH_COUNTS
-  addCount.qar = QAR_AddPrevCBITHealthStatus( CurrCnt.qar, PrevCnt.qar ); 
-  
+  addCount.qar = QAR_AddPrevCBITHealthStatus( CurrCnt.qar, PrevCnt.qar );
+
   // ARINC429_CBIT_HEALTH_COUNTS
-  addCount.arinc429 = Arinc429MgrAddPrevCBITHealthSts( CurrCnt.arinc429, PrevCnt.arinc429 ); 
-  
+  addCount.arinc429 = Arinc429MgrAddPrevCBITHealthSts( CurrCnt.arinc429, PrevCnt.arinc429 );
+
   // Task Manager Health Counts
-  addCount.tm = Tm_AddPrevTMHealthStatus( CurrCnt.tm, PrevCnt.tm ); 
-  
+  addCount.tm = Tm_AddPrevTMHealthStatus( CurrCnt.tm, PrevCnt.tm );
+
   // Reset Health Counts
   addCount.reset.nWatchdogResets =
     CurrCnt.reset.nWatchdogResets + PrevCnt.reset.nWatchdogResets;
@@ -1314,39 +1326,39 @@ PWEH_SEU_HEALTH_COUNTS CBITMgrPWEHSEU_AddPrevCntVals ( PWEH_SEU_HEALTH_COUNTS Cu
   addCount.log = LogAddPrevCBITHealthStatus( CurrCnt.log, PrevCnt.log );
 
   return ( addCount );
-  
+
 }
 
 
 /******************************************************************************
- * Function:     CBITMgrPWEHSEU_UpdateEepromData 
+ * Function:     CBITMgrPWEHSEU_UpdateEepromData
  *
- * Description:  Updates PwehSeuEepromData with current Run Time Count 
+ * Description:  Updates PwehSeuEepromData with current Run Time Count
   *
  * Parameters:   none
  *
  * Returns:      none
  *
  * Notes:        none
- * 
+ *
  *****************************************************************************/
-static 
+static
 void CBITMgrPWEHSEU_UpdateEepromData ( void )
 {
-  PWEH_SEU_HEALTH_COUNTS currentCount; 
+  PWEH_SEU_HEALTH_COUNTS currentCount;
 
   // Get current Health Counts (PwehSeuCounts) and subtract from PwehSeuCountsPrevious
-  currentCount = CBITMgrPWEHSEU_GetDiffCntVals(PwehSeuCountsAtStartOfRec); 
-  
+  currentCount = CBITMgrPWEHSEU_GetDiffCntVals(PwehSeuCountsAtStartOfRec);
+
   // If we were reset/shutdown, add previous (power on) count values to current running total
-  if (PwehSeuEepromData.bIntRecInProgress) 
+  if (PwehSeuEepromData.bIntRecInProgress)
   {
-    PwehSeuEepromData.Counts = CBITMgrPWEHSEU_AddPrevCntVals( currentCount, 
+    PwehSeuEepromData.Counts = CBITMgrPWEHSEU_AddPrevCntVals( currentCount,
                                                               PwehSeuCountsPrevStored );
   }
-  else 
+  else
   {
-    PwehSeuEepromData.Counts = currentCount; 
+    PwehSeuEepromData.Counts = currentCount;
   }
 }
 
@@ -1356,305 +1368,315 @@ void CBITMgrPWEHSEU_UpdateEepromData ( void )
  *  MODIFICATIONS
  *    $History: CBITManager.c $
  * 
+ * *****************  Version 61  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM Data- CR changes
+ *
+ * *****************  Version 60  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * Support changes for EEPROM Backup not updated before SHUTDOWN
+ *
  * *****************  Version 59  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:12p
  * Updated in $/software/control processor/code/system
  * SCR 1087 - Code Review Updates
- * 
+ *
  * *****************  Version 58  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p
  * Updated in $/software/control processor/code/system
  * SCR 1076 - Code Review Updates
- * 
+ *
  * *****************  Version 57  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 12:40p
  * Updated in $/software/control processor/code/system
  * SCR #1142 File Formatting
- * 
+ *
  * *****************  Version 56  *****************
  * User: Melanie Jutras Date: 12-10-10   Time: 12:38p
  * Updated in $/software/control processor/code/system
  * SCR 1172 PCLint 545 Suspicious use of & Error
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 54  *****************
  * User: Contractor2  Date: 4/11/11    Time: 5:24p
  * Updated in $/software/control processor/code/system
  * SCR 1012: Unitialized variable "SEUCounts_Interrupted"
- * 
+ *
  * *****************  Version 53  *****************
  * User: John Omalley Date: 10/12/10   Time: 2:45p
  * Updated in $/software/control processor/code/system
  * SCR 826 - Code Review - Spelling problem
- * 
+ *
  * *****************  Version 52  *****************
  * User: John Omalley Date: 10/12/10   Time: 2:42p
  * Updated in $/software/control processor/code/system
  * SCR 826 - Code Review Updates
- * 
+ *
  * *****************  Version 51  *****************
  * User: Contractor2  Date: 10/07/10   Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR #921 Watchdog reset counts not showing in
  * SYS_CBIT_PWEH_SEU_COUNT_LOG
- * 
+ *
  * *****************  Version 50  *****************
  * User: Jeff Vahue   Date: 9/07/10    Time: 11:57a
  * Updated in $/software/control processor/code/system
  * SCR# 853 - Item 6 Set the sysCond to NORMAL on fault recording
- * 
+ *
  * *****************  Version 49  *****************
  * User: Jeff Vahue   Date: 9/03/10    Time: 8:22p
  * Updated in $/software/control processor/code/system
  * SCR# 853 - UART Int Monitor
- * 
+ *
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 9/01/10    Time: 2:39p
  * Updated in $/software/control processor/code/system
  * SCR# 830 - Code Coverage Changes
- * 
+ *
  * *****************  Version 47  *****************
  * User: Jeff Vahue   Date: 8/17/10    Time: 9:43p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Disable CBIT RAM Test when doing coverage runs
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 7/23/10    Time: 8:12p
  * Updated in $/software/control processor/code/system
  * SCR# 707, 733 - More TP INstrumentation, and enable CBIT RAM test
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 7/21/10    Time: 7:16p
  * Updated in $/software/control processor/code/system
  * SCR #538 SPIManager startup & NV Mgr Issues
- * 
+ *
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 7/17/10    Time: 5:46p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Add TestPoints for code coverage.
- * 
+ *
  * *****************  Version 42  *****************
  * User: Contractor2  Date: 7/13/10    Time: 11:19a
  * Updated in $/software/control processor/code/system
  * SCR #563 Modfix: CBIT Ram Test.
- * 
+ *
  * *****************  Version 41  *****************
  * User: Peter Lee    Date: 7/08/10    Time: 3:05p
  * Updated in $/software/control processor/code/system
- * SCR #683 Fix constant recording of SYS_CBIT_REG_CHECK_FAIL log. 
- * 
+ * SCR #683 Fix constant recording of SYS_CBIT_REG_CHECK_FAIL log.
+ *
  * *****************  Version 40  *****************
  * User: Contractor2  Date: 6/30/10    Time: 11:04a
  * Updated in $/software/control processor/code/system
  * SCR #150 Implementation: SRS-3662 - Add Data Flash corruption CBIT
  * counts.
- * 
+ *
  * *****************  Version 39  *****************
  * User: Peter Lee    Date: 6/17/10    Time: 3:22p
  * Updated in $/software/control processor/code/system
- * SCR #634 Distribute reg check loading. 
- * 
+ * SCR #634 Distribute reg check loading.
+ *
  * *****************  Version 38  *****************
  * User: Contractor2  Date: 6/14/10    Time: 1:05p
  * Updated in $/software/control processor/code/system
  * SCR #483 Function Names must begin with the CSC it belongs with.
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor3  Date: 6/10/10    Time: 10:44a
  * Updated in $/software/control processor/code/system
  * SCR #642 - Changes based on Code Review
- * 
+ *
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 6/08/10    Time: 5:53p
  * Updated in $/software/control processor/code/system
  * SCR #614 fast.reset=really should initialize files
- * 
+ *
  * *****************  Version 35  *****************
  * User: John Omalley Date: 6/08/10    Time: 12:13p
  * Updated in $/software/control processor/code/system
  * SCR 627 - Updated for LJ60
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor2  Date: 6/07/10    Time: 2:16p
  * Updated in $/software/control processor/code/system
  * SCR #628 Count SEU resets during data capture
- * 
+ *
  * *****************  Version 33  *****************
  * User: Contractor2  Date: 5/25/10    Time: 3:00p
  * Updated in $/software/control processor/code/system
  * SCR #612 Initial CRC value set for release build
  * SCR #563 Implementation: Req SRS-1811,1813,1814,1815,3162 - CBIT RAM
  * Tests
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:10p
  * Updated in $/software/control processor/code/system
  * SCR #579 Change LogWriteSys to return void
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 4/30/10    Time: 11:28a
  * Updated in $/software/control processor/code/system
  * SCR #574 System Level objects should not be including Applicati
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 4/28/10    Time: 5:48p
  * Updated in $/software/control processor/code/system
  * SCR # 572 - vcast changes
- * 
+ *
  * *****************  Version 28  *****************
  * User: Contractor2  Date: 4/23/10    Time: 2:08p
  * Updated in $/software/control processor/code/system
  * Implementation: Req SRS-1811,1813,1814,1815,3162 - CBIT RAM Tests
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 4/12/10    Time: 5:43p
  * Updated in $/software/control processor/code/system
  * SCR #541 - all XXX_CreateLogs functions are now dependent on
  * GENERATE_SYS_LOGS
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 8:23p
  * Updated in $/software/control processor/code/system
  * SCR #534 - no message when treating default CRC as valid
- * 
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:09p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 1:39p
  * Updated in $/software/control processor/code/system
  * SCR #534 - Record the CBIT Program CRC only once/powerup
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 11:45a
  * Updated in $/software/control processor/code/system
  * SCR #534 - set the default program CRC to allow for development and
  * reformat so messages related tot he CRC.
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor2  Date: 4/06/10    Time: 3:56p
  * Updated in $/software/control processor/code/system
  * SCR 525 - Implement periodic CBIT CRC test.
- * 
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/system
  * SCR# 496 - Move GSE from driver to sys, make StatusStr variadic
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:30p
  * Updated in $/software/control processor/code/system
  * SCR #279 Making NV filenames uppercase
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 18  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:57p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 17  *****************
  * User: Contractor V&v Date: 2/03/10    Time: 2:57p
  * Updated in $/software/control processor/code/system
  * SCR 279
- * 
+ *
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 1/25/10    Time: 2:39p
  * Updated in $/software/control processor/code/system
- * SCR #414 Error - Primary and Backup PWEH SEU Cnt Restore Failure 
- * 
+ * SCR #414 Error - Primary and Backup PWEH SEU Cnt Restore Failure
+ *
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR# 397
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:24p
  * Updated in $/software/control processor/code/system
  * SCR 371
- * 
+ *
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 12/22/09   Time: 2:39p
  * Updated in $/software/control processor/code/system
- * SCR #237 Replace LogWriteSystem() with Flt_SetStatus() 
- * 
+ * SCR #237 Replace LogWriteSystem() with Flt_SetStatus()
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 12/22/09   Time: 11:35a
  * Updated in $/software/control processor/code/system
  * SCR #381
- * 
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 12/18/09   Time: 4:55p
  * Updated in $/software/control processor/code/system
- * Distribute reg check across several MIF. 
- * 
+ * Distribute reg check across several MIF.
+ *
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 12/18/09   Time: 4:49p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:35p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor V&v Date: 11/30/09   Time: 5:36p
  * Updated in $/software/control processor/code/system
  * SCR 106 XXXUserTable.c consistency
- * 
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 11/19/09   Time: 3:22p
  * Updated in $/software/control processor/code/system
- * SCR #315 SEU counts for TM Health Counts 
- * 
+ * SCR #315 SEU counts for TM Health Counts
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 11/19/09   Time: 10:53a
  * Updated in $/software/control processor/code/system
  * SCR #315 Fix bug with maintaining SEU counts across power cycle
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 4:45p
  * Updated in $/software/control processor/code/system
- * Added macro condition for PC testing. 
- *  
+ * Added macro condition for PC testing.
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 11/05/09   Time: 5:30p
  * Updated in $/software/control processor/code/system
  * SCR #315 DIO CBIT for SEU Processing
- * 
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 11/02/09   Time: 11:44a
  * Updated in $/software/control processor/code/system
- * SCR #315 CBIT and SEU Processing.   User Table for CBIT Manager. 
- * 
+ * SCR #315 CBIT and SEU Processing.   User Table for CBIT Manager.
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 10/23/09   Time: 9:34a
  * Created in $/software/control processor/code/system
  * Initial Check In.  SCR #315
- * 
+ *
  *****************************************************************************/
 

@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 28 $  $Date: 12/28/12 5:52p $
+  $Revision: 30 $  $Date: 4/23/14 11:52a $
 
 ******************************************************************************/
 
@@ -126,9 +126,9 @@ static INT32 EvalFmtOperStr              (INT16 tblIdx, const EVAL_CMD* cmd, CHA
   /*   NOTE: RetValueFunc and RetBoolFunc are mutually exclusive -DO NOT DECLARE BOTH!                */\
   /*       OpCode      IsConfiged           RetValueFunc    RetBoolFunc           ValidFunc           */\
   DAI(OP_GETSNRVAL,    SensorIsUsed,        SensorGetValue, NULL,                 SensorIsValid       ),\
-  DAI(OP_GETSNRVALID,  SensorIsUsed,        NULL,           SensorIsValid,        SensorIsValid       ),\
+  DAI(OP_GETSNRVALID,  SensorIsUsed,        NULL,           SensorIsValid,        NULL                ),\
   DAI(OP_GETTRIGVAL,   TriggerIsConfigured, NULL,           TriggerGetState,      TriggerValidGetState),\
-  DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, TriggerValidGetState),\
+  DAI(OP_GETTRIGVALID, TriggerIsConfigured, NULL,           TriggerValidGetState, NULL                ),\
   DAI(OP_CALL_ACTACK,  NULL,                NULL,           ActionAcknowledgable, NULL                )
 
 //#define DEBUG_EVALUATOR
@@ -469,7 +469,7 @@ INT32 EvalExprStrToBin( EVAL_CALLER_TYPE objType, INT32 objID,
   expr->size        = 0;
   expr->maxOperands = maxOperands; // Maximum # operands for this type
   expr->operandCnt = 0;
-  memset( expr->cmdList, 0, EVAL_EXPR_BIN_LEN );
+  memset( expr->cmdList, 0, sizeof(expr->cmdList) );
 
   // Shift to uppercase for comparisons
   Supper(str);
@@ -875,7 +875,8 @@ static BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
                   dataAcc->pfGetSrcByValue( (INT32) cmd->data) :
                   dataAcc->pfGetSrcByBool ( (INT32) cmd->data);
 
-    rslt.validity = dataAcc->pfGetSrcValidity( (INT32)cmd->data);
+    rslt.validity = (dataAcc->pfGetSrcValidity == NULL) ? TRUE :
+					 dataAcc->pfGetSrcValidity( (INT32)cmd->data);
   }
   else // The indicated data source is not configured.
   {
@@ -1792,6 +1793,16 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 4/23/14    Time: 11:52a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1259 - Fixed Sensor Valid validity and Trigger Valid validity.
+ * 
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 2/13/14    Time: 10:31a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1257 - Incorrect usage of memset, not initializing data as expected
  * 
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:52p

@@ -1,15 +1,15 @@
 #define F7X_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        F7XUserTables.c
-    
-    Description: Routines to support the user commands for F7X Protocol CSC 
+
+    Description: Routines to support the user commands for F7X Protocol CSC
 
     VERSION
-    $Revision: 16 $  $Date: 8/28/12 1:43p $
-    
+    $Revision: 18 $  $Date: 9/03/14 5:16p $
+
 ******************************************************************************/
 #ifndef F7X_PROTOCOL_BODY
 #error F7XUserTables.c should only be included by UartMgr.c
@@ -17,7 +17,7 @@
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -45,7 +45,7 @@ USER_HANDLER_RESULT F7XMsg_Cfg(USER_DATA_TYPE DataType,
                                UINT32 Index,
                                const void *SetPtr,
                                void **GetPtr);
-                               
+
 USER_HANDLER_RESULT F7XMsg_Debug(USER_DATA_TYPE DataType,
                                  USER_MSG_PARAM Param,
                                  UINT32 Index,
@@ -81,19 +81,19 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static F7X_STATUS F7XStatusTemp; 
-static F7X_DUMPLIST_CFG F7XCfgTemp; 
+static F7X_STATUS F7XStatusTemp;
+static F7X_DUMPLIST_CFG F7XCfgTemp;
 
-static F7X_PARAM_LIST F7XParamListTemp; 
-static F7X_PARAM F7XParamEntryTemp; 
+static F7X_PARAM_LIST F7XParamListTemp;
+static F7X_PARAM F7XParamEntryTemp;
 
-static F7X_DEBUG F7XDebugTemp; 
+static F7X_DEBUG F7XDebugTemp;
 
 
 /*****************************************/
 /* User Table Defintions                 */
 /*****************************************/
-USER_MSG_TBL F7XStatusTbl[] = 
+USER_MSG_TBL F7XStatusTbl[] =
 {
   {"SYNC",            NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &F7XStatusTemp.sync,         1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
   {"ADDR_CHKSUM",     NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_HEX32,   USER_RO, (void *) &F7XStatusTemp.AddrChksum,   1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
@@ -108,7 +108,7 @@ USER_MSG_TBL F7XStatusTbl[] =
 
 
 // Cfg table substruct used by dumplist
-USER_MSG_TBL F7XCfgTbl[] = 
+USER_MSG_TBL F7XCfgTbl[] =
 { /*Str           Next Tbl Ptr    Handler Func.    Data Type          Access         Parameter                         IndexRange             DataLimit    EnumTbl*/
   {"ADDR_CHKSUM", NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_HEX32,  USER_RW, (void *) &F7XCfgTemp.AddrChksum,  0,F7X_MAX_DUMPLISTS-1, NO_LIMIT,    NULL},
   {"NUM_PARAMS",  NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.NumParams,   0,F7X_MAX_DUMPLISTS-1, 32,128,      NULL},
@@ -190,7 +190,7 @@ USER_MSG_TBL F7XCfgTbl[] =
   {"W_76",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[75], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_77",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[76], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_78",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[77], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
-  {"W_79",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[78], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},          
+  {"W_79",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[78], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_80",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[79], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_81",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[80], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_82",        NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[81], 0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
@@ -241,11 +241,11 @@ USER_MSG_TBL F7XCfgTbl[] =
   {"W_127",       NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[126],0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {"W_128",       NO_NEXT_TABLE, F7XMsg_Cfg,  USER_TYPE_UINT16, USER_RW, (void *) &F7XCfgTemp.ParamId[127],0,F7X_MAX_DUMPLISTS-1,NO_LIMIT,NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
-  
+
 };
 
 
-USER_MSG_TBL F7XDebugTbl[] = 
+USER_MSG_TBL F7XDebugTbl[] =
 {
   {"ENABLE",   NO_NEXT_TABLE,F7XMsg_Debug, USER_TYPE_BOOLEAN,(USER_RW|USER_GSE),(void *) &F7XDebugTemp.bDebug,    -1,-1,NO_LIMIT,NULL},
   {"CHANNEL",  NO_NEXT_TABLE,F7XMsg_Debug, USER_TYPE_UINT16, (USER_RW|USER_GSE),(void *) &F7XDebugTemp.Ch,        -1,-1,1,3,     NULL},
@@ -258,7 +258,7 @@ USER_MSG_TBL F7XDebugTbl[] =
 };
 
 
-USER_MSG_TBL F7XParamEntryCfgTbl[] = 
+USER_MSG_TBL F7XParamEntryCfgTbl[] =
 { /*Str          Next Tbl Ptr    Handler Func.          Data Type          Access     Parameter                            IndexRange          DataLimit    EnumTbl*/
   {"SCALE",      NO_NEXT_TABLE,  F7XMsg_ParamEntryList, USER_TYPE_UINT16,  USER_RW,   (void *) &F7XParamEntryTemp.scale,   0,F7X_MAX_PARAMS-2, NO_LIMIT,    NULL},
   {"TOL",        NO_NEXT_TABLE,  F7XMsg_ParamEntryList, USER_TYPE_FLOAT,   USER_RW,   (void *) &F7XParamEntryTemp.tol,     0,F7X_MAX_PARAMS-2, NO_LIMIT,    NULL},
@@ -267,7 +267,7 @@ USER_MSG_TBL F7XParamEntryCfgTbl[] =
 };
 
 #define NUM_PARAMS_STRING  "NUM_PARAMS"
-USER_MSG_TBL F7XParamCfgTbl[] = 
+USER_MSG_TBL F7XParamCfgTbl[] =
 { /*Str               Next Tbl Ptr          Handler Func.       Data Type           Access      Parameter                            IndexRange     DataLimit           EnumTbl*/
   {"VERSION",         NO_NEXT_TABLE,        F7XMsg_ParamList,   USER_TYPE_UINT16,   USER_RW,    (void *) &F7XParamListTemp.ver,       -1,-1,        NO_LIMIT,           NULL},
   {NUM_PARAMS_STRING, NO_NEXT_TABLE,        F7XMsg_ParamList,   USER_TYPE_UINT16,   USER_RW,    (void *) &F7XParamListTemp.cnt,       -1,-1,        0,F7X_MAX_PARAMS-2, NULL},
@@ -277,26 +277,26 @@ USER_MSG_TBL F7XParamCfgTbl[] =
 
 
 
-USER_MSG_TBL F7XProtocolRoot[] = 
+USER_MSG_TBL F7XProtocolRoot[] =
 {
   {"STATUS",F7XStatusTbl,NULL,NO_HANDLER_DATA},
-  {"DEBUG" ,F7XDebugTbl ,NULL,NO_HANDLER_DATA},  
-/*  
-#ifdef GENERATE_SYS_LOGS  
+  {"DEBUG" ,F7XDebugTbl ,NULL,NO_HANDLER_DATA},
+/*
+#ifdef GENERATE_SYS_LOGS
   {"CREATELOGS",NO_NEXT_TABLE,Arinc429Msg_CreateLogs,   USER_TYPE_ACTION, USER_RO,               NULL, -1,-1, NULL},
 #endif
-*/    
+*/
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-USER_MSG_TBL F7XDumpListRoot[] = 
+USER_MSG_TBL F7XDumpListRoot[] =
 { /*Str            Next Tbl Ptr    Handler Func.             Data Type          Access                        Parameter     IndexRange  DataLimit    EnumTbl*/
   {"CFG",          F7XCfgTbl,     NULL,                      NO_HANDLER_DATA},
   {DISPLAY_CFG,    NO_NEXT_TABLE, F7XMsg_DumpListShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,        -1,-1,      NO_LIMIT,    NULL},
   {NULL,           NULL,          NULL,                      NO_HANDLER_DATA}
 };
 
-USER_MSG_TBL F7XParamRoot[] = 
+USER_MSG_TBL F7XParamRoot[] =
 { /*Str            Next Tbl Ptr    Handler Func.                 Data Type          Access                        Parameter     IndexRange  DataLimit    EnumTbl*/
   {"CFG",          F7XParamCfgTbl, NULL,NO_HANDLER_DATA},
   {DISPLAY_CFG,    NO_NEXT_TABLE,  F7XMsg_ParamListShowConfig,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,        -1,-1,      NO_LIMIT,    NULL},
@@ -310,11 +310,11 @@ USER_MSG_TBL F7XProtocolDumpListTblPtr = {"F7X_DUMPLIST",F7XDumpListRoot,NULL,NO
 USER_MSG_TBL F7XProtocolParamTblPtr = {"F7X_PARAM",F7XParamRoot,NULL,NO_HANDLER_DATA};
 
 /*****************************************************************************/
-/* Local Function Prototypes                                                 */ 
+/* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
 /*****************************************************************************/
-/* Public Functions                                                          */  
+/* Public Functions                                                          */
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -322,13 +322,13 @@ USER_MSG_TBL F7XProtocolParamTblPtr = {"F7X_PARAM",F7XParamRoot,NULL,NO_HANDLER_
 /*****************************************************************************/
 
 /******************************************************************************
- * Function:    F7XMsg_Status 
+ * Function:    F7XMsg_Status
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves the latest F7X Status Data 
- *              
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *              Retrieves the latest F7X Status Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -353,17 +353,17 @@ USER_HANDLER_RESULT F7XMsg_Status(USER_DATA_TYPE DataType,
                                   const void *SetPtr,
                                   void **GetPtr)
 {
-  USER_HANDLER_RESULT result ; 
+  USER_HANDLER_RESULT result ;
 
-  result = USER_RESULT_OK; 
-  
-  F7XStatusTemp = *F7XProtocol_GetStatus(Index); 
-  
+  result = USER_RESULT_OK;
+
+  F7XStatusTemp = *F7XProtocol_GetStatus(Index);
+
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
-  
+
   return result;
 }
- 
+
 
 
 /******************************************************************************
@@ -371,9 +371,9 @@ USER_HANDLER_RESULT F7XMsg_Status(USER_DATA_TYPE DataType,
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves and set the latest F7X Cfg Data 
- *              
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *              Retrieves and set the latest F7X Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -400,27 +400,26 @@ USER_HANDLER_RESULT F7XMsg_Cfg(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result;
 
-  result = USER_RESULT_OK; 
+  result = USER_RESULT_OK;
 
+  // Determine which array element
 
-  // Determine which array element 
-  
-  F7XCfgTemp = *F7XProtocol_GetCfg ( Index ); 
+  memcpy(&F7XCfgTemp,
+         &CfgMgr_ConfigPtr()->F7XConfig[Index],
+         sizeof(F7XCfgTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *F7XProtocol_GetCfg(Index) = F7XCfgTemp; 
-
-    memcpy(&CfgMgr_ConfigPtr()->F7XConfig[Index], &F7XCfgTemp, 
+    memcpy(&CfgMgr_ConfigPtr()->F7XConfig[Index], &F7XCfgTemp,
            sizeof(F7X_DUMPLIST_CFG));
-           
-    //Store the modified temporary structure in the EEPROM.       
+
+  // Persist the CfgMgr's updated copy back to EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),&CfgMgr_ConfigPtr()->F7XConfig[Index],
                            sizeof(F7X_DUMPLIST_CFG));
   }
-  return result;  
+  return result;
 
 }
 
@@ -431,9 +430,9 @@ USER_HANDLER_RESULT F7XMsg_Cfg(USER_DATA_TYPE DataType,
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves the latest F7X Debug Data 
- *              
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *              Retrieves the latest F7X Debug Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -458,16 +457,16 @@ USER_HANDLER_RESULT F7XMsg_Debug(USER_DATA_TYPE DataType,
                                  const void *SetPtr,
                                  void **GetPtr)
 {
-  USER_HANDLER_RESULT result ; 
+  USER_HANDLER_RESULT result ;
 
-  result = USER_RESULT_OK; 
-  
-  F7XDebugTemp = *F7XProtocol_GetDebug(); 
-  
+  result = USER_RESULT_OK;
+
+  F7XDebugTemp = *F7XProtocol_GetDebug();
+
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
-  
-  *F7XProtocol_GetDebug() = F7XDebugTemp; 
-  
+
+  *F7XProtocol_GetDebug() = F7XDebugTemp;
+
   return result;
 }
 
@@ -477,9 +476,9 @@ USER_HANDLER_RESULT F7XMsg_Debug(USER_DATA_TYPE DataType,
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves and set the latest F7X Param Cfg Data 
- *              
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *              Retrieves and set the latest F7X Param Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -506,27 +505,26 @@ USER_HANDLER_RESULT F7XMsg_ParamList(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result;
 
-  result = USER_RESULT_OK; 
+  result = USER_RESULT_OK;
 
+  // Determine which array element
 
-  // Determine which array element 
-  
-  F7XParamListTemp = *F7XProtocol_GetParamList(); 
+  memcpy(&F7XParamListTemp,
+    &CfgMgr_ConfigPtr()->F7XParamConfig,
+    sizeof(F7XParamListTemp));
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    *F7XProtocol_GetParamList() = F7XParamListTemp; 
-
-    memcpy(&CfgMgr_ConfigPtr()->F7XParamConfig, &F7XParamListTemp, 
+    memcpy(&CfgMgr_ConfigPtr()->F7XParamConfig, &F7XParamListTemp,
            sizeof(F7X_PARAM_LIST));
-           
-    //Store the modified temporary structure in the EEPROM.       
+
+    //Store the modified temporary structure in the EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),&CfgMgr_ConfigPtr()->F7XParamConfig,
                            sizeof(F7X_PARAM_LIST));
   }
-  return result;  
+  return result;
 
 }
 
@@ -536,9 +534,9 @@ USER_HANDLER_RESULT F7XMsg_ParamList(USER_DATA_TYPE DataType,
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves and set the latest F7X Param Cfg Data 
- *              
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+ *              Retrieves and set the latest F7X Param Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
  *               [in/out] Param: Pointer to the configuration item to be read
  *                               or changed
@@ -565,28 +563,32 @@ USER_HANDLER_RESULT F7XMsg_ParamEntryList(USER_DATA_TYPE DataType,
 {
   USER_HANDLER_RESULT result;
 
-  result = USER_RESULT_OK; 
+  result = USER_RESULT_OK;
 
 
-  // Grab the entry 
-  F7XParamEntryTemp = *F7XProtocol_GetParamEntryList(Index); 
+  // Grab the entry
+  F7XParamEntryTemp = *F7XProtocol_GetParamEntryList(Index);
+  memcpy(&F7XParamEntryTemp,
+       &CfgMgr_ConfigPtr()->F7XParamConfig.param[Index],
+       sizeof(F7XParamEntryTemp));
+
 
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    // Update the run time entry and the copy in CfgMgr
-    *F7XProtocol_GetParamEntryList(Index) = F7XParamEntryTemp; 
+    // Update the copy in CfgMgr
 
-    memcpy(&CfgMgr_ConfigPtr()->F7XParamConfig.param[Index], &F7XParamEntryTemp, 
+    memcpy(&CfgMgr_ConfigPtr()->F7XParamConfig.param[Index],
+       &F7XParamEntryTemp,
            sizeof(F7X_PARAM));
-           
-    // Store the modified temporary structure in the EEPROM.       
+
+    // Persist the CfgMgr's updated copy back to EEPROM.
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                            &CfgMgr_ConfigPtr()->F7XParamConfig.param[Index],
                            sizeof(F7X_PARAM));
   }
-  return result;  
+  return result;
 
 }
 
@@ -595,9 +597,9 @@ USER_HANDLER_RESULT F7XMsg_ParamEntryList(USER_DATA_TYPE DataType,
 * Function:    F7XMsg_DumpListShowConfig
 *
 * Description:  Handles User Manager requests to retrieve the configuration
-*               settings. 
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -611,9 +613,9 @@ USER_HANDLER_RESULT F7XMsg_ParamEntryList(USER_DATA_TYPE DataType,
 *
 *
 * Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.       
+*              USER_RESULT_ERROR: Error processing command.
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 USER_HANDLER_RESULT F7XMsg_DumpListShowConfig(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
@@ -621,15 +623,15 @@ USER_HANDLER_RESULT F7XMsg_DumpListShowConfig(USER_DATA_TYPE DataType,
                                               const void *SetPtr,
                                               void **GetPtr)
 {
-  USER_HANDLER_RESULT result;   
-  CHAR Label[USER_MAX_MSG_STR_LEN * 3];   
+  USER_HANDLER_RESULT result;
+  CHAR Label[USER_MAX_MSG_STR_LEN * 3];
 
   //Top-level name is a single indented space
   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
 
   USER_MSG_TBL*  pCfgTable;
   INT16 idx;
-  
+
   result = USER_RESULT_OK;
 
   // Loop for each param in the dumplist.
@@ -640,12 +642,12 @@ USER_HANDLER_RESULT F7XMsg_DumpListShowConfig(USER_DATA_TYPE DataType,
     result = USER_RESULT_ERROR;
     if (User_OutputMsgString( Label, FALSE ) )
     {
-      pCfgTable = F7XCfgTbl;  // Re-set the pointer to beginning of CFG table       
+      pCfgTable = F7XCfgTbl;  // Re-set the pointer to beginning of CFG table
 
       // User_DisplayConfigTree will invoke itself recursively to display all fields.
       result = User_DisplayConfigTree(BranchName, pCfgTable, idx, 0, NULL);
-    }     
-  } 
+    }
+  }
   return result;
 }
 
@@ -653,9 +655,9 @@ USER_HANDLER_RESULT F7XMsg_DumpListShowConfig(USER_DATA_TYPE DataType,
 * Function:    F7XMsg_ParamListShowConfig
 *
 * Description:  Handles User Manager requests to retrieve the configuration
-*               settings. 
-*               
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used 
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
@@ -669,9 +671,9 @@ USER_HANDLER_RESULT F7XMsg_DumpListShowConfig(USER_DATA_TYPE DataType,
 *
 *
 * Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.       
+*              USER_RESULT_ERROR: Error processing command.
 *
-* Notes:        
+* Notes:
 *****************************************************************************/
 
 USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
@@ -684,20 +686,20 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
   CHAR  LabelStem[MAX_LABEL_CHAR_ARRAY] = "\r\n\r\nF7X_PARAM.CFG";
   CHAR  Label[USER_MAX_MSG_STR_LEN * 3];
   CHAR  Value[MAX_VALUE_CHAR_ARRAY];
-  
+
   INT16  numParams = F7X_MAX_PARAMS - 2;
-  USER_HANDLER_RESULT result; 
-  
+  USER_HANDLER_RESULT result;
+
   // Declare a GetPtr to be used locally since
   // the GetPtr passed in is "NULL" because this funct is a user-action.
   UINT32 TempInt;
   void*  LocalPtr = &TempInt;
-  
+
   //Top-level name is a single indented space
   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
   CHAR NextBranchName[USER_MAX_MSG_STR_LEN] = "  ";
 
-  USER_MSG_TBL* pCfgTable;  
+  USER_MSG_TBL* pCfgTable;
   result = USER_RESULT_OK;
 
   /*
@@ -716,25 +718,25 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
       Level 4       TOL
       Level 4       TIMEOUT_MS
   */
-  
+
   // Display label for F7X_PARAM.CFG
   User_OutputMsgString( LabelStem, FALSE);
-  
-  /*** Process the leaf elements in Levels 1->3  ***/ 
+
+  /*** Process the leaf elements in Levels 1->3  ***/
   pCfgTable = F7XParamCfgTbl;
-  
-  idx = 0;  
+
+  idx = 0;
   while ( pCfgTable->MsgStr  != NULL             &&
           pCfgTable->pNext   == NO_NEXT_TABLE    &&
-          pCfgTable->MsgType != USER_TYPE_ACTION &&        
+          pCfgTable->MsgType != USER_TYPE_ACTION &&
           result == USER_RESULT_OK )
-  {    
+  {
     sprintf(  Label,"\r\n%s%s =", BranchName, pCfgTable->MsgStr);
     PadString(Label, USER_MAX_MSG_STR_LEN + 15);
     result = USER_RESULT_ERROR;
     if (User_OutputMsgString( Label, FALSE ))
     {
-      result = USER_RESULT_OK; 
+      result = USER_RESULT_OK;
 
       // Call user function for the table entry
       if( USER_RESULT_OK != pCfgTable->MsgHandler(pCfgTable->MsgType, pCfgTable->MsgParam,
@@ -753,13 +755,13 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
         }
 
         // Convert the param to string.
-        if( User_CvtGetStr(pCfgTable->MsgType, Value, sizeof(Value), 
+        if( User_CvtGetStr(pCfgTable->MsgType, Value, sizeof(Value),
                                           LocalPtr, pCfgTable->MsgEnumTbl))
         {
           result = USER_RESULT_ERROR;
           if (User_OutputMsgString( Value, FALSE ))
           {
-            result = USER_RESULT_OK; 
+            result = USER_RESULT_OK;
           }
         }
         else
@@ -776,22 +778,22 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 
   // Substruct name was the first entry to terminate the while-loop above
    strncpy_safe(LabelStem, sizeof(LabelStem), pCfgTable->MsgStr, _TRUNCATE);
-   
-   // Set pointer to array of param entry structs table   
+
+   // Set pointer to array of param entry structs table
    pCfgTable = &F7XParamEntryCfgTbl[0];
 
    for (idx = 0; idx < numParams && result == USER_RESULT_OK; ++idx)
    {
       // Display element info above each set of data.
-      sprintf(Label, "\r\n\r\n%s%s[%d]",BranchName, LabelStem, idx);      
-      
-      // Assume the worse, to terminate this for-loop 
+      sprintf(Label, "\r\n\r\n%s%s[%d]",BranchName, LabelStem, idx);
+
+      // Assume the worse, to terminate this for-loop
       result = USER_RESULT_ERROR;
       if ( User_OutputMsgString( Label, FALSE ) )
       {
          result = User_DisplayConfigTree(NextBranchName, pCfgTable, idx, 0, NULL);
       }
-   }   
+   }
   return result;
 }
 
@@ -800,90 +802,101 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: F7XUserTables.c $
  * 
+ * *****************  Version 18  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:16p
+ * Updated in $/software/control processor/code/system
+ * SCR #1234 - Configuration update of certain modules overwrites default
+ * settings/CR updates
+ *
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 8/14/14    Time: 4:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1234 - Configuration update of certain modules overwrites
+ *
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 15  *****************
  * User: John Omalley Date: 10/18/10   Time: 5:44p
  * Updated in $/software/control processor/code/system
  * SCR 953 - Fixed Output Msg Problem (Value vs. Label)
- * 
+ *
  * *****************  Version 14  *****************
  * User: Contractor2  Date: 10/18/10   Time: 4:12p
  * Updated in $/software/control processor/code/system
  * SCR #953 F7XMsg_ParamListShowConfig has code-coverage holes.
  * Fix incorrect implementation
- * 
+ *
  * *****************  Version 13  *****************
  * User: Contractor2  Date: 10/18/10   Time: 3:28p
  * Updated in $/software/control processor/code/system
  * SCR #953 F7XMsg_ParamListShowConfig has code-coverage holes.
- * 
+ *
  * *****************  Version 12  *****************
  * User: John Omalley Date: 10/15/10   Time: 9:32a
  * Updated in $/software/control processor/code/system
  * SCR 938 - Code Review Updates
- * 
+ *
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 8/03/10    Time: 6:26p
  * Updated in $/software/control processor/code/system
  * SCR #770 .num_params from 0 to 254.
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:01a
  * Updated in $/software/control processor/code/system
  * SCR #685 - Add USER_GSE flag
- * 
+ *
  * *****************  Version 9  *****************
  * User: Contractor V&v Date: 7/22/10    Time: 6:49p
  * Updated in $/software/control processor/code/system
  * SCR #643  Add showcfg to UartMgrUserTable and F7XUserTable
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 7/12/10    Time: 3:31p
  * Updated in $/software/control processor/code/system
- * SCR #665 F7X_Param range from 0 to 254 not 0 to 256 ! 
- * 
+ * SCR #665 F7X_Param range from 0 to 254 not 0 to 256 !
+ *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 6/28/10    Time: 5:17p
  * Updated in $/software/control processor/code/system
  * SCR #635 Force Uart and F7X min array to '1' from '0' since [0]
- * restricted to GSE port.  
- * 
+ * restricted to GSE port.
+ *
  * *****************  Version 6  *****************
  * User: Contractor V&v Date: 6/22/10    Time: 6:24p
  * Updated in $/software/control processor/code/system
  * SCR #643 Add showcfg to UartMgrUserTable and F7XUserTable
- * 
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 6/21/10    Time: 3:37p
  * Updated in $/software/control processor/code/system
  * SCR #635 items 17 and 18.  Update debug display to display new frames
- * only.  Make all f7x_dumplist.cfg[] and f7x_param.cfg[] entries blank.  
- * 
+ * only.  Make all f7x_dumplist.cfg[] and f7x_param.cfg[] entries blank.
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 6/16/10    Time: 6:09p
  * Updated in $/software/control processor/code/system
  * SCR #643 Implement showcfg for F7X/Uart
- * 
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 6/15/10    Time: 3:54p
  * Updated in $/software/control processor/code/system
  * SCR #635.  Add limit of 32 to 128 for num param.  Updated "timeout" to
  * "timeout_ms".
- * 
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 6/10/10    Time: 2:15p
  * Updated in $/software/control processor/code/system
- * SCR #365 Update better debug display for F7X. 
- * 
+ * SCR #365 Update better debug display for F7X.
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 5/31/10    Time: 5:55p
  * Created in $/software/control processor/code/system
- * Initial Check In.  Implementation of the F7X and UartMgr Requirements. 
- * 
- * 
+ * Initial Check In.  Implementation of the F7X and UartMgr Requirements.
+ *
+ *
  *
  *****************************************************************************/

@@ -715,7 +715,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          pData->bStarted = TRUE;
          // OR sequence number with the box power-on count stored during initialization
          nEventSeqCounter++;
-         pData->seqNumber &= 0xFFFF0000;
+		 pData->seqNumber &= 0xFFFF0000;
          pData->seqNumber |= (nEventSeqCounter & 0xFFFF);
 
          // SRS-4196 - Simple Event Action is mutually exclusive with Table processing

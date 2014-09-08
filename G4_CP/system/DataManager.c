@@ -1,6 +1,6 @@
 #define DATA_MNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        DataManager.c
@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 92 $  $Date: 12-12-06 4:29p $
+      $Revision: 95 $  $Date: 9/04/14 3:11p $
 
 ******************************************************************************/
 
@@ -70,6 +70,8 @@ static INT32 m_event_tag;
 //For channels 0-7,
 static UINT32 m_channel_busy_flags;
 static BOOLEAN m_is_busy_last = FALSE;
+
+static UINT8 noData = 0;
 
 // include user command tables here.(After local var have been declared.)
 #include "DataManagerUserTables.c"
@@ -403,8 +405,10 @@ BOOLEAN DataMgrDownloadGetState ( INT32 param )
  * Notes:
  *****************************************************************************/
 void DataMgrRecRun ( BOOLEAN Run, INT32 param  )
-{
+{  
   dmRecordEnabled = Run;
+  // Notify the ClockMgr of the new Recording state
+  CM_UpdateRecordingState(Run);
 }
 
 
@@ -427,12 +431,11 @@ void DataMgrDownloadRun ( BOOLEAN Run, INT32 param  )
 {
   if(Run)
   {
-    DataMgrStartDownload();
+    DataMgrStartDownload();    
   }
   else
   {
-    //Return value ignored, the FSM does not handle this error.
-    DataMgrStopDownload();
+    DataMgrStopDownload();    
   }
 }
 
@@ -454,6 +457,7 @@ void DataMgrStopDownload ( void )
    // Local Data
    DATA_MNG_INFO *pDMInfo;
    UINT8         nChannel;
+   BOOLEAN       bStopped = FALSE;
 
    // Loop through all the configured channels and look for the
    // channels that are currently downloading
@@ -462,7 +466,7 @@ void DataMgrStopDownload ( void )
       pDMInfo = &dataMgrInfo[nChannel];
 
       if ( pDMInfo->dl.bDownloading == TRUE )
-      {
+      {         
          // Check the interface type and command the interface to stop
          switch (pDMInfo->acs_Config.portType)
          {
@@ -480,9 +484,18 @@ void DataMgrStopDownload ( void )
          // Reset the flags for the channel
          pDMInfo->dl.bDownloading  = FALSE;
          pDMInfo->dl.bDownloadStop = TRUE;
-         break;
+
+         // Set flag to indicate that at least one/more download has been stopped.
+         bStopped = TRUE;
+         //break;  - removed this break as it could cause early-exit from 'for' loop         
       }
    }
+   // If at least one download has been stopped, update recording state.
+   if ( bStopped )
+   {
+     CM_UpdateRecordingState(FALSE);
+   }
+
 }
 
 
@@ -626,10 +639,17 @@ BOOLEAN DataMgrStartDownload( void )
 
             // Enable the tasks to perform the download
             TmTaskEnable ((TASK_INDEX)(nChannel + (UINT32)Data_Mgr0), TRUE);
-            bStarted = TRUE;
+            // Set flag to indicate that at least one/more download has been started.
+            bStarted = TRUE;            
          }
       }
+   }   
+   // If at least one download has been started, update recording state.
+   if ( bStarted )
+   {
+     CM_UpdateRecordingState(TRUE);
    }
+
    return bStarted;
 }
 
@@ -680,6 +700,7 @@ static void DataMgrCreateTask( UINT32 source, ACS_CONFIG *pACSConfig,
     dataMgrInfo[source].acs_Config           = *pACSConfig;
     dataMgrInfo[source].recordStatus         = DM_RECORD_IDLE;
     dataMgrInfo[source].bBufferOverflow      = FALSE;
+    dataMgrInfo[source].dl.nBytes            = 0;
     dataMgrInfo[source].dl.state             = DL_RECORD_REQUEST;
     dataMgrInfo[source].dl.bDownloading      = FALSE;
     dataMgrInfo[source].dl.bDownloadStop     = FALSE;
@@ -1503,6 +1524,7 @@ static void DataMgrDownloadTask( void *pParam )
    pDMParam = (DATA_MNG_TASK_PARMS *)pParam;
    pDMInfo  = &dataMgrInfo[pDMParam->nChannel];
    pMsgBuf  = &pDMInfo->msgBuf[pDMInfo->nCurrentBuffer];
+   requestStatus = DL_NO_RECORDS;
 
    // Get the current time for statistics
    CM_GetTimeAsTimestamp (&currentTime);
@@ -1533,6 +1555,9 @@ static void DataMgrDownloadTask( void *pParam )
             {
                // Advance to the END State for the download processing
                pDMInfo->dl.state = DL_END;
+	       // Reset the record statistics so they can be reused
+               memset (&recordStats[pDMParam->nChannel],0,
+					   sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
             }
             // Did the interface find a record?
             else if ( requestStatus == DL_RECORD_FOUND )
@@ -1565,6 +1590,8 @@ static void DataMgrDownloadTask( void *pParam )
          else // Stop Download was detected advance to the END State
          {
             pDMInfo->dl.state = DL_END;
+            // Reset the record statistics so they can be reused
+            memset (&recordStats[pDMParam->nChannel],0,sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
          }
          break;
       // The current record is larger than 16KBytes so we need to continue
@@ -1715,6 +1742,8 @@ static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
       case ACS_PORT_MAX:
       default:
          *pStatus = DL_NO_RECORDS;
+         pSrc     = &noData;
+         *pSize   = 0;
          break;
    }
    return pSrc;
@@ -1772,7 +1801,7 @@ static UINT32 DataMgrSaveDLRecord ( DATA_MNG_INFO *pDMInfo, UINT8 nChannel,
                                                  0xFFFFFFFF);
 
       // Update the buffer index
-      pMsgBuf->index += pDMInfo->dl.nBytes;
+      pMsgBuf->index += (UINT16)pDMInfo->dl.nBytes;
       // Record fit into on packet non bytes remain
       nRemaining = 0;
    }
@@ -1907,6 +1936,24 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 95  *****************
+ * User: Contractor V&v Date: 9/04/14    Time: 3:11p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording -Forgot to
+ * remove call.
+ * 
+ * *****************  Version 94  *****************
+ * User: Contractor V&v Date: 9/04/14    Time: 2:45p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording - Add
+ * download constraint.
+ * 
+ * *****************  Version 93  *****************
+ * User: John Omalley Date: 4/01/14    Time: 9:46a
+ * Updated in $/software/control processor/code/system
+ * SCR 1250 - Reset Statistics when the download has completed or is
+ * stopped.
  * 
  * *****************  Version 92  *****************
  * User: John Omalley Date: 12-12-06   Time: 4:29p

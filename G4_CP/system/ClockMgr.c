@@ -1,7 +1,7 @@
 #define SYS_CLOCKMGR_BODY
 
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:        ClockMgr.c
@@ -11,13 +11,13 @@
               The system RTC:
                 Maintains current date and time at sub-second resolution,
                 and is driven from a hardware timer or the PIT timer.
-                Actual resolution is dependant on the timer driving the clock.
+                Actual resolution is dependent on the timer driving the clock.
               The wallclock:
                 Maintains current date and time at 1 second resolution and
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 47 $  $Date: 12-11-27 7:06p $
+     $Revision: 51 $  $Date: 9/04/14 2:44p $
 
 ******************************************************************************/
 
@@ -100,13 +100,20 @@ static TIMESTRUCT     CM_SYS_CLOCK;           //System Real-time clock
 
 //static UINT32         CM_SystemOnTimeSec;   //Shadow copy of system up-time in seconds
 
-static UINT32         CM_TickCount;           //Tick count for CM_GetTickCount
+static UINT32         m_TickCount;            //Tick count for CM_GetTickCount
 
-static BOOLEAN        CM_PreInitFlag;         //Used during "pre-initlization"
+static BOOLEAN        m_bPreInitFlag;         //Used during "pre-initlization"
                                               //to indicate the interrupt
                                               //driven clock is not operating
                                               //and forces "Get" time routines
                                               //to read time from the RTC chip.
+
+static INT16          m_nRecRefCnt;           // Recording/DownLoading Ref cnt.
+                                              // Updated by FastMgr and DataMgr to signal CM
+                                              // when recording/downloading is in progress
+                                              // CM will only perform a clock-sync
+                                              // when this value is zero. This
+                                              // prevents time gaps or overlaps in logs.
 
 
 static const UINT8    DaysPerMonth [] =    {29, //Feb leap year
@@ -221,8 +228,8 @@ USER_MSG_TBL CMRoot[] =
  ****************************************************************************/
 void CM_Init(void)
 {
-  TCB TaskBlock;
-  TIMESTRUCT Time;
+  TCB taskBlock;
+  TIMESTRUCT timeStruct;
   CM_RTC_DRV_PBIT_LOG log;
 
  #ifdef GENERATE_SYS_LOGS
@@ -231,28 +238,29 @@ void CM_Init(void)
 
   //Initialize clock manager data
   CM_SYS_CLOCK    = CM_SYS_CLOCK_DEFAULT;
-  CM_TickCount    = 0;
-  CM_PreInitFlag  = FALSE;
+  m_TickCount     = 0;
+  m_bPreInitFlag  = FALSE;
+  m_nRecRefCnt    = 0;
 
   //Read the battery backed time and load it to
   //the system clock
-  CM_GetRTCClock(&Time);
-  CM_SetSystemClock(&Time, FALSE);
+  CM_GetRTCClock(&timeStruct);
+  CM_SetSystemClock(&timeStruct, FALSE);
 
-  memset(&TaskBlock, 0, sizeof(TaskBlock));
-  strncpy_safe(TaskBlock.Name, sizeof(TaskBlock.Name),"Clock CBIT",_TRUNCATE);
-  TaskBlock.TaskID         = Clock_CBIT;
-  TaskBlock.Function       = CM_CBit;
-  TaskBlock.Priority       = taskInfo[Clock_CBIT].priority;
-  TaskBlock.Type           = taskInfo[Clock_CBIT].taskType;
-  TaskBlock.modes          = taskInfo[Clock_CBIT].modes;
-  TaskBlock.MIFrames       = taskInfo[Clock_CBIT].MIFframes;
-  TaskBlock.Rmt.InitialMif = taskInfo[Clock_CBIT].InitialMif;
-  TaskBlock.Rmt.MifRate    = taskInfo[Clock_CBIT].MIFrate;
-  TaskBlock.Enabled        = TRUE;
-  TaskBlock.Locked         = FALSE;
-  TaskBlock.pParamBlock    = NULL;
-  TmTaskCreate (&TaskBlock);
+  memset(&taskBlock, 0, sizeof(taskBlock));
+  strncpy_safe(taskBlock.Name, sizeof(taskBlock.Name),"Clock CBIT",_TRUNCATE);
+  taskBlock.TaskID         = Clock_CBIT;
+  taskBlock.Function       = CM_CBit;
+  taskBlock.Priority       = taskInfo[Clock_CBIT].priority;
+  taskBlock.Type           = taskInfo[Clock_CBIT].taskType;
+  taskBlock.modes          = taskInfo[Clock_CBIT].modes;
+  taskBlock.MIFrames       = taskInfo[Clock_CBIT].MIFframes;
+  taskBlock.Rmt.InitialMif = taskInfo[Clock_CBIT].InitialMif;
+  taskBlock.Rmt.MifRate    = taskInfo[Clock_CBIT].MIFrate;
+  taskBlock.Enabled        = TRUE;
+  taskBlock.Locked         = FALSE;
+  taskBlock.pParamBlock    = NULL;
+  TmTaskCreate (&taskBlock);
 
   if ( RTC_GetStatus() != DRV_OK )
   {
@@ -292,7 +300,7 @@ void CM_Init(void)
  *****************************************************************************/
 void CM_PreInit(void)
 {
-  CM_PreInitFlag               = TRUE;   //Forces SynchToRTC to stay set
+  m_bPreInitFlag               = TRUE;   //Forces SynchToRTC to stay set
 }
 
 
@@ -315,7 +323,7 @@ void CM_GetSystemClock(TIMESTRUCT* pTime)
   //If system clock is not yet running (during system start "pre-init" phase)
   //Need to silently discard errors.  If an error occurs, RTCClock returns the
   //default time.  This case only applies in the pre-init stage.
-  if(CM_PreInitFlag)
+  if(m_bPreInitFlag)
   {
     // During init, read RTC directly, afterwards use CM_GetRTCClock(pTime)
     if (RTC_ReadTime(pTime) != DRV_OK)
@@ -406,7 +414,7 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
   Result = RTC_GetTime(pTime);
   if(Result != DRV_OK)
   {
-    if(!CM_PreInitFlag)
+    if(!m_bPreInitFlag)
     {
       InvalidTimeLog.Result   = Result;
       InvalidTimeLog.TimeRead = *pTime;
@@ -419,7 +427,7 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
     Result = RTC_SetTime(pTime);
     if (Result != DRV_OK)
     {
-      if(!CM_PreInitFlag)
+      if(!m_bPreInitFlag)
       {
         //Cannot set the time, log a fault (with "Result")
         InvalidTimeLog.Result = Result;
@@ -600,7 +608,7 @@ UINT32 CM_GetTickCount(void)
 {
   //Return of interrupt TickCount without disabling interrupts
   //is okay because the read is atomic.
-  return CM_TickCount;
+  return m_TickCount;
 }
 
 
@@ -673,7 +681,7 @@ void CM_GenerateDebugLogs(void)
 void CM_RTCTick(void)
 {
 
-  CM_TickCount += MIF_PERIOD_mS;              //Update millisecond tick count
+  m_TickCount += MIF_PERIOD_mS;              //Update millisecond tick count
   CM_SYS_CLOCK.MilliSecond += MIF_PERIOD_mS;        //Update RTC
 
   if (CM_SYS_CLOCK.MilliSecond >= MILLISECONDS_PER_SECOND)    // Update Seconds
@@ -716,8 +724,7 @@ void CM_RTCTick(void)
     }//Second == 0
 
     // Check sync to Cfg Time Source every 2 sec
-    if ( (((CM_SYS_CLOCK.Second) % 2) == 0) &&
-         (FAST_TimeSourceCfg() != TIME_SOURCE_LOCAL) )
+    if ( (((CM_SYS_CLOCK.Second) % 2) == 0) )
     {
       CM_TimeSourceSyncToRemote( CM_SYS_CLOCK );
     }
@@ -1038,26 +1045,23 @@ void CM_CBit(void* pParam)
 /*****************************************************************************
  * Function:    CM_TimeSourceSyncToRemote
  *
- * Description: Sync the FASST internal system clock(s) to the Remote Time Source
+ * Description: Sync the FAST internal system clock(s) to the Remote Time Source
  *
  * Parameters:  TIMESTRUCT cm_time_struct - Remote Time Source
  *
  * Returns:     none
  *
- * Notes:       none
+ * Notes:       As of FAST 2.1 'Remote' refers to the MS, since CP can
+ *              no longer be configured to sync directly to Ground Station
  *
  ****************************************************************************/
 static
 void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
 {
-  BOOLEAN bSync;
   TIMESTRUCT mssc_TimeStruct;
   UINT32 mssc_SecSinceBaseYr;
   UINT32 cm_SecSinceBaseYr;
   UINT32 time_diff;
-
-
-  bSync = TRUE;
 
   // Have we received heart beat from MS ?
   // NOTE: Expect that when heart beat goes away ("data loss"), FALSE will be
@@ -1066,24 +1070,11 @@ void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
   //       the logic below will re-sync the system clock
   // NOTE: To make logic simplier, will not have test to ensure time is
   //       "ticking from ms".
-  if ( MSSC_GetIsAlive() == TRUE )
-  {
-    // If cfg set for TIME_SOURCE_REMOTE and ms has not synced to remote server
-    //    do not attempt to sync FAST time to ms
-    if ( (FAST_TimeSourceCfg() == TIME_SOURCE_REMOTE) &&
-         (MSSC_GetMSTimeSynced() != TRUE) )
-    {
-      bSync = FALSE;
-    }
-  }
-  else
-  {
-    // ms not connected, do not perform time sync processing
-    bSync = FALSE;
-  }
 
-  // Update system clock and RTC if time difference is > 1 minute !
-  if (bSync == TRUE)
+  // Update system clock and RTC if configured for non-local,
+  // MS is alive and time difference is > 1 minute !
+  if ( FAST_TimeSourceCfg() != TIME_SOURCE_LOCAL &&
+       MSSC_GetIsAlive() == TRUE )
   {
     // Get current ms time.
     // NOTE: Heart beat is at 1 sec and timeout to be 10 sec
@@ -1109,8 +1100,8 @@ void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
         time_diff = cm_SecSinceBaseYr - mssc_SecSinceBaseYr;
       }
 
-      // If time diff is >  CM_MS_TIME_DIFF, then sync system clk to MS
-      if ( time_diff > CM_MS_TIME_DIFF_SECS )
+      // If not recording and time diff is >  CM_MS_TIME_DIFF, then sync system clk to MS
+      if ( 0 == m_nRecRefCnt && time_diff > CM_MS_TIME_DIFF_SECS )
       {
         // Update system clock, log created within func call
         CM_SetSystemClock( &mssc_TimeStruct, TRUE );
@@ -1121,7 +1112,7 @@ void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
     }
     // else TBD indicate that ms time is "suspect"
 
-  } // End of if (bSync == TRUE)
+  } // End of MSSC_GetIsAlive()
 
 }
 
@@ -1153,12 +1144,61 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
                   sizeof(CM_CLOCKUPDATE_LOG), NULL );
 }
 
+/*****************************************************************************
+ * Function:    CM_UpdateRecordingState
+ *
+ * Description: Updates local variable m_nRecRefCnt when FAST recording state
+ *              changes. ClockMgr uses this to control whether to allow a
+ *              clock sync to MS to occur. Sync is not allowed while
+ *              recording/ downloading.
+ *
+ * Parameters:  bRec  TRUE  - Increment the ref count by one
+ *                    FALSE - Decrement the ref count by one
+ *
+ * Returns:     none
+ *
+ * Notes:       none
+ *
+ ****************************************************************************/
+void CM_UpdateRecordingState(BOOLEAN bRec)
+{
+  // incr/decr the ref count of recorders/downloaders accordingly.  
+  m_nRecRefCnt += bRec ? 1 : -1;
 
+  // Prevent ref count from going negative.
+  m_nRecRefCnt = (m_nRecRefCnt >= 0) ? m_nRecRefCnt : 0;
+
+  GSE_DebugStr(NORMAL,TRUE,
+               "Clk Sync inhibit ref cnt %s to: %d", bRec ? "incremented" : "decremented",
+               m_nRecRefCnt);
+}
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
  * 
+ * *****************  Version 51  *****************
+ * User: Contractor V&v Date: 9/04/14    Time: 2:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording - Add
+ * download constraint.
+ * 
+ * *****************  Version 50  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording - FSM
+ * handling.and CR updates
+ *
+ * *****************  Version 49  *****************
+ * User: Contractor V&v Date: 8/26/14    Time: 4:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording
+ *
+ * *****************  Version 48  *****************
+ * User: Contractor V&v Date: 7/28/14    Time: 6:48p
+ * Updated in $/software/control processor/code/system
+ * Removed support for TIME_SOURCE_REMOTE
+ *
  * *****************  Version 47  *****************
  * User: Peter Lee    Date: 12-11-27   Time: 7:06p
  * Updated in $/software/control processor/code/system

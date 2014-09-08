@@ -1,6 +1,6 @@
 #define LOG_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        LogUserTables.c
@@ -8,7 +8,7 @@
     Description:
 
 *  VERSION
- *    $Revision: 20 $  $Date: 12-11-12 9:48a $
+ *    $Revision: 22 $  $Date: 9/03/14 5:19p $
 ******************************************************************************/
 #ifndef LOGMNG_BODY
 #error LogUserTables.c should only be included by LogManager.c
@@ -54,20 +54,20 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
 
 static USER_MSG_TBL LogQueueCmd[] =
 { /*  Str    Next Tbl Ptr   Handler Func.  Data Type        Access    Parameter       IndexRange   DataLimit  EnumTbl*/
-   { "HEAD", NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32, USER_RO,  &LogQueue.head, -1, -1,      NO_LIMIT,   NULL },
-   { "TAIL", NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32, USER_RO,  &LogQueue.tail, -1, -1,      NO_LIMIT,   NULL },
+   { "HEAD", NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32, USER_RO,  &logQueue.head, -1, -1,      NO_LIMIT,   NULL },
+   { "TAIL", NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32, USER_RO,  &logQueue.tail, -1, -1,      NO_LIMIT,   NULL },
    { NULL  , NULL,          NULL,          NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL LogStatusCmd[] =
 {/*  Str             Next Tbl Ptr   Handler Func.    Data Type       Access    Parameter                 IndexRange   DataLimit  EnumTbl*/
-  { "PERCENTUSED",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_FLOAT,  USER_RO,  &LogConfig.fPercentUsage, -1, -1,      NO_LIMIT,  NULL },
-  { "WRITEOFFSET",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &LogConfig.nWrOffset,     -1, -1,      NO_LIMIT,  NULL },
-  { "STARTOFFSET",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &LogConfig.nStartOffset,  -1, -1,      NO_LIMIT,  NULL },
-  { "ENDOFFSET",     NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &LogConfig.nEndOffset,    -1, -1,      NO_LIMIT,  NULL },
-  { "LOGCOUNT",      NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &LogConfig.nLogCount,     -1, -1,      NO_LIMIT,  NULL },
-  { "LOGDELETED",    NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &LogConfig.nDeleted,      -1, -1,      NO_LIMIT,  NULL },
-  { "CORRUPT",       NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &LogConfig.nCorrupt,      -1, -1,      NO_LIMIT,  NULL },
+  { "PERCENTUSED",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_FLOAT,  USER_RO,  &logConfig.fPercentUsage, -1, -1,      NO_LIMIT,  NULL },
+  { "WRITEOFFSET",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &logConfig.nWrOffset,     -1, -1,      NO_LIMIT,  NULL },
+  { "STARTOFFSET",   NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &logConfig.nStartOffset,  -1, -1,      NO_LIMIT,  NULL },
+  { "ENDOFFSET",     NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_HEX32,  USER_RO,  &logConfig.nEndOffset,    -1, -1,      NO_LIMIT,  NULL },
+  { "LOGCOUNT",      NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &logConfig.nLogCount,     -1, -1,      NO_LIMIT,  NULL },
+  { "LOGDELETED",    NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &logConfig.nDeleted,      -1, -1,      NO_LIMIT,  NULL },
+  { "CORRUPT",       NO_NEXT_TABLE, Log_GetStatus, USER_TYPE_UINT32, USER_RO,  &logConfig.nCorrupt,      -1, -1,      NO_LIMIT,  NULL },
   { NULL,            NULL,          NULL,          NO_HANDLER_DATA }
 };
 
@@ -156,7 +156,7 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
                                        void **GetPtr)
 {
    USER_HANDLER_RESULT result = USER_RESULT_ERROR;
-   LOG_REQUEST New;
+   LOG_REQUEST newReq;
 
    if(strncmp(SetPtr,"really",sizeof("really")) == 0)
    {
@@ -164,19 +164,19 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
       {
          GSE_DebugStr(NORMAL,TRUE, "LogEraseCmd: Erase Already in Progress"NL);
       }
-      else if (LogConfig.nLogCount == 0)
+      else if (logConfig.nLogCount == 0)
       {
          GSE_DebugStr(NORMAL,TRUE, "LogEraseCmd: No Logs to Erase"NL);
       }
       else
       {
-         New.reqType                    = LOG_REQ_ERASE;
-         New.pStatus                    = &LogMonEraseBlock.erStatus;
-         New.request.erase.pFoundOffset = &LogMonEraseBlock.found;
-         New.request.erase.nStartOffset = LogConfig.nStartOffset;
-         New.request.erase.type         = LOG_ERASE_QUICK;
+         newReq.reqType                    = LOG_REQ_ERASE;
+         newReq.pStatus                    = &logMonEraseBlock.erStatus;
+         newReq.request.erase.pFoundOffset = &logMonEraseBlock.found;
+         newReq.request.erase.nStartOffset = logConfig.nStartOffset;
+         newReq.request.erase.type         = LOG_ERASE_QUICK;
 
-         if (LOG_QUEUE_FULL != LogQueuePut(New))
+         if (LOG_QUEUE_FULL != LogQueuePut(newReq))
          {
             result = USER_RESULT_OK;
             GSE_DebugStr(NORMAL,TRUE, "LogEraseCmd: Queued");
@@ -195,6 +195,16 @@ USER_HANDLER_RESULT Log_EraseBlock(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: LogUserTables.c $
  * 
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - CR updates
+ *
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 8/26/14    Time: 3:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - Compliance cleanup
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-11-12   Time: 9:48a
  * Updated in $/software/control processor/code/system

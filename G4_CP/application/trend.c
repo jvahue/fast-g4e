@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 30 $  $Date: 1/30/13 3:19p $
+ $Revision: 31 $  $Date: 2/13/14 10:31a $
 
 ******************************************************************************/
 
@@ -262,7 +262,7 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
    pBuffer    = (INT8 *)pDest;
    nRemaining = nMaxByteSize;
    nTotal     = 0;
-   memset ( trendHdr, 0, sizeof(TREND_HDR) );
+   memset ( trendHdr, 0, sizeof(trendHdr) );
 
    // Loop through all the Trends
    for ( trendIndex = TREND_0;
@@ -1064,6 +1064,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 2/13/14    Time: 10:31a
+ * Updated in $/software/control processor/code/application
+ * SCR 1257 - Incorrect usage of memset, not initializing data as expected
  * 
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 1/30/13    Time: 3:19p

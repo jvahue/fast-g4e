@@ -1,6 +1,6 @@
 #define FASTSTATEMGR_BODY
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2012-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         FASTStateMgr.c
@@ -10,9 +10,9 @@
                   The definition of the inputs and tasks are defined in
                   FASTStateMgrInterfaces.h
 
-     
+
    VERSION
-   $Revision: 21 $  $Date: 1/30/13 1:47p $
+   $Revision: 23 $  $Date: 9/03/14 5:11p $
 
 ******************************************************************************/
 
@@ -35,10 +35,11 @@
 #include "gse.h"
 #include "user.h"
 #include "FASTMgr.h"
+#include "PowerManager.h"
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-                                   //If task enums are equal...           && 
+                                   //If task enums are equal...           &&
 //..If numerated the parmams are equal (last part only evaluated if IsNumerated is TRUE)
 #define IS_TASKS_EQUAL(A,Ai,B,Bi) ( (A->RunTasks[Ai] == B->RunTasks[Bi])  && \
 (!m_Tasks[A->RunTasks[Ai]].IsNumerated || (A->RunTasks[Ai+1] == B->RunTasks[Bi+1])) )
@@ -60,11 +61,11 @@
 #define FSM_TASK_ITEM(Name,IsNumerated,MaxNum,RunFunc,GetStateFunc)\
 {#Name,IsNumerated,MaxNum,RunFunc,GetStateFunc},
 
-//Array of Transition Criteria 
+//Array of Transition Criteria
 #undef FSM_TC_ITEM
 #define FSM_TC_ITEM(Name,IsNumerated,GetStateFunc)\
 {#Name,IsNumerated,GetStateFunc},
- 
+
 //List of all FAST Task definitions
 static FSM_TASK  m_Tasks[] = {FSM_TASK_LIST {"",FALSE,NULL,NULL}};
 //List of all FAST Transition Criteria definitions
@@ -128,74 +129,77 @@ static void FSM_TaskFunc(void* pParam);
  *****************************************************************************/
 void FSM_Init(void)
 {
-  TCB TaskInfo;
-  USER_MSG_TBL RootMsg = {"FSM", FSMRoot, NULL, NO_HANDLER_DATA};
-  static CHAR CRCMismatchStateStr[64];
-  UINT16 CalcCRC;  
+  TCB tcb;
+  USER_MSG_TBL rootMsg = {"FSM", FSMRoot, NULL, NO_HANDLER_DATA};
+  static CHAR crcMismatchStateStr[64];
+  UINT16 calcCRC;
   FSM_CRC_MISMATCH_LOG log;
-    
+
   m_CurState = 0;
   m_StateStartTime = 0;
   m_IsTimerExpired = FALSE;
   m_CurStateStr = m_Cfg.States[0].Name;
-  memcpy(&m_Cfg,&CfgMgr_ConfigPtr()->FSMConfig,sizeof(m_Cfg));
+  memcpy(&m_Cfg, &CfgMgr_ConfigPtr()->FSMConfig, sizeof(m_Cfg));
 
   //Compute CRC
 #ifndef WIN32
-  CalcCRC = CRC16(&m_Cfg, sizeof(m_Cfg)-sizeof(m_Cfg.CRC));
+  calcCRC = CRC16(&m_Cfg, sizeof(m_Cfg)-sizeof(m_Cfg.CRC));
 #else
   /*vcast_dont_instrument_start*/
-  // For G4E assume the configured CRC is valid, since the CalcCRC will not contain the
+  // For G4E assume the configured CRC is valid, since the calcCRC will not contain the
   // actual value except on FAST box.
-  CalcCRC = m_Cfg.CRC;
+  calcCRC = m_Cfg.CRC;
   /*vcast_dont_instrument_end*/
 #endif
 
-  if((CalcCRC == m_Cfg.CRC) && m_Cfg.Enabled)
+  if((calcCRC == m_Cfg.CRC) && m_Cfg.Enabled)
   {
     //Enable Fast State Machine
-    memset(&TaskInfo, 0, sizeof(TaskInfo));
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"FSM",_TRUNCATE);
-    TaskInfo.TaskID         = FSM_Task;
-    TaskInfo.Function       = FSM_TaskFunc;
-    TaskInfo.Priority       = taskInfo[FSM_Task].priority;
-    TaskInfo.Type           = taskInfo[FSM_Task].taskType;
-    TaskInfo.modes          = taskInfo[FSM_Task].modes;
-    TaskInfo.MIFrames       = taskInfo[FSM_Task].MIFframes;
-    TaskInfo.Rmt.InitialMif = taskInfo[FSM_Task].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[FSM_Task].MIFrate;
-    TaskInfo.Enabled        = TRUE;
-    TaskInfo.Locked         = FALSE;
-    TaskInfo.pParamBlock    = NULL;
-    TmTaskCreate (&TaskInfo);
-    
+    memset(&tcb, 0, sizeof(tcb));
+    strncpy_safe(tcb.Name, sizeof(tcb.Name),"FSM",_TRUNCATE);
+    tcb.TaskID         = FSM_Task;
+    tcb.Function       = FSM_TaskFunc;
+    tcb.Priority       = taskInfo[FSM_Task].priority;
+    tcb.Type           = taskInfo[FSM_Task].taskType;
+    tcb.modes          = taskInfo[FSM_Task].modes;
+    tcb.MIFrames       = taskInfo[FSM_Task].MIFframes;
+    tcb.Rmt.InitialMif = taskInfo[FSM_Task].InitialMif;
+    tcb.Rmt.MifRate    = taskInfo[FSM_Task].MIFrate;
+    tcb.Enabled        = TRUE;
+    tcb.Locked         = FALSE;
+    tcb.pParamBlock    = NULL;
+    TmTaskCreate (&tcb);
+
     //Disable old FAST Manager.
     FAST_TurnOffFASTControl();
+
+    // Tell PM latch-control that FSM is active.
+    PmSetFsmActive();
   }
-  else if((CalcCRC != m_Cfg.CRC) && m_Cfg.Enabled)
+  else if((calcCRC != m_Cfg.CRC) && m_Cfg.Enabled)
   {
     //CRC mismatch, do not enable
-    snprintf(CRCMismatchStateStr,
-        sizeof(CRCMismatchStateStr),
-        "Err: CRC mismatch Exp: 0x%04X Calc:0x%04X",m_Cfg.CRC,CalcCRC);
+    snprintf(crcMismatchStateStr,
+        sizeof(crcMismatchStateStr),
+        "Err: CRC mismatch Exp: 0x%04X Calc:0x%04X",m_Cfg.CRC,calcCRC);
 
-    m_CurStateStr = CRCMismatchStateStr;
-    
+    m_CurStateStr = crcMismatchStateStr;
+
     log.ExpectedCRC = m_Cfg.CRC;
-    log.CalculatedCRC = CalcCRC;
+    log.CalculatedCRC = calcCRC;
     LogWriteSystem(APP_ID_FSM_CRC_MISMATCH, LOG_PRIORITY_LOW, &log,
         sizeof(log), NULL );
   }
-  
-  User_AddRootCmd(&RootMsg);
 
-    
+  User_AddRootCmd(&rootMsg);
+
+
 }
 
 
 
 /******************************************************************************
- * Function:      FSM_GetIsTimerExpired  | IMPLEMENTS GetState INTERFACE to 
+ * Function:      FSM_GetIsTimerExpired  | IMPLEMENTS GetState INTERFACE to
  *                                       | FAST STATE MGR
  *
  * Description:   Returns the status of the timer flag that is set/cleared
@@ -203,7 +207,7 @@ void FSM_Init(void)
  *
  * Parameters:    [in] param: Not used, to match call signature only
  *
- * Returns:       .  
+ * Returns:       .
  *
  * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
@@ -213,23 +217,23 @@ BOOLEAN FSM_GetIsTimerExpired(INT32 param)
 {
 
   return m_IsTimerExpired;
-  
+
 }
 
 
 
 /******************************************************************************
- * Function:      FSM_GetStateFALSE  | IMPLEMENTS GetState INTERFACE to 
+ * Function:      FSM_GetStateFALSE  | IMPLEMENTS GetState INTERFACE to
  *                                   | FAST STATE MGR
  *
  * Description:   Generic interface function that always returns false.
  *                One use is for tasks that perform a simple in-line function
  *                when they are run and there for never return an active status
- *                when GetState is called. 
+ *                when GetState is called.
  *
- * Parameters:    [in] param: Not used, to match call signature only. 
+ * Parameters:    [in] param: Not used, to match call signature only.
  *
- * Returns:       FALSE: always returns false  
+ * Returns:       FALSE: always returns false
  *
  * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
@@ -250,7 +254,7 @@ BOOLEAN FSM_GetStateFALSE(INT32 param)
  * Function:    FSM_TaskFunc
  *
  * Description: Main periodic task for the state manager.
- *               
+ *
  *
  * Parameters:  [] pParam: Not used, only to match TaskManager Task prototype
  *
@@ -272,11 +276,11 @@ void FSM_TaskFunc(void* pParam)
   if(bPwrOnInit)
   {
     //Stop tasks that are running at power on
-    FSM_StopThisStateTasks(&m_InitState,&m_Cfg.States[0]);         
+    FSM_StopThisStateTasks(&m_InitState,&m_Cfg.States[0]);
     FSM_StartNextStateTasks(&m_InitState,&m_Cfg.States[0]);
     bPwrOnInit = FALSE;
   }
-  
+
   //Evaluate timer if enabled
   if( current->Timer > 0 )
   {
@@ -295,28 +299,28 @@ void FSM_TaskFunc(void* pParam)
       {
         TCIndex = i;
         next = &m_Cfg.States[m_Cfg.TCs[i].NextState];
-          
+
         //Stop current tasks
         FSM_StopThisStateTasks(current,next);
-          
+
         FSM_ChangeState(current,next,i,input_states);
         m_CurState = m_Cfg.TCs[TCIndex].NextState;
         m_CurStateStr = m_Cfg.States[m_CurState].Name;
-        break;        
+        break;
       }
-    }    
-  } 
+    }
+  }
 }
 
 
 /******************************************************************************
  * Function:    FSM_ChangeState
- *  
+ *
  * Description: Sets the next state as the current state.  This is the
  *              final call after stopping tasks and waiting for them to
  *              stop (if synchronous)
  *
- *              
+ *
  *
  * Parameters:  [in] current: Pointer to location for the current state
  *              [in] next: Pointer to location for the next state
@@ -333,7 +337,7 @@ void FSM_ChangeState(const FSM_STATE* current, const FSM_STATE* next,
     INT32 tc, CHAR* input_states)
 {
   FSM_STATE_CHANGE_LOG log;
-  
+
 
   //If logged transition, log it.
   strncpy_safe(log.current,sizeof(log.current),
@@ -362,19 +366,19 @@ void FSM_ChangeState(const FSM_STATE* current, const FSM_STATE* next,
 
 /******************************************************************************
  * Function:    FSM_StopThisStateTasks
- *  
+ *
  * Description: Stops tasks running in the current state that are not in the
  *              next state.
  *
  *               For each task defined in the 'current' state
  *                If it is defined in the next state, do nothing
  *                If it is not defined in the next state, stop it
- *              
+ *
  *
  * Parameters:  [in] current: Pointer to location for the current state
  *              [in] next: Pointer to location for the next state
  *
- * Returns:    
+ * Returns:
  *
  * Notes:
  *
@@ -384,7 +388,7 @@ void FSM_StopThisStateTasks(const FSM_STATE* current, const FSM_STATE* next)
   INT32 n,c;
   BOOLEAN bTaskNotInNext;
   INT32   param;
-  
+
   //For every task in the current state.....
   for(c = 0; c < current->Size; c++)
   {
@@ -415,18 +419,18 @@ void FSM_StopThisStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 
 /******************************************************************************
  * Function:    FSM_StartNextStateTasks
- *  
+ *
  * Description: Starts all tasks in the next state that are not already defined
  *              in the current state.
  *
  *               For each task defined in the 'next' state
  *                If it is not defined in the 'current' state, start it
- *              
+ *
  *
  * Parameters:  [in] current: Pointer to location for the current state
  *              [in] next: Pointer to location for the next state
  *
- * Returns:    
+ * Returns:
  *
  * Notes:
  *
@@ -435,7 +439,7 @@ void FSM_StartNextStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 {
   INT32 n,c,param;
   BOOLEAN bTaskNotInCurrent;
-  
+
   //for each task in the next state....
   for(n = 0; n < next->Size; n++)
   {
@@ -468,18 +472,18 @@ void FSM_StartNextStateTasks(const FSM_STATE* current, const FSM_STATE* next)
 /******************************************************************************
  * Function:    FSM_EvalTCExpr
  *
- * Description: Take a binary format boolean expression of transition criteria 
- *              Evaluate that expression based on the current state of all the 
- *              inputs.  
+ * Description: Take a binary format boolean expression of transition criteria
+ *              Evaluate that expression based on the current state of all the
+ *              inputs.
  *
  *              The function evaluates the RPN boolean expression
  *
  *              Error checking is for use during system initialization/
  *              configuration.  If an error is detected at runtime the
  *              caller should assert
- *              
  *
- * Parameters:  [in] tc_desc: A Transition Criteria to evaluate, must not be an 
+ *
+ * Parameters:  [in] tc_desc: A Transition Criteria to evaluate, must not be an
  *                            empty set.
  *              [out] input_states: Optional, will be populated with the
  *                                  input states in the same order as
@@ -503,14 +507,14 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
   INT32 i,input_state_idx = 0;
   BOOLEAN a,b;
   BYTE operand;
-    
+
   for(i = 0; i < tc_desc->size; i++)
   {
     //If input operand
     if(tc_desc->data[i] < FSM_TC_END)
     {
       //Add extra to i if 2 bytes decoded
-      i += FSM_EvaluateTCExprInput(&tc_desc->data[i],&operand) - 1; 
+      i += FSM_EvaluateTCExprInput(&tc_desc->data[i],&operand) - 1;
       if(input_states != NULL)
       {
         input_states[input_state_idx++] = operand ? '1' : '0';
@@ -521,9 +525,9 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
     else
     {
       //NOT Operator "!"
-      if(FSM_OP_NOT == tc_desc->data[i]) 
+      if(FSM_OP_NOT == tc_desc->data[i])
       {
-        if(RPN_STACK_CNT < 1)  
+        if(RPN_STACK_CNT < 1)
         {
           RPN_PUSH(-1);
           break;
@@ -535,7 +539,7 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
       //AND or OR operator "&" or "|"
       else
       {
-        if(RPN_STACK_CNT < 2) 
+        if(RPN_STACK_CNT < 2)
         {
           RPN_PUSH(-1);
           break;
@@ -546,14 +550,14 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
       }
     }
   }
-  
+
   //ERROR, too many values in expression
   if(RPN_STACK_CNT != 1)
   {
     RPN_PUSH(-2);
   }
   return RPN_POP;
- 
+
 }
 
 
@@ -561,7 +565,7 @@ INT32 FSM_EvalTCExpr(const FSM_TC* tc_desc, CHAR* input_states)
 /******************************************************************************
  * Function:    FSM_EvaluateTCExprInput
  *
- * Description: Evaluates the an input defined by a binary format TC Expression 
+ * Description: Evaluates the an input defined by a binary format TC Expression
  *              and returns the state of the input into 'state'.  The number
  *              of bytes decoded in the input expression is the return value of
  *              the function.  Currently returns 1 for inputs or 2 for inputs
@@ -592,7 +596,7 @@ INT32 FSM_EvaluateTCExprInput(const BYTE* data, BYTE* state)
   else
   {
     *state = m_TransitionCriteria[data[0]].GetState(0) ? 1 : 0;
-    retval = 1;    
+    retval = 1;
   }
   return retval;
 }
@@ -603,7 +607,7 @@ INT32 FSM_EvaluateTCExprInput(const BYTE* data, BYTE* state)
  * Function:    FSM_TCStrToBin
  *
  * Description: Convert a transition criteria binary expression from string
- *              form (i.e that with 4-char names and !,&,| operators) to a 
+ *              form (i.e that with 4-char names and !,&,| operators) to a
  *              binary form used at runtime.
  *
  *
@@ -632,7 +636,7 @@ INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin)
                             {FSM_TC_OP_OR_CHAR , FSM_OP_OR },
                             {FSM_TC_OP_NOT_CHAR, FSM_OP_NOT},
                             {NULL,FSM_OP_END_OF_EXP }};
-  
+
   bin->size = 0;
   //Start looking for operators and inputs
   while((*str != '\0') && (retval == 0))
@@ -647,7 +651,7 @@ INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin)
     //See if string at current position is TC input name
     len = FSM_ConvertTCInputStrToBin(str, bin);
     if(len != 0)
-    { 
+    {
       str += len;
       retval = input_lim++ < FSM_NUM_OF_INPUTS_PER_TC ? 0 : -3;
     }
@@ -657,8 +661,8 @@ INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin)
       //store in buffer
       for(j = 0;(OpTbl[j].str != NULL) && (OpTbl[j].str[0] != *str);j++)
       {
-        
-      }   
+
+      }
       if(OpTbl[j].str != NULL)
       {
         bin->data[bin->size++] = OpTbl[j].bin;
@@ -672,13 +676,13 @@ INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin)
       }
     }
   }
-  
-  //Run through RPN evaluator to check for errors.  
+
+  //Run through RPN evaluator to check for errors.
   if((retval != -1 && bin->size != 0))
   {
     retval = FSM_EvalTCExpr(bin,NULL);
   }
-  
+
   return retval;
 }
 
@@ -686,8 +690,8 @@ INT32 FSM_TCStrToBin(CHAR* str, FSM_TC* bin)
 /******************************************************************************
  * Function:    FSM_ConvertTCInputStrToBin
  *
- * Description: Converts a 4 character TC input string and number if 
- *              "IsNumerated" to its respective enumerated binary value.  
+ * Description: Converts a 4 character TC input string and number if
+ *              "IsNumerated" to its respective enumerated binary value.
  *              Characters beyond 4 are ignored.
  *
  *
@@ -709,7 +713,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
   CHAR* ptr;
 
   //search for an operator character 4 chars after str*
-  //should be: LLLL[!&|] or LLnn[!&|]  
+  //should be: LLLL[!&|] or LLnn[!&|]
   //Compare string to list of known TC inputs
   for(i = 0; m_TransitionCriteria[i].Name[0] != '\0';i++)
   {
@@ -718,7 +722,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
       bin->data[bin->size++] = i;
       retval = 4;
       break;
-    }    
+    }
   }
   //If found (found 4 characters), then check if it is followed by a number
   if(m_TransitionCriteria[i].IsNumerated && (retval == 4))
@@ -737,7 +741,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
       retval = 0;
     }
   }
-  
+
   return retval;
 }
 
@@ -758,7 +762,7 @@ INT32 FSM_ConvertTCInputStrToBin(CHAR* str, FSM_TC* bin)
  *                    param value out of range.
  *
  * Notes:
- *  
+ *
  *****************************************************************************/
 INT32 FSM_TaskStrToBin(CHAR* str, FSM_STATE* bin)
 {
@@ -767,12 +771,12 @@ INT32 FSM_TaskStrToBin(CHAR* str, FSM_STATE* bin)
   CHAR *ptr,*end;
   BOOLEAN TaskFound;
   UINT32 num;
-  
+
   bin->Size = 0;
   str = strtok_r(str,",",&ptr);
-  
-  
-  while( ( str != NULL ) && ( lim++ <= FSM_NUM_OF_TASK ) && 
+
+
+  while( ( str != NULL ) && ( lim++ <= FSM_NUM_OF_TASK ) &&
          ( retval != -1 )                                   )
   {
     TaskFound = FALSE;
@@ -806,22 +810,22 @@ INT32 FSM_TaskStrToBin(CHAR* str, FSM_STATE* bin)
         retval = -1;
       }
     }
-    //Else if task is not supposed to have a number, 
+    //Else if task is not supposed to have a number,
     //ensure no trailing characters after the 4
     else if(!m_Tasks[i].IsNumerated && TaskFound && (strlen(str) != 4))
     {
       retval = -1;
     }
-    
+
     //Error, could not find task string or max # of tasks exceeded.
     if(!TaskFound || (lim > FSM_NUM_OF_TASK) )
     {
       retval = -1;
     }
-        
+
     str = strtok_r(NULL,",",&ptr) ;
   }
-  
+
   return retval;
 }
 
@@ -838,7 +842,7 @@ INT32 FSM_TaskStrToBin(CHAR* str, FSM_STATE* bin)
  *                              at least FSM_TC_STR_LEN
  *                [in]     bin: Binary transition criteria expression
  *
- * Returns:        none.  
+ * Returns:        none.
  *
  * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
@@ -852,8 +856,8 @@ void FSM_TCBinToStr( CHAR* str, FSM_TC* bin )
 
   //Clear str
   *str = '\0';
-  
-                      
+
+
   for(i = 0; i < bin->size; i++)
   {
     //Test if TC Input or Operator
@@ -869,12 +873,12 @@ void FSM_TCBinToStr( CHAR* str, FSM_TC* bin )
       }
     }
     else
-    {     
+    {
       //an operator
       SuperStrcat(str, op_chars[bin->data[i] - FSM_TC_OP_BYTE_CODE_START],
           FSM_TC_STR_LEN);
     }
-    
+
     if( i != (bin->size - 1))
     {
       SuperStrcat(str, " ", FSM_TC_STR_LEN);
@@ -895,7 +899,7 @@ void FSM_TCBinToStr( CHAR* str, FSM_TC* bin )
  *                              at least FSM_TASK_LIST_STR_LEN
  *                [in]     bin: Binary transition criteria expression
  *
- * Returns:       none.  
+ * Returns:       none.
  *
  * Notes:         Binary form is assumed parsable, since it was checked when
  *                parsed in from a string
@@ -908,7 +912,7 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
 
   //Clear str
   *str = '\0';
-  
+
   for(i = 0; i < bin->Size; i++)
   {
     SuperStrcat(str, m_Tasks[bin->RunTasks[i]].Name , FSM_TASK_LIST_STR_LEN);
@@ -930,61 +934,72 @@ void FSM_TaskBinToStr( CHAR* str, FSM_STATE* bin )
  *  MODIFICATIONS
  *    $History: FASTStateMgr.c $
  * 
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:11p
+ * Updated in $/software/control processor/code/application
+ * SCR #1204 - Legacy App Busy Input still latches battery while FSM
+ * enabled Code review 
+ *
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 4:56p
+ * Updated in $/software/control processor/code/application
+ * Fix legacy Battery latch when FSM enabled
+ *
  * *****************  Version 21  *****************
  * User: Jeff Vahue   Date: 1/30/13    Time: 1:47p
  * Updated in $/software/control processor/code/application
  * SCR# 1214 - add vcast statements, fix typos
- * 
+ *
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-12-03   Time: 11:19a
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Added back missing history for version 15.
- * 
+ *
  * *****************  Version 19  *****************
  * User: Melanie Jutras Date: 12-11-14   Time: 2:00p
  * Updated in $/software/control processor/code/application
  * SCR #1142 File Format Error - Moved defines
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jeff Vahue   Date: 8/29/12    Time: 12:50p
  * Updated in $/software/control processor/code/application
  * Code Review Tool Findings
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 12:43p
  * Updated in $/software/control processor/code/application
  * SCR# 1142
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 2/24/12    Time: 10:32a
  * Updated in $/software/control processor/code/application
  * SCR 1114 - Re labeled after v1.1.1 release
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 2/09/12    Time: 11:17a
  * Updated in $/software/control processor/code/application
  * SCR:1110 This file has changed since 1.1.0, so it is being checked in
  * back to 1.1.0 so it can be labeled 1.1.1
- *  
+ *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12/14/11   Time: 6:49p
  * Updated in $/software/control processor/code/application
  * SCR #1105 End of Flight Log Race Condition
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 10/27/11   Time: 9:58p
  * Updated in $/software/control processor/code/application
  * SCR #1100 Loop error in StartNextStateTasks
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 10/12/11   Time: 6:52p
  * Updated in $/software/control processor/code/application
  * SCR 1084 fsm.cfg.states.run parsing error when comma seperator is
  * missing or there are extra characters in the task name
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 10/11/11   Time: 5:31p
  * Updated in $/software/control processor/code/application
  * SCR 1078 Update for Code Review Findings
- * 
+ *
  ***************************************************************************/

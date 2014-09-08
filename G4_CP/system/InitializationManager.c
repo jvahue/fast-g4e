@@ -1,6 +1,6 @@
 #define INITIALIZATION_MANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:        InitializationManager.c
@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 119 $  $Date: 1/18/13 8:35p $
+     $Revision: 121 $  $Date: 9/03/14 5:17p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -183,6 +183,7 @@ void Im_InitializeControlProcessor(void)
 
    CM_PreInit();
    RegSetCheck_Init();
+   PmPreInit();
 
     //Init drivers
    Im_Driver_Initialize();
@@ -770,6 +771,16 @@ void Im_StartupTickHandler(void)
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
  * 
+ * *****************  Version 121  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
+ *
+ * *****************  Version 120  *****************
+ * User: Contractor V&v Date: 8/12/14    Time: 5:05p
+ * Updated in $/software/control processor/code/system
+ * Legacy App Busy Input still latches battery while FSM enabled
+ *
  * *****************  Version 119  *****************
  * User: Jim Mood     Date: 1/18/13    Time: 8:35p
  * Updated in $/software/control processor/code/system

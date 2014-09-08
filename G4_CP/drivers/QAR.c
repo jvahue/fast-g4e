@@ -1,6 +1,6 @@
 #define QAR_BODY
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         QAR.c
@@ -9,7 +9,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 103 $  $Date: 12/13/12 1:51p $
+      $Revision: 106 $  $Date: 9/03/14 5:12p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -572,7 +572,7 @@ void QAR_ReadSubFrameTask( void *pParam )
          {
            GSE_DebugStr(NORMAL,
                   TRUE,
-                  "QAR_ReadSubFrame: Barker Code Mismatch (exp=%04X,act=%04X)\r\n",
+                  "QAR_ReadSubFrame: Barker Code Mismatch (exp=%04X,act=%04X)",
                   pQARCfg->BarkerCode[NewFrame],
                   *pSrc);
          }
@@ -1344,42 +1344,6 @@ QAR_STATE_PTR QAR_GetState ( void )
 }
 
 /******************************************************************************
- * Function:     QAR_GetCfg
- *
- * Description:  Returns the address of the QARCfg data
- *
- * Parameters:   None.
- *
- * Returns:      Ptr to QARCfg
- *
- * Notes:        None.
- *
- *****************************************************************************/
-QAR_CONFIGURATION_PTR QAR_GetCfg ( void )
-{
-  return ( (QAR_CONFIGURATION_PTR) &QARCfg );
-}
-
-
-/******************************************************************************
- * Function:     QAR_SetCfg
- *
- * Description:  Set QARCfg
- *
- * Parameters:   Cfg - ptr to the QAR_CONFIGURATION
- *
- * Returns:      None.
- *
- * Notes:        None.
- *
- *****************************************************************************/
-void QAR_SetCfg (QAR_CONFIGURATION *Cfg)
-{
-   QARCfg = *Cfg;
-}
-
-
-/******************************************************************************
  * Function:     QAR_SensorSetup
  *
  * Description:  Decodes the GPA and GPB setting for QAR word sensor setup
@@ -1502,9 +1466,6 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
  *   3) Mult word location, only the last word location of a SF is used. All other
  *      will be ignored.  Therefore sensor processing / event max at 1 Hz !
  *   4) If ->FrameSync = FALSE or SF is Not OK will use previous GOOD word value
- *   5) TBD - if out of sync then back into sync reset to SF1 and last good was
- *      ie SF2, then algorithm will look from SF1 and behind, which will use SF3
- *      and SF4 which will be older than SF2 by about 2 seconds.
  *
  *****************************************************************************/
 FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
@@ -1525,9 +1486,7 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
 
    // NOTE: if currentSF == QAR_SF_MAX then we should ASSERT ! bad configuration !
 
-   // Determine if SF is OK or use previous SF
-   // TBD: If word info identifies other SF, then we might want to try those SF rather
-   //   then use the previous SF.  We could be 4 seconds delayed vs best case 1 sec !
+   // Determine if SF is OK or use previous SF (of prev FRAME)
    if ( pState->bSubFrameOk[currentSF] == TRUE )
    {
       // word = QARFrame[currentSF][pWordInfo->WordLocation];
@@ -1649,7 +1608,7 @@ BOOLEAN QAR_SensorTest (UINT16 nIndex)
         {
            pWordInfo->bFailed = TRUE;
 
-           sprintf (GSE_OutLine, "QAR_SensorTest: Word Timeout (S = %d)\r\n",
+           sprintf (GSE_OutLine, "QAR_SensorTest: Word Timeout (S = %d)",
                                  pWordInfo->nSensor);
            GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
 
@@ -2276,6 +2235,22 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
  *  MODIFICATIONS
  *    $History: QAR.c $
  * 
+ * *****************  Version 106  *****************
+ * User: Contractor V&v Date: 9/03/14    Time: 5:12p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1234 - Code Review cleanup
+ * 
+ * *****************  Version 105  *****************
+ * User: Contractor V&v Date: 8/14/14    Time: 4:03p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1234 - Removed Get/Set QarCfg function
+ *
+ * *****************  Version 104  *****************
+ * User: John Omalley Date: 4/17/14    Time: 2:43p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1174 - Removed TBDs
+ * SCR 1168 - Removed carriage return line feeds from debug messages
+ *
  * *****************  Version 103  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 1:51p
  * Updated in $/software/control processor/code/drivers
