@@ -1,6 +1,6 @@
 #define SENSOR_USERTABLES_BODY
 /******************************************************************************
-Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
 All Rights Reserved. Proprietary and Confidential.
 
 File:        SensorUserTables.c
@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 26 $  $Date: 12-11-16 10:32p $
+$Revision: 27 $  $Date: 9/22/14 6:46p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -53,6 +53,11 @@ static USER_HANDLER_RESULT Sensor_ShowConfig ( USER_DATA_TYPE DataType,
                                                UINT32 Index,
                                                const void *SetPtr,
                                                void **GetPtr );
+static USER_HANDLER_RESULT Sensor_LiveDataList( USER_DATA_TYPE DataType,
+                                                USER_MSG_PARAM Param,
+                                                UINT32 Index,
+                                                const void *SetPtr,
+                                                void **GetPtr);
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -124,6 +129,7 @@ USER_ENUM_TBL sensorType[]      =  { { "UNUSED"  , UNUSED          },
 static
 USER_ENUM_TBL liveDataType[]    =  { { "NONE"  , LD_NONE           },
                                      { "ASCII" , LD_ASCII          },
+                                     { "BINARY", LD_BINARY         },
                                      { NULL,       0               }
                                    };
 static
@@ -141,7 +147,7 @@ USER_ENUM_TBL sampleType[]      =  { { "1HZ"    , SSR_1HZ          },
                                      { "50HZ"   , SSR_50HZ         },
                                      { NULL     , 0                }
                                    };
-static 
+static
 USER_ENUM_TBL filterType[]      =  { { "NONE"       , FILTERNONE     },
                                      { "EXPONENTIAL", EXPO_AVERAGE   },
                                      { "SPIKEREJECT", SPIKEREJECTION },
@@ -156,162 +162,97 @@ USER_ENUM_TBL filterType[]      =  { { "NONE"       , FILTERNONE     },
 
 // ~~~~~~~~~ Sensor Commands ~~~~~~~~~~~~~~
 static USER_MSG_TBL sensorCalConfigCmd [] =
-{
-   { "TYPE"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.calibration.type,0,MAX_SENSORS-1,NO_LIMIT,conversionType },
-   { "PARAM1", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.calibration.fParams[0],0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { "PARAM2", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.calibration.fParams[1],0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
+{  /* Str          Next Tbl Ptr    Handler Func.    Data Type          Access         Parameter                     IndexRange       DataLimit  EnumTbl*/
+   { "TYPE"  , NO_NEXT_TABLE,    Sensor_UserCfg, USER_TYPE_ENUM,      USER_RW,  &configTemp.calibration.type,       0,MAX_SENSORS-1, NO_LIMIT,  conversionType },
+   { "PARAM1", NO_NEXT_TABLE,    Sensor_UserCfg, USER_TYPE_FLOAT,     USER_RW,  &configTemp.calibration.fParams[0], 0,MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "PARAM2", NO_NEXT_TABLE,    Sensor_UserCfg, USER_TYPE_FLOAT,     USER_RW,  &configTemp.calibration.fParams[1], 0,MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { NULL    , NO_NEXT_TABLE,    NULL,           NO_HANDLER_DATA }
 };
 
 
 static USER_MSG_TBL sensorConvConfigCmd [] =
-{
-   { "TYPE"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.conversion.type,0,MAX_SENSORS-1,NO_LIMIT,conversionType },
-   { "PARAM1", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.conversion.fParams[0],0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { "PARAM2", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.conversion.fParams[1],0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
+{   /* Str     Next Tbl Ptr    Handler Func.    Data Type          Access         Parameter                        IndexRange       DataLimit   EnumTbl*/
+   { "TYPE"  , NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_ENUM,     USER_RW,     &configTemp.conversion.type,        0,MAX_SENSORS-1, NO_LIMIT,   conversionType },
+   { "PARAM1", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT,    USER_RW,     &configTemp.conversion.fParams[0],  0,MAX_SENSORS-1, NO_LIMIT,   NULL },
+   { "PARAM2", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT,    USER_RW,     &configTemp.conversion.fParams[1],  0,MAX_SENSORS-1, NO_LIMIT,   NULL },
+   { NULL    , NO_NEXT_TABLE, NULL,           NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL sensorFilterConfigCmd [] =
-{
-   { "TYPE", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_ENUM, USER_RW,
-     &configTemp.filterCfg.type, 0, MAX_SENSORS-1, NO_LIMIT, filterType },
-   { "FULLSCALE", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT, USER_RW,
-     &configTemp.filterCfg.fFullScale, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "SPIKEREJECTPERCENT", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT8, USER_RW,
-     &configTemp.filterCfg.nSpikeRejectPct, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "MAXREJECTCOUNT", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT8, USER_RW,
-     &configTemp.filterCfg.nMaxRejectCount, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "MAXPERCENT", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT16, USER_RW,
-     &configTemp.filterCfg.nMaxPct, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "REJECTVALUE", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT, USER_RW,
-     &configTemp.filterCfg.fRejectValue, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "TIMECONSTANT", NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT, USER_RW,
-     &configTemp.filterCfg.fTimeConstant, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
+{  /* Str                   Next Tbl Ptr    Handler Func.    Data Type      Access     Parameter                            IndexRange        DataLimit  EnumTbl*/
+   { "TYPE",                NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_ENUM,   USER_RW, &configTemp.filterCfg.type,           0, MAX_SENSORS-1, NO_LIMIT,  filterType },
+   { "FULLSCALE",           NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configTemp.filterCfg.fFullScale,     0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "SPIKEREJECTPERCENT",  NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.filterCfg.nSpikeRejectPct,0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "MAXREJECTCOUNT",      NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.filterCfg.nMaxRejectCount,0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "MAXPERCENT",          NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_UINT16, USER_RW, &configTemp.filterCfg.nMaxPct,        0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "REJECTVALUE",         NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configTemp.filterCfg.fRejectValue,   0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { "TIMECONSTANT",        NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configTemp.filterCfg.fTimeConstant,  0, MAX_SENSORS-1, NO_LIMIT,  NULL },
+   { NULL          ,        NO_NEXT_TABLE, NULL,           NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL sensorCmd [] =
-{
-   { "TYPE"        , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.type,0,MAX_SENSORS-1,NO_LIMIT,sensorType },
-   { "NAME"        , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_STR, USER_RW,
-     configTemp.sSensorName,0,MAX_SENSORS-1,0,MAX_SENSORNAME,NULL },
-   { "OUTPUT"      , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_STR, USER_RW,
-     configTemp.sOutputUnits,0,MAX_SENSORS-1,0,MAX_SENSORUNITS,NULL },
-   { "INPUT"       , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT8,USER_RW,
-     &configTemp.nInputChannel,0,MAX_SENSORS-1,NO_LIMIT,NULL },
-   { "MAXSAMPLES"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT8,USER_RW,
-     &configTemp.nMaximumSamples,0,MAX_SENSORS-1,1,MAX_SAMPLES, NULL },
-   { "RATE"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.sampleRate,0,MAX_SENSORS-1,NO_LIMIT,sampleType },
-   { "RATEOFFSET_MS", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT16, USER_RW,
-     &configTemp.nSampleOffset_ms,0,MAX_SENSORS-1,0,1000,NULL },
-
-   { "CALIBRATION" , sensorCalConfigCmd , NULL, NO_HANDLER_DATA },
-   { "CONVERSION"  , sensorConvConfigCmd, NULL, NO_HANDLER_DATA },
-
-   { "FILTER"      , sensorFilterConfigCmd, NULL, NO_HANDLER_DATA },
-
-   { "SYSCOND"  , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.systemCondition,0,MAX_SENSORS-1, NO_LIMIT, Flt_UserEnumStatus  },
-   { "SELFHEAL"    , NO_NEXT_TABLE, Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,
-     &configTemp.bSelfHeal, 0, MAX_SENSORS-1, NO_LIMIT, NULL },
-   { "RANGETEST"   , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_BOOLEAN,USER_RW,
-     &configTemp.bRangeTest,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "RANGEDURATION_MS" , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT16,USER_RW,
-     &configTemp.nRangeDuration_ms,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "MIN"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.fMinValue,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "MAX"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.fMaxValue,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "RATETEST"   , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_BOOLEAN,USER_RW,
-     &configTemp.bRateTest,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "RATETHRESHOLD", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_FLOAT,USER_RW,
-     &configTemp.fRateThreshold,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "RATEDURATION_MS" , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT16,USER_RW,
-     &configTemp.nRateDuration_ms,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "SIGNALTEST", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_BOOLEAN,USER_RW,
-     &configTemp.bSignalTest,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "SIGNALTESTINDEX", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_ENUM,USER_RW,
-     &configTemp.signalTestIndex,0,MAX_SENSORS-1,NO_LIMIT,FaultIndexType  },
-   { "SIGNALDURATION_MS", NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_UINT16,USER_RW,
-     &configTemp.nSignalDuration_ms,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "INSPECT"   , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_BOOLEAN,USER_RW,
-     &configTemp.bInspectInclude,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "GPA"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_HEX32,USER_RW,
-     &configTemp.generalPurposeA,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { "GPB"         , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_HEX32,USER_RW,
-     &configTemp.generalPurposeB,0,MAX_SENSORS-1,NO_LIMIT,NULL  },
-   { NULL          , NO_NEXT_TABLE,Sensor_UserCfg, USER_TYPE_NONE,USER_RW,
-     NULL,0,MAX_SENSORS-1,NO_LIMIT,NULL  }
+{  /* Str                  Next Tbl Ptr         Handler Func.    Data Type         Access   Parameter                        IndexRange       DataLimit          EnumTbl*/
+   { "TYPE"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,   USER_RW, &configTemp.type,              0,MAX_SENSORS-1,  NO_LIMIT,          sensorType },
+   { "NAME"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_STR,    USER_RW, configTemp.sSensorName,        0,MAX_SENSORS-1,  0,MAX_SENSORNAME,  NULL },
+   { "OUTPUT"      ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_STR,    USER_RW, configTemp.sOutputUnits,       0,MAX_SENSORS-1,  0,MAX_SENSORUNITS, NULL },
+   { "INPUT"       ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.nInputChannel,     0,MAX_SENSORS-1,  NO_LIMIT,          NULL },
+   { "MAXSAMPLES"  ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.nMaximumSamples,   0,MAX_SENSORS-1,  1,MAX_SAMPLES,     NULL },
+   { "RATE"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,   USER_RW, &configTemp.sampleRate,        0,MAX_SENSORS-1,  NO_LIMIT,          sampleType },
+   { "RATEOFFSET_MS",     NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16, USER_RW, &configTemp.nSampleOffset_ms,  0,MAX_SENSORS-1,  0,1000,            NULL },
+   { "CALIBRATION" ,      sensorCalConfigCmd ,  NULL,           NO_HANDLER_DATA },
+   { "CONVERSION"  ,      sensorConvConfigCmd,  NULL,           NO_HANDLER_DATA },
+   { "FILTER"      ,      sensorFilterConfigCmd,NULL,           NO_HANDLER_DATA },
+   { "SYSCOND"          , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,    USER_RW,&configTemp.systemCondition,   0,MAX_SENSORS-1,    NO_LIMIT,        Flt_UserEnumStatus  },
+   { "SELFHEAL"         , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,&configTemp.bSelfHeal,         0,MAX_SENSORS-1,    NO_LIMIT,        NULL },
+   { "RANGETEST"        , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,&configTemp.bRangeTest,        0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "RANGEDURATION_MS" , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16,  USER_RW,&configTemp.nRangeDuration_ms, 0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "MIN"              , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_FLOAT,   USER_RW,&configTemp.fMinValue,         0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "MAX"              , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_FLOAT,   USER_RW,&configTemp.fMaxValue,         0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "RATETEST"         , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,&configTemp.bRateTest,         0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "RATETHRESHOLD"    , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_FLOAT,   USER_RW,&configTemp.fRateThreshold,    0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "RATEDURATION_MS"  , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16,  USER_RW,&configTemp.nRateDuration_ms,  0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "SIGNALTEST"       , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,&configTemp.bSignalTest,       0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "SIGNALTESTINDEX"  , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,    USER_RW,&configTemp.signalTestIndex,   0,MAX_SENSORS-1,    NO_LIMIT,        FaultIndexType  },
+   { "SIGNALDURATION_MS", NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16,  USER_RW,&configTemp.nSignalDuration_ms,0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "INSPECT"          , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_BOOLEAN, USER_RW,&configTemp.bInspectInclude,   0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "GPA"              , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_HEX32,   USER_RW,&configTemp.generalPurposeA,   0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { "GPB"              , NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_HEX32,   USER_RW,&configTemp.generalPurposeB,   0,MAX_SENSORS-1,    NO_LIMIT,        NULL  },
+   { NULL               , NO_NEXT_TABLE,        NULL,           NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL filterState [] =
-{
-   { "LASTVALIDVALUE", NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.fLastValidValue,     0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "LASTAVGVALUE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.fLastAvgValue  ,     0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "REJECTCOUNT"   , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8, USER_RO,
-     &sensorTemp.filterData.nRejectCount   ,     0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "K"             , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.fK              ,     0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "(n-1)/2"       , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.nMinusOneOverTwo,    0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "FULLSCALEINV"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.fullScaleInv,        0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "MAXPERCENT"    , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT, USER_RO,
-     &sensorTemp.filterData.maxPercent,          0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "SPIKEPERCENT"  , NO_NEXT_TABLE, Sensor_State,USER_TYPE_FLOAT,USER_RO,
-     &sensorTemp.filterData.spikePercent,        0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "PERSISTSTATE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, USER_RO,
-     &sensorTemp.filterData.persistState,        0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { "PERSISTSTATEZ1", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, USER_RO,
-     &sensorTemp.filterData.persistStateZ1,      0, MAX_SENSORS - 1, NO_LIMIT, NULL    },
-   { NULL            , NO_NEXT_TABLE, NULL, USER_TYPE_NONE,  USER_RW,
-     NULL,0,MAX_SENSORS-1,NULL  }
+{  /* Str               Next Tbl Ptr  Handler Func.  Data Type         Access              Parameter                           IndexRange         DataLimit   EnumTbl*/
+   { "LASTVALIDVALUE", NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.fLastValidValue,   0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "LASTAVGVALUE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.fLastAvgValue  ,   0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "REJECTCOUNT"   , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,   USER_RO,     &sensorTemp.filterData.nRejectCount   ,   0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "K"             , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.fK              ,  0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "(n-1)/2"       , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.nMinusOneOverTwo,  0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "FULLSCALEINV"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.fullScaleInv,      0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "MAXPERCENT"    , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.maxPercent,        0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "SPIKEPERCENT"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,   USER_RO,     &sensorTemp.filterData.spikePercent,      0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "PERSISTSTATE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, USER_RO,     &sensorTemp.filterData.persistState,      0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { "PERSISTSTATEZ1", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN, USER_RO,     &sensorTemp.filterData.persistStateZ1,    0, MAX_SENSORS - 1, NO_LIMIT,   NULL    },
+   { NULL            , NO_NEXT_TABLE, NULL,         NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL sensorStatus [] =
-{
-   { "INDEX"       , NO_NEXT_TABLE, Sensor_State,  USER_TYPE_ENUM,
-     USER_RO       , &sensorTemp.nSensorIndex , 0, MAX_SENSORS - 1, NO_LIMIT,SensorIndexType },
-   { "VALID"       , NO_NEXT_TABLE, Sensor_State,  USER_TYPE_BOOLEAN,
-     USER_RO       , &sensorTemp.bValueIsValid  , 0, MAX_SENSORS - 1,NO_LIMIT,NULL },
-   { "FVALUE"      , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,
-     USER_RO       , &sensorTemp.fValue         , 0, MAX_SENSORS - 1,NO_LIMIT,NULL },
-   { "PRIORVALUE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,
-     USER_RO       , &sensorTemp.fPriorValue    , 0, MAX_SENSORS - 1,NO_LIMIT,NULL },
-   { "SAMPLECOUNTDOWN", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,
-     USER_RO       , &sensorTemp.nSampleCountdown, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "NEXTSAMPLE"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,
-     USER_RO       , &sensorTemp.nNextSample     , 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "CURRENTSAMPLES", NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,
-     USER_RO       , &sensorTemp.nCurrentSamples , 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "BITFAIL"     , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
-     USER_RO       , &sensorTemp.bBITFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RANGEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
-     USER_RO       , &sensorTemp.bRangeFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RATEFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
-     USER_RO       , &sensorTemp.bRateFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "RATEVALUE", NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,
-     USER_RO       , &sensorTemp.fRateValue, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "SIGNALFAIL", NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,
-     USER_RO       , &sensorTemp.bSignalFail, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "FILTERDATA", filterState, NULL, NO_HANDLER_DATA },
-   { "INTERFACEINDEX" , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,
-     USER_RO       , &sensorTemp.nInterfaceIndex, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { "LASTTICK"    , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT32,
-     USER_RO       , &sensorTemp.lastUpdateTick, 0, MAX_SENSORS - 1, NO_LIMIT, NULL },
-   { NULL          , NO_NEXT_TABLE, Sensor_State, USER_TYPE_NONE, USER_RW,
-     NULL,0,MAX_SENSORS-1, NO_LIMIT, NULL  }
+{  /* Str                  Next Tbl Ptr  Handler Func.  Data Type          Access           Parameter               IndexRange        DataLimit  EnumTbl*/
+   { "INDEX"            , NO_NEXT_TABLE, Sensor_State,  USER_TYPE_ENUM,    USER_RO, &sensorTemp.nSensorIndex ,    0, MAX_SENSORS - 1, NO_LIMIT,  SensorIndexType },
+   { "VALID"            , NO_NEXT_TABLE, Sensor_State,  USER_TYPE_BOOLEAN, USER_RO, &sensorTemp.bValueIsValid  ,  0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "FVALUE"           , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,    USER_RO, &sensorTemp.fValue         ,  0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "PRIORVALUE"       , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,    USER_RO, &sensorTemp.fPriorValue    ,  0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "SAMPLECOUNTDOWN"  , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,   USER_RO, &sensorTemp.nSampleCountdown, 0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "NEXTSAMPLE"       , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,    USER_RO, &sensorTemp.nNextSample     , 0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "CURRENTSAMPLES"   , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT8,    USER_RO, &sensorTemp.nCurrentSamples , 0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "BITFAIL"          , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,  USER_RO, &sensorTemp.bBITFail,         0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "RANGEFAIL"        , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,  USER_RO, &sensorTemp.bRangeFail,       0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "RATEFAIL"         , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,  USER_RO, &sensorTemp.bRateFail,        0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "RATEVALUE"        , NO_NEXT_TABLE, Sensor_State, USER_TYPE_FLOAT,    USER_RO, &sensorTemp.fRateValue,       0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "SIGNALFAIL"       , NO_NEXT_TABLE, Sensor_State, USER_TYPE_BOOLEAN,  USER_RO, &sensorTemp.bSignalFail,      0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "FILTERDATA"       , filterState,   NULL,         NO_HANDLER_DATA },
+   { "INTERFACEINDEX"   , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT16,   USER_RO, &sensorTemp.nInterfaceIndex,  0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { "LASTTICK"         , NO_NEXT_TABLE, Sensor_State, USER_TYPE_UINT32,   USER_RO, &sensorTemp.lastUpdateTick,   0, MAX_SENSORS - 1, NO_LIMIT,  NULL },
+   { NULL               , NO_NEXT_TABLE, NULL,         NO_HANDLER_DATA }
 };
 
 
@@ -325,16 +266,18 @@ static USER_MSG_TBL sensorRoot [] =
 
 static USER_MSG_TBL liveDataCfg [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange  DataLimit                 EnumTbl*/
-  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &liveDataTemp.type,     -1,-1,      NO_LIMIT,                 liveDataType },
-  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &liveDataTemp.nRate_ms,  -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
+  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &liveDataTemp.gseType,  -1,-1,      NO_LIMIT,                 liveDataType },
+  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &liveDataTemp.nRate_ms, -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL liveDataRoot [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange     DataLimit                 EnumTbl*/
   { "CFG",      liveDataCfg,    NULL,                 NO_HANDLER_DATA},
-  { "TYPE",     NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &LiveDataDisplay.type,     -1,-1,      NO_LIMIT,                 liveDataType },
-  { "RATE_MS",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &LiveDataDisplay.nRate_ms,  -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
+  { "TYPE",     NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_liveDataDisplay.gseType,  -1,-1,    NO_LIMIT,                 liveDataType },
+  { "MS_TYPE",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_liveDataDisplay.msType,   -1,-1,    NO_LIMIT,                 liveDataType },
+  { "RATE_MS",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &m_liveDataDisplay.nRate_ms, -1,-1,    SENSOR_LD_MAX_RATE,10000, NULL },
+  { "GETLIST",  NO_NEXT_TABLE,  Sensor_LiveDataList,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,             -1,-1,    NO_LIMIT,                 NULL},
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
 };
 
@@ -486,15 +429,20 @@ USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
 
     #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
     // set proper member of local working copy
-    if (Param.Ptr == &liveDataTemp.type)
+    if (Param.Ptr == &liveDataTemp.gseType)
     {
       // copy to local display control
-      LiveDataDisplay.type = liveDataTemp.type;
+      m_liveDataDisplay.gseType = liveDataTemp.gseType;    
+    }
+    else if (Param.Ptr == &liveDataTemp.msType)
+    {
+      // copy to local display control ms_type
+      m_liveDataDisplay.msType = liveDataTemp.msType;
     }
     else if (Param.Ptr == &liveDataTemp.nRate_ms)
     {
       // copy to local display control
-      LiveDataDisplay.nRate_ms = liveDataTemp.nRate_ms;
+      m_liveDataDisplay.nRate_ms = liveDataTemp.nRate_ms;
     }
     #pragma ghs endnowarning
   }
@@ -560,6 +508,84 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
    return result;
 }
 
+/******************************************************************************
+* Function:     Sensor_LiveDataList
+*
+* Description:  Handles User Manager requests to display the list of sensors
+*               configured for LiveData (i.e. sensor[x].cfg.inspect=TRUE)
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific sensor to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
+*
+* Returns:     USER_RESULT_OK:    Processed successfully
+*              USER_RESULT_ERROR: Error processing command.
+*
+* Notes:
+*****************************************************************************/
+static
+USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
+                                        USER_MSG_PARAM Param,
+                                        UINT32 Index,
+                                        const void *SetPtr,
+                                        void **GetPtr)
+{
+
+  CHAR buff[GETLIST_BUFF_SIZE + 1];
+  SENSOR_CONFIG*     pSnsrCfg;
+  SENSOR_INDEX       sensorIdx;
+  BOOLEAN result   = TRUE;
+  BOOLEAN bInspect = FALSE;
+
+  pSnsrCfg =  (SENSOR_CONFIG*) &CfgMgr_ConfigPtr()->SensorConfigs;
+
+  // Create an output suitable for importing into a CSV file.
+  // First line is a header, subsequent lines contain the sensor-id, sensor-name and units,
+  // for each sensor configured for livedata; if no sensors are configured, a none configured
+  // msg is included.
+
+  // Header line
+  snprintf(buff, sizeof(buff), "Sensor-ID,Sensor-Name,Sensor-Units\r\n");
+  result = User_OutputMsgString( buff, FALSE);
+
+  // Write out an entry for each defined sensor which is configured for LiveData
+  for (sensorIdx = SENSOR_0; sensorIdx < MAX_SENSORS && result; ++sensorIdx)
+  {
+    if( pSnsrCfg[sensorIdx].bInspectInclude &&
+        SensorIsUsed(sensorIdx))
+    {
+      bInspect = TRUE;
+      snprintf(buff, sizeof(buff),"%03d,%s,%s\r\n",
+              sensorIdx,
+              pSnsrCfg[sensorIdx].sSensorName,
+              pSnsrCfg[sensorIdx].sOutputUnits);
+      result = User_OutputMsgString(buff, FALSE);
+    }
+  }
+
+  // If no sensors were configured for LiveData, let the caller
+  // definitely know it.
+  if (!bInspect && result)
+  {
+    snprintf(buff, sizeof(buff), "None Configured\r\n");
+    result = User_OutputMsgString( buff, FALSE);
+  }
+
+  // finalize the output
+  buff[0] = '\0';
+  result = User_OutputMsgString(buff, TRUE);
+
+  return (result) ? USER_RESULT_OK : USER_RESULT_ERROR;
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -568,11 +594,16 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
  * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
+ *
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-11-16   Time: 10:32p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-12   Time: 11:36a
  * Updated in $/software/control processor/code/system

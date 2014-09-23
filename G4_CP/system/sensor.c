@@ -1,6 +1,6 @@
 #define SENSOR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        sensor.c
@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 87 $  $Date: 4/16/14 11:50a $
+      $Revision: 89 $  $Date: 9/23/14 6:04p $
 
 ******************************************************************************/
 
@@ -54,6 +54,26 @@ typedef struct
 {
   UINT32  startTime;
 }SENSOR_LD_PARMS;
+
+// Sensor LiveData collection buffer.
+#pragma pack(1)
+typedef struct
+{
+  UINT16   nSensorIndex;
+  FLOAT32  fValue;
+  BOOLEAN  bValueIsValid;
+}SENSOR_LD_ENTRY;
+#pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+  TIMESTAMP       timeStamp;           // Timestamp for this collection
+  UINT16          count;               // number of entries used in sensor field
+  SENSOR_LD_ENTRY sensor[MAX_SENSORS]; // SENSOR_LD_ENTRY for sensors with inspect=TRUE
+}SENSOR_LD_COLLECT;
+#pragma pack()
+
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -62,7 +82,9 @@ static UINT16             maxSensorUsed;   // Storage for largest indexed cfg
 static SENSOR_LD_PARMS    liveDataBlock;   // Live Data Task block
 /*static SENSORLOG SensorLog;*/
 static SENSOR_CONFIG      m_SensorCfg[MAX_SENSORS]; // Sensors cfg array
-static SENSOR_LD_CONFIG   LiveDataDisplay; // runtime copy of LiveData config data
+static SENSOR_LD_CONFIG   m_liveDataDisplay; // runtime copy of LiveData config data
+static SENSOR_LD_COLLECT  m_liveDataBuffer;  // collection of all sensor values.
+static UINT16             m_liveDataMap[MAX_SENSORS]; // Maps Sensors -> m_liveDataBuffer
 
 // include the usertable here so local vars are declared
 #include "SensorUserTables.c" // Include user cmd tables & functions .c
@@ -115,8 +137,10 @@ static FLOAT32       SensorSlope         ( FLOAT32 fVal, SENSOR_CONFIG *pConfig,
                                            SENSOR *pSensor);
 
 static void          SensorsLiveDataTask ( void *pParam );
-static void          SensorDumpASCIILiveData ( void );
-
+static void          SensorDumpASCIILiveData ( LD_DEST_ENUM dest );
+static void          SensorDumpBinaryLiveData( LD_DEST_ENUM dest );
+static void          SensorInitializeLiveData( void );
+static void          SensorUpdateLiveData    (UINT16, SENSOR* pSensor);
 
 static const CHAR *sensorFailureNames[MAX_FAILURE+1] =
 {
@@ -158,19 +182,25 @@ void SensorsInitialize( void)
   // Reset the Sensor configuration storage array
   memset(m_SensorCfg, 0, sizeof(m_SensorCfg));
 
+  // Reset the buffer used to collect sensor data for stream
+  memset( &m_liveDataBuffer, 0, sizeof(m_liveDataBuffer ));
+
   // Load the current configuration to the sensor configuration array.
   memcpy(m_SensorCfg,
          CfgMgr_RuntimeConfigPtr()->SensorConfigs,
          sizeof(m_SensorCfg));
 
   // init runtime copy of live data config
-  memcpy(&LiveDataDisplay, &(CfgMgr_RuntimeConfigPtr()->LiveDataConfig),
-             sizeof(LiveDataDisplay));
+  memcpy(&m_liveDataDisplay, &(CfgMgr_RuntimeConfigPtr()->LiveDataConfig),
+             sizeof(m_liveDataDisplay));
 
   // Reset the dynamic sensor storage array
   SensorsReset();
   // Configure the sensor interface parameters
   SensorsConfigure();
+
+  // Setup the storage and sensor-index mapping table for live-data monitoring.
+  SensorInitializeLiveData();
 
   // Create Sensor Task - DT
   memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
@@ -425,8 +455,8 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
 /******************************************************************************
  * Function:     SensorDisableLiveStream
  *
- * Description:  SensorDisableLiveStream sets the live data mode.
- *
+ * Description:  SensorDisableLiveStream disables the live data mode for
+ *               the GSE stream.
  *
  * Parameters:   None.
  *
@@ -436,7 +466,7 @@ UINT16 SensorGetETMHdr ( void *pDest, UINT16 nMaxByteSize )
  *****************************************************************************/
 void SensorDisableLiveStream( void )
 {
-  LiveDataDisplay.type = LD_NONE;
+  m_liveDataDisplay.gseType = LD_NONE;
 }
 
 /******************************************************************************
@@ -481,7 +511,7 @@ UINT16 SensorInitSummaryArray ( SNSR_SUMMARY summary[],  INT32 summarySize,
       ++summaryCnt;
     }
   }
- 
+
   return (summaryCnt);
 }
 
@@ -489,16 +519,16 @@ UINT16 SensorInitSummaryArray ( SNSR_SUMMARY summary[],  INT32 summarySize,
 /******************************************************************************
  * Function:     SensorResetSummaryArray
  *
- * Description:  The SensorResetSummaryArray resets the statistics of the 
+ * Description:  The SensorResetSummaryArray resets the statistics of the
  *               sensors that were initilialized to be monitored by independent
- *               system objects. 
+ *               system objects.
  *
  * Parameters:   [in/out] summary      - SNSR_SUMMARY array structure to be reset.
  *               [in]     nEntries     - number of used entries in SNSR_SUMMARY[].
  *
  * Returns:      None
  *
- * Notes:        Must run SensorInitSummaryArray to setup the summary array 
+ * Notes:        Must run SensorInitSummaryArray to setup the summary array
  *               and get the nEntries. This should be done at initialization
  *               and then use the Reset Summary Array at run time.
  *****************************************************************************/
@@ -731,7 +761,7 @@ static void SensorsConfigure (void)
             Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
         case MAX_SAMPLETYPE:
-		default:
+    default:
             // FATAL ERROR WITH CONFIGURATION
             // Initialize String
             FATAL("Sensor Config Fail: Sensor %d, Type %d not Valid",
@@ -887,6 +917,13 @@ static void SensorsUpdateTask( void *pParam )
             pSensor->nSampleCountdown = pSensor->nSampleCounts;
             // Read the sensor
             SensorRead( pConfig, pSensor );
+
+            // If this sensor is in the livedata map, update it
+            if ( SENSOR_UNUSED != m_liveDataMap[nSensor])
+            {
+              SensorUpdateLiveData(nSensor, pSensor);
+            }
+
          }
       }
    }
@@ -1909,28 +1946,60 @@ static FLOAT32 SensorSlope( FLOAT32 fVal, SENSOR_CONFIG *pConfig, SENSOR *pSenso
  *****************************************************************************/
 static void SensorsLiveDataTask( void *pParam )
 {
-   // Local Data
-   SENSOR_LD_PARMS  *pTCB;
-   UINT32           nRate;
+  // Local Data
+  SENSOR_LD_PARMS  *pTCB;
+  UINT32           nRate;
+  INT16            i;
+  SENSOR_LD_ENUM   liveDataDest[LD_DEST_MAX];
 
-   // Initialize Local Data
-   pTCB   = (SENSOR_LD_PARMS *)pParam;
+  // Initialize Local Data
+  pTCB = (SENSOR_LD_PARMS *)pParam;
 
-   // Is live data enabled?
-   if (LD_NONE != LiveDataDisplay.type)
-   {
-      // Make sure the rate is not too fast and fix if it is
-      nRate = LiveDataDisplay.nRate_ms < SENSOR_LD_MAX_RATE ?
-              SENSOR_LD_MAX_RATE : LiveDataDisplay.nRate_ms;
+  // Is live data enabled?
+  if (LD_NONE != m_liveDataDisplay.gseType ||
+      LD_NONE != m_liveDataDisplay.msType)
+  {
+    // Make sure the rate is not too fast and fix if it is
+    nRate = m_liveDataDisplay.nRate_ms < SENSOR_LD_MAX_RATE ?
+              SENSOR_LD_MAX_RATE : m_liveDataDisplay.nRate_ms;
 
-      // Check if end of period has been reached
-      if ((CM_GetTickCount() - pTCB->startTime) >= nRate)
+    // Check if end of period has been reached
+    if ((CM_GetTickCount() - pTCB->startTime) >= nRate)
+    {
+      // Save new start time
+      pTCB->startTime = CM_GetTickCount();
+
+      // Use an array to process the streams dest, prevent if..if..if
+      liveDataDest[LD_DEST_GSE] = m_liveDataDisplay.gseType;
+      liveDataDest[LD_DEST_MS]  = m_liveDataDisplay.msType;
+
+      // The livedata structure is updated in real-time when the sensors are read...
+      // Get the current time and perform the outputs.
+      CM_GetTimeAsTimestamp(&m_liveDataBuffer.timeStamp);
+
+      for (i = 0; i < LD_DEST_MAX; ++i)
       {
-         // Save new start time
-         pTCB->startTime = CM_GetTickCount();
-         SensorDumpASCIILiveData();
-      }
-   }
+        switch( liveDataDest[i] )
+        {
+          case LD_NONE:
+            // Nothing to do here
+            break;
+
+          case LD_ASCII:
+            SensorDumpASCIILiveData( (LD_DEST_ENUM)i );
+            break;
+
+          case LD_BINARY:
+            SensorDumpBinaryLiveData( (LD_DEST_ENUM)i );
+            break;
+
+          default:
+            FATAL("Unrecognized LiveData Stream output %d", liveDataDest[i] );
+            break;
+        } // switch output fmts
+      } // for dest types
+    } // time to process?
+  } //Is live data enabled?
 }
 
 /******************************************************************************
@@ -1944,59 +2013,49 @@ static void SensorsLiveDataTask( void *pParam )
  *               |<SensorIndex>:<SensorValue>:<ValidFlag>
                  |t:<Hour>:<Minute>:<Second>:<Millisecond>|c:<Checksum>
  *
- * Parameters:   None.
+ * Parameters:   dest - SENSOR_LD_ENUM value indicating the dest (GSE or MS for
+ *                      stream output.
  *
  * Returns:      None.
  *
  * Notes:        None
  *****************************************************************************/
-static void SensorDumpASCIILiveData(void)
+static void SensorDumpASCIILiveData(LD_DEST_ENUM dest)
 {
   // Local Data
-  INT8          str[2048];
+  TIMESTRUCT    ts;
+  INT8          str[3072]; // 3k buffer is enough to handle max 128-sensor ascii stream
   INT8          tempStr[64];
-  TIMESTRUCT    timeStruct;
-  UINT32        sensorIndex;
+  UINT32        idx;
   UINT16        checksum;
+  const CHAR*   startDelims = "\r\n\0";
 
   // Initialize local data
-  memset(str,0,sizeof(str));
+  memset(str,0, sizeof(str));
 
   // Build the live data header
-  sprintf(str, "\r\n");
-  GSE_PutLine(str);
-
+  //sprintf(str, "\r\n");
+  //GSE_PutLine(str);
+  
   sprintf(str, "#77");
 
   // Loop through all sensors
-  for (sensorIndex = 0; sensorIndex < MAX_SENSORS; sensorIndex++)
+  for (idx = 0; idx < m_liveDataBuffer.count; idx++)
   {
-     // Check if inspection is enabled and the sensor is in use.
-     if (TRUE == m_SensorCfg[sensorIndex].bInspectInclude &&
-         SensorIsUsed(( SENSOR_INDEX)sensorIndex) )
-     {
-        // Add the sensor index and value to the stream
-        sprintf(tempStr, "|%02d:%.4f", sensorIndex, Sensors[sensorIndex].fValue);
-        strcat(str,tempStr);
-
-        // Check if the sensor is valid and add 1 if valid 0 not valid
-        if (Sensors[sensorIndex].bValueIsValid)
-        {
-           strcat (str,":1");
-        }
-        else
-        {
-           strcat (str,":0");
-        }
-     }
+    // Add the sensor index, value and validity indicator to the stream
+    sprintf(tempStr, "|%03d:%.4f:%c", m_liveDataBuffer.sensor[idx].nSensorIndex,
+                                      m_liveDataBuffer.sensor[idx].fValue,
+                                      m_liveDataBuffer.sensor[idx].bValueIsValid ? '1' : '0');
+    strcat(str,tempStr);
   }
-  // Read the current system time
-  CM_GetSystemClock (&timeStruct);
-  // Add time to the live data stream
-  sprintf (tempStr, "|t:%02d:%02d:%02d.%02d", timeStruct.Hour,
-                                              timeStruct.Minute,
-                                              timeStruct.Second,
-                                             (timeStruct.MilliSecond/10) );
+
+  // Add the collection time to the live data stream
+  CM_ConvertTimeStamptoTimeStruct(&m_liveDataBuffer.timeStamp, &ts);
+
+  sprintf (tempStr, "|t:%02d:%02d:%02d.%02d", ts.Hour,
+                                              ts.Minute,
+                                              ts.Second,
+                                              (ts.MilliSecond/10) );
   strcat(str,tempStr);
 
   // Checksum the data
@@ -2005,25 +2064,188 @@ static void SensorDumpASCIILiveData(void)
   sprintf (tempStr, "|c:%04X", checksum);
   strcat(str,tempStr);
 
-  // Output the live data stream on the GSE port
-  GSE_PutLine(str);
+  // Output the live data stream on the GSE port or to MS
+  // #77 msg should be preceded by \r\n
+  if (LD_DEST_GSE == dest)
+  {
+    GSE_PutLine(startDelims);
+    GSE_PutLine(str);
+  }
+  else if (LD_DEST_MS == dest)
+  {
+    GSE_MsWrite(startDelims, strlen(startDelims) );
+    GSE_MsWrite( str, strlen(str) );
+  }
+  else
+  {
+    FATAL("Unrecognized Output dest for ASCII Stream: %d", dest);
+  }
+}
+
+/******************************************************************************
+ * Function:     SensorDumpBinaryLiveData
+ *
+ * Description:  SensorDumpBinaryLiveData formats the sensor live data and
+ *               outputs it on the 'dest' interface.
+ *
+ *               The format is:
+ *               #88
+ *               TIMESTAMP Time;
+ *               UINT16 NumSensors;
+ *               struct sensor [NumSensors]
+ *               {
+ *                 UINT16 Index;
+ *                 FLOAT32 Value;
+ *                 BOOLEAN Validity;
+ *               }
+ *              UINT32 Checksum;
+ *
+ * Parameters:   dest - SENSOR_LD_ENUM value indicating the dest (GSE or MS for
+ *                      stream output.
+ *
+ * Returns:      None.
+ *
+ * Notes:        None
+ *****************************************************************************/
+static void SensorDumpBinaryLiveData(LD_DEST_ENUM dest)
+{
+  // Local Data
+  INT8    str[2048]; // 2K buffer is enough to handle max 128-sensor binary stream
+  UINT16  checksum;
+  UINT32  dataBlockSize;
+  INT8*   pStr = str;
+
+  // Initialize local data
+  memset(str,0, sizeof(str));
+
+  // Msg type
+  sprintf(str, "#88");
+  pStr += 3;
+
+  // Timestamp, num sensors, the sensor sets(idx, value, validity)
+  dataBlockSize = sizeof(m_liveDataBuffer.timeStamp) +
+                  sizeof(m_liveDataBuffer.count)     +
+                  (m_liveDataBuffer.count * sizeof(SENSOR_LD_ENTRY));
+
+  memcpy(pStr, &m_liveDataBuffer.timeStamp, dataBlockSize);
+  pStr += dataBlockSize;
+
+  // Checksum the data
+  checksum = (UINT16)ChecksumBuffer(str, strlen(str), 0xFFFF);
+
+  // Add checksum to end of live data
+  memcpy(pStr, &checksum, sizeof(checksum));
+  pStr += sizeof(checksum);
+
+
+  if (LD_DEST_GSE == dest)
+  {
+    GSE_write(str, (pStr - str));
+  }
+  else if (LD_DEST_MS == dest)
+  {
+    GSE_MsWrite( str, (pStr - str));
+  }
+  else
+  {
+    FATAL("Unrecognized Output dest for BINARY Stream= %d", dest);
+  }
+
+}
+/******************************************************************************
+ * Function:     SensorInitializeLiveData
+ *
+ * Description:  SensorInitializeLiveData inits the structure used for ASCII
+ *               and BINARY streaming and the mapping from Sensors -> livedata
+ *               structure.
+ *
+ * Parameters:   None
+ *
+ * Returns:      None.
+ *
+ * Notes:        None
+ *****************************************************************************/
+static void SensorInitializeLiveData(void)
+{
+  UINT32 sensorIndex;
+  UINT16 nCount = 0;
+
+  // Clear buffer
+  memset(&m_liveDataBuffer, 0, sizeof(m_liveDataBuffer));
+
+  // Initialize the map
+  for (sensorIndex = 0; sensorIndex < MAX_SENSORS; sensorIndex++)
+  {
+    m_liveDataMap[sensorIndex] = SENSOR_UNUSED;
+  }
+
+  // Loop through all configured sensors.
+  // For each sensor enabled for livedata streaming, init the next avail entry in collection
+  // structure and create a map entry so it can be quickly updated during sensor processing
+  for (sensorIndex = 0; sensorIndex < MAX_SENSORS; sensorIndex++)
+  {
+    // Check if inspection is enabled and the sensor is in use.
+    if (TRUE == m_SensorCfg[sensorIndex].bInspectInclude &&
+        SensorIsUsed(( SENSOR_INDEX)sensorIndex) )
+    {
+      m_liveDataMap[sensorIndex] = nCount;
+      m_liveDataBuffer.sensor[nCount].nSensorIndex = sensorIndex;
+      nCount++;
+    }
+  }
+  // Save the count of sensors in the list and the time this collection was stored.
+  m_liveDataBuffer.count = nCount;
+}
+
+/******************************************************************************
+ * Function:     SensorUpdateLiveData
+ *
+ * Description:  SensorUpdateLiveData updates the live data collection for a specific
+ *               sensors.
+ *
+ * Parameters:   None
+ *
+ * Returns:      None.
+ *
+ * Notes:        None
+ *****************************************************************************/
+
+static void  SensorUpdateLiveData(UINT16 sensorIndex, SENSOR* pSensor)
+{
+  // Referential integrity check...
+  // Verify m_liveDataBuffer entry references the expected sensor-id as in the map table
+  ASSERT( m_liveDataBuffer.sensor[ m_liveDataMap[sensorIndex] ].nSensorIndex == sensorIndex);
+
+  // Update the livedata structure;
+  m_liveDataBuffer.sensor[m_liveDataMap[sensorIndex]].fValue        = pSensor->fValue;
+  m_liveDataBuffer.sensor[m_liveDataMap[sensorIndex]].bValueIsValid = pSensor->bValueIsValid;
 }
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
  * 
+ * *****************  Version 89  *****************
+ * User: Contractor V&v Date: 9/23/14    Time: 6:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Fix fornatting.
+ * 
+ * *****************  Version 88  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
+ *
  * *****************  Version 87  *****************
  * User: John Omalley Date: 4/16/14    Time: 11:50a
  * Updated in $/software/control processor/code/system
  * SCR 1168 - Fixed specific complaint for debug message not having a
  * timestamp on sensor failure.
- * 
+ *
  * *****************  Version 86  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p
  * Updated in $/software/control processor/code/system
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 85  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p
  * Updated in $/software/control processor/code/system

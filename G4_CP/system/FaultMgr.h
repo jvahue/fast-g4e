@@ -1,7 +1,7 @@
 #ifndef FAULTMGR_H
 #define FAULTMGR_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:          FaultMgr.h
@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 34 $  $Date: 12/27/12 4:54p $
+    $Revision: 35 $  $Date: 9/22/14 6:50p $
 
 ******************************************************************************/
 
@@ -30,6 +30,7 @@
 #define SYS_COND_OUTPUT_DISABLED DIO_MAX_OUTPUTS
 
 #define FAULTMGR_CONFIG_DEFAULT DBGOFF,                   /* Debug Verbosity       */\
+                                DEST_GSE,                 /* Debug output dest     */\
                                 FLT_ANUNC_DIRECT,         /* DIRECT Mode           */\
                                 SYS_COND_OUTPUT_DISABLED, /* Default DIO Out Pin   */\
                                 0,                        /* NORMAL Action         */\
@@ -56,6 +57,13 @@ typedef enum
   VERBOSE
 } FLT_DBG_LEVEL;
 
+typedef enum
+{
+  DEST_GSE = 0,
+  DEST_MS,
+  DEST_BOTH
+} FLT_DBG_DEST;
+
 typedef enum {
   FLT_ANUNC_DIRECT,
   FLT_ANUNC_ACTION
@@ -64,6 +72,7 @@ typedef enum {
 typedef struct
 {
   FLT_DBG_LEVEL debugLevel;
+  FLT_DBG_DEST  debugDest;
   FLT_ANUNC_MODE mode;
   DIO_OUTPUT    sysCondDioOutPin;
   UINT8         action[STA_MAX];                    /* Action to perform for FAULT/CAUTION */
@@ -127,10 +136,13 @@ EXPORT void Flt_SetStatus(FLT_STATUS Status, SYS_APP_ID LogID, void *LogData,
                           INT32 LogDataSize);
 EXPORT void Flt_ClrStatus(FLT_STATUS Status);
 
-EXPORT void Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel);
+EXPORT void          Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel);
 EXPORT FLT_DBG_LEVEL Flt_GetDebugVerbosity( void);
+EXPORT void          Flt_InitDebugVerbosity( void);
 
-EXPORT void Flt_InitDebugVerbosity( void);
+EXPORT void          Flt_SetDebugDest(FLT_DBG_DEST newDest);
+EXPORT FLT_DBG_DEST  Flt_GetDebugDest( void);
+EXPORT void          Flt_InitDebugDest( void);
 
 EXPORT void Flt_PreInitFaultMgr(void);
 
@@ -145,11 +157,16 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
  * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:50p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
+ *
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 12/27/12   Time: 4:54p
  * Updated in $/software/control processor/code/system
  * SCR #1197 Code Review Updates
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-11-13   Time: 5:46p
  * Updated in $/software/control processor/code/system
@@ -159,7 +176,7 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
  * User: John Omalley Date: 12-11-09   Time: 4:41p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 31  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system

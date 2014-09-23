@@ -1,7 +1,7 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 /******************************************************************************
-            Copyright (C) 2009-2010 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
    File: sensor.h
@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 45 $  $Date: 12-12-08 1:32p $
+      $Revision: 46 $  $Date: 9/22/14 6:46p $
 
 ******************************************************************************/
 
@@ -201,7 +201,8 @@
                                {SENSOR_CONFIG_DEFAULT},\
                                {SENSOR_CONFIG_DEFAULT}
 
-#define SENSOR_LIVEDATA_DEFAULT   LD_NONE, /*Type*/\
+#define SENSOR_LIVEDATA_DEFAULT   LD_NONE, /*GSE LD Type*/\
+                                  LD_NONE, /*MS  LD Type*/\
                                   5000     /*Rate*/
 
 #define MAX_SAMPLES         8   // Maximum number of samples stored
@@ -210,6 +211,10 @@
 #define MAX_CONV_PARAMS     2   // Total Linear Conversion parameters
 
 #define SENSOR_LD_MAX_RATE  500
+
+#define LD_SNSR_LEN 3
+#define LD_DELIM    2
+#define GETLIST_BUFF_SIZE (LD_SNSR_LEN + MAX_SENSORNAME + MAX_SENSORUNITS + LD_DELIM)
 
 /******************************************************************************
                                  Package Typedefs
@@ -304,8 +309,16 @@ typedef enum
 typedef enum
 {
   LD_NONE,                   /* No Live Data Displayed     */
-  LD_ASCII                  /* ASCII live Data Displayed  */
+  LD_ASCII,                  /* ASCII live Data Displayed  */
+  LD_BINARY                  /* BINARY live Data Displayed */
 } SENSOR_LD_ENUM;
+
+typedef enum
+{
+  LD_DEST_GSE,              
+  LD_DEST_MS,                 
+  LD_DEST_MAX                  
+} LD_DEST_ENUM;
 
 typedef enum
 {
@@ -417,8 +430,9 @@ typedef struct
 // Sensor Live Data Configuration
 typedef struct
 {
-   SENSOR_LD_ENUM type;       /* type of live data output, ASCII or BINARY */
-   UINT32         nRate_ms;    /* Rate in milliseconds to output live data */
+   SENSOR_LD_ENUM gseType;    /* type of live data output to GSE, ASCII or BINARY */ // todo DaveB sb 'gseType'
+   SENSOR_LD_ENUM msType;     /* type of live data output,to MS,  ASCII or BINARY */
+   UINT32         nRate_ms;   /* Rate in milliseconds to output live data */
 }SENSOR_LD_CONFIG;
 #pragma pack()
 //A type for an array of the maximum number of sensors
@@ -555,6 +569,11 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p

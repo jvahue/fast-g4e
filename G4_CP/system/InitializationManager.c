@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 121 $  $Date: 9/03/14 5:17p $
+     $Revision: 122 $  $Date: 9/22/14 6:49p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -265,7 +265,8 @@ void Im_InitializeControlProcessor(void)
    Box_PowerOn_StartTimeCounting();
 
    // SCR# 640 inti real cfg verbosity after startup is complete
-   Flt_InitDebugVerbosity();   // now that config data is available - init debug level
+   Flt_InitDebugVerbosity();   // now that config data is available - init debug level   
+   Flt_InitDebugDest();        // ... and the debug destination
 
 }   // End of Im_InitializeControlProcessor()
 
@@ -770,6 +771,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 122  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
  * 
  * *****************  Version 121  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:17p

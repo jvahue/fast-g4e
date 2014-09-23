@@ -1,6 +1,6 @@
 #define FAULTMGR_USERTABLE_BODY
 /******************************************************************************
-         Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
 
          File:        FaultMgrUserTables.c
@@ -8,7 +8,7 @@
          Description:
 
          VERSION
-         $Revision: 33 $  $Date: 13-01-17 8:47a $
+         $Revision: 34 $  $Date: 9/22/14 6:50p $
 ******************************************************************************/
 
 #ifndef FAULTMGR_BODY
@@ -71,10 +71,19 @@ static USER_HANDLER_RESULT Flt_UserCfg             ( USER_DATA_TYPE DataType,
 
 //Enumeration tables for the User Messages
 static USER_ENUM_TBL flt_UserEnumVerbosityTbl[] =
-{ {"OFF",    DBGOFF},
+{
+   {"OFF",    DBGOFF},
    {"NORMAL", NORMAL},
    {"VERBOSE",VERBOSE},
    {NULL,0}
+};
+
+static USER_ENUM_TBL flt_UserEnumDestTbl[] =
+{
+  {"GSE",  DEST_GSE},
+  {"MS",   DEST_MS},
+  {"BOTH", DEST_BOTH},
+  {NULL,0}
 };
 
 static USER_ENUM_TBL flt_SysCondOutPin[] =
@@ -112,6 +121,7 @@ static USER_MSG_TBL fltCmd [] =
   { "STATUS",     NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     (USER_RW|USER_GSE),             &faultSystemStatus,  -1,-1,                     NO_LIMIT,    Flt_UserEnumStatus },
   { "CFG",        cfgCmd,                NULL,                     NO_HANDLER_DATA},
   { "VERBOSITY",  NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     USER_RW,                        &debugLevel,         -1, -1,                    NO_LIMIT,    flt_UserEnumVerbosityTbl },
+  { "DEST",       NO_NEXT_TABLE,         User_GenericAccessor,     USER_TYPE_ENUM,     USER_RW,                        &debugDest,          -1, -1,                    NO_LIMIT,    flt_UserEnumDestTbl },
   { DISPLAY_CFG,  NO_NEXT_TABLE,         Flt_ShowConfig,           USER_TYPE_ACTION,   (USER_RO|USER_NO_LOG|USER_GSE), NULL,                -1, -1,                    NO_LIMIT,    NULL },
   { "RECENTALL",  NO_NEXT_TABLE,         Flt_UserMessageRecentAll, USER_TYPE_ACTION,   (USER_RO|USER_NO_LOG),          NULL,                -1, -1,                    NO_LIMIT,    NULL},
   { NULL ,        NULL,                  NULL,                     NO_HANDLER_DATA }
@@ -396,11 +406,16 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
  * 
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:50p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 13-01-17   Time: 8:47a
  * Updated in $/software/control processor/code/system
  * SCR 1223 - Annunciation user command typo
- * 
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:40p
  * Updated in $/software/control processor/code/system
@@ -415,7 +430,7 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
  * User: John Omalley Date: 12-11-09   Time: 5:04p
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Update
- * 
+ *
  * *****************  Version 29  *****************
  * User: John Omalley Date: 12-10-30   Time: 5:48p
  * Updated in $/software/control processor/code/system
