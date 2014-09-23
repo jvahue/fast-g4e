@@ -10,7 +10,7 @@
                  and the debug verbosity.
 
     VERSION
-      $Revision: 58 $  $Date: 13-01-17 10:49a $
+      $Revision: 59 $  $Date: 9/22/14 6:49p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -71,6 +71,7 @@ static FAULTMGR_ACTION m_Previous;
 static FAULTMGR_ACTION m_Current;
 
 static FLT_DBG_LEVEL  debugLevel;   // local runtime copy of config data
+static FLT_DBG_DEST   debugDest;    // local runtime copy of fault output logging dest.
 
 // Include cmd tables and functions here after local dependencies are declared.
 #include "FaultMgrUserTables.c"
@@ -379,6 +380,59 @@ void Flt_InitDebugVerbosity( void)
 }
 
 /******************************************************************************
+* Function:    Flt_InitDebugDest
+*
+* Description: Init the current debug output destination (GSE, MS or BOTH)
+*              to the value set in non-vol configuration.
+*              This is done here because the fault manager is initialized
+*              before the configuration manager.
+*
+* Parameters:  None
+*
+* Returns:     None
+*
+* Notes:
+*
+*****************************************************************************/
+void Flt_InitDebugDest( void)
+{
+  debugDest = CfgMgr_RuntimeConfigPtr()->FaultMgrCfg.debugDest;
+}
+
+/******************************************************************************
+ * Function:    Flt_SetDebugVerbosity
+ *
+ * Description: Set the debug output dest to GSE, MS or BOTH
+ *
+ * Parameters:  [in] newDest: New debug destination to set
+ * 
+ * Notes:
+ *
+ *****************************************************************************/
+void Flt_SetDebugDest(FLT_DBG_DEST newDest)
+{
+  // set local working copy
+  debugDest = newDest;
+}
+
+/******************************************************************************
+* Function:    Flt_GetDebugDest
+*
+* Description: Get the current debug output destination (GSE, MS or BOTH)
+*
+* Parameters:  None
+*
+* Returns:     Current debug destination at the time of the call.
+*
+* Notes:
+*
+*****************************************************************************/
+FLT_DBG_DEST Flt_GetDebugDest( void)
+{
+  return debugDest;
+}
+
+/******************************************************************************
 * Function:    Flt_GetSystemStatus
 *
 * Description: Returns the value of the local copy of the system status
@@ -594,6 +648,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
  * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 13-01-17   Time: 10:49a

@@ -1,7 +1,7 @@
 #define GSE_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:        GSE.c
@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 26 $  $Date: 12-12-02 10:39a $
+     $Revision: 28 $  $Date: 9/23/14 6:06p $
 
 ******************************************************************************/
 
@@ -44,6 +44,7 @@
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define TEMP_CHAR_BUF_SIZE 1024
+#define MS_MSG_HDR_LEN     3
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -59,11 +60,17 @@ UINT32 Cnt;
 static FIFO TxFIFO;
 GSE_GET_LINE_BUFFER GSE_GetLineBuf;
 
+
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
                               const CHAR* str, va_list args);
+
+static void GSE_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
+                              MSI_RSP_STATUS Status);
+
+static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size );
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -478,13 +485,16 @@ void GSE_ToggleDisplayLiveStream(void)
 void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
                    const CHAR* str, ...)
 {
+  static UINT32 nReentrantCnt = 0;
   //Check the current debug level, print the debug message if the message level
   //is within the current debug level
-  if( DbgLevel <= Flt_GetDebugVerbosity())
-  {
+  if( 0 == nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
+  {    
     va_list args;
     va_start(args,str);
+    nReentrantCnt++;
     GSE_vDebugOutput( TRUE, Timestamp, str, args);
+    nReentrantCnt--;
   }
 }
 
@@ -511,11 +521,14 @@ void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
 *****************************************************************************/
 void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 {
-  if( DbgLevel <= Flt_GetDebugVerbosity())
+  static UINT32 nReentrantCnt = 0;
+  if( 0 == nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
   {
     va_list args;
     va_start(args,str);
+    nReentrantCnt++;
     GSE_vDebugOutput( FALSE, FALSE, str, args);
+    nReentrantCnt--;
   }
 }
 
@@ -547,27 +560,133 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
     TIMESTRUCT dateTime;
 
     if ( newLine)
-    {
-      GSE_PutLine(NEW_LINE);
+    {      
+      snprintf(buf, sizeof(buf), "%s", NEW_LINE);
+      GSE_WriteDebugToDest(buf, strlen(buf));      
     }
 
     if( showTime)
     {
       CM_GetSystemClock( &dateTime );
-      snprintf(buf,sizeof(buf),"[%02d:%02d:%02d.%03d] ",
+      snprintf(buf, sizeof(buf), "[%02d:%02d:%02d.%03d] ",
         dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.MilliSecond);
-      GSE_PutLine(buf);
+
+      GSE_WriteDebugToDest(buf, strlen(buf) );
     }
 
     vsnprintf( buf, sizeof(buf), str, args);
     va_end(args);
 
-    GSE_PutLine(buf);
+    GSE_WriteDebugToDest(buf, strlen(buf));
 }
 
+/******************************************************************************
+ * Function:    GSE_MsWrite
+ *
+ * Description: Puts a micro-server message into the MSInterface queue. 
+ *
+ * Parameters:  [in] Data:    Pointer to the block containing the message data
+ *              [in] Size:    Size of the data, in bytes, pointed to by Data*
+ *
+ * Returns:     None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+void GSE_MsWrite(const void* pData, UINT32 size)
+{
+  // Send a serial data stream msg to the MicroServer.
+  // Since this is effectively a send-and-forget msg,
+  // use 5000 millisecs as the timeout 
+  MSI_PutCommand(CMD_ID_SERIAL_DATA, pData, size, 5000, GSE_MSRspCallback); 
+}
+
+/******************************************************************************
+ * Function:    GSE_MSRspCallback
+ *
+ * Description: Callback from the MSInterface to handle responses from the
+ *              micro-server.  The parameter list matches the callback typedef
+ *              in MSInterface.h
+ *
+ * Parameters:  [in]    Id:         ID of the response
+ *              [in/out]PacketData  Pointer to response data
+ *              [in]    Size        size of the response data
+ *              [in]    Status      Response status, (Success,fail,timeout)
+ *
+ * Returns:
+ *
+ * Notes:       This is an empty place-holder callback function to handle
+ *              the MS response, while NULL is a valid callback, it results
+ *              in a nusiance log msg, so this keeps things neat.
+ *
+ *****************************************************************************/
+static void GSE_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
+                                     MSI_RSP_STATUS Status)
+{
+  // This function empty... no response processing needed at this time.
+}
+
+/*****************************************************************************
+* Function:    GSE_WriteDebugToDest
+*
+* Description: Output wrapper function to control where to send debug msg,
+*
+* Parameters:  [in] str:      Formatted string to print to the console.
+*              [in] size:     Number of bytes in
+*
+* Returns:     void
+*
+* Notes:       None
+*
+*****************************************************************************/
+static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
+{
+  CHAR buf[TEMP_CHAR_BUF_SIZE + MS_MSG_HDR_LEN ];
+  FLT_DBG_DEST dest = Flt_GetDebugDest();
+
+  // If fault debug msg is dest for MS, prepend msgtype and add null-term.
+  if (DEST_MS == dest || DEST_BOTH == dest)
+  {
+    buf[0] = 0;
+    // Note: the size param in SuperStrcat is the limit on the dest size
+    SuperStrcat(buf, "#00", sizeof(buf) );
+    SuperStrcat(buf, str, sizeof(buf) );    
+    size = strlen(buf);
+  }
+  
+  switch (dest)
+  {
+    case DEST_GSE:
+      GSE_PutLine(str);
+      break;
+
+    case DEST_MS:         
+      GSE_MsWrite(buf, size);
+      break;
+
+    case DEST_BOTH:
+      GSE_PutLine(str);
+      GSE_MsWrite(buf, size);
+      break;
+
+    default:
+      FATAL("Unknown FLT_DBG_DEST: %d", dest);
+      break;
+    }
+}
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Contractor V&v Date: 9/23/14    Time: 6:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS fix formatting
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
  * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-12-02   Time: 10:39a

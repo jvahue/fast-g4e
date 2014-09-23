@@ -1,33 +1,33 @@
 #ifndef MSCPINTERFACE_H
 #define MSCPINTERFACE_H
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:          MSCPInterface.h
- 
+
   Description:   Contains the command/response packet structure, packet ID
-                 enumerations and data structures for the data payload of 
+                 enumerations and data structures for the data payload of
                  the different packet IDs
 
-  Note:          This file shall contain ONLY the enumerations and data 
-                 structure related to the cmd/rsp packet and the data payload 
+  Note:          This file shall contain ONLY the enumerations and data
+                 structure related to the cmd/rsp packet and the data payload
                  structures.  Function prototypes and inclusion of other
-                 #include are forbidden.    
-                 
+                 #include are forbidden.
+
                  THIS FILE IS SHARED BETWEEN THE CONTROL PROCESSOR AND
                  MICRO SERVER PROJECTS.
 
                  FILE IS UNDER THE VERSION CONTROL OF THE CONTROL PROCESSOR
 
       VERSION
-      $Revision: 46 $  $Date: 12-11-12 4:46p $    
+      $Revision: 47 $  $Date: 9/22/14 6:47p $
 
  ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/ 
+/*****************************************************************************/
 #include "alt_basic.h"
 /*SHARED HEADER FILE, DO NOT INCLUDE ANY OTHER PROJECT SPECIFIC HEADER FILES*/
 
@@ -63,12 +63,12 @@
                                      //handler table needed to define every
                                      //command that can originate from the
                                      //microserver.
-                                     
+
 #define MSCP_CMDRSP_PACKET_SIZE      (8180) //Maximum size of the CMDRSP packet
 #define MSCP_CMDRSP_MAX_DATA_SIZE    (MSCP_CMDRSP_PACKET_SIZE - 18) //Max size
                                             //of the data payload of the
                                             //CMDRSP packet
-                                      
+
 #define MSCP_FILE_UPLOAD_DATA_SIZE (1024 + 768)
 #define MSCP_USER_MGR_STR_LEN       2048
 
@@ -92,77 +92,78 @@
                                  Package Typedefs
 ******************************************************************************/
 // command ids
-typedef enum 
+typedef enum
 {
     CMD_ID_NONE            = 0x0000,
     CMD_ID_CONNECT_GSM     = 0x0101,  /*Cmd: MSCP_GSM_CONFIG             Rsp: None*/
     CMD_ID_GET_GSM_STATUS  = 0x0102,  /*Cmd: ?                           Rsp: ?*/
-    CMD_ID_SETUP_WLAN      = 0x0103,  /*Cmd: MSCP_WLAN_CONFIG            Rsp: None*/ 
+    CMD_ID_SETUP_WLAN      = 0x0103,  /*Cmd: MSCP_WLAN_CONFIG            Rsp: None*/
     CMD_ID_GET_WLAN_STATUS = 0x0104,  /*Cmd: ?                           Rsp: ?*/
     CMD_ID_SET_TX_METHOD   = 0x0105,  /*Cmd: MSCP_TX_CONFIG              Rsp: ?*/
     CMD_ID_START_LOG_DATA  = 0x0106,  /*Cmd: MSCP_LOGFILE_INFO           Rsp: ?*/
     CMD_ID_LOG_DATA        = 0x0107,  /*Cmd: MSCP_FILE_PACKET_INFO       Rsp: ?*/
     CMD_ID_END_LOG_DATA    = 0x0108,  /*Cmd: MSCP_LOGFILE_INFO           Rsp: ?*/
-    CMD_ID_FTP_CHECK       = 0x0109,  /*Cmd: ? Rsp: ?*/      /*reserved in FAST*/ 
-    CMD_ID_FTP_FILE        = 0x010A,  /*Cmd: MSCP_CMD_FTP_FILE_INFO      
+    CMD_ID_FTP_CHECK       = 0x0109,  /*Cmd: ? Rsp: ?*/      /*reserved in FAST*/
+    CMD_ID_FTP_FILE        = 0x010A,  /*Cmd: MSCP_CMD_FTP_FILE_INFO
                                         Rsp: ?*/             /*reserved in FAST*/
-    CMD_ID_REMOVE_LOG_FILE = 0x010B,  /*Cmd: MSCP_LOGFILE_INFO           
+    CMD_ID_REMOVE_LOG_FILE = 0x010B,  /*Cmd: MSCP_LOGFILE_INFO
                                         Rsp: MSCP_REMOVE_FILE_RSP  */
-    CMD_ID_USER_MGR_MS     = 0x010C,  /*Cmd: MSCP_USER_MGR_CMD           
-                                        Rsp: MSCP_USER_MGR_RSP     */  
-    CMD_ID_USER_MGR_GSE    = 0x010D,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/ 
-    CMD_ID_SETUP_GSM       = 0x010E,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/ 
-    CMD_ID_UPLOAD_START    = 0x010F,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/   
-    CMD_ID_UPLOAD_DATA     = 0x0110,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/ 
-    CMD_ID_UPLOAD_END      = 0x0111,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/     
-    CMD_ID_UPLOAD_STATUS   = 0x0112,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/  
-    CMD_ID_FTPBACKGND_CTL  = 0x0113,  /*Cmd: ?                           
-                                        Rsp: ?*/             /*reserved in FAST*/  
-    CMD_ID_UPDATE_CFG      = 0x0114,
-    CMD_ID_ONGROUND_STATE  = 0x0115,  /*Cmd: ?                           
+    CMD_ID_USER_MGR_MS     = 0x010C,  /*Cmd: MSCP_USER_MGR_CMD
+                                        Rsp: MSCP_USER_MGR_RSP     */
+    CMD_ID_USER_MGR_GSE    = 0x010D,  /*Cmd: ?
                                         Rsp: ?*/             /*reserved in FAST*/
-    CMD_ID_VALIDATE_CRC    = 0x0116,  /*Cmd: MSCP_VALIDATE_CRC_CMD       
-                                        Rsp: MSCP_VALIDATE_CRC_RSP      */  
-    CMD_ID_CHECK_FILE      = 0x0117,  /*Cmd: MSCP_CHECK_FILE_CMD         
-                                        Rsp: MSCP_CHECK_FILE_RSP        */  
-    CMD_ID_SET_ROUTE       = 0x0118,  /*Cmd: ?                           Rsp: ?*/  
-    CMD_ID_GET_ROUTE       = 0x0119,  /*Cmd: ?                           Rsp: ?*/  
-    CMD_ID_SET_URLS        = 0x011A,  /*Cmd: ?                           Rsp: ?*/  
-    CMD_ID_GET_URLS        = 0x011B,  /*Cmd: ?                           Rsp: ?*/  
-    CMD_ID_GET_MSSIM_INFO  = 0x011C,  /*Cmd: No command data             Rsp: MSCP_MS_GET_INFO_RSP;*/  
+    CMD_ID_SETUP_GSM       = 0x010E,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_UPLOAD_START    = 0x010F,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_UPLOAD_DATA     = 0x0110,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_UPLOAD_END      = 0x0111,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_UPLOAD_STATUS   = 0x0112,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_FTPBACKGND_CTL  = 0x0113,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_UPDATE_CFG      = 0x0114,
+    CMD_ID_ONGROUND_STATE  = 0x0115,  /*Cmd: ?
+                                        Rsp: ?*/             /*reserved in FAST*/
+    CMD_ID_VALIDATE_CRC    = 0x0116,  /*Cmd: MSCP_VALIDATE_CRC_CMD
+                                        Rsp: MSCP_VALIDATE_CRC_RSP      */
+    CMD_ID_CHECK_FILE      = 0x0117,  /*Cmd: MSCP_CHECK_FILE_CMD
+                                        Rsp: MSCP_CHECK_FILE_RSP        */
+    CMD_ID_SET_ROUTE       = 0x0118,  /*Cmd: ?                           Rsp: ?*/
+    CMD_ID_GET_ROUTE       = 0x0119,  /*Cmd: ?                           Rsp: ?*/
+    CMD_ID_SET_URLS        = 0x011A,  /*Cmd: ?                           Rsp: ?*/
+    CMD_ID_GET_URLS        = 0x011B,  /*Cmd: ?                           Rsp: ?*/
+    CMD_ID_GET_MSSIM_INFO  = 0x011C,  /*Cmd: No command data             Rsp: MSCP_MS_GET_INFO_RSP;*/
     CMD_ID_GET_CP_INFO     = 0x011D,  /*Cmd: No command data             Rsp  MSCP_CP_GET_INFO_RSP*/
-                                      /*Rsp: MSCP_GET_CP_INFO_RSP       */  
-    CMD_ID_HEARTBEAT       = 0x011E,  /*Cmd: MSCP_CP_HEARTBEAT_CMD       
-                                        Rsp: MSCP_MS_HEARTBEAT_RSP      */  
-    CMD_ID_SHELL_CMD       = 0x011F,  /*Cmd: MSCP_CP_SHELL_CMD           
+                                      /*Rsp: MSCP_GET_CP_INFO_RSP       */
+    CMD_ID_HEARTBEAT       = 0x011E,  /*Cmd: MSCP_CP_HEARTBEAT_CMD
+                                        Rsp: MSCP_MS_HEARTBEAT_RSP      */
+    CMD_ID_SHELL_CMD       = 0x011F,  /*Cmd: MSCP_CP_SHELL_CMD
                                         Rsp: MSCP_MS_SHELL_RSP          */
-    CMD_ID_GET_FILE_START  = 0x0120,  /*Cmd: MSCP_CP_GET_FILE_START_CMD  
+    CMD_ID_GET_FILE_START  = 0x0120,  /*Cmd: MSCP_CP_GET_FILE_START_CMD
                                         Rsp: MSCP_MS_GET_FILE_START_RSP */
-    CMD_ID_GET_FILE_DATA   = 0x0121,  /*Cmd: MSCP_MS_GET_FILE_DATA_CMD   
+    CMD_ID_GET_FILE_DATA   = 0x0121,  /*Cmd: MSCP_MS_GET_FILE_DATA_CMD
                                         Rsp: MSCP_CP_GET_FILE_DATA_RSP  */
-    CMD_ID_FILE_XFRD       = 0x0122,  /*Cmd: MSCP_CP_FILE_XFRD_CMD       
+    CMD_ID_FILE_XFRD       = 0x0122,  /*Cmd: MSCP_CP_FILE_XFRD_CMD
                                         Rsp: MSCP_MS_FILE_XFRD_RSP      */
-    CMD_ID_MSNGR_CTL       = 0x0123,  /*Cmd: MSCP_CP_MSNGR_CTL_CMD       
+    CMD_ID_MSNGR_CTL       = 0x0123,  /*Cmd: MSCP_CP_MSNGR_CTL_CMD
                                         Rsp: MSCP_MS_MSNGR_CTL_RSP      */
-    CMD_ID_PUT_FILE_START  = 0x0124,  /*Cmd: MSCP_CP_PUT_FILE_START_CMD  
+    CMD_ID_PUT_FILE_START  = 0x0124,  /*Cmd: MSCP_CP_PUT_FILE_START_CMD
                                         Rsp: None                       */
-    CMD_ID_PUT_FILE_DATA   = 0x0125,  /*Cmd: MSCP_MS_PUT_FILE_DATA_CMD   
+    CMD_ID_PUT_FILE_DATA   = 0x0125,  /*Cmd: MSCP_MS_PUT_FILE_DATA_CMD
                                         Rsp: None                       */
-    CMD_ID_REQ_CFG_FILES   = 0x0126,  /*Cmd: MSCP_CP_REQ_CFG_FILES_CMD   
+    CMD_ID_REQ_CFG_FILES   = 0x0126,  /*Cmd: MSCP_CP_REQ_CFG_FILES_CMD
                                         Rsp: MSCP_MS_REQ_CFG_FILES_RSP  */
-    CMD_ID_REQ_START_RECFG = 0x0127,  /*Cmd: MSCP_CP_REQ_START_RECFG_CMD 
+    CMD_ID_REQ_START_RECFG = 0x0127,  /*Cmd: MSCP_CP_REQ_START_RECFG_CMD
                                         Rsp: None                       */
-    CMD_ID_REQ_STOP_RECFG  = 0x0128,  /*Cmd: MSCP_CP_REQ_START_RECFG_CMD 
+    CMD_ID_REQ_STOP_RECFG  = 0x0128,  /*Cmd: MSCP_CP_REQ_START_RECFG_CMD
                                         Rsp: None                       */
-    CMD_ID_GET_RECFG_STS   = 0x0129,  /*Cmd: MSCP_CP_GET_RECFG_STS_CMD   
+    CMD_ID_GET_RECFG_STS   = 0x0129,  /*Cmd: MSCP_CP_GET_RECFG_STS_CMD
                                         Rsp: MSCP_MS_GET_RECFG_STS_RSP  */
-    
+    CMD_ID_SERIAL_DATA     = 0x012A,  /*Cmd: ?                    Rsp: ?*/
+
     CMD_ID_LAST,
     // Warning - target type for this enum may be as small UINT16.
     // Do not make enum larger than 65536.
@@ -174,12 +175,12 @@ typedef enum
 #endif
 
 typedef struct {
-    UINT32 checksum;              // check sum for data in this structure    
+    UINT32 checksum;              // check sum for data in this structure
     UINT16 type;                  // Defines the packet as a command from MS
                                   // or a response from the MS.
     UINT16 id;                    // command id or id associate with this response,
                                   // (MSCP_CMD_ID)
-    UINT32 sequence;              // response/command sequence id 
+    UINT32 sequence;              // response/command sequence id
     UINT16 status;                // status for response only (MSCP_RSP_STATUS)
     UINT8  UmRspSource;           // see UM_RSP_SOURCE
     UINT8  UmDataFType;           // see UM_CMD_TYPE
@@ -198,7 +199,7 @@ typedef enum
   // Do not make enum larger than 65536.
 } MSCP_PACKET_TYPE;
 
-//command/response packet source (Legacy field, always set to MS).  
+//command/response packet source (Legacy field, always set to MS).
 typedef enum
 {
   MSCP_GSE,
@@ -228,8 +229,8 @@ typedef enum
 } MSCP_GSM_MODE;
 
 typedef struct {
-  INT8   Phone[MSCP_MAX_STRING_SIZE];     
-  UINT16 Mode; 
+  INT8   Phone[MSCP_MAX_STRING_SIZE];
+  UINT16 Mode;
   INT8   APN[MSCP_MAX_STRING_SIZE];
   INT8   User[MSCP_MAX_STRING_SIZE];
   INT8   Password[MSCP_MAX_STRING_SIZE];
@@ -308,20 +309,20 @@ typedef enum
 
 //---Command ID: Start Log Data---
 /*Data Structure for pre-2.0.0 FAST Control Processor software*/
-typedef struct 
+typedef struct
 {
     INT8    FileName[MSCP_MAX_STRING_SIZE];
 }  PACKED MSCP_LOGFILE_INFO_LEGACY;
 
 //---Command ID: Start Log Data---
-typedef struct 
+typedef struct
 {
     INT8    FileName[MSCP_MAX_STRING_SIZE];
     INT32   Priority;
 }  PACKED MSCP_LOGFILE_INFO;
 
 //---Command ID: Log Data---
-typedef struct 
+typedef struct
 {
     UINT16 id;
     UINT16 seq;
@@ -358,20 +359,20 @@ typedef enum
 
 } MSCP_FILE_TX_STATE_ERROR_TYPE;
 
-typedef struct 
+typedef struct
 {
     CHAR    AcsName[MSCP_MAX_STRING_SIZE];  // ACS install id-version id-time stamp
                                             // not used when log type is DTUMGR_LOG_TYPE_DTU
     UINT16  Priority;                       // priority of log data of this ACS
                                             // not used when log type is DTUMGR_LOG_TYPE_DTU
     UINT16  Status;                         // TBD added def for DTUMGR_TT_LOG_STATUS
-    UINT16  Detail;                         // TBD added def for 
+    UINT16  Detail;                         // TBD added def for
                                             //     see DTUMGR_TT_LOG_STATUS_DETAIL - TBD
     UINT32  nDataSize;                      // size of data block
     UINT32  nCheckSum;                      // checksum for this data block, this is long word
                                             // will not be cacluated
 } PACKED MSCP_TT_RSP;
- 
+
 typedef struct
 {
     UINT16 state;                          // see MS_FILE_TX_STATE
@@ -383,7 +384,7 @@ typedef struct
 
 //---Command ID: FTP File---
 typedef struct
-{ 
+{
     INT8    FilePath[MSCP_MAX_STRING_SIZE];
 }  MSCP_CMD_FTP_FILE_INFO;
 
@@ -477,7 +478,7 @@ typedef enum
 typedef struct AircraftCfgData
 {
     UINT16        CfgVer;
-    UINT16        Update_Method;    
+    UINT16        Update_Method;
     UINT16        CfgStatus;
     INT8          ClientStatusStr[MSCP_MAX_STRING_SIZE];  //Store the cfg error code generated
                                                           //by the client connected to MSSIM
@@ -505,9 +506,9 @@ typedef enum
 typedef enum
 {
   MSCP_AC_CFG_SUCCESS,             // 0    0 - not used
-  MSCP_AC_NOT_USED,                // 1    1 - not used 
+  MSCP_AC_NOT_USED,                // 1    1 - not used
   MSCP_AC_XML_SERVER_NOT_FOUND,    // 2    2 - Server not found OK
-  MSCP_AC_XML_FILE_NOT_FOUND,      // 3    3 - File not found 
+  MSCP_AC_XML_FILE_NOT_FOUND,      // 3    3 - File not found
   MSCP_AC_XML_FAILED_TO_OPEN,      // 4    4 - File failed to open ???
   MSCP_AC_XML_FAST_NOT_FOUND,      // 5    5 - File format error (any type)
   MSCP_AC_XML_SN_NOT_FOUND,        // 6    6 - Serial number not in file
@@ -516,7 +517,7 @@ typedef enum
   MSCP_AC_CFG_FILE_NO_VER,         // 9    9 - Configuration version is missing
   MSCP_AC_CFG_FILE_FMT_ERR,        // 10   10- Configuration file format error NEW
   MSCP_AC_CFG_FAILED_TO_UPDATE,    // 11   11- Reconfiguration of FAST failed
-  MSCP_AC_ID_MISMATCH,             // 12   12- Aircraft ID mismatch (was 001)     
+  MSCP_AC_ID_MISMATCH,             // 12   12- Aircraft ID mismatch (was 001)
   MSCP_AC_CFG_NO_VALIDATE,         // 13   13- Validate data == no
   MSCP_AC_CFG_NOTHING,
   MSCP_AC_CFG_STARTED,
@@ -525,19 +526,19 @@ typedef enum
 
 
 //---Command ID: CMD_ID_ONGROUND_STATE---
-typedef struct 
+typedef struct
 {
-    UINT16  OnGround;             // TRUE = On Ground, FALSE = In Air 
+    UINT16  OnGround;             // TRUE = On Ground, FALSE = In Air
                                   // Current State of DtuMgrConfig->OnGround
-    UINT32  CurrentTime;          // Current DTU Time from TIMESTAMP->Timestamp fmt 
-                                  //   See CmGetTimeStamp() for fmt 
-    UINT16  StartupComplete;      // Flag to indicate Dtu Re-starting.  
+    UINT32  CurrentTime;          // Current DTU Time from TIMESTAMP->Timestamp fmt
+                                  //   See CmGetTimeStamp() for fmt
+    UINT16  StartupComplete;      // Flag to indicate Dtu Re-starting.
                                   // Used by mssim to restart TC35
-} PACKED MSCP_ONGROUND_STATE_AND_TIME; 
+} PACKED MSCP_ONGROUND_STATE_AND_TIME;
 
 
 //---Command ID: CMD_ID_VALIDATE_CRC---
-//Command from MS to CP 
+//Command from MS to CP
 typedef struct
 {
   INT8    FN[MSCP_MAX_STRING_SIZE];
@@ -575,7 +576,7 @@ typedef struct
 //Response from MS to CP
 typedef struct
 {
-  UINT16  FileSta;                 //See: MSCP_FILE_STA  
+  UINT16  FileSta;                 //See: MSCP_FILE_STA
 }PACKED MSCP_CHECK_FILE_RSP;
 
 typedef enum
@@ -584,10 +585,10 @@ typedef enum
   MSCP_FILE_STA_NOT_YET_VALIDATED  = 1, //File validation not performed yet
   MSCP_FILE_STA_MSFAIL      = 2,     //File on compact flash failed CRC check
   MSCP_FILE_STA_MSVALID     = 3,     //File validated on the Compact Flash
-  MSCP_FILE_STA_GSFAIL      = 4,     //File validation failed on the Ground 
+  MSCP_FILE_STA_GSFAIL      = 4,     //File validation failed on the Ground
   MSCP_FILE_STA_GSVALID     = 5      //File validated on the Ground Server
-}MSCP_FILE_STA;                      //The order of enum is expected to be the same order as 
-                                     //the verification process i.e. 
+}MSCP_FILE_STA;                      //The order of enum is expected to be the same order as
+                                     //the verification process i.e.
                                      //not verified->ms failed || ms verified->gs failed || gs verified
 
 
@@ -615,7 +616,7 @@ typedef struct DtuMgrTTRspStruct
 } PACKED DTUMGR_TT_RSP, *DTUMGR_TT_RSP_PTR;
 
 // FTP Status
-typedef struct 
+typedef struct
 {
     UINT16 state;                        // see MS_FILE_TX_STATE
     UINT16 error;                        // see MS_FILE_TX_STATE_ERROR_TYPE
@@ -629,7 +630,7 @@ typedef struct
 {
   INT8  SN[MSCP_MAX_STRING_SIZE];
 //  CHAR  SwVer[MSCP_MAX_STRING_SIZE];
-  INT32 Pri4DirMaxSizeMB;  
+  INT32 Pri4DirMaxSizeMB;
 }MSCP_GET_CP_INFO_RSP;
 
 
@@ -645,8 +646,8 @@ typedef struct
 {
   CHAR Imei[MSCP_MAX_STRING_SIZE];     //IMEI decoded from /var/run/gsm
   CHAR Scid[MSCP_MAX_STRING_SIZE];     //SCID decoded from /var/run/gsm
-  CHAR Signal[MSCP_MAX_STRING_SIZE];   //Signal strength from /var/run/gsm   
-  CHAR Operator[MSCP_MAX_STRING_SIZE]; //Current Operator from /var/run/gsm   
+  CHAR Signal[MSCP_MAX_STRING_SIZE];   //Signal strength from /var/run/gsm
+  CHAR Operator[MSCP_MAX_STRING_SIZE]; //Current Operator from /var/run/gsm
   CHAR Cimi[MSCP_MAX_STRING_SIZE];
   CHAR Creg[MSCP_MAX_STRING_SIZE];
   CHAR Lac[MSCP_MAX_STRING_SIZE];
@@ -656,7 +657,7 @@ typedef struct
   CHAR Cnum[MSCP_MAX_STRING_SIZE];
   CHAR Sbv[MSCP_MAX_STRING_SIZE];
   CHAR Sctm[MSCP_MAX_STRING_SIZE];
-  CHAR Other[1024];                    //List of additional lines from /var/run/gsm not 
+  CHAR Other[1024];                    //List of additional lines from /var/run/gsm not
 }MSCP_MS_GSM_INFO;                        // decoded into the other memebers of MS_GSM_INFO
 
 //Static information about the micro-server
@@ -772,8 +773,8 @@ typedef struct{
 typedef struct{
   UINT8  BlockNum; /*BlockNum 0 indicates start of new file, */
   UINT32 Len;
-  union  {INT8 Block[MSCP_CMDRSP_MAX_DATA_SIZE-5]; //Data block size is the maximum 
-                                                   //data size, minus the size of the 
+  union  {INT8 Block[MSCP_CMDRSP_MAX_DATA_SIZE-5]; //Data block size is the maximum
+                                                   //data size, minus the size of the
                                                    //"BlockNum" and "Len" memebers
           MSCP_FILE_DATA_INFO FileInfo;}Data;
 }PACKED MSCP_MS_GET_FILE_DATA_CMD;
@@ -810,7 +811,7 @@ typedef struct{
 
 //---Command ID: CMD_ID_MSNGR_CTL
 typedef struct{
-  BOOLEAN Pause;   //TRUE: Pause; FALSE: Run 
+  BOOLEAN Pause;   //TRUE: Pause; FALSE: Run
 }PACKED MSCP_CP_MSNGR_CTL_CMD;
 
 //---Command ID: CMD_ID_PUT_FILE_START
@@ -832,10 +833,10 @@ typedef struct{
   INT8          Type[MSCP_MAX_STRING_SIZE];
   INT8          FleetIdent[MSCP_MAX_STRING_SIZE];
   INT8          Number[MSCP_MAX_STRING_SIZE];
-  INT8          TailNumber[MSCP_MAX_STRING_SIZE];    
+  INT8          TailNumber[MSCP_MAX_STRING_SIZE];
   INT8          Style[MSCP_MAX_STRING_SIZE];
   INT8          Operator[MSCP_MAX_STRING_SIZE];
-  INT8          Owner[MSCP_MAX_STRING_SIZE];  
+  INT8          Owner[MSCP_MAX_STRING_SIZE];
   BOOLEAN       ValidateData;
 }PACKED MSCP_CP_REQ_CFG_FILES_CMD;
 
@@ -855,7 +856,7 @@ typedef enum {
 }MSCP_REQ_START_RECFG_MODE;
 
 typedef struct{
-  INT8  CP_SN[MSCP_MAX_STRING_SIZE];  
+  INT8  CP_SN[MSCP_MAX_STRING_SIZE];
   INT32 Mode;                         //Contains MSCP_REQ_START_RECFG_MODE
 }MSCP_CP_REQ_START_RECFG_CMD;
 
@@ -873,11 +874,11 @@ typedef enum{
 }MSCP_RECFG_STS;
 
 typedef struct{
-  INT8  StatusStr[MSCP_MAX_STRING_SIZE];   //Descriptive status string of the current 
+  INT8  StatusStr[MSCP_MAX_STRING_SIZE];   //Descriptive status string of the current
                                            //reconfiguration activity
-  INT8  ErrorStr[MSCP_MAX_ERROR_STR_SIZE]; //Error code string (ERR###) (If the Status 
+  INT8  ErrorStr[MSCP_MAX_ERROR_STR_SIZE]; //Error code string (ERR###) (If the Status
                                            //field is error)
-  INT32 Status;           //MSCP_RECFG_STS enum.  
+  INT32 Status;           //MSCP_RECFG_STS enum.
 }PACKED MSCP_MS_GET_RECFG_STS_RSP;
 
 
@@ -911,80 +912,86 @@ typedef struct{
  *  MODIFICATIONS
  *    $History: MSCPInterface.h $
  * 
+ * *****************  Version 47  *****************
+ * User: Contractor V&v Date: 9/22/14    Time: 6:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS
+ * 
+ *
  * *****************  Version 46  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:46p
  * Updated in $/software/control processor/code/system
  * SCR 1142 - Formatting Error
- * 
+ *
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCrR1107 - Code Review Updates
- * 
+ *
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:14a
  * Updated in $/software/control processor/code/system
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 42  *****************
  * User: Jim Mood     Date: 7/19/12    Time: 11:07a
  * Updated in $/software/control processor/code/system
  * SCR 1107: Data Offload changes for 2.0.0
- * 
+ *
  * *****************  Version 41  *****************
  * User: John Omalley Date: 8/05/10    Time: 11:40a
  * Updated in $/software/control processor/code/system
  * SCR 750 - Remove TX Method
- * 
+ *
  * *****************  Version 40  *****************
  * User: Jim Mood     Date: 7/30/10    Time: 8:57a
  * Updated in $/software/control processor/code/system
  * SCR 327 Fast transmission test functionality
- * 
+ *
  * *****************  Version 39  *****************
  * User: Contractor3  Date: 7/29/10    Time: 12:13p
  * Updated in $/software/control processor/code/system
  * SCR #703 - Fixes for code review findings
- * 
+ *
  * *****************  Version 38  *****************
  * User: Jim Mood     Date: 7/23/10    Time: 7:40p
  * Updated in $/software/control processor/code/system
  * SCR 151 Delete FVT entry after a good ground server CRC
- * 
+ *
  * *****************  Version 37  *****************
  * User: Contractor3  Date: 7/06/10    Time: 10:38a
  * Updated in $/software/control processor/code/system
  * SCR #672 - Changes based on Code Review.
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jim Mood     Date: 7/02/10    Time: 4:06p
  * Updated in $/software/control processor/code/system
  * SCR 671 Added "busy" status to the MS-CP response packet
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jim Mood     Date: 6/29/10    Time: 6:28p
  * Updated in $/software/control processor/code/system
  * SCR 623 Reconfiguration updates
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jim Mood     Date: 6/16/10    Time: 4:24p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 33  *****************
  * User: Jim Mood     Date: 6/14/10    Time: 2:46p
  * Updated in $/software/control processor/code/system
  * SCR 623 Batch configuration updates
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 5/26/10    Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR #607 The CP shall query Ms CF mounted before File Upload pr
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jim Mood     Date: 5/25/10    Time: 5:29p
  * Updated in $/software/control processor/code/system
@@ -992,108 +999,108 @@ typedef struct{
  * 1) Request configuration files (126)
  * 2) Start reconfiguration (127)
  * 3) Get reconfiguration status (128)
- * 
+ *
  * *****************  Version 29  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jim Mood     Date: 2/23/10    Time: 3:43p
  * Updated in $/software/control processor/code/system
  * Added commands for putting a file from the CP to the Micro-Server
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jim Mood     Date: 1/20/10    Time: 3:43p
  * Updated in $/software/control processor/code/system
  * Added definition for commands: Control JMessenger; Mark log file
  * transfered
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jim Mood     Date: 11/20/09   Time: 3:28p
  * Updated in $/software/control processor/code/system
  * Updated FILE_DATA command
- * 
+ *
  * *****************  Version 25  *****************
  * User: Jim Mood     Date: 11/02/09   Time: 11:24a
  * Updated in $/software/control processor/code/system
  * Added file transfer commands
- * 
+ *
  * *****************  Version 24  *****************
  * User: Jim Mood     Date: 10/26/09   Time: 5:41p
  * Updated in $/software/control processor/code/system
  * Modifed recently added Shell cmd
- * 
+ *
  * *****************  Version 23  *****************
  * User: Jim Mood     Date: 10/26/09   Time: 2:48p
  * Updated in $/software/control processor/code/system
- * Added shell command 
- * 
+ * Added shell command
+ *
  * *****************  Version 22  *****************
  * User: Jim Mood     Date: 8/28/09    Time: 10:02a
  * Updated in $/software/control processor/code/system
  * Added MNC and MCC fields to the GSM config structure.  Removed Netmask
  * and Gateway.
- * 
+ *
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 6/30/09    Time: 3:23p
  * Updated in $/software/control processor/code/system
  * SCR #204 Misc Code Review Updates
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jim Mood     Date: 5/15/09    Time: 5:15p
  * Updated in $/software/control processor/code/system
  * Update STS definition
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 4/02/09    Time: 9:03a
  * Updated in $/control processor/code/system
  * Added USER_MGR_MS_CMD message definitions.
  * Added CHECK_NO_VALIDATE to the AC_UPDATE_METHOD structure
- * 
+ *
  * *****************  Version 18  *****************
  * User: Jim Mood     Date: 1/29/09    Time: 10:27a
  * Updated in $/control processor/code/system
  * Added a response structure for the CMD_ID_GET_CP_INFO command
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 1/22/09    Time: 1:18p
  * Updated in $/control processor/code/system
  * Added "UPDATE METHOD" enum for the aircraft config command
- * 
+ *
  * *****************  Version 16  *****************
  * User: Jim Mood     Date: 1/06/09    Time: 9:56a
  * Updated in $/control processor/code/system
- * 
+ *
  * *****************  Version 15  *****************
  * User: Jim Mood     Date: 12/17/08   Time: 11:01a
  * Updated in $/control processor/code/system
- * 
+ *
  * *****************  Version 14  *****************
  * User: Jim Mood     Date: 12/12/08   Time: 4:23p
  * Updated in $/control processor/code/system
  * Updated the Check File Status enumeration to match FAST ICD v5
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 12/11/08   Time: 11:11a
  * Updated in $/control processor/code/system
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jim Mood     Date: 12/04/08   Time: 5:58p
  * Updated in $/control processor/code/system
  * Added data structures for the commands:
  * CMD_ID_VALIDATE_CRC
  * CMD_ID_CHECK_FILE
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jim Mood     Date: 11/12/08   Time: 1:40p
  * Updated in $/control processor/code/system
- * 
+ *
  * *****************  Version 10  *****************
  * User: Jim Mood     Date: 10/28/08   Time: 11:54a
  * Updated in $/control processor/code/system
  * Added version, date, history comments.
- * 
+ *
  *
  ***************************************************************************/
 
