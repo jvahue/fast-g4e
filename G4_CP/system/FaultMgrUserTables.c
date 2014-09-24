@@ -8,7 +8,7 @@
          Description:
 
          VERSION
-         $Revision: 34 $  $Date: 9/22/14 6:50p $
+         $Revision: 35 $  $Date: 9/24/14 4:31p $
 ******************************************************************************/
 
 #ifndef FAULTMGR_BODY
@@ -80,9 +80,9 @@ static USER_ENUM_TBL flt_UserEnumVerbosityTbl[] =
 
 static USER_ENUM_TBL flt_UserEnumDestTbl[] =
 {
-  {"GSE",  DEST_GSE},
-  {"MS",   DEST_MS},
-  {"BOTH", DEST_BOTH},
+  {"GSE",    DEST_GSE},
+  {"MS",     DEST_MS},
+  {"MS_GSE", DEST_BOTH},
   {NULL,0}
 };
 
@@ -405,6 +405,11 @@ USER_HANDLER_RESULT Flt_UserCfg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FaultMgrUserTables.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 9/24/14    Time: 4:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - Updated fault.dest to accept MS_GSE string
  * 
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:50p
