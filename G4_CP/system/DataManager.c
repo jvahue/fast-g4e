@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 95 $  $Date: 9/04/14 3:11p $
+      $Revision: 96 $  $Date: 10/01/14 3:24p $
 
 ******************************************************************************/
 
@@ -405,7 +405,7 @@ BOOLEAN DataMgrDownloadGetState ( INT32 param )
  * Notes:
  *****************************************************************************/
 void DataMgrRecRun ( BOOLEAN Run, INT32 param  )
-{  
+{
   dmRecordEnabled = Run;
   // Notify the ClockMgr of the new Recording state
   CM_UpdateRecordingState(Run);
@@ -431,11 +431,11 @@ void DataMgrDownloadRun ( BOOLEAN Run, INT32 param  )
 {
   if(Run)
   {
-    DataMgrStartDownload();    
+    DataMgrStartDownload();
   }
   else
   {
-    DataMgrStopDownload();    
+    DataMgrStopDownload();
   }
 }
 
@@ -457,7 +457,6 @@ void DataMgrStopDownload ( void )
    // Local Data
    DATA_MNG_INFO *pDMInfo;
    UINT8         nChannel;
-   BOOLEAN       bStopped = FALSE;
 
    // Loop through all the configured channels and look for the
    // channels that are currently downloading
@@ -466,7 +465,7 @@ void DataMgrStopDownload ( void )
       pDMInfo = &dataMgrInfo[nChannel];
 
       if ( pDMInfo->dl.bDownloading == TRUE )
-      {         
+      {
          // Check the interface type and command the interface to stop
          switch (pDMInfo->acs_Config.portType)
          {
@@ -485,15 +484,10 @@ void DataMgrStopDownload ( void )
          pDMInfo->dl.bDownloading  = FALSE;
          pDMInfo->dl.bDownloadStop = TRUE;
 
-         // Set flag to indicate that at least one/more download has been stopped.
-         bStopped = TRUE;
-         //break;  - removed this break as it could cause early-exit from 'for' loop         
+         // Decrement for this channel download ending.
+         CM_UpdateRecordingState(FALSE);
+         //break;  - removed this break as it could cause early-exit from 'for' loop
       }
-   }
-   // If at least one download has been stopped, update recording state.
-   if ( bStopped )
-   {
-     CM_UpdateRecordingState(FALSE);
    }
 
 }
@@ -639,15 +633,14 @@ BOOLEAN DataMgrStartDownload( void )
 
             // Enable the tasks to perform the download
             TmTaskEnable ((TASK_INDEX)(nChannel + (UINT32)Data_Mgr0), TRUE);
-            // Set flag to indicate that at least one/more download has been started.
-            bStarted = TRUE;            
+
+            // Increment for this channel download starting.
+            CM_UpdateRecordingState(TRUE);
+
+            // Indicate that 1..n tasks are active.
+            bStarted = TRUE;
          }
       }
-   }   
-   // If at least one download has been started, update recording state.
-   if ( bStarted )
-   {
-     CM_UpdateRecordingState(TRUE);
    }
 
    return bStarted;
@@ -1635,6 +1628,9 @@ static void DataMgrDownloadTask( void *pParam )
             pDMInfo->dl.state         = DL_RECORD_REQUEST;
             pDMInfo->dl.bDownloading  = FALSE;
             pDMInfo->dl.bDownloadStop = FALSE;
+
+            // Decrement count for this task's download ending.
+            CM_UpdateRecordingState(FALSE);
           }
         }
         break;
@@ -1936,6 +1932,11 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 96  *****************
+ * User: Contractor V&v Date: 10/01/14   Time: 3:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - CP Time Synce when Not Recording
  * 
  * *****************  Version 95  *****************
  * User: Contractor V&v Date: 9/04/14    Time: 3:11p

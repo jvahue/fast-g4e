@@ -1,7 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:        Version.h
@@ -9,7 +9,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 66 $  $Date: 4/03/13 1:35p $
+      $Revision: 67 $  $Date: 10/01/14 3:23p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -24,9 +24,9 @@
                                  Package Defines
 ******************************************************************************/
 #define VER_FUNC    "2"       // FN - Functional Build
-#define VER_MAJOR   "0"       // MJ - Major Functional Change
-#define VER_MINOR   "1"       // MN - Minor Functional Change
-#define DEV_BUILD   " Dev 7b1004d195f2+"  // ER - Development Build = "" for release
+#define VER_MAJOR   "1"       // MJ - Major Functional Change
+#define VER_MINOR   "0"       // MN - Minor Functional Change
+#define DEV_BUILD   " Dev eda7dad64c0d+"  // ER - Development Build = "" for release
 
 /******************************************************************************
                                  Package Typedefs
@@ -66,6 +66,11 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 67  *****************
+ * User: Contractor V&v Date: 10/01/14   Time: 3:23p
+ * Updated in $/software/control processor/code/drivers
+ * Update build string for 'v2.1.0' and Dev string
  * 
  * *****************  Version 66  *****************
  * User: John Omalley Date: 4/03/13    Time: 1:35p

@@ -10,7 +10,7 @@
                  and the debug verbosity.
 
     VERSION
-      $Revision: 59 $  $Date: 9/22/14 6:49p $
+      $Revision: 60 $  $Date: 10/01/14 3:25p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -400,22 +400,6 @@ void Flt_InitDebugDest( void)
 }
 
 /******************************************************************************
- * Function:    Flt_SetDebugVerbosity
- *
- * Description: Set the debug output dest to GSE, MS or BOTH
- *
- * Parameters:  [in] newDest: New debug destination to set
- * 
- * Notes:
- *
- *****************************************************************************/
-void Flt_SetDebugDest(FLT_DBG_DEST newDest)
-{
-  // set local working copy
-  debugDest = newDest;
-}
-
-/******************************************************************************
 * Function:    Flt_GetDebugDest
 *
 * Description: Get the current debug output destination (GSE, MS or BOTH)
@@ -648,6 +632,12 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 60  *****************
+ * User: Contractor V&v Date: 10/01/14   Time: 3:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS. Removed unref'ed function
+ * Flt_SetDebugDest
  * 
  * *****************  Version 59  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:49p

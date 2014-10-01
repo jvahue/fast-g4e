@@ -9,7 +9,7 @@
     Description:
 
   VERSION
-    $Revision: 35 $  $Date: 9/22/14 6:50p $
+    $Revision: 36 $  $Date: 10/01/14 3:25p $
 
 ******************************************************************************/
 
@@ -140,7 +140,6 @@ EXPORT void          Flt_SetDebugVerbosity(FLT_DBG_LEVEL NewLevel);
 EXPORT FLT_DBG_LEVEL Flt_GetDebugVerbosity( void);
 EXPORT void          Flt_InitDebugVerbosity( void);
 
-EXPORT void          Flt_SetDebugDest(FLT_DBG_DEST newDest);
 EXPORT FLT_DBG_DEST  Flt_GetDebugDest( void);
 EXPORT void          Flt_InitDebugDest( void);
 
@@ -156,6 +155,12 @@ FLT_ANUNC_MODE Flt_GetSysAnunciationMode( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.h $
+ * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 10/01/14   Time: 3:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS. Removed unref'ed function
+ * Flt_SetDebugDest
  * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:50p
