@@ -52,6 +52,9 @@
 /*****************************************************************************/
 #define PULSE(x,s) if (x>=0 && x <=3) {DIO_SetPin((DIO_OUTPUT)x, s);}
 
+#define TEMPBUFFSIZE  128
+#define OVRDATASIZE   2048
+
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -60,6 +63,14 @@ typedef struct rmtOverrunTag {
   UINT16 taskId;
   CHAR   taskName[TASK_NAME_SIZE];
 } RMT_OVERRUN_LOG;
+#pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+  UINT16 nMifOverrun[MAX_MIF + 1];
+ // UINT16 nTaskTimes[MAX_TASKS];
+}TASK_OVR_DATA;
 #pragma pack()
 
 /*****************************************************************************/
@@ -73,6 +84,10 @@ static SYS_MODE_IDS pendingSystemMode; // pending system mode, next MIF
 
 // controls the transition from mode to mode
 static BOOLEAN systemModeTransitions[SYS_MAX_MODE_ID][SYS_MAX_MODE_ID];
+
+static TASK_OVR_DATA m_taskOvrData;
+CHAR overRunStats[OVRDATASIZE];
+CHAR tempBuff    [TEMPBUFFSIZE];
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -149,6 +164,8 @@ void TmInitializeTaskManager (void)
 
     // no MIF0 pulse on LSS0
     mifPulse = -1;
+
+    memset( &m_taskOvrData, 0, sizeof(m_taskOvrData) );
 
 }   // End of TmInitializeTaskManager()
 
@@ -271,6 +288,7 @@ void TmInitializeTaskDispatcher (void)
     UINT32 InsertAt;
     UINT16 TaskPriority;
     TCB*   pTask;
+    //UINT32 task;
 
     //------------------------------------------------------------------------
     // Initialize the DT and RMT Task Lists for all task created in the system
@@ -364,6 +382,33 @@ void TmInitializeTaskDispatcher (void)
         }    // End for (all tasks)
 
         Tm.bInitialized = TRUE;
+#if 0
+        // Display a temp msg which lists the execution order of DT tasks.
+        overRunStats[0] = '\0';
+        SuperStrcat(overRunStats, "Task Times: ", OVRDATASIZE );
+        for ( Mif = 0; (Mif <= MAX_MIF); Mif++)
+        {
+          for ( task = 0; (task < MAX_DT_TASKS); task++)
+          {
+            if (Tm.pDtTasks[Mif][task] != NULL)
+            {
+              TCB* pTcb = (TCB*)Tm.pDtTasks[Mif][task];
+              snprintf(tempBuff, TEMPBUFFSIZE, "%d,%d,%d,%d,%s",
+                       Mif,
+                       task,
+                       pTcb->Priority,
+                       pTcb->TaskID,
+                       pTcb->Name);            
+              GSE_DebugStr(NORMAL, FALSE, tempBuff);
+            }
+            else
+            {
+              snprintf(tempBuff, TEMPBUFFSIZE, "%d,%d,", Mif, task);            
+              GSE_DebugStr(NORMAL, FALSE, tempBuff);
+            }
+          }
+        }
+#endif
 
     }    // End if (Tm.nTasks > 0)
 }
@@ -385,6 +430,9 @@ void TmInitializeTaskDispatcher (void)
 void TmTick (UINT32 LastIntLvl)
 {
     UINT32 MifStartTime;
+    UINT32 i;
+
+
 
     // Record the start time for this frame.
     // It is used for determining the execution time of interrupted RMT tasks
@@ -405,7 +453,21 @@ void TmTick (UINT32 LastIntLvl)
             DT_OVERRUN_LOG dtOverrun;
 
             if (++Tm.nDtOverRuns >= TPU( MAX_DT_OVERRUNS, eTpNoDtOverrun))
-            {
+            {                
+                // Before going FATAL, dump test diags.
+                overRunStats[0] = '\0';
+                SuperStrcat(overRunStats, "Task Times: ", OVRDATASIZE );
+                for (i = 0; i < MAX_TASKS; ++i )
+                {
+                  if (Tm.pTaskList[i] != NULL)
+                  {
+                    snprintf(tempBuff, TEMPBUFFSIZE, "|%02d:%d", i,
+                             Tm.pTaskList[i]->totExecutionTimeCnt );
+                    SuperStrcat(overRunStats, tempBuff, OVRDATASIZE );
+                  }
+                }
+                GSE_DebugStr(NORMAL, TRUE, overRunStats);
+
                 // More than 3 sequential overruns
                 FATAL("DT Overrun %d - In-Progress (MIF: %d ID: %d Name: %s )",
                     Tm.nDtOverRuns, Tm.currentMIF, Tm.nDtTaskInProgressID,
@@ -438,6 +500,31 @@ void TmTick (UINT32 LastIntLvl)
                   Tm.nDtOverRuns, Tm.currentMIF, Tm.nDtTaskInProgressID,
                   Tm.pTaskList[Tm.nDtTaskInProgressID]);
             }
+            // Increment this frame's overrun counter.
+            ++m_taskOvrData.nMifOverrun[Tm.currentMIF];
+#if 0            
+            overRunStats[0] = '\0';
+            SuperStrcat( overRunStats, "Dump Overrun Cnts: ", OVRDATASIZE );
+            for (i = 0; i < MAX_MIF; ++i )
+            {
+              snprintf(tempBuff, TEMPBUFFSIZE, "|%02d:%d", i,
+                       m_taskOvrData.nMifOverrun[i] );
+              SuperStrcat(overRunStats, tempBuff, OVRDATASIZE );
+            }
+            GSE_DebugStr(NORMAL, TRUE, overRunStats);
+#endif
+            overRunStats[0] = '\0';
+            SuperStrcat(overRunStats, "Task Times: ", OVRDATASIZE );
+            for (i = 0; i < MAX_TASKS; ++i )
+            {
+              if (Tm.pTaskList[i] != NULL)
+              {
+                snprintf(tempBuff, TEMPBUFFSIZE, "|%02d:%d", i,
+                         Tm.pTaskList[i]->totExecutionTimeCnt );
+                SuperStrcat(overRunStats, tempBuff, OVRDATASIZE );
+              }
+            }
+            GSE_DebugStr(NORMAL, TRUE, overRunStats);
         }
         else
         {
