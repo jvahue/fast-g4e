@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 176 $  $Date: 9/03/14 5:11p $
+   $Revision: 178 $  $Date: 10/06/14 4:04p $
 
 ******************************************************************************/
 
@@ -466,7 +466,12 @@ void UploadMgr_StartUpload(UPLOAD_START_SOURCE StartSource)
 {
   if(!LCTaskData.Disable)
   {
-    if(LCTaskData.InProgress == FALSE)
+    // If recording is active, we can't upload... tell the user.
+    if ( FAST_IsRecording() )
+    {
+      GSE_DebugStr(NORMAL,TRUE, "UploadMgr: Cannot Upload while Recording is active");
+    }
+    else if(LCTaskData.InProgress == FALSE)
     {
       if( MSSC_GetIsAlive() && MSSC_GetIsCompactFlashMounted() )
       {
@@ -2140,6 +2145,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
         if(VfyRow.Priority == LOG_PRIORITY_4)
         {
           VfyRow.State = VFY_STA_DELETED;
+          m_FreeFVTRows += 1;
         }
 
         NV_Write(NV_UPLOAD_VFY_TBL,VFY_ROW_TO_OFFSET(Row),&VfyRow,sizeof(VfyRow));
@@ -3528,6 +3534,16 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 178  *****************
+ * User: Contractor V&v Date: 10/06/14   Time: 4:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1092 - Forceupload recording-in-progress notification.
+ * 
+ * *****************  Version 177  *****************
+ * User: Contractor V&v Date: 10/02/14   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1266 - FVT runtime Free count does not count Pri 4 files
  * 
  * *****************  Version 176  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:11p

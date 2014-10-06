@@ -9,7 +9,7 @@
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 13 $  $Date: 2/20/13 4:20p $
+      $Revision: 14 $  $Date: 10/06/14 2:14p $
 
 ******************************************************************************/
 
@@ -94,8 +94,6 @@ static FLOAT64 Creep_InterpolateVal( FLOAT64 y1, FLOAT64 x1, FLOAT64 y0, FLOAT64
 static BOOLEAN Creep_RestoreAppData( void );
 static BOOLEAN Creep_RestoreAppDataRTC( void );
 
-//static void Creep_UpdateCreepXAppData (UINT16 index_obj);
-
 static void Creep_CreateSummaryLog ( UINT16 index_obj );
 static void Creep_CreateSensorFailLog ( UINT16 index_obj );
 static void Creep_CreateFaultLog ( CREEP_FAULT_TYPE type );
@@ -113,7 +111,6 @@ static void Creep_InitPersistentPcnt ( void );
 static void Creep_UpdateCreepXAppData (UINT16 index_obj);
 static void Creep_ClearFaultFile (TIMESTAMP *pTs);
 static CREEP_DEBUG_PTR Creep_GetDebug (void);
-static CREEP_CFG_PTR Creep_GetCfg (void);
 static CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index);
 static CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
 
@@ -1244,7 +1241,6 @@ void Creep_ClearFaultFile(TIMESTAMP *pTs)
 
 }
 
-
 /******************************************************************************
  * Function:    Creep_GetDebug
  *
@@ -1261,25 +1257,6 @@ static
 CREEP_DEBUG_PTR Creep_GetDebug ( void )
 {
   return ( (CREEP_DEBUG_PTR) &m_Creep_Debug );
-}
-
-
-/******************************************************************************
- * Function:    Creep_GetCfg
- *
- * Description: Utility function to request current Creep Cfg
- *
- * Parameters:  None
- *
- * Returns:     Ptr to Creep Cfg
- *
- * Notes:       None
- *
- *****************************************************************************/
-static
-CREEP_CFG_PTR Creep_GetCfg ( void )
-{
-  return ( (CREEP_CFG_PTR) &m_Creep_Cfg );
 }
 
 
@@ -1953,6 +1930,12 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Contractor V&v Date: 10/06/14   Time: 2:14p
+ * Updated in $/software/control processor/code/application
+ * SCR #1234 - Configuration update of certain modules overwrites default
+ * settings. Creep rework.
  * 
  * *****************  Version 13  *****************
  * User: Jim Mood     Date: 2/20/13    Time: 4:20p
