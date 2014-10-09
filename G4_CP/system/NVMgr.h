@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 65 $  $Date: 12-12-09 6:40p $
+    $Revision: 66 $  $Date: 14-10-08 6:56p $
 
 ******************************************************************************/
 
@@ -159,7 +159,7 @@ NV_CREEP_HISTORY   - Creep Fault History Data
 NV_FILE(NV_BOX_CFG,        "Status Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,  (1 KB)), \
 NV_FILE(NV_PWR_ON_CNTS_EE, "Power-On Counts EE",   DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_PWR_ON_CNTS_RTC,"Power-On Counts RTC",  DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      12), \
-NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (88 KB)),\
+NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (92 KB)),\
 NV_FILE(NV_UPLOAD_VFY_TBL, "Upload Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  UploadMgr_InitFileVfyTbl,    18176),\
 NV_FILE(NV_FAULT_LOG,      "Fault Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Flt_InitFltBuf          ,      256),\
 NV_FILE(NV_PWR_MGR,        "Power Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  PmFileInit              ,      256),\
@@ -397,10 +397,15 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
  *  MODIFICATIONS
  *    $History: NVMgr.h $
  * 
+ * *****************  Version 66  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 65  *****************
  * User: Peter Lee    Date: 12-12-09   Time: 6:40p
  * Updated in $/software/control processor/code/system
- * SCR #1195 Item 6, increase creep fault buffer to 75 entries. 
+ * SCR #1195 Item 6, increase creep fault buffer to 75 entries.
  *
  * *****************  Version 64  *****************
  * User: John Omalley Date: 12-12-08   Time: 11:44a

@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 46 $  $Date: 9/22/14 6:46p $
+      $Revision: 47 $  $Date: 14-10-08 7:10p $
 
 ******************************************************************************/
 
@@ -394,7 +394,7 @@ typedef struct
     CHAR              sSensorName[MAX_SENSORNAME];   /* "Engine RPM", etc. */
     CHAR              sOutputUnits[MAX_SENSORUNITS]; /* Units after conversion
                                                       *   (ie - "RPM", "Deg. C", etc.) */
-    UINT8             nInputChannel;                 /* Input channel, specific to type of
+    UINT16            nInputChannel;                 /* Input channel, specific to type of
                                                       * sensor (ie - which analog channel)*/
                                                      /* "Engine RPM", etc. */
     UINT8             nMaximumSamples;               /* Maximum Number of Samples to take */
@@ -569,6 +569,11 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 47  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 7:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
  * 
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:46p
