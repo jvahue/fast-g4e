@@ -8,11 +8,11 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 52 $  $Date: 9/03/14 5:27p $
+      $Revision: 53 $  $Date: 14-10-08 6:56p $
 
 ******************************************************************************/
 
-
+//#define UARTMGR_TIMING_TEST 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -66,6 +66,17 @@ static UARTMGR_DOWNLOAD              m_UartMgr_Download[UART_NUM_OF_UARTS];
 
 static INT8 str[UARTMGR_DEBUG_BUFFER_SIZE * 6]; // convert byte to "0xXX" with CR/LF
 
+// Test Timing
+#ifdef UARTMGR_TIMING_TEST
+  #define UARTMGR_TIMING_BUFF_MAX 200
+  UINT32 m_UARTMGRTiming_Buff[UARTMGR_TIMING_BUFF_MAX];
+  UINT32 m_UARTMGRTiming_Start;
+  UINT32 m_UARTMGRTiming_End;
+  UINT16 m_UARTMGRTiming_Index;
+#endif
+// Test Timing
+
+
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -74,10 +85,9 @@ static void              UartMgr_BITTask                ( void *pParam );
 static BOOLEAN           UartMgr_DetermineChanLoss      ( UINT16 ch );
 static void              UartMgr_CreateTimeOutSystemLog ( RESULT resultType, UINT16 ch );
 static void              UartMgr_DetermineParamDataLoss ( UINT16 ch );
-static void              UartMgr_UpdateDataReduction    ( UINT16 ch );
 static UINT16            UartMgr_CopyRollBuff           ( UINT8  *dest_ptr, UINT8 *src_ptr,
                                                           UINT16 size,      UINT32 *wr_cnt,
-												     	                UINT32 *rd_cnt,   UINT16 wrap_size );
+                                              UINT32 *rd_cnt,   UINT16 wrap_size );
 static FLOAT32           UartMgr_ConvertToEngUnits (UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr);
 static void              UartMgrDispDebug_Task          ( void *pParam );
 static void              UartMgr_Download_NoneHndl      ( UINT8 port,
@@ -91,8 +101,15 @@ static void              UartMgr_Download_NoneHndl      ( UINT8 port,
                                                           UINT8   **pData );
 static void               UartMgr_ClearDownloadState    ( UINT8 PortIndex );
 static UARTMGR_DEBUG_PTR  UartMgr_GetDebug              ( void );
-//static UARTMGR_CFG_PTR    UartMgr_GetCfg                ( UINT8 portIndex );
 static UARTMGR_STATUS_PTR UartMgr_GetStatus             ( UINT8 portIndex );
+
+static void UartMgr_UpdateDataReduction                 ( UINT16 ch,
+                                                          UARTMGR_PROTOCOLS protocols );
+
+static  UINT16  UartMgr_ReadBufferSnapshot_Protocol     ( void *pDest, UINT32 chan,
+                                                          UINT16 nMaxByteSize,
+                                                          BOOLEAN bBeginSnapshot,
+                                                          UARTMGR_PROTOCOLS protocols );
 
 #include "UartMgrUserTables.c"   // Include the cmd table & functions
 
@@ -138,7 +155,7 @@ static UART_CONFIG uartDrvDefaultCfg =
 void UartMgr_Initialize (void)
 {
   TCB    tcbTaskInfo;
-  UINT8  i,k;
+  UINT16  i,k;
   RESULT result;
   UARTMGR_CFG_PTR pUartMgrCfg;
   UARTMGR_PORT_CFG_PTR pUartMgrPortCfg;
@@ -152,8 +169,8 @@ void UartMgr_Initialize (void)
 
   // Initialize all local variables
   memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * (UINT8)UART_NUM_OF_UARTS);
-  memset (m_UartMgr_WordInfo, 0, sizeof(UARTMGR_WORD_INFO) * (UINT8)UARTMGR_MAX_PARAM_WORD );
-  memset (m_UartMgr_Data, 0, sizeof(UARTMGR_PARAM_DATA) * (UINT8)UARTMGR_MAX_PARAM_WORD );
+  memset (m_UartMgr_WordInfo, 0, sizeof(m_UartMgr_WordInfo) );
+  memset (m_UartMgr_Data, 0, sizeof(m_UartMgr_Data) );
   memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * (UINT8)UART_NUM_OF_UARTS );
   memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * (UINT8)UART_NUM_OF_UARTS);
   memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * (UINT8)UART_NUM_OF_UARTS);
@@ -185,6 +202,8 @@ void UartMgr_Initialize (void)
   // Initialize all protocol handlers after UargMgrConfig restored
   F7XProtocol_Initialize();
   EMU150Protocol_Initialize();
+  IDParamProtocol_Initialize();
+
   //Add an entry in the user message handler table
   User_AddRootCmd(&uartMgrRootTblPtr);
   // Restore User Default
@@ -228,6 +247,12 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
+          break;
+        case UARTMGR_PROTOCOL_ID_PARAM:
+          uartMgrBlock[i].exec_protocol = IDParamProtocol_Handler;
+          uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
+          uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
+          IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
@@ -328,6 +353,18 @@ void UartMgr_Initialize (void)
   m_UartMgr_Debug.bDebug = FALSE;
   m_UartMgr_Debug.ch = 1;
   m_UartMgr_Debug.num_bytes = 20;
+
+#ifdef UARTMGR_TIMING_TEST
+  /*vcast_dont_instrument_start*/
+  for (i=0;i<UARTMGR_TIMING_TEST;i++)
+  {
+    m_UARTMGRTiming_Buff[i] = 0;
+  }
+  m_UARTMGRTiming_Index = 0;
+  m_UARTMGRTiming_Start = 0;
+  m_UARTMGRTiming_End = 0;
+  /*vcast_dont_instrument_end*/
+#endif
 }
 
 
@@ -432,7 +469,7 @@ static void UartMgr_Task (void *pParam)
     //    send last known param with flag set to invalid to data buffer.
     if ( pUartMgrStatus->bRecordingActive == TRUE )
     {
-      UartMgr_UpdateDataReduction(nChannel);
+      UartMgr_UpdateDataReduction(nChannel, m_UartMgrCfg[nChannel].protocol);
     }
 
     // For debug display of raw input data
@@ -541,6 +578,8 @@ void UartMgr_BITTask ( void *pParam )
  *     bits  7 to  0  Protocol Selection (see UARTMGR_PROTOCOLS)
  *                     0 - Not Used
  *                     1 - F7X-N-Parameter
+ *                     2 - EMU 150
+ *                     3 - ID Parameter
  *                     255 to 1 - Not Used
  *     bits 10 to  8: Selects the uart channel
  *                    000b - ch 0 (Allocated to GSE, not valid !)
@@ -560,7 +599,7 @@ void UartMgr_BITTask ( void *pParam )
  *     bits 31 to  0: timeout (msec)
  *
  *****************************************************************************/
-UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor)
+UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 param, UINT16 nSensor)
 {
   UARTMGR_PROTOCOLS protocol;
   UINT16 ch;
@@ -568,6 +607,7 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor)
   UARTMGR_WORD_INFO_PTR word_info_ptr;
   BOOLEAN bOk;
   UINT16 wordIndex;
+  UARTMGR_PARAM_DATA_PTR uart_data_ptr;
 
 
   protocol = (UARTMGR_PROTOCOLS) (gpA & 0xFF);
@@ -579,11 +619,17 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT8 param, UINT16 nSensor)
   word_info_ptr = (UARTMGR_WORD_INFO_PTR)
                   &m_UartMgr_WordInfo[ch][m_UartMgr_WordSensorCount[ch]];
 
+  uart_data_ptr = (UARTMGR_PARAM_DATA_PTR)
+                  &m_UartMgr_Data[ch];
+
   // Determine Protocol
   switch ( protocol )
   {
     case UARTMGR_PROTOCOL_F7X_N_PARAM:
-      bOk = F7XProtocol_SensorSetup ( gpA, gpB, param, word_info_ptr );
+      bOk = F7XProtocol_SensorSetup ( gpA, gpB, (UINT8) param, word_info_ptr );
+      break;
+    case UARTMGR_PROTOCOL_ID_PARAM:
+      bOk = IDParamProtocol_SensorSetup ( gpA, gpB, param, word_info_ptr, uart_data_ptr, ch );
       break;
     case UARTMGR_PROTOCOL_NONE:
     case UARTMGR_PROTOCOL_EMU150:
@@ -741,7 +787,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
   //       everywhere, add here just as "fall back".  Not level A/B, all conditions need
   //       not to be checked !!!
   if ( ((pUartMgrStatus->timeChanActive != 0) || (pUartMgrStatus->bChanActive == TRUE)) &&
-        (pWordInfo->id != UARTMGR_WORD_INDEX_NOT_FOUND) )
+        (pWordInfo->id != UARTMGR_WORD_ID_NOT_USED) )
   {
     bValid = TRUE;
 
@@ -758,13 +804,13 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
         pWordInfo->bFailed = TRUE;
 
         snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-				  "Uart_SensorTest: Word Timeout (ch = %d, S = %d)\r\n",
+          "Uart_SensorTest: Word Timeout (ch = %d, S = %d)\r\n",
                                ch, pWordInfo->nSensor);
         GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
 
         wordTimeoutLog.result = SYS_UART_DATA_LOSS_TIMEOUT;
         snprintf( wordTimeoutLog.sFailMsg, sizeof(wordTimeoutLog.sFailMsg),
-				  "Xcptn: Word Timeout (ch = %d, S = %d)",
+          "Xcptn: Word Timeout (ch = %d, S = %d)",
                  ch, pWordInfo->nSensor );
 
         // Log CBIT Here only on transition from data rx to no data rx
@@ -814,7 +860,7 @@ BOOLEAN UartMgr_InterfaceValid (UINT16 nIndex)
   bValid = FALSE;
 
   if ( (pUartMgrStatus->status == UARTMGR_STATUS_OK) &&
-	   (pUartMgrStatus->bChanActive == TRUE) )
+     (pUartMgrStatus->bChanActive == TRUE) )
   {
     bValid = TRUE;
   }
@@ -913,116 +959,11 @@ UINT16 UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSiz
 {
   UINT16 cnt;
 
-  UARTMGR_PARAM_DATA_PTR pUartData;
-  UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;
-  REDUCTIONDATASTRUCT_PTR reduction_data_ptr;
-
-  UINT8 *dest_ptr;
-  UINT32 i;
-  SINT16 sval;
-
-  UARTMGR_STORE_SNAP_DATA storeData;
-  UARTMGR_STATUS_PTR pUartMgrStatus;
-
-  BOOLEAN bDestBuffNotFull;
-
-
-  pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[chan][0];
-  cnt = 0;
-  dest_ptr = (UINT8 *) pDest;
-  pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[chan];
-
-  bDestBuffNotFull = TRUE;
-
-  // Set Recording Status
-  if ( bBeginSnapshot == TRUE )
-  {
-    pUartMgrStatus->bRecordingActive = TRUE;
-  }
-  else
-  {
-    pUartMgrStatus->bRecordingActive = FALSE;
-  }
-
-  // Loop thru all parameters and calc the current data reduction value
-  for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
-  {
-    runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
-    reduction_data_ptr = (REDUCTIONDATASTRUCT_PTR) &pUartData->reduction_data;
-
-    if ( ( runtime_data_ptr->id != UARTMGR_WORD_ID_NOT_INIT ) &&
-         ( bDestBuffNotFull == TRUE ) )
-    {
-      // Return current data reduced value
-      storeData.ts = runtime_data_ptr->rxTS;
-      storeData.paramId = (UINT8)runtime_data_ptr->id;
-      storeData.bValidity = runtime_data_ptr->bValid;
-
-      reduction_data_ptr->EngVal = UartMgr_ConvertToEngUnits ( runtime_data_ptr );
-
-      reduction_data_ptr->Time = runtime_data_ptr->rxTime;
-
-      if ( bBeginSnapshot == TRUE )
-      {
-        // Call Init Data Reduction for Begin Snapshot, for any data that has been received !
-        DataReductionInit ( reduction_data_ptr );
-        // Conversion at this point not needed, first point !
-        storeData.paramVal = runtime_data_ptr->val_raw;
-
-        if (runtime_data_ptr->bValid == TRUE)
-        {
-          // Clear Re-Init flag as we have just called DataReductionInit()
-          runtime_data_ptr->bReInit = FALSE;
-        }
-        // Note: If bValid == FALSE, indicates Uart Data was received then was lost again.
-        //       In this case we can return a snapshot with the last known value
-        //       and when data is received again, DataReductionInit() will be recalled to
-        //       restart !
-      }
-      else
-      {
-        // Call Get current value for End Snapshot.
-        DataReductionGetCurrentValue ( reduction_data_ptr );
-
-        sval = (SINT16) ( reduction_data_ptr->EngVal / runtime_data_ptr->scale_lsb );
-        storeData.paramVal = *(UINT16 *) &sval;
-      }
-
-      bDestBuffNotFull = FALSE; // Constant update here prevents use of "else" case below.
-
-      // Copy data to dest buffer, iff entire packet fits !
-      if ( (cnt + sizeof(UARTMGR_STORE_SNAP_DATA) ) < nMaxByteSize )
-      {
-        memcpy ( (void *) (dest_ptr + cnt), (UINT8 *) &storeData,
-                 sizeof(UARTMGR_STORE_SNAP_DATA) );
-        cnt += sizeof(UARTMGR_STORE_SNAP_DATA);
-        bDestBuffNotFull = TRUE;
-      }
-
-      // Clear param new flag ! Note: bReInit should remain in current state
-      //    so that is data received again, will have to call ReInit of data reduction
-      //    point !
-      runtime_data_ptr->bNewVal = FALSE;
-
-    }
-
-    if ( ( runtime_data_ptr->id == UARTMGR_WORD_ID_NOT_INIT ) ||
-         ( bDestBuffNotFull == FALSE ) )
-    {
-      // Single exit point for two conditions. Easy coverage. JV should appreciate this.
-      break;
-    }
-    else
-    {
-      pUartData++;
-    }
-
-  } // End for loop thru parameters
+  cnt = UartMgr_ReadBufferSnapshot_Protocol ( pDest, chan, nMaxByteSize, bBeginSnapshot,
+                                              m_UartMgrCfg[chan].protocol );
 
   return (cnt);
-
 }
-
 
 
 /******************************************************************************
@@ -1387,7 +1328,7 @@ void UartMgrDispDebug_Task ( void *pParam )
     {
       // Output one char per line
       snprintf( (char *) str, sizeof(str),
-				"%02x ", m_UartMgr_Debug.data[m_UartMgr_Debug.readOffset++] );
+        "%02x ", m_UartMgr_Debug.data[m_UartMgr_Debug.readOffset++] );
       GSE_PutLine( (const char *) str );
 
       // Check for Wrap
@@ -1505,14 +1446,14 @@ BOOLEAN UartMgr_DetermineChanLoss (UINT16 ch)
       {
         UartMgr_CreateTimeOutSystemLog(SYS_UART_DATA_LOSS_TIMEOUT, ch);
         snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-				  "\r\nUartMgr: Uart Data Loss Timeout (Ch=%d) !\r\n", ch);
+          "\r\nUartMgr: Uart Data Loss Timeout (Ch=%d) !\r\n", ch);
         GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
       }
       else
       {
         UartMgr_CreateTimeOutSystemLog(SYS_UART_STARTUP_TIMEOUT, ch);
         snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-		          "\r\nUartMgr: Uart StartUp Timeout (Ch=%d) !\r\n", ch);
+              "\r\nUartMgr: Uart StartUp Timeout (Ch=%d) !\r\n", ch);
         GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
       }
 
@@ -1646,6 +1587,7 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
  * Description:  Update data reduction on the specified parameter if necessary.
  *
  * Parameters:   ch - Uart channel
+ *               protocols - UARTMGR_PROTOCOLS
  *
  * Returns:      none
  *
@@ -1653,7 +1595,7 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
  *
  *****************************************************************************/
  static
- void UartMgr_UpdateDataReduction ( UINT16 ch )
+ void UartMgr_UpdateDataReduction ( UINT16 ch, UARTMGR_PROTOCOLS protocols )
  {
    UARTMGR_PARAM_DATA_PTR   pUartData;
    UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;
@@ -1663,12 +1605,41 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
    BOOLEAN bRecord;
    UARTMGR_STORE_BUFF_PTR pUartStoreData;
    UARTMGR_STORE_DATA     storeData;
+   UARTMGR_STORE_DATA_ID  storeDataID;
+
+   UINT8 *timeDelta_ptr;
+   UINT8 *paramId_U8_ptr;
+   UINT16 *paramId_U16_ptr;
+   UINT16 *paramVal_ptr;
+   BOOLEAN *bValidity_ptr;
+   void *store_ptr;
+   UINT16 storeSize;
 
    UINT32 i;
    UINT16 cnt;
    UINT32 rxTime;
    SINT16 sval;
 
+   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+   if (protocols == UARTMGR_PROTOCOL_ID_PARAM)
+   {
+     timeDelta_ptr = &storeDataID.timeDelta;
+     paramId_U16_ptr = &storeDataID.paramId;
+     paramVal_ptr = &storeDataID.paramVal;
+     bValidity_ptr = &storeDataID.bValidity;
+     store_ptr = &storeDataID;
+     storeSize = sizeof(storeDataID);
+   }
+   else //all other protocols
+   {
+     timeDelta_ptr = &storeData.timeDelta;
+     paramId_U8_ptr = &storeData.paramId;
+     paramVal_ptr = &storeData.paramVal;
+     bValidity_ptr = &storeData.bValidity;
+     store_ptr = &storeData;
+     storeSize = sizeof(storeData);
+   }
+   #pragma ghs endnowarning
 
    pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][0];
    pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[ch];
@@ -1732,26 +1703,28 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
          //           UartMgr_Task sample time changes) be tick from current frame,
          //       For invalid, we want current frame time !
          rxTime = rxTime / MIF_PERIOD_mS;
-         storeData.timeDelta = (rxTime > pUartMgrStatus->timeCntReset) ?
-                               (UINT8)(rxTime - pUartMgrStatus->timeCntReset) :
-                               (UINT8)(UARTMGR_TIMEDELTA_OUTOFSEQUENCE);
-
-         storeData.paramId = (UINT8)runtime_data_ptr->id;
+         *timeDelta_ptr = (rxTime > pUartMgrStatus->timeCntReset) ?
+                          (UINT8)(rxTime - pUartMgrStatus->timeCntReset) :
+                          (UINT8)(UARTMGR_TIMEDELTA_OUTOFSEQUENCE);
+         if ( protocols == UARTMGR_PROTOCOL_ID_PARAM ) {
+           *paramId_U16_ptr = (UINT16)runtime_data_ptr->id;
+         }
+         else {
+           *paramId_U8_ptr = (UINT8)runtime_data_ptr->id;
+         }
 
          sval = (SINT16) (data_red_ptr->EngVal / runtime_data_ptr->scale_lsb);
-         storeData.paramVal = *(UINT16 *) &sval;
+         *paramVal_ptr = *(UINT16 *) &sval;
 
-         storeData.bValidity = runtime_data_ptr->bValid;
+         *bValidity_ptr = runtime_data_ptr->bValid;
 
          pUartStoreData = (UARTMGR_STORE_BUFF_PTR) &m_UartMgr_StoreBuffer[ch];
 
          cnt = UartMgr_CopyRollBuff ( (UINT8 *) &pUartStoreData->data[0],
-                            (UINT8 *) &storeData,
-                            sizeof(UARTMGR_STORE_DATA),
+                            (UINT8 *) store_ptr, storeSize,
                             (UINT32 *) &pUartStoreData->writeOffset,
                             (UINT32 *) &pUartStoreData->readOffset,
                             UARTMGR_RAW_RX_BUFFER_SIZE );
-
 
           pUartStoreData->cnt += cnt;
 
@@ -1767,6 +1740,192 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
 
  }
 
+
+/******************************************************************************
+ * Function:     UartMgr_ReadBufferSnapshot_Protocol
+ *
+ * Description:  Returns the current snapshot view of all the word parameters.
+ *               Only if label word data has been received is data returned.
+ *
+ * Parameters:   pDest - ptr to App Buffer to copy data
+ *               chan - Rx Chan to process raw data
+ *               nMaxByteSize - max size of App Buffer
+ *               bBeginSnapshot - TRUE for begin snapshot
+ *               protocols - UARTMGR_PROTOCOLS
+ *
+ * Returns:      Number of bytes returned
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+UINT16 UartMgr_ReadBufferSnapshot_Protocol ( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
+                                      BOOLEAN bBeginSnapshot, UARTMGR_PROTOCOLS protocols )
+{
+  UINT16 cnt;
+
+  UARTMGR_PARAM_DATA_PTR pUartData;
+  UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;
+  REDUCTIONDATASTRUCT_PTR reduction_data_ptr;
+
+  UINT8 *dest_ptr;
+  UINT32 i;
+  SINT16 sval;
+
+  UARTMGR_STORE_SNAP_DATA storeData;
+  UARTMGR_STORE_SNAP_DATA_ID  storeDataID;
+
+  TIMESTAMP *ts_ptr;
+  UINT8 *paramId_U8_ptr;
+  UINT16 *paramId_U16_ptr;
+  UINT16 *paramVal_ptr;
+  BOOLEAN *bValidity_ptr;
+  void *store_ptr;
+  UINT16 storeSize;
+
+
+  UARTMGR_STATUS_PTR pUartMgrStatus;
+
+  BOOLEAN bDestBuffNotFull;
+
+
+#ifdef UARTMGR_TIMING_TEST
+  /*vcast_dont_instrument_start*/
+   m_UARTMGRTiming_Start = TTMR_GetHSTickCount();
+   /*vcast_dont_instrument_end*/
+#endif
+
+  #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
+  if (protocols == UARTMGR_PROTOCOL_ID_PARAM)
+  {
+    ts_ptr = &storeDataID.ts;
+    paramId_U16_ptr = &storeDataID.paramId;
+    paramVal_ptr = &storeDataID.paramVal;
+    bValidity_ptr = &storeDataID.bValidity;
+    store_ptr = &storeDataID;
+    storeSize = sizeof(storeDataID);
+  }
+  else //all other protocols
+  {
+    ts_ptr = &storeData.ts;
+    paramId_U8_ptr = &storeData.paramId;
+    paramVal_ptr = &storeData.paramVal;
+    bValidity_ptr = &storeData.bValidity;
+    store_ptr = &storeData;
+    storeSize = sizeof(storeData);
+  }
+  #pragma ghs endnowarning
+
+  pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[chan][0];
+  cnt = 0;
+  dest_ptr = (UINT8 *) pDest;
+  pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[chan];
+
+  bDestBuffNotFull = TRUE;
+
+  // Set Recording Status
+  if ( bBeginSnapshot == TRUE )
+  {
+    pUartMgrStatus->bRecordingActive = TRUE;
+  }
+  else
+  {
+    pUartMgrStatus->bRecordingActive = FALSE;
+  }
+
+  // Loop thru all parameters and calc the current data reduction value
+  for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
+  {
+    runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
+    reduction_data_ptr = (REDUCTIONDATASTRUCT_PTR) &pUartData->reduction_data;
+
+    if ( ( runtime_data_ptr->id != UARTMGR_WORD_ID_NOT_INIT ) &&
+         ( bDestBuffNotFull == TRUE ) )
+    {
+      // Return current data reduced value
+      *ts_ptr = runtime_data_ptr->rxTS;
+      if ( protocols == UARTMGR_PROTOCOL_ID_PARAM ) {
+        *paramId_U16_ptr = (UINT16)runtime_data_ptr->id;
+      }
+      else {
+        *paramId_U8_ptr = (UINT8)runtime_data_ptr->id;
+      }
+      *bValidity_ptr = runtime_data_ptr->bValid;
+
+      reduction_data_ptr->EngVal = UartMgr_ConvertToEngUnits ( runtime_data_ptr );
+
+      reduction_data_ptr->Time = runtime_data_ptr->rxTime;
+
+      if ( bBeginSnapshot == TRUE )
+      {
+        // Call Init Data Reduction for Begin Snapshot, for any data that has been received !
+        DataReductionInit ( reduction_data_ptr );
+        // Conversion at this point not needed, first point !
+        *paramVal_ptr = runtime_data_ptr->val_raw;
+
+        if (runtime_data_ptr->bValid == TRUE)
+        {
+          // Clear Re-Init flag as we have just called DataReductionInit()
+          runtime_data_ptr->bReInit = FALSE;
+        }
+        // Note: If bValid == FALSE, indicates Uart Data was received then was lost again.
+        //       In this case we can return a snapshot with the last known value
+        //       and when data is received again, DataReductionInit() will be recalled to
+        //       restart !
+      }
+      else
+      {
+        // Call Get current value for End Snapshot.
+        DataReductionGetCurrentValue ( reduction_data_ptr );
+
+        sval = (SINT16) ( reduction_data_ptr->EngVal / runtime_data_ptr->scale_lsb );
+        *paramVal_ptr = *(UINT16 *) &sval;
+      }
+
+      bDestBuffNotFull = FALSE; // Constant update here prevents use of "else" case below.
+
+      // Copy data to dest buffer, iff entire packet fits !
+      if ( (cnt + storeSize ) < nMaxByteSize )
+      {
+        memcpy ( (void *) (dest_ptr + cnt), (UINT8 *) store_ptr, storeSize );
+        cnt += storeSize;
+        bDestBuffNotFull = TRUE;
+      }
+
+      // Clear param new flag ! Note: bReInit should remain in current state
+      //    so that is data received again, will have to call ReInit of data reduction
+      //    point !
+      runtime_data_ptr->bNewVal = FALSE;
+
+    }
+
+    if ( ( runtime_data_ptr->id == UARTMGR_WORD_ID_NOT_INIT ) ||
+         ( bDestBuffNotFull == FALSE ) )
+    {
+      // Single exit point for two conditions. Easy coverage. JV should appreciate this.
+      break;
+    }
+    else
+    {
+      pUartData++;
+    }
+
+  } // End for loop thru parameters
+
+#ifdef UARTMGR_TIMING_TEST
+  /*vcast_dont_instrument_start*/
+   m_UARTMGRTiming_End = TTMR_GetHSTickCount();
+   m_UARTMGRTiming_Buff[m_UARTMGRTiming_Index] =
+                    (m_UARTMGRTiming_End - m_UARTMGRTiming_Start);
+   m_UARTMGRTiming_Index = (++m_UARTMGRTiming_Index) % UARTMGR_TIMING_BUFF_MAX;
+
+if (m_UARTMGRTiming_Index == 0)
+   m_UARTMGRTiming_Index = 1;  // Set BP here
+   /*vcast_dont_instrument_end*/
+#endif
+
+  return (cnt);
+
+}
 
 
 /******************************************************************************
@@ -1916,6 +2075,11 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
  *  MODIFICATIONS
  *    $History: UartMgr.c $
  * 
+ * *****************  Version 53  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:27p
  * Updated in $/software/control processor/code/system

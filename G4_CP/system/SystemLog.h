@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 111 $  $Date: 1/02/13 5:54p $
+      $Revision: 112 $  $Date: 14-10-08 6:56p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -173,6 +173,7 @@ SYS_LOG_ID(SYS_ID_UART_CBIT_WORD_TIMEOUT_FAIL       ,0x5C13 ,0)\
 SYS_LOG_ID(SYS_ID_UART_F7X_NEW_DL_FOUND             ,0x5C20 ,0)\
 SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
 SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
+SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
 \
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
@@ -281,6 +282,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  *  MODIFICATIONS
  *    $History: SystemLog.h $
  * 
+ * *****************  Version 112  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 111  *****************
  * User: Contractor V&v Date: 1/02/13    Time: 5:54p
  * Updated in $/software/control processor/code/system

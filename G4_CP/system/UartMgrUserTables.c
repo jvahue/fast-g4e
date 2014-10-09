@@ -10,7 +10,7 @@
     Note:
 
     VERSION
-    $Revision: 19 $  $Date: 9/03/14 5:27p $
+    $Revision: 20 $  $Date: 14-10-08 6:56p $
 
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -85,6 +85,7 @@ static USER_ENUM_TBL uartMgrProtocolStrs[] =
 {
   {"NONE",        UARTMGR_PROTOCOL_NONE},
   {"F7X_N_PARAM", UARTMGR_PROTOCOL_F7X_N_PARAM},
+  {"ID_PARAM",    UARTMGR_PROTOCOL_ID_PARAM},
   {"EMU150",      UARTMGR_PROTOCOL_EMU150},
   {NULL,          0}
 };
@@ -535,6 +536,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
  * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:27p
  * Updated in $/software/control processor/code/system

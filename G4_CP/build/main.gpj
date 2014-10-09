@@ -96,7 +96,9 @@ FASTII.ld
 ..\system\F7XProtocol.c
 ..\system\EMU150Protocol.c
 ..\system\WatchDog.c
+..\system\IDParamProtocol.c
 ..\test\etm.c
+
 
 :postexecShell=..\build\ELFtoDLD.bat
 

@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 74 $  $Date: 1/08/13 2:15p $
+    $Revision: 75 $  $Date: 14-10-08 6:56p $
 
 ******************************************************************************/
 
@@ -106,7 +106,9 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // TREND Config
                                           {TREND_CFG_DEFAULT},
                                           // CREEP Config
-                                          {CREEP_DEFAULT_CFG}
+                                          {CREEP_DEFAULT_CFG},
+                                          // ID PARAM PROTOCOL
+                                          {ID_PARAM_CFG_DEFAULT}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
@@ -731,6 +733,11 @@ void CfgMgr_GenerateDebugLogs(void)
  *  MODIFICATIONS
  *    $History: CfgManager.c $
  * 
+ * *****************  Version 75  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 74  *****************
  * User: Jim Mood     Date: 1/08/13    Time: 2:15p
  * Updated in $/software/control processor/code/system

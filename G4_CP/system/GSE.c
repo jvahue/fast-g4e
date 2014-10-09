@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 28 $  $Date: 9/23/14 6:06p $
+     $Revision: 29 $  $Date: 10/09/14 2:08p $
 
 ******************************************************************************/
 
@@ -640,19 +640,21 @@ static void GSE_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 *
 *****************************************************************************/
 static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
-{
-  CHAR buf[TEMP_CHAR_BUF_SIZE + MS_MSG_HDR_LEN ];
+{  
   FLT_DBG_DEST dest = Flt_GetDebugDest();
 
+  //CHAR buf[TEMP_CHAR_BUF_SIZE + MS_MSG_HDR_LEN ];
+  // if using a msgtype for debug msgs,
   // If fault debug msg is dest for MS, prepend msgtype and add null-term.
-  if (DEST_MS == dest || DEST_BOTH == dest)
-  {
-    buf[0] = 0;
-    // Note: the size param in SuperStrcat is the limit on the dest size
-    SuperStrcat(buf, "#00", sizeof(buf) );
-    SuperStrcat(buf, str, sizeof(buf) );    
-    size = strlen(buf);
-  }
+  //if (DEST_MS == dest || DEST_BOTH == dest)
+  //{
+  //  buf[0] = 0;
+  // // Note: the size param in SuperStrcat is the limit on the dest size
+  //  SuperStrcat(buf, "#00", sizeof(buf) );
+  //  SuperStrcat(buf, str, sizeof(buf) );    
+  //  size = strlen(buf);
+  //}
+
   
   switch (dest)
   {
@@ -661,12 +663,12 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
       break;
 
     case DEST_MS:         
-      GSE_MsWrite(buf, size);
+      GSE_MsWrite(str, size);
       break;
 
     case DEST_BOTH:
       GSE_PutLine(str);
-      GSE_MsWrite(buf, size);
+      GSE_MsWrite(str, size);
       break;
 
     default:
@@ -677,6 +679,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Contractor V&v Date: 10/09/14   Time: 2:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Debug msg handling
  * 
  * *****************  Version 28  *****************
  * User: Contractor V&v Date: 9/23/14    Time: 6:06p

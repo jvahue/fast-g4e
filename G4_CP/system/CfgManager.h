@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 52 $  $Date: 12/13/12 3:02p $
+ $Revision: 53 $  $Date: 14-10-08 6:56p $
 
 ******************************************************************************/
 
@@ -45,6 +45,7 @@
 #include "Cycle.h"
 #include "Trend.h"
 #include "Creep.h"
+#include "IDParamProtocol.h"
 #ifdef ENV_TEST
 #include "Etm.h"
 #endif
@@ -141,6 +142,8 @@ typedef struct
     TREND_CONFIGS           TrendConfigs;
     // CREEP Configuration
     CREEP_CFG               CreepConfig;
+    // ID Param Protocol Configuration
+    ID_PARAM_CFG            IDParamConfig;
 #ifdef ENV_TEST
     TestControl             etm;
 #endif
@@ -200,6 +203,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
  *  MODIFICATIONS
  *    $History: CfgManager.h $
  * 
+ * *****************  Version 53  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 52  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 3:02p
  * Updated in $/software/control processor/code/system

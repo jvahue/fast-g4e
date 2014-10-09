@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 27 $  $Date: 9/22/14 6:46p $
+$Revision: 28 $  $Date: 14-10-08 7:10p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -195,7 +195,7 @@ static USER_MSG_TBL sensorCmd [] =
    { "TYPE"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,   USER_RW, &configTemp.type,              0,MAX_SENSORS-1,  NO_LIMIT,          sensorType },
    { "NAME"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_STR,    USER_RW, configTemp.sSensorName,        0,MAX_SENSORS-1,  0,MAX_SENSORNAME,  NULL },
    { "OUTPUT"      ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_STR,    USER_RW, configTemp.sOutputUnits,       0,MAX_SENSORS-1,  0,MAX_SENSORUNITS, NULL },
-   { "INPUT"       ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.nInputChannel,     0,MAX_SENSORS-1,  NO_LIMIT,          NULL },
+   { "INPUT"       ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16, USER_RW, &configTemp.nInputChannel,     0,MAX_SENSORS-1,  NO_LIMIT,          NULL },
    { "MAXSAMPLES"  ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT8,  USER_RW, &configTemp.nMaximumSamples,   0,MAX_SENSORS-1,  1,MAX_SAMPLES,     NULL },
    { "RATE"        ,      NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_ENUM,   USER_RW, &configTemp.sampleRate,        0,MAX_SENSORS-1,  NO_LIMIT,          sampleType },
    { "RATEOFFSET_MS",     NO_NEXT_TABLE,        Sensor_UserCfg, USER_TYPE_UINT16, USER_RW, &configTemp.nSampleOffset_ms,  0,MAX_SENSORS-1,  0,1000,            NULL },
@@ -432,7 +432,7 @@ USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
     if (Param.Ptr == &liveDataTemp.gseType)
     {
       // copy to local display control
-      m_liveDataDisplay.gseType = liveDataTemp.gseType;    
+      m_liveDataDisplay.gseType = liveDataTemp.gseType;
     }
     else if (Param.Ptr == &liveDataTemp.msType)
     {
@@ -594,6 +594,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
  * 
+ * *****************  Version 28  *****************
+ * User: Peter Lee    Date: 14-10-08   Time: 7:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol Implementation
+ *
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:46p
  * Updated in $/software/control processor/code/system
