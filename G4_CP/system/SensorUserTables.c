@@ -552,17 +552,19 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
   // for each sensor configured for livedata; if no sensors are configured, a none configured
   // msg is included.
 
-  // Header line
-  snprintf(buff, sizeof(buff), "Sensor-ID,Sensor-Name,Sensor-Units\r\n");
-  result = User_OutputMsgString( buff, FALSE);
-
   // Write out an entry for each defined sensor which is configured for LiveData
   for (sensorIdx = SENSOR_0; sensorIdx < MAX_SENSORS && result; ++sensorIdx)
   {
-    if( pSnsrCfg[sensorIdx].bInspectInclude &&
-        SensorIsUsed(sensorIdx))
+    if( SensorIsUsed(sensorIdx) && pSnsrCfg[sensorIdx].bInspectInclude )
     {
-      bInspect = TRUE;
+      if (FALSE == bInspect)
+      {
+        // Found the first sensor configured for LD, print a header line.
+        snprintf(buff, sizeof(buff), "Sensor-ID,Sensor-Name,Sensor-Units\r\n");
+        result = User_OutputMsgString( buff, FALSE);
+        bInspect = TRUE;
+      }
+      
       snprintf(buff, sizeof(buff),"%03d,%s,%s\r\n",
               sensorIdx,
               pSnsrCfg[sensorIdx].sSensorName,
@@ -575,7 +577,7 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
   // definitely know it.
   if (!bInspect && result)
   {
-    snprintf(buff, sizeof(buff), "None Configured\r\n");
+    snprintf(buff, sizeof(buff), "No sensors configured for LiveData\r\n");
     result = User_OutputMsgString( buff, FALSE);
   }
 

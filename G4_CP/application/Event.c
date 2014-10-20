@@ -1,6 +1,6 @@
 #define EVENT_BODY
 /******************************************************************************
-           Copyright (C) 2012-2013 Pratt & Whitney Engine Services, Inc.
+           Copyright (C) 2012-2014 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
 
    File:        event.c
@@ -78,6 +78,8 @@ static EVENT_TABLE_CFG   m_EventTableCfg  [MAX_TABLES];     // Event Table Cfg A
 static UINT32            nEventSeqCounter;                  // Sequence number
 static UINT32            m_EventActiveFlags;                // Event Active Flags
 
+static EVENT_HIST_BUFFER m_EventHistory;                    // Runtime copy of hist-buff file
+
 /*Busy/Not Busy event data*/
 static INT32 m_event_tag;
 static void (*m_event_func)(INT32 tag, BOOLEAN is_busy) = NULL;
@@ -135,6 +137,10 @@ static void           EventTableLogSummary     ( const EVENT_TABLE_CFG  *pConfig
                                                  EVENT_TABLE_STATE endReason );
 static void           EventForceTableEnd       ( EVENT_TABLE_INDEX eventTableIndex,
                                                  LOG_PRIORITY priority );
+/*-------------------------- EVENT HISTORY ----------------------------------*/
+static void           EventUpdateHistory       ( const EVENT_CFG  *pConfig,
+                                                 const EVENT_DATA   *pData);
+
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -161,6 +167,8 @@ void EventsInitialize ( void )
 
    EVENT_CFG  *pEventCfg;
    EVENT_DATA *pEventData;
+
+   RESULT result;
 
    // Add Trigger Tables to the User Manager
    User_AddRootCmd(&rootEventMsg);
@@ -214,6 +222,32 @@ void EventsInitialize ( void )
 
    // Initialize the Event Tables
    EventTablesInitialize();
+
+   // NV_EVENT_HISTORY init / read
+
+   // Open EE event history buffer,
+   // If it contains default EEPROM, values, init the file
+   result = NV_Open(NV_EVENT_HISTORY);
+   if ( SYS_OK != result )
+   {
+     //GSE_DebugStr(NORMAL, TRUE, "EventBuff Open fail.. Initialize");
+     // clear and reset the history buffer
+     EventInitHistoryBuffer();
+   }
+   else
+   {
+     // read the data into local working buffer
+     NV_Read( NV_EVENT_HISTORY, 0, &m_EventHistory, sizeof( m_EventHistory));
+
+     // If the data is un-initialized as indicated by the 'last cleared' timestamp
+     // contains default EEPROM values... init the file.
+     if ( m_EventHistory.tsLastCleared.Timestamp == 0xFFFFFFFF)
+     {
+       //GSE_DebugStr(NORMAL, TRUE, "EventBuff in default state..Initialize");
+       // clear and reset the event hist buffer
+       EventInitHistoryBuffer();
+     }
+   }
 
    // Create Event Task - DT
    memset(&tTaskInfo, 0, sizeof(tTaskInfo));
@@ -359,6 +393,40 @@ void EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN))
 {
   m_event_func = func;
   m_event_tag  = tag;
+}
+
+/******************************************************************************
+ * Function:    EventInitHistoryBuffer
+ *
+ * Description: Re-initialize the event history buffer in EEPROM.
+ *
+ * Parameters: None
+ *
+ * Returns:    TRUE
+ * Notes:
+ *
+ *****************************************************************************/
+BOOLEAN EventInitHistoryBuffer( void )
+{
+  UINT32 i;
+  // Clear the event history buffer.
+  // Specifically set the maxRegion to not-found/not-applicable
+  for (i = 0;i < MAX_EVENTS; ++i)
+  {
+    memset( (void*)&m_EventHistory.histData[i].tsEvent, 0, sizeof(TIMESTAMP));
+    m_EventHistory.histData[i].nCnt      = 0;
+    m_EventHistory.histData[i].maxRegion = REGION_NOT_FOUND;
+  }
+
+  // Set the 'last cleared' time to now.
+  CM_GetTimeAsTimestamp(&m_EventHistory.tsLastCleared);
+
+  // Write the event history buffer back to EEPROM
+  //GSE_DebugStr(NORMAL, TRUE, "EventBuff Initialized, writing to EEPROM");
+  NV_Write( NV_EVENT_HISTORY, 0, &m_EventHistory, sizeof(m_EventHistory) );
+
+  return TRUE;
+
 }
 
 /*****************************************************************************/
@@ -659,7 +727,7 @@ void EventProcess ( EVENT_CFG *pConfig, EVENT_DATA *pData )
 
    switch (pData->state)
    {
-      // Event start is looking for begining of all start triggers
+      // Event start is looking for beginning of all start triggers
       case EVENT_START:
             EventProcessStartState( pConfig, pData, nCurrentTick );
          break;
@@ -715,7 +783,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          pData->bStarted = TRUE;
          // OR sequence number with the box power-on count stored during initialization
          nEventSeqCounter++;
-		 pData->seqNumber &= 0xFFFF0000;
+         pData->seqNumber &= 0xFFFF0000;
          pData->seqNumber |= (nEventSeqCounter & 0xFFFF);
 
          // SRS-4196 - Simple Event Action is mutually exclusive with Table processing
@@ -749,6 +817,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          // met and there is no duration for events that have an event table
          pData->state = EVENT_ACTIVE;
          SetBit((INT32)pData->eventIndex, &m_EventActiveFlags, sizeof(m_EventActiveFlags));
+
       }
       // This is a simple event check if we have exceeded the cfg duration
       else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
@@ -856,6 +925,14 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
                             EVENT_TABLE_SENSOR_INVALID : EVENT_TABLE_END;
       }
 
+      // If this event is enabled for historybuffering,
+      // update buffer and write it out.
+      // Do this here before pData state flags are cleared!
+      if (TRUE == pConfig->bEnableBuff)
+      {
+        EventUpdateHistory(pConfig, pData);
+      }
+
       // Record the time the event ended
       CM_GetTimeAsTimestamp(&pData->tsEndTime);
       // Log the End
@@ -872,6 +949,7 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
          // End the time history
          TH_Close(pConfig->postTime_s);
       }
+
       // reset the event Action
       pData->nActionReqNum = ActionRequest ( pData->nActionReqNum,
                                              EVENT_ACTION_ON_DURATION(pConfig->nAction) |
@@ -1744,6 +1822,62 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
    }
    // Now reset the Started Flag
    pTableData->bStarted = FALSE;
+}
+
+/******************************************************************************
+ * Function:     EventUpdateHistory
+ *
+ * Description:  Update the history buffer for an event.
+ *
+ * Parameters:   [in] EVENT_HISTORY  event history activity
+ *               [in] EVENT_DATA     the runtime data for the event.
+ *
+ * Returns:      None.
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static void EventUpdateHistory( const EVENT_CFG *pConfig, const EVENT_DATA *pData)
+{
+  INT32 histMax;
+  INT32 eventMax;
+  EVENT_HISTORY*    pEventHist = &m_EventHistory.histData[pData->eventIndex];
+  EVENT_TABLE_DATA* pTblData;
+
+  // Always update the count.
+  pEventHist->nCnt += 1;
+
+  if ( EVENT_TABLE_UNUSED == pConfig->eventTableIndex )
+  {
+    // For simple events (i.e. no tables) store the start-time of the event
+    pEventHist->tsEvent = pData->tsCriteriaMetTime;
+  }
+  else // Table event
+  {
+    // Get a ptr to the event table used by this evnt.
+    pTblData = &m_EventTableData[pConfig->eventTableIndex];
+
+    // The EVENT_REGION enum ranges 0...6, with REGION_NOT_FOUND (6) having
+    // the greatest value, but the lowest comparison weight.
+    // The following two assignments simplify comparisons by redefining the range
+    // as -1...5 where REGION_NOT_FOUND is -1
+
+    histMax = pEventHist->maxRegion == REGION_NOT_FOUND ? -1 : (INT32)pEventHist->maxRegion;
+
+    eventMax = pTblData->maximumRegionEntered == REGION_NOT_FOUND ?
+                                -1 : (INT32)pTblData->maximumRegionEntered;
+
+    // If the timestamp is zero, then First time... anything is greater, incl REGION_NOT_FOUND,
+    // otherwise is the max from this event, bigger than the history buff?
+    if( ( 0 == pEventHist->tsEvent.Timestamp) ||
+        ( eventMax > histMax ))
+    {
+      pEventHist->tsEvent   = pData->tsCriteriaMetTime;
+      pEventHist->maxRegion = pTblData->maximumRegionEntered;
+    }
+  }
+  // Write the entire event history buffer to EEPROM
+  NV_Write(NV_EVENT_HISTORY, 0, &m_EventHistory, sizeof(m_EventHistory) );
 }
 
 /*************************************************************************

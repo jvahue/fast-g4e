@@ -1,7 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 /******************************************************************************
-                Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+                Copyright (C) 2012-2104 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
 
@@ -67,7 +67,8 @@
                                    0,                     /* Pre Time History Time Sec  */\
                                    0,                     /* Post Time History Time Sec */\
                                    LOG_PRIORITY_3,        /* Log Priority               */\
-                                   EVENT_TABLE_UNUSED     /* Event Table                */
+                                   EVENT_TABLE_UNUSED,    /* Event Table                */\
+                                   TRUE                   /* Event is Buffered          */
 
 #define EVENT_CONFIG_DEFAULT       EVENT_DEFAULT,\
                                    EVENT_DEFAULT,\
@@ -212,6 +213,7 @@ typedef struct
    UINT32              postTime_s;                  /* Amount of post-time history       */
    LOG_PRIORITY        priority;                    /* Priority to write the event log   */
    EVENT_TABLE_INDEX   eventTableIndex;             /* Related Event Table to process    */
+   BOOLEAN             bEnableBuff;                 /* Event Buffering enabled for Event */
 }EVENT_CFG;
 
 /* The following structure defines the START LOG for the event                           */
@@ -356,8 +358,8 @@ typedef struct
    SENSOR_INDEX     nSensorIndex;                   /* Sensor Index being monitored      */
    FLOAT32          fMaxSensorValue;                /* Maximum value the sensor reached  */
    UINT32           nMaxSensorElaspedTime_ms;       /* Time max sensor was reached       */
-   FLOAT32           fCurrentSensorValue;           /* Current Sensor Value at transition*/
-   UINT32            nDuration_ms;                  /* Duration spent in table           */
+   FLOAT32          fCurrentSensorValue;            /* Current Sensor Value at transition*/
+   UINT32           nDuration_ms;                   /* Duration spent in table           */
 } EVENT_TABLE_TRANSITION_LOG;
 
 
@@ -417,6 +419,25 @@ typedef struct
    INT8         nActionReqNum;
 } EVENT_TABLE_DATA;
 
+/* History definition for an Event */
+#pragma pack(1)
+typedef struct
+{
+  TIMESTAMP    tsEvent;  /* Most recent time a simple event occurred, or a table-event       */
+                         /* updated its maxRegion, since last cleared                        */
+  UINT32       nCnt;     /* Total number of times the event was detected since last cleared  */
+  EVENT_REGION maxRegion;/* Highest region detected, since last cleared, if applicable       */
+}EVENT_HISTORY;
+
+/* Data object for the event history buffer object */
+typedef struct
+{
+  TIMESTAMP     tsLastCleared;        /* Most recent date-time Event History Buffer was      */
+                                      /* cleared due to user cmd or as result of re-config   */
+  EVENT_HISTORY histData[MAX_EVENTS]; /* History data for each configured Event              */
+}EVENT_HIST_BUFFER;
+#pragma pack()
+
 //A type for an array of the maximum number of event tables
 //Used for storing event table configurations in the configuration manager
 typedef EVENT_TABLE_CFG EVENT_TABLE_CONFIGS[MAX_TABLES];
@@ -443,6 +464,8 @@ EXPORT void    EventsInitialize        ( void );
 EXPORT UINT16  EventGetBinaryHdr       ( void *pDest, UINT16 nMaxByteSize );
 EXPORT UINT16  EventTableGetBinaryHdr  ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void    EventSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLEAN));
+EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
+
 
 #endif // EVENT_H
 /*************************************************************************

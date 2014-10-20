@@ -1,6 +1,6 @@
 #define EVENT_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2012-2014 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
 
   File:        EventUserTables.c
@@ -57,7 +57,7 @@ USER_HANDLER_RESULT Event_State         ( USER_DATA_TYPE DataType,
                                           const void *SetPtr,
                                           void **GetPtr );
 static
-USER_HANDLER_RESULT Event_ShowConfig       ( USER_DATA_TYPE DataType,
+USER_HANDLER_RESULT Event_ShowConfig    ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
                                           const void *SetPtr,
@@ -86,6 +86,27 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
                                             UINT32 Index,
                                             const void *SetPtr,
                                             void **GetPtr);
+
+static
+USER_HANDLER_RESULT Event_DisplayBuff    ( USER_DATA_TYPE DataType,
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr);
+
+static
+USER_HANDLER_RESULT Event_ClearBuff     ( USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr);
+
+static
+USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr);
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -117,21 +138,31 @@ USER_ENUM_TBL eventStateEnum[]  =  { {"NOT_USED"  , EVENT_NONE      },
 
 
 // Note: Updates to EVENT_REGION has dependency to EVT_Region_UserEnumType[]
-static 
+static
 USER_ENUM_TBL evt_Region_UserEnumType [] =
-  { { "REGION_A",         REGION_A            },
-	{ "REGION_B",         REGION_B            },
-	{ "REGION_C",         REGION_C            },
-	{ "REGION_D",         REGION_D            },
-	{ "REGION_E",         REGION_E            },
-	{ "REGION_F",         REGION_F            },
-	{ "NONE",             REGION_NOT_FOUND    },
-	{ NULL,          0                        }
+{
+  { "REGION_A",         REGION_A            },
+  { "REGION_B",         REGION_B            },
+  { "REGION_C",         REGION_C            },
+  { "REGION_D",         REGION_D            },
+  { "REGION_E",         REGION_E            },
+  { "REGION_F",         REGION_F            },
+  { "NONE",             REGION_NOT_FOUND    },
+  { NULL,               0                   }
 };
-								   
+
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
 // Events - EVENT User and Configuration Table
+static USER_MSG_TBL eventHist [] =
+{
+  /* Str              Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
+  { "DISPLAY",        NO_NEXT_TABLE,            Event_DisplayBuff,      USER_TYPE_ACTION,   USER_RO,   NULL,                               -1,-1,               NO_LIMIT,            NULL                },
+  { "CLEAR",          NO_NEXT_TABLE,            Event_ClearBuff,        USER_TYPE_ACTION,  USER_RO,   NULL,                               -1,-1,               NO_LIMIT,            NULL                },
+  { "LASTCLEARED",    NO_NEXT_TABLE,            Event_LastCleared,      USER_TYPE_STR,     USER_RO,   NULL,                               -1,-1,               NO_LIMIT,            NULL                },
+  { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
+  };
+
 static USER_MSG_TBL eventCmd [] =
 {
   /* Str              Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
@@ -141,7 +172,7 @@ static USER_MSG_TBL eventCmd [] =
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &configEventTemp.nOffset_ms,        0,(MAX_EVENTS-1),    0,1000,              NULL                },
   { "SC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.startExpr,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "EC",             NO_NEXT_TABLE,            Event_CfgExprStrCmd,    USER_TYPE_STR,     USER_RW,   &configEventTemp.endExpr,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
-  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,            NULL                },
+  { "DURATION_MS",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.nMinDuration_ms,   0,(MAX_EVENTS-1),    0,3600000,           NULL                },
   { "ACTION",         NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ACT_LIST,USER_RW,   &configEventTemp.nAction,           0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "ENABLE_HISTORY", NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_BOOLEAN, USER_RW,   &configEventTemp.bEnableTH,         0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { "PRE_HISTORY_S",  NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &configEventTemp.preTime_s,         0,(MAX_EVENTS-1),    0,360,               NULL                },
@@ -149,6 +180,7 @@ static USER_MSG_TBL eventCmd [] =
   { "LOG_PRIORITY",   NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.priority,          0,(MAX_EVENTS-1),    NO_LIMIT,            lm_UserEnumPriority },
   { "EVENT_TABLE",    NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &configEventTemp.eventTableIndex,   0,(MAX_EVENTS-1),    NO_LIMIT,            eventTableType      },
   { "SENSORS",        NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_SNS_LIST,USER_RW,   &configEventTemp.sensorMap,         0,(MAX_EVENTS-1),    0,MAX_EVENT_SENSORS, NULL                },
+  { "BUFFENABLE",     NO_NEXT_TABLE,            Event_UserCfg,          USER_TYPE_BOOLEAN, USER_RW,   &configEventTemp.bEnableBuff,       0,(MAX_EVENTS-1),    NO_LIMIT,            NULL                },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 
@@ -591,6 +623,7 @@ static USER_MSG_TBL eventRoot [] =
 { /* Str            Next Tbl Ptr       Handler Func.        Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
    { "CFG",         eventCmd     ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      eventStatus  ,     NULL,                NO_HANDLER_DATA},
+   { "HISTORY",     eventHist    ,     NULL,                NO_HANDLER_DATA},
    { DISPLAY_CFG,   NO_NEXT_TABLE,     Event_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
@@ -1231,7 +1264,7 @@ USER_HANDLER_RESULT EventTable_ShowConfig ( USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-static 
+static
 USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
                                           UINT32 Index,
@@ -1290,6 +1323,184 @@ USER_HANDLER_RESULT Event_CfgExprStrCmd(USER_DATA_TYPE DataType,
   }
 
   return result;
+}
+
+/******************************************************************************
+ * Function:     Event_DisplayBuff | USER COMMAND HANDLER
+ *
+ * Description:  Displays all configured events that were detected since the last
+ *               event.history.clear was performed.
+ *
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static
+USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr)
+{
+  TIMESTRUCT ts;
+  CHAR         timeStr[80];
+  CHAR         regionStr[USER_MAX_MSG_STR_LEN];
+  CHAR         tempStr[USER_MAX_MSG_STR_LEN * 4];
+  static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
+  UINT8 i;
+  UINT32 len;
+  UINT32 nOffset;
+  USER_HANDLER_RESULT result = USER_RESULT_OK;
+
+  // Loop thru all event entries
+  // only list those which are configured as active
+  // ID, Name, Time, count, max-region
+
+  nOffset = 0;
+  for (i = 0; i < MAX_EVENTS; i++)
+  {
+    // Only display history items for enabled events which have been detected
+    if( m_EventCfg[i].bEnableBuff &&
+        m_EventHistory.histData[i].tsEvent.Timestamp != 0x00000000 )
+    {
+      // For table-event, set the string-value for the max region, otherwise "SIMPLE"
+      snprintf(regionStr, sizeof( regionStr), "%s",
+               EVENT_TABLE_UNUSED != m_EventCfg[i].eventTableIndex ?
+               evt_Region_UserEnumType[ m_EventHistory.histData[i].maxRegion ].Str :
+               "SIMPLE");
+
+      // Convert the event start time to string
+      CM_ConvertTimeStamptoTimeStruct( &m_EventHistory.histData[i].tsEvent, &ts);
+
+      snprintf( timeStr, sizeof(timeStr), "%04d/%02d/%02d %02d:%02d:%02d",
+                                           ts.Year, ts.Month,  ts.Day,
+                                           ts.Hour, ts.Minute, ts.Second );
+
+      // Create line item for this event history.
+      snprintf ( tempStr, sizeof(tempStr), "\r\n%*s %*s %s %04d %s",                                         
+                                           MAX_EVENT_ID,   m_EventCfg[i].sEventID,
+                                           MAX_EVENT_NAME, m_EventCfg[i].sEventName,
+                                           timeStr,
+                                           m_EventHistory.histData[i].nCnt,
+                                           regionStr );
+      len = strlen ( tempStr );
+      memcpy ( (void *) &outputBuffer[nOffset], tempStr, len );
+      nOffset += len;
+    }
+
+  }
+  // Upon ending, print a final msg in case no events were displayed 
+  snprintf( tempStr, sizeof(tempStr), "\r\nHistory display completed\r\n\0" );
+  len = strlen ( tempStr );
+  memcpy( (void *) &outputBuffer[nOffset], tempStr, len );
+
+  //nOffset += len;
+  //outputBuffer[nOffset] = NULL;  // Terminate String
+  User_OutputMsgString(outputBuffer, FALSE);
+
+  return result;
+}
+
+/******************************************************************************
+ * Function:     Event_ClearBuff | USER COMMAND HANDLER
+ *
+ * Description:  Clear the contents of the Event Buffer and update the clear
+ *               date field.
+ *
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static
+USER_HANDLER_RESULT Event_ClearBuff ( USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr)
+{
+  // Call the generic event history buffer file init function.
+  EventInitHistoryBuffer();
+
+  return USER_RESULT_OK;
+
+}
+/******************************************************************************
+ * Function:     Event_LastCleared | USER COMMAND HANDLER
+ *
+ * Description:  Displays the date field containing the the date/time the Event
+                 Buffer was last cleared.
+ *
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static
+USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr)
+{
+  TIMESTRUCT  ts;
+  static CHAR timeStr[32];
+
+  CM_ConvertTimeStamptoTimeStruct( &m_EventHistory.tsLastCleared, &ts);
+
+  // Convert the last-cleared timestamp to string
+  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d/ %02d:%02d:%02d",
+                                           ts.Year, ts.Month,  ts.Day,
+                                           ts.Hour, ts.Minute, ts.Second );
+  // Set the passed pointer to our static string buffer.
+  *GetPtr = timeStr;
+  return USER_RESULT_OK;
 }
 
 /*************************************************************************
