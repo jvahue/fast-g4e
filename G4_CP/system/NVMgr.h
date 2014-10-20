@@ -1,7 +1,7 @@
 #ifndef SYS_NVMGR_H
 #define SYS_NVMGR_H
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:          NVMgr.h
@@ -149,6 +149,7 @@ NV_ENGINE_ID       - Engine identification: EngineRun
 NV_CREEP_DATA      - Creep Application Data
 NV_CREEP_CNTS_RTC  - Creep Application RTC Data
 NV_CREEP_HISTORY   - Creep Fault History Data
+NV_EVENT_HISTORY   - High level history of Event processing.
 */
 
 #undef NV_FILE
@@ -178,7 +179,8 @@ NV_FILE(NV_ACT_STATUS_EE,  "Action Status EE ",    DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_ENGINE_ID,      "Engine Identification",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EngReInitFile           ,     256), \
 NV_FILE(NV_CREEP_DATA,     "Creep Data",           DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  Creep_FileInit          ,     256), \
 NV_FILE(NV_CREEP_CNTS_RTC, "Creep Cnts RTC",       DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      20), \
-NV_FILE(NV_CREEP_HISTORY,  "Creep Fault History",  DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Creep_FaultFileInit     ,    1024)
+NV_FILE(NV_CREEP_HISTORY,  "Creep Fault History",  DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Creep_FaultFileInit     ,    1024), \
+NV_FILE(NV_EVENT_HISTORY,  "Event History Buffer", DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EventInitHistoryBuffer  ,     512)
 
 
 
@@ -396,7 +398,7 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
- * 
+ *
  * *****************  Version 66  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system
