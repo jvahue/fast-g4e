@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 34 $  $Date: 9/03/14 5:10p $
+   $Revision: 35 $  $Date: 10/22/14 6:26p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -116,23 +116,23 @@ static FASTMGR_CONFIG fast_cfg_temp;
 
 static USER_MSG_TBL cfg_flags_cmd [] =
 {  /*Str               Next Tbl Ptr   Handler Func.       Data Type           Access      Parameter                          IndexRange   DataLimit          EnumTbl*/
-  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.record_triggers,    -1,-1,       0,MAX_TRIGGERS,    NULL },
-  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.on_ground_triggers, -1,-1,       0,MAX_TRIGGERS,    NULL },
-  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.auto_ul_per_s,     -1,-1,       NO_LIMIT,          NULL },
-  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &fast_cfg_temp.time_source,       -1,-1,       NO_LIMIT,          time_source_strs },
-  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                              -1,-1,       NO_LIMIT,          NULL },
-  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,      USER_RW,    NULL,                              -1,-1,       INSTALL_STR_LIMIT, NULL },
-  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_msrdy_to,  -1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_SIM_rdy_to,-1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_GSM_rdy_to,-1,-1,       NO_LIMIT,          NULL },
-  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_VPN_rdy_to,-1,-1,       NO_LIMIT,          NULL },
+  { "RECORD",          NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.record_triggers,    -1,-1,       0,(MAX_TRIGGERS-1), NULL },
+  { "ON_GROUND",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_128_LIST, USER_RW,    fast_cfg_temp.on_ground_triggers, -1,-1,       0,(MAX_TRIGGERS-1), NULL },
+  { "AUTO_UL_S",       NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.auto_ul_per_s,     -1,-1,       NO_LIMIT,           NULL },
+  { "TIME_SOURCE",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_ENUM,     USER_RW,    &fast_cfg_temp.time_source,       -1,-1,       NO_LIMIT,           time_source_strs },
+  { "VER",             NO_NEXT_TABLE, FAST_VersionCmd,    USER_TYPE_UINT16,   USER_RW,    NULL,                             -1,-1,       NO_LIMIT,           NULL },
+  { "INSTALL_ID",      NO_NEXT_TABLE, FAST_InstallIdCmd,  USER_TYPE_STR,      USER_RW,    NULL,                             -1,-1,       INSTALL_STR_LIMIT,  NULL },
+  { "TXTST_MSRDY_TO_S",NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_msrdy_to,  -1,-1,       NO_LIMIT,           NULL },
+  { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_SIM_rdy_to,-1,-1,       NO_LIMIT,           NULL },
+  { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_GSM_rdy_to,-1,-1,       NO_LIMIT,           NULL },
+  { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_VPN_rdy_to,-1,-1,       NO_LIMIT,           NULL },
   { NULL,              NULL,          NULL,               NO_HANDLER_DATA }
 };
 
 
 static USER_MSG_TBL status_flags_cmd [] =
 {  /*Str           Next Tbl Ptr     Handler Func.         Data Type          Access      Parameter                   IndexRange   DataLimit   EnumTbl*/
-  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    swVersion,                 -1,-1,       NO_LIMIT,   NULL },
+  { "SW_VER",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_STR,     USER_RO,    swVersion,                  -1,-1,       NO_LIMIT,   NULL },
   { "RECORDING",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &fastStatus.recording,      -1,-1,       NO_LIMIT,   NULL },
   { "ON_GROUND",   NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_YESNO,   USER_RO,    &fastStatus.onGround,       -1,-1,       NO_LIMIT,   NULL },
   { "RF_GSM",      NO_NEXT_TABLE,   User_GenericAccessor, USER_TYPE_ONOFF,   USER_RO,    &fastStatus.rfGsmEnable,    -1,-1,       NO_LIMIT,   NULL },
@@ -505,6 +505,11 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 10/22/14   Time: 6:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1271 - Initialization of ACTION list exceeds field size
  * 
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:10p
