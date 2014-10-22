@@ -16,7 +16,7 @@
 
 #define GSE_TX_SIZE 1000
 #define GSE_RX_SIZE 200
-#define MAX_UUT_SENSORS 200
+#define MAX_UUT_SENSORS 256
 #define SHUTDOWN 0x7EFF
 
 // QAR Status Words
