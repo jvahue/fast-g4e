@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 28 $  $Date: 14-10-08 7:10p $
+$Revision: 29 $  $Date: 10/20/14 3:55p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -595,6 +595,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Contractor V&v Date: 10/20/14   Time: 3:55p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS - none configured msg change.
  * 
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:10p

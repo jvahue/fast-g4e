@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 33 $  $Date: 12-12-19 5:56p $
+  $Revision: 34 $  $Date: 10/20/14 3:54p $
 
 ******************************************************************************/
 
@@ -471,6 +471,11 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 10/20/14   Time: 3:54p
+ * Updated in $/software/control processor/code/application
+ * SCR #1188 - Event History Buffer
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-12-19   Time: 5:56p

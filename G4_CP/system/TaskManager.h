@@ -9,7 +9,7 @@
   Description: Task Manager definitions.
 
   VERSION
-     $Revision: 69 $  $Date: 12/13/12 3:09p $
+     $Revision: 70 $  $Date: 14-10-13 11:25a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -113,6 +113,7 @@ TASK_ENTRY(MS_Status,                   50,      RMT,  SYS_MODE_GP1, 0x00000000,
 TASK_ENTRY(FAST_UL_Chk,                 55,      RMT,  SYS_MODE_GP1, 0x00000000, 100,         S2M(1)      )\
 TASK_ENTRY(F7X_Disp_Debug,              60,      RMT,  SYS_MODE_GP1, 0x00000000,  20,         S2M(1)      )\
 TASK_ENTRY(Uart_Disp_Debug,             65,      RMT,  SYS_MODE_GP1, 0x00000000,  20,         S2M(1)      )\
+TASK_ENTRY(IDParam_Disp_Debug,          67,      RMT,  SYS_MODE_GP1, 0x00000000,  30,         S2M(1)      )\
 TASK_ENTRY(TP_SUPPORT_RMT,              70,      RMT,  SYS_MODE_GP2, 0x00000000, 500,         S2M(2)      )\
 TASK_ENTRY(Clock_CBIT,                  75,      RMT,  SYS_MODE_GP1, 0x00000000, 500,         S2M(10*60)  )\
 /* Self-scheduled and pure event tasks -----------------------------------------------------*/\
@@ -377,6 +378,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
  *  MODIFICATIONS
  *    $History: TaskManager.h $
  * 
+ * *****************  Version 70  *****************
+ * User: Peter Lee    Date: 14-10-13   Time: 11:25a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 IDParam.  Add debug display func.
+ *
  * *****************  Version 69  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 3:09p
  * Updated in $/software/control processor/code/system
