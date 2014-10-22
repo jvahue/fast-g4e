@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 43 $  $Date: 13-03-12 11:24a $
+ $Revision: 44 $  $Date: 10/20/14 3:54p $
 
 ******************************************************************************/
 
@@ -1883,6 +1883,11 @@ static void EventUpdateHistory( const EVENT_CFG *pConfig, const EVENT_DATA *pDat
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: Contractor V&v Date: 10/20/14   Time: 3:54p
+ * Updated in $/software/control processor/code/application
+ * SCR #1188 - Event History Buffer
  * 
  * *****************  Version 43  *****************
  * User: John Omalley Date: 13-03-12   Time: 11:24a
