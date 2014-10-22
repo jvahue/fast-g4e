@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 66 $  $Date: 14-10-08 6:56p $
+    $Revision: 67 $  $Date: 10/20/14 3:54p $
 
 ******************************************************************************/
 
@@ -398,6 +398,11 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 67  *****************
+ * User: Contractor V&v Date: 10/20/14   Time: 3:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1188 - Event History Buffer
  *
  * *****************  Version 66  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p

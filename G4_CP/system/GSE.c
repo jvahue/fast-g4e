@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 29 $  $Date: 10/09/14 2:08p $
+     $Revision: 30 $  $Date: 14-10-13 11:25a $
 
 ******************************************************************************/
 
@@ -442,6 +442,9 @@ void GSE_ToggleDisplayLiveStream(void)
 
   // Disable F7X output stream
   F7XProtocol_DisableLiveStream();
+  
+  // Disable ID Param output stream
+  IDParamProtocol_DsbLiveStream();
 
   // Disable Debug Output
   Flt_SetDebugVerbosity(DBGOFF);
@@ -679,6 +682,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: Peter Lee    Date: 14-10-13   Time: 11:25a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 IDParam.  Add debug display func.
  * 
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 10/09/14   Time: 2:08p
