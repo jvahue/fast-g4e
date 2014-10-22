@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 1 $  $Date: 14-10-08 7:11p $
+      $Revision: 2 $  $Date: 14-10-13 11:25a $
 
 ******************************************************************************/
 
@@ -159,6 +159,8 @@ typedef struct
   UINT16 nElements;     // Number of elements (including scrolling) in data stream
   UINT32 cntGoodFrames; // Cnt # of good frames recieved
   UINT32 lastFrameTime_tick; // Tick time of last good frame received
+  UINT32 cntElemIDPosChanged;// # Times Elem ID Pos has changed
+  UINT32 cntSizeChanged;// # Time size value has changed
 } ID_PARAM_FRAME_TYPE, *ID_PARAM_FRAME_TYPE_PTR;
 
 typedef struct
@@ -238,6 +240,9 @@ EXPORT UINT16 IDParamProtocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size
 
 EXPORT void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr );
 
+EXPORT void IDParamProtocol_Diplsy_Task ( void *pParam );
+EXPORT void IDParamProtocol_DsbLiveStream ( void );
+
 #endif // ID_PARAM_PROTOCOL_H
 
 
@@ -245,6 +250,11 @@ EXPORT void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr );
  *  MODIFICATIONS
  *    $History: IDParamProtocol.h $
  * 
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 14-10-13   Time: 11:25a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 IDParam.  Add debug display func.
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:11p
  * Created in $/software/control processor/code/system

@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 1 $  $Date: 14-10-08 7:11p $
+    $Revision: 3 $  $Date: 14-10-22 1:20p $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
@@ -74,6 +74,12 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
                                                  const void *SetPtr,
                                                  void **GetPtr);
 
+static USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr);
+
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -84,7 +90,19 @@ static ID_PARAM_STATUS statusIDParamTemp;
 static ID_PARAM_SCROLL_CFG cfgIDParamScrollTemp;
 
 static CHAR statusIDS_Buff[ID_PARAM_IDS_BUFF_MAX];
+static ID_PARAM_DEBUG debugIDParamTemp;
 
+
+/*****************************************************************************/
+/* Local Constants                                                           */
+/*****************************************************************************/
+static
+USER_ENUM_TBL idParamDebugFrameStrs[] =
+{
+  {"FADEC",    ID_PARAM_FADEC_ENUM},
+  {"PEC",      ID_PARAM_PEC_ENUM},
+  { NULL,      0}
+};
 
 /*****************************************/
 /* User Table Defintions                 */
@@ -108,23 +126,23 @@ static USER_MSG_TBL IDParamScrollCfgTbl[] =
 #define P_PARAMS_STR  "P"
 static USER_MSG_TBL IDParamCfgTbl[] =
 { /*Str           Next Tbl Ptr   Handler Func.     Data Type          Access    Parameter                          IndexRange   DataLimit               EnumTbl*/
-  {"MAXWORDS",    NO_NEXT_TABLE, IDParamMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamTemp.maxWords, -1, -1,      5, ID_PARAM_CFG_MAX,    NULL},\
+  {"MAXWORDS",    NO_NEXT_TABLE, IDParamMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamTemp.maxWords, -1, -1,      10, ID_PARAM_CFG_MAX,    NULL},\
   {"SCROLL",      IDParamScrollCfgTbl, NULL, NO_HANDLER_DATA},\
   {P_PARAMS_STR,  IDParamDataCfgTbl, NULL, NO_HANDLER_DATA},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL IDParamStatusFrameFadecTypeTbl[] =
+static USER_MSG_TBL IDParamStatusFrame0TypeTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.      Data Type          Access     Parameter                                                    IndexRange    DataLimit    EnumTbl*/
   {"NUM_WORDS",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].nWords,             1,      3,    NO_LIMIT,    NULL},\
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].nElements,          1,      3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].cntGoodFrames,      1,      3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].lastFrameTime_tick, 1,      3,    NO_LIMIT,    NULL},\
-  {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_FADEC,          1,      3,    NO_LIMIT,    NULL},\
+  {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_STR,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_FADEC,             1,      3,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL IDParamStatusFramePecTypeTbl[] =
+static USER_MSG_TBL IDParamStatusFrame1TypeTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.      Data Type          Access     Parameter                                                    IndexRange    DataLimit    EnumTbl*/
   {"NUM_WORDS",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].nWords,             1,      3,    NO_LIMIT,    NULL},\
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].nElements,          1,      3,    NO_LIMIT,    NULL},\
@@ -142,8 +160,17 @@ static USER_MSG_TBL IDParamStatusTbl[] =
   {"RESYNC_CNT",      NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.cntReSync,          1,   3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.cntGoodFrames,      1,   3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.lastFrameTime_tick, 1,   3,    NO_LIMIT,    NULL},\
-  {"FRAME_FADEC",     IDParamStatusFrameFadecTypeTbl, NULL, NO_HANDLER_DATA},
-  {"FRAME_PEC",       IDParamStatusFramePecTypeTbl, NULL, NO_HANDLER_DATA},
+  {"FRAME_0"    ,     IDParamStatusFrame0TypeTbl, NULL, NO_HANDLER_DATA},
+  {"FRAME_1",         IDParamStatusFrame1TypeTbl, NULL, NO_HANDLER_DATA},
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL IDParamDebugTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.       Data Type          Access      Parameter                                 IndexRange   DataLimit    EnumTbl*/
+  {"ENABLE",          NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_BOOLEAN, USER_RW,    (void *) &debugIDParamTemp.bDebug,         -1,   -1,    NO_LIMIT,    NULL},\
+  {"CHANNEL",         NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_UINT16,  USER_RW,    (void *) &debugIDParamTemp.ch,             -1,   -1,    1,     3,    NULL},\
+  {"FRAME",           NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_ENUM,    USER_RW,    (void *) &debugIDParamTemp.frameType,      -1,   -1,    NO_LIMIT,    idParamDebugFrameStrs},\
+  {"FORMATTED",       NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_BOOLEAN, USER_RW,    (void *) &debugIDParamTemp.bFormatted,     -1,   -1,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -151,6 +178,7 @@ static USER_MSG_TBL IDParamProtocolRoot[] =
 { /*Str            Next Tbl Ptr    Handler Func.           Data Type          Access                         Parameter     IndexRange  DataLimit    EnumTbl*/
   {"CFG",          IDParamCfgTbl,   NULL,NO_HANDLER_DATA},
   {"STATUS",       IDParamStatusTbl,NULL,NO_HANDLER_DATA},
+  {"DEBUG",        IDParamDebugTbl, NULL,NO_HANDLER_DATA},
   {DISPLAY_CFG,    NO_NEXT_TABLE,   IDParamMsg_ShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,         -1,  -1,    NO_LIMIT,    NULL},
   {NULL,           NULL,            NULL,NO_HANDLER_DATA}
 };
@@ -635,10 +663,66 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
 }
 
 
+/******************************************************************************
+ * Function:    IDParamMsg_Debug
+ *
+ * Description: Called by the User.c module from the reference to this fucntion
+ *              in the user message tables above.
+ *              Retrieves the latest ID Param Debug Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed sucessfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
+                                     USER_MSG_PARAM Param,
+                                     UINT32 Index,
+                                     const void *SetPtr,
+                                     void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  debugIDParamTemp = m_IDParam_Debug;
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  m_IDParam_Debug = debugIDParamTemp;
+
+  return result;
+}
+
+
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 14-10-22   Time: 1:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263.  Several minor updates to table size and format. 
+ *
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 14-10-13   Time: 11:25a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 IDParam.  Add debug display func.
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:11p
  * Created in $/software/control processor/code/system

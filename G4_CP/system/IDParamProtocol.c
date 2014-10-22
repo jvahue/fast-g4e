@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 1 $  $Date: 14-10-08 7:11p $
+      $Revision: 3 $  $Date: 14-10-13 11:25a $
 
 ******************************************************************************/
 
@@ -65,6 +65,8 @@
 #define ID_PARAM_FRAME_CONSEC_BAD_CNT 1
 #define ID_PARAM_FRAME_CONSEC_CRC_CNT 3
 
+#define ID_PARAM_DEBUG_STR_MAX  128
+#define ID_PARAM_DEBUG_CHARS_PER_LINE 32
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -141,6 +143,22 @@ typedef struct
   UINT16 numCfgScrollID;
 } ID_PARAM_SCROLL_DATA, *ID_PARAM_SCROLL_DATA_PTR;
 
+typedef enum
+{
+  ID_PARAM_FADEC_ENUM = 0,
+  ID_PARAM_PEC_ENUM,
+  ID_PARAM_FRAME_ENUM_MAX
+} ID_PARAM_FRAME_ENUM;
+
+typedef struct
+{
+  BOOLEAN bDebug;   // Enable debug frame display
+  UINT16 ch;        // Channel to debug - default is firt UART (not GSE)
+  BOOLEAN bFormatted; // Raw or Formatted Debug Display
+  ID_PARAM_FRAME_ENUM frameType;  // Req FADEC or PEC frame
+  BOOLEAN bInProgress;// Debug Display Update in progress
+} ID_PARAM_DEBUG, *ID_PARAM_DEBUG_PTR;
+
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -156,6 +174,9 @@ ID_PARAM_FRAME m_IDParam_Frame[UART_NUM_OF_UARTS][ID_PARAM_FRAME_TYPES];
 ID_PARAM_SCROLL_DATA m_IDParam_Scroll[UART_NUM_OF_UARTS];
 ID_PARAM_FRAME m_IDParam_ScrollList[UART_NUM_OF_UARTS];
 
+ID_PARAM_DEBUG m_IDParam_Debug;
+UINT8 m_IDParam_DebugStr[ID_PARAM_DEBUG_STR_MAX];
+ID_PARAM_FRAME_BUFFER m_IDParam_FrameBuff_Debug[UART_NUM_OF_UARTS][ID_PARAM_FRAME_TYPES];
 
 // Test Timing
 #ifdef ID_TIMING_TEST
@@ -219,6 +240,7 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
 void IDParamProtocol_Initialize ( void )
 {
   UINT16 i,j;
+  TCB TaskInfo;
 
   memset ( (void *) &m_IDParam_Status, 0, sizeof(m_IDParam_Status) );
   memset ( (void *) &m_IDParam_Cfg, 0, sizeof(m_IDParam_Cfg) );
@@ -281,6 +303,28 @@ void IDParamProtocol_Initialize ( void )
     }
   }
 
+  // Create F7X Protocol Display Task
+  memset(&TaskInfo, 0, sizeof(TaskInfo));
+  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name), "ID Param Display Debug",_TRUNCATE);
+  TaskInfo.TaskID         = IDParam_Disp_Debug;
+  TaskInfo.Function       = IDParamProtocol_Diplsy_Task;
+  TaskInfo.Priority       = taskInfo[IDParam_Disp_Debug].priority;
+  TaskInfo.Type           = taskInfo[IDParam_Disp_Debug].taskType;
+  TaskInfo.modes          = taskInfo[IDParam_Disp_Debug].modes;
+  TaskInfo.MIFrames       = taskInfo[IDParam_Disp_Debug].MIFframes;
+  TaskInfo.Rmt.InitialMif = taskInfo[IDParam_Disp_Debug].InitialMif;
+  TaskInfo.Rmt.MifRate    = taskInfo[IDParam_Disp_Debug].MIFrate;
+  TaskInfo.Enabled        = TRUE;
+  TaskInfo.Locked         = FALSE;
+  TaskInfo.pParamBlock    = NULL;
+  TmTaskCreate (&TaskInfo);
+
+  // Update ID Param Debug
+  memset ( (void *) &m_IDParam_Debug, 0, sizeof(m_IDParam_Debug) );
+  m_IDParam_Debug.ch = (UINT16) UART_1;
+  memset ( (void *) &m_IDParam_FrameBuff_Debug, 0, sizeof(m_IDParam_FrameBuff_Debug) );
+
+
 #ifdef ID_TIMING_TEST
   /*vcast_dont_instrument_start*/
   for (i=0;i<ID_TIMING_TEST;i++)
@@ -294,7 +338,6 @@ void IDParamProtocol_Initialize ( void )
 #endif
 
 }
-
 
 
 /******************************************************************************
@@ -625,6 +668,90 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
 }
 
 
+/******************************************************************************
+ * Function:    IDParamProtocol_Diplsy_Task
+ *
+ * Description: Utility function to display ID Param frame data for a specific ch
+ *
+ * Parameters:  pParam: Not used, only to match Task Mgr call signature
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+void IDParamProtocol_Diplsy_Task ( void *pParam )
+{
+  ID_PARAM_FRAME_BUFFER_PTR frame_ptr;
+  UINT16 *pData;
+  UINT16 i, loopCnt;
+  UINT8 strBuff[ID_PARAM_DEBUG_CHARS_PER_LINE];
+
+  if ( m_IDParam_Debug.bDebug == TRUE )
+  {
+    m_IDParam_Debug.bInProgress = TRUE;
+    frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR)
+                &m_IDParam_FrameBuff_Debug[m_IDParam_Debug.ch][m_IDParam_Debug.frameType];
+    pData = (UINT16 *) &frame_ptr->data[0];
+    if ( m_IDParam_Debug.bFormatted == FALSE )
+    {
+      GSE_PutLine( "\r\n\r\n" ); // Output this line to GSE
+      loopCnt = frame_ptr->size / ID_PARAM_DEBUG_CHARS_PER_LINE;
+      for (i=0;i<(loopCnt);i++) // Loop thru the 16 word line
+      {
+        sprintf (  (char *) m_IDParam_DebugStr, "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
+                   *(pData +  0), *(pData +  1), *(pData +  2), *(pData +  3),
+                   *(pData +  4), *(pData +  5), *(pData +  6), *(pData +  7),
+                   *(pData +  8), *(pData +  9), *(pData + 10), *(pData + 11),
+                   *(pData + 12), *(pData + 13), *(pData + 14), *(pData + 15) );
+        GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+        pData = pData + (ID_PARAM_DEBUG_CHARS_PER_LINE/sizeof(UINT16)); // Move to next line
+      } // end for loopCnt
+      loopCnt = frame_ptr->size % ID_PARAM_DEBUG_CHARS_PER_LINE;
+      m_IDParam_DebugStr[0] = NULL;
+      for (i=0;i<(loopCnt/2);i++) // Loop thru the last line of char if < 16 words
+      {
+        sprintf ( (char *) strBuff, "%04x ", *pData++ );
+        strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
+      }
+      // strcat ( (char *) m_IDParam_DebugStr, "\r\n");
+      GSE_PutLine( (const char *) m_IDParam_DebugStr );
+    } // end if bFormatted == FALSE
+    else
+    {
+      // TBD format the display
+      // Sync=
+      // #Element=
+      // #ElementPos=
+      // #ElementId=
+      // W001=XXXX
+    } // end else bFormatted == TRUE
+    m_IDParam_Debug.bInProgress = FALSE;
+  } // end if m_IDParam_Debug.bDebug == TRUE
+
+}
+
+
+/******************************************************************************
+ * Function:     IDParamProtocol_DsbLiveStream
+ *
+ * Description:  Disables the outputting the live stream for ID Param Protocol
+ *
+ * Parameters:   None
+ *
+ * Returns:      None.
+ *
+ * Notes:
+ *  1) Used for debugging only
+ *
+ *
+ *****************************************************************************/
+void IDParamProtocol_DsbLiveStream(void)
+{
+  m_IDParam_Debug.bDebug = FALSE;
+}
+
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -774,7 +901,6 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
             }
             buff_ptr->cnt = (buff_ptr->cnt < frame_ptr->size) ? 0 :
                             (buff_ptr->cnt - frame_ptr->size);
-
             bNewData = TRUE;
           }
           else
@@ -944,6 +1070,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
     if ( frameData_ptr->data[index].elementID != elemID )
     {
       // TBD increment some counter here / sys log ?
+      m_IDParam_Status[ch].frameType[frameType].cntElemIDPosChanged++;
     }
   } // end else elementID != ID_PARAM_NOT_USED
 }
@@ -1000,6 +1127,7 @@ static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
   pFrameTypeStats->nElements = pFrameHdr->totalElements >> 1; // param shifted << 1 in raw
   pFrameTypeStats->cntGoodFrames++;
   pFrameTypeStats->lastFrameTime_tick = frameTime;
+  m_IDParam_Status[ch].cntGoodFrames++;
 
   // Loop thru m_IDParam_FrameBuff frame data, with m_IDParam_Frame as corresponding list
   //  based on the number of element indicated in Frame
@@ -1026,6 +1154,15 @@ static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
     IDParamProtocol_ProcScollID ( frame_ptr, data_ptr, ch, frameType, frameTime, frameTS );
   }
 
+  if ( (m_IDParam_Debug.bDebug == TRUE) && (m_IDParam_Debug.ch == ch) &&
+       (m_IDParam_Debug.bInProgress == FALSE) && (m_IDParam_Debug.frameType == frameType) )
+  {
+    ID_PARAM_FRAME_BUFFER_PTR frameDebug_ptr;
+
+    frameDebug_ptr = (ID_PARAM_FRAME_BUFFER_PTR) &m_IDParam_FrameBuff_Debug[ch][frameType];
+    memcpy ((void *) &frameDebug_ptr->data[0], (void *) &frame_ptr->data[0], frame_ptr->size);
+    frameDebug_ptr->size = frame_ptr->size;
+  }
 }
 
 
@@ -1083,7 +1220,6 @@ static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
   }
   else
   {
-    pStatus->cntGoodFrames++;
     pStatus->cntBadFrameInRow = 0;
     pStatus->cntBadCrcInRow = 0;
     pStatus->lastFrameTime_tick = tick;
@@ -1281,6 +1417,17 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 14-10-13   Time: 11:25a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 IDParam.  Add debug display func.
+ *
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 14-10-10   Time: 7:49p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263.  Update frame cnt to handle counting multiple frames in 10
+ * msec.  Yes, v&v sets very small packet size for testing.
+ *
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:11p
  * Created in $/software/control processor/code/system

@@ -1,6 +1,6 @@
 #define USER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2011 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:       User.c
@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 116 $  $Date: 4/07/14 11:54a $
+   $Revision: 117 $  $Date: 10/22/14 6:26p $
 
 ******************************************************************************/
 
@@ -833,14 +833,15 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
  *
  * Returns:     TRUE if successful otherwise FALSE
  *
- * Notes:
- *
+ * Notes:       tempInt size must be declared as USER_DATA_TYPE_MAX_WORDS
+ *              to allow temp storage of the largest defined user data type.
+ *              ref: < USER_TYPE_128_LIST >, < USER_TYPE_SNS_LIST >
  *****************************************************************************/
 static
 BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                               INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
-  {
-    UINT32 tempInt[4];  // Size of tempInt must be large enough to accommodate multi-word objs.
+  {    
+    UINT32 tempInt[USER_DATA_TYPE_MAX_WORDS]; // Store up to USER_TYPE_128_LIST. See Notes.  
     void* setPtr = tempInt;
     void* getPtr = tempInt;
     USER_RANGE min,max;
@@ -848,7 +849,7 @@ BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
 
     if (User_ValidateMessage(MsgTbl,source,Index,RspStr,SetStr, Len))
     {
-      //SetStr is the string after the "=" delimiter.  If it is present
+      //SetStr is the string after the "=" delimiter.  If it is present 
       //this is a "set" command to write a value.
       if(SetStr != NULL)
       {
@@ -1249,6 +1250,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   CHAR* end;
   UINT32 i;
   UINT32 uint_temp;
+  UINT32 byteCnt = 0;
 
   INT32  int_temp;
   FLOAT32 float_temp;
@@ -1372,8 +1374,13 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_ACT_LIST:
     case USER_TYPE_SNS_LIST:
     case USER_TYPE_128_LIST:
+      //*********************************************************************************
+      // NOTE: if adding new USER_TYPE_xxxx_LIST, update how byteCnt is assigned below.
+      //*********************************************************************************
 
-      memset((UINT32*)*SetPtr, 0, sizeof(BITARRAY128) );
+      // Clear the receiving bit field based on the byteCnt of specific USER_TYPE 
+      byteCnt = (USER_TYPE_ACT_LIST == Type) ? sizeof(UINT32) : sizeof(BITARRAY128);
+      memset((UINT32*)*SetPtr, 0, byteCnt );
 
       // Check if value is a list of 1..128 CSV decimal-values enclosed by square brackets
       // e.g.: [ 2,6,23, 56,127 ]
@@ -1954,7 +1961,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
               "Accepts a number list consisting of values in the range %u-%u, "NEW_LINE
               "a hex string where only bits %u-%u are allowed on."NEW_LINE
               "or an integer where only bits %u-%u are allowed on.",
-              Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1, Min.Uint, Max.Uint-1 );
+              Min.Uint, Max.Uint, Min.Uint, Max.Uint, Min.Uint, Max.Uint );
       break;
     case USER_TYPE_ACTION:
       // lint -fallthrough
@@ -2358,7 +2365,7 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(FLOAT64*)Param.Ptr = *(FLOAT64*)SetPtr;
 
       //lint -fallthrough
-	  case USER_TYPE_ENUM:
+      case USER_TYPE_ENUM:
       case USER_TYPE_UINT32:
       case USER_TYPE_HEX32:
         *(UINT32*)Param.Ptr = *(UINT32*)SetPtr;
@@ -2369,12 +2376,12 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         break;
 
       // lint -fallthrough
-	  case USER_TYPE_SNS_LIST:
+      case USER_TYPE_SNS_LIST:
       case USER_TYPE_128_LIST:
         memcpy(Param.Ptr, SetPtr, sizeof(BITARRAY128));
         break;
 
-	  // lint -fallthrough
+      // lint -fallthrough
       case USER_TYPE_BOOLEAN:
       case USER_TYPE_YESNO:
       case USER_TYPE_ONOFF:
@@ -3023,75 +3030,67 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
   UINT32* word = destPtr;
   BOOLEAN status = TRUE;
 
-  // scan the bits set and collect stats, min Bit, maxBit, count of bits set
-  bitIndex = 0;
-  for (iWord = 0; iWord < 4; ++iWord)
+  
+  
+  if (type == USER_TYPE_ACT_LIST)
   {
-    mask = 1;
-
-    // see which bits are turned on and keep stats
-    for ( iBit=0; iBit < 32; iBit++)
-    {
-      // is the bit on?
-      if (word[iWord] & mask)
-      {
-        // only get to set min once as we walk through the bit array
-        if (minBit == MAX_BIT)
-        {
-          minBit = bitIndex;
-        }
-
-        // usrMax always gets set as we walk through the bit array
-        maxBit = bitIndex;
-
-        // count the total number of bits set
-        bitCount += 1;
-      }
-
-      // move to the next bit
-      bitIndex += 1;
-      mask <<= 1;
-    }
-  }
-
-  // based on the type determine is we are good
-  if (type == USER_TYPE_SNS_LIST)
-  {
-    // range for a SNS_LIST is the number of bits allowed
-    if ( bitCount < usrMin->Uint || bitCount > usrMax->Uint )
-    {
-      status = FALSE;
-    }
-  }
-  else if (type == USER_TYPE_ACT_LIST)
-  {
-    // verify only bit 0-7, 12-19, 27 and 31 are on
-    if ( (word[0] & ~0x880ff0ff) != 0)
-    {
-      status = FALSE;
-    }
-    // verify bit 23-127 are zero
-    else
-    {
-      for ( iWord=1; iWord < 4; ++iWord)
-      {
-        if ( word[iWord] != 0)
-        {
-          status = FALSE;
-          break;
-        }
-      }
-    }
+    // verify only bit 0-7, 12-19, 27 and 31 are on    
+    status = ((word[0] & ~0x880ff0ff) != 0) ? FALSE : TRUE;
   }
   else
   {
-    // range for other types (USER_TYPE_128_LIST) is min/max bit set
-    // - count does not matter
-    if (minBit < usrMin->Uint || maxBit > usrMax->Uint)
+    // scan the bits set and collect stats, min Bit, maxBit, count of bits set
+    bitIndex = 0;
+    for (iWord = 0; iWord < 4; ++iWord)
     {
-      status = FALSE;
+      mask = 1;
+
+      // see which bits are turned on and keep stats
+      for ( iBit=0; iBit < 32; iBit++)
+      {
+        // is the bit on?
+        if (word[iWord] & mask)
+        {
+          // only get to set min once as we walk through the bit array
+          if (minBit == MAX_BIT)
+          {
+            minBit = bitIndex;
+          }
+
+          // usrMax always gets set as we walk through the bit array
+          maxBit = bitIndex;
+
+          // count the total number of bits set
+          bitCount += 1;
+        }
+
+        // move to the next bit
+        bitIndex += 1;
+        mask <<= 1;
+      }
     }
-  }
+
+    // based on the type determine is we are good
+    if (type == USER_TYPE_SNS_LIST)
+    {
+      // range for a SNS_LIST is the number of bits allowed
+      if ( bitCount < usrMin->Uint || bitCount > usrMax->Uint )
+      {
+        status = FALSE;
+      }
+    }  
+    else
+    {
+      // range for other types (USER_TYPE_128_LIST) is min/max bit set
+      // - count does not matter
+      if (minBit < usrMin->Uint || maxBit > usrMax->Uint)
+      {
+        status = FALSE;
+      }
+    }
+  } // process bit lists, 
+
+  
 
   return status;
 }
@@ -3099,6 +3098,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 117  *****************
+ * User: Contractor V&v Date: 10/22/14   Time: 6:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1271 - Initialization of ACTION list exceeds field size
  * 
  * *****************  Version 116  *****************
  * User: John Omalley Date: 4/07/14    Time: 11:54a

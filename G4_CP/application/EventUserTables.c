@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 34 $  $Date: 12-12-19 6:03p $
+$Revision: 35 $  $Date: 10/20/14 3:54p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1506,6 +1506,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 10/20/14   Time: 3:54p
+ * Updated in $/software/control processor/code/application
+ * SCR #1188 - Event History Buffer
  * 
  * *****************  Version 34  *****************
  * User: John Omalley Date: 12-12-19   Time: 6:03p
