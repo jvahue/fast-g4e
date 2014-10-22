@@ -2,7 +2,7 @@
 #define USER_H
 
 /******************************************************************************
-            Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         User.h
@@ -17,7 +17,7 @@
                   defines for user data access (ie. USER_RO)
 
     VERSION
-    $Revision: 47 $  $Date: 12/20/12 5:36p $
+    $Revision: 48 $  $Date: 10/22/14 6:26p $
 
 ******************************************************************************/
 
@@ -129,6 +129,9 @@ typedef enum{
   USER_TYPE_FLOAT64,
   USER_TYPE_END
 }USER_DATA_TYPE;
+
+// NOTE: IMPORTANT!!!!! Update following for largest defined USER_DATA_TYPE
+#define USER_DATA_TYPE_MAX_WORDS 4  // store up to size of USER_TYPE_128_LIST)
 
 /*USER_DATA_ACCESS
   Defines read/write attributes of the parameter this messages accesses
@@ -277,6 +280,11 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 48  *****************
+ * User: Contractor V&v Date: 10/22/14   Time: 6:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1271 - Initialization of ACTION list exceeds field size
  * 
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 12/20/12   Time: 5:36p

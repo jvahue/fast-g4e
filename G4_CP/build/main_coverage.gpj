@@ -102,6 +102,7 @@ FASTII.ld
 ..\system\F7XProtocol.c
 ..\system\EMU150Protocol.c
 ..\system\WatchDog.c
+..\system\IDParamProtocol.c
 ..\test\etm.c
 D:\knowlogic\FAST\dev\CP_Coverage\CP_Cov1\c_cover_ioPWES.c
 D:\knowlogic\FAST\dev\CP\test\TestPoints.c
