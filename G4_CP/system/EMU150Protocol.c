@@ -1,7 +1,7 @@
 #define EMU150_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EMU150Protocol.c
@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 20 $  $Date: 12-11-16 8:12p $     
+      $Revision: 21 $  $Date: 10/23/14 1:30p $     
 
 ******************************************************************************/
 
@@ -1915,7 +1915,7 @@ void EMU150_ProcessChksum (void)
       m_EMU150_Rx_Buff.cksum += curr; 
       
       // Move chksum index pointer to next long word position 
-      m_EMU150_Rx_Buff.cksum_cnt_ptr += 4; 
+      m_EMU150_Rx_Buff.cksum_cnt_ptr += 4;
     }
   } 
 
@@ -1985,7 +1985,7 @@ UINT32 EMU150_CalcCksum ( UINT32 *data_ptr, UINT32 nLongWords )
   cksum = 0; 
   for (i=0;i<nLongWords;i++)
   {
-    cksum += *data_ptr; 
+    cksum += data_ptr[i]; 
   }
   
   // Two's complement the cksum at the end
@@ -2079,6 +2079,11 @@ EMU150_STATUS_PTR EMU150Protocol_GetStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 10/23/14   Time: 1:30p
+ * Updated in $/software/control processor/code/system
+ * SCR #1270 -  EMU150 Configuration Retrieval
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 12-11-16   Time: 8:12p
