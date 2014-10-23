@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 2 $  $Date: 14-10-13 11:25a $
+    $Revision: 3 $  $Date: 14-10-22 1:20p $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
@@ -126,23 +126,23 @@ static USER_MSG_TBL IDParamScrollCfgTbl[] =
 #define P_PARAMS_STR  "P"
 static USER_MSG_TBL IDParamCfgTbl[] =
 { /*Str           Next Tbl Ptr   Handler Func.     Data Type          Access    Parameter                          IndexRange   DataLimit               EnumTbl*/
-  {"MAXWORDS",    NO_NEXT_TABLE, IDParamMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamTemp.maxWords, -1, -1,      5, ID_PARAM_CFG_MAX,    NULL},\
+  {"MAXWORDS",    NO_NEXT_TABLE, IDParamMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamTemp.maxWords, -1, -1,      10, ID_PARAM_CFG_MAX,    NULL},\
   {"SCROLL",      IDParamScrollCfgTbl, NULL, NO_HANDLER_DATA},\
   {P_PARAMS_STR,  IDParamDataCfgTbl, NULL, NO_HANDLER_DATA},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL IDParamStatusFrameFadecTypeTbl[] =
+static USER_MSG_TBL IDParamStatusFrame0TypeTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.      Data Type          Access     Parameter                                                    IndexRange    DataLimit    EnumTbl*/
   {"NUM_WORDS",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].nWords,             1,      3,    NO_LIMIT,    NULL},\
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].nElements,          1,      3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].cntGoodFrames,      1,      3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].lastFrameTime_tick, 1,      3,    NO_LIMIT,    NULL},\
-  {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_FADEC,          1,      3,    NO_LIMIT,    NULL},\
+  {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_STR,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_FADEC,             1,      3,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL IDParamStatusFramePecTypeTbl[] =
+static USER_MSG_TBL IDParamStatusFrame1TypeTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.      Data Type          Access     Parameter                                                    IndexRange    DataLimit    EnumTbl*/
   {"NUM_WORDS",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].nWords,             1,      3,    NO_LIMIT,    NULL},\
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].nElements,          1,      3,    NO_LIMIT,    NULL},\
@@ -160,15 +160,15 @@ static USER_MSG_TBL IDParamStatusTbl[] =
   {"RESYNC_CNT",      NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.cntReSync,          1,   3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.cntGoodFrames,      1,   3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status,  USER_TYPE_UINT32,  USER_RO,    (void *) &statusIDParamTemp.lastFrameTime_tick, 1,   3,    NO_LIMIT,    NULL},\
-  {"FRAME_FADEC",     IDParamStatusFrameFadecTypeTbl, NULL, NO_HANDLER_DATA},
-  {"FRAME_PEC",       IDParamStatusFramePecTypeTbl, NULL, NO_HANDLER_DATA},
+  {"FRAME_0"    ,     IDParamStatusFrame0TypeTbl, NULL, NO_HANDLER_DATA},
+  {"FRAME_1",         IDParamStatusFrame1TypeTbl, NULL, NO_HANDLER_DATA},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL IDParamDebugTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.       Data Type          Access      Parameter                                 IndexRange   DataLimit    EnumTbl*/
   {"ENABLE",          NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_BOOLEAN, USER_RW,    (void *) &debugIDParamTemp.bDebug,         -1,   -1,    NO_LIMIT,    NULL},\
-  {"CHANNEL",         NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_UINT16,  USER_RW,    (void *) &debugIDParamTemp.ch,             -1,   -1,    NO_LIMIT,    NULL},\
+  {"CHANNEL",         NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_UINT16,  USER_RW,    (void *) &debugIDParamTemp.ch,             -1,   -1,    1,     3,    NULL},\
   {"FRAME",           NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_ENUM,    USER_RW,    (void *) &debugIDParamTemp.frameType,      -1,   -1,    NO_LIMIT,    idParamDebugFrameStrs},\
   {"FORMATTED",       NO_NEXT_TABLE, IDParamMsg_Debug,  USER_TYPE_BOOLEAN, USER_RW,    (void *) &debugIDParamTemp.bFormatted,     -1,   -1,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -713,6 +713,11 @@ USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 14-10-22   Time: 1:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263.  Several minor updates to table size and format. 
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
  * Updated in $/software/control processor/code/system
