@@ -1,9 +1,9 @@
-Link Date:	Wed Oct 22 18:31:47 2014
+Link Date:	Thu Oct 23 14:53:12 2014
 Host OS:	Windows Vista Service Pack 1
 Version:	ELXR 5.0 (c) 1998-2009 Green Hills Software    Build: Nov  9 2009
 
 
-Load Map Wed Oct 22 18:31:47 2014
+Load Map Thu Oct 23 14:53:12 2014
 Image Summary
 
   Section              Base      Size(hex)    Size(dec)  SecOffs
@@ -15,18 +15,18 @@ Image Summary
   .stackbase           31f00000  00000000            0   0032408
   .stack               31f00000  00100000      1048576   0032408
   .vector              00100000  00000416         1046   0032408
-  .text                00100420  000727b6       468918   0032828
-  .rodata              00172bd6  00000000            0   00a4fde
-  .secinfo             00172bd8  00000288          648   00a4fe0
-  .fixaddr             00172e60  00000000            0   00a5268
-  .fixtype             00172e60  00000000            0   00a5268
-  .sdata               00172e60  00000000            0   00a5268
-  .syscall             00172e60  00000004            4   00a5268
-  .ROM.data            00172e64  00032268       205416   00001a0
-  .crcDefault          001a50cc  00000004            4   00a526c
-  .buildDate           001a50d0  00000020           32   00a5270
+  .text                00100420  000727c6       468934   0032828
+  .rodata              00172be6  00000000            0   00a4fee
+  .secinfo             00172be8  00000288          648   00a4ff0
+  .fixaddr             00172e70  00000000            0   00a5278
+  .fixtype             00172e70  00000000            0   00a5278
+  .sdata               00172e70  00000000            0   00a5278
+  .syscall             00172e70  00000004            4   00a5278
+  .ROM.data            00172e74  00032268       205416   00001a0
+  .crcDefault          001a50dc  00000004            4   00a527c
+  .buildDate           001a50e0  00000020           32   00a5280
 
-Load Map Wed Oct 22 18:31:47 2014
+Load Map Thu Oct 23 14:53:12 2014
 Module Summary
 
   Origin+Size    Section          Module
@@ -103,7 +103,7 @@ Module Summary
 304f9620+00010c  .bss             UART.o
 00126f2e+0001ea  .text            Version.o
 3189e16c+00000c  .data            Version.o
-001a50d0+000020  .buildDate       Version.o
+001a50e0+000020  .buildDate       Version.o
 00127118+00026a  .text            amdfujiscs.o
 00127384+002108  .text            arinc429.o
 304f972c+000084  .bss             arinc429.o
@@ -124,7 +124,7 @@ Module Summary
 00130a20+00131a  .text            CBITManager.o
 318b6e1c+0001a0  .data            CBITManager.o
 305e28ec+000238  .bss             CBITManager.o
-001a50cc+000004  .crcDefault      CBITManager.o
+001a50dc+000004  .crcDefault      CBITManager.o
 00131d3c+017290  .text            CfgManager.o
 305e2b24+02d8c4  .bss             CfgManager.o
 00148fcc+000ce8  .text            ClockMgr.o
@@ -197,63 +197,63 @@ Module Summary
 00168ef0+003088  .text            F7XProtocol.o
 318be414+002220  .data            F7XProtocol.o
 3183d3a8+0049a8  .bss             F7XProtocol.o
-0016bf78+00293c  .text            EMU150Protocol.o
+0016bf78+002940  .text            EMU150Protocol.o
 318c0634+000820  .data            EMU150Protocol.o
 31841d50+04a700  .bss             EMU150Protocol.o
-0016e8b4+00003c  .text            WatchDog.o
-0016e8f0+001d18  .text            IDParamProtocol.o
+0016e8b8+00003c  .text            WatchDog.o
+0016e8f4+001d18  .text            IDParamProtocol.o
 318c0e54+000908  .data            IDParamProtocol.o
 3188c450+003078  .bss             IDParamProtocol.o
-00170608+000010  .text            libmulti.a
-00170618+000068  .text            libansi.a(ccstrccmp.o)
-00170680+00009a  .text            libansi.a(ccstrtok.o)
+0017060c+000010  .text            libmulti.a
+0017061c+000068  .text            libansi.a(ccstrccmp.o)
+00170684+00009a  .text            libansi.a(ccstrtok.o)
 3188f4c8+000004  .bss             libansi.a(ccstrtok.o)
-0017071a+00004e  .text            libansi.a(ccstrstr.o)
-00170768+00002a  .text            libansi.a(ccstrspn.o)
-00170792+00002c  .text            libansi.a(ccstrpbr.o)
-001707be+000032  .text            libansi.a(ccstrncp.o)
-001707f0+000036  .text            libansi.a(ccstrncm.o)
-00170826+000018  .text            libansi.a(ccstrlen.o)
-0017083e+00002a  .text            libansi.a(ccstrcsp.o)
-00170868+00001a  .text            libansi.a(ccstrcpy.o)
-00170882+000024  .text            libansi.a(ccstrcmp.o)
-001708a6+000026  .text            libansi.a(ccstrchr.o)
-001708cc+000020  .text            libansi.a(ccstrcat.o)
-001708ec+000576  .text            libansi.a(ccefgout.o)
+0017071e+00004e  .text            libansi.a(ccstrstr.o)
+0017076c+00002a  .text            libansi.a(ccstrspn.o)
+00170796+00002c  .text            libansi.a(ccstrpbr.o)
+001707c2+000032  .text            libansi.a(ccstrncp.o)
+001707f4+000036  .text            libansi.a(ccstrncm.o)
+0017082a+000018  .text            libansi.a(ccstrlen.o)
+00170842+00002a  .text            libansi.a(ccstrcsp.o)
+0017086c+00001a  .text            libansi.a(ccstrcpy.o)
+00170886+000024  .text            libansi.a(ccstrcmp.o)
+001708aa+000026  .text            libansi.a(ccstrchr.o)
+001708d0+000020  .text            libansi.a(ccstrcat.o)
+001708f0+000576  .text            libansi.a(ccefgout.o)
 318c175c+000020  .data            libansi.a(ccefgout.o)
-00170e62+0006ea  .text            libansi.a(ccvsprnt.o)
-0017154c+000090  .text            libansi.a(ccsnprtf.o)
-001715dc+00005c  .text            libansi.a(ccsprntf.o)
-00171638+000490  .text            libansi.a(ccdocvt.o)
-00171ac8+00002e  .text            libansi.a(ccexit.o)
-00171af6+00005e  .text            libansi.a(ccwctomb.o)
-00171b54+00013c  .text            libansi.a(ccstrtul.o)
-00171c90+000160  .text            libansi.a(ccstrtol.o)
-00171df0+0000f2  .text            libansi.a(cclocale.o)
+00170e66+0006ea  .text            libansi.a(ccvsprnt.o)
+00171550+000090  .text            libansi.a(ccsnprtf.o)
+001715e0+00005c  .text            libansi.a(ccsprntf.o)
+00171640+000490  .text            libansi.a(ccdocvt.o)
+00171ad0+00002e  .text            libansi.a(ccexit.o)
+00171afe+00005e  .text            libansi.a(ccwctomb.o)
+00171b5c+00013c  .text            libansi.a(ccstrtul.o)
+00171c98+000160  .text            libansi.a(ccstrtol.o)
+00171df8+0000f2  .text            libansi.a(cclocale.o)
 318c177c+000004  .data            libansi.a(cclocale.o)
 3188f4cc+000044  .bss             libansi.a(cclocale.o)
-00171ee2+000010  .text            libansi.a(ccabs.o)
-00171ef2+000018  .text            libansi.a(ccatoi.o)
-00171f0a+00002c  .text            libansi.a(ccmemcmp.o)
-00171f36+000026  .text            libmath.a(indfabs.o)
-00171f60+000578  .text            libmath.a(ccstrtod.o)
-001724d8+000014  .text            libmath.a(ccatof.o)
-001724ec+00013c  .text            libmath.a(indscalbln.o)
-00172628+000144  .text            libind.a(ind64tod.o)
-0017276c+00009c  .text            libstartup.a(ind_uzip.o)
-00172808+000054  .text            libstartup.a(ind_mset.o)
-0017285c+00007c  .text            libstartup.a(ind_mcpy.o)
-001728d8+0000ae  .text            libsys.a(ind_exit.o)
+00171eea+000010  .text            libansi.a(ccabs.o)
+00171efa+000018  .text            libansi.a(ccatoi.o)
+00171f12+00002c  .text            libansi.a(ccmemcmp.o)
+00171f3e+000026  .text            libmath.a(indfabs.o)
+00171f68+000578  .text            libmath.a(ccstrtod.o)
+001724e0+000014  .text            libmath.a(ccatof.o)
+001724f4+00013c  .text            libmath.a(indscalbln.o)
+00172630+000144  .text            libind.a(ind64tod.o)
+00172774+00009c  .text            libstartup.a(ind_uzip.o)
+00172810+000054  .text            libstartup.a(ind_mset.o)
+00172864+00007c  .text            libstartup.a(ind_mcpy.o)
+001728e0+0000ae  .text            libsys.a(ind_exit.o)
 3188f510+000004  .bss             libsys.a(ind_exit.o)
-00172986+00002e  .text            libsys.a(ind_errn.o)
-00172e60+000004  .syscall         libsys.a(ind_dots.o)
-001729b4+000030  .text            libsys.a(ind_call.o)
-001729e4+00010e  .text            libsys.a(ind_crt1.o)
-00172af2+000088  .text            libsys.a(ind_thrd.o)
+0017298e+00002e  .text            libsys.a(ind_errn.o)
+00172e70+000004  .syscall         libsys.a(ind_dots.o)
+001729bc+000030  .text            libsys.a(ind_call.o)
+001729ec+00010e  .text            libsys.a(ind_crt1.o)
+00172afa+000088  .text            libsys.a(ind_thrd.o)
 3188f514+000004  .bss             libsys.a(ind_thrd.o)
-00172b80+000056  .text            libarch.a(indclz32.o)
+00172b90+000056  .text            libarch.a(indclz32.o)
 
-Load Map Wed Oct 22 18:31:47 2014
+Load Map Thu Oct 23 14:53:12 2014
 Global Symbols (sorted alphabetically)
 
  .text            0011c740 A0Str..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
@@ -534,7 +534,7 @@ Global Symbols (sorted alphabetically)
  .text            00161f10 CRC32
  .text            00161cbe CRC_CCITT
  .text            0011fdf2 CRC_CMP
- .crcDefault      001a50cc CRC_DEFAULT
+ .crcDefault      001a50dc CRC_DEFAULT
  .text            0011c670 CRLF..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011fb18 CRLF..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CPBIT.
  .text            00162380 CalculateCheckSum
@@ -642,7 +642,7 @@ Global Symbols (sorted alphabetically)
  .text            0011c72e D5Str..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011c734 D6Str..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
  .text            0011c73a D7Str..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CException.
- .buildDate       001a50d0 DATETIME
+ .buildDate       001a50e0 DATETIME
  .bss             317e6ea8 DEV_EE_BKUP_DevSem..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .bss             317e6aa8 DEV_EE_BKUP_RefCount..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
  .bss             317c62a6 DEV_EE_BKUP_Shadow..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr.
@@ -744,7 +744,7 @@ Global Symbols (sorted alphabetically)
  .text            00149796 DaysPerMonth..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CClockMgr.
  .bss             317e9bf8 DefaultIoResultAddress..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CSpiManager.
  .text            00131e98 DefaultNVCfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCfgManager.
- .text            0017297a DefaultSignalHandler
+ .text            00172982 DefaultSignalHandler
  .text            0015678e Delimiters.MonitorSysCmds.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CMonitor..1
  .bss             317e6eb8 Dev.NV_MgrTask.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..25
  .bss             317e6eb0 DevSectorSize.NV_MgrTask.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CNVMgr..23
@@ -767,7 +767,7 @@ Global Symbols (sorted alphabetically)
  .text            0016c0fe EMU150Msg_ShowConfig..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016bf78 EMU150Msg_Status..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016ce62 EMU150Protocol_DownloadHndl
- .text            0016e8a4 EMU150Protocol_GetStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016e8a8 EMU150Protocol_GetStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016c556 EMU150Protocol_Handler
  .text            0016c21c EMU150Protocol_Initialize
  .text            0016cd56 EMU150Protocol_ReturnFileHdr
@@ -779,10 +779,10 @@ Global Symbols (sorted alphabetically)
  .text            0016d3ea EMU150_CMDS_ACK..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016d314 EMU150_CMDS_HS..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016e712 EMU150_CalcCksum..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
- .text            0016e82e EMU150_CreateSummaryLog..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016e832 EMU150_CreateSummaryLog..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016d912 EMU150_CreateTxPacket..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016ceca EMU150_FileInit
- .text            0016e7ce EMU150_GetCksumStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
+ .text            0016e7d2 EMU150_GetCksumStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016e4f0 EMU150_GetDesiredBaudRateIndex..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016cbf7 EMU150_NAME..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .text            0016d8ac EMU150_NextCmdState..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
@@ -1127,34 +1127,34 @@ Global Symbols (sorted alphabetically)
  .data            318b806c HighLow
  .data            318c0e54 IDParamCfgTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c0fc0 IDParamDataCfgTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016ea16 IDParamDataMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016ea1a IDParamDataMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c13d0 IDParamDebugTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016ebbe IDParamIDSMsg_Status..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016e948 IDParamMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016f0de IDParamMsg_Debug..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016ed74 IDParamMsg_ShowConfig..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016e8f0 IDParamMsg_Status..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016ebc2 IDParamIDSMsg_Status..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016e94c IDParamMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016f0e2 IDParamMsg_Debug..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016ed78 IDParamMsg_ShowConfig..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016e8f4 IDParamMsg_Status..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c10f8 IDParamProtocolRoot..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c10c4 IDParamProtocolRootTblPtr..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016fed4 IDParamProtocol_CalcFrameChksum..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            001703be IDParamProtocol_CheckScrollID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0017024e IDParamProtocol_CheckSyncLoss..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016ff08 IDParamProtocol_ConfirmFrameFmt..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            00170376 IDParamProtocol_CreateSyncLog..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016f9e4 IDParamProtocol_Diplsy_Task
- .text            0016fbae IDParamProtocol_DsbLiveStream
- .text            0016fbbc IDParamProtocol_FrameSearch..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016f7bc IDParamProtocol_GetStatus
- .text            0016f724 IDParamProtocol_Handler
- .text            0016f92c IDParamProtocol_InitUartMgrData
- .text            0016f148 IDParamProtocol_Initialize
- .text            0016ff4a IDParamProtocol_ProcElemID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0017008a IDParamProtocol_ProcFrame..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0017044e IDParamProtocol_ProcScollID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016f8b4 IDParamProtocol_ReturnFileHdr
- .text            0016f7dc IDParamProtocol_SensorSetup
+ .text            0016fed8 IDParamProtocol_CalcFrameChksum..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            001703c2 IDParamProtocol_CheckScrollID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            00170252 IDParamProtocol_CheckSyncLoss..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016ff0c IDParamProtocol_ConfirmFrameFmt..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0017037a IDParamProtocol_CreateSyncLog..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016f9e8 IDParamProtocol_Diplsy_Task
+ .text            0016fbb2 IDParamProtocol_DsbLiveStream
+ .text            0016fbc0 IDParamProtocol_FrameSearch..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016f7c0 IDParamProtocol_GetStatus
+ .text            0016f728 IDParamProtocol_Handler
+ .text            0016f930 IDParamProtocol_InitUartMgrData
+ .text            0016f14c IDParamProtocol_Initialize
+ .text            0016ff4e IDParamProtocol_ProcElemID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0017008e IDParamProtocol_ProcFrame..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            00170452 IDParamProtocol_ProcScollID..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016f8b8 IDParamProtocol_ReturnFileHdr
+ .text            0016f7e0 IDParamProtocol_SensorSetup
  .data            318c0f24 IDParamScrollCfgTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
- .text            0016eafc IDParamScrollMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
+ .text            0016eb00 IDParamScrollMsg_Cfg..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c14d4 IDParamStatusFrame0TypeTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c160c IDParamStatusFrame1TypeTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
  .data            318c11fc IDParamStatusTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CIDParamProtocol.
@@ -1939,14 +1939,14 @@ Global Symbols (sorted alphabetically)
  .bss             30044d24 VfyRow.UploadMgr_MaintainFileTable.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr..28
  .bss             30044d08 VfyRspFailed..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             30044d04 VfyRspId..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            0016e8b4 WatchdogReboot
+ .text            0016e8b8 WatchdogReboot
  .data            318ba6ec YES_NO
  .bss             3000746c _ERR
- .text            001728ec _Exit
+ .text            001728f4 _Exit
  .bss             30001438 _SPIERR
  .vector          00100000 _VECTOR_TABLE
- .text            00172b80 __CLZ32
-                  001a50cc __CRC_END
+ .text            00172b90 __CLZ32
+                  001a50dc __CRC_END
                   00100000 __CRC_START
                   00000000 __Char_Max__
                   31f00000 __SP_END
@@ -1955,103 +1955,103 @@ Global Symbols (sorted alphabetically)
  .bss             3000e520 __atexit_cleanup
                   00000000 __cpp_exception_cleanup
                   00000000 __cpp_exception_init
- .text            00171638 __docvt
- .syscall         00172e60 __dotsyscall
- .text            00172b12 __get_eh_globals
- .text            00172998 __gh_errno_ptr
+ .text            00171640 __docvt
+ .syscall         00172e70 __dotsyscall
+ .text            00172b1a __get_eh_globals
+ .text            001729a0 __gh_errno_ptr
                   00000000 __gh_error_init
- .text            00170b2a __gh_float_printf
- .text            001729a6 __gh_get_errno
- .text            00171114 __gh_hexout
+ .text            00170b2e __gh_float_printf
+ .text            001729ae __gh_get_errno
+ .text            00171118 __gh_hexout
                   00000000 __gh_iob_init
- .text            00172b36 __gh_lock_init
+ .text            00172b3e __gh_lock_init
                   00000000 __gh_long_long_printf
- .text            00171174 __gh_octhexout
- .text            00170e9c __gh_outspaces
- .text            00172986 __gh_set_errno
+ .text            00171178 __gh_octhexout
+ .text            00170ea0 __gh_outspaces
+ .text            0017298e __gh_set_errno
                   00000000 __gh_signal_init
- .text            00170ec8 __gh_strout
+ .text            00170ecc __gh_strout
                   00000000 __gh_uns_long_long_printf
- .text            001711ba __gh_vsprintf
- .text            00170e62 __gh_xxdecout
- .text            00172b26 __ghsLock
- .text            00172b2e __ghsUnlock
- .text            00172af2 __ghs_GetThreadLocalStorageItem
- .text            00172b48 __ghs_RestoreSignalContext
- .text            00172b3e __ghs_SaveSignalContext
+ .text            001711be __gh_vsprintf
+ .text            00170e66 __gh_xxdecout
+ .text            00172b2e __ghsLock
+ .text            00172b36 __ghsUnlock
+ .text            00172afa __ghs_GetThreadLocalStorageItem
+ .text            00172b50 __ghs_RestoreSignalContext
+ .text            00172b46 __ghs_SaveSignalContext
                   3188f518 __ghs_allocatedramend
- .text            00172954 __ghs_at_exit
+ .text            0017295c __ghs_at_exit
                   00000000 __ghs_board_cache_sync
                   00000000 __ghs_board_devices_init
                   00000000 __ghs_board_memory_init
                   80010000 __ghs_cframstart
                   00000000 __ghs_checksum
- .text            0017276c __ghs_decompress
- .text            00172b6a __ghs_flock_create
- .text            00172b72 __ghs_flock_destroy
- .text            00172b50 __ghs_flock_file
- .text            00172b60 __ghs_ftrylock_file
- .text            00172b58 __ghs_funlock_file
+ .text            00172774 __ghs_decompress
+ .text            00172b72 __ghs_flock_create
+ .text            00172b7a __ghs_flock_destroy
+ .text            00172b58 __ghs_flock_file
+ .text            00172b68 __ghs_ftrylock_file
+ .text            00172b60 __ghs_funlock_file
  .text            0012a11c __ghs_ind_crt0
- .text            001729e4 __ghs_ind_crt1
+ .text            001729ec __ghs_ind_crt1
                   00000000 __ghs_init_d2
                   00000000 __ghs_init_d3
                   00000000 __ghs_init_d4
                   00000000 __ghs_init_d5
                   00000000 __ghs_manprf_init
- .text            00171f0a __ghs_memcmp
+ .text            00171f12 __ghs_memcmp
                   318c1a2c __ghs_pramend
                   318c1780 __ghs_pramstart
                   00000000 __ghs_rambootcodeend
                   00000000 __ghs_rambootcodestart
                   31f00000 __ghs_ramend
                   30000000 __ghs_ramstart
-                  00172e60 __ghs_rombootcodeend
+                  00172e70 __ghs_rombootcodeend
                   00100420 __ghs_rombootcodestart
                   02000000 __ghs_romend
                   00000000 __ghs_romstart
- .text            001708cc __ghs_strcat
- .text            001708a6 __ghs_strchr
- .text            00170882 __ghs_strcmp
- .text            00170868 __ghs_strcpy
- .text            00170826 __ghs_strlen
- .text            001707f0 __ghs_strncmp
- .text            001707be __ghs_strncpy
- .text            0017071a __ghs_strstr
- .text            001729b4 __ghs_syscall
+ .text            001708d0 __ghs_strcat
+ .text            001708aa __ghs_strchr
+ .text            00170886 __ghs_strcmp
+ .text            0017086c __ghs_strcpy
+ .text            0017082a __ghs_strlen
+ .text            001707f4 __ghs_strncmp
+ .text            001707c2 __ghs_strncpy
+ .text            0017071e __ghs_strstr
+ .text            001729bc __ghs_syscall
                   00000000 __ghs_undefined_func
- .fixaddr         00172e60 __ghsbegin_fixaddr
- .fixtype         00172e60 __ghsbegin_fixtype
+ .fixaddr         00172e70 __ghsbegin_fixaddr
+ .fixtype         00172e70 __ghsbegin_fixtype
                   00000000 __ghsbegin_picbase
                   00000000 __ghsbegin_pidbase
                   00000000 __ghsbegin_robase
  .sdabase         318c1a2c __ghsbegin_sdabase
- .secinfo         00172bd8 __ghsbegin_secinfo
- .secinfo         00172bf0 __ghsbinfo_aclear
- .secinfo         00172bfc __ghsbinfo_acopy
- .secinfo         00172bd8 __ghsbinfo_clear
- .secinfo         00172bfc __ghsbinfo_comacopy
- .secinfo         00172bfc __ghsbinfo_comcopy
- .secinfo         00172bfc __ghsbinfo_comtcopy
- .secinfo         00172bf0 __ghsbinfo_copy
- .secinfo         00172bfc __ghsbinfo_tcopy
- .secinfo         00172bf0 __ghseinfo_clear
- .secinfo         00172bfc __ghseinfo_comcopy
- .secinfo         00172bfc __ghseinfo_copy
- .fixaddr         00172e60 __ghsend_fixaddr
+ .secinfo         00172be8 __ghsbegin_secinfo
+ .secinfo         00172c00 __ghsbinfo_aclear
+ .secinfo         00172c0c __ghsbinfo_acopy
+ .secinfo         00172be8 __ghsbinfo_clear
+ .secinfo         00172c0c __ghsbinfo_comacopy
+ .secinfo         00172c0c __ghsbinfo_comcopy
+ .secinfo         00172c0c __ghsbinfo_comtcopy
+ .secinfo         00172c00 __ghsbinfo_copy
+ .secinfo         00172c0c __ghsbinfo_tcopy
+ .secinfo         00172c00 __ghseinfo_clear
+ .secinfo         00172c0c __ghseinfo_comcopy
+ .secinfo         00172c0c __ghseinfo_copy
+ .fixaddr         00172e70 __ghsend_fixaddr
  .stack           32000000 __ghsend_stack
- .text            001726bc __i64tod
- .secinfo         00172bfc __secinfo
+ .text            001726c4 __i64tod
+ .secinfo         00172c0c __secinfo
  .bss             3000e524 __stdio_cleanup
- .text            00172628 __u64tod
- .text            001728d8 _enter
- .text            001728ec _exit
+ .text            00172630 __u64tod
+ .text            001728e0 _enter
+ .text            001728f4 _exit
  .bss             3000e4f0 _multiArgs
- .text            00170614 _multibufSize
+ .text            00170618 _multibufSize
  .bss             300156b4 _multibuffer
- .text            00170608 _multiend
+ .text            0017060c _multiend
  .text            0012a070 _start
- .text            00171ee2 abs
+ .text            00171eea abs
  .data            318b835c acsCfgTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            318b8084 acsCmd..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .data            318b82dc acsMode..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
@@ -2340,8 +2340,8 @@ Global Symbols (sorted alphabetically)
  .bss             304fb1c4 arinc429SysStatusTemp_Rx..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .bss             304fb200 arinc429SysStatusTemp_Tx..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .data            318b66f0 arincSysStatusStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            001724d8 atof
- .text            00171ef2 atoi
+ .text            001724e0 atof
+ .text            00171efa atoi
  .bss             3001790c autoUploadTaskData..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .pbss            318c1780 bDIO_OutputShadow..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
  .bss             304e45ec bDebounceActive..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
@@ -2437,7 +2437,7 @@ Global Symbols (sorted alphabetically)
  .bss             316f6de8 dmpBlock..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDataManager.
  .bss             317911c4 doCleanup..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .text            0014ff34 driverInitList..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager.
- .text            001708ec efout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccefgout.
+ .text            001708f0 efout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccefgout.
  .data            318c0634 emu150CfgTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .bss             31841db4 emu150CfgTemp..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
  .data            318c0dec emu150DebugTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEMU150Protocol.
@@ -2508,8 +2508,8 @@ Global Symbols (sorted alphabetically)
  .data            318998b4 eventTableStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvent.
  .data            31893d6c eventTableType..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvent.
  .data            31895fdc evt_Region_UserEnumType..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEvent.
- .text            00171ac8 exit
- .text            00171f36 fabs
+ .text            00171ad0 exit
+ .text            00171f3e fabs
  .text            0011062d fact.User_AuthenticateModeRequest.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser..14
  .bss             300178d0 fastStatus..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .bss             30017730 fast_cfg_temp..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
@@ -2563,7 +2563,7 @@ Global Symbols (sorted alphabetically)
  .bss             318014b8 liveDataTemp..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            318bc9fc liveDataType..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            318b9c7c lm_UserEnumPriority
- .text            00171e76 localeconv
+ .text            00171e7e localeconv
  .bss             317911d8 logBuffer..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             31707108 logCmdEraseBlock..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
  .bss             3170703c logConfig..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CLogManager.
@@ -2827,9 +2827,9 @@ Global Symbols (sorted alphabetically)
  .bss             3180605c maxSensorUsed..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            318ba69c memInfoTable
  .data            318ba6d4 memInfoTableLen
- .text            00171f0a memcmp
- .text            0017285c memcpy
- .text            00172808 memset
+ .text            00171f12 memcmp
+ .text            00172864 memcpy
+ .text            00172810 memset
  .bss             30007624 mifPulse
  .bss             317fcb90 minuteCounter.UTIL_MinuteTimerDisplay.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtility..4
  .bss             3004be1f msBuffer..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
@@ -2902,7 +2902,7 @@ Global Symbols (sorted alphabetically)
  .bss             31700618 sResultBuffer.Flt_UserMessageRecentAll.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr..0
  .bss             31707038 sameIdCount.Im_StartupTickHandler.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CInitializationManager..3
  .data            318bbfe8 sampleType..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
- .text            001724ec scalbln
+ .text            001724f4 scalbln
  .bss             317fcb8c secondCounter.UTIL_MinuteTimerDisplay.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtility..3
  .data            318bc028 sensorCalConfigCmd..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            318bba68 sensorCmd..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
@@ -2914,8 +2914,8 @@ Global Symbols (sorted alphabetically)
  .bss             31801428 sensorTemp..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .data            318bbfb0 sensorType..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Csensor.
  .bss             317027d4 setFaultInitialized..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFaultMgr.
- .text            00171df0 setlocale
- .text            001715c0 snprintf
+ .text            00171df8 setlocale
+ .text            001715c4 snprintf
  .data            318906dc snsrSummaryEntry0..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            3189087c snsrSummaryEntry1..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            3189171c snsrSummaryEntry10..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
@@ -2933,9 +2933,9 @@ Global Symbols (sorted alphabetically)
  .data            318913dc snsrSummaryEntry8..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            3189157c snsrSummaryEntry9..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CEngineRun.
  .data            3189eda8 speedStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
- .text            0017160a sprintf
- .text            00171622 sputc..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsprntf.
- .text            0017154c sputc_limit..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsnprtf.
+ .text            0017160e sprintf
+ .text            00171626 sputc..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsprntf.
+ .text            00171550 sputc_limit..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccsnprtf.
  .data            3189a604 stabCritTbl..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrend.
  .bss             304e002c startHSTick..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCreep.
  .bss             317fcb94 startTime.UTIL_MinuteTimerDisplay.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUtility..5
@@ -2954,24 +2954,24 @@ Global Symbols (sorted alphabetically)
  .bss             30017a04 str.FSM_GetRunningTasks.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTStateMgr..8
  .bss             3180995c str.Trigger_CfgExprStrCmd.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Ctrigger..6
  .bss             304e24c4 strDateTime.CreepMsg_UserMessageRecentUpdate.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CCreep..13
- .text            00170618 strcasecmp
- .text            001708cc strcat
- .text            001708a6 strchr
- .text            00170882 strcmp
- .text            00170868 strcpy
- .text            0017083e strcspn
- .text            00170826 strlen
- .text            001707f0 strncmp
- .text            001707be strncpy
+ .text            0017061c strcasecmp
+ .text            001708d0 strcat
+ .text            001708aa strchr
+ .text            00170886 strcmp
+ .text            0017086c strcpy
+ .text            00170842 strcspn
+ .text            0017082a strlen
+ .text            001707f4 strncmp
+ .text            001707c2 strncpy
  .text            001625a6 strncpy_safe
- .text            00170792 strpbrk
- .text            00170768 strspn
- .text            0017071a strstr
- .text            00171f60 strtod
- .text            001706da strtok
- .text            00170680 strtok_r
- .text            00171c90 strtol
- .text            00171b54 strtoul
+ .text            00170796 strpbrk
+ .text            0017076c strspn
+ .text            0017071e strstr
+ .text            00171f68 strtod
+ .text            001706de strtok
+ .text            00170684 strtok_r
+ .text            00171c98 strtol
+ .text            00171b5c strtoul
  .data            3189ede0 subProtocolStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
  .bss             300178ec swVersion..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .data            318a2244 swapLabelStrsRx..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5Carinc429mgr.
@@ -3051,7 +3051,7 @@ Global Symbols (sorted alphabetically)
  .data            318bdeac uartMgrsDBStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .data            318bdefc uartMgrsDuplexStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
  .data            318bdedc uartMgrsParityStrs..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUartMgr.
- .text            001710de unsout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccvsprnt.
+ .text            001710e2 unsout..trg.2Fcf_floate.2Fobjs.2Flibs.2Flibansi.2Fccvsprnt.
  .data            31893340 upload_cmd..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
  .bss             30017910 upload_immediate_after_download.FAST_UploadCheckTask.D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr..18
  .data            318937ec upload_verify_state_enum..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
@@ -3063,10 +3063,10 @@ Global Symbols (sorted alphabetically)
  .bss             3004b5d0 userProcessed..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
  .bss             3004b5cc userRequest..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUser.
  .data            31893410 vfy_cmd..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CUploadMgr.
- .text            00171572 vsnprintf
- .text            001715dc vsprintf
+ .text            00171576 vsnprintf
+ .text            001715e0 vsprintf
  .bss             304e45e8 waFailLogRecorded..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
- .text            00171af6 wctomb
+ .text            00171afe wctomb
  .bss             300178e9 wlanOverride..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CFASTMgr.
  .text            0011b850 wrapAround..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
  .bss             304e45e4 wrapFailCounts..D.3A.5Cknowlogic.5CFAST.5Cdev.5CG4E.5CG4_CP.5Cbuild.5CDIO.
