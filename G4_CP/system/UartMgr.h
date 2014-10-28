@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 18 $  $Date: 14-10-08 6:56p $
+      $Revision: 19 $  $Date: 14-10-27 9:10p $
 
 ******************************************************************************/
 
@@ -79,6 +79,7 @@ typedef void    (*PROTOCOL_DOWNLOAD_HNDL) ( UINT8 port,
                                             BOOLEAN *bNewRec,
                                             UINT32  **pSize,
                                             UINT8   **pData );
+typedef BOOLEAN (*PROTOCOL_CH_READY_HNDL)  ( UINT16 ch );
 
 
 /**********************************
@@ -281,6 +282,7 @@ typedef struct
   PROTOCOL_HNDL          exec_protocol;
   PROTOCOL_FILE_HDR      get_protocol_fileHdr;
   PROTOCOL_DOWNLOAD_HNDL download_protocol_hndl;
+  PROTOCOL_CH_READY_HNDL get_protocol_ready_hndl;
 } UARTMGR_TASK_PARAMS, *UARTMGR_TASK_PARAMS_PTR;
 
 typedef struct
@@ -439,6 +441,11 @@ EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
  *  MODIFICATIONS
  *    $History: UartMgr.h $
  * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 14-10-27   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol, Design Review Updates. 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system

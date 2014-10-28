@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 3 $  $Date: 14-10-13 11:25a $
+      $Revision: 4 $  $Date: 14-10-27 9:10p $
 
 ******************************************************************************/
 
@@ -63,7 +63,7 @@
 
 #define ID_PARAM_FRAME_IDLE_TIMEOUT 1000
 #define ID_PARAM_FRAME_CONSEC_BAD_CNT 1
-#define ID_PARAM_FRAME_CONSEC_CRC_CNT 3
+#define ID_PARAM_FRAME_CONSEC_CHKSUM_CNT 1
 
 #define ID_PARAM_DEBUG_STR_MAX  128
 #define ID_PARAM_DEBUG_CHARS_PER_LINE 32
@@ -206,8 +206,7 @@ static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
                                            ID_PARAM_STATUS_PTR pStatus,
                                            ID_PARAM_RAW_BUFFER_PTR buff_ptr,
                                            UINT32 tick );
-static void IDParamProtocol_CreateSyncLog( BOOLEAN bIdleTimeOut,
-                                           ID_PARAM_STATUS_PTR pStatus );
+static void IDParamProtocol_CreateSyncLog( ID_PARAM_STATUS_PTR pStatus );
 static BOOLEAN IDParamProtocol_CheckScrollID( UINT16 elemID, UINT16 ch, UINT16 pos,
                                               UINT16 frameType );
 static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
@@ -327,7 +326,7 @@ void IDParamProtocol_Initialize ( void )
 
 #ifdef ID_TIMING_TEST
   /*vcast_dont_instrument_start*/
-  for (i=0;i<ID_TIMING_TEST;i++)
+  for (i=0;i<ID_TIMING_BUFF_MAX;i++)
   {
     m_IDTiming_Buff[i] = 0;
   }
@@ -752,6 +751,29 @@ void IDParamProtocol_DsbLiveStream(void)
 }
 
 
+/******************************************************************************
+ * Function:     IDParamProtocol_Ready
+ *
+ * Description:  Returns the Protocol Channel Ready Status.  The Status is consider
+ *               ready when the list of Element ID from data frame is known.
+ *
+ * Parameters:   ch - UART serial channel cfg for this protocol
+ *
+ * Returns:      TRUE - if protocol channel is ready.
+ *
+ * Notes:
+ *  - When the list of Element IDS (does not include Scroll ID) of both
+ *    FADEC and PEC are all known, the protocol ch will be consider ready.
+ *  - Note, channel is consider Active when at least one packet is encountered
+ *
+ *****************************************************************************/
+BOOLEAN IDParamProtocol_Ready(UINT16 ch)
+{
+  return ( m_IDParam_Status[ch].frameType[ID_PARAM_FRAME_TYPE_FADEC].bListComplete &&
+           m_IDParam_Status[ch].frameType[ID_PARAM_FRAME_TYPE_PEC].bListComplete );
+}
+
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -881,10 +903,10 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
             }
           }
           else { // checksum does not match !
-            pStatus->cntBadCRC++;
-            pStatus->cntBadCrcInRow =
-                (pStatus->cntBadCrcInRow < ID_PARAM_FRAME_CONSEC_CRC_CNT) ?
-                (pStatus->cntBadCrcInRow + 1) : pStatus->cntBadCrcInRow;
+            pStatus->cntBadChksum++;
+            pStatus->cntBadChksumInRow =
+                (pStatus->cntBadChksumInRow < ID_PARAM_FRAME_CONSEC_CHKSUM_CNT) ?
+                (pStatus->cntBadChksumInRow + 1) : pStatus->cntBadChksumInRow;
           }
 
           if (bOk == TRUE)
@@ -1018,6 +1040,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
   UINT16 index, elemID, frameType, i;
   ID_PARAM_FRAME_PTR frameData_ptr;
   UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;
+  ID_PARAM_FRAME_TYPE_PTR pFrameTypeStats;
 
   // Get Element ID / Pos Words from the frame header
   // Element Position in frame.  Bit 15 = LRU flag (1=PEC,0=FADEC), Bit 0 = 1
@@ -1030,7 +1053,8 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
   frameData_ptr = (ID_PARAM_FRAME_PTR) &m_IDParam_Frame[ch][frameType];
   // Update # element count, if not updated.
   frameData_ptr->size = (pFrameHdr->totalElements >> 1);
-    // Don't expect frame count to change. Do we add code to check ?
+  pFrameTypeStats = (ID_PARAM_FRAME_TYPE_PTR) &m_IDParam_Status[ch].frameType[frameType];
+  // Don't expect frame count to change. Do we add code to check ?
 
   if ( frameData_ptr->data[index].elementID == ID_PARAM_NOT_USED )
   { // Assign slot to this elem ID
@@ -1064,6 +1088,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
     {
       frameData_ptr->data[index].index = ID_PARAM_INDEX_SCROLL;
     }
+    pFrameTypeStats->cntElement++;  // Update element update count
   } // end of if elementID == ID_PARAM_NOT_USED
   else
   { // Check that this element ID at this pos has not changed !
@@ -1128,6 +1153,10 @@ static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
   pFrameTypeStats->cntGoodFrames++;
   pFrameTypeStats->lastFrameTime_tick = frameTime;
   m_IDParam_Status[ch].cntGoodFrames++;
+  if (pFrameTypeStats->bListComplete == FALSE) {
+    pFrameTypeStats->bListComplete =
+       (pFrameTypeStats->cntElement >= pFrameTypeStats->nElements) ? TRUE : FALSE;
+  }
 
   // Loop thru m_IDParam_FrameBuff frame data, with m_IDParam_Frame as corresponding list
   //  based on the number of element indicated in Frame
@@ -1194,7 +1223,7 @@ static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
   { // If several bad frames set sync to FALSE
     bSync = TRUE;
     if ( (pStatus->cntBadFrameInRow >= ID_PARAM_FRAME_CONSEC_BAD_CNT) ||
-         (pStatus->cntBadCRC >= ID_PARAM_FRAME_CONSEC_CRC_CNT) )
+         (pStatus->cntBadChksumInRow >= ID_PARAM_FRAME_CONSEC_CHKSUM_CNT) )
     {
       bSync = FALSE;
     }
@@ -1215,13 +1244,15 @@ static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
     {
       pStatus->sync = FALSE; // Reset to FALSE.  Loss Sync
       GSE_DebugStr(NORMAL,TRUE,"IDParam: Sync Loss (Ch = %d)\r\n", ch);
-      IDParamProtocol_CreateSyncLog ( bIdleTimeOut, pStatus );
+      pStatus->cntIdleTimeOut = bIdleTimeOut ? (pStatus->cntIdleTimeOut + 1) :
+                                                pStatus->cntIdleTimeOut;
+      IDParamProtocol_CreateSyncLog ( pStatus );
     }
   }
   else
   {
     pStatus->cntBadFrameInRow = 0;
-    pStatus->cntBadCrcInRow = 0;
+    pStatus->cntBadChksumInRow = 0;
     pStatus->lastFrameTime_tick = tick;
     if (pStatus->sync == FALSE)
     {
@@ -1247,15 +1278,14 @@ static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
  * Notes:       none
  *
  *****************************************************************************/
-static void IDParamProtocol_CreateSyncLog( BOOLEAN bIdleTimeOut,
-                                           ID_PARAM_STATUS_PTR pStatus )
+static void IDParamProtocol_CreateSyncLog( ID_PARAM_STATUS_PTR pStatus )
 {
   ID_PARAM_SYNC_LOSS_LOG log;
 
-  log.cntBadCRC = pStatus->cntBadCRC;
+  log.cntBadChksum = pStatus->cntBadChksum;
   log.cntBadFrame = pStatus->cntBadFrame;
   log.cntResync = pStatus->cntReSync;
-  log.idleTimeOut = bIdleTimeOut;
+  log.cntIdleTimeOut = pStatus->cntIdleTimeOut;
   LogWriteSystem (SYS_ID_UART_ID_PARAM_SYNC_LOSS, LOG_PRIORITY_LOW, &log, sizeof(log), NULL);
 }
 
@@ -1417,6 +1447,11 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 14-10-27   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol, Design Review Updates. 
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
  * Updated in $/software/control processor/code/system
