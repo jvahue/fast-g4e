@@ -628,249 +628,256 @@ static USER_MSG_TBL eventRoot [] =
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
-static
-USER_MSG_TBL    rootEventMsg = {"EVENT",eventRoot,NULL,NO_HANDLER_DATA};
+
 //*********************************************************************************************
 // Event Tables - EVENT Table User and Configuration Table
 //*********************************************************************************************
+
+// Macro defines the 'prototype' declaration for entry in EventTable  Region-Segment Configuration
+#define EVNT_TBL_SEG_ENTRY_DEF(r, s) &configEventTableTemp.regCfg.region[r].segment[s]
+
 static USER_MSG_TBL eventTableRegionA [] =
 {
-  /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                                IndexRange        DataLimit    EnumTbl*/
-  { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-  { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-  { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-  { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-  { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-  { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[0].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[0].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[0].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-  { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(0,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[0].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { NULL,                NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableRegionB [] =
 {
-   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                                IndexRange        DataLimit    EnumTbl*/
-   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[1].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[1].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(1,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[1].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[1].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,                NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableRegionC [] =
 {
-   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                                IndexRange        DataLimit    EnumTbl*/
-   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[2].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[2].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(2,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[2].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[2].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableRegionD [] =
 {
-   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                                IndexRange        DataLimit    EnumTbl*/
-   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[3].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[3].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(3,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[3].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[3].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableRegionE [] =
 {
-   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                                IndexRange        DataLimit    EnumTbl*/
-   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[4].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[4].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(4,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[4].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[4].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableRegionF [] =
 {
-   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                              IndexRange        DataLimit    EnumTbl*/
-   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[0].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[0].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[0].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[0].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   /* Str                 Next Tbl Ptr   Handler Func.       Data Type         Access   Parameter                                  IndexRange        DataLimit    EnumTbl*/
+   { "SEG0_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,0).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,0).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,0).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG0_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,0).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[1].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[1].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[1].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[1].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,1).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,1).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,1).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG1_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,1).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[2].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[2].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[2].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[2].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,2).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,2).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,2).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG2_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,2).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[3].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[3].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[3].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[3].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,3).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,3).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,3).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG3_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,3).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[4].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[4].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[4].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[4].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,4).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,4).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,4).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG4_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,4).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[5].fStartValue,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[5].nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, &configEventTableTemp.region[5].segment[5].fStopValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
-   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, &configEventTableTemp.region[5].segment[5].nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_VAL",    NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,5).fStartValue,   0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_START_TIME_MS",NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,5).nStartTime_ms, 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_VAL",     NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_FLOAT,  USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,5).fStopValue,    0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "SEG5_STOP_TIME_MS", NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_UINT32, USER_RW, EVNT_TBL_SEG_ENTRY_DEF(5,5).nStopTime_ms,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
 
-   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.region[5].nAction,                 0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
+   { "ACTION",            NO_NEXT_TABLE, EventTable_UserCfg, USER_TYPE_ACT_LIST,USER_RW, &configEventTableTemp.regCfg.region[5].nAction,  0,(MAX_TABLES-1), NO_LIMIT,    NULL       },
    { NULL,                NULL,          NULL,               NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableCmd [] =
 {
-  /* Str              Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                                    IndexRange           DataLimit            EnumTbl*/
-  { "SENSORINDEX",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,               0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
-  { "MINSENSORVALUE", NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,      0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  /* Str                 Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                                            IndexRange           DataLimit            EnumTbl*/
+  { "SENSORINDEX",       NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,                       0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
+  { "MINSENSORVALUE",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,              0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x7f7fc99e,          NULL            },
+  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x7f7fc99e,          NULL            },
+  { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
   // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
-  { "HYSTERESISPOS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisPos,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
-  { "HYSTERESISNEG",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fHysteresisNeg,        0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
-  { "TRANSIENT_MS",   NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
-  { "REGION_A",       eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
-  { "REGION_B",       eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
-  { "REGION_C",       eventTableRegionC,         NULL,                  NO_HANDLER_DATA },
-  { "REGION_D",       eventTableRegionD,         NULL,                  NO_HANDLER_DATA },
-  { "REGION_E",       eventTableRegionE,         NULL,                  NO_HANDLER_DATA },
-  { "REGION_F",       eventTableRegionF,         NULL,                  NO_HANDLER_DATA },
-  { NULL,             NULL,                      NULL,                  NO_HANDLER_DATA }
+  { "HYSTERESISPOS",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisPos,                0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
+  { "HYSTERESISNEG",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisNeg,                0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
+  { "TRANSIENT_MS",      NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.regCfg.nTransientAllowance_ms,        0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "REGION_A",          eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
+  { "REGION_B",          eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
+  { "REGION_C",          eventTableRegionC,         NULL,                  NO_HANDLER_DATA },
+  { "REGION_D",          eventTableRegionD,         NULL,                  NO_HANDLER_DATA },
+  { "REGION_E",          eventTableRegionE,         NULL,                  NO_HANDLER_DATA },
+  { "REGION_F",          eventTableRegionF,         NULL,                  NO_HANDLER_DATA },
+  { NULL,                NULL,                      NULL,                  NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL eventTableStatus [] =
@@ -916,6 +923,9 @@ static USER_MSG_TBL eventTableRoot [] =
    { DISPLAY_CFG, NO_NEXT_TABLE,    EventTable_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,        NULL,             NULL,                  NO_HANDLER_DATA}
 };
+
+static
+USER_MSG_TBL rootEventMsg = {"EVENT",eventRoot, NULL,NO_HANDLER_DATA};
 
 static
 USER_MSG_TBL rootEventTableMsg = {"EVENTTABLE", eventTableRoot, NULL, NO_HANDLER_DATA};
@@ -1393,7 +1403,7 @@ USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
                                            ts.Hour, ts.Minute, ts.Second );
 
       // Create line item for this event history.
-      snprintf ( tempStr, sizeof(tempStr), "\r\n%*s %*s %s %04d %s",                                         
+      snprintf ( tempStr, sizeof(tempStr), "\r\n%*s %*s %s %04d %s",
                                            MAX_EVENT_ID,   m_EventCfg[i].sEventID,
                                            MAX_EVENT_NAME, m_EventCfg[i].sEventName,
                                            timeStr,
@@ -1405,7 +1415,7 @@ USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
     }
 
   }
-  // Upon ending, print a final msg in case no events were displayed 
+  // Upon ending, print a final msg in case no events were displayed
   snprintf( tempStr, sizeof(tempStr), "\r\nHistory display completed\r\n\0" );
   len = strlen ( tempStr );
   memcpy( (void *) &outputBuffer[nOffset], tempStr, len );
@@ -1506,27 +1516,27 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
- * 
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p
  * Updated in $/software/control processor/code/application
  * SCR #1188 - Event History Buffer
- * 
+ *
  * *****************  Version 34  *****************
  * User: John Omalley Date: 12-12-19   Time: 6:03p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-12-05   Time: 8:17a
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:25p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:33p
  * Updated in $/software/control processor/code/application

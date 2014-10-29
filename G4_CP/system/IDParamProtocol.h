@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 2 $  $Date: 14-10-13 11:25a $
+      $Revision: 3 $  $Date: 14-10-27 9:10p $
 
 ******************************************************************************/
 
@@ -161,22 +161,25 @@ typedef struct
   UINT32 lastFrameTime_tick; // Tick time of last good frame received
   UINT32 cntElemIDPosChanged;// # Times Elem ID Pos has changed
   UINT32 cntSizeChanged;// # Time size value has changed
+  BOOLEAN bListComplete; // All element IDs known for this list
+  UINT32 cntElement;     // Count of # updates to Element ID Lookup Table during init of Table
 } ID_PARAM_FRAME_TYPE, *ID_PARAM_FRAME_TYPE_PTR;
 
 typedef struct
 {
   BOOLEAN sync;         // Run time sync flag.  Current state.
-  UINT32 cntBadCRC;     // Cnt # of bad crc frames received
+  UINT32 cntBadChksum;  // Cnt # of bad chksum frames received
   UINT32 cntBadFrame;   // Cnt # of bad frames (CRC is good) received
   UINT32 cntReSync;     // Cnt # of "resynce" encountered (ref Req on "sync")
   UINT32 cntGoodFrames; // Cnt # total good frames received (both FADEC/PEC)
+  UINT32 cntIdleTimeOut;// Cnt # of loss sync due to Idle Timeout
   UINT32 lastFrameTime_tick; // Tick time of last good frame received
   ID_PARAM_FRAME_TYPE frameType[ID_PARAM_NUM_FRAME_TYPES]; // FADEC or PEC specific
                                                            //    frame data summary
   UINT16 cntRecParam;   // Params sel in cfg to be recorded
   UINT16 cntMonParam;   // Params sel in cfg + sensor request (don't overlap cfg) to be mon
   UINT32 cntBadFrameInRow; // Keeps track of 1 bad Frame in a Row.
-  UINT32 cntBadCrcInRow;   // Keeps track of 3 bad CRC in a Row
+  UINT32 cntBadChksumInRow;// Keeps track of 3 bad Chksum in a Row
 } ID_PARAM_STATUS, *ID_PARAM_STATUS_PTR;
 
 
@@ -201,10 +204,10 @@ typedef struct
 
 typedef struct
 {
-  UINT32 cntBadCRC;   // Cnt of Bad CRC detected since Power Up
-  UINT32 cntBadFrame; // Cnt of Bad Frame detected since Power Up
-  UINT32 cntResync;   // Cnt of ReSync since Power Up
-  BOOLEAN idleTimeOut;// T=Sync Loss due to idle timeout, F=Sync loss due to CRC/Bad Frame
+  UINT32 cntBadChksum;  // Cnt of Bad checksum detected since Power Up
+  UINT32 cntBadFrame;   // Cnt of Bad Frame detected since Power Up
+  UINT32 cntResync;     // Cnt of ReSync since Power Up
+  UINT32 cntIdleTimeOut;// Cnt of loss sync due to Idle TimeOut
 } ID_PARAM_SYNC_LOSS_LOG, *ID_PARAM_SYNC_LOSS_LOG_PTR;
 #pragma pack()
 
@@ -243,6 +246,8 @@ EXPORT void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr );
 EXPORT void IDParamProtocol_Diplsy_Task ( void *pParam );
 EXPORT void IDParamProtocol_DsbLiveStream ( void );
 
+EXPORT BOOLEAN IDParamProtocol_Ready( UINT16 ch );
+
 #endif // ID_PARAM_PROTOCOL_H
 
 
@@ -250,6 +255,11 @@ EXPORT void IDParamProtocol_DsbLiveStream ( void );
  *  MODIFICATIONS
  *    $History: IDParamProtocol.h $
  * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 14-10-27   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol, Design Review Updates. 
+ *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
  * Updated in $/software/control processor/code/system

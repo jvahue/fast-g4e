@@ -15,7 +15,7 @@
                        the end has been reached.
 
    VERSION
-      $Revision: 112 $  $Date: 9/03/14 5:18p $
+      $Revision: 113 $  $Date: 10/29/14 3:37p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1382,7 +1382,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
             else // Memory is full
             {
                 pTCB->state                   = LOG_MNG_IDLE;
-                *(pTCB->currentEntry.pStatus) = LOG_REQ_COMPLETE;
+                *(pTCB->currentEntry.pStatus) = LOG_REQ_FAILED;
             }
          }
          else
@@ -1501,7 +1501,7 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
       else // Memory is full or faulted
       {
          pTCB->state                   = LOG_MNG_IDLE;
-         *(pTCB->currentEntry.pStatus) = LOG_REQ_COMPLETE;
+         *(pTCB->currentEntry.pStatus) = LOG_REQ_FAILED;
       }
    }
    else if (LOG_REQ_ERASE == pTCB->currentEntry.reqType)
@@ -2932,6 +2932,11 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 113  *****************
+ * User: Contractor V&v Date: 10/29/14   Time: 3:37p
+ * Updated in $/software/control processor/code/system
+ * SCR #1251 - EMU150 Download Records Lost - modfix LogMng start/pending.
  * 
  * *****************  Version 112  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:18p
