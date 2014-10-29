@@ -117,8 +117,13 @@
                                    EVENT_TABLE_SEGMENT,   /* Segment Definition 5       */\
                                    0                      /* Event Action               */
 
+#define EVENT_TABLE_HYSTERESIS     0.0,                   /* Table Entry Hysteresis     */\
+                                   0.0,                   /* Table Exit  Hysteresis     */\
+                                   0                      /* Hysteresis transient allow.*/
+
 #define EVENT_TABLE_DEFAULT        SENSOR_UNUSED,         /* Index                      */\
                                    0.0,                   /* Sensor value to enter Table*/\
+                                   EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis */\
                                    0.0,                   /* Hysteresis Positive        */\
                                    0.0,                   /* Hysteresis Negative        */\
                                    0,                     /* Transient Allowance        */\
@@ -309,22 +314,38 @@ typedef struct
                                                     /* in a region                       */
 } REGION_DEF;
 
+/* This structure defines the Regions for an Event Table                                 */
+typedef struct
+{
+  FLOAT32     fHysteresisPos;          /* Hysteresis value to exceed when entering the    */
+                                       /* region from a lower region                      */                                                  
+  FLOAT32     fHysteresisNeg;          /* Hysteresis value to exceed when entering the    */
+                                       /*  region from a higher region                    */                                                   
+  UINT32      nTransientAllowance_ms;  /* Amount of time in milliseconds a region must be */ 
+                                       /* entered before confirming the entry             */                                        
+  REGION_DEF region[MAX_TABLE_REGIONS];/* Definition of the regions                       */
+}REGION_CFG;
+
+/* This structure defines the Hysteresis for Event Table Entry/Exit                        */
+typedef struct
+{
+  FLOAT32 fHystEntry;             /* Hysteresis value to exceed fTableEntryValue when      */
+                                  /* entering this table                                   */
+  FLOAT32 fHystExit;              /* Hysteresis value to exceed when exiting this table.   */
+  UINT32  nTransientAllowance_ms; /* Amount of time in milliseconds table must be entered  */                                                   
+                                  /* before confirming table entered                       */
+} TABLE_HYSTERESIS_DEF;
+
+
 /* This structure defines the table configuration                                        */
 typedef struct
 {
-   SENSOR_INDEX nSensor;                            /* Index of sensor to monitor        */
-   FLOAT32      fTableEntryValue;                   /* Value that must be reached to     */
-                                                    /* enter the table                   */
-   FLOAT32      fHysteresisPos;                     /* Hysteresis value to exceed when   */
-                                                    /* entering the region from a lower  */
-                                                    /* region                            */
-   FLOAT32      fHysteresisNeg;                     /* Hysteresis value to exceed when   */
-                                                    /* entering the region from a        */
-                                                    /* higher region                     */
-   UINT32       nTransientAllowance_ms;             /* Amount of time in milliseconds    */
-                                                    /* a region must entered for before  */
-                                                    /* confirming the entry              */
-   REGION_DEF   region[MAX_TABLE_REGIONS];          /* Definition of the regions         */
+   SENSOR_INDEX nSensor;            /* Index of sensor to monitor                        */
+   FLOAT32      fTableEntryValue;   /* Value that must be reached to                     */ 
+
+   TABLE_HYSTERESIS_DEF tblHyst;    /* Hysteresis defs for tbl entry/exit                */                                                          
+   REGION_CFG           regCfg;     /* Region and region-transition cfg                  */      
+  
 } EVENT_TABLE_CFG;
 
 /* Region statistics to be reported                                                      */
@@ -417,6 +438,9 @@ typedef struct
    EVENT_REGION maximumCfgRegion;                   /* Maximum configured region         */
    REGION_STATS regionStats[MAX_TABLE_REGIONS+1];   /* Stats for each region             */
    INT8         nActionReqNum;
+   /*---------------------- Table Hysteresis vars ----------------------------------------*/
+   UINT32       nTblHystStartTime_ms;               /* Time the hyst threshold was met    */
+   TIMESTAMP    tsTblHystStartTime;                 /* Time the hyst threshold was met    */
 } EVENT_TABLE_DATA;
 
 /* History definition for an Event */
@@ -471,22 +495,22 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
- * 
+ *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p
  * Updated in $/software/control processor/code/application
  * SCR #1188 - Event History Buffer
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12-12-19   Time: 5:56p
  * Updated in $/software/control processor/code/application
  * SCR 1197 - Code Review Update
- * 
+ *
  * *****************  Version 32  *****************
  * User: John Omalley Date: 12-11-28   Time: 2:25p
  * Updated in $/software/control processor/code/application
  * SCR 1107 - Code Review Updates
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:32p
  * Updated in $/software/control processor/code/application

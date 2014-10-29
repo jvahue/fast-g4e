@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 53 $  $Date: 14-10-08 6:56p $
+      $Revision: 54 $  $Date: 14-10-27 9:10p $
 
 ******************************************************************************/
 
@@ -110,6 +110,7 @@ static  UINT16  UartMgr_ReadBufferSnapshot_Protocol     ( void *pDest, UINT32 ch
                                                           UINT16 nMaxByteSize,
                                                           BOOLEAN bBeginSnapshot,
                                                           UARTMGR_PROTOCOLS protocols );
+static BOOLEAN UartMgr_Protocol_ReadyOk_Hndl            ( UINT16 ch );
 
 #include "UartMgrUserTables.c"   // Include the cmd table & functions
 
@@ -241,17 +242,20 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].exec_protocol = F7XProtocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
+          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
           break;
         case UARTMGR_PROTOCOL_EMU150:
           uartMgrBlock[i].exec_protocol = EMU150Protocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
+          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
           break;
         case UARTMGR_PROTOCOL_ID_PARAM:
           uartMgrBlock[i].exec_protocol = IDParamProtocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
+          uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_NONE:
@@ -356,7 +360,7 @@ void UartMgr_Initialize (void)
 
 #ifdef UARTMGR_TIMING_TEST
   /*vcast_dont_instrument_start*/
-  for (i=0;i<UARTMGR_TIMING_TEST;i++)
+  for (i=0;i<UARTMGR_TIMING_BUFF_MAX;i++)
   {
     m_UARTMGRTiming_Buff[i] = 0;
   }
@@ -770,6 +774,8 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
 
   SYS_UART_CBIT_FAIL_WORD_TIMEOUT_LOG  wordTimeoutLog;
 
+  UARTMGR_TASK_PARAMS_PTR pUartMgrBlock;
+
 
   bValid = FALSE;
 
@@ -781,6 +787,8 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
   pWordInfo = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[ch][wordinfo_index];
   uartdata_index = pWordInfo->nIndex;
 
+  pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[ch];
+
 
   // Note: Not a fan of the last condition for checking != UARTMGR_WORD_INDEX_NOT_FOUND
   //       Believe it should be ASSERT during cfg setup, but we are fairly inconsistent
@@ -789,15 +797,12 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
   if ( ((pUartMgrStatus->timeChanActive != 0) || (pUartMgrStatus->bChanActive == TRUE)) &&
         (pWordInfo->id != UARTMGR_WORD_ID_NOT_USED) )
   {
-    bValid = TRUE;
-
     pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][uartdata_index];
     pRunTimeData = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
 
-    if ( (CM_GetTickCount() - pRunTimeData->rxTime) > pWordInfo->dataloss_time)
+    if (((CM_GetTickCount() - pRunTimeData->rxTime) > pWordInfo->dataloss_time) &&
+        ((pRunTimeData->rxTime != 0) || (pUartMgrBlock->get_protocol_ready_hndl(ch) == TRUE)))
     {
-      bValid = FALSE;
-
       // Update Log once per transition occurance !
       if (pWordInfo->bFailed == FALSE)
       {
@@ -806,6 +811,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
         snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
           "Uart_SensorTest: Word Timeout (ch = %d, S = %d)\r\n",
                                ch, pWordInfo->nSensor);
+
         GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
 
         wordTimeoutLog.result = SYS_UART_DATA_LOSS_TIMEOUT;
@@ -817,14 +823,14 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
         LogWriteSystem( SYS_ID_UART_CBIT_WORD_TIMEOUT_FAIL, LOG_PRIORITY_LOW,
                         &wordTimeoutLog,
                        sizeof(SYS_UART_CBIT_FAIL_WORD_TIMEOUT_LOG), NULL );
-      } // End of if ->bFailed != TRUE
 
+      } // End of if ->bFailed != TRUE
     } // End of TimeOut occurred
     else
     {
       pWordInfo->bFailed = FALSE;
+      bValid = TRUE;
     }
-
   } // End of Ch data has been received
 
   return (bValid);
@@ -1917,10 +1923,7 @@ UINT16 UartMgr_ReadBufferSnapshot_Protocol ( void *pDest, UINT32 chan, UINT16 nM
    m_UARTMGRTiming_Buff[m_UARTMGRTiming_Index] =
                     (m_UARTMGRTiming_End - m_UARTMGRTiming_Start);
    m_UARTMGRTiming_Index = (++m_UARTMGRTiming_Index) % UARTMGR_TIMING_BUFF_MAX;
-
-if (m_UARTMGRTiming_Index == 0)
-   m_UARTMGRTiming_Index = 1;  // Set BP here
-   /*vcast_dont_instrument_end*/
+  /*vcast_dont_instrument_end*/
 #endif
 
   return (cnt);
@@ -2069,12 +2072,42 @@ void UartMgr_Download_NoneHndl ( UINT8 port,
 }
 
 
+/******************************************************************************
+ * Function:     UartMgr_Protocol_ReadyOk_Hndl
+ *
+ * Description:  Function to handle UART protocols that don't have special channel
+ *               ready status.
+ *               Ex:  ID Param Protocol, when 1st packet is received, the ch is consider
+ *               ACTIVE even though all params in frame are unknown until at least
+ *               several sec later.  We don't want to hold off Uart Mgr processing
+ *               of received known params by holding off channel ACTIVE until all params
+ *               are known.  A 3rd state Channel Ready will be added.  Not all protocols
+ *               will require this 3rd state.  For F7X, on first frame, all params are known.
+ *
+ * Parameters:   UINT16 ch - serial channel cfg for this protocol
+ *
+ * Returns:      TRUE - always returned true, to indicate Protocol Ch Ready
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static
+BOOLEAN UartMgr_Protocol_ReadyOk_Hndl ( UINT16 ch )
+{
+   return (TRUE);
+}
+
 
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
  * 
+ * *****************  Version 54  *****************
+ * User: Peter Lee    Date: 14-10-27   Time: 9:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol, Design Review Updates. 
+ *
  * *****************  Version 53  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system
