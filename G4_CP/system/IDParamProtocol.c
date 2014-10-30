@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 4 $  $Date: 14-10-27 9:10p $
+      $Revision: 5 $  $Date: 14-10-29 8:29p $
 
 ******************************************************************************/
 
@@ -794,7 +794,7 @@ BOOLEAN IDParamProtocol_Ready(UINT16 ch)
  *****************************************************************************/
 static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
                                             UARTMGR_PARAM_DATA_PTR data_ptr,
-                                            UINT16 ch )
+                                            UINT16 ch  )
 {
   BOOLEAN bNewData, bContinueSearch, bOk;
   UINT8 *pData;
@@ -802,13 +802,14 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
   ID_PARAM_FRAME_BUFFER_PTR frame_ptr;
   ID_PARAM_STATUS_PTR pStatus;
   UINT32 tick;
+  BOOLEAN bPktBad;
 
   bNewData = FALSE;
   bContinueSearch = TRUE;
   frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR) &m_IDParam_FrameBuff[ch];
   pStatus = (ID_PARAM_STATUS_PTR) &m_IDParam_Status[ch];
   tick = CM_GetTickCount();
-
+  bPktBad = FALSE;
 
   while (bContinueSearch == TRUE)
   {
@@ -863,7 +864,17 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
              (buff_ptr->stateSearch == ID_PARAM_SEARCH_SYNC_WORD) )
         {
           bContinueSearch = FALSE;
+          // Indirect way of handling 0x8000 not seen in 1st word. If we are currently SYNC and we don't
+          // find 0x800 to move to ID_PARAM_SEARCH_PACKET_SIZE, then we must have lost sync.
+          if (( pStatus->sync == TRUE) && (*buff_ptr->pRd != 0x80) && (buff_ptr->cnt > 0) && (bPktBad == FALSE))
+          {
+            pStatus->cntBadFrame++;
+            pStatus->cntBadFrameInRow =
+                (pStatus->cntBadFrameInRow < ID_PARAM_FRAME_CONSEC_BAD_CNT) ?
+                (pStatus->cntBadFrameInRow + 1) : pStatus->cntBadFrameInRow;
+          }
         }
+
         break;
 
       case ID_PARAM_SEARCH_PACKET_SIZE:
@@ -900,6 +911,7 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
               pStatus->cntBadFrameInRow =
                   (pStatus->cntBadFrameInRow < ID_PARAM_FRAME_CONSEC_BAD_CNT) ?
                   (pStatus->cntBadFrameInRow + 1) : pStatus->cntBadFrameInRow;
+              bPktBad = TRUE;
             }
           }
           else { // checksum does not match !
@@ -907,6 +919,7 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
             pStatus->cntBadChksumInRow =
                 (pStatus->cntBadChksumInRow < ID_PARAM_FRAME_CONSEC_CHKSUM_CNT) ?
                 (pStatus->cntBadChksumInRow + 1) : pStatus->cntBadChksumInRow;
+            bPktBad = TRUE;
           }
 
           if (bOk == TRUE)
@@ -1007,9 +1020,9 @@ static BOOLEAN IDParamProtocol_ConfirmFrameFmt ( ID_PARAM_FRAME_HDR_PTR pFrameHd
 
   bOk = FALSE;
 
-  if ( (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->totalElements)) ||
-       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementPos)) ||
-       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementID)) ||
+  if ( (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->totalElements)) &&
+       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementPos)) &&
+       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementID)) &&
        (ID_PARAM_FRAME_WORD_BIT0_SET(cksum)) )
   {
     bOk = TRUE;
@@ -1447,10 +1460,15 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 14-10-29   Time: 8:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 Additional Updates for ID Param for JV. 
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param Protocol, Design Review Updates. 
+ * SCR #1263 ID Param Protocol, Design Review Updates.
  *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
