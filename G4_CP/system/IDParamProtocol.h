@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 3 $  $Date: 14-10-27 9:10p $
+      $Revision: 4 $  $Date: 14-10-30 6:54p $
 
 ******************************************************************************/
 
@@ -243,7 +243,7 @@ EXPORT UINT16 IDParamProtocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size
 
 EXPORT void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr );
 
-EXPORT void IDParamProtocol_Diplsy_Task ( void *pParam );
+EXPORT void IDParamProtocol_Display_Task ( void *pParam );
 EXPORT void IDParamProtocol_DsbLiveStream ( void );
 
 EXPORT BOOLEAN IDParamProtocol_Ready( UINT16 ch );
@@ -255,10 +255,15 @@ EXPORT BOOLEAN IDParamProtocol_Ready( UINT16 ch );
  *  MODIFICATIONS
  *    $History: IDParamProtocol.h $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 14-10-30   Time: 6:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param. Additional updates from V&V findings. 
+ *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param Protocol, Design Review Updates. 
+ * SCR #1263 ID Param Protocol, Design Review Updates.
  *
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
