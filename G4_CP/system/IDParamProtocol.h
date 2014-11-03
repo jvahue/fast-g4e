@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 4 $  $Date: 14-10-30 6:54p $
+      $Revision: 5 $  $Date: 14-11-03 5:09p $
 
 ******************************************************************************/
 
@@ -41,6 +41,9 @@
 #define ID_PARAM_INDEX_NOT_USED 0xFFFF   // Index not used.  Initialized state.
 #define ID_PARAM_INDEX_SCROLL 0xFFFE     // Value used to indentify Scroll ID Use
 #define ID_PARAM_NO_TIMEOUT 0x0
+
+#define ID_DR_NO_RANGE_SCALE   0.0f     // Treat as DISC where MSB != sign bit
+                                        //    When treating as BNR MSB == sign bit
 
 
 // ID Param Config Defaults
@@ -255,10 +258,16 @@ EXPORT BOOLEAN IDParamProtocol_Ready( UINT16 ch );
  *  MODIFICATIONS
  *    $History: IDParamProtocol.h $
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 14-11-03   Time: 5:09p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol.  Add ID_DR_NO_RANGE_SCALE for 0.0f
+ * (instead of 0x0000) as requested from V&V.  
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-30   Time: 6:54p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param. Additional updates from V&V findings. 
+ * SCR #1263 ID Param. Additional updates from V&V findings.
  *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
