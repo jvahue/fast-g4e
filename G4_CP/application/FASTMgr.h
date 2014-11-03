@@ -13,7 +13,7 @@
                   events.
 
     VERSION
-    $Revision: 31 $  $Date: 10/06/14 4:04p $
+    $Revision: 32 $  $Date: 11/03/14 5:24p $
 
 ******************************************************************************/
 
@@ -82,7 +82,6 @@ EXPORT TIME_SOURCE_ENUM     FAST_TimeSourceCfg       ( void );
 EXPORT void                 FAST_GetSoftwareVersion  ( INT8* SwVerStr );
 EXPORT void                 FAST_SignalUploadComplete( void );
 EXPORT void                 FAST_TurnOffFASTControl  ( void );
-EXPORT BOOLEAN              FAST_IsRecording         ( void );
 EXPORT BOOLEAN              FAST_FSMRfGetState       (INT32 param);
 EXPORT void                 FAST_FSMRfRun            (BOOLEAN Run,INT32 param);
 EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
@@ -93,11 +92,17 @@ EXPORT BOOLEAN              FAST_FSMRecordGetState   (INT32 param);
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
  * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:24p
+ * Updated in $/software/control processor/code/application
+ * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
+ * flag change
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification.
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jim Mood     Date: 12/13/12   Time: 2:56p
  * Updated in $/software/control processor/code/application

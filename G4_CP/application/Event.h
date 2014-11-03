@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 34 $  $Date: 10/20/14 3:54p $
+  $Revision: 35 $  $Date: 11/03/14 5:24p $
 
 ******************************************************************************/
 
@@ -121,10 +121,8 @@
                                    0.0,                   /* Table Exit  Hysteresis     */\
                                    0                      /* Hysteresis transient allow.*/
 
-#define EVENT_TABLE_DEFAULT        SENSOR_UNUSED,         /* Index                      */\
-                                   0.0,                   /* Sensor value to enter Table*/\
-                                   EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis */\
-                                   0.0,                   /* Hysteresis Positive        */\
+                                                          /* Region Defs & Entry criteria*/
+#define REGION_CFG_DEFAULT         0.0,                   /* Hysteresis Positive        */\
                                    0.0,                   /* Hysteresis Negative        */\
                                    0,                     /* Transient Allowance        */\
                                    EVENT_TABLE_REGION,    /* Region A                   */\
@@ -133,6 +131,11 @@
                                    EVENT_TABLE_REGION,    /* Region D                   */\
                                    EVENT_TABLE_REGION,    /* Region E                   */\
                                    EVENT_TABLE_REGION     /* Region F                   */
+
+#define EVENT_TABLE_DEFAULT        SENSOR_UNUSED,         /* Index                      */\
+                                   0.0,                   /* Sensor value to enter Table*/\
+                                   EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis */\
+                                   REGION_CFG_DEFAULT     /* Table Entry/Exit Hysteresis */
 
 #define EVENT_TABLE_CFG_DEFAULT    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
@@ -318,11 +321,11 @@ typedef struct
 typedef struct
 {
   FLOAT32     fHysteresisPos;          /* Hysteresis value to exceed when entering the    */
-                                       /* region from a lower region                      */                                                  
+                                       /* region from a lower region                      */
   FLOAT32     fHysteresisNeg;          /* Hysteresis value to exceed when entering the    */
-                                       /*  region from a higher region                    */                                                   
-  UINT32      nTransientAllowance_ms;  /* Amount of time in milliseconds a region must be */ 
-                                       /* entered before confirming the entry             */                                        
+                                       /*  region from a higher region                    */
+  UINT32      nTransientAllowance_ms;  /* Amount of time in milliseconds a region must be */
+                                       /* entered before confirming the entry             */
   REGION_DEF region[MAX_TABLE_REGIONS];/* Definition of the regions                       */
 }REGION_CFG;
 
@@ -332,7 +335,7 @@ typedef struct
   FLOAT32 fHystEntry;             /* Hysteresis value to exceed fTableEntryValue when      */
                                   /* entering this table                                   */
   FLOAT32 fHystExit;              /* Hysteresis value to exceed when exiting this table.   */
-  UINT32  nTransientAllowance_ms; /* Amount of time in milliseconds table must be entered  */                                                   
+  UINT32  nTransientAllowance_ms; /* Amount of time in milliseconds table must be entered  */
                                   /* before confirming table entered                       */
 } TABLE_HYSTERESIS_DEF;
 
@@ -341,11 +344,11 @@ typedef struct
 typedef struct
 {
    SENSOR_INDEX nSensor;            /* Index of sensor to monitor                        */
-   FLOAT32      fTableEntryValue;   /* Value that must be reached to                     */ 
+   FLOAT32      fTableEntryValue;   /* Value that must be reached to                     */
 
-   TABLE_HYSTERESIS_DEF tblHyst;    /* Hysteresis defs for tbl entry/exit                */                                                          
-   REGION_CFG           regCfg;     /* Region and region-transition cfg                  */      
-  
+   TABLE_HYSTERESIS_DEF tblHyst;    /* Hysteresis defs for tbl entry/exit                */
+   REGION_CFG           regCfg;     /* Region and region-transition cfg                  */
+
 } EVENT_TABLE_CFG;
 
 /* Region statistics to be reported                                                      */
@@ -438,9 +441,9 @@ typedef struct
    EVENT_REGION maximumCfgRegion;                   /* Maximum configured region         */
    REGION_STATS regionStats[MAX_TABLE_REGIONS+1];   /* Stats for each region             */
    INT8         nActionReqNum;
-   /*---------------------- Table Hysteresis vars ----------------------------------------*/
-   UINT32       nTblHystStartTime_ms;               /* Time the hyst threshold was met    */
-   TIMESTAMP    tsTblHystStartTime;                 /* Time the hyst threshold was met    */
+   /*---------------------- Table Hysteresis vars ------------------------------------------*/
+   UINT32       nTblHystStartTime_ms;               /* Time hyst threshold was met(mSec)    */
+   TIMESTAMP    tsTblHystStartTime;                 /* Time hyst threshold was met(TimeStmp)*/
 } EVENT_TABLE_DATA;
 
 /* History definition for an Event */
@@ -495,6 +498,11 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:24p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis
  *
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p

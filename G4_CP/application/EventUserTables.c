@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 35 $  $Date: 10/20/14 3:54p $
+$Revision: 36 $  $Date: 11/03/14 5:24p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1516,6 +1516,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:24p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis
  *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p

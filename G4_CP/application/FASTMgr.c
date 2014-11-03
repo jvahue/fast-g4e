@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 127 $  $Date: 10/06/14 4:04p $
+   $Revision: 128 $  $Date: 11/03/14 5:24p $
 
 
 ******************************************************************************/
@@ -526,24 +526,6 @@ void FAST_FSMEndOfFlightRun(BOOLEAN Run, INT32 Param)
   }
 }
 
-/******************************************************************************
- * Function:    FAST_IsRecording
- *
- * Description: Returns current recording active/inactive state.
- *
- * Parameters:  none
- *
- * Returns:     BOOLEAN: TRUE if system is current recording, otherwise FALSE
- *
- * Notes:       This function is intended to be used by other tasks which need
- *              to know the current rec state. Not to be confused with
- *              FAST_FSMRecordGetState which is used as part of FSM processing.
- *
- *****************************************************************************/
-BOOLEAN FAST_IsRecording( void )
-{
-  return fastStatus.recording;
-}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -1600,16 +1582,22 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
  * 
+ * *****************  Version 128  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:24p
+ * Updated in $/software/control processor/code/application
+ * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
+ * flag change
+ *
  * *****************  Version 127  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification.
- * 
+ *
  * *****************  Version 126  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:09p
  * Updated in $/software/control processor/code/application
  * SCR #1164 - Permit CP Time Syncing only when Not Recording - CR fixes
- * 
+ *
  * *****************  Version 125  *****************
  * User: Contractor V&v Date: 8/26/14    Time: 4:20p
  * Updated in $/software/control processor/code/application

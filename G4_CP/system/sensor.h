@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 47 $  $Date: 14-10-08 7:10p $
+      $Revision: 48 $  $Date: 11/03/14 5:21p $
 
 ******************************************************************************/
 
@@ -202,7 +202,6 @@
                                {SENSOR_CONFIG_DEFAULT}
 
 #define SENSOR_LIVEDATA_DEFAULT   LD_NONE, /*GSE LD Type*/\
-                                  LD_NONE, /*MS  LD Type*/\
                                   5000     /*Rate*/
 
 #define MAX_SAMPLES         8   // Maximum number of samples stored
@@ -315,9 +314,9 @@ typedef enum
 
 typedef enum
 {
-  LD_DEST_GSE,              
-  LD_DEST_MS,                 
-  LD_DEST_MAX                  
+  LD_DEST_GSE,
+  LD_DEST_MS,
+  LD_DEST_MAX
 } LD_DEST_ENUM;
 
 typedef enum
@@ -430,8 +429,7 @@ typedef struct
 // Sensor Live Data Configuration
 typedef struct
 {
-   SENSOR_LD_ENUM gseType;    /* type of live data output to GSE, ASCII or BINARY */ // todo DaveB sb 'gseType'
-   SENSOR_LD_ENUM msType;     /* type of live data output,to MS,  ASCII or BINARY */
+   SENSOR_LD_ENUM gseType;    /* type of live data output to GSE, ASCII or BINARY */
    UINT32         nRate_ms;   /* Rate in milliseconds to output live data */
 }SENSOR_LD_CONFIG;
 #pragma pack()
@@ -570,36 +568,41 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
  *  MODIFICATIONS
  *    $History: sensor.h $
  * 
+ * *****************  Version 48  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Modfix for ms_type
+ *
  * *****************  Version 47  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:10p
  * Updated in $/software/control processor/code/system
  * SCR #1263 ID Param Protocol Implementation
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:46p
  * Updated in $/software/control processor/code/system
  * SCR #1262 - LiveData CP to MS
- * 
+ *
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-12-08   Time: 1:32p
  * Updated in $/software/control processor/code/system
  * SCR 1167 - Sensor Summary Init optimization
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:17p
  * Updated in $/software/control processor/code/system
  * SCR #1107 Bitbucket #80
- * 
+ *
  * *****************  Version 43  *****************
  * User: John Omalley Date: 12-12-02   Time: 12:22p
  * Updated in $/software/control processor/code/system
  * SCR 1197 - Code Review Updates
- * 
+ *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 6:05p
  * Updated in $/software/control processor/code/system
  * SCR #1107 Code Review
- * 
+ *
  * *****************  Version 41  *****************
  * User: Contractor V&v Date: 11/26/12   Time: 12:42p
  * Updated in $/software/control processor/code/system

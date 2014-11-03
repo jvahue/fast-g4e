@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 44 $  $Date: 10/20/14 3:54p $
+ $Revision: 45 $  $Date: 11/03/14 5:23p $
 
 ******************************************************************************/
 
@@ -370,8 +370,8 @@ UINT16 EventTableGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
          ((tableIndex < MAX_TABLES) && (nRemaining > nSize));
          tableIndex++ )
    {
-      tableHdr[tableIndex].nSensor           = m_EventTableCfg[tableIndex].nSensor;
-      tableHdr[tableIndex].fTableEntryValue  = m_EventTableCfg[tableIndex].tblHyst.fHystEntry;
+      tableHdr[tableIndex].nSensor          = m_EventTableCfg[tableIndex].nSensor;
+      tableHdr[tableIndex].fTableEntryValue = m_EventTableCfg[tableIndex].fTableEntryValue;
       // Increment the total number of bytes and decrement the remaining
       nTotal     += nSize;
       nRemaining -= nSize;
@@ -598,7 +598,8 @@ void EventTablesInitialize ( void )
  *
  * Returns:      None
  *
- * Notes:        None
+ * Notes:        This function does not clear ALL fields in EVENT_TABLE_DATA!
+ *
  *
  *****************************************************************************/
 static
@@ -1109,7 +1110,7 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
    EVENT_REGION      foundRegion;
    BOOLEAN           bSensorValid;
    BOOLEAN           bHystEntryMet;
-   BOOLEAN           bHystExitMet;   
+   BOOLEAN           bHystExitMet;
    EVENT_TABLE_STATE tableState;
 
    // Initialize Local Data
@@ -1128,8 +1129,8 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
    // Get Sensor Value
    pTableData->fCurrentSensorValue = SensorGetValue( pTableCfg->nSensor );
    bSensorValid = SensorIsValid( pTableCfg->nSensor );
-   
-   
+
+
    // Hysteresis Entry/Exit Interlock
    // Entry test is only performed when table is NOT started.
    // Exit  test is only performed when table IS started.
@@ -1143,7 +1144,7 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
    }
    else
    {
-     // Table was started so hysteresis/transient-allowance already met... check for exit
+     // Table was started so entry hysteresis/transient-allowance already met... check for exit
      bHystEntryMet = TRUE;
      bHystExitMet  = EventTableIsExited(pTableCfg, pTableData, bSensorValid, bHystEntryMet);
    }
@@ -1151,20 +1152,25 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
 
    // Don't do anything until the table is entered and sensor is valid and above the
    // exit hysteresis limit
-   
-   if ( (TRUE == bHystEntryMet) && (FALSE == bHystExitMet))  
+
+   if ( (TRUE == bHystEntryMet) &&
+        (FALSE == bHystExitMet) &&
+        ( pTableData->fCurrentSensorValue > pTableCfg->fTableEntryValue ) &&
+        ( TRUE == bSensorValid ) )
    {
       tableState = ET_IN_TABLE;
 
-      // Check if this Table is starting now (i.e. was FALSE, is TRUE)
+      // Check if this Table is starting now (i.e. bStarted was FALSE, is TRUE)
       if ( FALSE == pTableData->bStarted )
       {
          pTableData->bStarted      = TRUE;
          pTableData->seqNumber     = seqNumber;
-         // Use the hyst start-time as event start time
+        // Use the hyst start-time as event-table start time
          pTableData->nStartTime_ms = pTableData->nTblHystStartTime_ms;
-         pTableData->tsExceedanceStartTime = 
-                                pTableData->tsTblHystStartTime;
+         memcpy((void *)&pTableData->tsExceedanceStartTime,
+                (void *)&pTableData->tsTblHystStartTime,
+                 sizeof(pTableData->tsTblHystStartTime));
+
       }
 
       // Calculate the duration since the exceedance began
@@ -1221,9 +1227,9 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
    }
    else
    {
-      // Check if we already started the Event Table Processing, and have met the exit criteria.      
+      // Check if we already started the Event Table Processing and have exited.
       if ( ( TRUE == pTableData->bStarted ) &&
-           ( 0 != pTableData->nTotalDuration_ms ) &&
+            // ( 0 != pTableData->nTotalDuration_ms ) &&
            (TRUE == bHystExitMet) )
       {
          // The exceedance has ended
@@ -1234,8 +1240,21 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
          EventTableExitRegion ( pTableCfg,  pTableData, foundRegion, nCurrentTick );
          // Determine the reason for ending the event table
          tableState = (bSensorValid == TRUE) ? ET_SENSOR_VALUE_LOW : ET_SENSOR_INVALID;
+         
+         // SRS-4510
+         // If a region was entered while in the table...
          // Log the Event Table -
-         EventTableLogSummary ( pTableCfg, pTableData, priority, tableState );
+         if ( REGION_NOT_FOUND != pTableData->maximumRegionEntered)
+         {
+           EventTableLogSummary ( pTableCfg, pTableData, priority, tableState );
+         }
+
+         // Re-init the table-hysteresis time vars for next entry
+
+         pTableData->nTblHystStartTime_ms = 0;
+         memset((void *)&pTableData->tsTblHystStartTime,
+                0, sizeof(pTableData->tsTblHystStartTime));
+
       }
       // Now reset the Started Flag and wait until we cross a region threshold
       pTableData->bStarted = FALSE;
@@ -1405,11 +1424,11 @@ void EventTableConfirmRegion ( const EVENT_TABLE_CFG  *pTableCfg,
          //       foundRegion should never be REGION_NOT_FOUND because it is protected
          //       by the calling function.
          pTableData->nActionReqNum = ActionRequest ( pTableData->nActionReqNum,
-                          ( EVENT_ACTION_ON_DURATION(pTableCfg->regCfg.region[foundRegion].nAction) |
-                            EVENT_ACTION_ON_MET(pTableCfg->regCfg.region[foundRegion].nAction) ),
-                            ACTION_ON,
-                            bACKFlag,
-                            bLatchFlag );
+                  ( EVENT_ACTION_ON_DURATION(pTableCfg->regCfg.region[foundRegion].nAction) |
+                    EVENT_ACTION_ON_MET(pTableCfg->regCfg.region[foundRegion].nAction) ),
+                    ACTION_ON,
+                    bACKFlag,
+                    bLatchFlag );
       }
       // We have a new confirmed region now save it
       pTableData->confirmedRegion = foundRegion;
@@ -1484,12 +1503,13 @@ void EventTableExitRegion ( const EVENT_TABLE_CFG *pTableCfg,  EVENT_TABLE_DATA 
          // Make sure we don't shut off the new found region.
          if ( (EVENT_REGION)i != foundRegion )
          {
-            pTableData->nActionReqNum = ActionRequest ( pTableData->nActionReqNum,
-                                       EVENT_ACTION_ON_DURATION(pTableCfg->regCfg.region[i].nAction) |
-                                       EVENT_ACTION_ON_MET(pTableCfg->regCfg.region[i].nAction),
-                                       ACTION_OFF,
-                                       0,
-                                       0 );
+            pTableData->nActionReqNum =
+              ActionRequest ( pTableData->nActionReqNum,
+                             EVENT_ACTION_ON_DURATION(pTableCfg->regCfg.region[i].nAction) |
+                             EVENT_ACTION_ON_MET(pTableCfg->regCfg.region[i].nAction),
+                             ACTION_OFF,
+                             0,
+                             0 );
          }
       }
    }
@@ -1870,7 +1890,7 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *
  * Description:  Update the history buffer for an event.
  *
- * Parameters:   [in] EVENT_CFG    event cfg 
+ * Parameters:   [in] EVENT_CFG    event cfg
  *               [in] EVENT_DATA   the runtime data for the event.
  *
  * Returns:      None.
@@ -1922,18 +1942,22 @@ void EventUpdateHistory( const EVENT_CFG *pConfig, const EVENT_DATA *pData)
   NV_Write(NV_EVENT_HISTORY, 0, &m_EventHistory, sizeof(m_EventHistory) );
 }
 
+
 /******************************************************************************
  * Function:     EventTableIsEntered
  *
  * Description:  Function used to monitor hysteresis and transient allowance
- *               to determine if conditions are met to considered the table 
+ *               to determine if conditions are met to considered the table
  *               entered.
  *
- * Parameters:   [in] EVENT_TABLE_CFG  - Pointer the the table cfg.
- *               pTableData -
- *               
+ * Parameters:   [in] EVENT_TABLE_CFG  - Pointer to the table cfg.
+ *               [in] EVENT_TABLE_DATA - Pointer to the table runtime data
+ *               [in] UINT32           - Current task tick used to calculate
+ *                                       transient allowance
+ *               [in] BOOLEAN          - The validity of the determining sensor
  *
- * Returns:      TREU or FALSE
+ *
+ * Returns:      TRUE or FALSE
  *
  * Notes:        None
  *
@@ -1942,45 +1966,72 @@ static
 BOOLEAN EventTableIsEntered(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableData,
                                    UINT32 nCurrentTick, BOOLEAN bSensorValid)
 {
-  BOOLEAN bStarted = FALSE;
+  BOOLEAN bEnterTable = FALSE;
   // Check current sensor against hysteresis threshold, update the duration time accordingly.
   if ( bSensorValid &&
-      ( pTableData->fCurrentSensorValue >
+      ( pTableData->fCurrentSensorValue >=
       ( pTableCfg->fTableEntryValue + pTableCfg->tblHyst.fHystEntry )) )
    {
      if (0 == pTableData->nTblHystStartTime_ms)
      {
-       // sensor met the threshold for hysteresis: start timing,
+       // sensor met the threshold for hysteresis: start timing for transient-allowance,
        pTableData->nTblHystStartTime_ms = nCurrentTick;
        CM_GetTimeAsTimestamp( &pTableData->tsTblHystStartTime );
+
+       // Special test: transient allowance is configured as zero? enter table now!
+       bEnterTable = (0 == pTableCfg->tblHyst.nTransientAllowance_ms) ? TRUE : FALSE;
+
      }
      else
      {
-       // the table-hyst start time was already set...
-       // check if transient-allowance time duration has been met;
-       bStarted = ( ( (nCurrentTick - pTableData->nTblHystStartTime_ms) >
-                     pTableCfg->tblHyst.nTransientAllowance_ms ))
-                      ? TRUE : FALSE;
+       // the table-hyst start-time was already set...
+       // check if transient-allowance duration has been met;
+       bEnterTable = ( ( (nCurrentTick - pTableData->nTblHystStartTime_ms) >=
+                          pTableCfg->tblHyst.nTransientAllowance_ms ))
+                          ? TRUE : FALSE;
      }
   }
-  else
+  else if (pTableData->nTblHystStartTime_ms != 0)
   {
-    // Sensor went bad or is below the hyst threshold: clear start time
+    // We were waiting out the TransientAllowance, but Sensor went bad or
+    // is fell below the hyst-threshold: clear start time
     pTableData->nTblHystStartTime_ms = 0;
+    memset((void *)&pTableData->tsTblHystStartTime, 0,
+            sizeof(pTableData->tsTblHystStartTime));
   }
-  return bStarted;
+
+  #if 0
+if (bEnterTable)
+  {
+    GSE_DebugStr(NORMAL,TRUE,
+        "DBG-Entered Table %d, snsrValue: %6.4f, minValue: %6.4f, hystValue: %6.4f, T/A: %d",
+        pTableData->nTableIndex,
+        pTableData->fCurrentSensorValue,
+        pTableCfg->fTableEntryValue,
+        pTableCfg->tblHyst.fHystEntry,
+        pTableCfg->tblHyst.nTransientAllowance_ms);
+  }
+#endif
+  return bEnterTable;
 }
 
 /******************************************************************************
  * Function:     EventTableIsExited
  *
  * Description:  Function used to monitor hysteresis to determine if conditions
- *               are met to considered the table 
+ *               are met to considered the table
  *               entered.
  *
- * Parameters:   BOOLEAN bEnable - The table has been formally exited
+ * Parameters:   [in] EVENT_TABLE_CFG  - Pointer to the table cfg.
+ *               [in] EVENT_TABLE_DATA - Pointer to the table runtime data
+ *               [in] UINT32           - Current task tick used to calculate
+ *                                       transient allowance
+ *               [in] BOOLEAN          - The validity of the determining sensor
  *
- * Returns:      TREU or FALSE
+ *
+ * Returns:      TRUE or FALSE
+ *
+ * Notes:        None
  *
  * Notes:        Exit Hysteresis does not use transient allowance; exit
  *               is immediate upon crossing threshold after table is entered.
@@ -1997,15 +2048,34 @@ BOOLEAN EventTableIsExited(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableD
   {
     bEnded = (FALSE == bSensorValid)  ||
              (TRUE == bSensorValid    &&
-              pTableData->fCurrentSensorValue <
+              pTableData->fCurrentSensorValue <=
               ( pTableCfg->fTableEntryValue - pTableCfg->tblHyst.fHystExit ));
+  }
+
+  if (bEnded)
+  {
+   #if 0
+ GSE_DebugStr( NORMAL,TRUE,
+      "DBG-Exited  Table %d, snsrValue: %6.4f, minValue: %6.4f, hystValue: %6.4f, TblDur: %d",
+                  pTableData->nTableIndex,
+                  pTableData->fCurrentSensorValue,
+                  pTableCfg->fTableEntryValue,
+                  pTableCfg->tblHyst.fHystEntry,
+                  pTableData->nTotalDuration_ms);
+#endif
   }
   return bEnded;
 }
 
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:23p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis
  *
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p
