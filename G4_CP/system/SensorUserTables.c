@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 29 $  $Date: 10/20/14 3:55p $
+$Revision: 30 $  $Date: 11/03/14 5:21p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -275,7 +275,7 @@ static USER_MSG_TBL liveDataRoot [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange     DataLimit                 EnumTbl*/
   { "CFG",      liveDataCfg,    NULL,                 NO_HANDLER_DATA},
   { "TYPE",     NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_liveDataDisplay.gseType,  -1,-1,    NO_LIMIT,                 liveDataType },
-  { "MS_TYPE",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_liveDataDisplay.msType,   -1,-1,    NO_LIMIT,                 liveDataType },
+  { "MS_TYPE",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_msType,                   -1,-1,    NO_LIMIT,                 liveDataType },
   { "RATE_MS",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &m_liveDataDisplay.nRate_ms, -1,-1,    SENSOR_LD_MAX_RATE,10000, NULL },
   { "GETLIST",  NO_NEXT_TABLE,  Sensor_LiveDataList,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,             -1,-1,    NO_LIMIT,                 NULL},
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
@@ -434,11 +434,6 @@ USER_HANDLER_RESULT Sensor_Live_Data_Cfg(USER_DATA_TYPE DataType,
       // copy to local display control
       m_liveDataDisplay.gseType = liveDataTemp.gseType;
     }
-    else if (Param.Ptr == &liveDataTemp.msType)
-    {
-      // copy to local display control ms_type
-      m_liveDataDisplay.msType = liveDataTemp.msType;
-    }
     else if (Param.Ptr == &liveDataTemp.nRate_ms)
     {
       // copy to local display control
@@ -564,7 +559,7 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
         result = User_OutputMsgString( buff, FALSE);
         bInspect = TRUE;
       }
-      
+
       snprintf(buff, sizeof(buff),"%03d,%s,%s\r\n",
               sensorIdx,
               pSnsrCfg[sensorIdx].sSensorName,
@@ -596,11 +591,16 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
  * 
+ * *****************  Version 30  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Modfix for ms_type
+ *
  * *****************  Version 29  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:55p
  * Updated in $/software/control processor/code/system
  * SCR #1262 - LiveData CP to MS - none configured msg change.
- * 
+ *
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 7:10p
  * Updated in $/software/control processor/code/system

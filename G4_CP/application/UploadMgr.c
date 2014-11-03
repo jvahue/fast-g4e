@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 178 $  $Date: 10/06/14 4:04p $
+   $Revision: 179 $  $Date: 11/03/14 5:25p $
 
 ******************************************************************************/
 
@@ -467,7 +467,7 @@ void UploadMgr_StartUpload(UPLOAD_START_SOURCE StartSource)
   if(!LCTaskData.Disable)
   {
     // If recording is active, we can't upload... tell the user.
-    if ( FAST_IsRecording() )
+    if ( FAST_FSMRecordGetState(NULL) )
     {
       GSE_DebugStr(NORMAL,TRUE, "UploadMgr: Cannot Upload while Recording is active");
     }
@@ -3534,6 +3534,12 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 179  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:25p
+ * Updated in $/software/control processor/code/application
+ * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
+ * flag change
  * 
  * *****************  Version 178  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p

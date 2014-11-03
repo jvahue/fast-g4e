@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 89 $  $Date: 9/23/14 6:04p $
+      $Revision: 90 $  $Date: 11/03/14 5:21p $
 
 ******************************************************************************/
 
@@ -83,6 +83,7 @@ static SENSOR_LD_PARMS    liveDataBlock;   // Live Data Task block
 /*static SENSORLOG SensorLog;*/
 static SENSOR_CONFIG      m_SensorCfg[MAX_SENSORS]; // Sensors cfg array
 static SENSOR_LD_CONFIG   m_liveDataDisplay; // runtime copy of LiveData config data
+static SENSOR_LD_ENUM     m_msType;          // runtime copy of MS display type
 static SENSOR_LD_COLLECT  m_liveDataBuffer;  // collection of all sensor values.
 static UINT16             m_liveDataMap[MAX_SENSORS]; // Maps Sensors -> m_liveDataBuffer
 
@@ -190,9 +191,10 @@ void SensorsInitialize( void)
          CfgMgr_RuntimeConfigPtr()->SensorConfigs,
          sizeof(m_SensorCfg));
 
-  // init runtime copy of live data config
+  // init runtime copy of live data config, MS output is disabled on startup
   memcpy(&m_liveDataDisplay, &(CfgMgr_RuntimeConfigPtr()->LiveDataConfig),
              sizeof(m_liveDataDisplay));
+  m_msType = LD_NONE;
 
   // Reset the dynamic sensor storage array
   SensorsReset();
@@ -1957,7 +1959,7 @@ static void SensorsLiveDataTask( void *pParam )
 
   // Is live data enabled?
   if (LD_NONE != m_liveDataDisplay.gseType ||
-      LD_NONE != m_liveDataDisplay.msType)
+      LD_NONE != m_msType)
   {
     // Make sure the rate is not too fast and fix if it is
     nRate = m_liveDataDisplay.nRate_ms < SENSOR_LD_MAX_RATE ?
@@ -1971,7 +1973,7 @@ static void SensorsLiveDataTask( void *pParam )
 
       // Use an array to process the streams dest, prevent if..if..if
       liveDataDest[LD_DEST_GSE] = m_liveDataDisplay.gseType;
-      liveDataDest[LD_DEST_MS]  = m_liveDataDisplay.msType;
+      liveDataDest[LD_DEST_MS]  = m_msType;
 
       // The livedata structure is updated in real-time when the sensors are read...
       // Get the current time and perform the outputs.
@@ -2036,7 +2038,7 @@ static void SensorDumpASCIILiveData(LD_DEST_ENUM dest)
   // Build the live data header
   //sprintf(str, "\r\n");
   //GSE_PutLine(str);
-  
+
   sprintf(str, "#77");
 
   // Loop through all sensors
@@ -2225,11 +2227,16 @@ static void  SensorUpdateLiveData(UINT16 sensorIndex, SENSOR* pSensor)
  *  MODIFICATIONS
  *    $History: sensor.c $
  * 
+ * *****************  Version 90  *****************
+ * User: Contractor V&v Date: 11/03/14   Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Modfix for ms_type
+ *
  * *****************  Version 89  *****************
  * User: Contractor V&v Date: 9/23/14    Time: 6:04p
  * Updated in $/software/control processor/code/system
  * SCR #1262 - LiveData CP to MS Fix fornatting.
- * 
+ *
  * *****************  Version 88  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:46p
  * Updated in $/software/control processor/code/system

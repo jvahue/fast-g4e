@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 6 $  $Date: 14-10-30 6:54p $
+      $Revision: 8 $  $Date: 14-11-03 6:08p $
 
 ******************************************************************************/
 
@@ -645,7 +645,7 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
 
       runtime_data_ptr->id = pDataCfg->id;
       runtime_data_ptr->scale = pDataCfg->scale;
-      if ( pDataCfg->scale != DR_NO_RANGE_SCALE )
+      if ( pDataCfg->scale != ID_DR_NO_RANGE_SCALE )
       {
         // Binary Data "BNR" type
         runtime_data_ptr->scale_lsb = (FLOAT32) pDataCfg->scale / 32768;
@@ -1098,7 +1098,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
         else
         {
           if ( (i <(ID_PARAM_CFG_MAX - 1)) &&
-               ((runtime_data_ptr + 1)->id == ID_PARAM_NOT_USED) )
+               ((data_ptr + 1)->runtime_data.id == ID_PARAM_NOT_USED) )
           { // Two IDs with ID_PARAM_NOT_USED signifies end of list.
             break; // End of list found. Exit for loop early here.
           }
@@ -1449,7 +1449,7 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
           else
           {
             if ( (k <(ID_PARAM_CFG_MAX - 1)) &&
-                 ((runtime_data_ptr + 1)->id == ID_PARAM_NOT_USED) )
+               ((data_ptr + 1)->runtime_data.id == ID_PARAM_NOT_USED) )
             { // Two IDs with ID_PARAM_NOT_USED signifies end of list.
               break; // End of list found. Exit for loop early here.
             }
@@ -1548,10 +1548,21 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 14-11-03   Time: 6:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param.  Fix logic for pointer into UART Data.  
+ *
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 14-11-03   Time: 5:09p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol.  Add ID_DR_NO_RANGE_SCALE for 0.0f
+ * (instead of 0x0000) as requested from V&V.
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 14-10-30   Time: 6:54p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param. Additional updates from V&V findings. 
+ * SCR #1263 ID Param. Additional updates from V&V findings.
  *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 14-10-29   Time: 8:29p
