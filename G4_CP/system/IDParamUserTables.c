@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 4 $  $Date: 14-10-27 9:10p $
+    $Revision: 5 $  $Date: 14-10-29 8:29p $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
@@ -138,6 +138,7 @@ static USER_MSG_TBL IDParamStatusFrame0TypeTbl[] =
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].nElements,          1,      3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].cntGoodFrames,      1,      3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[0].lastFrameTime_tick, 1,      3,    NO_LIMIT,    NULL},\
+  // NOTE:  IDS s/b USER_TYPE_ACTION so when top level idparam[].status is entered, the IDS won't automatically be printed
   {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_FADEC,          1,      3,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -148,6 +149,7 @@ static USER_MSG_TBL IDParamStatusFrame1TypeTbl[] =
   {"NUM_ELEMENTS",    NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT16,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].nElements,          1,      3,    NO_LIMIT,    NULL},\
   {"FRAME_CNT",       NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].cntGoodFrames,      1,      3,    NO_LIMIT,    NULL},\
   {"LAST_FRAME_TICK", NO_NEXT_TABLE, IDParamMsg_Status, USER_TYPE_UINT32,  USER_RO,   (void *) &statusIDParamTemp.frameType[1].lastFrameTime_tick, 1,      3,    NO_LIMIT,    NULL},\
+  // NOTE:  IDS s/b USER_TYPE_ACTION so when top level idparam[].status is entered, the IDS won't automatically be printed
   {"IDS",             NO_NEXT_TABLE, IDParamIDSMsg_Status, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),  (void *) ID_PARAM_FRAME_TYPE_PEC,            1,      3,    NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -714,10 +716,15 @@ USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 14-10-29   Time: 8:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 Additional Updates for ID Param for JV. 
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param Protocol, Design Review Updates. 
+ * SCR #1263 ID Param Protocol, Design Review Updates.
  *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-22   Time: 1:20p
