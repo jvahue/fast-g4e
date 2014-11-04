@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 4 $  $Date: 14-10-27 9:10p $
+      $Revision: 8 $  $Date: 14-11-03 6:08p $
 
 ******************************************************************************/
 
@@ -67,6 +67,7 @@
 
 #define ID_PARAM_DEBUG_STR_MAX  128
 #define ID_PARAM_DEBUG_CHARS_PER_LINE 32
+#define ID_PARAM_DBG_FMT_WORDS_PER_LINE 6
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -213,6 +214,8 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
                                          UARTMGR_PARAM_DATA_PTR data_ptr, UINT16 ch,
                                          UINT16 frameType, UINT32 frameTime,
                                          TIMESTAMP frameTS );
+static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
+                                               UINT32 pktCnt );
 #include "IDParamUserTables.c"
 
 /*****************************************************************************/
@@ -306,7 +309,7 @@ void IDParamProtocol_Initialize ( void )
   memset(&TaskInfo, 0, sizeof(TaskInfo));
   strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name), "ID Param Display Debug",_TRUNCATE);
   TaskInfo.TaskID         = IDParam_Disp_Debug;
-  TaskInfo.Function       = IDParamProtocol_Diplsy_Task;
+  TaskInfo.Function       = IDParamProtocol_Display_Task;
   TaskInfo.Priority       = taskInfo[IDParam_Disp_Debug].priority;
   TaskInfo.Type           = taskInfo[IDParam_Disp_Debug].taskType;
   TaskInfo.modes          = taskInfo[IDParam_Disp_Debug].modes;
@@ -642,7 +645,7 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
 
       runtime_data_ptr->id = pDataCfg->id;
       runtime_data_ptr->scale = pDataCfg->scale;
-      if ( pDataCfg->scale != DR_NO_RANGE_SCALE )
+      if ( pDataCfg->scale != ID_DR_NO_RANGE_SCALE )
       {
         // Binary Data "BNR" type
         runtime_data_ptr->scale_lsb = (FLOAT32) pDataCfg->scale / 32768;
@@ -668,7 +671,7 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
 
 
 /******************************************************************************
- * Function:    IDParamProtocol_Diplsy_Task
+ * Function:    IDParamProtocol_Display_Task
  *
  * Description: Utility function to display ID Param frame data for a specific ch
  *
@@ -679,53 +682,59 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
  * Notes:       None
  *
  *****************************************************************************/
-void IDParamProtocol_Diplsy_Task ( void *pParam )
+void IDParamProtocol_Display_Task ( void *pParam )
 {
   ID_PARAM_FRAME_BUFFER_PTR frame_ptr;
   UINT16 *pData;
   UINT16 i, loopCnt;
   UINT8 strBuff[ID_PARAM_DEBUG_CHARS_PER_LINE];
+  static UINT32 frameCnt[ID_PARAM_FRAME_ENUM_MAX] = { 0, 0 };
+  UINT16 ch;
+  UINT16 frameType;
+  UINT32 pktCnt;
 
   if ( m_IDParam_Debug.bDebug == TRUE )
   {
     m_IDParam_Debug.bInProgress = TRUE;
-    frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR)
-                &m_IDParam_FrameBuff_Debug[m_IDParam_Debug.ch][m_IDParam_Debug.frameType];
-    pData = (UINT16 *) &frame_ptr->data[0];
-    if ( m_IDParam_Debug.bFormatted == FALSE )
+    ch = m_IDParam_Debug.ch;
+    frameType = m_IDParam_Debug.frameType;
+    frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR) &m_IDParam_FrameBuff_Debug[ch][frameType];
+    pktCnt = m_IDParam_Status[ch].frameType[frameType].cntGoodFrames;
+
+    if ( (pktCnt != 0) && (frameCnt[frameType] != pktCnt) ) // if have new pkt
     {
-      GSE_PutLine( "\r\n\r\n" ); // Output this line to GSE
-      loopCnt = frame_ptr->size / ID_PARAM_DEBUG_CHARS_PER_LINE;
-      for (i=0;i<(loopCnt);i++) // Loop thru the 16 word line
+      pData = (UINT16 *) &frame_ptr->data[0];
+      if ( m_IDParam_Debug.bFormatted == FALSE )
       {
-        sprintf (  (char *) m_IDParam_DebugStr, "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
-                   *(pData +  0), *(pData +  1), *(pData +  2), *(pData +  3),
-                   *(pData +  4), *(pData +  5), *(pData +  6), *(pData +  7),
-                   *(pData +  8), *(pData +  9), *(pData + 10), *(pData + 11),
-                   *(pData + 12), *(pData + 13), *(pData + 14), *(pData + 15) );
-        GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
-        pData = pData + (ID_PARAM_DEBUG_CHARS_PER_LINE/sizeof(UINT16)); // Move to next line
-      } // end for loopCnt
-      loopCnt = frame_ptr->size % ID_PARAM_DEBUG_CHARS_PER_LINE;
-      m_IDParam_DebugStr[0] = NULL;
-      for (i=0;i<(loopCnt/2);i++) // Loop thru the last line of char if < 16 words
+        GSE_PutLine( "\r\n\r\n" ); // Output this line to GSE
+        loopCnt = frame_ptr->size / ID_PARAM_DEBUG_CHARS_PER_LINE;
+        for (i=0;i<(loopCnt);i++) // Loop thru the 16 word line
+        {
+          sprintf (  (char *) m_IDParam_DebugStr, "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
+                     *(pData +  0), *(pData +  1), *(pData +  2), *(pData +  3),
+                     *(pData +  4), *(pData +  5), *(pData +  6), *(pData +  7),
+                     *(pData +  8), *(pData +  9), *(pData + 10), *(pData + 11),
+                     *(pData + 12), *(pData + 13), *(pData + 14), *(pData + 15) );
+          GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+          pData = pData + (ID_PARAM_DEBUG_CHARS_PER_LINE/sizeof(UINT16)); // Move to next line
+        } // end for loopCnt
+        loopCnt = frame_ptr->size % ID_PARAM_DEBUG_CHARS_PER_LINE;
+        m_IDParam_DebugStr[0] = NULL;
+        for (i=0;i<(loopCnt/2);i++) // Loop thru the last line of char if < 16 words
+        {
+          sprintf ( (char *) strBuff, "%04x ", *pData++ );
+          strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
+        }
+        // strcat ( (char *) m_IDParam_DebugStr, "\r\n");
+        GSE_PutLine( (const char *) m_IDParam_DebugStr );
+      } // end if bFormatted == FALSE
+      else
       {
-        sprintf ( (char *) strBuff, "%04x ", *pData++ );
-        strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
-      }
-      // strcat ( (char *) m_IDParam_DebugStr, "\r\n");
-      GSE_PutLine( (const char *) m_IDParam_DebugStr );
-    } // end if bFormatted == FALSE
-    else
-    {
-      // TBD format the display
-      // Sync=
-      // #Element=
-      // #ElementPos=
-      // #ElementId=
-      // W001=XXXX
-    } // end else bFormatted == TRUE
+        IDParamProtocol_DisplayFormatted ( frame_ptr, pktCnt );
+      } // end else bFormatted == TRUE
+    } // end if have new packet
     m_IDParam_Debug.bInProgress = FALSE;
+    frameCnt[frameType] = pktCnt;
   } // end if m_IDParam_Debug.bDebug == TRUE
 
 }
@@ -794,7 +803,7 @@ BOOLEAN IDParamProtocol_Ready(UINT16 ch)
  *****************************************************************************/
 static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
                                             UARTMGR_PARAM_DATA_PTR data_ptr,
-                                            UINT16 ch )
+                                            UINT16 ch  )
 {
   BOOLEAN bNewData, bContinueSearch, bOk;
   UINT8 *pData;
@@ -802,13 +811,14 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
   ID_PARAM_FRAME_BUFFER_PTR frame_ptr;
   ID_PARAM_STATUS_PTR pStatus;
   UINT32 tick;
+  BOOLEAN bPktBad;
 
   bNewData = FALSE;
   bContinueSearch = TRUE;
   frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR) &m_IDParam_FrameBuff[ch];
   pStatus = (ID_PARAM_STATUS_PTR) &m_IDParam_Status[ch];
   tick = CM_GetTickCount();
-
+  bPktBad = FALSE;
 
   while (bContinueSearch == TRUE)
   {
@@ -863,7 +873,17 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
              (buff_ptr->stateSearch == ID_PARAM_SEARCH_SYNC_WORD) )
         {
           bContinueSearch = FALSE;
+          // Indirect way of handling 0x8000 not seen in 1st word. If we are currently SYNC and we don't
+          // find 0x800 to move to ID_PARAM_SEARCH_PACKET_SIZE, then we must have lost sync.
+          if (( pStatus->sync == TRUE) && (*buff_ptr->pRd != 0x80) && (buff_ptr->cnt > 0) && (bPktBad == FALSE))
+          {
+            pStatus->cntBadFrame++;
+            pStatus->cntBadFrameInRow =
+                (pStatus->cntBadFrameInRow < ID_PARAM_FRAME_CONSEC_BAD_CNT) ?
+                (pStatus->cntBadFrameInRow + 1) : pStatus->cntBadFrameInRow;
+          }
         }
+
         break;
 
       case ID_PARAM_SEARCH_PACKET_SIZE:
@@ -900,6 +920,7 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
               pStatus->cntBadFrameInRow =
                   (pStatus->cntBadFrameInRow < ID_PARAM_FRAME_CONSEC_BAD_CNT) ?
                   (pStatus->cntBadFrameInRow + 1) : pStatus->cntBadFrameInRow;
+              bPktBad = TRUE;
             }
           }
           else { // checksum does not match !
@@ -907,6 +928,7 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
             pStatus->cntBadChksumInRow =
                 (pStatus->cntBadChksumInRow < ID_PARAM_FRAME_CONSEC_CHKSUM_CNT) ?
                 (pStatus->cntBadChksumInRow + 1) : pStatus->cntBadChksumInRow;
+            bPktBad = TRUE;
           }
 
           if (bOk == TRUE)
@@ -1007,9 +1029,9 @@ static BOOLEAN IDParamProtocol_ConfirmFrameFmt ( ID_PARAM_FRAME_HDR_PTR pFrameHd
 
   bOk = FALSE;
 
-  if ( (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->totalElements)) ||
-       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementPos)) ||
-       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementID)) ||
+  if ( (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->totalElements)) &&
+       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementPos)) &&
+       (ID_PARAM_FRAME_WORD_BIT0_SET(pFrameHdr->elementID)) &&
        (ID_PARAM_FRAME_WORD_BIT0_SET(cksum)) )
   {
     bOk = TRUE;
@@ -1076,7 +1098,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
         else
         {
           if ( (i <(ID_PARAM_CFG_MAX - 1)) &&
-               ((runtime_data_ptr + 1)->id == ID_PARAM_NOT_USED) )
+               ((data_ptr + 1)->runtime_data.id == ID_PARAM_NOT_USED) )
           { // Two IDs with ID_PARAM_NOT_USED signifies end of list.
             break; // End of list found. Exit for loop early here.
           }
@@ -1427,7 +1449,7 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
           else
           {
             if ( (k <(ID_PARAM_CFG_MAX - 1)) &&
-                 ((runtime_data_ptr + 1)->id == ID_PARAM_NOT_USED) )
+               ((data_ptr + 1)->runtime_data.id == ID_PARAM_NOT_USED) )
             { // Two IDs with ID_PARAM_NOT_USED signifies end of list.
               break; // End of list found. Exit for loop early here.
             }
@@ -1442,15 +1464,115 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
 
 }
 
+/******************************************************************************
+ * Function:    IDParamProtocol_DisplayFormatted
+ *
+ * Description: Utility function to display ID Param frame data for a specific ch
+ *              in formatted form.
+ *
+ * Parameters:  frame_ptr - frame to be outputted
+ *              pktCnt - frame number
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
+                                                UINT32 pktCnt )
+{
+  UINT16 *pData;
+  UINT16 i, j, k, loopCnt;
+  UINT8 strBuff[ID_PARAM_DEBUG_CHARS_PER_LINE];
+  ID_PARAM_FRAME_HDR_PTR pFrameHdr;
+
+
+  pFrameHdr = (ID_PARAM_FRAME_HDR_PTR) &frame_ptr->data[0];
+
+  // Sync Char
+  sprintf ( (char *) m_IDParam_DebugStr, "\r\nSync=0x%04x\r\n", pFrameHdr->syncWord );
+  GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+
+  // # Elements
+  sprintf ( (char *) m_IDParam_DebugStr, "Num Element=0x%04x\r\n", pFrameHdr->totalElements );
+  GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+
+  // Element Pos
+  sprintf ( (char *) m_IDParam_DebugStr, "Element Pos=0x%04x\r\n", pFrameHdr->elementPos );
+  GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+
+  // Element Id
+  sprintf ( (char *) m_IDParam_DebugStr, "Element ID=0x%04x\r\n", pFrameHdr->elementID );
+  GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+
+  // Words for full char row
+  loopCnt = ((frame_ptr->size / sizeof(UINT16)) - ID_PARAM_FRAME_OH)
+             / ID_PARAM_DBG_FMT_WORDS_PER_LINE;
+  k = 0;  // Param Word Cnt
+  pData = (UINT16 *) &pFrameHdr->data;
+  for (i=0;i<loopCnt;i++)  // loop thru each line
+  {
+    m_IDParam_DebugStr[0] = '\0'; ;
+    for (j=0;j<ID_PARAM_DBG_FMT_WORDS_PER_LINE;j++) // loop thru each element
+    {
+      sprintf ( (char *) strBuff, "W%03d=0x%04x  ", k++, *(pData + j) );
+      strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
+    }
+    GSE_PutLine( (const char *) m_IDParam_DebugStr );
+    GSE_PutLine( "\r\n" );
+    pData = pData + j;
+  }
+  // Words for partial char row
+  loopCnt =  ((frame_ptr->size / sizeof(UINT16)) - ID_PARAM_FRAME_OH)
+             % ID_PARAM_DBG_FMT_WORDS_PER_LINE;
+  m_IDParam_DebugStr[0] = '\0'; ;
+  if (loopCnt > 0)
+  {
+    for (j=0;j<loopCnt;j++)  // loop thru each element of last line
+    {
+      sprintf ( (char *) strBuff, "W%03d=0x%04x  ", k++, *(pData + j) );
+      strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
+    }
+    GSE_PutLine( (const char *) m_IDParam_DebugStr );
+    GSE_PutLine( "\r\n" );
+  }
+
+  // Pkt Cnt
+  sprintf ( (char *) m_IDParam_DebugStr, "   FrameCnt=%d\r\n", pktCnt );
+  GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
+
+}
+
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 14-11-03   Time: 6:08p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param.  Fix logic for pointer into UART Data.  
+ *
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 14-11-03   Time: 5:09p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Protocol.  Add ID_DR_NO_RANGE_SCALE for 0.0f
+ * (instead of 0x0000) as requested from V&V.
+ *
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 14-10-30   Time: 6:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param. Additional updates from V&V findings.
+ *
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 14-10-29   Time: 8:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 Additional Updates for ID Param for JV.
+ *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param Protocol, Design Review Updates. 
+ * SCR #1263 ID Param Protocol, Design Review Updates.
  *
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a

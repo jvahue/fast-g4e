@@ -3549,7 +3549,6 @@ void UploadMgr_PrintInstallationInfo()
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
  * flag change
- *
  * *****************  Version 178  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p
  * Updated in $/software/control processor/code/application
