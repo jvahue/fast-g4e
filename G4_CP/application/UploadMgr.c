@@ -33,6 +33,8 @@
 #include "DataManager.h"
 #include "EngineRun.h"
 
+#include "TestPoints.h"
+
 extern UINT32  __CRC_END;    // declared in CBITManager.c
 
 /*****************************************************************************/
@@ -454,7 +456,7 @@ void UploadMgr_Init(void)
  *                                to attempt to start an upload.
  *                                UPLOAD_STARTED_POST_FLIGHT
  *                                UPLOAD_STARTED_AUTO (only uploads if data
-                                                       logs are present)
+ *                                                     logs are present)
  *                                UPLOAD_STARTED_FORCED
  *
  * Returns:     void
@@ -550,7 +552,6 @@ BOOLEAN UploadMgr_IsUploadInProgress(void)
 {
   return LCTaskData.InProgress;
 }
-
 
 
 /******************************************************************************
@@ -1205,6 +1206,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
   LOG_FIND_STATUS     result;
   UPLOAD_START_SOURCE startSource;
   LOG_TYPE types[] = {LOG_TYPE_DATA,LOG_TYPE_ETM};
+
   switch (pTask->State)
   {
     //Start the Log Collection process only if there are
@@ -1239,7 +1241,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                      "UploadMgr: Auto upload, no data/etm logs found, stopping");
         pTask->State = LOG_COLLECTION_FINISHED;
       }
-   break;
+      break;
 
     //Start the Log Collection process.  Reset log offset
     //to the beginning of log memory.  Find the start and end of
@@ -1277,7 +1279,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                     "UploadMgr: Canceled while waiting for recording to finish"),
                     LOG_COLLECTION_FINISHED :
                     pTask->State;
-    break;
+      break;
 
     case LOG_COLLECTION_PRE_MAINTENANCE:
       //MaintainFileTable() return 0 while in progress.  When it returns 1,
@@ -1424,10 +1426,10 @@ void UploadMgr_FileCollectionTask(void *pParam)
                 {
                   // Determine the number of TH logs and increment count...
                   // Divde the total size of the data read by the size of a
-			      // single TH-rec (header+data) to get # TH recs
+                  // single TH-rec (header+data) to get # TH recs
                   pTask->FileHeader.log_cnt += pTask->LogSize /
-			                                (((SYS_LOG_HEADER*)pTask->LogBuf)->nSize +
-			                                sizeof(SYS_LOG_HEADER));
+                                      (((SYS_LOG_HEADER*)pTask->LogBuf)->nSize +
+                                      sizeof(SYS_LOG_HEADER));
                 }
                 else
                 {
@@ -1483,10 +1485,10 @@ void UploadMgr_FileCollectionTask(void *pParam)
           {
             // Determine the number of TH logs and increment count...
             // Divde the total size of the data read by the size of a
-			// single TH-rec (header+data) to get # TH recs
+            // single TH-rec (header+data) to get # TH recs
             pTask->FileHeader.log_cnt += pTask->LogSize /
-			                            (((SYS_LOG_HEADER*)pTask->LogBuf)->nSize +
-			                            sizeof(SYS_LOG_HEADER));
+                                         (((SYS_LOG_HEADER*)pTask->LogBuf)->nSize +
+                                          sizeof(SYS_LOG_HEADER));
           }
           else
           {
@@ -1878,6 +1880,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
         pTask->State = LOG_COLLECTION_STARTFILE;
       }
       break;
+
     case LOG_COLLECTION_POST_MAINTENANCE:
       //MaintainFileTable() return 0 while in progress.  When it returns 1,
       //continue to the next task.  -1 indicates an error occurred, so quit
@@ -2990,6 +2993,13 @@ void UploadMgr_FileUploadTask(void *pParam)
     case FILE_UL_WAIT_END_UL_RSP:
       if(m_GotResponse)
       {
+#ifdef STE_TP
+        if (0 != TPU(0, eTpUldScr1245))
+        {
+          ResponseStatusSuccess = FALSE;
+          ResponseStatusBusy    = FALSE;
+        }
+#endif
         if(ResponseStatusSuccess)
         {
           task->State = FILE_UL_FINISHED;
@@ -3039,7 +3049,6 @@ void UploadMgr_FileUploadTask(void *pParam)
         }
       }
       break;
-
 
     case FILE_UL_FINISHED:
       //All done, kill thy self
@@ -3534,23 +3543,23 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
- * 
+ *
  * *****************  Version 179  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:25p
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
  * flag change
- * 
+ *
  * *****************  Version 178  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification.
- * 
+ *
  * *****************  Version 177  *****************
  * User: Contractor V&v Date: 10/02/14   Time: 3:59p
  * Updated in $/software/control processor/code/application
  * SCR #1266 - FVT runtime Free count does not count Pri 4 files
- * 
+ *
  * *****************  Version 176  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:11p
  * Updated in $/software/control processor/code/application
