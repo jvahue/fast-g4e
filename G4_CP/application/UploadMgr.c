@@ -2993,18 +2993,11 @@ void UploadMgr_FileUploadTask(void *pParam)
     case FILE_UL_WAIT_END_UL_RSP:
       if(m_GotResponse)
       {
-#ifdef STE_TP
-        if (0 != TPU(0, eTpUldScr1245))
-        {
-          ResponseStatusSuccess = FALSE;
-          ResponseStatusBusy    = FALSE;
-        }
-#endif
-        if(ResponseStatusSuccess)
+        if(TPU(ResponseStatusSuccess, eTpUldScr1245))
         {
           task->State = FILE_UL_FINISHED;
         }
-        else if(ResponseStatusBusy)
+        else if(TPU(ResponseStatusBusy, eTpUldScr1245))
         {
           //This resends the END LOG DATA cmd every 5s to poll the
           //microserver for the status of the file processing
