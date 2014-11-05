@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 179 $  $Date: 11/03/14 5:25p $
+   $Revision: 182 $  $Date: 11/05/14 3:15p $
 
 ******************************************************************************/
 
@@ -469,7 +469,7 @@ void UploadMgr_StartUpload(UPLOAD_START_SOURCE StartSource)
   if(!LCTaskData.Disable)
   {
     // If recording is active, we can't upload... tell the user.
-    if ( FAST_FSMRecordGetState(NULL) )
+    if ( UPLOAD_START_FORCED == StartSource && FAST_FSMRecordGetState(NULL) )
     {
       GSE_DebugStr(NORMAL,TRUE, "UploadMgr: Cannot Upload while Recording is active");
     }
@@ -3536,12 +3536,31 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 182  *****************
+ * User: Contractor2  Date: 11/05/14   Time: 3:15p
+ * Updated in $/software/control processor/code/application
+ * SCR-1274: Correct bad merge
+ *
+ * *****************  Version 181  *****************
+ * User: Contractor2  Date: 11/05/14   Time: 3:05p
+ * Updated in $/software/control processor/code/application
+ * SCR-1274: v2.1.0 Instrumented Test Point additions
+ * Test for SCR-1245: File Upload command "END_LOG" does not timeout
+ * properly
+ *
+ * *****************  Version 180  *****************
+ * User: Contractor V&v Date: 11/04/14   Time: 7:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1092 - Forceupload recording-in-progress notification.
+ * Modfix-fixed start source
  *
  * *****************  Version 179  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:25p
  * Updated in $/software/control processor/code/application
  * SCR #1092 - Forceupload recording-in-progress notification. Modfix-rec
  * flag change
+ *
  * *****************  Version 178  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 4:04p
  * Updated in $/software/control processor/code/application
