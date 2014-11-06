@@ -860,7 +860,7 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    new.request.write.nSize            = nSize;
 
    // Try to place Request in Queue
-   if ( TPU(LOG_QUEUE_FULL == LogQueuePut(new)), eTpLogFull)
+   if ( TPU(LOG_QUEUE_FULL == LogQueuePut(new)), eTpLogQFull)
    {
        // Log is full;
        // set the return status as failed and update the Log Counts File
