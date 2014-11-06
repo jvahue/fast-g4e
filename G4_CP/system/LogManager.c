@@ -238,7 +238,7 @@ void LogInitialize (void)
       logConfig.nEndOffset   = MemGetBlockSize(MEM_BLOCK_LOG);
 
       // Check the Data Flash and find the next offset to write
-      bValidFound = STPU( LogFindNextWriteOffset (&nOffset, &sysStatus), eTpLog1871);
+      bValidFound = STPU( LogFindNextWriteOffset(&nOffset, &sysStatus), eTpLog1871);
 
       // If a valid address was found then save it and calculate how much was used
       if (TRUE == bValidFound)
@@ -860,7 +860,7 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    new.request.write.nSize            = nSize;
 
    // Try to place Request in Queue
-   if ( TPU(LOG_QUEUE_FULL == LogQueuePut(new)), eTpLogQFull)
+   if ( LOG_QUEUE_FULL == TPU(LogQueuePut(new), eTpLogQFull))
    {
        // Log is full;
        // set the return status as failed and update the Log Counts File
@@ -1358,7 +1358,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
                     pTCB->currentEntry.request.write.nSize);
 
             // Check if memory full
-            if ( TPU( ((logConfig.nWrOffset + nLogSize) < logConfig.nEndOffset), eTpLogFull) )
+            if ( (logConfig.nWrOffset + nLogSize) < TPU(logConfig.nEndOffset, eTpLogFull) )
             {
                // Command the Write
                bStarted = MemWrite ( MEM_BLOCK_LOG, &logConfig.nWrOffset,
@@ -1465,7 +1465,7 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
       nSize = sizeof(LOG_HEADER) + pTCB->currentEntry.request.write.nSize;
 
       // Check if memory full
-      if ( TPU( (TPU((logConfig.nWrOffset + nSize), eTpLogPend) < logConfig.nEndOffset), eTpLogFull) )
+      if ( TPU((logConfig.nWrOffset + nSize), eTpLogPend) < TPU( logConfig.nEndOffset, eTpLogFull) )
       {
          // Command the Write
          bStarted = MemWrite (MEM_BLOCK_LOG, &logConfig.nWrOffset,
