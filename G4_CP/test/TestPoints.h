@@ -141,7 +141,8 @@ typedef enum {
     eTpRmtOverrun, // Cause RMT overrun
     eTpUnexpected, // unexpected interrupt
     eTpUldScr1245, // UploadMgr SCR 1245 - END_LOG timeout
-    eTpLogFull,    // Control LogFull flow
+    eTpLogFull,    // Control Log Flash Full flow
+    eTpLogQFull,   // Control Log Queue Full flow
 
 
 //>>>>>>>>>>>>>>>> Do not change the lines below <<<<<<<<<<<<<<<<<
