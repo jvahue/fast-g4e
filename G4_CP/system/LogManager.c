@@ -860,7 +860,7 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    new.request.write.nSize            = nSize;
 
    // Try to place Request in Queue
-   if (LOG_QUEUE_FULL == LogQueuePut(new))
+   if ( TPU(LOG_QUEUE_FULL == LogQueuePut(new)), eTpLogFull)
    {
        // Log is full;
        // set the return status as failed and update the Log Counts File
@@ -1358,7 +1358,7 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
                     pTCB->currentEntry.request.write.nSize);
 
             // Check if memory full
-            if ( ((logConfig.nWrOffset + nLogSize) < logConfig.nEndOffset) )
+            if ( TPU( ((logConfig.nWrOffset + nLogSize) < logConfig.nEndOffset), eTpLogFull) )
             {
                // Command the Write
                bStarted = MemWrite ( MEM_BLOCK_LOG, &logConfig.nWrOffset,
@@ -1465,7 +1465,7 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
       nSize = sizeof(LOG_HEADER) + pTCB->currentEntry.request.write.nSize;
 
       // Check if memory full
-      if ( TPU( (logConfig.nWrOffset + nSize), eTpLogPend) < logConfig.nEndOffset)
+      if ( TPU( (TPU((logConfig.nWrOffset + nSize), eTpLogPend) < logConfig.nEndOffset), eTpLogFull) )
       {
          // Command the Write
          bStarted = MemWrite (MEM_BLOCK_LOG, &logConfig.nWrOffset,
@@ -2932,12 +2932,12 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
- * 
+ *
  * *****************  Version 113  *****************
  * User: Contractor V&v Date: 10/29/14   Time: 3:37p
  * Updated in $/software/control processor/code/system
  * SCR #1251 - EMU150 Download Records Lost - modfix LogMng start/pending.
- * 
+ *
  * *****************  Version 112  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:18p
  * Updated in $/software/control processor/code/system

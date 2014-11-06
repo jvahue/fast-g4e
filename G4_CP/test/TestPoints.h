@@ -141,6 +141,7 @@ typedef enum {
     eTpRmtOverrun, // Cause RMT overrun
     eTpUnexpected, // unexpected interrupt
     eTpUldScr1245, // UploadMgr SCR 1245 - END_LOG timeout
+    eTpLogFull,    // Control LogFull flow
 
 
 //>>>>>>>>>>>>>>>> Do not change the lines below <<<<<<<<<<<<<<<<<
@@ -207,7 +208,7 @@ EXPORT  UINT32 StartupTpUintInit( UINT32 actual, TEST_POINTS tpId, UINT32 iValue
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.h $
- * 
+ *
  * *****************  Version 45  *****************
  * User: Contractor2  Date: 11/05/14   Time: 3:00p
  * Updated in $/software/control processor/code/test
