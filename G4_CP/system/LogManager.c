@@ -14,8 +14,9 @@
                        next sector is completely erased before determining
                        the end has been reached.
 
-   VERSION
-      $Revision: 113 $  $Date: 10/29/14 3:37p $
+    VERSION
+    $Revision: 114 $  $Date: 11/11/14 4:41p $
+
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -130,6 +131,7 @@ static BOOLEAN          LogWriteIsPaused ( void );
 static LOG_QUEUE_STATUS LogQueuePut   ( LOG_REQUEST Entry );
 /*****************************************************************************/
 #include "LogUserTables.c"
+
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -195,7 +197,7 @@ void LogInitialize (void)
    // Open the log error counts file
    if( SYS_OK == NV_Open(NV_LOG_COUNTS) )
    {
-      // Open Successfull now read the counts
+      // Open Successfully now read the counts
       NV_Read(NV_LOG_COUNTS, 0, &logError.counts, sizeof(logError.counts));
       // Are there any counts from the previous run?
       if ( (logError.counts.nDiscarded != 0) || (logError.counts.nErAccess != 0) ||
@@ -860,7 +862,7 @@ void LogWrite (LOG_TYPE Type, LOG_SOURCE Source, LOG_PRIORITY Priority,
    new.request.write.nSize            = nSize;
 
    // Try to place Request in Queue
-   if ( LOG_QUEUE_FULL == TPU(LogQueuePut(new), eTpLogQFull))
+   if ( LOG_QUEUE_FULL == LogQueuePut(new))
    {
        // Log is full;
        // set the return status as failed and update the Log Counts File
@@ -1136,7 +1138,7 @@ LOG_CBIT_HEALTH_COUNTS LogGetCBITHealthStatus ( void )
  *
  * Notes:       Corrupt count only set on restart, so no need for diff calculation
  *              Normally would return Diff in CBIT_HEALTH_COUNTS from (Current - PrevCnt)
- *              Assignment code has been left in to accomodate possible future statuses.
+ *              Assignment code has been left in to accommodate possible future statuses.
  *
  *****************************************************************************/
 LOG_CBIT_HEALTH_COUNTS LogCalcDiffCBITHealthStatus ( LOG_CBIT_HEALTH_COUNTS PrevCount )
@@ -1215,7 +1217,7 @@ BOOLEAN LogIsWriteComplete( LOG_REGISTER_TYPE regType )
 /**********************************************************************************************
  * Function:    LogETM_SetRecStateChangeEvt
  *
- * Description: Set the callback fuction to call when the busy/not busy status of the
+ * Description: Set the callback function to call when the busy/not busy status of the
  *              ETM Log writes.
  *
  * Parameters:  [in] tag:  Integer value to use when calling "func"
@@ -2913,7 +2915,7 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 
    intLevel = __DIR();
 
-   if ((pQueue->head - pQueue->tail) >= LOG_QUEUE_SIZE)
+   if ((pQueue->head - pQueue->tail) >= TPU(LOG_QUEUE_SIZE, eTpLogQFull))
    {
       status = LOG_QUEUE_FULL;
    }
@@ -2932,6 +2934,12 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 114  *****************
+ * User: Contractor2  Date: 11/11/14   Time: 4:41p
+ * Updated in $/software/control processor/code/system
+ * SCR-1274: v2.1.0 Instrumented Test Point additions
+ * Test for SCR-1251: EMU150 Download Data Records Lost
  *
  * *****************  Version 113  *****************
  * User: Contractor V&v Date: 10/29/14   Time: 3:37p
