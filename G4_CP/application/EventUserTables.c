@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 36 $  $Date: 11/03/14 5:24p $
+$Revision: 37 $  $Date: 11/11/14 3:26p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -863,13 +863,13 @@ static USER_MSG_TBL eventTableCmd [] =
   /* Str                 Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                                            IndexRange           DataLimit            EnumTbl*/
   { "SENSORINDEX",       NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,                       0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
   { "MINSENSORVALUE",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,              0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
-  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x7f7fc99e,          NULL            },
-  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x7f7fc99e,          NULL            },
+  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x48f42400,          NULL            },
+  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x48f42400,          NULL            },
   { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
   // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
-  { "HYSTERESISPOS",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisPos,                0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
-  { "HYSTERESISNEG",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisNeg,                0,(MAX_TABLES-1),    0,0x7f7fc99e,        NULL            },
+  { "HYSTERESISPOS",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisPos,                0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
+  { "HYSTERESISNEG",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisNeg,                0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
   { "TRANSIENT_MS",      NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.regCfg.nTransientAllowance_ms,        0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "REGION_A",          eventTableRegionA,         NULL,                  NO_HANDLER_DATA },
   { "REGION_B",          eventTableRegionB,         NULL,                  NO_HANDLER_DATA },
@@ -1516,6 +1516,12 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 11/11/14   Time: 3:26p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Modify max value of event table hysteresis to 500,000.0 or
+ * 0x48f42400
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:24p

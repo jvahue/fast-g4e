@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 30 $  $Date: 14-10-13 11:25a $
+     $Revision: 31 $  $Date: 11/11/14 10:48a $
 
 ******************************************************************************/
 
@@ -59,6 +59,7 @@ UINT32 Cnt;
 /*****************************************************************************/
 static FIFO TxFIFO;
 GSE_GET_LINE_BUFFER GSE_GetLineBuf;
+static UINT32 m_nReentrantCnt;
 
 
 /*****************************************************************************/
@@ -130,6 +131,9 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   // Note: If ->result == DRV_OK, then this value is ignored.
   *SysLogId = SYS_ID_GSE_PBIT_REG_INIT_FAIL;
+
+  // Init the re-entrant control flag for debug messaging
+  m_nReentrantCnt = 0;
 
   return pdest->result;
 }
@@ -488,16 +492,16 @@ void GSE_ToggleDisplayLiveStream(void)
 void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
                    const CHAR* str, ...)
 {
-  static UINT32 nReentrantCnt = 0;
+  
   //Check the current debug level, print the debug message if the message level
   //is within the current debug level
-  if( 0 == nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
+  if( 0 == m_nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
   {    
     va_list args;
     va_start(args,str);
-    nReentrantCnt++;
+    ++m_nReentrantCnt;
     GSE_vDebugOutput( TRUE, Timestamp, str, args);
-    nReentrantCnt--;
+    --m_nReentrantCnt;
   }
 }
 
@@ -524,14 +528,11 @@ void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
 *****************************************************************************/
 void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 {
-  static UINT32 nReentrantCnt = 0;
-  if( 0 == nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
+  if( DbgLevel <= Flt_GetDebugVerbosity())
   {
     va_list args;
-    va_start(args,str);
-    nReentrantCnt++;
-    GSE_vDebugOutput( FALSE, FALSE, str, args);
-    nReentrantCnt--;
+    va_start(args,str);    
+    GSE_vDebugOutput( FALSE, FALSE, str, args);    
   }
 }
 
@@ -559,27 +560,33 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
                               const CHAR* str, va_list args)
 {
-    CHAR buf[TEMP_CHAR_BUF_SIZE];
+    CHAR buf[TEMP_CHAR_BUF_SIZE];    
     TIMESTRUCT dateTime;
+    CHAR* ptr = buf;
 
+    // Pre-pend optional <return><newline>
     if ( newLine)
     {      
-      snprintf(buf, sizeof(buf), "%s", NEW_LINE);
-      GSE_WriteDebugToDest(buf, strlen(buf));      
+      snprintf(ptr, sizeof(buf), "%s", NEW_LINE);
+      ptr = &buf[strlen(buf)];
+      //GSE_WriteDebugToDest(buf, strlen(buf));      
     }
 
+    // Pre-pend optional HH:MM:SS.mmm
     if( showTime)
     {
       CM_GetSystemClock( &dateTime );
-      snprintf(buf, sizeof(buf), "[%02d:%02d:%02d.%03d] ",
+      snprintf(ptr, sizeof(buf), "[%02d:%02d:%02d.%03d] ",
         dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.MilliSecond);
-
-      GSE_WriteDebugToDest(buf, strlen(buf) );
+      ptr = &buf[strlen(buf)];
+      //GSE_WriteDebugToDest(buf, strlen(buf) );
     }
 
-    vsnprintf( buf, sizeof(buf), str, args);
+    // Attach msg string
+    vsnprintf( ptr, sizeof(buf), str, args);
     va_end(args);
 
+    //Write out formatted msg
     GSE_WriteDebugToDest(buf, strlen(buf));
 }
 
@@ -682,6 +689,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 10:48a
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS re-entrant test fix
  * 
  * *****************  Version 30  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a
