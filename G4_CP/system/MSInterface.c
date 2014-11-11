@@ -13,7 +13,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 69 $  $Date: 12/14/12 8:05p $
+      $Revision: 70 $  $Date: 11/11/14 5:17p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -283,9 +283,15 @@ RESULT MSI_PutCommandEx(MSCP_CMD_ID Id,const void* data,UINT32 size,INT32 TOmS,
         MSI_FindAndRemovePendingRsp((UINT16)Id,thisCmdSeqNum);
       }
     }
-
-    GSE_DebugStr(VERBOSE,TRUE,"MSI: Sent cmd %d seq %d result %s",Id,
-        thisCmdSeqNum, RcGetResultCodeString(result,resultStr));
+    
+    // Don't call GSE_DebugStr for a Serial Msg output, otherwise
+    // call re-entrancy would crash the system if debug mode is VERBOSE!
+    if (CMD_ID_SERIAL_DATA != Id)
+    {
+      GSE_DebugStr(VERBOSE, TRUE, "MSI: Sent cmd %d seq %d result %s", Id,
+                   thisCmdSeqNum, RcGetResultCodeString(result,resultStr));
+    }
+    
   }
   else
   {
@@ -935,6 +941,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 5:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS re-entrant test fix
  * 
  * *****************  Version 69  *****************
  * User: Jim Mood     Date: 12/14/12   Time: 8:05p
