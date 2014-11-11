@@ -9,7 +9,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 67 $  $Date: 10/01/14 3:23p $
+      $Revision: 68 $  $Date: 11/04/14 7:58p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -26,7 +26,7 @@
 #define VER_FUNC    "2"       // FN - Functional Build
 #define VER_MAJOR   "1"       // MJ - Major Functional Change
 #define VER_MINOR   "0"       // MN - Minor Functional Change
-#define DEV_BUILD   " Dev 8373cc151627+"  // ER - Development Build = "" for release
+#define DEV_BUILD   " Dev 605af74a2815+"        // ER - Development Build = "" for release
 
 /******************************************************************************
                                  Package Typedefs
@@ -66,6 +66,12 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 68  *****************
+ * User: Contractor V&v Date: 11/04/14   Time: 7:58p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1092 - Forceupload recording-in-progress notification.
+ * Modfix-fixed start source
  * 
  * *****************  Version 67  *****************
  * User: Contractor V&v Date: 10/01/14   Time: 3:23p

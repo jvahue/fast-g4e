@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 35 $  $Date: 11/03/14 5:24p $
+  $Revision: 36 $  $Date: 11/11/14 5:26p $
 
 ******************************************************************************/
 
@@ -134,8 +134,13 @@
 
 #define EVENT_TABLE_DEFAULT        SENSOR_UNUSED,         /* Index                      */\
                                    0.0,                   /* Sensor value to enter Table*/\
-                                   EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis */\
-                                   REGION_CFG_DEFAULT     /* Table Entry/Exit Hysteresis */
+                                   TRUE,                  /* TH enabled for table       */\
+                                   0,                     /* Pre-TH for table in secs.  */\
+                                   0,                     /* Post-TH for table in secs. */\
+                                   EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis*/\
+                                   REGION_CFG_DEFAULT    /* Table Entry/Exit Hysteresis */
+                                   
+
 
 #define EVENT_TABLE_CFG_DEFAULT    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
                                    EVENT_TABLE_DEFAULT, EVENT_TABLE_DEFAULT,\
@@ -343,12 +348,13 @@ typedef struct
 /* This structure defines the table configuration                                        */
 typedef struct
 {
-   SENSOR_INDEX nSensor;            /* Index of sensor to monitor                        */
-   FLOAT32      fTableEntryValue;   /* Value that must be reached to                     */
-
-   TABLE_HYSTERESIS_DEF tblHyst;    /* Hysteresis defs for tbl entry/exit                */
-   REGION_CFG           regCfg;     /* Region and region-transition cfg                  */
-
+   SENSOR_INDEX nSensor;             /* Index of sensor to monitor                       */
+   FLOAT32      fTableEntryValue;    /* Value that must be reached to                    */
+   BOOLEAN      bEnableTH;           /* Time History Enabled for Event table             */
+   UINT32       preTime_s;           /* Amount of pre-time history for Event table       */
+   UINT32       postTime_s;          /* Amount of post-time history for Event table      */
+   TABLE_HYSTERESIS_DEF tblHyst;     /* Hysteresis defs for tbl entry/exit               */
+   REGION_CFG           regCfg;      /* Region and region-transition cfg                 */
 } EVENT_TABLE_CFG;
 
 /* Region statistics to be reported                                                      */
@@ -499,6 +505,11 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
  *  MODIFICATIONS
  *    $History: Event.h $
  * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 5:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  TimeHistory 
+ *
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:24p
  * Updated in $/software/control processor/code/application
