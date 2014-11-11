@@ -11,7 +11,7 @@
                  Handler 
     
     VERSION
-      $Revision: 12 $  $Date: 8/28/12 1:43p $     
+      $Revision: 13 $  $Date: 11/11/14 4:00p $     
 
 ******************************************************************************/
 
@@ -78,7 +78,7 @@
                         
 #define F7X_PROTOCOL_DEFAULT_NOT_USED \
         0x00000000, /* Addr Checksum */\
-        0,          /* Num Param */\
+        32,         /* Num Param */\
         {    0,   0,   0,   0,   0,   0,   0,   0,   0,   0, \
              0,   0,   0,   0,   0,   0,   0,   0,   0,   0, \
              0,   0,   0,   0,   0,   0,   0,   0,   0,   0, \
@@ -427,6 +427,12 @@ EXPORT void F7XProtocol_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 11/11/14   Time: 4:00p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Made the default num_params 32 to match the GSE limits that
+ * can be programmed.
  * 
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
