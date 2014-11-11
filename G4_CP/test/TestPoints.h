@@ -11,7 +11,7 @@
                 certification.
 
   VERSION
-  $Revision: 45 $  $Date: 11/05/14 3:00p $
+  $Revision: 46 $  $Date: 11/11/14 4:33p $
 
 ******************************************************************************/
 
@@ -209,6 +209,12 @@ EXPORT  UINT32 StartupTpUintInit( UINT32 actual, TEST_POINTS tpId, UINT32 iValue
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: Contractor2  Date: 11/11/14   Time: 4:33p
+ * Updated in $/software/control processor/code/test
+ * SCR-1274: v2.1.0 Instrumented Test Point additions
+ * Test for SCR-1251: EMU150 Download Data Records Lost
  *
  * *****************  Version 45  *****************
  * User: Contractor2  Date: 11/05/14   Time: 3:00p

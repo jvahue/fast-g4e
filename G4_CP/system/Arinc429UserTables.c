@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 49 $  $Date: 9/03/14 5:14p $
+     $Revision: 50 $  $Date: 11/11/14 4:23p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -850,7 +850,7 @@ static USER_MSG_TBL arinc429Root[] =
 #ifdef GENERATE_SYS_LOGS
   {"CREATELOGS",  NO_NEXT_TABLE,  Arinc429Msg_CreateLogs,  USER_TYPE_ACTION, USER_RO,               NULL, -1,-1, NULL},
 #endif
-  {DISPLAY_CFG,   NO_NEXT_TABLE,  Arinc429Msg_ShowConfig,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG), NULL, -1,-1, NO_LIMIT, NULL},
+  {DISPLAY_CFG,   NO_NEXT_TABLE,  Arinc429Msg_ShowConfig,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL, -1,-1, NO_LIMIT, NULL},
   {NULL, NULL, NULL, NO_HANDLER_DATA}
 };
 
@@ -1415,6 +1415,11 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ * 
+ * *****************  Version 50  *****************
+ * User: John Omalley Date: 11/11/14   Time: 4:23p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Fixed Showcfg parameter for RO|N|G
  * 
  * *****************  Version 49  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:14p
