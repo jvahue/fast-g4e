@@ -17,7 +17,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 51 $  $Date: 9/04/14 2:44p $
+     $Revision: 52 $  $Date: 11/12/14 3:46p $
 
 ******************************************************************************/
 
@@ -1168,14 +1168,21 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
   // Prevent ref count from going negative.
   m_nRecRefCnt = (m_nRecRefCnt >= 0) ? m_nRecRefCnt : 0;
 
-  GSE_DebugStr(NORMAL,TRUE,
+  /*GSE_DebugStr(NORMAL,TRUE,
                "Clk Sync inhibit ref cnt %s to: %d", bRec ? "incremented" : "decremented",
                m_nRecRefCnt);
+  */
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: Contractor V&v Date: 11/12/14   Time: 3:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording Remove
+ * DebugStr
  * 
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 9/04/14    Time: 2:44p
