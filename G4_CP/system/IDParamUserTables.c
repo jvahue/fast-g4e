@@ -109,10 +109,10 @@ USER_ENUM_TBL idParamDebugFrameStrs[] =
 /*****************************************/
 static USER_MSG_TBL IDParamDataCfgTbl[] =
 { /*Str           Next Tbl Ptr   Handler Func.         Data Type          Access    Parameter                                 IndexRange            DataLimit    EnumTbl*/
-  {"ID",          NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamDataTemp.id,          0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"SCALE",       NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.scale,       0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"TOL",         NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.tol,         0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"TIMEOUT_MS",  NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT32,  USER_RW,  (void *) &cfgIDParamDataTemp.timeout_ms,  0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
+  {"ID",          NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamDataTemp.id,          0, ID_PARAM_CFG_MAX,  NO_LIMIT,    NULL},\
+  {"SCALE",       NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.scale,       0, ID_PARAM_CFG_MAX,  NO_LIMIT,    NULL},\
+  {"TOL",         NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.tol,         0, ID_PARAM_CFG_MAX,  NO_LIMIT,    NULL},\
+  {"TIMEOUT_MS",  NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT32,  USER_RW,  (void *) &cfgIDParamDataTemp.timeout_ms,  0, ID_PARAM_CFG_MAX,  NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
