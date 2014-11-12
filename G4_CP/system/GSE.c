@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 31 $  $Date: 11/11/14 10:48a $
+     $Revision: 32 $  $Date: 11/11/14 5:17p $
 
 ******************************************************************************/
 
@@ -59,8 +59,6 @@ UINT32 Cnt;
 /*****************************************************************************/
 static FIFO TxFIFO;
 GSE_GET_LINE_BUFFER GSE_GetLineBuf;
-static UINT32 m_nReentrantCnt;
-
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -131,9 +129,6 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
   // Note: If ->result == DRV_OK, then this value is ignored.
   *SysLogId = SYS_ID_GSE_PBIT_REG_INIT_FAIL;
-
-  // Init the re-entrant control flag for debug messaging
-  m_nReentrantCnt = 0;
 
   return pdest->result;
 }
@@ -495,13 +490,11 @@ void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
   
   //Check the current debug level, print the debug message if the message level
   //is within the current debug level
-  if( 0 == m_nReentrantCnt && DbgLevel <= Flt_GetDebugVerbosity())
-  {    
+  if( DbgLevel <= Flt_GetDebugVerbosity())
+  {
     va_list args;
     va_start(args,str);
-    ++m_nReentrantCnt;
-    GSE_vDebugOutput( TRUE, Timestamp, str, args);
-    --m_nReentrantCnt;
+    GSE_vDebugOutput( TRUE, Timestamp, str, args);   
   }
 }
 
@@ -531,8 +524,8 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
   if( DbgLevel <= Flt_GetDebugVerbosity())
   {
     va_list args;
-    va_start(args,str);    
-    GSE_vDebugOutput( FALSE, FALSE, str, args);    
+    va_start(args,str);
+    GSE_vDebugOutput( FALSE, FALSE, str, args);
   }
 }
 
@@ -568,18 +561,16 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
     if ( newLine)
     {      
       snprintf(ptr, sizeof(buf), "%s", NEW_LINE);
-      ptr = &buf[strlen(buf)];
-      //GSE_WriteDebugToDest(buf, strlen(buf));      
+      ptr = &buf[strlen(buf)];      
     }
 
-    // Pre-pend optional HH:MM:SS.mmm
+    // Pre-pend optional "[HH:MM:SS.mmm] "
     if( showTime)
     {
       CM_GetSystemClock( &dateTime );
       snprintf(ptr, sizeof(buf), "[%02d:%02d:%02d.%03d] ",
         dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.MilliSecond);
       ptr = &buf[strlen(buf)];
-      //GSE_WriteDebugToDest(buf, strlen(buf) );
     }
 
     // Attach msg string
@@ -652,19 +643,6 @@ static void GSE_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 {  
   FLT_DBG_DEST dest = Flt_GetDebugDest();
-
-  //CHAR buf[TEMP_CHAR_BUF_SIZE + MS_MSG_HDR_LEN ];
-  // if using a msgtype for debug msgs,
-  // If fault debug msg is dest for MS, prepend msgtype and add null-term.
-  //if (DEST_MS == dest || DEST_BOTH == dest)
-  //{
-  //  buf[0] = 0;
-  // // Note: the size param in SuperStrcat is the limit on the dest size
-  //  SuperStrcat(buf, "#00", sizeof(buf) );
-  //  SuperStrcat(buf, str, sizeof(buf) );    
-  //  size = strlen(buf);
-  //}
-
   
   switch (dest)
   {
@@ -689,6 +667,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 5:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS re-entrant test fix
  * 
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 10:48a

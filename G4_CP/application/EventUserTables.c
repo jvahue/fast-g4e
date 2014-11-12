@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 37 $  $Date: 11/11/14 3:26p $
+$Revision: 38 $  $Date: 11/11/14 5:29p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -866,6 +866,9 @@ static USER_MSG_TBL eventTableCmd [] =
   { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x48f42400,          NULL            },
   { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x48f42400,          NULL            },
   { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "ENABLETH",          NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_BOOLEAN, USER_RW,   &configEventTableTemp.bEnableTH,                     0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "PRE_HISTORY_S",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.preTime_s,                     0,(MAX_TABLES-1),    0,360,               NULL            },
+  { "POST_HISTORY_S",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.postTime_s,                    0,(MAX_TABLES-1),    0,360,               NULL            },
   // Since PWC Engineering cannot decide on hysteresis being + the threshold, - the threshold, or both; added configuration for both
   // NOTE: Data Limit would not accept a floating point value for assigning FLT_MAX, by maxing out the integer value the system puts the value at float max.
   { "HYSTERESISPOS",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.regCfg.fHysteresisPos,                0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
@@ -1516,6 +1519,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 38  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 5:29p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  TimeHistory 
  * 
  * *****************  Version 37  *****************
  * User: John Omalley Date: 11/11/14   Time: 3:26p
