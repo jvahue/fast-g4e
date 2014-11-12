@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 45 $  $Date: 11/03/14 5:23p $
+ $Revision: 46 $  $Date: 11/11/14 5:26p $
 
 ******************************************************************************/
 
@@ -817,7 +817,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
       // Since we just started begin collecting data
       EventUpdateData ( pData );
 
-      // If this is a table event then perform table processing
+      // If this is a TABLE EVENT, then perform table processing
       if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
       {
          pData->tableState = EventTableUpdate ( pConfig->eventTableIndex,
@@ -832,7 +832,7 @@ void EventProcessStartState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCur
          SetBit((INT32)pData->eventIndex, &m_EventActiveFlags, sizeof(m_EventActiveFlags));
 
       }
-      // This is a simple event check if we have exceeded the cfg duration
+      // This is a SIMPLE EVENT, check if we have exceeded the cfg duration
       else if ( TRUE == EventCheckDuration ( pConfig, pData ) )
       {
          // Duration was exceeded the event is now active
@@ -907,7 +907,7 @@ void EventProcessActiveState ( EVENT_CFG *pConfig, EVENT_DATA *pData, UINT32 nCu
    // keep updating the cfg parameters for the event
    EventUpdateData( pData );
 
-   // Perform table processing if configured for a table
+   // Perform table processing if configured for EVENT TABLE
    if ( EVENT_TABLE_UNUSED != pConfig->eventTableIndex )
    {
       //bTableEntered
@@ -1171,6 +1171,13 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
                 (void *)&pTableData->tsTblHystStartTime,
                  sizeof(pTableData->tsTblHystStartTime));
 
+         // If this eventtable is configured for TH, start it now
+         if (TRUE == pTableCfg->bEnableTH)
+         {
+           // Start Time History
+           TH_Open(pTableCfg->preTime_s);
+         }
+
       }
 
       // Calculate the duration since the exceedance began
@@ -1240,13 +1247,19 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
          EventTableExitRegion ( pTableCfg,  pTableData, foundRegion, nCurrentTick );
          // Determine the reason for ending the event table
          tableState = (bSensorValid == TRUE) ? ET_SENSOR_VALUE_LOW : ET_SENSOR_INVALID;
-         
+
          // SRS-4510
          // If a region was entered while in the table...
          // Log the Event Table -
          if ( REGION_NOT_FOUND != pTableData->maximumRegionEntered)
          {
            EventTableLogSummary ( pTableCfg, pTableData, priority, tableState );
+         }
+
+         // If TH was configured for this eventtable, close it at configured post time.
+         if (TRUE == pTableCfg->bEnableTH)
+         {
+           TH_Close(pTableCfg->postTime_s);
          }
 
          // Re-init the table-hysteresis time vars for next entry
@@ -1972,9 +1985,12 @@ BOOLEAN EventTableIsEntered(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTable
       ( pTableData->fCurrentSensorValue >=
       ( pTableCfg->fTableEntryValue + pTableCfg->tblHyst.fHystEntry )) )
    {
+     // sensor has met (or is continuing to meet) the threshold for hysteresis,
+     // Check ttransient-allowancer
+
      if (0 == pTableData->nTblHystStartTime_ms)
      {
-       // sensor met the threshold for hysteresis: start timing for transient-allowance,
+       // Hyst just met now, start timing...
        pTableData->nTblHystStartTime_ms = nCurrentTick;
        CM_GetTimeAsTimestamp( &pTableData->tsTblHystStartTime );
 
@@ -1984,17 +2000,17 @@ BOOLEAN EventTableIsEntered(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTable
      }
      else
      {
-       // the table-hyst start-time was already set...
+       // the table-hyst was met in a prior frame and start-time already initialized...
        // check if transient-allowance duration has been met;
        bEnterTable = ( ( (nCurrentTick - pTableData->nTblHystStartTime_ms) >=
                           pTableCfg->tblHyst.nTransientAllowance_ms ))
                           ? TRUE : FALSE;
      }
   }
-  else if (pTableData->nTblHystStartTime_ms != 0)
+  else if ( 0 != pTableData->nTblHystStartTime_ms )
   {
-    // We were waiting out the TransientAllowance, but Sensor went bad or
-    // is fell below the hyst-threshold: clear start time
+    // We were waiting for the TransientAllowance to be met, but Sensor went bad or
+    // fell below the hyst-threshold: clear start-time so we perform entry process again.
     pTableData->nTblHystStartTime_ms = 0;
     memset((void *)&pTableData->tsTblHystStartTime, 0,
             sizeof(pTableData->tsTblHystStartTime));
@@ -2072,6 +2088,11 @@ BOOLEAN EventTableIsExited(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableD
  *  MODIFICATIONS
  *    $History: Event.c $
  * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 11/11/14   Time: 5:26p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  TimeHistory 
+ *
  * *****************  Version 45  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:23p
  * Updated in $/software/control processor/code/application
