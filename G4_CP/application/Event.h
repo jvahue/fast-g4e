@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 36 $  $Date: 11/11/14 5:26p $
+  $Revision: 37 $  $Date: 11/12/14 3:45p $
 
 ******************************************************************************/
 
@@ -134,7 +134,7 @@
 
 #define EVENT_TABLE_DEFAULT        SENSOR_UNUSED,         /* Index                      */\
                                    0.0,                   /* Sensor value to enter Table*/\
-                                   TRUE,                  /* TH enabled for table       */\
+                                   FALSE,                 /* TH enabled for table       */\
                                    0,                     /* Pre-TH for table in secs.  */\
                                    0,                     /* Post-TH for table in secs. */\
                                    EVENT_TABLE_HYSTERESIS,/* Table Entry/Exit Hysteresis*/\
@@ -504,6 +504,11 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 11/12/14   Time: 3:45p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  TimeHistory ET-TH default FALSE
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:26p
