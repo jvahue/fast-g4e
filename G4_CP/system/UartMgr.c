@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 54 $  $Date: 14-10-27 9:10p $
+      $Revision: 55 $  $Date: 11/13/14 10:38a $
 
 ******************************************************************************/
 
@@ -1147,7 +1147,7 @@ void UartMgr_FlushChannels (void)
  *
  *****************************************************************************/
 UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSize,
-                                DL_WRITE_STATUS *pDL_WrStatus )
+                                DL_WRITE_STATUS **pDL_WrStatus )
 {
   UARTMGR_TASK_PARAMS_PTR pUartMgrBlock;
   UARTMGR_DOWNLOAD_PTR pUartMgrDownload;
@@ -1155,6 +1155,7 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
 
   pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[PortIndex];
   pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex];
+  *pDL_WrStatus = &pUartMgrDownload->wrStatus;
 
   switch ( pUartMgrDownload->state)
   {
@@ -1214,9 +1215,9 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
 
     case UARTMGR_DOWNLOAD_REC_STR_INPROGR:
       *pStatus = DL_IN_PROGRESS; // Immediately Say InProgress
-      if ( *pDL_WrStatus != DL_WRITE_IN_PROGRESS )
+      if ( pUartMgrDownload->wrStatus != DL_WRITE_IN_PROGRESS )
       {
-        if ( *pDL_WrStatus == DL_WRITE_SUCCESS )
+        if ( pUartMgrDownload->wrStatus == DL_WRITE_SUCCESS )
         {
           pUartMgrDownload->bWriteOk = TRUE;
         }
@@ -2102,6 +2103,11 @@ BOOLEAN UartMgr_Protocol_ReadyOk_Hndl ( UINT16 ch )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 11/13/14   Time: 10:38a
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Fixed Data Manager DL Write status location
  * 
  * *****************  Version 54  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p

@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 96 $  $Date: 10/01/14 3:24p $
+      $Revision: 97 $  $Date: 11/13/14 10:40a $
 
 ******************************************************************************/
 
@@ -47,7 +47,6 @@
 static DATA_MNG_INFO       dataMgrInfo[DATA_MGR_MAX_CHANNELS];
 static DATA_MNG_TASK_PARMS dmpBlock   [DATA_MGR_MAX_CHANNELS];
 static BOOLEAN             dmRecordEnabled; // Local Flag for recording status
-static DL_WRITE_STATUS     dataMgrDLWriteStatus[MAX_DM_BUFFERS][DATA_MGR_MAX_CHANNELS];
 static DATA_MNG_DOWNLOAD_RECORD_STATS recordStats[DATA_MGR_MAX_CHANNELS];
 // This needs to be declared as UINT32 to ensure proper alignment
 // Internally this is handled as a BYTE buffer
@@ -120,7 +119,7 @@ static void DataMgrDownloadTask( void *pParam );
 
 static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
                                      DL_STATUS *pStatus, UINT32 *pSize,
-                                     DL_WRITE_STATUS *pDL_WrStatus );
+                                     DL_WRITE_STATUS **pDL_WrStatus );
 static UINT32 DataMgrSaveDLRecord ( DATA_MNG_INFO *pDMInfo, UINT8 Channel,
                                     DM_PACKET_TYPE PacketType );
 
@@ -706,8 +705,6 @@ static void DataMgrCreateTask( UINT32 source, ACS_CONFIG *pACSConfig,
         dataMgrInfo[source].msgBuf[i].index       = 0;
         dataMgrInfo[source].msgBuf[i].tryTime_mS  = 0;
         dataMgrInfo[source].msgBuf[i].wrStatus    = LOG_REQ_NULL;
-        dataMgrDLWriteStatus[i][source]           = DL_WRITE_SUCCESS;
-        dataMgrInfo[source].msgBuf[i].pDL_Status  = &dataMgrDLWriteStatus[i][source];
     }
 
     memset (&recordStats[source],0,sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
@@ -1259,7 +1256,7 @@ BOOLEAN DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
          }
          else if ( LOG_REQ_FAILED == pDMInfo->msgBuf[i].wrStatus )
          {
-	         *(pDMInfo->msgBuf[i].pDL_Status) = DL_WRITE_FAIL;
+             *(pDMInfo->msgBuf[i].pDL_Status) = DL_WRITE_FAIL;
             pDMInfo->msgBuf[i].status        = DM_BUF_EMPTY;
             pDMInfo->msgBuf[i].tryTime_mS    = 0;
             pDMInfo->msgBuf[i].wrStatus      = LOG_REQ_NULL;
@@ -1542,15 +1539,15 @@ static void DataMgrDownloadTask( void *pParam )
             pDMInfo->dl.pDataSrc = DataMgrRequestRecord ( pDMInfo->acs_Config.portType,
                                                           pDMInfo->acs_Config.nPortIndex,
                                                           &requestStatus, &pDMInfo->dl.nBytes,
-                                                          pMsgBuf->pDL_Status );
+                                                          &pMsgBuf->pDL_Status );
             // Did the interface report no records or no more records to download?
             if ( requestStatus == DL_NO_RECORDS )
             {
                // Advance to the END State for the download processing
                pDMInfo->dl.state = DL_END;
-	       // Reset the record statistics so they can be reused
+           // Reset the record statistics so they can be reused
                memset (&recordStats[pDMParam->nChannel],0,
-					   sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
+                       sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
             }
             // Did the interface find a record?
             else if ( requestStatus == DL_RECORD_FOUND )
@@ -1571,7 +1568,7 @@ static void DataMgrDownloadTask( void *pParam )
                recordStats[pDMParam->nChannel].nSize   = pDMInfo->dl.nBytes;
                // Print a debug message about the record being found
                snprintf (tempDebugString, sizeof(tempDebugString), 
-						 "\r\nFOUND: %d Bytes: %d\r\n",
+                         "\r\nFOUND: %d Bytes: %d\r\n",
                         pDMInfo->dl.statistics.nRcvd, pDMInfo->dl.nBytes);
                GSE_DebugStr(NORMAL,TRUE,tempDebugString);
                // Initiate the record save and change states
@@ -1682,7 +1679,7 @@ void DataMgrDLSaveAndChangeState(DATA_MNG_INFO *pDMInfo, DM_PACKET_TYPE Type, UI
 
       // Send out a debug message that the current request completed
       snprintf (tempDebugString, sizeof(tempDebugString), "\rDONE: %d", 
-				pDMInfo->dl.statistics.nRcvd);
+                pDMInfo->dl.statistics.nRcvd);
       GSE_StatusStr(NORMAL,tempDebugString);
 
       // Update the statistics using the current record
@@ -1712,7 +1709,7 @@ void DataMgrDLSaveAndChangeState(DATA_MNG_INFO *pDMInfo, DM_PACKET_TYPE Type, UI
  *               UINT8            PortIndex     - Configured Index
  *               DL_STATUS       *pStatus       - Status from the interface
  *               UINT32          *pSize         - Size of the data in bytes found
- *               DL_WRITE_STATUS *pDL_WrStatus  - Status of the write once data is found
+ *               DL_WRITE_STATUS **pDL_WrStatus  - Status of the write once data is found
  *
  * Returns:      Location of the data found
  *
@@ -1721,7 +1718,7 @@ void DataMgrDLSaveAndChangeState(DATA_MNG_INFO *pDMInfo, DM_PACKET_TYPE Type, UI
  *****************************************************************************/
 static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
                                      DL_STATUS *pStatus, UINT32 *pSize,
-                                     DL_WRITE_STATUS *pDL_WrStatus )
+                                     DL_WRITE_STATUS **pDL_WrStatus )
 {
    // Local Data
    UINT8     *pSrc;
@@ -1932,6 +1929,11 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 97  *****************
+ * User: John Omalley Date: 11/13/14   Time: 10:40a
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Fixed Data Manager DL Write status location
  * 
  * *****************  Version 96  *****************
  * User: Contractor V&v Date: 10/01/14   Time: 3:24p
