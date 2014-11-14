@@ -15,7 +15,7 @@
                        the end has been reached.
 
     VERSION
-    $Revision: 114 $  $Date: 11/11/14 4:41p $
+    $Revision: 115 $  $Date: 11/13/14 10:39a $
 
 ******************************************************************************/
 
@@ -1385,6 +1385,9 @@ void LogMngStart (LOG_MNG_TASK_PARMS *pTCB)
             {
                 pTCB->state                   = LOG_MNG_IDLE;
                 *(pTCB->currentEntry.pStatus) = LOG_REQ_FAILED;
+                logError.counts.nDiscarded++;
+                // Store count to RTC RAM
+                NV_Write(NV_LOG_COUNTS,0,&logError.counts,sizeof(logError.counts));
             }
          }
          else
@@ -1504,6 +1507,9 @@ void LogMngPending (LOG_MNG_TASK_PARMS *pTCB)
       {
          pTCB->state                   = LOG_MNG_IDLE;
          *(pTCB->currentEntry.pStatus) = LOG_REQ_FAILED;
+         logError.counts.nDiscarded++;
+         // Store count to RTC RAM
+         NV_Write(NV_LOG_COUNTS,0,&logError.counts,sizeof(logError.counts));
       }
    }
    else if (LOG_REQ_ERASE == pTCB->currentEntry.reqType)
@@ -2934,6 +2940,12 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 115  *****************
+ * User: John Omalley Date: 11/13/14   Time: 10:39a
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Fixed Data Manager DL Write status location and increment
+ * the discard count if the memory is full.
  * 
  * *****************  Version 114  *****************
  * User: Contractor2  Date: 11/11/14   Time: 4:41p

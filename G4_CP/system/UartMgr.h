@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 19 $  $Date: 14-10-27 9:10p $
+      $Revision: 20 $  $Date: 11/13/14 10:38a $
 
 ******************************************************************************/
 
@@ -365,7 +365,9 @@ typedef struct
 
   BOOLEAN bHalt;
   // Between UartMgr and Protocol
-
+  // Between UartMgr and DataMgr
+  DL_WRITE_STATUS wrStatus;
+  // Between UartMgr and DataMgr
 
 } UARTMGR_DOWNLOAD, *UARTMGR_DOWNLOAD_PTR;
 
@@ -431,7 +433,7 @@ EXPORT UINT16  UartMgr_GetFileHdr         ( void *pDest, UINT32 chan, UINT16 nMa
 EXPORT UINT16  UartMgr_GetSystemHdr       ( void *pDest, UINT16 nMaxByteSize );
 EXPORT void    UartMgr_FlushChannels      ( void );
 EXPORT UINT8*  UartMgr_DownloadRecord     ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSize,
-                                            DL_WRITE_STATUS *pDL_WrStatus );
+                                            DL_WRITE_STATUS **pDL_WrStatus );
 EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 
 #endif // UARTMGR_H
@@ -440,6 +442,11 @@ EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: John Omalley Date: 11/13/14   Time: 10:38a
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Fixed Data Manager DL Write status location
  * 
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
