@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 117 $  $Date: 10/22/14 6:26p $
+   $Revision: 118 $  $Date: 11/14/14 9:45a $
 
 ******************************************************************************/
 
@@ -614,22 +614,31 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     // ===============
     if (strncmp(msgTokPtr, DISPLAY_CFG, strlen(DISPLAY_CFG) ) == 0)
     {
-      // Only GSE can issue this command
-      if ( USER_MSG_SOURCE_GSE != source )
+      // Make sure the user isn't trying to set the showcfg to a value
+      if (setTokPtr != NULL)
       {
-        User_OutputMsgString(USER_MSG_GSE_ONLY, TRUE);
-      }
-      else if( User_ShowAllConfig() )
-      {
-        // global showcfg worked ok. All the output strings have been written along
-        // the way. Pass an empty buffer to User_PutRsp and finalize the msg
-        rspString[0] = '\0';
-        User_OutputMsgString(rspString, TRUE);
+        User_OutputMsgString("\r\n", FALSE);
+        User_OutputMsgString(USER_MSG_READ_ONLY, TRUE);
       }
       else
       {
-        // Something went wrong,
-        FATAL("ShowCfg Failure", NULL);
+        // Only GSE can issue this command
+        if ( USER_MSG_SOURCE_GSE != source )
+        {
+          User_OutputMsgString(USER_MSG_GSE_ONLY, TRUE);
+        }
+        else if( User_ShowAllConfig() )
+        {
+          // global showcfg worked ok. All the output strings have been written along
+          // the way. Pass an empty buffer to User_PutRsp and finalize the msg
+          rspString[0] = '\0';
+          User_OutputMsgString(rspString, TRUE);
+        }
+        else
+        {
+          // Something went wrong,
+          FATAL("ShowCfg Failure", NULL);
+        }
       }
     }
     else
@@ -1285,7 +1294,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     }
 
     // Unhandled USER types for this operation
-	//lint -fallthrough
+    //lint -fallthrough
     case USER_TYPE_128_LIST:
     case USER_TYPE_ACTION:
     case USER_TYPE_ACT_LIST:
@@ -3098,6 +3107,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 118  *****************
+ * User: John Omalley Date: 11/14/14   Time: 9:45a
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Made "showcfg" command RO
  * 
  * *****************  Version 117  *****************
  * User: Contractor V&v Date: 10/22/14   Time: 6:26p
