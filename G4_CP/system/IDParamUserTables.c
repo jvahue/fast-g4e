@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 5 $  $Date: 14-10-29 8:29p $
+    $Revision: 6 $  $Date: 14-11-17 10:36a $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
@@ -108,11 +108,11 @@ USER_ENUM_TBL idParamDebugFrameStrs[] =
 /* User Table Defintions                 */
 /*****************************************/
 static USER_MSG_TBL IDParamDataCfgTbl[] =
-{ /*Str           Next Tbl Ptr   Handler Func.         Data Type          Access    Parameter                                 IndexRange             DataLimit    EnumTbl*/
-  {"ID",          NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamDataTemp.id,          0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"SCALE",       NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.scale,       0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"TOL",         NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.tol,         0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
-  {"TIMEOUT_MS",  NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT32,  USER_RW,  (void *) &cfgIDParamDataTemp.timeout_ms,  0, ID_PARAM_CFG_MAX-1,  NO_LIMIT,    NULL},\
+{ /*Str           Next Tbl Ptr   Handler Func.         Data Type          Access    Parameter                                 IndexRange                DataLimit    EnumTbl*/
+  {"ID",          NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgIDParamDataTemp.id,          0, ID_PARAM_CFG_MAX - 1,  NO_LIMIT,    NULL},\
+  {"SCALE",       NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.scale,       0, ID_PARAM_CFG_MAX - 1,  NO_LIMIT,    NULL},\
+  {"TOL",         NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &cfgIDParamDataTemp.tol,         0, ID_PARAM_CFG_MAX - 1,  NO_LIMIT,    NULL},\
+  {"TIMEOUT_MS",  NO_NEXT_TABLE, IDParamDataMsg_Cfg,   USER_TYPE_UINT32,  USER_RW,  (void *) &cfgIDParamDataTemp.timeout_ms,  0, ID_PARAM_CFG_MAX - 1,  NO_LIMIT,    NULL},\
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -716,10 +716,16 @@ USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
  * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 14-11-17   Time: 10:36a
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param.  Update IDPARAM.CFG.P[x] to max index of
+ * ID_PARAM_CFG_MAX - 1 instead of ID_PARAM_CFG_MAX . 
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 14-10-29   Time: 8:29p
  * Updated in $/software/control processor/code/system
- * SCR #1263 Additional Updates for ID Param for JV. 
+ * SCR #1263 Additional Updates for ID Param for JV.
  *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p

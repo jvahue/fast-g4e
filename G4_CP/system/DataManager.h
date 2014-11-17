@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 43 $  $Date: 12-11-28 4:50p $
+      $Revision: 44 $  $Date: 11/17/14 2:09p $
 
 ******************************************************************************/
 
@@ -58,7 +58,7 @@
 #define MAX_LOG_STR_LG  16
 #define MAX_LOG_STR_SM  8
 
-#define HDR_VERSION   2
+#define HDR_VERSION   3
 
 /******************************************************************************
                                  Package Typedefs
@@ -237,6 +237,11 @@ EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLE
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 11/17/14   Time: 2:09p
+ * Updated in $/software/control processor/code/system
+ * SCR 1146 - Updated the Binary Header Version for new or modified fields
  * 
  * *****************  Version 43  *****************
  * User: John Omalley Date: 12-11-28   Time: 4:50p
