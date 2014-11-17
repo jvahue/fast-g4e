@@ -863,8 +863,8 @@ static USER_MSG_TBL eventTableCmd [] =
   /* Str                 Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                                            IndexRange           DataLimit            EnumTbl*/
   { "SENSORINDEX",       NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,                       0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
   { "MINSENSORVALUE",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,              0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
-  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x48f42400,          NULL            },
-  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x48f42400,          NULL            },
+  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
+  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0.0x48f42400,        NULL            },
   { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "ENABLETH",          NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_BOOLEAN, USER_RW,   &configEventTableTemp.bEnableTH,                     0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "PRE_HISTORY_S",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.preTime_s,                     0,(MAX_TABLES-1),    0,360,               NULL            },
@@ -1508,7 +1508,7 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
   CM_ConvertTimeStamptoTimeStruct( &m_EventHistory.tsLastCleared, &ts);
 
   // Convert the last-cleared timestamp to string
-  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d/ %02d:%02d:%02d",
+  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d %02d:%02d:%02d",
                                            ts.Year, ts.Month,  ts.Day,
                                            ts.Hour, ts.Minute, ts.Second );
   // Set the passed pointer to our static string buffer.
