@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 30 $  $Date: 11/03/14 5:21p $
+$Revision: 31 $  $Date: 11/17/14 6:15p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -570,15 +570,17 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 
   // If no sensors were configured for LiveData, let the caller
   // definitely know it.
-  if (!bInspect && result)
+  if (!bInspect )
   {
     snprintf(buff, sizeof(buff), "No sensors configured for LiveData\r\n");
-    result = User_OutputMsgString( buff, FALSE);
+    result = User_OutputMsgString( buff, TRUE);
   }
-
-  // finalize the output
-  buff[0] = '\0';
-  result = User_OutputMsgString(buff, TRUE);
+  else
+  {
+    // finalize the list of sensors output
+    buff[0] = '\0';
+    result = User_OutputMsgString(buff, TRUE);
+  }  
 
   return (result) ? USER_RESULT_OK : USER_RESULT_ERROR;
 }
@@ -590,6 +592,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 11/17/14   Time: 6:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Modfix formatting tweaks for V&V
  * 
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p

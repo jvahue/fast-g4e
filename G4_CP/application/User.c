@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 118 $  $Date: 11/14/14 9:45a $
+   $Revision: 119 $  $Date: 11/17/14 6:16p $
 
 ******************************************************************************/
 
@@ -424,10 +424,10 @@ BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 static
 void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
-  CHAR chkstr[32];
+  CHAR chkstr[10];  // check-string length is: "\r\n$%04x\r\n"
   CHAR writeBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
-  INT32 msgSize = strlen(Msg) + strlen(chkstr) + 1;
+  INT32 msgSize = strlen(Msg) + sizeof(chkstr) + 1;
 
   // We should never have a single msg-part which is too big for the
   // USER_SINGLE_MSG_MAX_SIZE + checksum!
@@ -3107,6 +3107,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 119  *****************
+ * User: Contractor V&v Date: 11/17/14   Time: 6:16p
+ * Updated in $/software/control processor/code/application
+ * SCR #1262 - LiveData CP to MS found existing bug, fixed
  * 
  * *****************  Version 118  *****************
  * User: John Omalley Date: 11/14/14   Time: 9:45a

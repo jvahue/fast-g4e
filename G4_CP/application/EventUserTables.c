@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 38 $  $Date: 11/11/14 5:29p $
+$Revision: 39 $  $Date: 11/17/14 6:17p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1423,8 +1423,6 @@ USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
   len = strlen ( tempStr );
   memcpy( (void *) &outputBuffer[nOffset], tempStr, len );
 
-  //nOffset += len;
-  //outputBuffer[nOffset] = NULL;  // Terminate String
   User_OutputMsgString(outputBuffer, FALSE);
 
   return result;
@@ -1519,6 +1517,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 11/17/14   Time: 6:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis data limit fix range
  * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:29p
