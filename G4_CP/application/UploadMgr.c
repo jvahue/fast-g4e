@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 182 $  $Date: 11/05/14 3:15p $
+   $Revision: 184 $  $Date: 11/18/14 2:36p $
 
 ******************************************************************************/
 
@@ -76,7 +76,8 @@ typedef enum
   LOG_COLLECTION_FILE_UL_ERROR,
   LOG_COLLECTION_POST_MAINTENANCE,
   LOG_COLLECTION_LOG_ERASE_MEMORY,
-  LOG_COLLECTION_FINISHED
+  LOG_COLLECTION_FINISHED,
+  LOG_COLLECTION_AUTO_CHECK_FINISHED
 }UPLOADMGR_LOG_COLLECTION_STATE;
 
 //Static data for the Log Collection task
@@ -1239,7 +1240,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         GSE_DebugStr(VERBOSE,TRUE,
                      "UploadMgr: Auto upload, no data/etm logs found, stopping");
-        pTask->State = LOG_COLLECTION_FINISHED;
+        pTask->State = LOG_COLLECTION_AUTO_CHECK_FINISHED;
       }
       break;
 
@@ -1933,6 +1934,11 @@ void UploadMgr_FileCollectionTask(void *pParam)
       break;
 
     case LOG_COLLECTION_FINISHED:
+       GSE_DebugStr(NORMAL,TRUE,
+                 "UploadMgr: LC FINISHED=Upload complete, turning off LC task");
+      /**** DELIBERATE FALL THROUGH TO LOG_AUTO_CHECK_FINISHED 
+            THIS REMOVES THE DEBUG OUTPUT EVERY TIME AUTOUPLOAD DOESNT FIND A RECORD ****/
+    case LOG_COLLECTION_AUTO_CHECK_FINISHED:
       FAST_SignalUploadComplete();
       pTask->InProgress = FALSE;
       pTask->Disable    = FALSE;
@@ -1940,8 +1946,6 @@ void UploadMgr_FileCollectionTask(void *pParam)
       // and readOffset is static so the software may be stuck at the end of the logs
       readOffset = 0;
       TmTaskEnable(UL_Log_Collection, FALSE);
-      GSE_DebugStr(NORMAL,TRUE,
-              "UploadMgr: LC FINISHED=Upload complete, turning off LC task");
       break;
 
     default:
@@ -3536,6 +3540,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 184  *****************
+ * User: John Omalley Date: 11/18/14   Time: 2:36p
+ * Updated in $/software/control processor/code/application
+ * SCR 1254 - Fixed ENUMERATION NAME
  * 
  * *****************  Version 182  *****************
  * User: Contractor2  Date: 11/05/14   Time: 3:15p
