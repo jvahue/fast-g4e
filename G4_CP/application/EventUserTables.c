@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 39 $  $Date: 11/17/14 6:17p $
+$Revision: 40 $  $Date: 11/18/14 2:18p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -865,7 +865,7 @@ static USER_MSG_TBL eventTableCmd [] =
   { "MINSENSORVALUE",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,              0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
   { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
-  { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "ENABLETH",          NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_BOOLEAN, USER_RW,   &configEventTableTemp.bEnableTH,                     0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "PRE_HISTORY_S",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.preTime_s,                     0,(MAX_TABLES-1),    0,360,               NULL            },
   { "POST_HISTORY_S",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.postTime_s,                    0,(MAX_TABLES-1),    0,360,               NULL            },
@@ -1517,6 +1517,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: Contractor V&v Date: 11/18/14   Time: 2:18p
+ * Updated in $/software/control processor/code/application
+ * Event Table  Hysteresis transient allowance typo
  * 
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 11/17/14   Time: 6:17p
