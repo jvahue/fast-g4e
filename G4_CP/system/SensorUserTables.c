@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 30 $  $Date: 11/03/14 5:21p $
+$Revision: 33 $  $Date: 11/19/14 4:57p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -266,8 +266,8 @@ static USER_MSG_TBL sensorRoot [] =
 
 static USER_MSG_TBL liveDataCfg [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange  DataLimit                 EnumTbl*/
-  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &liveDataTemp.gseType,  -1,-1,      NO_LIMIT,                 liveDataType },
-  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &liveDataTemp.nRate_ms, -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
+  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   USER_RW,  &liveDataTemp.gseType,  -1,-1,      NO_LIMIT,                 liveDataType },
+  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, USER_RW,  &liveDataTemp.nRate_ms, -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
 };
 
@@ -570,15 +570,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 
   // If no sensors were configured for LiveData, let the caller
   // definitely know it.
-  if (!bInspect && result)
+  if (!bInspect )
   {
-    snprintf(buff, sizeof(buff), "No sensors configured for LiveData\r\n");
+    snprintf(buff, sizeof(buff), "No sensors configured for LiveData");
     result = User_OutputMsgString( buff, FALSE);
-  }
-
-  // finalize the output
-  buff[0] = '\0';
-  result = User_OutputMsgString(buff, TRUE);
+  }  
 
   return (result) ? USER_RESULT_OK : USER_RESULT_ERROR;
 }
@@ -590,6 +586,22 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 11/19/14   Time: 4:57p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Livedata cfg had GSE only set so the values could never be
+ * set in a normal configuration through the MS.
+ * 
+ * *****************  Version 32  *****************
+ * User: Contractor V&v Date: 11/19/14   Time: 4:50p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 -  LiveData CP to MS remove finalize in GetList function
+ * 
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 11/17/14   Time: 6:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS Modfix formatting tweaks for V&V
  * 
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p

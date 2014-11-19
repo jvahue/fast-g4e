@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 38 $  $Date: 11/11/14 5:29p $
+$Revision: 40 $  $Date: 11/18/14 2:18p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -863,9 +863,9 @@ static USER_MSG_TBL eventTableCmd [] =
   /* Str                 Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                                            IndexRange           DataLimit            EnumTbl*/
   { "SENSORINDEX",       NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_ENUM,    USER_RW,   &configEventTableTemp.nSensor,                       0,(MAX_TABLES-1),    NO_LIMIT,            SensorIndexType },
   { "MINSENSORVALUE",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.fTableEntryValue,              0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
-  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0x48f42400,          NULL            },
-  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0x48f42400,          NULL            },
-  { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
+  { "TBL_ENTRY_HYST",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystEntry,            0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
+  { "TBL_EXIT_HYST",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_FLOAT,   USER_RW,   &configEventTableTemp.tblHyst.fHystExit,             0,(MAX_TABLES-1),    0,0x48f42400,        NULL            },
+  { "TBL_TRANSIENT_MS",  NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.tblHyst.nTransientAllowance_ms,0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "ENABLETH",          NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_BOOLEAN, USER_RW,   &configEventTableTemp.bEnableTH,                     0,(MAX_TABLES-1),    NO_LIMIT,            NULL            },
   { "PRE_HISTORY_S",     NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.preTime_s,                     0,(MAX_TABLES-1),    0,360,               NULL            },
   { "POST_HISTORY_S",    NO_NEXT_TABLE,             EventTable_UserCfg,    USER_TYPE_UINT32,  USER_RW,   &configEventTableTemp.postTime_s,                    0,(MAX_TABLES-1),    0,360,               NULL            },
@@ -1423,8 +1423,6 @@ USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
   len = strlen ( tempStr );
   memcpy( (void *) &outputBuffer[nOffset], tempStr, len );
 
-  //nOffset += len;
-  //outputBuffer[nOffset] = NULL;  // Terminate String
   User_OutputMsgString(outputBuffer, FALSE);
 
   return result;
@@ -1508,7 +1506,7 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
   CM_ConvertTimeStamptoTimeStruct( &m_EventHistory.tsLastCleared, &ts);
 
   // Convert the last-cleared timestamp to string
-  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d/ %02d:%02d:%02d",
+  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d %02d:%02d:%02d",
                                            ts.Year, ts.Month,  ts.Day,
                                            ts.Hour, ts.Minute, ts.Second );
   // Set the passed pointer to our static string buffer.
@@ -1519,6 +1517,16 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: Contractor V&v Date: 11/18/14   Time: 2:18p
+ * Updated in $/software/control processor/code/application
+ * Event Table  Hysteresis transient allowance typo
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 11/17/14   Time: 6:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis data limit fix range
  * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:29p
