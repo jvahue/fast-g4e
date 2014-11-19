@@ -9,7 +9,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 97 $  $Date: 11/13/14 10:40a $
+      $Revision: 98 $  $Date: 11/18/14 1:45p $
 
 ******************************************************************************/
 
@@ -60,6 +60,10 @@ static DATA_MNG_TASK_PARMS    tcbTemp;
 static DATA_MNG_INFO          dmInfoTemp;
 static DM_DOWNLOAD_STATISTICS acs_StatusTemp;
 static CHAR tempDebugString[512];
+// Temporary location to set storage of status before it is returned from 
+// download protocol handler. For channels that record data this needs to 
+// initialized even though it isn't needed. 
+static DL_WRITE_STATUS tempDLstatus[DATA_MGR_MAX_CHANNELS];
 
 //Used to generate events back to "parent" when the record busy/not busy
 //status changes
@@ -698,6 +702,8 @@ static void DataMgrCreateTask( UINT32 source, ACS_CONFIG *pACSConfig,
     dataMgrInfo[source].dl.bDownloadStop     = FALSE;
     dataMgrInfo[source].dl.statistics.nRcvd  = 0;
 
+    tempDLstatus[source] = DL_WRITE_SUCCESS;
+    
     for (i = 0; i < MAX_DM_BUFFERS; ++i)
     {
         memset( &dataMgrInfo[source].msgBuf[i].packet, 0, sizeof(DM_PACKET));
@@ -705,6 +711,7 @@ static void DataMgrCreateTask( UINT32 source, ACS_CONFIG *pACSConfig,
         dataMgrInfo[source].msgBuf[i].index       = 0;
         dataMgrInfo[source].msgBuf[i].tryTime_mS  = 0;
         dataMgrInfo[source].msgBuf[i].wrStatus    = LOG_REQ_NULL;
+        dataMgrInfo[source].msgBuf[i].pDL_Status  = &tempDLstatus[source];
     }
 
     memset (&recordStats[source],0,sizeof(DATA_MNG_DOWNLOAD_RECORD_STATS));
@@ -1200,8 +1207,6 @@ static void DataMgrFinishPacket( DATA_MNG_INFO *pDMInfo, UINT32 nChannel,
  * Parameters:  DATA_MNG_INFO *pDMInfo   - Information about the data manager
  *                                         storage buffers
  *              UINT32        nChannel   - Channel being recorded
- *              UINT32        Timeout_nS - Number of nanoseconds to wait
- *                                         before declaring a timeout.
  *
  * Returns:     Active status TRUE - Buffer(s) pending write to FLASH
  *                            FALSE - All Buffers written to FLASH
@@ -1210,7 +1215,7 @@ static void DataMgrFinishPacket( DATA_MNG_INFO *pDMInfo, UINT32 nChannel,
  *
  *****************************************************************************/
 static
-BOOLEAN DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
+BOOLEAN DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel)
 {
    // Local Data
    UINT32       i;
@@ -1256,7 +1261,7 @@ BOOLEAN DataMgrProcBuffers(DATA_MNG_INFO *pDMInfo, UINT32 nChannel )
          }
          else if ( LOG_REQ_FAILED == pDMInfo->msgBuf[i].wrStatus )
          {
-             *(pDMInfo->msgBuf[i].pDL_Status) = DL_WRITE_FAIL;
+            *(pDMInfo->msgBuf[i].pDL_Status) = DL_WRITE_FAIL;
             pDMInfo->msgBuf[i].status        = DM_BUF_EMPTY;
             pDMInfo->msgBuf[i].tryTime_mS    = 0;
             pDMInfo->msgBuf[i].wrStatus      = LOG_REQ_NULL;
@@ -1929,6 +1934,12 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 98  *****************
+ * User: John Omalley Date: 11/18/14   Time: 1:45p
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Uninitialized pointer used for DL write status when
+ * recording data
  * 
  * *****************  Version 97  *****************
  * User: John Omalley Date: 11/13/14   Time: 10:40a
