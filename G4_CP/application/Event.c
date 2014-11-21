@@ -37,7 +37,7 @@
    Note:
 
  VERSION
- $Revision: 46 $  $Date: 11/11/14 5:26p $
+ $Revision: 47 $  $Date: 11/20/14 3:05p $
 
 ******************************************************************************/
 
@@ -1149,7 +1149,6 @@ EVENT_TABLE_STATE EventTableUpdate ( EVENT_TABLE_INDEX eventTableIndex, UINT32 n
      bHystExitMet  = EventTableIsExited(pTableCfg, pTableData, bSensorValid, bHystEntryMet);
    }
 
-
    // Don't do anything until the table is entered and sensor is valid and above the
    // exit hysteresis limit
 
@@ -1903,8 +1902,8 @@ void EventForceTableEnd ( EVENT_TABLE_INDEX eventTableIndex, LOG_PRIORITY priori
  *
  * Description:  Update the history buffer for an event.
  *
- * Parameters:   [in] EVENT_CFG    event cfg
- *               [in] EVENT_DATA   the runtime data for the event.
+ * Parameters:   [in] EVENT_CFG    pConfig event cfg
+ *               [in] EVENT_DATA   pData   the runtime data for the event.
  *
  * Returns:      None.
  *
@@ -1963,11 +1962,11 @@ void EventUpdateHistory( const EVENT_CFG *pConfig, const EVENT_DATA *pData)
  *               to determine if conditions are met to considered the table
  *               entered.
  *
- * Parameters:   [in] EVENT_TABLE_CFG  - Pointer to the table cfg.
- *               [in] EVENT_TABLE_DATA - Pointer to the table runtime data
- *               [in] UINT32           - Current task tick used to calculate
+ * Parameters:   [in] EVENT_TABLE_CFG  - pTableCfg Pointer to the table cfg.
+ *               [in] EVENT_TABLE_DATA - pTableData Pointer to the table runtime data
+ *               [in] UINT32           - nCurrentTick Current task tick used to calculate
  *                                       transient allowance
- *               [in] BOOLEAN          - The validity of the determining sensor
+ *               [in] BOOLEAN          - bSensorValid The validity of the determining sensor
  *
  *
  * Returns:      TRUE or FALSE
@@ -2038,11 +2037,10 @@ if (bEnterTable)
  *               are met to considered the table
  *               entered.
  *
- * Parameters:   [in] EVENT_TABLE_CFG  - Pointer to the table cfg.
- *               [in] EVENT_TABLE_DATA - Pointer to the table runtime data
- *               [in] UINT32           - Current task tick used to calculate
- *                                       transient allowance
- *               [in] BOOLEAN          - The validity of the determining sensor
+ * Parameters:   [in] EVENT_TABLE_CFG  - pTableCfg Pointer to the table cfg.
+ *               [in] EVENT_TABLE_DATA - pTableData Pointer to the table runtime data
+ *               [in] BOOLEAN          - bSensorValid Validity of the determining sensor
+ *               [in] BOOLEAN          - bEntered  Table entered state
  *
  *
  * Returns:      TRUE or FALSE
@@ -2087,6 +2085,11 @@ BOOLEAN EventTableIsExited(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableD
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 47  *****************
+ * User: Contractor V&v Date: 11/20/14   Time: 3:05p
+ * Updated in $/software/control processor/code/application
+ * SCR #1249 - Event Table  Hysteresis Code Review - no logic changes
  * 
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:26p
