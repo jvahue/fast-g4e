@@ -8,7 +8,7 @@ File:        SensorUserTables.c
 Description: User Interface for Sensor Runtime Processing
 
 VERSION
-$Revision: 33 $  $Date: 11/19/14 4:57p $
+$Revision: 34 $  $Date: 11/20/14 9:55a $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -266,18 +266,18 @@ static USER_MSG_TBL sensorRoot [] =
 
 static USER_MSG_TBL liveDataCfg [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange  DataLimit                 EnumTbl*/
-  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   USER_RW,  &liveDataTemp.gseType,  -1,-1,      NO_LIMIT,                 liveDataType },
-  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, USER_RW,  &liveDataTemp.nRate_ms, -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
+  { "TYPE",     NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_ENUM,   USER_RW,             &liveDataTemp.gseType,  -1,-1,      NO_LIMIT,                 liveDataType },
+  { "RATE_MS",  NO_NEXT_TABLE,  Sensor_Live_Data_Cfg, USER_TYPE_UINT32, USER_RW,             &liveDataTemp.nRate_ms, -1,-1,      SENSOR_LD_MAX_RATE,10000, NULL },
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL liveDataRoot [] =
 { /*Str         Next Tbl Ptr    Handler Func.         Data Type         Access               Parameter               IndexRange     DataLimit                 EnumTbl*/
   { "CFG",      liveDataCfg,    NULL,                 NO_HANDLER_DATA},
-  { "TYPE",     NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_liveDataDisplay.gseType,  -1,-1,    NO_LIMIT,                 liveDataType },
-  { "MS_TYPE",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   (USER_RW|USER_GSE),  &m_msType,                   -1,-1,    NO_LIMIT,                 liveDataType },
-  { "RATE_MS",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_UINT32, (USER_RW|USER_GSE),  &m_liveDataDisplay.nRate_ms, -1,-1,    SENSOR_LD_MAX_RATE,10000, NULL },
-  { "GETLIST",  NO_NEXT_TABLE,  Sensor_LiveDataList,  USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,             -1,-1,    NO_LIMIT,                 NULL},
+  { "TYPE",     NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   USER_RW,             &m_liveDataDisplay.gseType,  -1,-1,    NO_LIMIT,                 liveDataType },
+  { "MS_TYPE",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_ENUM,   USER_RW,             &m_msType,                   -1,-1,    NO_LIMIT,                 liveDataType },
+  { "RATE_MS",  NO_NEXT_TABLE,  User_GenericAccessor, USER_TYPE_UINT32, USER_RW,             &m_liveDataDisplay.nRate_ms, -1,-1,    SENSOR_LD_MAX_RATE,10000, NULL },
+  { "GETLIST",  NO_NEXT_TABLE,  Sensor_LiveDataList,  USER_TYPE_ACTION, USER_RO,             NULL,                        -1,-1,    NO_LIMIT,                 NULL },
   { NULL,       NULL,           NULL,                 NO_HANDLER_DATA}
 };
 
@@ -586,6 +586,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 34  *****************
+ * User: John Omalley Date: 11/20/14   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR 1262 - Removed GSE limitations on livedata commands.
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 11/19/14   Time: 4:57p

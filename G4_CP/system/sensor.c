@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 90 $  $Date: 11/03/14 5:21p $
+      $Revision: 91 $  $Date: 11/20/14 7:25p $
 
 ******************************************************************************/
 
@@ -141,7 +141,6 @@ static void          SensorsLiveDataTask ( void *pParam );
 static void          SensorDumpASCIILiveData ( LD_DEST_ENUM dest );
 static void          SensorDumpBinaryLiveData( LD_DEST_ENUM dest );
 static void          SensorInitializeLiveData( void );
-static void          SensorUpdateLiveData    (UINT16, SENSOR* pSensor);
 
 static const CHAR *sensorFailureNames[MAX_FAILURE+1] =
 {
@@ -901,6 +900,7 @@ static void SensorsUpdateTask( void *pParam )
    UINT8           nSensor;
    SENSOR_CONFIG   *pConfig;
    SENSOR          *pSensor;
+   UINT16          snsrMapIdx;
 
    // Loop through all the sensors
    for (nSensor = 0; nSensor <= maxSensorUsed; nSensor++)
@@ -918,12 +918,14 @@ static void SensorsUpdateTask( void *pParam )
             // Reload the sample countdown
             pSensor->nSampleCountdown = pSensor->nSampleCounts;
             // Read the sensor
-            SensorRead( pConfig, pSensor );
+            SensorRead( pConfig, pSensor );            
 
             // If this sensor is in the livedata map, update it
-            if ( SENSOR_UNUSED != m_liveDataMap[nSensor])
-            {
-              SensorUpdateLiveData(nSensor, pSensor);
+            snsrMapIdx = m_liveDataMap[nSensor];
+            if ( SENSOR_UNUSED != snsrMapIdx)
+            {              
+              m_liveDataBuffer.sensor[snsrMapIdx].fValue        = pSensor->fValue;
+              m_liveDataBuffer.sensor[snsrMapIdx].bValueIsValid = pSensor->bValueIsValid;
             }
 
          }
@@ -1461,7 +1463,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
 
    // Display a debug message about the failure
    memset(str,0,sizeof(str));
-   sprintf(str,"Sensor (%d) - %s",
+   snprintf(str, sizeof(str), "Sensor (%d) - %s",
             pSensor->nSensorIndex, sensorFailureNames[type] );
    GSE_DebugStr(NORMAL, TRUE, str);
 
@@ -2034,36 +2036,33 @@ static void SensorDumpASCIILiveData(LD_DEST_ENUM dest)
 
   // Initialize local data
   memset(str,0, sizeof(str));
-
-  // Build the live data header
-  //sprintf(str, "\r\n");
-  //GSE_PutLine(str);
-
-  sprintf(str, "#77");
+  
+  snprintf(str, sizeof(str), "#77");
 
   // Loop through all sensors
   for (idx = 0; idx < m_liveDataBuffer.count; idx++)
   {
     // Add the sensor index, value and validity indicator to the stream
-    sprintf(tempStr, "|%03d:%.4f:%c", m_liveDataBuffer.sensor[idx].nSensorIndex,
-                                      m_liveDataBuffer.sensor[idx].fValue,
-                                      m_liveDataBuffer.sensor[idx].bValueIsValid ? '1' : '0');
+    snprintf(tempStr, sizeof(tempStr), "|%03d:%.4f:%c",
+             m_liveDataBuffer.sensor[idx].nSensorIndex,
+             m_liveDataBuffer.sensor[idx].fValue,
+             m_liveDataBuffer.sensor[idx].bValueIsValid ? '1' : '0');
     strcat(str,tempStr);
   }
 
   // Add the collection time to the live data stream
   CM_ConvertTimeStamptoTimeStruct(&m_liveDataBuffer.timeStamp, &ts);
 
-  sprintf (tempStr, "|t:%02d:%02d:%02d.%02d", ts.Hour,
-                                              ts.Minute,
-                                              ts.Second,
-                                              (ts.MilliSecond/10) );
+  snprintf (tempStr, sizeof(tempStr), "|t:%02d:%02d:%02d.%02d", ts.Hour,
+             ts.Minute,
+             ts.Second,
+             (ts.MilliSecond/10) );
   strcat(str,tempStr);
 
   // Checksum the data
   checksum = (UINT16)ChecksumBuffer(str, strlen(str), 0xFFFF);
   // Add checksum to end of live data
-  sprintf (tempStr, "|c:%04X", checksum);
+  snprintf (tempStr, sizeof(tempStr), "|c:%04X", checksum);
   strcat(str,tempStr);
 
   // Output the live data stream on the GSE port or to MS
@@ -2121,7 +2120,7 @@ static void SensorDumpBinaryLiveData(LD_DEST_ENUM dest)
   memset(str,0, sizeof(str));
 
   // Msg type
-  sprintf(str, "#88");
+  snprintf(str, sizeof(str), "#88");
   pStr += 3;
 
   // Timestamp, num sensors, the sensor sets(idx, value, validity)
@@ -2199,33 +2198,14 @@ static void SensorInitializeLiveData(void)
   m_liveDataBuffer.count = nCount;
 }
 
-/******************************************************************************
- * Function:     SensorUpdateLiveData
- *
- * Description:  SensorUpdateLiveData updates the live data collection for a specific
- *               sensors.
- *
- * Parameters:   None
- *
- * Returns:      None.
- *
- * Notes:        None
- *****************************************************************************/
-
-static void  SensorUpdateLiveData(UINT16 sensorIndex, SENSOR* pSensor)
-{
-  // Referential integrity check...
-  // Verify m_liveDataBuffer entry references the expected sensor-id as in the map table
-  ASSERT( m_liveDataBuffer.sensor[ m_liveDataMap[sensorIndex] ].nSensorIndex == sensorIndex);
-
-  // Update the livedata structure;
-  m_liveDataBuffer.sensor[m_liveDataMap[sensorIndex]].fValue        = pSensor->fValue;
-  m_liveDataBuffer.sensor[m_liveDataMap[sensorIndex]].bValueIsValid = pSensor->bValueIsValid;
-}
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 91  *****************
+ * User: Contractor V&v Date: 11/20/14   Time: 7:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 -  LiveData CP to MS  Code Review changes
  * 
  * *****************  Version 90  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p

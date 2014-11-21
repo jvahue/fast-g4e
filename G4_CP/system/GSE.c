@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 32 $  $Date: 11/11/14 5:17p $
+     $Revision: 33 $  $Date: 11/20/14 6:31p $
 
 ******************************************************************************/
 
@@ -183,7 +183,6 @@ RESULT GSE_PutLineBlocked(const INT8* Str, BOOLEAN bBlock)
     // Timeout after GSE_TX_BUFFER_AVAIL_WAIT_MS period.
     if ( (CM_GetTickCount() - WaitStart) > GSE_TX_BUFFER_AVAIL_WAIT_MS )
     {
-      // TODO DaveB - Define a wait-timeout alert notification.
       break;
     }
   }
@@ -586,8 +585,8 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
  *
  * Description: Puts a micro-server message into the MSInterface queue. 
  *
- * Parameters:  [in] Data:    Pointer to the block containing the message data
- *              [in] Size:    Size of the data, in bytes, pointed to by Data*
+ * Parameters:  [in] pData:    Pointer to the block containing the message data
+ *              [in] size:    Size of the data, in bytes, pointed to by Data*
  *
  * Returns:     None
  *
@@ -667,6 +666,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: Contractor V&v Date: 11/20/14   Time: 6:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 -  LiveData CP to MS  Code Review changes
  * 
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:17p
