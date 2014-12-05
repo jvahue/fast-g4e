@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 8 $  $Date: 1/17/13 2:44p $
+$Revision: 9 $  $Date: 12/05/14 4:31p $
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -103,7 +103,7 @@ static USER_MSG_TBL time_history_root [] =
    { "CFG",         time_history_cfg,    NULL,          NO_HANDLER_DATA},
    { "STATUS",      time_history_status, NULL,          NO_HANDLER_DATA},
    { "DEBUG",       time_history_debug,  NULL,          NO_HANDLER_DATA},
-   { DISPLAY_CFG,   NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,   NO_NEXT_TABLE,       TH_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,                NULL,          NO_HANDLER_DATA}
 };
 
@@ -302,6 +302,11 @@ static USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 12/05/14   Time: 4:31p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Update showcfg access type
  * 
  * *****************  Version 8  *****************
  * User: Jim Mood     Date: 1/17/13    Time: 2:44p

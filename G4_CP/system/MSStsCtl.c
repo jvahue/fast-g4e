@@ -8,7 +8,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 65 $  $Date: 9/03/14 5:21p $
+      $Revision: 66 $  $Date: 12/02/14 2:27p $
 
 ******************************************************************************/
 
@@ -110,7 +110,7 @@ void MSSC_Init(void)
 {
   TCB tcbTaskInfo;
 
-  User_AddRootCmd(&MsRoot);
+  User_AddRootCmd(&msRoot);
 
   m_SendHeartbeat = TRUE;
 
@@ -1040,6 +1040,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 66  *****************
+ * User: Contractor V&v Date: 12/02/14   Time: 2:27p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
  * 
  * *****************  Version 65  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:21p

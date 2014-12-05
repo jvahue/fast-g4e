@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 8 $  $Date: 14-11-03 6:08p $
+      $Revision: 9 $  $Date: 14-12-04 4:17p $
 
 ******************************************************************************/
 
@@ -260,7 +260,7 @@ void IDParamProtocol_Initialize ( void )
 
   memset ( (void *) &m_IDParam_FrameBuff, 0, sizeof(m_IDParam_FrameBuff) );
 
-  for (i=0;i<UART_NUM_OF_UARTS;i++)
+  for (i=0;i<(UINT16) UART_NUM_OF_UARTS;i++)
   {
     m_IDParam_RawBuff[i].pRd = (UINT8 *) &m_IDParam_RawBuff[i].data[0];
     m_IDParam_RawBuff[i].pWr = m_IDParam_RawBuff[i].pRd;
@@ -282,7 +282,7 @@ void IDParamProtocol_Initialize ( void )
     }
   }
 
-  for (i=0;i<UART_NUM_OF_UARTS;i++) {
+  for (i=0;i< (UINT16) UART_NUM_OF_UARTS;i++) {
     for (j=0;j<ID_PARAM_SCROLL_ID_MAX;j++) {
       m_IDParam_Scroll[i].info[j].id_elemId = ID_PARAM_NOT_USED;
       m_IDParam_Scroll[i].info[j].id_value = ID_PARAM_NOT_USED;
@@ -351,11 +351,11 @@ void IDParamProtocol_Initialize ( void )
  *                         read from the UART
  *              [in] cnt:  Size of "data" in bytes
  *              [in] ch:   Channel (UART 1,2,or 3) the data was read from
- *              [in] runtime_data_ptr: Location that has scaling data for
- *                                     the parameters stored in the
- *                                     buffer
- *              [in] info_ptr:         Location that has dumplist definition
- *                                     data
+ *              [in] uart_data_ptr: Location that has scaling data for
+ *                                  the parameters stored in the
+ *                                  buffer
+ *              [in] info_ptr:      Location that has dumplist definition
+ *                                  data
  *
  * Returns:     TRUE - Protocol Sync has been obtained
  *
@@ -697,7 +697,7 @@ void IDParamProtocol_Display_Task ( void *pParam )
   {
     m_IDParam_Debug.bInProgress = TRUE;
     ch = m_IDParam_Debug.ch;
-    frameType = m_IDParam_Debug.frameType;
+    frameType = (UINT16) m_IDParam_Debug.frameType;
     frame_ptr = (ID_PARAM_FRAME_BUFFER_PTR) &m_IDParam_FrameBuff_Debug[ch][frameType];
     pktCnt = m_IDParam_Status[ch].frameType[frameType].cntGoodFrames;
 
@@ -710,7 +710,8 @@ void IDParamProtocol_Display_Task ( void *pParam )
         loopCnt = frame_ptr->size / ID_PARAM_DEBUG_CHARS_PER_LINE;
         for (i=0;i<(loopCnt);i++) // Loop thru the 16 word line
         {
-          sprintf (  (char *) m_IDParam_DebugStr, "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
+          snprintf (  (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+                     "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
                      *(pData +  0), *(pData +  1), *(pData +  2), *(pData +  3),
                      *(pData +  4), *(pData +  5), *(pData +  6), *(pData +  7),
                      *(pData +  8), *(pData +  9), *(pData + 10), *(pData + 11),
@@ -722,7 +723,7 @@ void IDParamProtocol_Display_Task ( void *pParam )
         m_IDParam_DebugStr[0] = NULL;
         for (i=0;i<(loopCnt/2);i++) // Loop thru the last line of char if < 16 words
         {
-          sprintf ( (char *) strBuff, "%04x ", *pData++ );
+          snprintf ( (char *) strBuff, sizeof(strBuff), "%04x ", *pData++ );
           strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
         }
         // strcat ( (char *) m_IDParam_DebugStr, "\r\n");
@@ -873,9 +874,11 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
              (buff_ptr->stateSearch == ID_PARAM_SEARCH_SYNC_WORD) )
         {
           bContinueSearch = FALSE;
-          // Indirect way of handling 0x8000 not seen in 1st word. If we are currently SYNC and we don't
+          // Indirect way of handling 0x8000 not seen in 1st word. If we are currently SYNC
+          // and we don't
           // find 0x800 to move to ID_PARAM_SEARCH_PACKET_SIZE, then we must have lost sync.
-          if (( pStatus->sync == TRUE) && (*buff_ptr->pRd != 0x80) && (buff_ptr->cnt > 0) && (bPktBad == FALSE))
+          if (( pStatus->sync == TRUE) && (*buff_ptr->pRd != 0x80) && (buff_ptr->cnt > 0) &&
+              (bPktBad == FALSE))
           {
             pStatus->cntBadFrame++;
             pStatus->cntBadFrameInRow =
@@ -1116,7 +1119,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
   { // Check that this element ID at this pos has not changed !
     if ( frameData_ptr->data[index].elementID != elemID )
     {
-      // TBD increment some counter here / sys log ?
+      // Increment some counter here / sys log ?
       m_IDParam_Status[ch].frameType[frameType].cntElemIDPosChanged++;
     }
   } // end else elementID != ID_PARAM_NOT_USED
@@ -1206,7 +1209,8 @@ static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
   }
 
   if ( (m_IDParam_Debug.bDebug == TRUE) && (m_IDParam_Debug.ch == ch) &&
-       (m_IDParam_Debug.bInProgress == FALSE) && (m_IDParam_Debug.frameType == frameType) )
+       (m_IDParam_Debug.bInProgress == FALSE) &&
+       ((UINT16) m_IDParam_Debug.frameType == frameType) )
   {
     ID_PARAM_FRAME_BUFFER_PTR frameDebug_ptr;
 
@@ -1490,19 +1494,23 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
   pFrameHdr = (ID_PARAM_FRAME_HDR_PTR) &frame_ptr->data[0];
 
   // Sync Char
-  sprintf ( (char *) m_IDParam_DebugStr, "\r\nSync=0x%04x\r\n", pFrameHdr->syncWord );
+  snprintf ( (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+             "\r\nSync=0x%04x\r\n", pFrameHdr->syncWord );
   GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
 
   // # Elements
-  sprintf ( (char *) m_IDParam_DebugStr, "Num Element=0x%04x\r\n", pFrameHdr->totalElements );
+  snprintf ( (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+             "Num Element=0x%04x\r\n", pFrameHdr->totalElements );
   GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
 
   // Element Pos
-  sprintf ( (char *) m_IDParam_DebugStr, "Element Pos=0x%04x\r\n", pFrameHdr->elementPos );
+  snprintf ( (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+             "Element Pos=0x%04x\r\n", pFrameHdr->elementPos );
   GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
 
   // Element Id
-  sprintf ( (char *) m_IDParam_DebugStr, "Element ID=0x%04x\r\n", pFrameHdr->elementID );
+  snprintf ( (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+             "Element ID=0x%04x\r\n", pFrameHdr->elementID );
   GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
 
   // Words for full char row
@@ -1530,7 +1538,7 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
   {
     for (j=0;j<loopCnt;j++)  // loop thru each element of last line
     {
-      sprintf ( (char *) strBuff, "W%03d=0x%04x  ", k++, *(pData + j) );
+      snprintf ( (char *) strBuff, sizeof(strBuff), "W%03d=0x%04x  ", k++, *(pData + j) );
       strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
     }
     GSE_PutLine( (const char *) m_IDParam_DebugStr );
@@ -1538,7 +1546,8 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
   }
 
   // Pkt Cnt
-  sprintf ( (char *) m_IDParam_DebugStr, "   FrameCnt=%d\r\n", pktCnt );
+  snprintf ( (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
+             "   FrameCnt=%d\r\n", pktCnt );
   GSE_PutLine( (const char *) m_IDParam_DebugStr ); // Output this line to GSE
 
 }
@@ -1548,10 +1557,15 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
  * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 14-12-04   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates per SCR #1263
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 14-11-03   Time: 6:08p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param.  Fix logic for pointer into UART Data.  
+ * SCR #1263 ID Param.  Fix logic for pointer into UART Data.
  *
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 14-11-03   Time: 5:09p

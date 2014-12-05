@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 5 $  $Date: 14-11-03 5:09p $
+      $Revision: 6 $  $Date: 14-12-04 4:17p $
 
 ******************************************************************************/
 
@@ -33,10 +33,10 @@
 ******************************************************************************/
 #define ID_PARAM_NUM_FRAME_TYPES 2 // 0 = FADEC 1 = PEC based on Frame Word X bit #X
 #define ID_PARAM_CFG_MAX  256 // Max Params supported for recording.
-#define ID_PARAM_FRAME_MAX ID_PARAM_CFG_MAX  // Max Param supported in frame
+//#define ID_PARAM_FRAME_MAX ID_PARAM_CFG_MAX  // Max Param supported in frame
 #define ID_PARAM_FRAME_MIN 5 // Min Params supported in frame
 
-#define ID_PARAM_CH_MAX   3   // Max # Uart Channels allowed for ID Param Protocol Processing
+//#define ID_PARAM_CH_MAX   3   // Max # Uart Channels allowed for ID Param Protocol Processing
 #define ID_PARAM_NOT_USED 0xFFFF // ID to indicate param not used
 #define ID_PARAM_INDEX_NOT_USED 0xFFFF   // Index not used.  Initialized state.
 #define ID_PARAM_INDEX_SCROLL 0xFFFE     // Value used to indentify Scroll ID Use
@@ -163,7 +163,7 @@ typedef struct
   UINT32 cntGoodFrames; // Cnt # of good frames recieved
   UINT32 lastFrameTime_tick; // Tick time of last good frame received
   UINT32 cntElemIDPosChanged;// # Times Elem ID Pos has changed
-  UINT32 cntSizeChanged;// # Time size value has changed
+//UINT32 cntSizeChanged;// # Time size value has changed
   BOOLEAN bListComplete; // All element IDs known for this list
   UINT32 cntElement;     // Count of # updates to Element ID Lookup Table during init of Table
 } ID_PARAM_FRAME_TYPE, *ID_PARAM_FRAME_TYPE_PTR;
@@ -258,11 +258,16 @@ EXPORT BOOLEAN IDParamProtocol_Ready( UINT16 ch );
  *  MODIFICATIONS
  *    $History: IDParamProtocol.h $
  * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 14-12-04   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates per SCR #1263
+ *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 14-11-03   Time: 5:09p
  * Updated in $/software/control processor/code/system
  * SCR #1263 ID Param Protocol.  Add ID_DR_NO_RANGE_SCALE for 0.0f
- * (instead of 0x0000) as requested from V&V.  
+ * (instead of 0x0000) as requested from V&V.
  *
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 14-10-30   Time: 6:54p

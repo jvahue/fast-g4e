@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trend processing
 
 VERSION
-$Revision: 20 $  $Date: 13-01-08 12:00p $
+$Revision: 21 $  $Date: 12/05/14 4:33p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -41,10 +41,10 @@ $Revision: 20 $  $Date: 13-01-08 12:00p $
 //Prototype for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
 static USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
-										   USER_MSG_PARAM Param,
-										   UINT32 Index,
-										   const void *SetPtr,
-										   void **GetPtr );
+                                           USER_MSG_PARAM Param,
+                                           UINT32 Index,
+                                           const void *SetPtr,
+                                           void **GetPtr );
 
 static USER_HANDLER_RESULT  Trend_State ( USER_DATA_TYPE DataType,
                                           USER_MSG_PARAM Param,
@@ -209,7 +209,7 @@ static USER_MSG_TBL trendRoot [] =
 { /* Str            Next Tbl Ptr       Handler Func.        Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
    { "CFG",         trendCmd     ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      trendStatus  ,     NULL,                NO_HANDLER_DATA},
-   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trend_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trend_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
@@ -376,6 +376,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 12/05/14   Time: 4:33p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Updated showcfg access type
  * 
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 12:00p

@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the trigger processing
 
 VERSION
-$Revision: 32 $  $Date: 12/05/12 5:03p $
+$Revision: 33 $  $Date: 12/05/14 4:26p $
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -46,7 +46,7 @@ static BOOLEAN        m_triggerValidTemp;
 static USER_HANDLER_RESULT Trigger_UserCfg(USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
                                             UINT32 Index,
-                                          	const void *SetPtr,
+                                            const void *SetPtr,
                                             void **GetPtr);
 
 static USER_HANDLER_RESULT Trigger_State(USER_DATA_TYPE DataType,
@@ -157,7 +157,7 @@ static USER_MSG_TBL triggerRoot [] =
    { "CFG",         triggerCmd   ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      triggerStatus,     NULL,                NO_HANDLER_DATA},
    { "FLAGS",       NO_NEXT_TABLE,     Trigger_State,       USER_TYPE_128_LIST, USER_RO,          m_triggerFlags,  -1, -1,      0,MAX_TRIGGERS-1,  NULL },
-   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE, NULL,            -1, -1,      NO_LIMIT,          NULL},
+   { DISPLAY_CFG,   NO_NEXT_TABLE,     Trigger_ShowConfig,  USER_TYPE_ACTION,   USER_RO|USER_GSE|USER_NO_LOG, NULL,            -1, -1,      NO_LIMIT,          NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
@@ -457,6 +457,11 @@ static USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 12/05/14   Time: 4:26p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Fixed showcfg Access flags
  * 
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 5:03p

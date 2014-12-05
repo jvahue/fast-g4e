@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 6 $  $Date: 14-11-17 10:36a $
+    $Revision: 7 $  $Date: 14-12-04 4:17p $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
@@ -489,7 +489,7 @@ static USER_HANDLER_RESULT IDParamIDSMsg_Status(USER_DATA_TYPE DataType,
         statusIDS_Buff[cnt++] = '\r';
         statusIDS_Buff[cnt++] = '\n';
       }
-      snprintf ( buff, sizeof(buff), "SW%02d=%04d\r\n", scrollCnt++, frameElem_ptr->elementID );
+      snprintf (buff, sizeof(buff), "SW%02d=%04d\r\n", scrollCnt++, frameElem_ptr->elementID);
       len = strlen (buff);
       memcpy ( (void *) &statusIDS_Buff[cnt], buff, len );
       cnt += len;
@@ -591,7 +591,7 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
   {
     if (pCfgTable->pNext == NO_NEXT_TABLE) // Level 3 Items
     {
-      sprintf(  label,"\r\n%s%s =", branchName, pCfgTable->MsgStr);
+      snprintf(  label, sizeof(label), "\r\n%s%s =", branchName, pCfgTable->MsgStr);
       PadString(label, USER_MAX_MSG_STR_LEN + 15);
       result = USER_RESULT_ERROR;
       if (User_OutputMsgString( label, FALSE )) {
@@ -638,7 +638,8 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
         for (idx=0;idx<numParams;idx++)
         {
           // Display element info above each set of data.
-          sprintf(label, "\r\n\r\n%s%s[%d]",branchName, pCfgTable->MsgStr, idx);
+          snprintf(label, sizeof(label),  "\r\n\r\n%s%s[%d]",branchName, pCfgTable->MsgStr,
+                   idx);
 
           // Assume the worse, to terminate this for-loop
           result = USER_RESULT_ERROR;
@@ -650,7 +651,7 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
       } // end if "P" found
       else
       {
-        sprintf(  label,"\r\n%s%s", branchName, pCfgTable->MsgStr);
+        snprintf(  label,sizeof(label), "\r\n%s%s", branchName, pCfgTable->MsgStr);
         PadString(label, USER_MAX_MSG_STR_LEN + 15);
         result = USER_RESULT_ERROR;
         if (User_OutputMsgString( label, FALSE )) {
@@ -692,11 +693,11 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
-USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
-                                     USER_MSG_PARAM Param,
-                                     UINT32 Index,
-                                     const void *SetPtr,
-                                     void **GetPtr)
+static USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr)
 {
   USER_HANDLER_RESULT result ;
 
@@ -716,11 +717,16 @@ USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
  * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 14-12-04   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates per SCR #1263
+ *
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 14-11-17   Time: 10:36a
  * Updated in $/software/control processor/code/system
  * SCR #1263 ID Param.  Update IDPARAM.CFG.P[x] to max index of
- * ID_PARAM_CFG_MAX - 1 instead of ID_PARAM_CFG_MAX . 
+ * ID_PARAM_CFG_MAX - 1 instead of ID_PARAM_CFG_MAX .
  *
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 14-10-29   Time: 8:29p
