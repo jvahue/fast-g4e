@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the sction processing
 
 VERSION
-$Revision: 14 $  $Date: 12/05/12 4:16p $
+$Revision: 15 $  $Date: 12/05/14 4:37p $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -124,7 +124,7 @@ static USER_MSG_TBL actionRoot [] =
    { "CFG",                  actionCmd,         NULL,              NO_HANDLER_DATA},
    { "STATUS",               actionStatus,      NULL,              NO_HANDLER_DATA},
    { "CLEAR_LATCH",          NO_NEXT_TABLE,     Action_ClearLatch, USER_TYPE_ACTION,  USER_RO,          NULL,          -1, -1,      NO_LIMIT,  NULL},
-   { DISPLAY_CFG,            NO_NEXT_TABLE,     Action_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,            NO_NEXT_TABLE,     Action_ShowConfig, USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,                   NULL,              NULL,              NO_HANDLER_DATA}
 };
 
@@ -428,6 +428,11 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 12/05/14   Time: 4:37p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Updated Showscfg access types
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 12/05/12   Time: 4:16p

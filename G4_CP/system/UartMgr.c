@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 55 $  $Date: 11/13/14 10:38a $
+      $Revision: 56 $  $Date: 14-12-05 4:39p $
 
 ******************************************************************************/
 
@@ -106,10 +106,10 @@ static UARTMGR_STATUS_PTR UartMgr_GetStatus             ( UINT8 portIndex );
 static void UartMgr_UpdateDataReduction                 ( UINT16 ch,
                                                           UARTMGR_PROTOCOLS protocols );
 
-static  UINT16  UartMgr_ReadBufferSnapshot_Protocol     ( void *pDest, UINT32 chan,
-                                                          UINT16 nMaxByteSize,
-                                                          BOOLEAN bBeginSnapshot,
-                                                          UARTMGR_PROTOCOLS protocols );
+static  UINT16  UartMgr_ReadBuffSnapshotProtocol     ( void *pDest, UINT32 chan,
+                                                       UINT16 nMaxByteSize,
+                                                       BOOLEAN bBeginSnapshot,
+                                                       UARTMGR_PROTOCOLS protocols );
 static BOOLEAN UartMgr_Protocol_ReadyOk_Hndl            ( UINT16 ch );
 
 #include "UartMgrUserTables.c"   // Include the cmd table & functions
@@ -521,7 +521,7 @@ void UartMgr_BITTask ( void *pParam )
 
 
   // Perform BIT only on channels that are enabled
-  for (i = 0; i < UART_NUM_OF_UARTS; i++)
+  for (i = 0; i < (UINT16) UART_NUM_OF_UARTS; i++)
   {
     pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[i];
     pUartMgrStatus = (UARTMGR_STATUS_PTR) &m_UartMgrStatus[i];
@@ -965,8 +965,8 @@ UINT16 UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSiz
 {
   UINT16 cnt;
 
-  cnt = UartMgr_ReadBufferSnapshot_Protocol ( pDest, chan, nMaxByteSize, bBeginSnapshot,
-                                              m_UartMgrCfg[chan].protocol );
+  cnt = UartMgr_ReadBuffSnapshotProtocol ( pDest, chan, nMaxByteSize, bBeginSnapshot,
+                                           m_UartMgrCfg[chan].protocol );
 
   return (cnt);
 }
@@ -1749,7 +1749,7 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
 
 
 /******************************************************************************
- * Function:     UartMgr_ReadBufferSnapshot_Protocol
+ * Function:     UartMgr_ReadBuffSnapshotProtocol
  *
  * Description:  Returns the current snapshot view of all the word parameters.
  *               Only if label word data has been received is data returned.
@@ -1765,8 +1765,8 @@ void UartMgr_CreateTimeOutSystemLog (RESULT resultType, UINT16 ch)
  * Notes:        none
  *
  *****************************************************************************/
-UINT16 UartMgr_ReadBufferSnapshot_Protocol ( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
-                                      BOOLEAN bBeginSnapshot, UARTMGR_PROTOCOLS protocols )
+static UINT16 UartMgr_ReadBuffSnapshotProtocol ( void *pDest, UINT32 chan,
+                 UINT16 nMaxByteSize, BOOLEAN bBeginSnapshot, UARTMGR_PROTOCOLS protocols )
 {
   UINT16 cnt;
 
@@ -2104,15 +2104,20 @@ BOOLEAN UartMgr_Protocol_ReadyOk_Hndl ( UINT16 ch )
  *  MODIFICATIONS
  *    $History: UartMgr.c $
  * 
+ * *****************  Version 56  *****************
+ * User: Peter Lee    Date: 14-12-05   Time: 4:39p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Code Review Mod Fix. 
+ *
  * *****************  Version 55  *****************
  * User: John Omalley Date: 11/13/14   Time: 10:38a
  * Updated in $/software/control processor/code/system
  * SCR 1251 - Fixed Data Manager DL Write status location
- * 
+ *
  * *****************  Version 54  *****************
  * User: Peter Lee    Date: 14-10-27   Time: 9:10p
  * Updated in $/software/control processor/code/system
- * SCR #1263 ID Param Protocol, Design Review Updates. 
+ * SCR #1263 ID Param Protocol, Design Review Updates.
  *
  * *****************  Version 53  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p

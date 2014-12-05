@@ -10,7 +10,7 @@
     Note:
 
     VERSION
-    $Revision: 20 $  $Date: 14-10-08 6:56p $
+    $Revision: 21 $  $Date: 14-12-05 4:39p $
 
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -417,7 +417,10 @@ USER_HANDLER_RESULT UartMgrMsg_Cfg(USER_DATA_TYPE DataType,
 }
 
 
-
+// Testing Only
+// Specific to "UartMgrCfgTemp.bRecordingActive" only !!!
+#ifdef UARTMGR_DEBUG_TEST
+/*vcast_dont_instrument_start*/
 /******************************************************************************
  * Function:    UartMgrMsg_Debug
  *
@@ -444,10 +447,6 @@ USER_HANDLER_RESULT UartMgrMsg_Cfg(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
-// Testing Only
-// Specific to "UartMgrCfgTemp.bRecordingActive" only !!!
-#ifdef UARTMGR_DEBUG_TEST
-/*vcast_dont_instrument_start*/
 static
 USER_HANDLER_RESULT UartMgrMsg_Debug(USER_DATA_TYPE DataType,
                                      USER_MSG_PARAM Param,
@@ -536,6 +535,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
  * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 14-12-05   Time: 4:39p
+ * Updated in $/software/control processor/code/system
+ * SCR #1263 ID Param Code Review Mod Fix. 
+ *
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system

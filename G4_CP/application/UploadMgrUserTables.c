@@ -12,7 +12,7 @@ validate the files were received correctly by the
 micro-server and ground server.
 
 VERSION
-$Revision: 21 $  $Date: 3/06/13 6:20p $
+$Revision: 22 $  $Date: 12/05/14 3:59p $
 
 ******************************************************************************/
 #ifndef UPLOADMGR_BODY
@@ -126,8 +126,8 @@ static USER_MSG_TBL file_cmd[] =
 
 static USER_MSG_TBL lookup_cmd[] =
 {
-  {"FN",            NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_STR,  USER_RW,m_vfy_lookup_fn,        -1,-1,                           NO_LIMIT, NULL },
-  {"INDEX",         NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_INT32,USER_RO,NULL,               -1,-1,                           NO_LIMIT, NULL },
+  {"FN",            NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_STR,  USER_RW,m_vfy_lookup_fn,    -1,-1,  1,VFY_TBL_FN_SIZE, NULL },
+  {"INDEX",         NO_NEXT_TABLE,  UploadMgr_UserVfyIdxByFN, USER_TYPE_INT32,USER_RO,NULL,               -1,-1,  NO_LIMIT,          NULL },
   { NULL,     NULL,         NULL,   NO_HANDLER_DATA}
 };
 
@@ -381,12 +381,9 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
    {
       if(SetPtr != NULL)
       {
-         if(strlen(SetPtr) < sizeof(m_vfy_lookup_fn))
-         {
-            strncpy_safe(m_vfy_lookup_fn, sizeof(m_vfy_lookup_fn), SetPtr, _TRUNCATE);
-            m_vfy_lookup_idx = UploadMgr_GetFileVfy( m_vfy_lookup_fn,&vfy_row );
-            result = USER_RESULT_OK;
-         }
+        strncpy_safe(m_vfy_lookup_fn, sizeof(m_vfy_lookup_fn), SetPtr, _TRUNCATE);
+        m_vfy_lookup_idx = UploadMgr_GetFileVfy( m_vfy_lookup_fn,&vfy_row );
+        result = USER_RESULT_OK;
       }
       else
       {
@@ -410,6 +407,11 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: UploadMgrUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 12/05/14   Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - GSE Testing Updates
  * 
  * *****************  Version 21  *****************
  * User: Jim Mood     Date: 3/06/13    Time: 6:20p

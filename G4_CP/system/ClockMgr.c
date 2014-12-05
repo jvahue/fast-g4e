@@ -17,7 +17,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 52 $  $Date: 11/12/14 3:46p $
+     $Revision: 53 $  $Date: 12/02/14 2:26p $
 
 ******************************************************************************/
 
@@ -130,7 +130,7 @@ static const UINT8    DaysPerMonth [] =    {29, //Feb leap year
                                             30, //Nov
                                             31};//Dec
 
-static char GSE_OutLine[512];
+static char gse_OutLine[512];
 
 
 /*****************************************************************************/
@@ -376,17 +376,17 @@ void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
     CM_CreateClockUpdateLog( SYS_CM_CLK_UPDATE_CPU, &currTime, pTime );
 
     // Output Debug Message
-    sprintf (GSE_OutLine,
+    snprintf (gse_OutLine, sizeof(gse_OutLine),
              "\r\nCM_SetSystemClock: Auto update time (old=%02d/%02d/%4d %02d:%02d:%02d)\r\n",
              currTime.Month, currTime.Day, currTime.Year, currTime.Hour, currTime.Minute,
              currTime.Second);
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
+    GSE_DebugStr(NORMAL,TRUE,gse_OutLine);
 
-    sprintf (GSE_OutLine,
+    snprintf (gse_OutLine, sizeof(gse_OutLine),
              "\r\nCM_SetSystemClock: Auto update time (new=%02d/%02d/%4d %02d:%02d:%02d)\r\n",
              CM_SYS_CLOCK.Month,CM_SYS_CLOCK.Day, CM_SYS_CLOCK.Year, CM_SYS_CLOCK.Hour,
              CM_SYS_CLOCK.Minute, CM_SYS_CLOCK.Second);
-    GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
+    GSE_DebugStr(NORMAL,TRUE,gse_OutLine);
   }
 
 }
@@ -399,7 +399,7 @@ void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
  *              on the SPI bus.  Note that the system maintained clock is different
  *              than the real-time clock on the SPI bus.
  *
- * Parameters:  PTime  -  ptr to TIMESTRUCT
+ * Parameters:  pTime  -  ptr to TIMESTRUCT
  *
  * Returns:     none
  *
@@ -408,32 +408,32 @@ void CM_SetSystemClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog )
  ****************************************************************************/
 void CM_GetRTCClock(TIMESTRUCT* pTime)
 {
-  RESULT Result;
-  CM_TIME_INVALID_LOG InvalidTimeLog;
+  RESULT result;
+  CM_TIME_INVALID_LOG invalidTimeLog;
 
-  Result = RTC_GetTime(pTime);
-  if(Result != DRV_OK)
+  result = RTC_GetTime(pTime);
+  if(DRV_OK != result)
   {
     if(!m_bPreInitFlag)
     {
-      InvalidTimeLog.Result   = Result;
-      InvalidTimeLog.TimeRead = *pTime;
+      invalidTimeLog.Result   = result;
+      invalidTimeLog.TimeRead = *pTime;
       LogWriteSystem(SYS_CM_CBIT_TIME_INVALID_LOG,
-          LOG_PRIORITY_LOW,&InvalidTimeLog,sizeof(InvalidTimeLog),NULL);
+          LOG_PRIORITY_LOW,&invalidTimeLog,sizeof(invalidTimeLog),NULL);
     }
 
     //Set return time to default value
     *pTime = CM_SYS_CLOCK_DEFAULT;
-    Result = RTC_SetTime(pTime);
-    if (Result != DRV_OK)
+    result = RTC_SetTime(pTime);
+    if (DRV_OK != result)
     {
       if(!m_bPreInitFlag)
       {
         //Cannot set the time, log a fault (with "Result")
-        InvalidTimeLog.Result = Result;
-        InvalidTimeLog.TimeRead = *pTime;
-        LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &InvalidTimeLog,
-                       sizeof(InvalidTimeLog),NULL);
+        invalidTimeLog.Result = result;
+        invalidTimeLog.TimeRead = *pTime;
+        LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &invalidTimeLog,
+                       sizeof(invalidTimeLog),NULL);
       }
     }
   }
@@ -458,20 +458,20 @@ void CM_GetRTCClock(TIMESTRUCT* pTime)
 void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
 {
   TIMESTRUCT currTime;
-  CM_TIME_INVALID_LOG InvalidTimeLog;
-  RESULT Result;
+  CM_TIME_INVALID_LOG invalidTimeLog;
+  RESULT result;
 
   CM_GetRTCClock( &currTime );
 
-  Result = RTC_SetTime(pTime);
+  result = RTC_SetTime(pTime);
 
-  if(Result != DRV_OK)
+  if(DRV_OK != result )
   {
     //Cannot set the time, log a fault (with "Result")
-    InvalidTimeLog.Result = Result;
-    InvalidTimeLog.TimeRead = *pTime;
-    LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &InvalidTimeLog,
-                   sizeof(InvalidTimeLog),NULL);
+    invalidTimeLog.Result = result;
+    invalidTimeLog.TimeRead = *pTime;
+    LogWriteSystem(SYS_CM_CBIT_SET_RTC_FAILED, LOG_PRIORITY_LOW, &invalidTimeLog,
+                   sizeof(invalidTimeLog),NULL);
   }
   else
   {
@@ -508,7 +508,7 @@ void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
  *                  Hour = Year/Hour % 24
  *                  Year = BASE_YEAR + (Year/Hour / 24)
  *
- * Parameters:  TimeStamp - Pointer to the time stamp structure.
+ * Parameters:  timeStamp - Pointer to the time stamp structure.
  *
  * Returns:     none
  *
@@ -518,19 +518,19 @@ void CM_SetRTCClock(TIMESTRUCT* pTime, BOOLEAN bRecordLog)
  *              the wallclock.  The milliseconds are retrived from the system RTC.
  *
  ****************************************************************************/
-void CM_GetTimeAsTimestamp (TIMESTAMP* TimeStamp)
+void CM_GetTimeAsTimestamp (TIMESTAMP* timeStamp)
 {
- TIMESTRUCT Time;
+ TIMESTRUCT ts;
 
-  CM_GetSystemClock(&Time);
+  CM_GetSystemClock(&ts);
 
-  TimeStamp->Timestamp =   ((UINT32) ((Time.Second & 0x3F)))       +
-                           ((UINT32) ((Time.Minute & 0x3F)) << 6)  +
-                           ((UINT32) ((Time.Month  & 0x0F)) << 12) +
-                           ((UINT32) ((Time.Day    & 0x1F)) << 16) +
-                           ((UINT32) ((Time.Year - BASE_YEAR) * 24 +
-                              Time.Hour) << 21);
-  TimeStamp->MSecond   =   CM_SYS_CLOCK.MilliSecond;
+  timeStamp->Timestamp =   ((UINT32) ((ts.Second & 0x3F)))       +
+                           ((UINT32) ((ts.Minute & 0x3F)) << 6)  +
+                           ((UINT32) ((ts.Month  & 0x0F)) << 12) +
+                           ((UINT32) ((ts.Day    & 0x1F)) << 16) +
+                           ((UINT32) ((ts.Year - BASE_YEAR) * 24 +
+                              ts.Hour) << 21);
+  timeStamp->MSecond   =   CM_SYS_CLOCK.MilliSecond;
 
 }
 
@@ -981,52 +981,52 @@ void CM_CompareSystemToMsClockDrift(void)
  ****************************************************************************/
 void CM_CBit(void* pParam)
 {
-  TIMESTRUCT SysTime, RtcTime ;
-  INT32 SysS = 0, RtcS = 0;
-  INT32 TimeDif;
+  TIMESTRUCT sysTime, rtcTime;
+  INT32 sysS = 0, rtcS = 0;
+  INT32 timeDif;
   UINT32 intrLevel;
-  CM_RTC_SYS_TIME_DRIFT_LOG TimeDriftLog;
+  CM_RTC_SYS_TIME_DRIFT_LOG timeDriftLog;
 
   //Get Clocks and convert to seconds
   //past midnight
   intrLevel = __DIR();
-  if(RTC_GetTime(&RtcTime) == DRV_OK)
+  if(RTC_GetTime(&rtcTime) == DRV_OK)
   {
-    CM_GetSystemClock(&SysTime);
+    CM_GetSystemClock(&sysTime);
     __RIR(intrLevel);
-    RtcS += RtcTime.Hour * CM_SEC_IN_HR;
-    RtcS += RtcTime.Minute * CM_SEC_IN_MIN;
-    RtcS += RtcTime.Second;
+    rtcS += rtcTime.Hour * CM_SEC_IN_HR;
+    rtcS += rtcTime.Minute * CM_SEC_IN_MIN;
+    rtcS += rtcTime.Second;
 
-    SysS += SysTime.Hour * CM_SEC_IN_HR;
-    SysS += SysTime.Minute * CM_SEC_IN_MIN;
-    SysS += SysTime.Second;
+    sysS += sysTime.Hour * CM_SEC_IN_HR;
+    sysS += sysTime.Minute * CM_SEC_IN_MIN;
+    sysS += sysTime.Second;
 
     //Now, check for midnight roll over and compensate
-    if(RtcTime.Day != SysTime.Day)
+    if(rtcTime.Day != sysTime.Day)
     {
       //The clock that has rolled over midnight will have a lower value
       //than the clock captured before midnight, add 24 hours of seconds
-      if(RtcS < SysS)
+      if(rtcS < sysS)
       {
-        RtcS += (CM_SEC_IN_MIN * CM_MIN_IN_HR * CM_HR_IN_DAY);
+        rtcS += (CM_SEC_IN_MIN * CM_MIN_IN_HR * CM_HR_IN_DAY);
       }
       else
       {
-        SysS += (CM_SEC_IN_MIN * CM_MIN_IN_HR * CM_HR_IN_DAY);
+        sysS += (CM_SEC_IN_MIN * CM_MIN_IN_HR * CM_HR_IN_DAY);
       }
     }
 
     //Get time difference
-    TimeDif = abs(RtcS - SysS);
+    timeDif = abs(rtcS - sysS);
 
-    if(TimeDif > CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS)
+    if(timeDif > CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS)
     {
-      TimeDriftLog.RTC    = RtcTime;
-      TimeDriftLog.System = SysTime;
-      TimeDriftLog.MaxAllowedDriftSecs = CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS;
+      timeDriftLog.RTC    = rtcTime;
+      timeDriftLog.System = sysTime;
+      timeDriftLog.MaxAllowedDriftSecs = CM_SYS_RTC_CLOCK_DRIFT_MAX_SECS;
         Flt_SetStatus(STA_CAUTION, SYS_CM_CBIT_TIME_DRIFT_LIMIT_EXCEEDED,
-                      &TimeDriftLog, sizeof(TimeDriftLog));
+                      &timeDriftLog, sizeof(timeDriftLog));
       //6 second difference exceeded
       CM_SynchRTCtoWallClock();
       GSE_DebugStr(NORMAL,FALSE, "ClockMgr: Clock drift > %ds in 10 min",
@@ -1135,12 +1135,12 @@ static
 void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
                               TIMESTRUCT *newTime )
 {
-  CM_CLOCKUPDATE_LOG ClockUpdateLog;
+  CM_CLOCKUPDATE_LOG clockUpdateLog;
 
-  ClockUpdateLog.currTime = *currTime;
-  ClockUpdateLog.newTime = *newTime;
+  clockUpdateLog.currTime = *currTime;
+  clockUpdateLog.newTime = *newTime;
 
-  LogWriteSystem( SysId, LOG_PRIORITY_LOW, &ClockUpdateLog,
+  LogWriteSystem( SysId, LOG_PRIORITY_LOW, &clockUpdateLog,
                   sizeof(CM_CLOCKUPDATE_LOG), NULL );
 }
 
@@ -1162,7 +1162,7 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
  ****************************************************************************/
 void CM_UpdateRecordingState(BOOLEAN bRec)
 {
-  // incr/decr the ref count of recorders/downloaders accordingly.  
+  // incr/decr the ref count of recorders/downloaders accordingly.
   m_nRecRefCnt += bRec ? 1 : -1;
 
   // Prevent ref count from going negative.
@@ -1178,18 +1178,24 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
  * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 12/02/14   Time: 2:26p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Permit CP Time Syncing only when Not Recording CR
+ * compliance
+ *
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 11/12/14   Time: 3:46p
  * Updated in $/software/control processor/code/system
  * SCR #1164 - Permit CP Time Syncing only when Not Recording Remove
  * DebugStr
- * 
+ *
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 9/04/14    Time: 2:44p
  * Updated in $/software/control processor/code/system
  * SCR #1164 - Permit CP Time Syncing only when Not Recording - Add
  * download constraint.
- * 
+ *
  * *****************  Version 50  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:15p
  * Updated in $/software/control processor/code/system

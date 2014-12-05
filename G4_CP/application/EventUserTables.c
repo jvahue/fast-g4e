@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 40 $  $Date: 11/18/14 2:18p $
+$Revision: 41 $  $Date: 12/05/14 4:29p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -624,7 +624,7 @@ static USER_MSG_TBL eventRoot [] =
    { "CFG",         eventCmd     ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      eventStatus  ,     NULL,                NO_HANDLER_DATA},
    { "HISTORY",     eventHist    ,     NULL,                NO_HANDLER_DATA},
-   { DISPLAY_CFG,   NO_NEXT_TABLE,     Event_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE, NULL,          -1, -1,      NO_LIMIT,  NULL},
+   { DISPLAY_CFG,   NO_NEXT_TABLE,     Event_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
 
@@ -1517,6 +1517,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 41  *****************
+ * User: John Omalley Date: 12/05/14   Time: 4:29p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Add Access type NO_LOG to show cfg
  * 
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 11/18/14   Time: 2:18p

@@ -8,7 +8,7 @@
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 26 $  $Date: 12/14/12 8:05p $
+    $Revision: 28 $  $Date: 12/05/14 3:58p $
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -157,14 +157,14 @@ static USER_MSG_TBL msMsgs[] =
 {   /*Str           Next Tbl Ptr      Handler Func.      Data Type           Access                          Parameter    IndexRange    DataLimit           EnumTbl*/
    { "STATUS"     , msStatusMsgs   ,  NULL             , NO_HANDLER_DATA}  ,
    { "CFG"        , msCfgMsgs      ,  NULL             , NO_HANDLER_DATA}  ,
-   { "CMD"        , NO_NEXT_TABLE  ,  MSSC_ShellCmd    , USER_TYPE_STR     , USER_RW                         ,NULL      , -1, -1       , 1, 1024           , NULL },
+   { "CMD"        , NO_NEXT_TABLE  ,  MSSC_ShellCmd    , USER_TYPE_STR     , USER_RW                         ,NULL      , -1, -1       , 1, 245           , NULL },
    { DISPLAY_CFG  , NO_NEXT_TABLE  ,  MSSC_ShowConfig  , USER_TYPE_ACTION  ,(USER_RO|USER_NO_LOG|USER_GSE)   ,NULL      , -1, -1       , NO_LIMIT          , NULL},
    { NULL         , NULL           ,  NULL             , NO_HANDLER_DATA}
 };
 #pragma ghs endnowarning
 
 static
-USER_MSG_TBL MsRoot   = {"MS", msMsgs, NULL, NO_HANDLER_DATA};
+USER_MSG_TBL msRoot   = {"MS", msMsgs, NULL, NO_HANDLER_DATA};
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -490,6 +490,16 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
  * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 12/05/14   Time: 3:58p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - GSE Testing Updates
+ * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 12/02/14   Time: 2:45p
+ * Updated in $/software/control processor/code/system
+ * SCR #1204 - Legacy App Busy Input still latches battery / CR updates
+ *
  * *****************  Version 26  *****************
  * User: Jim Mood     Date: 12/14/12   Time: 8:05p
  * Updated in $/software/control processor/code/system
