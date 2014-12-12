@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 91 $  $Date: 11/20/14 7:25p $
+      $Revision: 92 $  $Date: 12/11/14 11:59a $
 
 ******************************************************************************/
 
@@ -258,8 +258,17 @@ void SensorsInitialize( void)
  *****************************************************************************/
 BOOLEAN SensorIsValid( SENSOR_INDEX Sensor )
 {
+  BOOLEAN bValid;
+  
+  bValid = FALSE;
+  
+  if ( (Sensor < MAX_SENSORS) && Sensors[Sensor].bValueIsValid )
+  {
+      bValid = TRUE;
+  }
+    
   // returns the sensor validity
-  return (Sensors[Sensor].bValueIsValid);
+  return (bValid);
 }
 
 /******************************************************************************
@@ -278,8 +287,16 @@ BOOLEAN SensorIsValid( SENSOR_INDEX Sensor )
  *****************************************************************************/
 BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
 {
+  BOOLEAN bUsed;
+  
+  bUsed = FALSE;
+  
+  if ((Sensor < MAX_SENSORS) && (m_SensorCfg[Sensor].type != UNUSED))
+  {
+     bUsed = TRUE;
+  }
   // return if the sensor is used
-  return (BOOLEAN)(m_SensorCfg[Sensor].type != UNUSED);
+  return bUsed;
 }
 
 /******************************************************************************
@@ -296,8 +313,16 @@ BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
  *****************************************************************************/
 FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
 {
+  FLOAT32 fValue;
+  
+  fValue = 0;
+  
+  if (Sensor < MAX_SENSORS)
+  {
+     fValue = Sensors[Sensor].fValue;
+  }
   // return the current value of the sensor
-  return (Sensors[Sensor].fValue);
+  return (fValue);
 }
 
 /******************************************************************************
@@ -315,8 +340,16 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
  *****************************************************************************/
 UINT32 SensorGetLastUpdateTime( SENSOR_INDEX Sensor)
 {
+  UINT32 nTickTime;
+  
+  nTickTime = 0;
+    
+  if (Sensor < MAX_SENSORS)
+  {
+    nTickTime = Sensors[Sensor].lastUpdateTick;
+  }
   // return the current value of the sensor
-  return (Sensors[Sensor].lastUpdateTick);
+  return (nTickTime);
 }
 
 /******************************************************************************
@@ -334,8 +367,16 @@ UINT32 SensorGetLastUpdateTime( SENSOR_INDEX Sensor)
  *****************************************************************************/
 FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 {
+   FLOAT32 fPriorValue;
+   
+   fPriorValue = 0;
+    
+   if ( Sensor < MAX_SENSORS )
+   {
+     fPriorValue = Sensors[Sensor].fPriorValue;
+   }
    // return the previous value of the sensor
-   return (Sensors[Sensor].fPriorValue);
+   return (fPriorValue);
 }
 
 /******************************************************************************
@@ -2201,6 +2242,12 @@ static void SensorInitializeLiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 92  *****************
+ * User: John Omalley Date: 12/11/14   Time: 11:59a
+ * Updated in $/software/control processor/code/system
+ * SCR 1276 - Wrapped sensor utilities with a check for vaild sensor
+ * index.
  * 
  * *****************  Version 91  *****************
  * User: Contractor V&v Date: 11/20/14   Time: 7:25p

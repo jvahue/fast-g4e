@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 119 $  $Date: 11/17/14 6:16p $
+   $Revision: 120 $  $Date: 12/11/14 1:13p $
 
 ******************************************************************************/
 
@@ -1464,7 +1464,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       break;
 
     case USER_TYPE_STR:
-      if(strlen(SetStr)+1 >= Min->Uint && strlen(SetStr)+1 <= Max->Uint)
+      if(strlen(SetStr) >= Min->Uint && strlen(SetStr)+1 <= Max->Uint)
       {
         *(INT8**)SetPtr = SetStr;
         result = TRUE;
@@ -3107,6 +3107,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 120  *****************
+ * User: John Omalley Date: 12/11/14   Time: 1:13p
+ * Updated in $/software/control processor/code/application
+ * SCR 1167 - User Min length for strings incorrect
  * 
  * *****************  Version 119  *****************
  * User: Contractor V&v Date: 11/17/14   Time: 6:16p

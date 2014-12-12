@@ -9,7 +9,7 @@
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 85 $  $Date: 12-11-13 2:15p $    
+      $Revision: 86 $  $Date: 12/10/14 7:53p $    
 ******************************************************************************/
 
 
@@ -215,6 +215,7 @@ static void MonitorInvalidCommand  (char* msg);
 static void* MonitorGetNvRAM  ( CHAR dataType, void* pAddress);
 static BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value);
 static BOOLEAN MonitorMemoryWrite( CHAR* address, UINT8 size, UINT32 value);
+static void    MonitorResetTaskTime(CHAR* token3);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -548,6 +549,11 @@ static void MonitorSysCmds( CHAR* Cmd)
     else if (strcmp (Token[TOK1], "reboot") == 0)
     {
       WatchdogReboot(TRUE);
+    }    
+    // sys.reset.counts.#TASKID ----------------------------------------
+    else if ( strcmp (Token[TOK1], "reset") == 0 && strcmp (Token[TOK2], "counts") == 0 )
+    {
+      MonitorResetTaskTime(Token[TOK3]);
     }
     /*
 #ifdef ENABLE_SYS_DUMP_MEM_CMD
@@ -596,7 +602,7 @@ static void MonitorSysGet(CHAR*  Token[])
         else if (strcmp (Token[TOK3], "timing") == 0)
         {
             MonitorGetTaskTiming();
-        }
+        }        
         else
         {
             // validate the parameter provided is a number
@@ -675,7 +681,6 @@ static void MonitorSysSet(CHAR* Token[])
     {
       MonitorSetTaskEnable (&Token[TOK0]);
     }
-
     // UNKNOWN SET COMMAND
     else
     {
@@ -1846,10 +1851,68 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
   return success;
 }
 
+/*****************************************************************************
+ * Function:    MonitorResetTaskTime
+ *
+ * Description: Erase task times/counts for the indicated task
+ *              sys.reset.counts.#TASKID
+ *
+ * Parameters:  token3 - TaskId
+ *
+ * Returns:     void
+ *
+ * Notes:       None.
+ *
+ ****************************************************************************/
+static void MonitorResetTaskTime(CHAR* token3)
+{
+  TCB* pTask;
+  UINT32     intSave;
+  TASK_INDEX taskId;
+  
+  // Verify the task Id is in range
+  if ( isdigit( token3[0]))
+  {
+    // convert task ID to task index
+    taskId = (TASK_INDEX)atoi( token3);
+
+    if ( (taskId >= MAX_TASKS) || (Tm.pTaskList[taskId] == NULL) )
+    {
+      MonitorInvalidCommand( "Invalid Task Id");
+    }
+    else
+    {
+      pTask = Tm.pTaskList[taskId];
+      if ( pTask != NULL )
+      {
+        intSave = __DIR();    
+        pTask->lastExecutionTime    = 0;
+        pTask->minExecutionTime     = UINT32MAX;
+        pTask->maxExecutionTime     = 0;
+        pTask->maxExecutionMif      = 0;
+        pTask->executionCount       = 0;
+        pTask->totExecutionTime     = 0;
+        pTask->totExecutionTimeCnt  = 0;
+        
+        if (RMT == pTask->Type)
+        {
+          pTask->Rmt.overrunCount     = 0;
+          pTask->Rmt.interruptedCount = 0;
+        }
+        __RIR(intSave);
+      }
+    }
+  }
+}
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
+ * 
+ * *****************  Version 86  *****************
+ * User: Contractor V&v Date: 12/10/14   Time: 7:53p
+ * Updated in $/software/control processor/code/system
+ * SCR #1194 - Performance and timing added func sys.reset.counts.<taskid>
  * 
  * *****************  Version 85  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:15p
