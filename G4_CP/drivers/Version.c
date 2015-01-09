@@ -9,7 +9,7 @@
   Description: Product Name and Build Version and Date strings.
  
     VERSION
-      $Revision: 43 $  $Date: 12-10-08 10:48a $
+      $Revision: 44 $  $Date: 12/15/14 2:30p $
     
 ******************************************************************************/
 
@@ -45,7 +45,7 @@ typedef struct
 /* Local Variables                                                           */
 /*****************************************************************************/
 const CHAR *PRODUCT_COPYRIGHT = "Pratt & Whitney Engine Services\r\n"
-                                "Copyright (c) 2007-2012 \r\n";
+                                "Copyright (c) 2007-2015 \r\n";
 
 const CHAR *PRODUCT_NAME      = "FAST II Software";
 
@@ -138,6 +138,10 @@ BOOLEAN Ver_CheckVerAndDateMatch(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.c $
+ * 
+ * *****************  Version 44  *****************
+ * User: John Omalley Date: 12/15/14   Time: 2:30p
+ * Updated in $/software/control processor/code/drivers
  * 
  * *****************  Version 43  *****************
  * User: John Omalley Date: 12-10-08   Time: 10:48a
