@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 30 $  $Date: 4/23/14 11:52a $
+  $Revision: 31 $  $Date: 1/09/15 3:18p $
 
 ******************************************************************************/
 
@@ -310,7 +310,7 @@ const CHAR* EvalGetMsgFromErrCode(INT32 errNum)
   // Check index range.
   // Invert the negative errNum into the positive index into the string table.
   INT32 i = (errNum < (INT32)RPN_ERR_MAX || errNum >= (INT32) RPN_ERR_UNKNOWN)
-			 ? (INT32) RPN_ERR_UNKNOWN : -errNum;
+             ? (INT32) RPN_ERR_UNKNOWN : -errNum;
   return m_EvalRetValEnumString[i];
 }
 
@@ -409,9 +409,9 @@ INT32 EvalExeExpression (EVAL_CALLER_TYPE objType, INT32 objId,
       if (!fullTableReported)
       {
         GSE_DebugStr(NORMAL,
-					 TRUE,
-					 "Expression Runtime Error. %s",
-					 EvalGetMsgFromErrCode( (INT32) RPN_ERR_NOT_PREV_TABLE_FULL));
+                     TRUE,
+                     "Expression Runtime Error. %s",
+                     EvalGetMsgFromErrCode( (INT32) RPN_ERR_NOT_PREV_TABLE_FULL));
         fullTableReported = TRUE;
       }
     }
@@ -876,7 +876,7 @@ static BOOLEAN EvalLoadInputSrc( EVAL_EXE_CONTEXT* context)
                   dataAcc->pfGetSrcByBool ( (INT32) cmd->data);
 
     rslt.validity = (dataAcc->pfGetSrcValidity == NULL) ? TRUE :
-					 dataAcc->pfGetSrcValidity( (INT32)cmd->data);
+                     dataAcc->pfGetSrcValidity( (INT32)cmd->data);
   }
   else // The indicated data source is not configured.
   {
@@ -1378,7 +1378,7 @@ static INT32 EvalAddFuncCall(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     expr->cmdList[expr->size++] = cmd;
     expr->operandCnt++;
 
-    retval = m_OpCodeTable[tblIdx].tokenLen;
+    retval = (INT32) m_OpCodeTable[tblIdx].tokenLen;
   }
   return retval;
 }
@@ -1444,7 +1444,7 @@ static INT32 EvalAddInputSrc(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
       // Add cmd to expression list
       expr->cmdList[expr->size++] = cmd;
       expr->operandCnt++;
-      retval = EVAL_OPRND_LEN;
+      retval = (INT32) EVAL_OPRND_LEN;
     }
     else // The operand index was not valid, return it.
     {
@@ -1481,7 +1481,7 @@ static INT32 EvalAddStdOper(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
   expr->cmdList[expr->size++] = cmd;
 
   // Return the len for this operator
-  return m_OpCodeTable[tblIdx].tokenLen;
+  return (INT32)m_OpCodeTable[tblIdx].tokenLen;
 }
 
 /******************************************************************************
@@ -1515,7 +1515,7 @@ static INT32 EvalAddNotEqPrev(INT16 tblIdx, const CHAR* str, EVAL_EXPR* expr)
     cmd.opCode = (UINT8)OP_NOT_EQ_PREV;
     cmd.data   = expr->cmdList[expr->size - 1].data;
     expr->cmdList[expr->size++] = cmd;
-    retval = m_OpCodeTable[tblIdx].tokenLen;
+    retval = (INT32) m_OpCodeTable[tblIdx].tokenLen;
   }
   else
   {
@@ -1793,6 +1793,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 1/09/15    Time: 3:18p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1259 - Code Review Updates
  * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 4/23/14    Time: 11:52a
