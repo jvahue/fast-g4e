@@ -1,6 +1,6 @@
 #define CMUTIL_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
 
@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 75 $  $Date: 14-10-08 6:56p $
+    $Revision: 77 $  $Date: 1/12/15 12:57p $
 
 ******************************************************************************/
 
@@ -108,7 +108,11 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // CREEP Config
                                           {CREEP_DEFAULT_CFG},
                                           // ID PARAM PROTOCOL
-                                          {ID_PARAM_CFG_DEFAULT}
+                                          {ID_PARAM_CFG_DEFAULT},
+                                          // GBS Multiplexed Config
+                                          {GBS_MULTI_CFG_DEFAULT},
+                                          // GBS Configs
+                                          {GBS_CFGS_DEFAULT}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
@@ -733,6 +737,16 @@ void CfgMgr_GenerateDebugLogs(void)
  *  MODIFICATIONS
  *    $History: CfgManager.c $
  * 
+ * *****************  Version 77  *****************
+ * User: John Omalley Date: 1/12/15    Time: 12:57p
+ * Updated in $/software/control processor/code/system
+ * SCR 1263 - Code Review Update
+ * 
+ * *****************  Version 76  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
+ *
  * *****************  Version 75  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system

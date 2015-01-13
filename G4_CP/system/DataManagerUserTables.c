@@ -10,7 +10,7 @@ Description: The data manager contains the functions used to record
 
 
 VERSION
-$Revision: 25 $  $Date: 12-11-28 4:50p $ 
+$Revision: 26 $  $Date: 15-01-11 10:20p $ 
 
 ******************************************************************************/
 
@@ -166,7 +166,7 @@ static USER_MSG_TBL acsCmd [] =
   { "ID"            , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , configTemp.sID,               0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
   { "PRIORITY"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.priority,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       priorityTbl },
   { "PORTTYPE"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.portType,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsPortType },
-  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT8 , USER_RW , &configTemp.nPortIndex,       0,MAX_ACS_CONFIG-1, 0,3,            NULL        },
+  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT8 , USER_RW , &configTemp.nPortIndex,       0,MAX_ACS_CONFIG-1, 0,10,           NULL       },
   { "PACKETSIZE_MS" , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT16, USER_RW , &configTemp.nPacketSize_ms,   0,MAX_ACS_CONFIG-1, 500,4000,       NULL        },
   { "SYSCOND"       , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.systemCondition,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       Flt_UserEnumStatus },
   { "MODE"          , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.mode,             0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsMode     },
@@ -576,6 +576,11 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: DataManagerUserTables.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
  * 
  * *****************  Version 25  *****************
  * User: John Omalley Date: 12-11-28   Time: 4:50p

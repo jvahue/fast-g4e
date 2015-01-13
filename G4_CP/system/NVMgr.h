@@ -1,7 +1,7 @@
 #ifndef SYS_NVMGR_H
 #define SYS_NVMGR_H
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:          NVMgr.h
@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 67 $  $Date: 10/20/14 3:54p $
+    $Revision: 69 $  $Date: 1/12/15 1:51p $
 
 ******************************************************************************/
 
@@ -180,8 +180,8 @@ NV_FILE(NV_ENGINE_ID,      "Engine Identification",DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_CREEP_DATA,     "Creep Data",           DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  Creep_FileInit          ,     256), \
 NV_FILE(NV_CREEP_CNTS_RTC, "Creep Cnts RTC",       DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      20), \
 NV_FILE(NV_CREEP_HISTORY,  "Creep Fault History",  DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Creep_FaultFileInit     ,    1024), \
-NV_FILE(NV_EVENT_HISTORY,  "Event History Buffer", DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EventInitHistoryBuffer  ,     512)
-
+NV_FILE(NV_EVENT_HISTORY,  "Event History Buffer", DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EventInitHistoryBuffer  ,     512), \
+NV_FILE(NV_GBS_DATA,       "GBS App Data",         DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  GBS_FileInit            ,     256)
 
 
 /******************************************************************************
@@ -399,6 +399,16 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
  *  MODIFICATIONS
  *    $History: NVMgr.h $
  * 
+ * *****************  Version 69  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:51p
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Code Review Update
+ * 
+ * *****************  Version 68  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
+ *
  * *****************  Version 67  *****************
  * User: Contractor V&v Date: 10/20/14   Time: 3:54p
  * Updated in $/software/control processor/code/system

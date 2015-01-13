@@ -2,7 +2,7 @@
 #define TTMR_H
 
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   File:         TTMR.h
@@ -12,7 +12,7 @@
                description.
 
    VERSION
-   $Revision: 30 $  $Date: 3/10/14 4:31p $
+   $Revision: 31 $  $Date: 1/12/15 12:21p $
 
 ******************************************************************************/
 
@@ -114,6 +114,11 @@ EXPORT UINT32           TTMR_Get10msTickCount      (void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: TTMR.h $
+ * 
+ * *****************  Version 31  *****************
+ * User: John Omalley Date: 1/12/15    Time: 12:21p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1065 - Code Review Update
  * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 3/10/14    Time: 4:31p

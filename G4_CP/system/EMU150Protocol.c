@@ -1,7 +1,7 @@
 #define EMU150_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        EMU150Protocol.c
@@ -10,7 +10,7 @@
                  Handler 
     
     VERSION
-      $Revision: 21 $  $Date: 10/23/14 1:30p $     
+      $Revision: 22 $  $Date: 1/12/15 1:25p $     
 
 ******************************************************************************/
 
@@ -2079,6 +2079,11 @@ EMU150_STATUS_PTR EMU150Protocol_GetStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: EMU150Protocol.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:25p
+ * Updated in $/software/control processor/code/system
+ * SCR 1270 - Code Review Update
  * 
  * *****************  Version 21  *****************
  * User: Contractor V&v Date: 10/23/14   Time: 1:30p

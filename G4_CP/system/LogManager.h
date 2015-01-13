@@ -1,7 +1,7 @@
 #ifndef LOGMNG_H
 #define LOGMNG_H
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:          LogManager.h
@@ -10,7 +10,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 60 $  $Date: 9/03/14 5:18p $
+    $Revision: 61 $  $Date: 1/12/15 1:40p $
 
 ******************************************************************************/
 
@@ -423,6 +423,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 61  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:40p
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Code Review Update
  * 
  * *****************  Version 60  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:18p
