@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 56 $  $Date: 14-12-05 4:39p $
+      $Revision: 57 $  $Date: 15-01-11 10:20p $
 
 ******************************************************************************/
 
@@ -63,6 +63,7 @@ static UARTMGR_DEBUG           m_UartMgr_Debug;
 
 static UARTMGR_DISP_DEBUG_TASK_PARMS uartMgrDispDebugBlock;
 static UARTMGR_DOWNLOAD              m_UartMgr_Download[UART_NUM_OF_UARTS];
+static UARTMGR_DOWNLOAD              m_UartMgr_Download_GBS_SIM; 
 
 static INT8 str[UARTMGR_DEBUG_BUFFER_SIZE * 6]; // convert byte to "0xXX" with CR/LF
 
@@ -175,6 +176,7 @@ void UartMgr_Initialize (void)
   memset (m_UartMgr_RawBuffer, 0, UARTMGR_RAW_BUF_SIZE * (UINT8)UART_NUM_OF_UARTS );
   memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * (UINT8)UART_NUM_OF_UARTS);
   memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * (UINT8)UART_NUM_OF_UARTS);
+  memset ( (void *) &m_UartMgr_Download_GBS_SIM, 0, sizeof(m_UartMgr_Download_GBS_SIM) );
   // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
   for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
   {
@@ -204,6 +206,8 @@ void UartMgr_Initialize (void)
   F7XProtocol_Initialize();
   EMU150Protocol_Initialize();
   IDParamProtocol_Initialize();
+  GBSProtocol_Initialize(); 
+  
 
   //Add an entry in the user message handler table
   User_AddRootCmd(&uartMgrRootTblPtr);
@@ -258,6 +262,12 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
+        case UARTMGR_PROTOCOL_GBS:
+          uartMgrBlock[i].exec_protocol = GBSProtocol_Handler;
+          uartMgrBlock[i].get_protocol_fileHdr = GBSProtocol_ReturnFileHdr;
+          uartMgrBlock[i].download_protocol_hndl = GBSProtocol_DownloadHndl;
+          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          break;          
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through
@@ -314,6 +324,9 @@ void UartMgr_Initialize (void)
     // Update internal variables
     UartMgr_ClearDownloadState(i);
   } // End for loop
+  
+  // Update internal variables  
+  UartMgr_ClearDownloadState(GBS_SIM_PORT_INDEX); 
 
   // Enable UartMgr BIT Task if any Uart is enabled
   if ( bAtLeastOneEnabled == TRUE )
@@ -637,6 +650,7 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 param, UINT16 nSensor
       break;
     case UARTMGR_PROTOCOL_NONE:
     case UARTMGR_PROTOCOL_EMU150:
+    case UARTMGR_PROTOCOL_GBS:
     case UARTMGR_PROTOCOL_MAX:
     default:
       // This is a configuration error
@@ -1016,11 +1030,13 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
   UARTMGR_FILE_HDR        fileHdr;
   UARTMGR_TASK_PARAMS_PTR pUartMgrBlock;
   UARTMGR_CFG_PTR         pUartCfg;
+  UINT16 nPort; 
 
   UINT16 cnt;
+  
+  nPort = (chan != GBS_SIM_PORT_INDEX) ? chan : GBSProtocol_SIM_Port();
 
-
-  pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[chan];
+  pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[nPort];  
 
   // Update protocol file hdr first !
   pdest = (UINT8 *) pDest;
@@ -1031,7 +1047,7 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
   // Update Uart file hdr
   memset ( (UINT8 *) &fileHdr, 0, sizeof(UARTMGR_FILE_HDR) );
 
-  pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[chan];
+  pUartCfg = (UARTMGR_CFG_PTR) &m_UartMgrCfg[nPort];
   fileHdr.size = cnt + sizeof(UARTMGR_FILE_HDR);
   fileHdr.ch = (UINT8)chan;
   strncpy ( (char *) fileHdr.sName, pUartCfg->sName, UART_CFG_NAME_SIZE );
@@ -1151,10 +1167,19 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
 {
   UARTMGR_TASK_PARAMS_PTR pUartMgrBlock;
   UARTMGR_DOWNLOAD_PTR pUartMgrDownload;
-
-
-  pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[PortIndex];
-  pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex];
+  UINT8 nPort; 
+  
+  if (PortIndex == GBS_SIM_PORT_INDEX)
+  {
+    nPort = GBSProtocol_SIM_Port();
+    pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[nPort];
+    pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download_GBS_SIM;  
+  }
+  else 
+  {
+    pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[PortIndex];
+    pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex];  
+  }
   *pDL_WrStatus = &pUartMgrDownload->wrStatus;
 
   switch ( pUartMgrDownload->state)
@@ -1260,8 +1285,9 @@ void UartMgr_DownloadStop ( UINT8 PortIndex )
 {
   UARTMGR_DOWNLOAD_PTR pUartMgrDownload;
 
-
-  pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex];
+  pUartMgrDownload = (PortIndex != GBS_SIM_PORT_INDEX) ? 
+                     (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex] :
+                     (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download_GBS_SIM; 
 
   pUartMgrDownload->bHalt = TRUE;
 
@@ -1288,8 +1314,10 @@ void UartMgr_ClearDownloadState ( UINT8 PortIndex )
 {
   UARTMGR_DOWNLOAD_PTR pUartMgrDownload;
 
-  pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex];
-
+  pUartMgrDownload = (PortIndex != GBS_SIM_PORT_INDEX) ? 
+                     (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download[PortIndex] :
+                     (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download_GBS_SIM; 
+  
   pUartMgrDownload->state = UARTMGR_DOWNLOAD_IDLE;
 
   pUartMgrDownload->bStartDownload = FALSE;
@@ -2103,6 +2131,11 @@ BOOLEAN UartMgr_Protocol_ReadyOk_Hndl ( UINT16 ch )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
  * 
  * *****************  Version 56  *****************
  * User: Peter Lee    Date: 14-12-05   Time: 4:39p

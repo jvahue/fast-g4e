@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 184 $  $Date: 11/18/14 2:36p $
+   $Revision: 185 $  $Date: 1/13/15 12:11p $
 
 ******************************************************************************/
 
@@ -1936,10 +1936,11 @@ void UploadMgr_FileCollectionTask(void *pParam)
     case LOG_COLLECTION_FINISHED:
        GSE_DebugStr(NORMAL,TRUE,
                  "UploadMgr: LC FINISHED=Upload complete, turning off LC task");
-      /**** DELIBERATE FALL THROUGH TO LOG_AUTO_CHECK_FINISHED 
+       FAST_SignalUploadComplete();
+       /**** DELIBERATE FALL THROUGH TO LOG_AUTO_CHECK_FINISHED 
             THIS REMOVES THE DEBUG OUTPUT EVERY TIME AUTOUPLOAD DOESNT FIND A RECORD ****/
     case LOG_COLLECTION_AUTO_CHECK_FINISHED:
-      FAST_SignalUploadComplete();
+      
       pTask->InProgress = FALSE;
       pTask->Disable    = FALSE;
       // SCR 1072: Set readOffset back to 0 because we may have gotten here through a fail path
@@ -3540,6 +3541,12 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 185  *****************
+ * User: John Omalley Date: 1/13/15    Time: 12:11p
+ * Updated in $/software/control processor/code/application
+ * SCR 1055 and SCR 1204 - Change VPN wait counter to only happen when
+ * data is actually uploaded.
  * 
  * *****************  Version 184  *****************
  * User: John Omalley Date: 11/18/14   Time: 2:36p

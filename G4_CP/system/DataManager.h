@@ -1,7 +1,7 @@
 #ifndef DATA_MNG_H
 #define DATA_MNG_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        DataManager.h
@@ -10,7 +10,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 44 $  $Date: 11/17/14 2:09p $
+      $Revision: 45 $  $Date: 1/12/15 1:21p $
 
 ******************************************************************************/
 
@@ -237,6 +237,11 @@ EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLE
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1146 - Code Review Update
  * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 11/17/14   Time: 2:09p

@@ -10,7 +10,7 @@
     Note:
 
     VERSION
-    $Revision: 21 $  $Date: 14-12-05 4:39p $
+    $Revision: 22 $  $Date: 15-01-11 10:21p $
 
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -87,6 +87,7 @@ static USER_ENUM_TBL uartMgrProtocolStrs[] =
   {"F7X_N_PARAM", UARTMGR_PROTOCOL_F7X_N_PARAM},
   {"ID_PARAM",    UARTMGR_PROTOCOL_ID_PARAM},
   {"EMU150",      UARTMGR_PROTOCOL_EMU150},
+  {"GBS",         UARTMGR_PROTOCOL_GBS},
   {NULL,          0}
 };
 
@@ -534,6 +535,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
  * 
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 14-12-05   Time: 4:39p

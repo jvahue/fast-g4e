@@ -1,6 +1,6 @@
 #define TREND_BODY
 /******************************************************************************
-           Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+           Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
 
    File:        trend.c
@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 31 $  $Date: 2/13/14 10:31a $
+ $Revision: 32 $  $Date: 1/12/15 2:11p $
 
 ******************************************************************************/
 
@@ -1064,6 +1064,11 @@ static void TrendStartAutoTrend( TREND_CFG* pCfg, TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 1/12/15    Time: 2:11p
+ * Updated in $/software/control processor/code/application
+ * SCR 1257 - Code Review Update
  * 
  * *****************  Version 31  *****************
  * User: John Omalley Date: 2/13/14    Time: 10:31a

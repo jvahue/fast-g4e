@@ -1,0 +1,710 @@
+#define GBS_USERTABLES_BODY
+/******************************************************************************
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+               All Rights Reserved. Proprietary and Confidential.
+
+    File:        GBSUserTables.c
+
+    Description: Routines to support the user commands for GBS Protocol CSC
+
+    VERSION
+    $Revision: 1 $  $Date: 15-01-11 10:21p $
+
+******************************************************************************/
+#ifndef GBS_PROTOCOL_BODY
+#error GBSUserTables.c should only be included by GBSProtocol.c
+#endif
+
+/*****************************************************************************/
+/* Compiler Specific Includes                                                */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Software Specific Includes                                                */
+/*****************************************************************************/
+#include "CfgManager.h"
+
+
+/*****************************************************************************/
+/* Local Defines                                                             */
+/*****************************************************************************/
+
+
+/*****************************************************************************/
+/* Local Typedefs                                                            */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static GBS_STATUS gbsStatusTemp;
+static GBS_CFG gbsCfgTemp;
+static GBS_CTL_CFG gbsCtlTemp;
+static GBS_MULTI_CTL gbsCtlStatusTemp; 
+static GBS_DEBUG_CTL gbsDebugTemp;
+
+
+/*****************************************************************************/
+/* Local Function Prototypes                                                 */
+/*****************************************************************************/
+//Prototype for the User Manager message handlers, has to go before
+//the local variable tables that use the function pointer.
+static USER_HANDLER_RESULT GBSMsg_Status     ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+                                               
+static USER_HANDLER_RESULT GBSMsg_SimStatus  ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );    
+                                               
+static USER_HANDLER_RESULT GBSMsg_CtlStatus  ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );                                                                                              
+
+static USER_HANDLER_RESULT GBSMsg_CmdCfg     ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+                                               
+static USER_HANDLER_RESULT GBSMsg_CtlCfg     ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );                                               
+
+static USER_HANDLER_RESULT GBSMsg_CtlDebugClear ( USER_DATA_TYPE DataType,
+                                                  USER_MSG_PARAM Param,
+                                                  UINT32 Index,
+                                                  const void *SetPtr,
+                                                  void **GetPtr );
+                                                  
+static USER_HANDLER_RESULT GBSMsg_CtlDebug   ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );                                                  
+
+/*
+static USER_HANDLER_RESULT GBSMsg_Debug      ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+
+static USER_HANDLER_RESULT GBSMsg_ShowConfig ( USER_DATA_TYPE DataType,
+                                               USER_MSG_PARAM Param,
+                                               UINT32 Index,
+                                               const void *SetPtr,
+                                               void **GetPtr );
+*/
+/*****************************************************************************/
+/* Local Variables                                                           */
+/*****************************************************************************/
+static
+USER_ENUM_TBL gbsStateStrs[] =
+{
+  {"GBS_IDLE",     GBS_STATE_IDLE},
+  {"GBS_LRU_SEL",  GBS_STATE_SET_EDU_MODE},
+  {"GBS_DOWNLOAD", GBS_STATE_DOWNLOAD},
+  {"GBS_CONFIRM",  GBS_STATE_CONFIRM},
+  {"GBS_STATE_COMPLETE", GBS_STATE_COMPLETE},
+  {"GBS_STATE_RESTART_DELAY", GBS_STATE_RESTART_DELAY},
+  { NULL,      0}
+};
+
+static
+USER_ENUM_TBL gbsMultiStateStrs[] =
+{
+  {"MULTI_PRIMARY",   GBS_MULTI_PRIMARY},
+  {"MULTI_SECONDARY", GBS_MULTI_SECONDARY},
+  { NULL,      0}
+};
+
+
+// GBS *******************************************************************
+static USER_MSG_TBL gbsCmdCodeTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.   Data Type          Access   Parameter                             IndexRange DataLimit EnumTbl*/
+  {"CODE_0",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[0],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"CODE_1",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[1],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"CODE_2",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[2],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"CODE_3",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[3],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"CODE_4",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[4],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsCfgTbl[] =
+{ 
+  {"CMD", gbsCmdCodeTbl,      NULL,          NO_HANDLER_DATA},
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsStatusTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.  Data Type          Access   Parameter                                            IndexRange DataLimit EnumTbl*/
+  {"STATE",           NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_ENUM,    USER_RO, (void *) &gbsStatusTemp.state,                       1,UART_NUM_OF_UARTS-1,NO_LIMIT,gbsStateStrs},
+  {"RESTART_LEFT",    NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.nRetriesCurr,                1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+  {"BLK_CURR",        NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkCurr,     1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+  {"BLK_EXP",         NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeExp,               1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+  {"BLK_SIZE_TOTAL",  NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.cntDnLoadSizeExp,            1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+  {"BLK_RX",          NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkRx,       1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"BLK_REJECT",      NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkBadRx,    1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"BLK_BAD",         NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkBadTotal, 1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"BLK_BAD_STORE",   NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntStoreBad,    1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"DL_INTERRUPTED",  NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bDownloadInterrupted,        1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"DL_COMPLETED",    NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bCompleted,                  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"DL_REQ_CNT",      NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntDnloadReq,                1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"BLK_NVM",         NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeNVM,               1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+ 
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+// GBS *******************************************************************
+
+
+// GBS_SIM ***************************************************************
+static USER_MSG_TBL gbsSimStatusTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                            IndexRange DataLimit EnumTbl*/
+  {"STATE",           NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsStatusTemp.state,                       -1,-1,  NO_LIMIT,gbsStateStrs},
+  {"RESTART_LEFT",    NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.nRetriesCurr,                -1,-1,  NO_LIMIT,NULL},
+  {"BLK_CURR",        NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkCurr,     -1,-1,  NO_LIMIT,NULL},
+  {"BLK_EXP",         NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeExp,               -1,-1,  NO_LIMIT,NULL},
+  {"BLK_SIZE_TOTAL",  NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.cntDnLoadSizeExp,            -1,-1,  NO_LIMIT,NULL},
+  {"BLK_RX",          NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkRx,       -1,-1,  NO_LIMIT,NULL}, 
+  {"BLK_REJECT",      NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkBadRx,    -1,-1,  NO_LIMIT,NULL}, 
+  {"BLK_BAD",         NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntBlkBadTotal, -1,-1,  NO_LIMIT,NULL}, 
+  {"BLK_BAD_STORE",   NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT32,  USER_RO, (void *) &gbsStatusTemp.dataBlkState.cntStoreBad,    -1,-1,  NO_LIMIT,NULL}, 
+  {"DL_INTERRUPTED",  NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bDownloadInterrupted,        -1,-1,  NO_LIMIT,NULL}, 
+  {"DL_COMPLETED",    NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bCompleted,                  -1,-1,  NO_LIMIT,NULL}, 
+  {"DL_REQ_CNT",      NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntDnloadReq,                -1,-1,  NO_LIMIT,NULL}, 
+  {"BLK_NVM",         NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeNVM,               -1,-1,  NO_LIMIT,NULL},
+
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+// GBS_SIM ***************************************************************
+
+
+// GBS_CTL ***************************************************************
+static USER_MSG_TBL gbsCtlCfgTbl[] =
+{ /*Str                Next Tbl Ptr   Handler Func.   Data Type          Access   Parameter                             IndexRange DataLimit EnumTbl*/
+  {"MULTIPLEX",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bMultiplex,      -1,-1,  NO_LIMIT,NULL}, 
+  {"MULTI_PORT",       NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCtlTemp.nPort,           -1,-1,  NO_LIMIT,NULL}, 
+  {"MULTI_LSS",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.discPort,        -1,-1,  NO_LIMIT,NULL}, 
+  {"KEEPALIVE",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepAlive,      -1,-1,  NO_LIMIT,NULL}, 
+  {"IDLE_TIMEOUT_MS",  NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.timeIdleOut,     -1,-1,  NO_LIMIT,NULL}, 
+  {"REC_RETRIES",      NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.retriesSingle,   -1,-1,  1,100,   NULL}, 
+  {"REC_FAILS_RESTART",NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.retriesMulti,    -1,-1,  1,100,   NULL}, 
+  {"RESTARTS",         NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.restarts,        -1,-1,  1,100,   NULL}, 
+  {"RESTARTS_DELAY_MS",NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.restart_delay_ms,-1,-1,  NO_LIMIT,NULL}, 
+  {"CMD_DELAY_MS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cmd_delay_ms,    -1,-1,  NO_LIMIT,NULL},   
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsCtlMultiTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                         IndexRange DataLimit EnumTbl*/
+  {"STATE",           NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
+  {"PRIMARY_PEND",     NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
+  {"SECONDARY_PEND",   NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending   -1,-1,  NO_LIMIT,NULL},
+
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsCtlStatusTbl[] =
+{ 
+  {"MULTI", gbsCtlMultiTbl,  NULL,          NO_HANDLER_DATA},
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsCtlDebugTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.         Data Type          Access                  Parameter                        IndexRange DataLimit EnumTbl*/
+  {"CLEAR_NVM",       NO_NEXT_TABLE, GBSMsg_CtlDebugClear, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),  NULL,                            -1,-1,  NO_LIMIT,NULL},
+#ifdef DTU_GBS_SIM  
+  {"DTU_GBS_SIM_LOG", NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_BOOLEAN, USER_RW,                &gbsDebugTemp.DTU_GBS_SIM_SimLog,-1,-1,  NO_LIMIT,NULL},
+#endif  
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+// GBS_CTL ***************************************************************
+
+
+
+static USER_MSG_TBL gbsSimProtocolRoot[] =
+{
+  {"STATUS",gbsSimStatusTbl,  NULL,          NO_HANDLER_DATA},
+//{DISPLAY_CFG,               NO_NEXT_TABLE, EMU150Msg_ShowConfig,  USER_TYPE_ACTION,(USER_RO|USER_NO_LOG|USER_GSE) ,NULL     ,-1,-1,      NO_LIMIT, NULL},
+  {NULL,                      NULL,          NULL,                  NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsCtlProtocolRoot[] =
+{
+  {"CFG",    gbsCtlCfgTbl,    NULL,          NO_HANDLER_DATA},
+  {"STATUS", gbsCtlStatusTbl, NULL,          NO_HANDLER_DATA},
+  {"DEBUG",  gbsCtlDebugTbl,  NULL,          NO_HANDLER_DATA},
+//{DISPLAY_CFG,               NO_NEXT_TABLE, EMU150Msg_ShowConfig,  USER_TYPE_ACTION,(USER_RO|USER_NO_LOG|USER_GSE) ,NULL     ,-1,-1,      NO_LIMIT, NULL},
+  {NULL,                      NULL,          NULL,                  NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL gbsProtocolRoot[] =
+{
+  {"STATUS",gbsStatusTbl,  NULL,          NO_HANDLER_DATA},
+  {"CFG",   gbsCfgTbl,     NULL,          NO_HANDLER_DATA},
+//{DISPLAY_CFG,            NO_NEXT_TABLE, EMU150Msg_ShowConfig,  USER_TYPE_ACTION,(USER_RO|USER_NO_LOG|USER_GSE) ,NULL     ,-1,-1,      NO_LIMIT, NULL},
+  {NULL,                      NULL,          NULL,                  NO_HANDLER_DATA}
+};
+
+
+
+
+static USER_MSG_TBL gbsProtocolRootTblPtr = {"GBS",gbsProtocolRoot,NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL gbsCtlProtocolRootTblPtr = {"GBS_CTL",gbsCtlProtocolRoot,NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL gbsSimProtocolRootTblPtr = {"GBS_MULTI",gbsSimProtocolRoot,NULL,NO_HANDLER_DATA};
+
+
+/*****************************************************************************/
+/* Public Functions                                                          */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* Local Functions                                                           */
+/*****************************************************************************/
+
+/******************************************************************************
+ * Function:    GBSMsg_Status
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Status Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_Status(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  gbsStatusTemp = *GBS_GetStatus(Index);
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  return result;
+}
+
+
+/******************************************************************************
+ * Function:    GBSMsg_SimStatus
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Sim Status Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_SimStatus(USER_DATA_TYPE DataType,
+                                     USER_MSG_PARAM Param,
+                                     UINT32 Index,
+                                     const void *SetPtr,
+                                     void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  gbsStatusTemp = *GBS_GetSimStatus();
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  return result;
+}
+
+
+/******************************************************************************
+ * Function:    GBSMsg_CtlStatus
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Ctl Status Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_CtlStatus(USER_DATA_TYPE DataType,
+                                     USER_MSG_PARAM Param,
+                                     UINT32 Index,
+                                     const void *SetPtr,
+                                     void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  gbsCtlStatusTemp = *GBS_GetCtlStatus();
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  return result;
+}
+
+/******************************************************************************
+ * Function:    GBSMsg_Debug
+ *
+ * Description: Called by the User.c module from the reference to this fucntion
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Status Data for Debug
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+/*
+static
+USER_HANDLER_RESULT GBSMsg_Debug(USER_DATA_TYPE DataType,
+                                 USER_MSG_PARAM Param,
+                                 UINT32 Index,
+                                 const void *SetPtr,
+                                 void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  gbsStatusTemp = *GBSProtocol_GetStatus();
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  return result;
+}
+*/
+
+
+/******************************************************************************
+ * Function:    GBSMsg_CmdCfg
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_CmdCfg(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+
+  result = USER_RESULT_OK;
+
+  memcpy(&gbsCfgTemp, &CfgMgr_ConfigPtr()->GBSConfigs[Index], sizeof(GBS_CFG));
+  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+
+  // If performing a "set" and it was successful, write the update.
+  if(SetPtr != NULL && USER_RESULT_OK == result)
+  {
+    memcpy(&CfgMgr_ConfigPtr()->GBSConfigs[Index],
+      &gbsCfgTemp,
+      sizeof(GBS_CFG));
+
+    CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
+      &CfgMgr_ConfigPtr()->GBSConfigs[Index],
+      sizeof(GBS_CFG));
+  }
+
+  return result;
+}
+
+
+/******************************************************************************
+ * Function:    GBSMsg_CtlCfg
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Ctl Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_CtlCfg(USER_DATA_TYPE DataType,
+                                  USER_MSG_PARAM Param,
+                                  UINT32 Index,
+                                  const void *SetPtr,
+                                  void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+
+  result = USER_RESULT_OK;
+
+  memcpy(&gbsCtlTemp, &CfgMgr_ConfigPtr()->GBSCtlConfig, sizeof(GBS_CTL_CFG));
+  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+
+  // If performing a "set" and it was successful, write the update.
+  if(SetPtr != NULL && USER_RESULT_OK == result)
+  {
+    memcpy(&CfgMgr_ConfigPtr()->GBSCtlConfig,
+      &gbsCtlTemp,
+      sizeof(GBS_CTL_CFG));
+
+    CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
+      &CfgMgr_ConfigPtr()->GBSCtlConfig,
+      sizeof(GBS_CTL_CFG));
+  }
+
+  return result;
+}
+
+
+/******************************************************************************
+ * Function:    GBSMsg_CtlDebugClear
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Clears the NVM data for the GBS Protocol Module
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_CtlDebugClear(USER_DATA_TYPE DataType,
+                                         USER_MSG_PARAM Param,
+                                         UINT32 Index,
+                                         const void *SetPtr,
+                                         void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+  UINT16 i; 
+
+  result = USER_RESULT_OK;
+
+  GBS_FileInit(); 
+  
+  for (i=0;i<GBS_MAX_CH;i++) {
+    m_GBS_Status[i].cntBlkSizeNVM = 0; 
+  }
+  m_GBS_Multi_Status.cntBlkSizeNVM = 0; 
+
+  return result;
+}
+
+/******************************************************************************
+ * Function:    GBSMsg_CtlDebug
+ *
+ * Description: Called by the User.c module from the reference to this function
+ *              in the user message tables above.
+ *              Retrieves the latest GBS Ctl Debug Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed successfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
+                                    USER_MSG_PARAM Param,
+                                    UINT32 Index,
+                                    const void *SetPtr,
+                                    void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  gbsDebugTemp = m_GBS_Debug;
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+  
+  m_GBS_Debug=gbsDebugTemp; 
+
+  return result;
+}
+
+/******************************************************************************
+* Function:    GBSMsg_ShowConfig
+*
+* Description:  Handles User Manager requests to retrieve the configuration
+*               settings.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific sensor to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
+*
+*
+* Returns:     USER_RESULT_OK:    Processed successfully
+*              USER_RESULT_ERROR: Error processing command.
+*
+* Notes:
+*****************************************************************************/
+/*
+static
+USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  return result;
+}
+*/
+
+/*****************************************************************************
+ *  MODIFICATIONS
+ *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 1  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:21p
+ * Created in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
+ *
+ *****************************************************************************/

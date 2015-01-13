@@ -1,6 +1,6 @@
 #define LOGMNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        LogManager.c
@@ -8,14 +8,14 @@
     Description: The log manager is responsible for reading, writing,
                  and erasing logs that are stored in the data flash.
 
-                 TODO: It is not valid to assume that if a blank header
+                 NOTE: It is not valid to assume that if a blank header
                        is found that the rest of the memory is erased.
                        Should implement an algorithm that verifies the
                        next sector is completely erased before determining
                        the end has been reached.
 
     VERSION
-    $Revision: 115 $  $Date: 11/13/14 10:39a $
+    $Revision: 116 $  $Date: 1/12/15 1:37p $
 
 ******************************************************************************/
 
@@ -2940,6 +2940,11 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 116  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:37p
+ * Updated in $/software/control processor/code/system
+ * SCR 1251 - Code Review Update
  * 
  * *****************  Version 115  *****************
  * User: John Omalley Date: 11/13/14   Time: 10:39a

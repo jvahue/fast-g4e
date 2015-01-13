@@ -1,7 +1,7 @@
 #ifndef CMUTIL_H
 #define CMUTIL_H
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File: CfgManager.h
@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 53 $  $Date: 14-10-08 6:56p $
+ $Revision: 55 $  $Date: 1/12/15 1:10p $
 
 ******************************************************************************/
 
@@ -46,6 +46,7 @@
 #include "Trend.h"
 #include "Creep.h"
 #include "IDParamProtocol.h"
+#include "GBSProtocol.h"
 #ifdef ENV_TEST
 #include "Etm.h"
 #endif
@@ -144,6 +145,10 @@ typedef struct
     CREEP_CFG               CreepConfig;
     // ID Param Protocol Configuration
     ID_PARAM_CFG            IDParamConfig;
+    // GBS Param Protocol Configuration
+    GBS_CTL_CFG             GBSCtlConfig;
+    // GBS Param Protocol Configuration
+    GBS_CFGS                GBSConfigs;
 #ifdef ENV_TEST
     TestControl             etm;
 #endif
@@ -203,6 +208,16 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
  *  MODIFICATIONS
  *    $History: CfgManager.h $
  * 
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 1/12/15    Time: 1:10p
+ * Updated in $/software/control processor/code/system
+ * SCR 1263 - Code Review Update
+ * 
+ * *****************  Version 54  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
+ *
  * *****************  Version 53  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system

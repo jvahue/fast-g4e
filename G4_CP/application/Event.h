@@ -1,7 +1,7 @@
 #ifndef EVENT_H
 #define EVENT_H
 /******************************************************************************
-                Copyright (C) 2012-2104 Pratt & Whitney Engine Services, Inc.
+                Copyright (C) 2012-2015 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
 
@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the event processing.
 
   VERSION
-  $Revision: 37 $  $Date: 11/12/14 3:45p $
+  $Revision: 38 $  $Date: 1/12/15 2:00p $
 
 ******************************************************************************/
 
@@ -504,6 +504,11 @@ EXPORT BOOLEAN EventInitHistoryBuffer  ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.h $
+ * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 1/12/15    Time: 2:00p
+ * Updated in $/software/control processor/code/application
+ * SCR 1249 - Code Review Update
  * 
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 11/12/14   Time: 3:45p

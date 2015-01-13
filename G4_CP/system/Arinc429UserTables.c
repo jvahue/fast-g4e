@@ -1,6 +1,6 @@
 #define ARINC429_USERTABLE_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Arinc429UserTables.c
@@ -8,7 +8,7 @@
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 50 $  $Date: 11/11/14 4:23p $
+     $Revision: 51 $  $Date: 1/12/15 12:51p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -1415,6 +1415,11 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ * 
+ * *****************  Version 51  *****************
+ * User: John Omalley Date: 1/12/15    Time: 12:51p
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Code Review Update
  * 
  * *****************  Version 50  *****************
  * User: John Omalley Date: 11/11/14   Time: 4:23p

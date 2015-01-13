@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 20 $  $Date: 11/13/14 10:38a $
+      $Revision: 21 $  $Date: 15-01-11 10:20p $
 
 ******************************************************************************/
 
@@ -28,6 +28,7 @@
 #include "DataReduction.h"
 
 #include "EMU150Protocol.h"
+#include "GBSProtocol.h"
 
 #include "alt_Time.h"
 
@@ -91,6 +92,7 @@ typedef enum
   UARTMGR_PROTOCOL_F7X_N_PARAM,
   UARTMGR_PROTOCOL_EMU150,
   UARTMGR_PROTOCOL_ID_PARAM,
+  UARTMGR_PROTOCOL_GBS,
   UARTMGR_PROTOCOL_MAX
 } UARTMGR_PROTOCOLS;
 
@@ -442,6 +444,11 @@ EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 15-01-11   Time: 10:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol 
  * 
  * *****************  Version 20  *****************
  * User: John Omalley Date: 11/13/14   Time: 10:38a
