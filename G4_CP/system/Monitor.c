@@ -9,7 +9,7 @@
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 86 $  $Date: 12/10/14 7:53p $    
+      $Revision: 87 $  $Date: 1/13/15 6:16p $    
 ******************************************************************************/
 
 
@@ -215,7 +215,10 @@ static void MonitorInvalidCommand  (char* msg);
 static void* MonitorGetNvRAM  ( CHAR dataType, void* pAddress);
 static BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value);
 static BOOLEAN MonitorMemoryWrite( CHAR* address, UINT8 size, UINT32 value);
-static void    MonitorResetTaskTime(CHAR* token3);
+
+static void MonitorSysPerf(CHAR* Token[]);
+static void MonitorSysPerfReset(CHAR* token3);
+static void MonitorSysPerfStats(void);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -550,10 +553,10 @@ static void MonitorSysCmds( CHAR* Cmd)
     {
       WatchdogReboot(TRUE);
     }    
-    // sys.reset.counts.#TASKID ----------------------------------------
-    else if ( strcmp (Token[TOK1], "reset") == 0 && strcmp (Token[TOK2], "counts") == 0 )
+    // sys.perf COMMAND FAMILY -------------------------------------------
+    else if ( strcmp (Token[TOK1], "perf") == 0 )
     {
-      MonitorResetTaskTime(Token[TOK3]);
+      MonitorSysPerf(Token);
     }
     /*
 #ifdef ENABLE_SYS_DUMP_MEM_CMD
@@ -1110,6 +1113,7 @@ static void MonitorGetRtc (void)
  * Returns:     void
  *
  * Notes:       SYS.GET.TM
+ *              Tm 'Performance Data' is not displayed
  *
  ****************************************************************************/
 static void MonitorGetTm (void)
@@ -1171,6 +1175,7 @@ static void MonitorGetTm (void)
           avgDc);
       GSE_PutLine(Str);
   }
+  // NOTE: Tm Perf Data is not displayed
 }
 
 
@@ -1864,24 +1869,68 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
  * Notes:       None.
  *
  ****************************************************************************/
-static void MonitorResetTaskTime(CHAR* token3)
+static void MonitorSysPerf(CHAR* Token[])
 {
-  TCB* pTask;
-  UINT32     intSave;
-  TASK_INDEX taskId;
-  
-  // Verify the task Id is in range
-  if ( isdigit( token3[0]))
+  // sys.perf.reset.<task#>
+  if ( 0 == strcmp (Token[TOK2], "reset") )
   {
-    // convert task ID to task index
-    taskId = (TASK_INDEX)atoi( token3);
+    MonitorSysPerfReset( Token[TOK3] );
+  }
+  else if ( 0 == strcmp (Token[TOK2], "stats") )
+  {
+    MonitorSysPerfStats();
+  }
+  else
+  {
+    MonitorInvalidCommand( "Unknown Monitor Perf command");
+  }
+}
 
-    if ( (taskId >= MAX_TASKS) || (Tm.pTaskList[taskId] == NULL) )
+
+/*****************************************************************************
+ * Function:    MonitorSysPerfReset
+ *
+ * Description: Erase task times/counts for the indicated task
+ *              sys.perf.reset.<task#>
+ *
+ * Parameters:  token3 the task id to be reset or -1 to disable buffering
+ *
+ * Returns:     void
+ *
+ * Notes:       If  0 <=taskId <= MAX_TASKS, then buffer is reset and current
+ *              task cnts are reset. Data will be buffered until buffer is full
+ *              If -1 == taskId, then current task(if any) is left unchanged, buffer is
+ *              reset and buffering is disabled
+ *
+ ****************************************************************************/
+static void MonitorSysPerfReset(CHAR* token3)
+{
+  TCB*   pTask;
+  UINT32 intSave;
+  INT32  taskId;  
+   
+  // Verify the task Id is in range, or '-1'
+
+  if ( isdigit( token3[0]) ||
+       (('-' == token3[0]) && ('1' == token3[1])) )
+  {
+    // convert task ID to task index, or -1
+    taskId = atoi( token3);
+
+    if ( -1 == taskId )
+    {      
+      // Disable collection, mark the taskId and reset the array size counter.
+      // Don't clear counts for whomever may have been logging.
+      Tm.perfTask = taskId;      
+      Tm.nPerfCount = 0;      
+    }
+    else if( (taskId < -1) || (taskId >= MAX_TASKS) || (Tm.pTaskList[taskId] == NULL) )
     {
       MonitorInvalidCommand( "Invalid Task Id");
     }
     else
-    {
+    { 
+      // Reset the active count for the associated task and the perfdata area
       pTask = Tm.pTaskList[taskId];
       if ( pTask != NULL )
       {
@@ -1899,9 +1948,59 @@ static void MonitorResetTaskTime(CHAR* token3)
           pTask->Rmt.overrunCount     = 0;
           pTask->Rmt.interruptedCount = 0;
         }
+
+        // Clear out the accumulated totals
+        // and set/disable collection
+        Tm.perfTask = taskId;        
+        //memset(&Tm.perfData, 0, sizeof(Tm.perfData));
+        Tm.nPerfCount = 0;
         __RIR(intSave);
       }
     }
+  }
+}
+
+
+/*****************************************************************************
+ * Function:    MonitorSysPerfStats
+ *
+ * Description: Displays formatted strings showing the exe stats from
+ *              the first 1000 exe cnts since the counts were reset
+ *              sys.perf.stats
+ *
+ * Parameters:  None
+ *
+ * Returns:     void
+ *
+ * Notes:       None
+ *
+ ****************************************************************************/
+static void MonitorSysPerfStats(void)
+{
+  INT8   Str[ARRAY_128];
+  UINT32 i;
+  
+  if (-1 != Tm.perfTask)
+  {
+    snprintf(Str, ARRAY_128, "ExeCnt,Last,Min,Max,Tot,MaxExeMif\r\n");                         
+    GSE_PutLineBlocked(Str, TRUE);    
+
+    for ( i = 0; i < Tm.nPerfCount; ++i)
+    {
+      snprintf(Str,ARRAY_128,"%d,%d,%d,%d,%d,%d\r\n",
+                              Tm.perfData[i].executionCount,
+                              Tm.perfData[i].lastExecutionTime,
+                              Tm.perfData[i].minExecutionTime,
+                              Tm.perfData[i].maxExecutionTime,
+                              Tm.perfData[i].totExecutionTime,                              
+                              Tm.perfData[i].maxExecutionMif);
+      GSE_PutLineBlocked(Str, TRUE);
+    }
+  }
+  else
+  {
+    snprintf(Str, ARRAY_128, "Perf Monitoring not active,\n (use sys.perf.reset.<id>)");
+    GSE_PutLine(Str);
   }
 }
 
@@ -1909,10 +2008,15 @@ static void MonitorResetTaskTime(CHAR* token3)
  *  MODIFICATIONS
  *    $History: Monitor.c $
  * 
+ * *****************  Version 87  *****************
+ * User: Contractor V&v Date: 1/13/15    Time: 6:16p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Performance and timing added func sys.perf.reset and stats
+ * 
  * *****************  Version 86  *****************
  * User: Contractor V&v Date: 12/10/14   Time: 7:53p
  * Updated in $/software/control processor/code/system
- * SCR #1194 - Performance and timing added func sys.reset.counts.<taskid>
+ * SCR #1192 - Performance and timing added func sys.reset.counts.<taskid>
  * 
  * *****************  Version 85  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:15p

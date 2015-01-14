@@ -9,7 +9,7 @@
   Description: Task Manager definitions.
 
   VERSION
-     $Revision: 70 $  $Date: 14-10-13 11:25a $
+     $Revision: 71 $  $Date: 1/13/15 6:16p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -34,6 +34,9 @@
 #define MAX_DT_OVERRUNS    3        //  Max of 3 sequential DT task overruns
 
 #define EVENT_DRIVEN_RMT   0
+
+#define MAX_PERF_MIFS       1000     // The number of execution frames for which 
+                                    // perf data is collected.
 
 #define MIF_PERIOD_mS (TTMR_TASK_MGR_TICK_INTERRUPT_INTERVAL_uS/1000)
 #define MIFs_PER_SECOND (1000/MIF_PERIOD_mS)
@@ -229,6 +232,9 @@ typedef struct
     BOOLEAN         Locked;
     void*           pParamBlock;
     INT32           timingPulse;         // DOUT (LSS0-3) to pulse when task active (-1 off)
+    // IMPORTANT -
+    // Keep the following decls in sync with TM_PERF_DATA below
+    // memcpy relies on order and size!
     RMT_ATTRIBUTE   Rmt;
     UINT32          lastExecutionTime;
     UINT32          minExecutionTime;
@@ -237,6 +243,7 @@ typedef struct
     UINT32          totExecutionTimeCnt; // average execution time
     UINT32          maxExecutionMif;
     UINT32          executionCount;
+    // 
 } TCB;
 
 // Task manager Data / Control Structure
@@ -260,6 +267,18 @@ typedef struct
   UINT32    exeCount;               // number of times this MIF has executed
 } MIF_DUTY_CYCLE;
 
+// Task Manager Performance Data Structure
+typedef struct
+{
+  RMT_ATTRIBUTE   Rmt;
+  UINT32          lastExecutionTime;
+  UINT32          minExecutionTime;
+  UINT32          maxExecutionTime;
+  UINT32          totExecutionTime;   
+  UINT32          totExecutionTimeCnt;
+  UINT32          maxExecutionMif;
+  UINT32          executionCount;
+}TM_PERF_DATA;
 
 typedef struct
 {
@@ -289,6 +308,9 @@ typedef struct
     MIF_DUTY_CYCLE mifDc[MAX_MIF+1];                 // MIF duty cycle info
     UINT32         nMifPeriod;                       // Measured MIF period in uSec
     UINT32         nMifCount;
+    INT32          perfTask;                         // Task whose perf is being collected -1 == inactive
+    UINT32         nPerfCount;                       // The count of elements in use in perfData
+    TM_PERF_DATA   perfData[MAX_PERF_MIFS];          // Array of perf data collected for the task
 } TM_DATA;
 
 #pragma pack(1)
@@ -307,8 +329,6 @@ typedef struct
   UINT32  nDtOverRuns;       // Number of Dt Over Runs
   UINT32  nRmtOverRuns;      // Number of Rmt Over Runs
 } TM_HEALTH_COUNTS;
-
-
 #pragma pack()
 
 /******************************************************************************
@@ -377,6 +397,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 71  *****************
+ * User: Contractor V&v Date: 1/13/15    Time: 6:16p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Performance and timing added func sys.perf.reset and stats
  * 
  * *****************  Version 70  *****************
  * User: Peter Lee    Date: 14-10-13   Time: 11:25a

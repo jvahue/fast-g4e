@@ -22,7 +22,7 @@
    TmScheduleTask             Force a specific RMT task for dispatch ASAP
   
  VERSION
-      $Revision: 67 $  $Date: 1/07/13 1:31p $
+      $Revision: 68 $  $Date: 1/13/15 6:16p $
 
 ******************************************************************************/
 
@@ -121,6 +121,10 @@ void TmInitializeTaskManager (void)
     Tm.nMifPeriod         = TTMR_TASK_MGR_TICK_INTERRUPT_INTERVAL_uS;
 
     memset ( &TMHealthCounts, 0, sizeof(TM_HEALTH_COUNTS) );
+
+    // init the performance data collection vars.
+    Tm.perfTask   = -1;
+    Tm.nPerfCount = 0;    
 
     Tm.systemMode = SYS_NORMAL_ID;
     pendingSystemMode = SYS_NORMAL_ID;
@@ -681,6 +685,15 @@ void TmDispatchRmtTasks (void)
             {
                 pTask->minExecutionTime = ExecutionTime;
             }
+
+            // If 'this' scheduled task is being monitored for perf data collection, 
+            // copy the current totals as long as there is room in the buffer.
+            if( (pTask->TaskID == Tm.perfTask) && (Tm.nPerfCount < (MAX_PERF_MIFS - 1)) )
+            {              
+              memcpy( &Tm.perfData[Tm.nPerfCount], &pTask->Rmt, sizeof(Tm.perfData[0]));
+              Tm.nPerfCount++;
+            }
+
             __RIR(IntSave);
           }
           else
@@ -990,6 +1003,14 @@ void TmDispatchDtTasks (void)
             {
                 pTask->minExecutionTime = executionTime;
             }
+
+            // If 'this' enabled task is being monitored for perf data collection, 
+            // copy the current totals as long as there is room in the buffer.
+            if( (pTask->TaskID == Tm.perfTask) && (Tm.nPerfCount < (MAX_PERF_MIFS - 1)) )
+            {              
+              memcpy(&Tm.perfData[Tm.nPerfCount], &pTask->Rmt, sizeof(Tm.perfData[0]));
+              Tm.nPerfCount++;
+            }
         }    // End if (task enabled)
 
         // go to the next task in the list for this MIF
@@ -1027,10 +1048,14 @@ void TmDispatchDtTasks (void)
 
 
 
-
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 68  *****************
+ * User: Contractor V&v Date: 1/13/15    Time: 6:16p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Performance and timing added func sys.perf.reset and stats
  * 
  * *****************  Version 67  *****************
  * User: Jeff Vahue   Date: 1/07/13    Time: 1:31p

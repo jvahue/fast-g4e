@@ -1,6 +1,6 @@
 #define UPLOADMGR_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         UploadMgr.c
@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 185 $  $Date: 1/13/15 12:11p $
+   $Revision: 186 $  $Date: 1/14/15 10:31a $
 
 ******************************************************************************/
 
@@ -52,6 +52,9 @@ extern UINT32  __CRC_END;    // declared in CBITManager.c
 #define ONE_SEC_IN_MS       1000
 #define ONE_KB              1024
 
+#define CHECK_FILE_TIMEOUT  10000
+#define RMV_FILE_TIMEOUT    10000
+#define CHECK_ROW_TIMEOUT    5000
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -61,14 +64,14 @@ typedef enum
   LOG_COLLECTION_INIT_AUTO,
   LOG_COLLECTION_INIT,
   LOG_COLLECTION_PRE_MAINTENANCE,
-  LOG_COLLECTION_WAIT_END_OF_FLIGHT_LOGGED,
+  LOG_COLLECTION_WAIT_EOF_LOGGED,
   LOG_COLLECTION_FINDFLIGHT,
   LOG_COLLECTION_STARTFILE,
-  LOG_COLLECTION_LOG_HEADER_FIND_LOG,
-  LOG_COLLECTION_LOG_HEADER_READ_LOG,
+  LOG_COLLECTION_LOG_HEADER_FIND,
+  LOG_COLLECTION_LOG_HEADER_READ,
   LOG_COLLECTION_START_LOG_UPLOAD,
-  LOG_COLLECTION_LOG_UPLOAD_FIND_LOG,
-  LOG_COLLECTION_LOG_UPLOAD_READ_LOG,
+  LOG_COLLECTION_UPLOAD_FIND_LOG,
+  LOG_COLLECTION_UPLOAD_READ_LOG,
   LOG_COLLECTION_FINISHFILE,
   LOG_COLLECTION_WT_FOR_MS_TO_VFY,
   LOG_COLLECTION_VFY_MS_MOVED_FILE,
@@ -77,7 +80,7 @@ typedef enum
   LOG_COLLECTION_POST_MAINTENANCE,
   LOG_COLLECTION_LOG_ERASE_MEMORY,
   LOG_COLLECTION_FINISHED,
-  LOG_COLLECTION_AUTO_CHECK_FINISHED
+  LOG_COLLECTION_AUTO_CHECK_FINISH
 }UPLOADMGR_LOG_COLLECTION_STATE;
 
 //Static data for the Log Collection task
@@ -386,7 +389,7 @@ void UploadMgr_Init(void)
   TmTaskCreate (&task_info);
 
   // Register the File-collection-In-Progress flag with the Power Manager.
-  PmRegisterAppBusyFlag(PM_UPLOAD_LOG_COLLECTION_BUSY, &LCTaskData.InProgress, PM_BUSY_LEGACY );
+  PmRegisterAppBusyFlag(PM_UPLOAD_LOG_COLLECTION_BUSY,&LCTaskData.InProgress,PM_BUSY_LEGACY);
 
   //Log Upload Task
   memset(&task_info, 0, sizeof(task_info));
@@ -474,11 +477,11 @@ void UploadMgr_StartUpload(UPLOAD_START_SOURCE StartSource)
     {
       GSE_DebugStr(NORMAL,TRUE, "UploadMgr: Cannot Upload while Recording is active");
     }
-    else if(LCTaskData.InProgress == FALSE)
+    else if(FALSE == LCTaskData.InProgress)
     {
       if( MSSC_GetIsAlive() && MSSC_GetIsCompactFlashMounted() )
       {
-        if(StartSource == UPLOAD_START_AUTO)
+        if(UPLOAD_START_AUTO == StartSource)
         {
           LCTaskData.State = LOG_COLLECTION_INIT_AUTO;
           GSE_DebugStr(VERBOSE,TRUE,"UploadMgr: Starting auto-upload check");
@@ -1240,7 +1243,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         GSE_DebugStr(VERBOSE,TRUE,
                      "UploadMgr: Auto upload, no data/etm logs found, stopping");
-        pTask->State = LOG_COLLECTION_AUTO_CHECK_FINISHED;
+        pTask->State = LOG_COLLECTION_AUTO_CHECK_FINISH;
       }
       break;
 
@@ -1289,7 +1292,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       i = UploadMgr_MaintainFileTable(FALSE);
       if(1 == i )
       {
-        pTask->State = LOG_COLLECTION_WAIT_END_OF_FLIGHT_LOGGED;
+        pTask->State = LOG_COLLECTION_WAIT_EOF_LOGGED;
         // Display installation info to the version
         UploadMgr_PrintInstallationInfo();
 
@@ -1304,7 +1307,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
 
     // Check with the LogMgr to see if the end-of-flight marker-log
     // is being written out, before attempting to collect the flight records.
-    case LOG_COLLECTION_WAIT_END_OF_FLIGHT_LOGGED:
+    case LOG_COLLECTION_WAIT_EOF_LOGGED:
       if ( LogIsWriteComplete(LOG_REGISTER_END_FLIGHT) )
       {
         pTask->State = LOG_COLLECTION_FINDFLIGHT;
@@ -1351,7 +1354,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         memset(&pTask->FileHeader,0,sizeof(pTask->FileHeader));
         readOffset = pTask->FlightDataStart;
-        pTask->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
+        pTask->State = LOG_COLLECTION_LOG_HEADER_FIND;
         m_MSCrcResult = MS_CRC_RESULT_NONE;
       }
       else
@@ -1364,7 +1367,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
     //flight.  When a log is found, read it and add its checksum to the
     //file checksum value.  If the Log Manager is busy, try reading
     //on the next frame
-    case LOG_COLLECTION_LOG_HEADER_FIND_LOG:
+    case LOG_COLLECTION_LOG_HEADER_FIND:
       for(i = 0; i < UPLOADMGR_READ_LOGS_PER_MIF; i++)
       {
         findLogResult = LogFindNextRecord(LOG_NEW,
@@ -1380,7 +1383,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
         {
           case LOG_BUSY:
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_FIND_LOG-FindRec=BUSY");
-            pTask->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
+            pTask->State = LOG_COLLECTION_LOG_HEADER_FIND;
             break;
 
           case LOG_FOUND:
@@ -1407,7 +1410,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             if(LOG_READ_BUSY == readLogResult)
             {
               GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_FIND_LOG-LogRead=BUSY");
-              pTask->State = LOG_COLLECTION_LOG_HEADER_READ_LOG;
+              pTask->State = LOG_COLLECTION_LOG_HEADER_READ;
             }
             else if(LOG_READ_SUCCESS == readLogResult)
             {
@@ -1437,7 +1440,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                    pTask->FileHeader.log_cnt += 1;
                 }
               }
-              pTask->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
+              pTask->State = LOG_COLLECTION_LOG_HEADER_FIND;
             }
 
             (readLogResult == LOG_READ_FAIL) ? GSE_DebugStr(NORMAL,TRUE,
@@ -1463,12 +1466,12 @@ void UploadMgr_FileCollectionTask(void *pParam)
     //Read a found log and add its checksum to the header.  This read
     //is only used if ReadLog returns a "BUSY" status in the
     //LOG_COLLECTION_LOG_HEADER_FIND_LOG state.
-    case LOG_COLLECTION_LOG_HEADER_READ_LOG:
+    case LOG_COLLECTION_LOG_HEADER_READ:
       readLogResult = LogRead(pTask->LogOffset,(LOG_BUF *) pTask->LogBuf);
       if(LOG_READ_BUSY == readLogResult)
       {
         GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC HEADER_READ_LOG-ReadLog=BUSY");
-        pTask->State = LOG_COLLECTION_LOG_HEADER_READ_LOG;
+        pTask->State = LOG_COLLECTION_LOG_HEADER_READ;
       }
       else if(LOG_READ_SUCCESS == readLogResult)
       {
@@ -1496,7 +1499,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             pTask->FileHeader.log_cnt += 1;
           }
         }
-        pTask->State = LOG_COLLECTION_LOG_HEADER_FIND_LOG;
+        pTask->State = LOG_COLLECTION_LOG_HEADER_FIND;
       }
       //LogReadFail (Shouldn't happen, but if it does then the log memory
       //have been corrupted. I'm scared of asserting here, if I just skip
@@ -1549,7 +1552,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
         if(pTask->VfyRow >= 0)
         {
           //Start the upload task and create the file header
-          UploadMgr_StartFileUploadTask(pTask->FN, UploadOrderTbl[pTask->UploadOrderIdx].Priority);
+          UploadMgr_StartFileUploadTask(pTask->FN, 
+                                        UploadOrderTbl[pTask->UploadOrderIdx].Priority);
 
           UploadMgr_MakeFileHeader(&pTask->FileHeader,
               UploadOrderTbl[pTask->UploadOrderIdx].Type,
@@ -1573,7 +1577,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
           //The next task state will transfer the log data for this file
           //into the file data queue.
           readOffset = pTask->FlightDataStart;
-          pTask->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
+          pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
 
           GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Uploading %s...",pTask->FN);
 
@@ -1596,9 +1600,9 @@ void UploadMgr_FileCollectionTask(void *pParam)
     //Transfer log data to the upload task.  Find a log, read it, and
     //stuff it into the queue.  If the log manager is busy on a find
     //or read, come back on the next frame to finish.
-    case LOG_COLLECTION_LOG_UPLOAD_FIND_LOG:
+    case LOG_COLLECTION_UPLOAD_FIND_LOG:
       //Read logs until all logs are read, or the FIFO is full
-      while(pTask->State == LOG_COLLECTION_LOG_UPLOAD_FIND_LOG)
+      while(pTask->State == LOG_COLLECTION_UPLOAD_FIND_LOG)
       {
         (ULTaskData.State == FILE_UL_ERROR) ?
            UploadMgr_UpdateFileVfy(pTask->VfyRow, VFY_STA_DELETED, 0, 0),
@@ -1617,7 +1621,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
           if(findLogResult == LOG_BUSY)
           {
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_FIND_LOG-FindLog=BUSY");
-            pTask->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
+            pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
           }
           else if(findLogResult == LOG_FOUND)
           {
@@ -1634,7 +1638,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
               if(LOG_READ_BUSY == readLogResult)
               {
                 GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_FIND_LOG-ReadLog=BUSY");
-                pTask->State = LOG_COLLECTION_LOG_UPLOAD_READ_LOG;
+                pTask->State = LOG_COLLECTION_UPLOAD_READ_LOG;
               }
               else
               {
@@ -1649,7 +1653,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                 //ensure it is put in a different file.
                 if(--pTask->FileHeader.log_cnt != 0)
                 {
-                  pTask->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
+                  pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
                 }
                 else
                 {
@@ -1663,7 +1667,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             }
             else
             {
-              pTask->State = LOG_COLLECTION_LOG_UPLOAD_READ_LOG;
+              pTask->State = LOG_COLLECTION_UPLOAD_READ_LOG;
             }
           }
           //No more logs found, but the number of logs transfered is less
@@ -1682,7 +1686,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
 
     //Read log data from log manager and transfer it into the file upload
     //queue.  This task is only used if
-    case LOG_COLLECTION_LOG_UPLOAD_READ_LOG:
+    case LOG_COLLECTION_UPLOAD_READ_LOG:
 
       (ULTaskData.State == FILE_UL_ERROR) ?
            UploadMgr_UpdateFileVfy(pTask->VfyRow, VFY_STA_DELETED, 0, 0),
@@ -1700,7 +1704,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
           {
             GSE_DebugStr(VERBOSE,FALSE,"UploadMgr: LC UPLOAD_READ_LOG-ReadLog=BUSY");
             //Repeat state until Log Mgr is no longer busy
-            pTask->State = LOG_COLLECTION_LOG_UPLOAD_READ_LOG;
+            pTask->State = LOG_COLLECTION_UPLOAD_READ_LOG;
           }
           else
           {
@@ -1715,7 +1719,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //ensure it is put in a different file.
             if(--pTask->FileHeader.log_cnt != 0)
             {
-              pTask->State = LOG_COLLECTION_LOG_UPLOAD_FIND_LOG;
+              pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
             }
             else
             {
@@ -1730,7 +1734,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
         }
         else //File queue full, wait until U/L process frees up some room
         {
-          pTask->State = LOG_COLLECTION_LOG_UPLOAD_READ_LOG;
+          pTask->State = LOG_COLLECTION_UPLOAD_READ_LOG;
         }
       }
       break;
@@ -1762,10 +1766,11 @@ void UploadMgr_FileCollectionTask(void *pParam)
         VfyRspFailed = FALSE;
         GSE_DebugStr(NORMAL,TRUE,"UploadMgr: CRC OK!, verify log file was moved...");
         strncpy_safe(checkCmdData.FN,sizeof(checkCmdData.FN),pTask->FN,_TRUNCATE);
-        pTask->State =
-          MSI_PutCommand(CMD_ID_CHECK_FILE,&checkCmdData,sizeof(checkCmdData),10000,
-          UploadMgr_VerifyMSCmdsCallback)  == SYS_OK ?
-          LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_FILE_UL_ERROR;
+        pTask->State = 
+        MSI_PutCommand(CMD_ID_CHECK_FILE,&checkCmdData,sizeof(checkCmdData),
+                       CHECK_FILE_TIMEOUT, 
+            UploadMgr_VerifyMSCmdsCallback)  == SYS_OK ?
+            LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_FILE_UL_ERROR;
         tickLast = CM_GetTickCount();
         checkFileCnt = UPLOADMGR_CHECK_FILE_CNT;
       }
@@ -1818,7 +1823,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
               //If MSI fails to to put the command, treat it as a MS response failure
               //and attempt the file again
               pTask->State =
-              MSI_PutCommand(CMD_ID_CHECK_FILE,&checkCmdData,sizeof(checkCmdData),10000,
+              MSI_PutCommand(CMD_ID_CHECK_FILE,&checkCmdData,sizeof(checkCmdData),
+                             CHECK_FILE_TIMEOUT, 
                   UploadMgr_VerifyMSCmdsCallback)  == SYS_OK ?
                   LOG_COLLECTION_VFY_MS_MOVED_FILE : LOG_COLLECTION_FILE_UL_ERROR;
 
@@ -1939,7 +1945,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
        FAST_SignalUploadComplete();
        /**** DELIBERATE FALL THROUGH TO LOG_AUTO_CHECK_FINISHED 
             THIS REMOVES THE DEBUG OUTPUT EVERY TIME AUTOUPLOAD DOESNT FIND A RECORD ****/
-    case LOG_COLLECTION_AUTO_CHECK_FINISHED:
+    case LOG_COLLECTION_AUTO_CHECK_FINISH:
       
       pTask->InProgress = FALSE;
       pTask->Disable    = FALSE;
@@ -2047,7 +2053,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
           if(SYS_OK == MSI_PutCommand(CMD_ID_REMOVE_LOG_FILE,
               &RemoveCmdData,
               sizeof(RemoveCmdData),
-              10000,
+              RMV_FILE_TIMEOUT,
               UploadMgr_VerifyMSCmdsCallback))
           {
             GSE_DebugStr(NORMAL,FALSE,"UploadMgr FVT: Removing %s file %s...",
@@ -2179,7 +2185,7 @@ INT32 UploadMgr_MaintainFileTable(BOOLEAN Start)
           strncpy_safe(CheckCmdData.FN,sizeof(CheckCmdData.FN),VfyRow.Name,_TRUNCATE);
 
           State = (MSI_PutCommand(CMD_ID_CHECK_FILE,&CheckCmdData,
-                   sizeof(CheckCmdData),10000,
+                   sizeof(CheckCmdData),CHECK_FILE_TIMEOUT,
                    UploadMgr_VerifyMSCmdsCallback) == SYS_OK)  ?
             TBL_MAINT_WT_CHECK_RSP2: TBL_MAINT_ERROR;
 
@@ -2399,7 +2405,7 @@ void UploadMgr_CheckLogMoved(void *pParam)
         m_CheckLogRow = MSI_PutCommand(CMD_ID_CHECK_FILE,
                                        &cmd,
                                        sizeof(cmd),
-                                       5000,
+                                       CHECK_ROW_TIMEOUT,
                                        UploadMgr_CheckLogCmdCallback) == SYS_OK ? row : -2;
         file_found = TRUE;
         m_CheckLogFileCnt > 0 ? m_CheckLogFileCnt-- : 0;
@@ -3542,11 +3548,10 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
- * *****************  Version 185  *****************
- * User: John Omalley Date: 1/13/15    Time: 12:11p
+ * *****************  Version 186  *****************
+ * User: John Omalley Date: 1/14/15    Time: 10:31a
  * Updated in $/software/control processor/code/application
- * SCR 1055 and SCR 1204 - Change VPN wait counter to only happen when
- * data is actually uploaded.
+ * SCR 1254 - Code Review Updates
  * 
  * *****************  Version 184  *****************
  * User: John Omalley Date: 11/18/14   Time: 2:36p
