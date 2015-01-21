@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 2 $  $Date: 15-01-11 10:43p $
+      $Revision: 3 $  $Date: 15-01-19 6:18p $
 
 ******************************************************************************/
 
@@ -31,6 +31,7 @@
 #include "NVMgr.h"
 #include "Assert.h"
 #include "ACS_Interface.h"
+#include "dio.h"
 
 
 /*****************************************************************************/
@@ -97,6 +98,16 @@ typedef struct {
 } GBS_RAW_TX_BUFF, *GBS_RAW_TX_BUFF_PTR;
 
 typedef struct {
+  UINT32 cnt;    
+  UINT32 buff_end; // Current end of data 
+                       // For efficiency, copy bytes as they are received.  However 
+                       //    if cksum fails, then have to move back and 
+                       //    start @ buff_end again. 
+  UINT32 data_index; // Index into Rx Buff where data is being copied from 
+  UINT8 buff[GBS_RAW_BUFF_MAX];
+} GBS_RAW_RX_BUFF_MULTI_REC, *GBS_RAW_RX_BUFF_MULTI_REC_PTR;
+
+typedef struct {
   UINT8 cmd;
   UINT8 code;
   UINT8 spare;
@@ -125,6 +136,7 @@ typedef struct {
 #define GBS_KA_DATE_BASE_YR 1900 // This needs to be confirmed
 #define GBS_KA_CKSUM_EXCL 2
 
+#pragma pack(1)
 typedef struct {
   UINT8 selLRU;   // LRU Select is "0x9B"
   UINT8 code;     // Keep alive Code "0xFE"
@@ -132,6 +144,8 @@ typedef struct {
   UINT8 date[GBS_KA_DATE_SIZE]; 
   UINT8 cksum;  // sum of fields 'code' to end of 'date' inclusive. Excl selLRU
 } GBS_KEEPALIVE_MSG, *GBS_KEEPALIVE_MSG_PTR; 
+#pragma pack()
+
 
 typedef struct {
 #ifdef DTU_GBS_SIM
@@ -142,6 +156,7 @@ typedef struct {
                                 //   With Sim Log, blk size excludes CRC and Status.
                                 //   Have to acct for difference
 #endif        
+  UINT8 dnloadCode;             // Download Code for Debugging 
   UINT16 pad;                         
 } GBS_DEBUG_CTL, *GBS_DEBUG_CTL_PTR ; // Run Time Only
 
@@ -166,6 +181,9 @@ static GBS_APP_DATA m_GBS_App_Data;
 
 static GBS_RAW_RX_BUFF m_GBS_RxBuff[GBS_MAX_CH]; // Note: Multiplex GBS will
                                                  //       use Physical Ch Port.
+                                                 
+static GBS_RAW_RX_BUFF_MULTI_REC m_GBS_RxBuffMultiRec[GBS_MAX_CH]; // Use when buff multi Rec
+                                                                   //   option set
 
 static GBS_RAW_TX_BUFF m_GBS_TxBuff[GBS_MAX_CH];
 
@@ -185,13 +203,18 @@ static GBS_CMD_RSP cmdRsp_Confirm[GBS_CMD_RSP_MAX];  // Rec Retreived OK.  Confi
   UINT16 m_GBSTiming_Index;
 #endif
 // Test Timing
+// m_GBSTiming_Start = TTMR_GetHSTickCount();
+
+//m_GBSTiming_End = TTMR_GetHSTickCount();
+//m_GBSTiming_Buff[m_GBSTiming_Index] = (m_GBSTiming_End - m_GBSTiming_Start);
+//m_GBSTiming_Index = (++m_GBSTiming_Index) % GBS_TIMING_BUFF_MAX;
 
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static void GBS_RestoreAppData (void);
-static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus );
+static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary );
 static GBS_STATUS_PTR GBS_GetStatus (UINT16 index);
 static GBS_STATUS_PTR GBS_GetSimStatus (void);
 static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void);
@@ -205,7 +228,7 @@ static void GBS_ProcessStateSetEDU_Init ( GBS_STATUS_PTR pStatus );
 static void GBS_ProcessStateConfirm_Init ( GBS_STATUS_PTR pStatus );
 static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *pData,
                                                UINT16 cnt );
-static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus );
+static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus, BOOLEAN clearCmdCodeIndex );
 static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus );
 
 static BOOLEAN GBS_ProcessACK ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr );
@@ -214,7 +237,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr);
 static UINT32 GBS_VerifyChkSum ( UINT16 ch, UINT16 type );
 
 static void GBS_RunningCksum (UINT16 ch, UINT16 type); 
-static void GBS_CreateKeepAlive ( GBS_STATUS_PTR pStatus );
+static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr );
 
 
 #include "GBSUserTables.c"
@@ -229,20 +252,20 @@ const GBS_CMD_RSP CMD_RSP_SET_EDU[] = {
 
   // Wait 2 sec to force EDU back to Normal Mode
   { GBS_SETEDU_IDLE_2SEC, {0}, 0, GBS_RSP_NONE, 0, 2000, 0 },
-  // LRU Select Cmd 1, No Rsp, Wait 500 ms
-  { GBS_SETEDU_LRU_SELECT_ACK, {0x9B, 0x01}, 2, GBS_RSP_NONE, 0, 250, 0 },
-  // LRU Select Cmd 2, No Rsp, Wait 500 ms
-  { GBS_SETEDU_LRU_SELECT_ACK, {0x9B, 0x01}, 2, GBS_RSP_NONE, 0, 250, 0 },
+  // LRU Select Cmd 1, No Rsp, Wait 1000 ms
+  { GBS_SETEDU_LRU_SELECT_ACK, {0x9B, 0x01}, 2, GBS_RSP_NONE, 0, 1000, 0 },
+  // LRU Select Cmd 2, Ack Rsp, Wait 500 ms, 3 retries
+  { GBS_SETEDU_LRU_SELECT_ACK, {0x9B, 0x01}, 2, GBS_RSP_ACK, 3, 500, 0 },
   // HS Cmd 1, ACK Rsp, Wait 500 ms
-  { GBS_SETEDU_HS_ACK, {0x12}, 1, GBS_RSP_ACK, 3, 500, 0 },
+  // { GBS_SETEDU_HS_ACK, {0x12}, 1, GBS_RSP_ACK, 3, 500, 0 },
   // HS Cmd 2, ACK Rsp, Wait 500 ms
-  { GBS_SETEDU_HS_ACK, {0x12}, 1, GBS_RSP_ACK, 3, 500, 500 },
+  // { GBS_SETEDU_HS_ACK, {0x12}, 1, GBS_RSP_ACK, 3, 500, 500 },
   // KeepAlive Cmd 1, Wait 1000 ms  NOTE: Optional based on cfg
-  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 1000, 0 },
+  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 500, 0 },
   // KeepAlive Cmd 2, Wait 1000 ms  NOTE: Optional based on cfg
-  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 1000, 0 },
+  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 500, 0 },
   // KeepAlive Cmd 3, Wait 1000 ms  NOTE: Optional based on cfg
-  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 1000, 0 },
+  { GBS_SETEDU_KEEPALIVE_ACK, {0x9B, 0xFE}, 9, GBS_RSP_NONE, 0, 500, 0 },
   // HS Cmd 3, ACK Rsp, Wait 500 ms
   { GBS_SETEDU_HS_ACK, {0x12}, 1, GBS_RSP_ACK, 3, 500, 0 },
   // End of Cmd Delimiter
@@ -254,7 +277,7 @@ const GBS_CMD_RSP CMD_RSP_CONFIRM[] = {
   // cmd_rsp_state, cmd[], cmdSize, respType, nRetries, nRetryTimeOut, nCmdToCmdDelay
 
   // Wait 0.25 sec
-  { GBS_STATE_CONFIRM_IDLE, {0}, 0, GBS_RSP_NONE, 0, 250, 0 },
+  { GBS_STATE_CONFIRM_IDLE, {0}, 0, GBS_RSP_NONE, 0, 100, 0 },
   // ACK 1 to confirm new Rec Downloaded
   { GBS_STATE_CONFIRM_ACK, {0x06}, 1, GBS_RSP_NONE, 0, 250, 0 },
   // ACK 2 to confirm new Rec Downloaded
@@ -458,6 +481,7 @@ void GBSProtocol_Initialize ( void )
 #ifdef DTU_GBS_SIM
   m_GBS_Debug.DTU_GBS_SIM_SimLog = TRUE; 
 #endif  
+  m_GBS_Debug.dnloadCode = GBS_DNLOAD_CODE_NOTUSED; 
     
 #ifdef GBS_TIMING_TEST
   /*vcast_dont_instrument_start*/
@@ -501,11 +525,8 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   RESULT result;
   GBS_STATUS_PTR pStatus;
   GBS_DOWNLOAD_DATA_PTR pDownloadData;
-  //GBS_CFG_PTR pCfg;
   UINT16 sent_cnt;
 
-
-  //pCfg = &m_GBS_Cfg[ch];
 
   // Check if multiplex is cfg.  Set pointers appropriately
   if ( (m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort) &&
@@ -514,13 +535,14 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     pStatus = &m_GBS_Multi_Status;
     pDownloadData = &m_GBS_Multi_Download_Ptr;
     pStatus->multi_ch = TRUE; 
-    // TBD control LSS to correct port
+    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, DIO_SetLow ); 
   }
   else
   {
     pStatus = &m_GBS_Status[ch];
     pDownloadData = &m_GBS_Download_Ptr[ch];
     pStatus->multi_ch = FALSE; 
+    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, DIO_SetHigh );     
   }
 
   // If Halt Rx, "reset"
@@ -536,7 +558,7 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       GSE_DebugStr(NORMAL,TRUE,"\r\nGBS Protocol: Download Halt Encountered ! (Ch=%d) \r\n",
                    (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);
       
-      GBS_CreateSummaryLog(pStatus); // Create statistics summary log
+      GBS_CreateSummaryLog(pStatus, TRUE); // Create statistics summary log
     }
     else { // State is ILDE, but for Multiplex could be Pending. Have to dsb it. 
       if ((m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Ctl_Cfg.nPort))
@@ -550,7 +572,7 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
           pStatus->bDownloadInterrupted = TRUE; 
           pStatus->bCompleted = FALSE; 
           //m_GBS_Multi_Ctl.bSecondaryReqPending = FALSE; 
-          GBS_ProcessStateRecord_Init(pStatus);
+          GBS_ProcessStateRecord_Init(pStatus, TRUE);
           GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Download Start Request (Ch=%d)\r\n", 
                      (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);  
           pStatus->state = GBS_STATE_SET_EDU_MODE; // Temp set state to != GBS_STATE_IDLE                     
@@ -722,9 +744,19 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
     }  
   }
 
-  *pSize = &m_GBS_RxBuff[nPort].cnt;
-  // Move pass U16 blksize and U16 blk#
-  *pData = &m_GBS_RxBuff[nPort].buff[0] + GBS_CKSUM_REC_START;
+  if (m_GBS_Ctl_Cfg.bBuffRecStore == FALSE ) 
+  {
+    *pSize = &m_GBS_RxBuff[nPort].cnt;
+    // Move pass U16 blksize and U16 blk#
+    *pData = &m_GBS_RxBuff[nPort].buff[0] + GBS_CKSUM_REC_START;
+  }
+  else 
+  {
+    *pSize = &m_GBS_RxBuffMultiRec[nPort].cnt;
+    // U16 blksize and U16 blk# removed from pkts when in _RxBuffMultiRec buff
+    *pData = &m_GBS_RxBuffMultiRec[nPort].buff[0];
+  }
+ 
 }
 
 
@@ -826,7 +858,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
       // Jump to sub state _SET_EDU_MODE,
       pStatus->state = GBS_ProcessStateSetConfirmEDU( pStatus, pData, cnt );
       if (pStatus->state == GBS_STATE_DOWNLOAD){
-        GBS_ProcessStateRecord_Init ( pStatus );
+        GBS_ProcessStateRecord_Init ( pStatus, TRUE );
         GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: EDU in GBS Mode (Ch=%d)\r\n", 
         (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);
       }
@@ -846,6 +878,19 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
 
     case GBS_STATE_CONFIRM:
       pStatus->state = GBS_ProcessStateSetConfirmEDU( pStatus, pData, cnt );
+      // If _CONFIRM is done, goto _DOWNLOAD again if looping thru Cmd Code is not complete
+      //    Else, goto _COMPLETE.  NOTE: If Debug Cmd Code enb, goto _COMPLETE as well (thus
+      //    exe the Debug Cmd Code only).  
+      if ( (pStatus->state != GBS_STATE_CONFIRM) && 
+           (pStatus->cmdRecCodeIndex < GBS_MAX_DNLOAD_TYPES) && 
+           (m_GBS_Cfg[pStatus->ch].dnloadTypes[pStatus->cmdRecCodeIndex] != 
+            GBS_DNLOAD_CODE_NOTUSED) &&
+           (m_GBS_Debug.dnloadCode == GBS_DNLOAD_CODE_NOTUSED) )
+      { // Check if we have loop thru all cfg dnload code 
+        GBS_CreateSummaryLog( pStatus, FALSE ); 
+        pStatus->state = GBS_STATE_DOWNLOAD; 
+        GBS_ProcessStateRecord_Init ( pStatus, FALSE );
+      }
       break;
 
     case GBS_STATE_COMPLETE:
@@ -991,6 +1036,7 @@ static GBS_STATE_ENUM GBS_ProcessStateSetConfirmEDU ( GBS_STATUS_PTR pStatus, UI
       }
       else { // Send next CmdRsp for _SET_EDU_MODE
         pStatus->cmdRsp_ptr = cmdRsp_ptr;
+        GBS_CreateKeepAlive ( cmdRsp_ptr );  
         memcpy ( (UINT8 *) &m_GBS_TxBuff[ch].buff[0], (UINT8 *) &cmdRsp_ptr->cmd[0],
                  cmdRsp_ptr->cmdSize );
         m_GBS_TxBuff[ch].cnt = cmdRsp_ptr->cmdSize;
@@ -1059,6 +1105,7 @@ static void GBS_ProcessStateSetEDU_Init ( GBS_STATUS_PTR pStatus )
   // Clear Blk Cnt data
   pStatus->cntBlkSizeBad = 0; 
   pStatus->cntBlkSizeExp = 0;
+  pStatus->cntBlkSizeExpDnNew = 0;
   pStatus->cntDnLoadSizeExp = 0; 
   
   memset ( (UINT8 *) &pStatus->dataBlkState, 0, sizeof(GBS_BLK_DATA) ); 
@@ -1115,7 +1162,7 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
   GBS_CMD_RSP_PTR cmdRsp_ptr;
   BOOLEAN bCmdCompleted;
   GBS_STATE_ENUM nextState;
-  UINT16 ch;
+  UINT16 ch, index;
   UINT32 tick_ms;
 
   ch = pStatus->ch;
@@ -1150,11 +1197,12 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
               CMD_RSP_RECORD_STR[pStatus->cmdRsp_ptr->cmd_rsp_state], 
               pStatus->dataBlkState.cntBlkCurr, pStatus->nCmdRetriesCurr);
     
-      //if ( pStatus->dataBlkState.state == GBS_BLK_STATE_GETSIZE )
       if (cmdRsp_ptr->cmd_rsp_state == GBS_STATE_RECORD_CODE)
-      { // If # Rec == # Rec last retrieval then exit as NO NEW REC
+      { // If # Rec == # Rec last retrieval AND !dnload new code, then exit as NO NEW REC
+        index = pStatus->cmdRecCodeIndex - 1;
         if ( (pStatus->cntBlkSizeExp == pStatus->cntBlkSizeNVM) && 
-             (pStatus->cntBlkSizeNVM != 0) )
+             (pStatus->cntBlkSizeNVM != 0) && 
+             (m_GBS_Cfg[ch].dnloadTypes[index] == GBS_DNLOAD_CODE_NEW) )
         {
           nextState = GBS_STATE_COMPLETE;
           pStatus->bCompleted = TRUE;  // No new records.  Completed OK. 
@@ -1163,6 +1211,11 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
                         (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch,
                         pStatus->cntBlkSizeNVM, pStatus->cntBlkSizeExp);          
         }
+
+         
+        pStatus->cntBlkSizeExpDnNew = (m_GBS_Cfg[ch].dnloadTypes[index] == 
+                                       GBS_DNLOAD_CODE_NEW) ? 
+                                       pStatus->cntBlkSizeExp : pStatus->cntBlkSizeExpDnNew; 
       } 
       // Fall thru. Ok if nextState set to GBS_STATE_COMPLETE already. 
       if ( cmdRsp_ptr->cmd_rsp_state != GBS_STATE_RECORD_ACK_NACK ) {
@@ -1245,10 +1298,12 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
  *
  * Returns:     None
  *
- * Notes:       None
+ * Notes:
+ *  - Initialize variables and state for Get Rec Blk Size and Rec 
+ *  - Send cfg dnload code or debug dnload code (if set)
  *
  *****************************************************************************/
-static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus )
+static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus, BOOLEAN clearCmdCodeIndex )
 {
   GBS_CMD_RSP_PTR cmdRsp_ptr;
   UINT16 ch;
@@ -1263,23 +1318,37 @@ static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus )
   pStatus->msCmdTimer = CM_GetTickCount() + cmdRsp_ptr->nRetryTimeOut;
   pStatus->nCmdRetriesCurr = cmdRsp_ptr->nRetries;
   pStatus->msCmdDelay = 0; // Clear Cmd to Cmd runtime timer
+  pStatus->cntBadCRCRow = 0; 
 
   // Setup GBS_STATE_RECORD_CODE
-  pStatus->cmdRecCodeIndex = 0;  // Start with first index into GBS_CFG.dnloadTypes[index]
+  // Start with first index into GBS_CFG.dnloadTypes[index] if STARTING DNLOAD
+  pStatus->cmdRecCodeIndex = (clearCmdCodeIndex == TRUE) ? 0 : pStatus->cmdRecCodeIndex; 
+  
   m_CmdReqBlk[ch].cmd = 0x5E;
-  m_CmdReqBlk[ch].code = m_GBS_Cfg[ch].dnloadTypes[pStatus->cmdRecCodeIndex];
+  m_CmdReqBlk[ch].code = (m_GBS_Debug.dnloadCode != GBS_DNLOAD_CODE_NOTUSED) ? 
+                          m_GBS_Debug.dnloadCode :
+                          m_GBS_Cfg[ch].dnloadTypes[pStatus->cmdRecCodeIndex]; 
   memcpy ( (UINT8 *) &cmdRsp_Record[ch][GBS_STATE_RECORD_CODE_INDEX].cmd[0],
            &m_CmdReqBlk[ch], sizeof(GBS_CMD_REQ_BLK) );
   cmdRsp_Record[ch][GBS_STATE_RECORD_CODE_INDEX].cmdSize = sizeof(GBS_CMD_REQ_BLK);
+  ++pStatus->cmdRecCodeIndex; 
+  
+  GSE_DebugStr(NORMAL,TRUE, 
+                "GBS_Protocol: Dnload Code = %d (Ch=%d)\r\n", m_CmdReqBlk[ch].code, 
+                (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch );
  
   // Initialize Data Vars
   pStatus->cntBlkSizeBad = 0; 
   pStatus->cntBlkSizeExp = 0;
+  pStatus->cntBlkSizeExpDnNew = (clearCmdCodeIndex == TRUE) ? 0 : pStatus->cntBlkSizeExpDnNew;
   pStatus->cntDnLoadSizeExp = 0; 
   
   memset ( (UINT8 *) &pStatus->dataBlkState, 0, sizeof(GBS_BLK_DATA) ); 
   
   GBS_FLUSH_RXBUFF;
+  
+  m_GBS_RxBuffMultiRec[ch].cnt = 0; 
+  m_GBS_RxBuffMultiRec[ch].data_index = 0; 
 }
 
 
@@ -1307,16 +1376,16 @@ static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus )
   *pDownloadData->bDownloadCompleted = TRUE; 
   
   // Update NVM PktCnt. If retreived successfully and cnt don't match update NVM
-  if ( (pStatus->cntBlkSizeExp != pStatus->cntBlkSizeNVM) &&
+  if ( (pStatus->cntBlkSizeExpDnNew != pStatus->cntBlkSizeNVM) &&
        (pStatus->bCompleted == TRUE) )
   {
-    pStatus->cntBlkSizeNVM = pStatus->cntBlkSizeExp; 
+    pStatus->cntBlkSizeNVM = pStatus->cntBlkSizeExpDnNew; 
     if ( (m_GBS_Multi_Ctl.state == GBS_MULTI_SECONDARY) && 
          (pStatus->ch == m_GBS_Ctl_Cfg.nPort) ) {
-      m_GBS_App_Data.pktCnt_Multi = pStatus->cntBlkSizeExp;
+      m_GBS_App_Data.pktCnt_Multi = pStatus->cntBlkSizeExpDnNew;
     } // end of if MULTI set and SECONDARY active
     else {
-      m_GBS_App_Data.pktCnt[pStatus->ch] = pStatus->cntBlkSizeExp;
+      m_GBS_App_Data.pktCnt[pStatus->ch] = pStatus->cntBlkSizeExpDnNew;
     } // end of else not MULTI and SECONDARY, thus straight channel 
     NV_Write ( NV_GBS_DATA, 0, (void *) &m_GBS_App_Data, sizeof(m_GBS_App_Data) ); 
   } // end if (pStatus->cntBlkSizeExp != pStatus->cntBlkSizeNVM) 
@@ -1339,7 +1408,9 @@ static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus )
     }
   } // end if (m_GBS_Multi_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Multi_Cfg.nPort)
  
-  GBS_CreateSummaryLog(pStatus); // Create statistics summary log
+  GBS_CreateSummaryLog(pStatus, TRUE); // Create statistics summary log
+  
+  m_GBS_Debug.dnloadCode = GBS_DNLOAD_CODE_NOTUSED; 
   
   return (GBS_STATE_IDLE); 
 }
@@ -1490,9 +1561,10 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
   GBS_STATUS_PTR pStatus;
   GBS_BLK_DATA_PTR pBlkData; 
   UINT8 *pDest;
-  UINT32 *pCnt, tick_ms;  
+  UINT32 *pCnt, tick_ms, i, j, k;  
   UINT16 *pWord, ch, blkSize; 
   GBS_DOWNLOAD_DATA_PTR pDownloadData;
+  GBS_RAW_RX_BUFF_MULTI_REC_PTR pBuffManyRec; 
   
 
   bOk = FALSE;
@@ -1501,6 +1573,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
   
   ch = pStatus->ch; 
   pBlkData = &pStatus->dataBlkState; 
+  pBuffManyRec = &m_GBS_RxBuffMultiRec[ch];           
   
   tick_ms = CM_GetTickCount();
   
@@ -1517,6 +1590,16 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
           memcpy ( (UINT8 *) pDest, (UINT8 *) pData, cnt );
           *pCnt = *pCnt + cnt;
           GBS_RunningCksum( ch, GBS_CKSUM_REC_TYPE ); 
+          if ( (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) && (*pCnt > GBS_BLK_OH) )
+          { // As data Rx fill the "Combined Rec Buff" 
+            // Determine how much to copy 
+            i = (*pCnt - GBS_BLK_OH) - pBuffManyRec->data_index; 
+            // If beginning of Rec, exclude GBS_BLK_OH
+            j = (pBuffManyRec->data_index == 0) ? GBS_BLK_OH : 0; 
+            k = pBuffManyRec->cnt + pBuffManyRec->data_index; 
+            memcpy ( (UINT8 *) &pBuffManyRec->buff[k], (pDest + j), i ); 
+            pBuffManyRec->data_index = pBuffManyRec->data_index + i; 
+          }
         }      
       
         if ( (pBlkData->currBlkSize == 0) && (*pCnt > sizeof(UINT32)) )
@@ -1542,7 +1625,6 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
           // blkSize = pBlkData->currBlkSize + GBS_BLK_OH + GBS_CKSUM_EXCL;  
               // Temp.  Add '8' to be used with DTU GBS SIM as SIM + '4' for U16 Blk#,Size
               //   blk size does not inlude CRC and STATUS at the end          
-              
           bGoodData = (*pCnt > blkSize) ? FALSE : TRUE;
           // If bytes Rx < expected after IDLE timeout then we have a problem
             // If last Rx Data time to current exceed cfg IDLE time 
@@ -1557,29 +1639,59 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
                        
           if (*pCnt == blkSize)  
           {
-// Test force checksum failure on Rec = 50 
+            // Test force checksum failure on Rec = 10 
 /*
-if ( (pBlkData->currBlkNum == 50) && (pStatus->multi_ch==TRUE) )
+if ( (pBlkData->currBlkNum == 10) && (pStatus->multi_ch==TRUE) )
   m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
-if ( (pBlkData->currBlkNum == 55) && (pStatus->multi_ch==FALSE) )
+if ( (pBlkData->currBlkNum == 15) && (pStatus->multi_ch==FALSE) )
   m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
 */
-// Test force checksum failure on Rec = 50 
+            // Test force checksum failure on Rec = 50 
             bGoodData = GBS_VerifyChkSum ( ch, GBS_CKSUM_REC_TYPE );
             if (bGoodData)
             { // Store Data and trans to _STATE_SAVING
-              *pDownloadData->bNewRec = TRUE; 
-              pBlkData->state = GBS_BLK_STATE_SAVING; 
-              // Reset timeout to wait for store complete
-              pStatus->msCmdTimer = pStatus->cmdRsp_ptr->nRetryTimeOut + tick_ms;
-              pStatus->nCmdRetriesCurr = pStatus->cmdRsp_ptr->nRetries; 
-              pBlkData->cntBlkBadInRow = 0;  // Got good record
+              if (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) 
+              {
+                pBuffManyRec->cnt = pBuffManyRec->cnt + pBuffManyRec->data_index; 
+                pBuffManyRec->data_index = 0; 
+                pBlkData->cntBlkRx++; 
+                pBlkData->cntBlkBuffering++; 
+              }
               // Have to remove U16 Blk# and U16 BlkSize from 
               *pCnt = *pCnt - GBS_CKSUM_REC_START; 
+              pStatus->cntBadCRCRow = 0; 
+              pBlkData->cntBlkBadInRow = 0;  // Got good record
+              if ((m_GBS_Ctl_Cfg.bBuffRecStore == FALSE) || 
+                  ((m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) && 
+                   (pBuffManyRec->cnt >= m_GBS_Ctl_Cfg.cntBuffRecSize)) ||
+                  (pStatus->dataBlkState.currBlkNum >= pStatus->cntBlkSizeExp))
+              {
+                *pDownloadData->bNewRec = TRUE; 
+                pBlkData->state = GBS_BLK_STATE_SAVING; 
+                // Reset timeout to wait for store complete
+                pStatus->msCmdTimer = pStatus->cmdRsp_ptr->nRetryTimeOut + tick_ms;
+                pStatus->nCmdRetriesCurr = pStatus->cmdRsp_ptr->nRetries; 
+              }
+              else // Rec Good, but don't store yet. Buff until cntCombineThresh met
+              {
+                *pStatus->ptrACK_NAK = GBS_RSP_ACK_DATA;
+                if (++pBlkData->cntBlkCurr != pBlkData->currBlkNum) // Statistics
+                {
+                  pBlkData->cntRecOutSeq++; 
+                  pBlkData->cntBlkCurr = pBlkData->currBlkNum; 
+                }
+                bOk = TRUE;
+                GSE_DebugStr(NORMAL,TRUE, 
+                  "GBS_Protocol: Record Ok, Buffering (Ch=%d,blk_rx=%d,blk_num=%d,sz=%d)\r\n",
+                  (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
+                  pBlkData->cntBlkRx, pBlkData->currBlkNum, pBlkData->currBlkSize);
+              }
             } // end if GBS_VerifyChksum good
+            pStatus->cntBadCRCRow = (bGoodData == FALSE) ? pStatus->cntBadCRCRow + 1 : 
+                                                           pStatus->cntBadCRCRow;
           } // end if (*pCnt == pBlkData->currBlkSize) 
           
-          if (bGoodData == FALSE) 
+          if (bGoodData == FALSE) // Too Large, Too Small, Cksum Bad
           { // Reset timeout and indicate 1 bad rec in row
             pBlkData->cntBlkBadTotal++; 
             if (++pBlkData->cntBlkBadInRow >= (m_GBS_Ctl_Cfg.retriesMulti + 1)) 
@@ -1588,15 +1700,48 @@ if ( (pBlkData->currBlkNum == 55) && (pStatus->multi_ch==FALSE) )
               GSE_DebugStr(NORMAL,TRUE, 
                   "GBS_Protocol: _StateRecord Too Many Err. Timeout and restart (Ch=%d)\r\n",
                   (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);
+               // If combined is enb, will flush combine buff and stats will be consistent
             }
             else if ((pBlkData->cntBlkBadInRow % (m_GBS_Ctl_Cfg.retriesSingle + 1)) == 0) {
               pBlkData->cntBlkBadRx++; 
-              bOk = TRUE;  // Force move onto next Rec
-              *pStatus->ptrACK_NAK = GBS_RSP_ACK_DATA;
-              GSE_DebugStr(NORMAL,TRUE, 
-                "GBS_Protocol: _StateRecord BadRec, GetNext (Ch=%d,blk_rx=%d,blk_num=%d)\r\n",
-                (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
-                pBlkData->cntBlkRx, pBlkData->currBlkNum);
+              if ( (m_GBS_Ctl_Cfg.bKeepBadRec == FALSE) || 
+                   ( (m_GBS_Ctl_Cfg.bKeepBadRec == TRUE) && 
+                     (pStatus->cntBadCRCRow < m_GBS_Ctl_Cfg.retriesSingle)) )
+              {
+                bOk = TRUE;  // Force move onto next Rec
+                *pStatus->ptrACK_NAK = GBS_RSP_ACK_DATA;
+                GSE_DebugStr(NORMAL,TRUE, 
+                  "GBS_Protocol: _StateRecord Bad, GetNext (Ch=%d,blk_rx=%d,blk_num=%d)\r\n",
+                  (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
+                  pBlkData->cntBlkRx, pBlkData->currBlkNum);
+                pStatus->cntBadCRCRow = 0; 
+                // If combine is enb, flush this rec from Combine Rx Buff
+                pBuffManyRec->data_index = 0;  // Clear Mulit Rec Buff
+              }
+              else // Store bad rec if bKeepBadRec == TRUE
+              {
+                if (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) 
+                {
+                  pBuffManyRec->cnt = pBuffManyRec->cnt + pBuffManyRec->data_index; 
+                  pBuffManyRec->data_index = 0; 
+                  pBlkData->cntBlkRx++; 
+                  pBlkData->cntBlkBuffering++; 
+                }
+                // Have to remove U16 Blk# and U16 BlkSize from 
+                // *pCnt = *pCnt - GBS_CKSUM_REC_START; 
+                // Don't want to remove OH, because it might not be OH is thisc ase 
+                pBlkData->cntBlkBadInRow = 0;  // Got good record
+                pStatus->cntBadCRCRow = 0; 
+                *pDownloadData->bNewRec = TRUE; 
+                pBlkData->state = GBS_BLK_STATE_SAVING; 
+                // Reset timeout to wait for store complete
+                pStatus->msCmdTimer = pStatus->cmdRsp_ptr->nRetryTimeOut + tick_ms;
+                pStatus->nCmdRetriesCurr = pStatus->cmdRsp_ptr->nRetries; 
+                GSE_DebugStr(NORMAL,TRUE, 
+                  "GBS_Protocol: _StateRecord Bad, StoreRec (Ch=%d,blk_rx=%d,blk_num=%d)\r\n",
+                  (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
+                  pBlkData->cntBlkRx, pBlkData->currBlkNum);
+              }
             }
             else { // Setup and send NAK.  Let outer loop send NAK.  
               bOk = TRUE;  // Force to resend this NAK
@@ -1605,21 +1750,25 @@ if ( (pBlkData->currBlkNum == 55) && (pStatus->multi_ch==FALSE) )
                       "GBS_Protocol: _StateRecord Send NAK (Ch=%d,blk_rx=%d,blk_num=%d)\r\n",
                       (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
                       pBlkData->cntBlkRx, pBlkData->currBlkNum);
+              // If combine is enb, flush this rec from Combine Rx Buff
+              pBuffManyRec->data_index = 0;  // Clear Mulit Rec Buff
             }
           } // end if (bGoodData == FALSE) 
+          
         } // end if ( pBlkData->state == GBS_BLK_STATE_DATA )
-        
         break; 
         
       case GBS_BLK_STATE_SAVING:
         if (*pDownloadData->bWriteInProgress == FALSE)
         {
+          i = (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) ? pBlkData->cntBlkBuffering : 1; 
           pBlkData->cntStoreBad = (*pDownloadData->bWriteOk == FALSE) ?  
-                                  (pBlkData->cntStoreBad + 1) : pBlkData->cntStoreBad; 
-          // TBD Check if 20 sec timer has expired ? If has, then have to Reboot
-          //   (get back into GBS mode) before continuing additional retrievals        
-          *pStatus->ptrACK_NAK = GBS_RSP_ACK_DATA;
-          pBlkData->cntBlkRx++; 
+                                  i : pBlkData->cntStoreBad;
+          pBlkData->cntBlkBuffering = 0; // Clear buffering cnt on store 
+          pBuffManyRec->cnt = 0;         // Clear Multi Rec Buff
+          pBuffManyRec->data_index = 0;  // Clear Mulit Rec Buff
+          pBlkData->cntBlkRx = (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) ? 
+                                pBlkData->cntBlkRx : (pBlkData->cntBlkRx + 1); 
           if (++pBlkData->cntBlkCurr !=  pBlkData->currBlkNum)
           {
             pBlkData->cntRecOutSeq++; 
@@ -1633,6 +1782,10 @@ if ( (pBlkData->currBlkNum == 55) && (pStatus->multi_ch==FALSE) )
                         "GBS_Protocol: Record Stored (Ch=%d,blk_rx=%d,blk_num=%d,sz=%d)\r\n",
                         (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
                         pBlkData->cntBlkRx, pBlkData->currBlkNum, pBlkData->currBlkSize);
+          // Check if 20 sec timer has expired ? Not necessary.  
+          //   If 20 sec expires and EDU -> Out of GBS mode, then will get failures
+          //   which will Restart Dnload conn
+          *pStatus->ptrACK_NAK = GBS_RSP_ACK_DATA;
         }
         break; 
         
@@ -1774,28 +1927,37 @@ static UINT32 GBS_VerifyChkSum ( UINT16 ch, UINT16 type )
  * Description: Creates GBS download summary complete log
  *
  * Parameters:  pStatus - ptr to GBS_STATUS data for specific chan
+ *              bSummary - TRUE to create summary log
  *
  * Returns:     None
  *
  * Notes:       None
  *
  *****************************************************************************/
-static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus )
+static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary )
 {
   GBS_STATUS_LOG log; 
-
+  SYS_APP_ID id; 
+  
+  memset ( (void *) &log, 0, sizeof(log) ); 
+  
+  // Blk and Summary Info
   log.nBlkExpected = pStatus->cntBlkSizeExp; 
   log.nBlkSizeTotal = pStatus->cntDnLoadSizeExp; 
   log.nBlkRx = pStatus->dataBlkState.cntBlkRx; 
   log.nBlkRxErr = pStatus->dataBlkState.cntBlkBadRx;
   log.nBlkRxErrTotal = pStatus->dataBlkState.cntBlkBadTotal;
-  log.nRestarts = pStatus->nRetriesCurr - m_GBS_Ctl_Cfg.restarts; 
-  log.bCompleted = pStatus->bCompleted; 
-  log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
   log.nBadStore = pStatus->dataBlkState.cntStoreBad; 
+  if (bSummary == TRUE) {  // Summary log Info
+    log.nRestarts = pStatus->nRetriesCurr - m_GBS_Ctl_Cfg.restarts; 
+    log.bCompleted = pStatus->bCompleted; 
+    log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
+  }
+  
+  id = bSummary ? SYS_ID_UART_GBS_STATUS : SYS_ID_UART_GBS_BLK_STATUS; 
   
   // Write the log
-  LogWriteSystem (SYS_ID_UART_GBS_STATUS, LOG_PRIORITY_LOW, &log, sizeof(log), NULL);  
+  LogWriteSystem (id, LOG_PRIORITY_LOW, &log, sizeof(log), NULL);
 }
 
 
@@ -1830,8 +1992,10 @@ static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus )
  *                        Bits 5-7  Not Used "0"
  *      Byte 8 - Cksum (Sum of bytes 1 to 7 inclusive) 
  *
+ *  2) If cmd_rsp_state == GBS_SETEDU_KEEPALIVE_ACK, then create Keep Alive msg
+ *
  *****************************************************************************/
-static void GBS_CreateKeepAlive ( GBS_STATUS_PTR pStatus )
+static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr )
 {
   TIMESTRUCT time_s; 
   GBS_KEEPALIVE_MSG msg; 
@@ -1840,47 +2004,50 @@ static void GBS_CreateKeepAlive ( GBS_STATUS_PTR pStatus )
   UINT8 bcd_day, bcd_mon, bcd_yr; 
   
   
-  msg.selLRU = GBS_KA_LRU_SEL;
-  msg.code = GBS_KA_CODE;
-
-  CM_GetSystemClock ( (TIMESTRUCT *) &time_s ); 
+  if (cmdRsp_ptr->cmd_rsp_state == GBS_SETEDU_KEEPALIVE_ACK)
+  {
+    msg.selLRU = GBS_KA_LRU_SEL;
+    msg.code = GBS_KA_CODE;
   
-  // Create GMT 
-  // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
-  // x x x s s s s s s m m  m  m  m  m  h  h  h  h  h  x  x  x  x
-  data = (time_s.Second & 0x3F) | (time_s.Minute & 0x3F << 6) | 
-         ((time_s.Hour & 0x1F) << 12 ); 
-  data = data << 3; 
-  byte_ptr = (UINT8 *) &data; // Big Endian 
-  byte_ptr++; // Move past MSB of MSW since GBS_KA_GMT is only 3 bytes
-  msg.gmt[2] = *byte_ptr++;  // Reverse the ordering, Big Endian to Little Endian
-  msg.gmt[1] = *byte_ptr++;
-  msg.gmt[0] = *byte_ptr; 
-  
-  // Create Date
-  // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
-  // x x y y y y y y y y m  m  m  m  m  d  d  d  d  d  d  x  x  x
-  bcd_day = ((time_s.Day / 10) << 4) | (time_s.Day % 10);
-  bcd_mon = ((time_s.Month / 10) << 4) | (time_s.Month % 10); 
-  data = time_s.Year - GBS_KA_DATE_BASE_YR;
-  bcd_yr = ((data / 10) << 4) | (data % 10); 
-  data = bcd_yr | (bcd_mon << 8) | (bcd_day << 13); 
-  data = data << 2; 
-  byte_ptr = (UINT8 *) &data; 
-  byte_ptr++; // Move past MSB of MSW since GBS_KA_DATE is only 3 bytes
-  msg.date[2] = *byte_ptr++;  // Reverse the ordering, Big Endian to Little Endian
-  msg.date[1] = *byte_ptr++; 
-  msg.date[0] = *byte_ptr; 
-  
-  // Update Checksum 
-  byte_ptr = (UINT8 *) &msg.code; 
-  data = 0; 
-  for (i=0;i<sizeof(GBS_KEEPALIVE_MSG) - GBS_KA_CKSUM_EXCL;i++) {
-    data = *byte_ptr + data; 
+    CM_GetSystemClock ( (TIMESTRUCT *) &time_s ); 
+    
+    // Create GMT 
+    // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
+    // x x x s s s s s s m m  m  m  m  m  h  h  h  h  h  x  x  x  x
+    data = (time_s.Second & 0x3F) | (time_s.Minute & 0x3F << 6) | 
+           ((time_s.Hour & 0x1F) << 12 ); 
+    data = data << 3; 
+    byte_ptr = (UINT8 *) &data; // Big Endian 
+    byte_ptr++; // Move past MSB of MSW since GBS_KA_GMT is only 3 bytes
+    msg.gmt[2] = *byte_ptr++;  // Reverse the ordering, Big Endian to Little Endian
+    msg.gmt[1] = *byte_ptr++;
+    msg.gmt[0] = *byte_ptr; 
+    
+    // Create Date
+    // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+    // x x y y y y y y y y m  m  m  m  m  d  d  d  d  d  d  x  x  x
+    bcd_day = ((time_s.Day / 10) << 4) | (time_s.Day % 10);
+    bcd_mon = ((time_s.Month / 10) << 4) | (time_s.Month % 10); 
+    data = time_s.Year - GBS_KA_DATE_BASE_YR;
+    bcd_yr = ((data / 10) << 4) | (data % 10); 
+    data = bcd_yr | (bcd_mon << 8) | (bcd_day << 13); 
+    data = data << 2; 
+    byte_ptr = (UINT8 *) &data; 
+    byte_ptr++; // Move past MSB of MSW since GBS_KA_DATE is only 3 bytes
+    msg.date[2] = *byte_ptr++;  // Reverse the ordering, Big Endian to Little Endian
+    msg.date[1] = *byte_ptr++; 
+    msg.date[0] = *byte_ptr; 
+    
+    // Update Checksum 
+    byte_ptr = (UINT8 *) &msg.code; 
+    data = 0; 
+    for (i=0;i<sizeof(GBS_KEEPALIVE_MSG) - GBS_KA_CKSUM_EXCL;i++) {
+      data = *byte_ptr + data; 
+    }
+    msg.cksum = data & 0xFF;  // cksum is only 8 bits
+    
+    memcpy ( (UINT8 *) &cmdRsp_ptr->cmd[0], &msg, sizeof(msg) ); 
   }
-  msg.cksum = data & 0xFF;  // cksum is only 8 bits
-  
-  // Return msg
 }  
 
 
@@ -1941,6 +2108,16 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 15-01-19   Time: 6:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol Updates 
+ * 1) LSS output control
+ * 2) KeepAlive Msg
+ * 3) Dnload code loop thru
+ * 4) Debug Dnload Code
+ * 5) Buffer Multi Records before storing 
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:43p

@@ -1,14 +1,14 @@
 #define SENSOR_USERTABLES_BODY
 /******************************************************************************
-Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
-All Rights Reserved. Proprietary and Confidential.
+        Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            All Rights Reserved. Proprietary and Confidential.
 
-File:        SensorUserTables.c
+    File:        SensorUserTables.c
 
-Description: User Interface for Sensor Runtime Processing
+    Description: User Interface for Sensor Runtime Processing
 
-VERSION
-$Revision: 34 $  $Date: 11/20/14 9:55a $
+    VERSION
+       $Revision: 35 $  $Date: 1/19/15 12:20p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -513,9 +513,8 @@ USER_HANDLER_RESULT Sensor_ShowConfig(USER_DATA_TYPE DataType,
 *                               for casting the data pointers
 *               [in/out] Param: Pointer to the configuration item to be read
 *                               or changed
-*               [in] Index:     Index parameter is used to reference the
-*                               specific sensor to change.  Range is validated
-*                               by the user manager
+*               [in] Index:     Not Used for this command
+*
 *               [in] SetPtr:    For write commands, a pointer to the data to
 *                               write to the configuration.
 *               [out] GetPtr:   For read commands, UserCfg function will set
@@ -540,7 +539,7 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
   BOOLEAN result   = TRUE;
   BOOLEAN bInspect = FALSE;
 
-  pSnsrCfg =  (SENSOR_CONFIG*) &CfgMgr_ConfigPtr()->SensorConfigs;
+  pSnsrCfg =  &CfgMgr_ConfigPtr()->SensorConfigs[0];
 
   // Create an output suitable for importing into a CSV file.
   // First line is a header, subsequent lines contain the sensor-id, sensor-name and units,
@@ -586,6 +585,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: John Omalley Date: 1/19/15    Time: 12:20p
+ * Updated in $/software/control processor/code/system
+ * SCR 1262 - Code Review Updates
  * 
  * *****************  Version 34  *****************
  * User: John Omalley Date: 11/20/14   Time: 9:55a

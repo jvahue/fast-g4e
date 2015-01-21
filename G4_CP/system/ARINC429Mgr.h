@@ -1,7 +1,7 @@
 #ifndef ARINC429MGR_H
 #define ARINC429MGR_H
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        Arinc429Mgr.h
@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Arinc429
 
 VERSION
-     $Revision: 16 $  $Date: 4/17/14 2:05p $
+     $Revision: 17 $  $Date: 1/19/15 11:12a $
 
 ******************************************************************************/
 
@@ -693,6 +693,11 @@ EXPORT ARINC429_CBIT_HEALTH_COUNTS Arinc429MgrAddPrevCBITHealthSts (
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 1/19/15    Time: 11:12a
+ * Updated in $/software/control processor/code/system
+ * SCR 1146 - Code Review Update
  * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 4/17/14    Time: 2:05p

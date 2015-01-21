@@ -1,6 +1,6 @@
 #define ARINC429MGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:         Arinc429Mgr.c
@@ -9,7 +9,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 61 $  $Date: 4/17/14 2:04p $
+     $Revision: 62 $  $Date: 1/19/15 11:02a $
 
 ******************************************************************************/
 
@@ -379,8 +379,8 @@ void Arinc429MgrInitTasks (void)
       // Update DISABLE state for Rx Ch where Enable == FALSE
       if (m_Arinc429Cfg.RxChan[nChannel].Enable == FALSE )
       {
-		 // Note: ->Status updated to ARINC429_STATUS_OK or 
-		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
+         // Note: ->Status updated to ARINC429_STATUS_OK or 
+         //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
              m_Arinc429MgrBlock.Rx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
@@ -395,9 +395,9 @@ void Arinc429MgrInitTasks (void)
       //   arinc429.reconfigure() called.
       else
       {
-		 // Note: ->Status updated to ARINC429_STATUS_OK or 
-		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
-		 if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
+         // Note: ->Status updated to ARINC429_STATUS_OK or 
+         //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
+         if (m_Arinc429MgrBlock.Rx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Arinc429 DRV PBIT failed.  Disable this Ch.
             m_Arinc429MgrBlock.Rx[nChannel].Enabled = FALSE;
@@ -420,7 +420,7 @@ void Arinc429MgrInitTasks (void)
       if (m_Arinc429Cfg.TxChan[nChannel].Enable == FALSE )
       {
          // Note: ->Status updated to ARINC429_STATUS_OK or 
-		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
+         //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
             m_Arinc429MgrBlock.Tx[nChannel].Status = ARINC429_STATUS_DISABLED_FAULTED;
@@ -436,7 +436,7 @@ void Arinc429MgrInitTasks (void)
       else
       {
          // Note: ->Status updated to ARINC429_STATUS_OK or 
-		 //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
+         //       ARINC429_STATUS_FAULTED_PBIT by Arinc429MgrInitialize() PBIT
          if (m_Arinc429MgrBlock.Tx[nChannel].Status != ARINC429_STATUS_OK)
          {
             // Create PBIT Arinc429 Mgr Startup PBIT Log
@@ -773,7 +773,7 @@ void Arinc429MgrBITTask ( void *pParam )
                // Set to TRUE
                pArincRxStatus->bChanActive = TRUE;
                // Output Debug Message on transition
-               sprintf (GSE_OutLine,
+               snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                         "Arinc429_Monitor: Arinc429 Data Present Detected (Ch=%d)",
                         Channel );
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
@@ -817,7 +817,7 @@ void Arinc429MgrBITTask ( void *pParam )
                   if ( pArincRxStatus->LastActivityTime != 0 )
                   {
                      // Output Debug Message on transition
-                     sprintf (GSE_OutLine,
+                     snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                               "Arinc429_Monitor: Arinc429 Data Present Lost (Ch=%d)!",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
@@ -826,7 +826,7 @@ void Arinc429MgrBITTask ( void *pParam )
                   else
                   {
                      // Output Debug Message on transition
-                     sprintf (GSE_OutLine,
+                     snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                               "Arinc429_Monitor: Arinc429 Startup Time Out (Ch=%d)!",
                               Channel);
                      GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
@@ -1424,13 +1424,14 @@ BOOLEAN Arinc429MgrSensorTest (UINT16 nIndex)
             Arinc429MgrDetermineSSMFailure( pSensorInfo->FailCount,
                                             pSensorInfo->TotalTests,
                                             SSMFailLog.FailMsg );
-            sprintf(TempStr, " S = %d", pSensorInfo->nSensor);
+            snprintf(TempStr, sizeof(TempStr)," S = %d", pSensorInfo->nSensor);
             strcat(SSMFailLog.FailMsg, TempStr);
 
 #ifdef ARINC429_DEBUG_COMPILE
             /*vcast_dont_instrument_start*/
             // Debug testing
-            sprintf (GSE_OutLine, "Arinc429_SensorTest: %s", SSMFailLog.FailMsg);
+            snprintf (GSE_OutLine, sizeof(GSE_OutLine), 
+                      "Arinc429_SensorTest: %s", SSMFailLog.FailMsg);
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
             /*vcast_dont_instrument_end*/
 #endif
@@ -1834,8 +1835,8 @@ static void Arinc429MgrCfgReduction ( ARINC429_RX_CFG_PTR pRxChanCfg,
                // Store the parameter configuration for the label SDI combination
                pSdi->ProtocolStorage.ConversionData.WordInfoIndex =
                                                      pChanData->ReduceParamCount;
-               pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;												 
-												 
+               pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;                                              
+
                if (BNR == pWordInfo->Format)
                {
                   pSdi->ProtocolStorage.ConversionData.Scale /= 
@@ -1858,7 +1859,7 @@ static void Arinc429MgrCfgReduction ( ARINC429_RX_CFG_PTR pRxChanCfg,
             pSdi->Accept  = TRUE;
             // Store the parameter configuration for the label SDI combination
             pSdi->ProtocolStorage.ConversionData.WordInfoIndex = pChanData->ReduceParamCount;
-            pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;												 
+            pSdi->ProtocolStorage.ConversionData.Scale = pRxChanCfg->Parameter[Index].Scale;                                                 
             if (BNR == pWordInfo->Format)
             {
                pSdi->ProtocolStorage.ConversionData.Scale /= 
@@ -2629,11 +2630,13 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                                                pProtocol->TotalTests,
                                                SSMFailLog.FailMsg );
 
-               sprintf(TempStr, " Ch = %d L = %o"NL, pWordInfo->RxChan, pWordInfo->Label);
+               snprintf(TempStr, sizeof(TempStr),
+                        " Ch = %d L = %o"NL, pWordInfo->RxChan, pWordInfo->Label);
                strcat(SSMFailLog.FailMsg, TempStr);
 
                // Debug testing
-               sprintf (GSE_OutLine, "Arinc429_ParamTest: %s", SSMFailLog.FailMsg);
+               snprintf (GSE_OutLine, sizeof(GSE_OutLine),
+                         "Arinc429_ParamTest: %s", SSMFailLog.FailMsg);
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                /*vcast_dont_instrument_end*/
 #endif
@@ -3145,7 +3148,7 @@ void Arinc429MgrDetermineSSMFailure ( UINT32 *pFailCount, UINT8 TotalTests, char
 
    // If the MaxCount is still zero then the label is not being
    // transmitted.  FailIndex == END_OF_FAIL_COUNT.
-   sprintf ( pMsg, "%s", Arinc429_ErrMsg[FailIndex] );
+   snprintf ( pMsg, sizeof(Arinc429_ErrMsg), "%s", Arinc429_ErrMsg[FailIndex] );
 }
 
 /*****************************************************************************/
@@ -3607,7 +3610,7 @@ void Arinc429MgrDisplayMultiArincChan ( void )
 
     i = 0;
     while ((i != nMaxCnt) && (i < ARINC429_MAX_DISPLAY_LINES))
-	// Max 12 lines (80 bytes each) at 100 msec
+     // Max 12 lines (80 bytes each) at 100 msec
     //   @ 115200 bps GSE
     {
       for ( k = 0; k < ARINC_RX_CHAN_MAX; k++ )
@@ -3711,6 +3714,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: John Omalley Date: 1/19/15    Time: 11:02a
+ * Updated in $/software/control processor/code/system
+ * SCR 1276 - Code Review Updates
  * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 4/17/14    Time: 2:04p

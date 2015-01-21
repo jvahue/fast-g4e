@@ -2,7 +2,7 @@
 #define SYSTEMLOG_H
 
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        SystemLog.h
@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 113 $  $Date: 15-01-11 10:20p $
+      $Revision: 115 $  $Date: 15-01-19 6:22p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -174,6 +174,7 @@ SYS_LOG_ID(SYS_ID_UART_F7X_NEW_DL_FOUND             ,0x5C20 ,0)\
 SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
 SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
 SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
+SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS               ,0x5C32 ,0)\
 SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
 \
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
@@ -282,6 +283,25 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 115  *****************
+ * User: Peter Lee    Date: 15-01-19   Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol Updates
+ * 1) LSS output control
+ * 
+ * 2) KeepAlive Msg
+ * 
+ * 3) Dnload code loop thru
+ * 
+ * 4) Debug Dnload Code
+ * 
+ * 5) Buffer Multi Records before storing 
+ * 
+ * *****************  Version 114  *****************
+ * User: John Omalley Date: 1/19/15    Time: 1:59p
+ * Updated in $/software/control processor/code/system
+ * SCR 1263 - Code Review Update
  * 
  * *****************  Version 113  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:20p
