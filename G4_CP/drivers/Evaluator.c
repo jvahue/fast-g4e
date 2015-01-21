@@ -1,6 +1,6 @@
 #define EVALUATOR_BODY
 /******************************************************************************
-              Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+              Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
                  All Rights Reserved. Proprietary and Confidential.
 
     File:        evaluator.c
@@ -13,7 +13,7 @@
      Notes:
 
   VERSION
-  $Revision: 31 $  $Date: 1/09/15 3:18p $
+  $Revision: 32 $  $Date: 1/19/15 10:34a $
 
 ******************************************************************************/
 
@@ -1793,6 +1793,11 @@ static BOOLEAN EvalUpdatePrevSensorList( const EVAL_EXE_CONTEXT* context)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.c $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 1/19/15    Time: 10:34a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1259 - Code Review Update
  * 
  * *****************  Version 31  *****************
  * User: John Omalley Date: 1/09/15    Time: 3:18p

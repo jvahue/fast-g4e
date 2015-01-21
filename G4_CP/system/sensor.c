@@ -1,6 +1,6 @@
 #define SENSOR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        sensor.c
@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 92 $  $Date: 12/11/14 11:59a $
+      $Revision: 93 $  $Date: 1/19/15 12:03p $
 
 ******************************************************************************/
 
@@ -756,9 +756,9 @@ static void SensorsConfigure (void)
             // interface index to retrieve the data later.
             Sensors[i].nInterfaceIndex  =
                             Arinc429MgrSensorSetup(pSensorCfg->generalPurposeA,
-                                                 pSensorCfg->generalPurposeB,
-                                                 pSensorCfg->nInputChannel,
-                                                 i);
+                                                   pSensorCfg->generalPurposeB,
+                                                   (UINT8)pSensorCfg->nInputChannel,
+                                                   i);
             // Set the function pointers for the ARINC429 interface
             Sensors[i].pGetSensorData   = Arinc429MgrReadWord;
             Sensors[i].pTestSensor      = Arinc429MgrSensorTest;
@@ -803,7 +803,7 @@ static void SensorsConfigure (void)
             Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
         case MAX_SAMPLETYPE:
-    default:
+        default:
             // FATAL ERROR WITH CONFIGURATION
             // Initialize String
             FATAL("Sensor Config Fail: Sensor %d, Type %d not Valid",
@@ -2182,11 +2182,11 @@ static void SensorDumpBinaryLiveData(LD_DEST_ENUM dest)
 
   if (LD_DEST_GSE == dest)
   {
-    GSE_write(str, (pStr - str));
+    GSE_write(str, (UINT16)(pStr - str));
   }
   else if (LD_DEST_MS == dest)
   {
-    GSE_MsWrite( str, (pStr - str));
+    GSE_MsWrite( str, (UINT16)(pStr - str));
   }
   else
   {
@@ -2231,7 +2231,7 @@ static void SensorInitializeLiveData(void)
         SensorIsUsed(( SENSOR_INDEX)sensorIndex) )
     {
       m_liveDataMap[sensorIndex] = nCount;
-      m_liveDataBuffer.sensor[nCount].nSensorIndex = sensorIndex;
+      m_liveDataBuffer.sensor[nCount].nSensorIndex = (UINT16)sensorIndex;
       nCount++;
     }
   }
@@ -2242,6 +2242,11 @@ static void SensorInitializeLiveData(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 93  *****************
+ * User: John Omalley Date: 1/19/15    Time: 12:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1276 - Code Review Updates
  * 
  * *****************  Version 92  *****************
  * User: John Omalley Date: 12/11/14   Time: 11:59a

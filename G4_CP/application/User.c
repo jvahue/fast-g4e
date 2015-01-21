@@ -1,6 +1,6 @@
 #define USER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:       User.c
@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 120 $  $Date: 12/11/14 1:13p $
+   $Revision: 121 $  $Date: 1/19/15 2:37p $
 
 ******************************************************************************/
 
@@ -424,7 +424,7 @@ BOOLEAN User_PutMsg(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 static
 void User_PutRsp(const INT8* Msg, USER_MSG_SOURCES Source, UINT32 Tag)
 {
-  CHAR chkstr[10];  // check-string length is: "\r\n$%04x\r\n"
+  CHAR chkstr[32];
   CHAR writeBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
   INT32 msgSize = strlen(Msg) + sizeof(chkstr) + 1;
@@ -556,7 +556,6 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
   rspBuffOverflowDetected = FALSE;
   msBuffer[0] = '\0';
 
-
   // Strip leading and trailing unprintable characters
   // from command msg string.
   StripString( msg );
@@ -606,9 +605,7 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     //table pointer and get the first message token
     msgTokPtr = strtok_r(msg,".",&tokPtr);
 
-
     // Check for global-scope commands. These are not associated with a specific command table.
-
     // ===============
     // SHOWCFG command
     // ===============
@@ -644,7 +641,6 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
     else
     {
       // Search command tables
-
       cmdTblPtr = User_TraverseCmdTables(msgTokPtr,&rootCmdTbl[0],tokPtr);
 
       if(cmdTblPtr == NULL)
@@ -688,31 +684,26 @@ void User_ExecuteCmdMsg(INT8* msg,  USER_MSG_SOURCES source, UINT32 tag)
              ( ((USER_TYPE_ACTION == cmdTblPtr->MsgType) || (setTokPtr != NULL)) &&
                  User_ValidateMessage(cmdTblPtr, source, nIndex, rspString,
                                       setTokPtr, USER_SINGLE_MSG_MAX_SIZE) ) )
-
         {
           // Get the current value of the param (if applicable) and whether this command
           // is log-able
           bLogThisChange =
             User_GetParamValue(cmdTblPtr, source, nIndex, oldValue, sizeof(oldValue));
         }
-
         // ==================
         // EXECUTE SINGLE CMD
         // ==================
         // The variable 'msg' which contained the command, will now be used to hold
         // the result string.
-
         User_OutputMsgString("\r\n", FALSE);
         rspString[0] = '\0';
         bExecutionResult = User_ExecuteSingleMsg(cmdTblPtr, source, nIndex,
                                                  setTokPtr, rspString,
                                                  USER_SINGLE_MSG_MAX_SIZE);
-
         // Output the results and finalize the display with CS and fast prompt
         User_OutputMsgString(rspString, TRUE);
 
-        // if cmd is loggable and executed ok,
-        // log it.
+        // if cmd is loggable and executed ok, log it.
         if(bLogThisChange && bExecutionResult )
         {
           // Bypass logging if "newvalue == oldvalue"
@@ -3107,6 +3098,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 121  *****************
+ * User: John Omalley Date: 1/19/15    Time: 2:37p
+ * Updated in $/software/control processor/code/application
+ * SCR 1167 - Updates per Code Review
  * 
  * *****************  Version 120  *****************
  * User: John Omalley Date: 12/11/14   Time: 1:13p

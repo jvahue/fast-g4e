@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 1 $  $Date: 15-01-11 10:21p $
+      $Revision: 2 $  $Date: 15-01-19 6:19p $
 
 ******************************************************************************/
 
@@ -36,7 +36,9 @@
 #define GBS_MAX_CH 4  // One for each physical UART channel
 
 #define GBS_MAX_DNLOAD_TYPES  5
-#define GBS_DNLOAD_TYPE_NOTUSED 255
+#define GBS_DNLOAD_CODE_NOTUSED 255
+#define GBS_DNLOAD_CODE_NEW 5
+//#define GBS_DNLOAD_CODE_NEW_INDEX 1
 
 
 #define GBS_IDLE_TIMEOUT      CM_DELAY_IN_MSEC(500)
@@ -48,19 +50,23 @@
 #define GBS_CMD_DELAY_MS      CM_DELAY_IN_MSEC(100)
 
                             /*0,  1,  2,  3,  4*/ /* dnloadTypes */
-#define GBS_CFG_DEFAULT     0x5,0xFF,0xFF,0xFF,0xFF
+#define GBS_CFG_DEFAULT     0x5,GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED,\
+                                GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED
 
 #define GBS_MULTI_CFG_DEFAULT  FALSE,                /* bMultiplex */\
                                1,                    /* nPort */\
-                               1,                    /* discAddr */\
+                               GBS_LSS0,             /* discAddr */\
                                FALSE,                /* bKeepAlive */\
                                GBS_IDLE_TIMEOUT,     /* timeOut */\
                                GBS_TIMEOUT_RETRIES,  /* retriesSingle */\
                                GBS_MULTIPLE_RETRIES, /* retriesMulti */\
                                GBS_RESTART_SETEDU_MODE,  /* restarts */\
                                GBS_RESTART_DELAY_MS,     /* restart_delay_ms */\
-                               GBS_CMD_DELAY_MS          /* cmd_delay_ms */
-                                
+                               GBS_CMD_DELAY_MS,         /* cmd_delay_ms */\
+                               TRUE,                     /* bKeepBadRec */\
+                               FALSE,                    /* bBuffRecStore */\
+                               1000                      /* cntBuffRecSize */
+
 
 #define GBS_CFGS_DEFAULT    GBS_CFG_DEFAULT, \
                             GBS_CFG_DEFAULT, \
@@ -73,12 +79,20 @@
                                  Package Typedefs
 ******************************************************************************/
 
+typedef enum {  // Note: if DIO_OUTPUT_LIST changes
+  GBS_LSS0, 
+  GBS_LSS1,
+  GBS_LSS2, 
+  GBS_LSS3, 
+  GBS_MAX_ENUM
+} GBS_LSS_ENUM; 
+
 typedef struct {
   BOOLEAN bMultiplex;   // TRUE = Two EDU multiplex onto same UART channel
   UINT8 nPort;          // Physical UART Port for Multiplex EDU data
-  UINT32 discPort;      // Port / Identifier for discrete to switch when
+  GBS_LSS_ENUM discPort;// Port / Identifier for discrete to switch when
                         //   comm with two EDU(s)
-  BOOLEAN bKeepAlive;  // Send Keep Alive Cmd with GMT Time
+  BOOLEAN bKeepAlive;   // Send Keep Alive Cmd with GMT Time
 
   UINT32 timeIdleOut;   // TBD add more timeouts
   UINT32 retriesSingle; // Max retries before moving onto next cmd
@@ -86,6 +100,9 @@ typedef struct {
   UINT32 restarts;      // Max restart before declaring dnload failed
   UINT32 restart_delay_ms;  // Delay between restarts
   UINT32 cmd_delay_ms;  // Cmd to Cmd Delay 
+  BOOLEAN bKeepBadRec;  // TRUE keep bad CRC record
+  BOOLEAN bBuffRecStore; // Enb the buffering of small records for storage
+  UINT32 cntBuffRecSize; // When buffering of rec enb, the size to flush
 } GBS_CTL_CFG, *GBS_CTL_CFG_PTR;
 
 typedef struct {
@@ -188,6 +205,7 @@ typedef struct {
   BOOLEAN bFailed;       // Rec Retrieval Failed.  Too many bad Rec in row. 
   
   UINT32 cntBlkBadRx;    // Cnt number of Bad Rx Block (i.e Bad Checksum) not stored
+  UINT32 cntBlkBuffering; // Number of Blks buffer for single Store. 
   
 } GBS_BLK_DATA, *GBS_BLK_DATA_PTR; 
 
@@ -239,6 +257,8 @@ typedef struct {
   UINT16 cntBlkSizeExp;    // On Good BlkSize Req Rec, this is # Blk to expected
   UINT32 cntDnLoadSizeExp; // On Good BlkSize Req Rec, this is Total Byte size expected
   
+  UINT16 cntBlkSizeExpDnNew;  // this is # Blk expected for Dnload New Cmd 
+  
   UINT16 cntBlkSizeNVM;    // NVM copy of previously retrieved download size 
   
   UINT8 *ptrACK_NAK;       // Ptr to data buff for ACK / NAK response 
@@ -252,6 +272,8 @@ typedef struct {
   UINT16 cntDnloadReq;    // Count # of download req since power up. Multi Req before 
                           //    req initiated is not incl.  
   UINT32 restartDelay;    // Restart Delay Timer 
+  
+  UINT32 cntBadCRCRow;    // Consecutive Cnt of Bad CRC In Row 
                             
 } GBS_STATUS, *GBS_STATUS_PTR;
 
@@ -291,7 +313,7 @@ typedef struct
   UINT16 cnt;    // Size of GBS Protocol file header
   UINT16 completed; // 1=Retrieval Completed Successfully 
                     // 0=Retrieval Not completed successfully 
-  UINT8 reserved[12]; // Reserved for future use
+  UINT8 reserved[13]; // Reserved for future use
 } GBS_FILE_HDR_DATA, *GBS_FILE_HDR_DATA_PTR; 
 #pragma pack()
 
@@ -342,6 +364,16 @@ EXPORT UINT16 GBSProtocol_SIM_Port ( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 15-01-19   Time: 6:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol Updates 
+ * 1) LSS output control
+ * 2) KeepAlive Msg
+ * 3) Dnload code loop thru
+ * 4) Debug Dnload Code
+ * 5) Buffer Multi Records before storing 
  * 
  * *****************  Version 1  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:21p
