@@ -1,14 +1,16 @@
 #define MSSC_USERTABLE_BODY
 /******************************************************************************
-         Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        MSStsCtlUserTables.c
 
     Description: MicroServer Status and Control User Commands.
 
     VERSION
-    $Revision: 28 $  $Date: 12/05/14 3:58p $
+    $Revision: 29 $  $Date: 1/22/15 8:31a $
 ******************************************************************************/
 #ifndef MSSC_BODY
 #error MSStsCtlUserTables.c should only be included by MSStsCtl.c
@@ -489,6 +491,11 @@ USER_HANDLER_RESULT MSSC_MSTimeMsg(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: MSStsCtlUserTables.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: John Omalley Date: 1/22/15    Time: 8:31a
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Code Review Update
  * 
  * *****************  Version 28  *****************
  * User: John Omalley Date: 12/05/14   Time: 3:58p

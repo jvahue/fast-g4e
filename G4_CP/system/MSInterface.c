@@ -1,7 +1,9 @@
 #define SYS_MSINTERFACE_BODY
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:          9D991
 
   File:          MSInterface.c
 
@@ -13,7 +15,7 @@
                  TaskManager.h
 
   VERSION
-      $Revision: 70 $  $Date: 11/11/14 5:17p $
+      $Revision: 71 $  $Date: 1/22/15 9:20a $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -658,12 +660,12 @@ void MSI_HandleMSCommand(MSCP_CMDRSP_PACKET* Packet)
 void MSI_CheckMsgTimeouts(void)
 {
   UINT32 i;
-  UINT32 TimeElapsed;
-  static UINT32 TimeLast;
-  MSI_RSP_CALLBACK RspFunc;
-  UINT16 Id;
+  UINT32 timeElapsed;
+  static UINT32 timeLast = 0;
+  MSI_RSP_CALLBACK rspFunc;
+  UINT16 id;
 
-  TimeElapsed = CM_GetTickCount() - TimeLast;
+  timeElapsed = CM_GetTickCount() - timeLast;
 
   //Check all possible pending response entries
   for( i = 0 ; i < MSI_MAX_PENDING_RSP ; i++)
@@ -673,17 +675,17 @@ void MSI_CheckMsgTimeouts(void)
     if( (CMD_ID_NONE != MSI_PendingMSResponseList[i].Id) &&
         (-1 != MSI_PendingMSResponseList[i].Timeout) )
     {
-      MSI_PendingMSResponseList[i].Timeout -= TimeElapsed;
+      MSI_PendingMSResponseList[i].Timeout -= timeElapsed;
       //If the timeout has elapsed, remove it from the expected responses
       //and call the callback with a Timeout status.
       if(MSI_PendingMSResponseList[i].Timeout < 0)
       {
-        Id = MSI_PendingMSResponseList[i].Id;
-        RspFunc = MSI_FindAndRemovePendingRsp(Id,
+        id = MSI_PendingMSResponseList[i].Id;
+        rspFunc = MSI_FindAndRemovePendingRsp(id,
                                              MSI_PendingMSResponseList[i].Seq);
-        if(RspFunc != NULL)
+        if(rspFunc != NULL)
         {
-          RspFunc(Id,
+          rspFunc(id,
                   NULL,
                   0,
                   MSI_RSP_TIMEOUT);
@@ -692,7 +694,7 @@ void MSI_CheckMsgTimeouts(void)
     }
   }
 
-  TimeLast = CM_GetTickCount();
+  timeLast = CM_GetTickCount();
 }
 
 
@@ -713,38 +715,38 @@ void MSI_CheckMsgTimeouts(void)
  *****************************************************************************/
 void MSI_CheckDPRAM(void)
 {
-  static UINT32 TxCntLast;
-  static UINT32 TimeElapsed;
-  static UINT32 TimeLast;
-  UINT32 TxCnt;
-  UINT32 TimeNow;
-  BOOLEAN MsgPending;
+  static UINT32 txCntLast = 0;
+  static UINT32 timeElapsed;
+  static UINT32 timeLast = 0;
+  UINT32 txCnt;
+  UINT32 timeNow;
+  BOOLEAN msgPending;
 
-  TimeNow = CM_GetTickCount();
+  timeNow = CM_GetTickCount();
 
-  TimeElapsed +=  TimeNow - TimeLast;
+  timeElapsed +=  timeNow - timeLast;
 
-  DPRAM_GetTxInfo(&TxCnt,&MsgPending);
+  DPRAM_GetTxInfo(&txCnt,&msgPending);
 
   //If a message is waiting and the message count is not changing, examine the timeout
-  if( MsgPending && (TxCnt == TxCntLast))
+  if( msgPending && (txCnt == txCntLast))
   {
-    if( TimeElapsed > MSI_MSG_IN_DPRAM_TIMEOUT_mS)
+    if( timeElapsed > MSI_MSG_IN_DPRAM_TIMEOUT_mS)
     {
       m_MSIntSvcTimeout = TRUE;
       DPRAM_KickMS();
       GSE_DebugStr(VERBOSE,TRUE,"MSI: Issued repeat interrupt to MS");
-      TimeElapsed = 0;
+      timeElapsed = 0;
     }
   }
   //else, everything is moving along, reset the timeout.
   else
   {
-    TimeElapsed = 0;
+    timeElapsed = 0;
     m_MSIntSvcTimeout = FALSE;
   }
-  TxCntLast = TxCnt;
-  TimeLast = TimeNow;
+  txCntLast = txCnt;
+  timeLast  = timeNow;
 }
 
 
@@ -941,6 +943,11 @@ RESULT MSI_ValidatePacket(const MSCP_CMDRSP_PACKET* Packet, UINT32 SizeRead)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSInterface.c $
+ * 
+ * *****************  Version 71  *****************
+ * User: John Omalley Date: 1/22/15    Time: 9:20a
+ * Updated in $/software/control processor/code/system
+ * SCR 1262 - Code Review Updates
  * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 11/11/14   Time: 5:17p

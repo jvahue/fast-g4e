@@ -1,15 +1,16 @@
 #define VERSION_BODY
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
+  
+  ECCN:        9D991
 
   File:        Version.c
- 
  
   Description: Product Name and Build Version and Date strings.
  
     VERSION
-      $Revision: 44 $  $Date: 12/15/14 2:30p $
+      $Revision: 45 $  $Date: 1/21/15 1:48p $
     
 ******************************************************************************/
 
@@ -138,6 +139,10 @@ BOOLEAN Ver_CheckVerAndDateMatch(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.c $
+ * 
+ * *****************  Version 45  *****************
+ * User: John Omalley Date: 1/21/15    Time: 1:48p
+ * Updated in $/software/control processor/code/drivers
  * 
  * *****************  Version 44  *****************
  * User: John Omalley Date: 12/15/14   Time: 2:30p
