@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 186 $  $Date: 1/14/15 10:31a $
+   $Revision: 187 $  $Date: 1/21/15 1:10p $
 
 ******************************************************************************/
 
@@ -98,6 +98,7 @@ typedef struct
   LOG_BUF LogBuf;
   LOG_REQ_STATUS  LogEraseStatus;
   UPLOADMGR_FILE_HEADER FileHeader;
+  UINT32  logUploadCnt;
   UINT32  FileFailCnt;
   UINT32  FileUploadedCnt;
   UINT32  FileNotUploadedCnt;
@@ -1391,6 +1392,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //a new file is being started
             if(pTask->FileHeader.log_cnt == 0)
             {
+              pTask->logUploadCnt = 0;
               GSE_StatusStr(NORMAL,"\r\n");
               GSE_DebugStr(NORMAL,TRUE,"UploadMgr: Calculating log file header...");
               //Start timer display
@@ -1419,14 +1421,15 @@ void UploadMgr_FileCollectionTask(void *pParam)
               pTask->FileHeader.check_sum += ChecksumBuffer( pTask->LogBuf,
                                                            pTask->LogSize,
                                                            0xFFFFFFFF );
-
+              pTask->logUploadCnt += 1;
+              
               if(LOG_TYPE_ETM != UploadOrderTbl[pTask->UploadOrderIdx].Type)
               {
                 pTask->FileHeader.log_cnt += 1;
               }
               else // This is an ETM LOG; check if Time History
               {
-                if(APP_ID_TIMEHISTORY_ETM_LOG == ((SYSTEM_LOG*)pTask->LogBuf)->source )
+                if(APP_ID_TIMEHISTORY_ETM_LOG == ((SYS_LOG_HEADER*)pTask->LogBuf)->nID )
                 {
                   // Determine the number of TH logs and increment count...
                   // Divde the total size of the data read by the size of a
@@ -1479,13 +1482,16 @@ void UploadMgr_FileCollectionTask(void *pParam)
         pTask->FileHeader.check_sum += ChecksumBuffer( pTask->LogBuf,
                                                      pTask->LogSize,
                                                      0xFFFFFFFF );
+        
+        pTask->logUploadCnt += 1;
+        
         if (LOG_TYPE_ETM != UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
           pTask->FileHeader.log_cnt += 1;
         }
         else // ETM LOG; Check if Time History
         {
-          if(APP_ID_TIMEHISTORY_ETM_LOG == ((SYSTEM_LOG*)pTask->LogBuf)->source )
+          if(APP_ID_TIMEHISTORY_ETM_LOG == ((SYS_LOG_HEADER*)pTask->LogBuf)->nID )
           {
             // Determine the number of TH logs and increment count...
             // Divde the total size of the data read by the size of a
@@ -1512,7 +1518,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
 
     case LOG_COLLECTION_START_LOG_UPLOAD:
       //If no logs were collected for this file, move onto the next file
-      if(0 == pTask->FileHeader.log_cnt)
+      if(0 == pTask->logUploadCnt)
       {
         pTask->State = LOG_COLLECTION_NEXTFILE;
       }
@@ -1651,7 +1657,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
                 //Ensure the number of logs in this file is the same as indicated
                 //in the header.  If a log is written while uploading, this will
                 //ensure it is put in a different file.
-                if(--pTask->FileHeader.log_cnt != 0)
+                if(--pTask->logUploadCnt != 0)
                 {
                   pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
                 }
@@ -1717,7 +1723,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
             //Ensure the number of logs in this file is the same as indicated
             //in the header.  If a log is written while uploading, this will
             //ensure it is put in a different file.
-            if(--pTask->FileHeader.log_cnt != 0)
+            if(--pTask->logUploadCnt != 0)
             {
               pTask->State = LOG_COLLECTION_UPLOAD_FIND_LOG;
             }
@@ -3547,6 +3553,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 187  *****************
+ * User: John Omalley Date: 1/21/15    Time: 1:10p
+ * Updated in $/software/control processor/code/application
+ * SCR 1253 - ModFix because the ETM log check was using the wrong field.
  * 
  * *****************  Version 186  *****************
  * User: John Omalley Date: 1/14/15    Time: 10:31a

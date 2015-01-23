@@ -1,15 +1,17 @@
 #ifndef TASK_MANAGER_H
 #define TASK_MANAGER_H
 /******************************************************************************
-         Copyright (C) 2003-2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2003-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        TaskManager.h
 
   Description: Task Manager definitions.
 
   VERSION
-     $Revision: 71 $  $Date: 1/13/15 6:16p $
+     $Revision: 72 $  $Date: 1/22/15 9:35a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -308,9 +310,9 @@ typedef struct
     MIF_DUTY_CYCLE mifDc[MAX_MIF+1];                 // MIF duty cycle info
     UINT32         nMifPeriod;                       // Measured MIF period in uSec
     UINT32         nMifCount;
-    INT32          perfTask;                         // Task whose perf is being collected -1 == inactive
-    UINT32         nPerfCount;                       // The count of elements in use in perfData
-    TM_PERF_DATA   perfData[MAX_PERF_MIFS];          // Array of perf data collected for the task
+    INT32          perfTask;               // Task whose perf is being collected -1 == inactive
+    UINT32         nPerfCount;                      // The count of elements in use in perfData
+    TM_PERF_DATA   perfData[MAX_PERF_MIFS];        // Array of perf data collected for the task
 } TM_DATA;
 
 #pragma pack(1)
@@ -397,6 +399,11 @@ EXPORT TASK_INDEX TmGetTaskId             (char* name);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.h $
+ * 
+ * *****************  Version 72  *****************
+ * User: John Omalley Date: 1/22/15    Time: 9:35a
+ * Updated in $/software/control processor/code/system
+ * SCR 1192 - Code Review Update
  * 
  * *****************  Version 71  *****************
  * User: Contractor V&v Date: 1/13/15    Time: 6:16p
