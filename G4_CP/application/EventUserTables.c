@@ -8,7 +8,7 @@
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 41 $  $Date: 12/05/14 4:29p $
+$Revision: 42 $  $Date: 1/23/15 7:53p $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -25,7 +25,7 @@ $Revision: 41 $  $Date: 12/05/14 4:29p $
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define DATE_TIME_STR_LEN 32 //More than enough for "yyyy/mm/dd hh:mm:ss[.mmm]" 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -1372,7 +1372,7 @@ USER_HANDLER_RESULT Event_DisplayBuff(USER_DATA_TYPE DataType,
                                           void **GetPtr)
 {
   TIMESTRUCT ts;
-  CHAR         timeStr[80];
+  CHAR         timeStr[DATE_TIME_STR_LEN];
   CHAR         regionStr[USER_MAX_MSG_STR_LEN];
   CHAR         tempStr[USER_MAX_MSG_STR_LEN * 4];
   static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
@@ -1501,12 +1501,12 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
                                          void **GetPtr)
 {
   TIMESTRUCT  ts;
-  static CHAR timeStr[32];
+  static CHAR timeStr[DATE_TIME_STR_LEN];
 
   CM_ConvertTimeStamptoTimeStruct( &m_EventHistory.tsLastCleared, &ts);
 
   // Convert the last-cleared timestamp to string
-  snprintf( timeStr, sizeof(timeStr), "%4d/%02d/%02d %02d:%02d:%02d",
+  snprintf( timeStr, sizeof(timeStr), "%04d/%02d/%02d %02d:%02d:%02d",
                                            ts.Year, ts.Month,  ts.Day,
                                            ts.Hour, ts.Minute, ts.Second );
   // Set the passed pointer to our static string buffer.
@@ -1517,6 +1517,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 42  *****************
+ * User: Contractor V&v Date: 1/23/15    Time: 7:53p
+ * Updated in $/software/control processor/code/application
+ * SCR #1188/1249 - Code Review compliance update
  * 
  * *****************  Version 41  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:29p
