@@ -1,8 +1,10 @@
 #define FAULTMGR_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2010 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        FaultMgr.c
 
@@ -10,7 +12,7 @@
                  and the debug verbosity.
 
     VERSION
-      $Revision: 60 $  $Date: 10/01/14 3:25p $
+      $Revision: 61 $  $Date: 1/23/15 3:59p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -632,6 +634,11 @@ static void Flt_LogSysStatus(SYS_APP_ID LogID, FLT_STATUS Status, FLT_STATUS pre
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FaultMgr.c $
+ * 
+ * *****************  Version 61  *****************
+ * User: John Omalley Date: 1/23/15    Time: 3:59p
+ * Updated in $/software/control processor/code/system
+ * SCR 1262 - Code Review Updates
  * 
  * *****************  Version 60  *****************
  * User: Contractor V&v Date: 10/01/14   Time: 3:25p

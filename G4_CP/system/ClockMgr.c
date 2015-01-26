@@ -17,7 +17,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 53 $  $Date: 12/02/14 2:26p $
+     $Revision: 54 $  $Date: 1/23/15 7:53p $
 
 ******************************************************************************/
 
@@ -130,7 +130,7 @@ static const UINT8    DaysPerMonth [] =    {29, //Feb leap year
                                             30, //Nov
                                             31};//Dec
 
-static char gse_OutLine[512];
+static CHAR gse_OutLine[512];
 
 
 /*****************************************************************************/
@@ -1110,7 +1110,6 @@ void CM_TimeSourceSyncToRemote ( TIMESTRUCT cm_time_struct )
         CM_SetRTCClock( &mssc_TimeStruct, TRUE );
       }
     }
-    // else TBD indicate that ms time is "suspect"
 
   } // End of MSSC_GetIsAlive()
 
@@ -1147,7 +1146,7 @@ void CM_CreateClockUpdateLog( SYS_APP_ID SysId, TIMESTRUCT *currTime,
 /*****************************************************************************
  * Function:    CM_UpdateRecordingState
  *
- * Description: Updates local variable m_nRecRefCnt when FAST recording state
+ * Description: Updates global variable m_nRecRefCnt when FAST recording state
  *              changes. ClockMgr uses this to control whether to allow a
  *              clock sync to MS to occur. Sync is not allowed while
  *              recording/ downloading.
@@ -1177,6 +1176,11 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 54  *****************
+ * User: Contractor V&v Date: 1/23/15    Time: 7:53p
+ * Updated in $/software/control processor/code/system
+ * SCR #1164 - Code Review compliance update
  * 
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 12/02/14   Time: 2:26p
