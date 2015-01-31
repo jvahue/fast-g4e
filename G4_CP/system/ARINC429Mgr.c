@@ -3,13 +3,15 @@
             Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:         9D991
+
     File:         Arinc429Mgr.c
 
     Description:  Contains all functions and data related to Managing the
                   data received on ARINC429.
 
 VERSION
-     $Revision: 62 $  $Date: 1/19/15 11:02a $
+     $Revision: 63 $  $Date: 1/29/15 4:51p $
 
 ******************************************************************************/
 
@@ -68,7 +70,7 @@ static const UINT8 FailureCondition[END_OF_FAIL_COUNT] =
   ARINC_BNR_SSM_NORM_v       // 0x60 MSB - SSM BNR Normal Op Data value
 };
 
-static char GSE_OutLine[512];
+static CHAR GSE_OutLine[512];
 
 /*****************************************************************************/
 /* Include the cmd table & functions                                         */
@@ -83,7 +85,7 @@ static char GSE_OutLine[512];
 // Note: Failure Condition Array ordering is directly related to the
 //         bit ordering in Arinc429Filter->ValidSSM. Which is
 //         directly defined in ARINC_FAIL_COUNT enum.
-const char *Arinc429_ErrMsg[END_OF_FAIL_COUNT+1] =
+const CHAR *Arinc429_ErrMsg[END_OF_FAIL_COUNT+1] =
 {
   // [0] SSM_FAIL
   "Xcptn: SSM Fail 00",
@@ -193,11 +195,11 @@ static void   Arinc429MgrParseGPA_GPB                 ( UINT32 GPA, UINT32 GPB,
                                                         ARINC429_WORD_INFO_PTR pWordInfo );
 
 static SINT32 Arinc429MgrParseMsg                     ( UINT32 Arinc429Msg,
-                                                    ARINC_FORM Format,
+                                                        ARINC_FORM Format,
                                                         UINT8  Position,
-                            UINT8 Size,
+                                                        UINT8  Size,
                                                         UINT32 Chan,
-                            BOOLEAN *pWordValid );
+                                                        BOOLEAN *pWordValid );
 
 static SINT32 Arinc429MgrParseBCD                     ( UINT32 raw,  UINT32  Chan,
                                                         UINT8  Size, BOOLEAN *pWordValid );
@@ -221,9 +223,9 @@ static BOOLEAN Arinc429MgrDataReduction               ( ARINC429_RX_CFG_PTR     
                                                         ARINC_SDI               sdi,
                                                         ARINC429_RECORD_PTR     pDataRecord );
 
-static BOOLEAN Arinc429MgrProcPW305ABEngineMFD      ( MFD_DATA_TABLE_PTR   pMFDTable,
-                                                         UINT32               *pArincMsg,
-                                                         UINT8                Label );
+static BOOLEAN Arinc429MgrProcPW305ABEngineMFD       ( MFD_DATA_TABLE_PTR   pMFDTable,
+                                                       UINT32               *pArincMsg,
+                                                       UINT8                Label );
 
 static void    Arinc429MgrChkPW305AB_MFDTimeout        ( ARINC429_CHAN_DATA_PTR pChanData,
                                                         ARINC429_RAW_RX_BUFFER_PTR pRxBuffer );
@@ -266,9 +268,9 @@ static UINT16 Arinc429MgrReadReduceSnapshot            ( ARINC429_SNAPSHOT_RECOR
                                                          ARINC429_RX_CFG_PTR pCfg,
                                                          BOOLEAN bStartSnap );
 static UINT16 Arinc429MgrGetReduceHdr                  ( INT8 *pDest,
-                                                     UINT32 chan,
+                                                         UINT32 chan,
                                                          UINT16 nMaxByteSize,
-                             UINT16 *pNumParams );
+                                                         UINT16 *pNumParams );
 
 // Shutdown
 void Arinc429MgrProcMsgsTaskShutdown(void);
@@ -3148,7 +3150,7 @@ void Arinc429MgrDetermineSSMFailure ( UINT32 *pFailCount, UINT8 TotalTests, char
 
    // If the MaxCount is still zero then the label is not being
    // transmitted.  FailIndex == END_OF_FAIL_COUNT.
-   snprintf ( pMsg, sizeof(Arinc429_ErrMsg), "%s", Arinc429_ErrMsg[FailIndex] );
+   snprintf ( pMsg, sizeof(Arinc429_ErrMsg[FailIndex]), "%s", Arinc429_ErrMsg[FailIndex] );
 }
 
 /*****************************************************************************/
@@ -3714,6 +3716,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 63  *****************
+ * User: John Omalley Date: 1/29/15    Time: 4:51p
+ * Updated in $/software/control processor/code/system
+ * SCR 1261 - Code Review Update
  * 
  * *****************  Version 62  *****************
  * User: John Omalley Date: 1/19/15    Time: 11:02a

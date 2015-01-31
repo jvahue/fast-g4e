@@ -1,14 +1,16 @@
 #define QAR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        QARUserTables.c
 
     Description: User commands definition for QAR Manager
 
     VERSION
-    $Revision: 42 $  $Date: 9/03/14 5:27p $
+    $Revision: 43 $  $Date: 1/28/15 5:40p $
 
 ******************************************************************************/
 #ifndef QAR_MANAGER_BODY
@@ -58,17 +60,19 @@ typedef enum {
 /*****************************************************************************/
 //Prototypes for the User Manager message handlers, has to go before
 //the local variable tables that use the function pointer.
-
+static
 USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr);
+static
 USER_HANDLER_RESULT QARMsg_State(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr);
+static
 USER_HANDLER_RESULT QARMsg_State_SubFrameOk(USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
                                             UINT32 Index,
@@ -81,28 +85,28 @@ USER_HANDLER_RESULT QARMsg_State_DebugCntl(USER_DATA_TYPE DataType,
                                            const void *SetPtr,
                                            void **GetPtr);
 */
+static
 USER_HANDLER_RESULT QARMsg_Cfg(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr);
+static
 USER_HANDLER_RESULT QARMsg_CfgBarker(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr);
-USER_HANDLER_RESULT QARMsg_Reconfigure(USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr);
+
 #ifdef GENERATE_SYS_LOGS
+static
 USER_HANDLER_RESULT QARMsg_CreateLogs(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
                                       const void *SetPtr,
                                       void **GetPtr);
 #endif
+static
 USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
@@ -112,20 +116,21 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-QAR_STATE QAR_StateTemp;
-QAR_CONFIGURATION QAR_CfgTemp;
+static QAR_STATE m_QAR_StateTemp;
+static QAR_CONFIGURATION m_QAR_CfgTemp;
 
 
-QAR_REGISTERS QAR_register;
-UINT16 QarRegData;
+static QAR_REGISTERS m_QAR_register;
+static UINT16 nQarRegData;
 
-USER_ENUM_TBL FormatStrs[] =
+
+static USER_ENUM_TBL formatStrs[] =
 {
   {"BIPOLAR_RETURN_ZERO",QAR_BIPOLAR_RETURN_ZERO},
   {"HARVARD_BIPHASE",QAR_HARVARD_BIPHASE},
   {NULL,0}
 };
-USER_ENUM_TBL NumWordsStrs[] =
+static USER_ENUM_TBL numWordsStrs[] =
 {
   {"64_WORDS",QAR_64_WORDS},
   {"128_WORDS",QAR_128_WORDS},
@@ -134,19 +139,19 @@ USER_ENUM_TBL NumWordsStrs[] =
   {"1024_WORDS",QAR_1024_WORDS},
   {NULL,0}
 };
-USER_ENUM_TBL ResyncStrs[] =
+static USER_ENUM_TBL resyncStrs[] =
 {
   {"NORMAL_OPERATION",QAR_NORMAL_OPERATION},
   {"FORCE_REFRAME",QAR_FORCE_REFRAME},
   {NULL,0}
 };
-USER_ENUM_TBL SyncStatusStrs[] =
+static USER_ENUM_TBL syncStatusStrs[] =
 {
   {"FRAME_INVALID",QAR_FRAME_INVALID},
   {"FRAME_SYNC",QAR_FRAME_SYNC},
   {NULL,0}
 };
-USER_ENUM_TBL SFStrs[] =
+static USER_ENUM_TBL sfStrs[] =
 {
   {"SF1",QAR_SF1},
   {"SF2",QAR_SF2},
@@ -154,14 +159,14 @@ USER_ENUM_TBL SFStrs[] =
   {"SF4",QAR_SF4},
   {NULL,0}
 };
-USER_ENUM_TBL SFStateStrs[] =
+static USER_ENUM_TBL sfStateStrs[] =
 {
   {"NO_STATE",QAR_NO_STATE},
   {"SYNCD",QAR_SYNCD},
   {"LOSF",QAR_LOSF},
   {NULL,0}
 };
-USER_ENUM_TBL OutputStrs[] =
+static USER_ENUM_TBL outputStrs[] =
 {
 //{"ASCII",QAR_UART1_ASCII},
 //{"BINARY",QAR_UART1_BINARY},
@@ -170,7 +175,7 @@ USER_ENUM_TBL OutputStrs[] =
   {NULL,0}
 };
 
-USER_ENUM_TBL QarSysStatusStrs[] =
+static USER_ENUM_TBL qarSysStatusStrs[] =
 {
   {"OK",QAR_STATUS_OK},
   {"FAULTED_PBIT",QAR_STATUS_FAULTED_PBIT},
@@ -180,59 +185,57 @@ USER_ENUM_TBL QarSysStatusStrs[] =
   {NULL,0}
 };
 
-
-
-static USER_MSG_TBL QarStatusTbl [] =
+static USER_MSG_TBL qarStatusTbl [] =
 {/* Str                     Next Tbl Ptr    Handler Func.            Data Type           Access    Parameter                             IndexRange   DataLimit  EnumTbl*/
-  {"CURRENT_FRAME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.CurrentFrame           ,-1,-1      ,NO_LIMIT  ,SFStrs},
-  {"PREVIOUS_FRAME"         ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.PreviousFrame          ,-1,-1      ,NO_LIMIT  ,SFStrs},
-  {"LAST_SERVICED"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.LastServiced           ,-1,-1      ,NO_LIMIT  ,SFStrs},
-  {"TOTAL_WORDS"            ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT16   ,USER_RO  ,&QAR_StateTemp.TotalWords             ,-1,-1      ,NO_LIMIT  ,SFStrs},
-  {"LOSS_OF_FRAME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.LossOfFrame            ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"LOSS_OF_FRAME_CNT"      ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.LossOfFrameCount       ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"CURRENT_FRAME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.currentFrame           ,-1,-1      ,NO_LIMIT  ,sfStrs},
+  {"PREVIOUS_FRAME"         ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.previousFrame          ,-1,-1      ,NO_LIMIT  ,sfStrs},
+  {"LAST_SERVICED"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.lastServiced           ,-1,-1      ,NO_LIMIT  ,sfStrs},
+  {"TOTAL_WORDS"            ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT16   ,USER_RO  ,&m_QAR_StateTemp.totalWords             ,-1,-1      ,NO_LIMIT  ,sfStrs},
+  {"LOSS_OF_FRAME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.lossOfFrame            ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"LOSS_OF_FRAME_CNT"      ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.lossOfFrameCount       ,-1,-1      ,NO_LIMIT  ,NULL},
   // New P Lee 04/02/2008
-  {"BARKER_ERROR"           ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.BarkerError            ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"BARKER_ERROR_CNT"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.BarkerErrorCount       ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"BARKER_ERROR"           ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.barkerError            ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"BARKER_ERROR_CNT"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.barkerErrorCount       ,-1,-1      ,NO_LIMIT  ,NULL},
   // New P Lee 04/02/2008
-  {"FRAME_SYNC"             ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.FrameSync              ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"FRAME_STATE"            ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.FrameState             ,-1,-1      ,NO_LIMIT  ,SFStateStrs},
-  {"DATA_PRESENT"           ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.DataPresent            ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"DATA_PRES_LOST_CNT"     ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.DataPresentLostCount   ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"FRAME_SYNC"             ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.frameSync              ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"FRAME_STATE"            ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.frameState             ,-1,-1      ,NO_LIMIT  ,sfStateStrs},
+  {"DATA_PRESENT"           ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.dataPresent            ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"DATA_PRES_LOST_CNT"     ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.dataPresentLostCount   ,-1,-1      ,NO_LIMIT  ,NULL},
   // New P Lee 04/02/2008
-  {"PREVIOUS_SUBFRAME_OK"   ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.PreviousSubFrameOk     ,-1,-1      ,NO_LIMIT  ,SFStrs},
-  {"LAST_INT_TIME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.LastIntTime            ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"BAD_INT_FREQ_CNT"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.BadIntFreqCnt          ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"SUBFRAME_OK"            ,NO_NEXT_TABLE ,QARMsg_State_SubFrameOk ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.bSubFrameOk[0]         , 0, 3      ,NO_LIMIT  ,NULL},
-  {"QARENABLE"              ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.bQAREnable             ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"LASTACTIVITYTIME"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.LastActivityTime       ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"CHANNELSTARTUP_TIMEOUT" ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.bChannelStartupTimeOut ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"CHANNEL_TIMEOUT"        ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&QAR_StateTemp.bChannelTimeOut        ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"INTERRUPT_CNT"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.InterruptCnt           ,-1,-1      ,NO_LIMIT  ,NULL},
-  {"INTERRUPT_CNT_LOFS"     ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&QAR_StateTemp.InterruptCntLOFS       ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"PREVIOUS_SUBFRAME_OK"   ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.previousSubFrameOk     ,-1,-1      ,NO_LIMIT  ,sfStrs},
+  {"LAST_INT_TIME"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.lastIntTime            ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"BAD_INT_FREQ_CNT"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.badIntFreqCnt          ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"SUBFRAME_OK"            ,NO_NEXT_TABLE ,QARMsg_State_SubFrameOk ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.bSubFrameOk[0]         , 0, 3      ,NO_LIMIT  ,NULL},
+  {"QARENABLE"              ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.bQAREnable             ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"LASTACTIVITYTIME"       ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.lastActivityTime       ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"CHANNELSTARTUP_TIMEOUT" ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.bChannelStartupTimeOut ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"CHANNEL_TIMEOUT"        ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_BOOLEAN  ,USER_RO  ,&m_QAR_StateTemp.bChannelTimeOut        ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"INTERRUPT_CNT"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.interruptCnt           ,-1,-1      ,NO_LIMIT  ,NULL},
+  {"INTERRUPT_CNT_LOFS"     ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_UINT32   ,USER_RO  ,&m_QAR_StateTemp.interruptCntLOFS       ,-1,-1      ,NO_LIMIT  ,NULL},
   // New P Lee 04/02/2008
-  {"SYSTEM_STATUS"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&QAR_StateTemp.SystemStatus           ,-1,-1      ,NO_LIMIT  ,QarSysStatusStrs},
+  {"SYSTEM_STATUS"          ,NO_NEXT_TABLE ,QARMsg_State            ,USER_TYPE_ENUM     ,USER_RO  ,&m_QAR_StateTemp.systemStatus           ,-1,-1      ,NO_LIMIT  ,qarSysStatusStrs},
 
   {NULL                     ,NULL          ,NULL                    ,NO_HANDLER_DATA}
 };
-static USER_MSG_TBL QarCfgTbl [] =
+static USER_MSG_TBL qarCfgTbl [] =
 {/* Str                Next Tbl Ptr   Handler Func.     Data Type          Access    Parameter                       IndexRange  DataLimit       EnumTbl*/
-  {"NAME"             ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_STR     ,USER_RW  ,&QAR_CfgTemp.Name             ,-1,-1      ,0,QAR_MAX_NAME ,NULL},
-  {"FORMAT"           ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&QAR_CfgTemp.Format           ,-1,-1      ,NO_LIMIT       ,FormatStrs},
-  {"NUMWORDS"         ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&QAR_CfgTemp.NumWords         ,-1,-1      ,NO_LIMIT       ,NumWordsStrs},
-  {"BARKER"           ,NO_NEXT_TABLE ,QARMsg_CfgBarker ,USER_TYPE_HEX16   ,USER_RW  ,&QAR_CfgTemp.BarkerCode[0]    , 0, 3      ,0,0xFFF        ,NULL},
+  {"NAME"             ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_STR     ,USER_RW  ,&m_QAR_CfgTemp.name             ,-1,-1      ,0,QAR_MAX_NAME ,NULL},
+  {"FORMAT"           ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&m_QAR_CfgTemp.format           ,-1,-1      ,NO_LIMIT       ,formatStrs},
+  {"NUMWORDS"         ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&m_QAR_CfgTemp.numWords         ,-1,-1      ,NO_LIMIT       ,numWordsStrs},
+  {"BARKER"           ,NO_NEXT_TABLE ,QARMsg_CfgBarker ,USER_TYPE_HEX16   ,USER_RW  ,&m_QAR_CfgTemp.barkerCode[0]    , 0, 3      ,0,0xFFF        ,NULL},
   // New P Lee 04/02/2008
-  {"CHANNELSTARTUP_S" ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_UINT32  ,USER_RW  ,&QAR_CfgTemp.ChannelStartup_s ,-1,-1      ,NO_LIMIT       ,NULL},
-  {"CHANNELTIMEOUT_S" ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_UINT32  ,USER_RW  ,&QAR_CfgTemp.ChannelTimeOut_s ,-1,-1      ,NO_LIMIT       ,NULL},
-  {"CHANNELSYSCOND"   ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&QAR_CfgTemp.ChannelSysCond   ,-1,-1      ,NO_LIMIT       ,Flt_UserEnumStatus},
-  {"PBITSYSCOND"      ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&QAR_CfgTemp.PBITSysCond      ,-1,-1      ,NO_LIMIT       ,Flt_UserEnumStatus},
+  {"CHANNELSTARTUP_S" ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_UINT32  ,USER_RW  ,&m_QAR_CfgTemp.channelStartup_s ,-1,-1      ,NO_LIMIT       ,NULL},
+  {"CHANNELTIMEOUT_S" ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_UINT32  ,USER_RW  ,&m_QAR_CfgTemp.channelTimeOut_s ,-1,-1      ,NO_LIMIT       ,NULL},
+  {"CHANNELSYSCOND"   ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&m_QAR_CfgTemp.channelSysCond   ,-1,-1      ,NO_LIMIT       ,Flt_UserEnumStatus},
+  {"PBITSYSCOND"      ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_ENUM    ,USER_RW  ,&m_QAR_CfgTemp.pBITSysCond      ,-1,-1      ,NO_LIMIT       ,Flt_UserEnumStatus},
   // New P Lee 04/02/2008
   // New P Lee 11/18/2008
-  {"ENABLE"           ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_BOOLEAN ,USER_RW  ,&QAR_CfgTemp.Enable           ,-1,-1      ,NO_LIMIT       ,NULL},
+  {"ENABLE"           ,NO_NEXT_TABLE ,QARMsg_Cfg       ,USER_TYPE_BOOLEAN ,USER_RW  ,&m_QAR_CfgTemp.enable           ,-1,-1      ,NO_LIMIT       ,NULL},
   // New P Lee 11/18/2008
   {NULL               ,NULL          ,NULL             ,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL QarRegisterControlTbl[] =
+static USER_MSG_TBL qarRegisterControlTbl[] =
 {/* Str        Next Tbl Ptr    Handler Func.     Data Type          Access    Parameter                IndexRange  DataLimit   EnumTbl*/
   {"TSTP"     ,NO_NEXT_TABLE  ,QARMsg_Register,  USER_TYPE_HEX16  ,USER_RO  ,(void*)QAR_REG_TSTP      ,-1,-1      ,NO_LIMIT   ,NULL},
   {"TSTN"     ,NO_NEXT_TABLE  ,QARMsg_Register,  USER_TYPE_HEX16  ,USER_RO  ,(void*)QAR_REG_TSTN      ,-1,-1      ,NO_LIMIT   ,NULL},
@@ -243,7 +246,7 @@ static USER_MSG_TBL QarRegisterControlTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL QarRegisterStatusTbl[] =
+static USER_MSG_TBL qarRegisterStatusTbl[] =
 {/* Str            Next Tbl Ptr      Handler Func.       Data Type         Access    Parameter                    IndexRange  DataLimit  EnumTbl*/
   {"BIIP",         NO_NEXT_TABLE,    QARMsg_Register,  USER_TYPE_HEX16,  USER_RO,  (void*)QAR_REG_BIPP,           -1,-1,      NO_LIMIT,  NULL},
   {"BIIN",         NO_NEXT_TABLE,    QARMsg_Register,  USER_TYPE_HEX16,  USER_RO,  (void*)QAR_REG_BIIN,           -1,-1,      NO_LIMIT,  NULL},
@@ -254,21 +257,20 @@ static USER_MSG_TBL QarRegisterStatusTbl[] =
   {"DATA_PRESENT", NO_NEXT_TABLE,    QARMsg_Register,  USER_TYPE_HEX16,  USER_RO,  (void*)QAR_REG_DATA_PRESENT,   -1,-1,      NO_LIMIT,  NULL},
   {NULL,           NULL,             NULL,             NO_HANDLER_DATA}
 };
-USER_MSG_TBL QarRegisterTbl[] =
+static USER_MSG_TBL qarRegisterTbl[] =
 {/* Str         Next Tbl Ptr           Handler Func.       Data Type         Access    Parameter              IndexRange  DataLimit  EnumTbl*/
-  {"CONTROL",   QarRegisterControlTbl, NULL,               NO_HANDLER_DATA},
-  {"STATUS",    QarRegisterStatusTbl,  NULL,               NO_HANDLER_DATA},
+  {"CONTROL",   qarRegisterControlTbl, NULL,               NO_HANDLER_DATA},
+  {"STATUS",    qarRegisterStatusTbl,  NULL,               NO_HANDLER_DATA},
   {"BARKER",    NO_NEXT_TABLE,         QARMsg_Register,    USER_TYPE_HEX16,  USER_RO,  (void*)QAR_REG_BARKER, 0,3,        NO_LIMIT,  NULL},
   { NULL,       NULL,                  NULL,               NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL QarRoot[] =
+static USER_MSG_TBL qarRoot[] =
 {/* Str            Next Tbl Ptr   Handler Func.         Data Type         Access                         Parameter   IndexRange  DataLimit  EnumTbl*/
-  {"REGISTER",     QarRegisterTbl,NULL,                 NO_HANDLER_DATA},
-  {"STATUS",       QarStatusTbl,  NULL,                 NO_HANDLER_DATA},
-  {"CFG",          QarCfgTbl,     NULL,                 NO_HANDLER_DATA},
-  {"RECONFIGURE",  NO_NEXT_TABLE, QARMsg_Reconfigure  , USER_TYPE_ACTION, USER_RO,                        NULL,       -1,-1,     NO_LIMIT, NULL},
-  {"OUTPUT"     ,  NO_NEXT_TABLE ,User_GenericAccessor, USER_TYPE_ENUM  , USER_RW  ,&m_QarOutputType,    -1,-1        ,NO_LIMIT ,OutputStrs},
+  {"REGISTER",     qarRegisterTbl,NULL,                 NO_HANDLER_DATA},
+  {"STATUS",       qarStatusTbl,  NULL,                 NO_HANDLER_DATA},
+  {"CFG",          qarCfgTbl,     NULL,                 NO_HANDLER_DATA},
+  {"OUTPUT"     ,  NO_NEXT_TABLE ,User_GenericAccessor, USER_TYPE_ENUM  , USER_RW  ,&m_QarOutputType,    -1,-1        ,NO_LIMIT ,outputStrs},
 #ifdef GENERATE_SYS_LOGS
   {"CREATELOGS",   NO_NEXT_TABLE, QARMsg_CreateLogs,  USER_TYPE_ACTION, USER_RO,                          NULL,       -1,-1,     NO_LIMIT, NULL},
 #endif
@@ -276,7 +278,7 @@ static USER_MSG_TBL QarRoot[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL QarRootTblPtr = {"QAR",QarRoot,NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL QarRootTblPtr = {"QAR",qarRoot,NULL,NO_HANDLER_DATA};
 
 
 
@@ -309,13 +311,14 @@ static USER_MSG_TBL QarRootTblPtr = {"QAR",QarRoot,NULL,NO_HANDLER_DATA};
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr)
 {
-  QAR_GetRegisters( &QAR_register);
+  QAR_GetRegisters( &m_QAR_register);
 
   switch(Param.Int)
   {
@@ -323,66 +326,68 @@ USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
     //       bit fields is not allowed, which limits a "cleaner" implementation.
 
     case QAR_REG_TSTP:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_TSTP);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_TSTP);
       break;
 
     case QAR_REG_TSTN:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_TSTN);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_TSTN);
       break;
 
     case QAR_REG_EN:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_ENABLE);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_ENABLE);
       break;
 
     case QAR_REG_FORMAT:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_FORMAT);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_FORMAT);
       break;
 
     case QAR_REG_NUMWORDS:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_NUM_WORDS);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_NUM_WORDS);
       break;
 
     case QAR_REG_RESYNC:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Control, C_RESYNC);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.control, C_RESYNC);
       break;
 
     case QAR_REG_BIPP:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_BIIP);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_BIIP);
       break;
 
     case QAR_REG_BIIN:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_BIIN);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_BIIN);
       break;
 
     case QAR_REG_SUBFRAME:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_SUBFRAME);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_SUBFRAME);
       break;
 
     case QAR_REG_LOSSOFFRAMESYNC:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_LOST_SYNC);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_LOST_SYNC);
       break;
 
     case QAR_REG_FRAMEVALID:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_FRAME_VALID);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_FRAME_VALID);
       break;
 
     // New P Lee 04/02/2008
     case QAR_REG_BARKER_ERROR:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_BARKER_ERR);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_BARKER_ERR);
       break;
 
     case QAR_REG_DATA_PRESENT:
-      QarRegData = QAR_R((UINT16 *) &QAR_register.Status, S_DATA_PRESENT);
+      nQarRegData = QAR_R((UINT16 *) &m_QAR_register.status, S_DATA_PRESENT);
       break;
 
     // New P Lee 04/02/2008
     case QAR_REG_BARKER:
-      QarRegData = QAR_register.Barker[Index];
+      nQarRegData = m_QAR_register.barker[Index];
       break;
-
+	
+    default:
+	  break;  
   }
 
-  *GetPtr = (UINT16 *) &QarRegData;
+  *GetPtr = (UINT16 *) &nQarRegData;
 
   return USER_RESULT_OK;
 }
@@ -412,13 +417,14 @@ USER_HANDLER_RESULT QARMsg_Register(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_State(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
                                         const void *SetPtr,
                                         void **GetPtr)
 {
-  QAR_StateTemp = *QAR_GetState();
+  m_QAR_StateTemp = *QAR_GetState();
   return  User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 }
 
@@ -443,13 +449,14 @@ USER_HANDLER_RESULT QARMsg_State(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_State_SubFrameOk(USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
                                             UINT32 Index,
                                             const void *SetPtr,
                                             void **GetPtr)
 {
-  QAR_StateTemp = *QAR_GetState();
+  m_QAR_StateTemp = *QAR_GetState();
 
   **(UINT8**)GetPtr = ((UINT8*)Param.Ptr)[Index];
 
@@ -480,6 +487,7 @@ USER_HANDLER_RESULT QARMsg_State_SubFrameOk(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_Cfg(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
@@ -488,18 +496,18 @@ USER_HANDLER_RESULT QARMsg_Cfg(USER_DATA_TYPE DataType,
 {
    USER_HANDLER_RESULT result = USER_RESULT_OK;
 
-   memcpy(&QAR_CfgTemp, &CfgMgr_ConfigPtr()->QARConfig, sizeof(QAR_CfgTemp));
+   memcpy(&m_QAR_CfgTemp, &CfgMgr_ConfigPtr()->QARConfig, sizeof(m_QAR_CfgTemp));
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   // If performing a "set" and it was successful, write the update.
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
     memcpy(&CfgMgr_ConfigPtr()->QARConfig,
-      &QAR_CfgTemp,
-      sizeof(QAR_CfgTemp));
+      &m_QAR_CfgTemp,
+      sizeof(m_QAR_CfgTemp));
 
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
       &CfgMgr_ConfigPtr()->QARConfig,
-      sizeof(QAR_CfgTemp));
+      sizeof(m_QAR_CfgTemp));
   }
 
   return result;
@@ -528,6 +536,7 @@ USER_HANDLER_RESULT QARMsg_Cfg(USER_DATA_TYPE DataType,
  * Notes:
  *
  *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_CfgBarker(USER_DATA_TYPE DataType,
                                         USER_MSG_PARAM Param,
                                         UINT32 Index,
@@ -536,9 +545,9 @@ USER_HANDLER_RESULT QARMsg_CfgBarker(USER_DATA_TYPE DataType,
 {
   //QAR_CfgTemp = *QAR_GetCfg();
   // Read data into temp-cfg
-  memcpy(&QAR_CfgTemp,
+  memcpy(&m_QAR_CfgTemp,
          &CfgMgr_ConfigPtr()->QARConfig,
-         sizeof(QAR_CfgTemp));
+         sizeof(m_QAR_CfgTemp));
 
   //Setting or getting this value?  (if the SetPtr is null, assume this is
   //to "get" the cfg value)
@@ -553,48 +562,15 @@ USER_HANDLER_RESULT QARMsg_CfgBarker(USER_DATA_TYPE DataType,
     ((UINT16*)Param.Ptr)[Index] = *(UINT16*)SetPtr;
 
      memcpy(&CfgMgr_ConfigPtr()->QARConfig,
-            &QAR_CfgTemp,
-            sizeof(QAR_CfgTemp));
+            &m_QAR_CfgTemp,
+            sizeof(m_QAR_CfgTemp));
 
      CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
                             &CfgMgr_ConfigPtr()->QARConfig,
-                            sizeof(QAR_CfgTemp));
+                            sizeof(m_QAR_CfgTemp));
   }
   return USER_RESULT_OK;
 }
-
-
-
-/******************************************************************************
- * Function:    QARMsg_Reconfigure (qar.reconfigure)
- *
- * Description: Executes the reconfigure function of QAR.c
- *
- * Parameters:  USER_DATA_TYPE     DataType
- *              USER_MSG_PARAM     Param
- *              UINT32             Index
- *              const void         *SetPtr
- *              void               **GetPtr
- *
- * Returns:     USER_RESULT_OK:    Processed sucessfully
- *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
- *                                 set.
- *
- * Notes:
- *
- *****************************************************************************/
-USER_HANDLER_RESULT QARMsg_Reconfigure(USER_DATA_TYPE DataType,
-                                        USER_MSG_PARAM Param,
-                                        UINT32 Index,
-                                        const void *SetPtr,
-                                        void **GetPtr)
-{
-  QAR_Reconfigure();
-
-  return USER_RESULT_OK;
-
-}
-
 
 /******************************************************************************
  * Function:    QARMsg_CreateLogs (qar.createlogs)
@@ -616,6 +592,7 @@ USER_HANDLER_RESULT QARMsg_Reconfigure(USER_DATA_TYPE DataType,
 #ifdef GENERATE_SYS_LOGS
 
 /*vcast_dont_instrument_start*/
+static 
 USER_HANDLER_RESULT QARMsg_CreateLogs(USER_DATA_TYPE DataType,
                                       USER_MSG_PARAM Param,
                                       UINT32 Index,
@@ -655,25 +632,26 @@ USER_HANDLER_RESULT QARMsg_CreateLogs(USER_DATA_TYPE DataType,
 *
 * Notes:
 *****************************************************************************/
+static 
 USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
                                        USER_MSG_PARAM Param,
                                        UINT32 Index,
                                        const void *SetPtr,
                                        void **GetPtr)
 {
-   CHAR  LabelStem[] = "\r\n\r\nQAR.CFG";
+   CHAR  labelStem[] = "\r\n\r\nQAR.CFG";
    USER_HANDLER_RESULT result = USER_RESULT_OK;
    USER_MSG_TBL*  pCfgTable;
 
    //Top-level name is a single indented space
-   CHAR BranchName[USER_MAX_MSG_STR_LEN] = " ";
+   CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
 
-   pCfgTable = QarCfgTbl;  // Get pointer to config entry
+   pCfgTable = qarCfgTbl;  // Get pointer to config entry
 
    result = USER_RESULT_ERROR;
-  if (User_OutputMsgString(LabelStem, FALSE ) )
+  if (User_OutputMsgString(labelStem, FALSE ) )
   {
-     result = User_DisplayConfigTree(BranchName, pCfgTable, 0, 0, LabelStem);
+     result = User_DisplayConfigTree(branchName, pCfgTable, 0, 0, labelStem);
   }
   return result;
 }
@@ -681,6 +659,11 @@ USER_HANDLER_RESULT QARMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: QARUserTables.c $
+ * 
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 1/28/15    Time: 5:40p
+ * Updated in $/software/control processor/code/system
+ * SCR 1279 - Remove QAR Reconfigure Functionality
  * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:27p
