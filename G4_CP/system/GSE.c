@@ -1,7 +1,7 @@
 #define GSE_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:        GSE.c
@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 33 $  $Date: 11/20/14 6:31p $
+     $Revision: 35 $  $Date: 1/29/15 4:14p $
 
 ******************************************************************************/
 
@@ -87,14 +87,14 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size );
  *              psize -    Ptr to return size of system log data
  *
  * Returns:     RESULT
- * 
+ *
  * Notes:
  *
 ****************************************************************************/
 RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 {
   UART_CONFIG config;
-  static INT8 TxBuf[GSE_TX_BUFFER_SIZE];
+  static INT8 txBuf[GSE_TX_BUFFER_SIZE];
 
   GSE_DRV_PBIT_LOG  *pdest;
 
@@ -105,7 +105,7 @@ RESULT GSE_Init (SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
   *psize = sizeof(GSE_DRV_PBIT_LOG);
 
 
-  FIFO_Init(&TxFIFO,TxBuf,GSE_TX_BUFFER_SIZE);
+  FIFO_Init(&TxFIFO,txBuf,GSE_TX_BUFFER_SIZE);
 
   // Init the Live Data Stream display state to enabled.
 
@@ -323,21 +323,21 @@ RESULT GSE_GetLine(INT8* Str)
  *              -1:       No char to read
  *              -2:       Receive error (parity or framing)
  *
- * Notes: 
+ * Notes:
 ****************************************************************************/
 INT16 GSE_getc(void)
 {
   INT16 result = -2;
   INT8  buf;
-  UINT16 BytesReturned = 0;
+  UINT16 bytesReturned = 0;
 
   //Get data from the GSE port
   if( DRV_OK == UART_Receive( GSE_UART_PORT,
                               &buf,
                               1,
-                              &BytesReturned))
+                              &bytesReturned))
   {
-    if(BytesReturned == 1)
+    if(bytesReturned == 1)
     {
       result = buf;
     }
@@ -440,7 +440,7 @@ void GSE_ToggleDisplayLiveStream(void)
 
   // Disable F7X output stream
   F7XProtocol_DisableLiveStream();
-  
+
   // Disable ID Param output stream
   IDParamProtocol_DsbLiveStream();
 
@@ -486,14 +486,14 @@ void GSE_ToggleDisplayLiveStream(void)
 void GSE_DebugStr( const FLT_DBG_LEVEL DbgLevel, const BOOLEAN Timestamp,
                    const CHAR* str, ...)
 {
-  
+
   //Check the current debug level, print the debug message if the message level
   //is within the current debug level
   if( DbgLevel <= Flt_GetDebugVerbosity())
   {
     va_list args;
     va_start(args,str);
-    GSE_vDebugOutput( TRUE, Timestamp, str, args);   
+    GSE_vDebugOutput( TRUE, Timestamp, str, args);
   }
 }
 
@@ -552,15 +552,15 @@ void GSE_StatusStr( const FLT_DBG_LEVEL DbgLevel, const CHAR* str, ...)
 static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
                               const CHAR* str, va_list args)
 {
-    CHAR buf[TEMP_CHAR_BUF_SIZE];    
+    CHAR buf[TEMP_CHAR_BUF_SIZE];
     TIMESTRUCT dateTime;
     CHAR* ptr = buf;
 
     // Pre-pend optional <return><newline>
     if ( newLine)
-    {      
+    {
       snprintf(ptr, sizeof(buf), "%s", NEW_LINE);
-      ptr = &buf[strlen(buf)];      
+      ptr = &buf[strlen(buf)];
     }
 
     // Pre-pend optional "[HH:MM:SS.mmm] "
@@ -583,22 +583,31 @@ static void GSE_vDebugOutput( const BOOLEAN newLine, const BOOLEAN showTime,
 /******************************************************************************
  * Function:    GSE_MsWrite
  *
- * Description: Puts a micro-server message into the MSInterface queue. 
+ * Description: Puts a micro-server message into the MSInterface queue.
  *
  * Parameters:  [in] pData:    Pointer to the block containing the message data
  *              [in] size:    Size of the data, in bytes, pointed to by Data*
  *
  * Returns:     None
  *
- * Notes:
+ * Notes:       This is a send-and-forget serial stream msg whose success/failure,
+ *              does not affect the caller's state or processing as is the case
+ *              when called from UploadMgr and MsInterface.
+ *
+ *              The GSE_MSRspCallback is pro-forma and therefore empty.
+ *
+ *              The returned RESULT from MSI_PutCommand is not needed by callers
+ *
  *
  *****************************************************************************/
 void GSE_MsWrite(const void* pData, UINT32 size)
 {
   // Send a serial data stream msg to the MicroServer.
   // Since this is effectively a send-and-forget msg,
-  // use 5000 millisecs as the timeout 
-  MSI_PutCommand(CMD_ID_SERIAL_DATA, pData, size, 5000, GSE_MSRspCallback); 
+  // use 5000 millisecs as the timeout
+  MSI_PutCommand(CMD_ID_SERIAL_DATA, pData, size, 5000, GSE_MSRspCallback);
+
+ // See Notes
 }
 
 /******************************************************************************
@@ -640,16 +649,16 @@ static void GSE_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 *
 *****************************************************************************/
 static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
-{  
+{
   FLT_DBG_DEST dest = Flt_GetDebugDest();
-  
+
   switch (dest)
   {
     case DEST_GSE:
       GSE_PutLine(str);
       break;
 
-    case DEST_MS:         
+    case DEST_MS:
       GSE_MsWrite(str, size);
       break;
 
@@ -666,6 +675,16 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 1/29/15    Time: 4:14p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS  Code Review changes copyright date
+ * 
+ * *****************  Version 34  *****************
+ * User: Contractor V&v Date: 1/29/15    Time: 3:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1262 - LiveData CP to MS  Code Review change.
  * 
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 11/20/14   Time: 6:31p

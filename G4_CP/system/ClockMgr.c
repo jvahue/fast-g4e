@@ -1,8 +1,10 @@
 #define SYS_CLOCKMGR_BODY
 
 /******************************************************************************
-            Copyright (C) 2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+ ECCN:        9D991
 
  File:        ClockMgr.c
 
@@ -17,7 +19,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 54 $  $Date: 1/23/15 7:53p $
+     $Revision: 55 $  $Date: 1/29/15 4:43p $
 
 ******************************************************************************/
 
@@ -1176,6 +1178,11 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: John Omalley Date: 1/29/15    Time: 4:43p
+ * Updated in $/software/control processor/code/system
+ * SCR 1164 - Code Review Update!!!
  * 
  * *****************  Version 54  *****************
  * User: Contractor V&v Date: 1/23/15    Time: 7:53p

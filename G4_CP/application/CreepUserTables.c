@@ -1,14 +1,16 @@
 #define CREEP_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+    
+    ECCN:        9D991
 
     File:        CreepUserTables.c
 
     Description: Routines to support the user commands for Creep CSC
 
     VERSION
-    $Revision: 13 $  $Date: 10/06/14 2:14p $
+    $Revision: 14 $  $Date: 1/28/15 2:11p $
 
 ******************************************************************************/
 #ifndef CREEP_BODY
@@ -724,13 +726,6 @@ USER_HANDLER_RESULT CreepMsg_Cfg(USER_DATA_TYPE DataType,
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {    
     CreepMsg_UpdateCfg( (void*)&CfgMgr_ConfigPtr()->CreepConfig, (void*)&creepCfgTemp, sizeof(creepCfgTemp) );    
-   // memcpy(&CfgMgr_ConfigPtr()->CreepConfig,
-   //        &creepCfgTemp,
-   //        sizeof(CREEP_CFG));         
-
-   ////Store the modified temporary structure in the EEPROM.
-   //CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),&CfgMgr_ConfigPtr()->CreepConfig,
-   //                       sizeof(CREEP_CFG) );
   }
   return result;
 }
@@ -784,15 +779,6 @@ USER_HANDLER_RESULT CreepMsg_Table(USER_DATA_TYPE DataType,
     CreepMsg_UpdateCfg((void*)&CfgMgr_ConfigPtr()->CreepConfig.creepTbl[Index],
                        (void*)&creepCfgTblTemp,
                        sizeof(creepCfgTblTemp) );    
-    //// Copy the updated temp-cfg  back to the shadow ram store.
-    //memcpy( &CfgMgr_ConfigPtr()->CreepConfig.creepTbl[Index],
-    //        &creepCfgTblTemp,
-    //        sizeof( creepCfgTblTemp ) );
-
-    //// Persist the CfgMgr's updated copy back to EEPROM.
-    //CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(),
-    //                       &CfgMgr_ConfigPtr()->CreepConfig.creepTbl[Index],
-    //                       sizeof(CREEP_TBL));    
   }
   return result;
 }
@@ -1389,6 +1375,8 @@ static USER_HANDLER_RESULT CreepMsg_DebugTbl(USER_DATA_TYPE DataType,
  * Parameters:  [in] pNVRAMShadow:  Offset into NVRAM Shadow for config info
  *              [in] pTemp:         Address of the local temp buffer containing
  *                                  modified data.
+ *              [in] nSize:         size of the data pointed to by pTemp
+ *
  * Returns:     None
  *
  * Notes:
@@ -1576,6 +1564,11 @@ USER_HANDLER_RESULT Creep_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CreepUserTables.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 1/28/15    Time: 2:11p
+ * Updated in $/software/control processor/code/application
+ * SCR 1234 - Code Review Updates
  * 
  * *****************  Version 13  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 2:14p

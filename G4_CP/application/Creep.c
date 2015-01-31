@@ -1,23 +1,22 @@
 #define CREEP_BODY
-
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
+    
     File:        Creep.c
 
     Description: Contains all functions and data related to the Creep
 
     VERSION
-      $Revision: 14 $  $Date: 10/06/14 2:14p $
+      $Revision: 15 $  $Date: 1/28/15 1:31p $
 
 ******************************************************************************/
-
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -36,17 +35,13 @@
 #include "TaskManager.h"
 
 #include "Assert.h"
-
-
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define CREEP_RATE_MS_TO_MIF_CNT  10   // i.e cvrt 1000 ms to 100 MIF cnt
-
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
-
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -74,8 +69,6 @@ static CREEP_FAULT_HISTORY m_creepHistory;
   UINT16 m_CreepTiming_Index;
 #endif
 // Test Timing
-
-
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -116,7 +109,6 @@ static CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
 
 #include "CreepUserTables.c"
 
-
 #ifdef CREEP_TEST
   // Debug Functions
   static ER_STATE EngRunGetState_Sim (ENGRUN_INDEX idx, UINT8* EngRunFlags);
@@ -124,7 +116,6 @@ static CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
   static FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id);
   // Debug Functions
 #endif
-
 /*****************************************************************************/
 /* Constant Data                                                             */
 /*****************************************************************************/
@@ -168,7 +159,6 @@ static CREEP_STATUS_PTR Creep_GetStatus (UINT8 index);
   // Test Debug
 #endif
 
-
 typedef struct {
   SYS_APP_ID id;
 } CREEP_TYPE_TO_SYSLOG_ID;
@@ -189,7 +179,6 @@ static const CREEP_TYPE_TO_SYSLOG_ID creep_CBIT_TypeToSysLog[CREEP_FAULT_TYPE_MA
   APP_ID_CREEP_CBIT_FAULT_ER,
   APP_ID_CREEP_CBIT_FAULT_RESET
 };
-
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -212,7 +201,6 @@ void Creep_Initialize ( BOOLEAN degradedMode )
   UINT16 i,j;
   BOOLEAN bCheckDsbOk;
 
-
   // Initialize Local Variables
   memset ( m_Creep_Status, 0, sizeof(CREEP_STATUS) * CREEP_MAX_OBJ);
   memset ( &m_Creep_AppData, 0, sizeof(CREEP_APP_DATA) );
@@ -223,7 +211,6 @@ void Creep_Initialize ( BOOLEAN degradedMode )
 
   // Retrieve Creep History
   Creep_RestoreFaultHistory();
-
 
   // Initialize Rate Cnt to 1 Hz
   for (j=0;j<CREEP_MAX_OBJ;j++)
@@ -283,7 +270,6 @@ void Creep_Initialize ( BOOLEAN degradedMode )
     }
   }
 
-
   // Add an entry in the user message handler table for F7X Cfg Items
   User_AddRootCmd(&creepRootTblPtr);
 
@@ -322,7 +308,6 @@ void Creep_Initialize ( BOOLEAN degradedMode )
   /*vcast_dont_instrument_end*/
 #endif
 
-
 #ifdef CREEP_TIMING_TEST
   /*vcast_dont_instrument_start*/
   for (i=0;i<CREEP_TIMING_BUFF_MAX;i++)
@@ -334,9 +319,7 @@ void Creep_Initialize ( BOOLEAN degradedMode )
   m_CreepTiming_End = 0;
   /*vcast_dont_instrument_end*/
 #endif
-
 }
-
 
 /******************************************************************************
  * Function:    Creep_Task
@@ -366,7 +349,6 @@ static void Creep_Task ( void *pParam )
   BOOLEAN bCreepCountStart;
   BOOLEAN bErTransFault;
 
-
   pCfg = (CREEP_CFG_PTR) &m_Creep_Cfg;
   pStatus = ((CREEP_STATUS_PTR) pParam);
 
@@ -375,7 +357,6 @@ static void Creep_Task ( void *pParam )
    m_CreepTiming_Start = TTMR_GetHSTickCount();
    /*vcast_dont_instrument_end*/
 #endif
-
 
   for (i=0;i<CREEP_MAX_OBJ;i++)
   {
@@ -471,7 +452,6 @@ static void Creep_Task ( void *pParam )
         // When ER ends, the count will be the new mission count or thrown away
         //   due to sensor failure detected.
         pCreepData->creepMissionCnt += creepIncrement;
-
 
         // Update App Data RTC if new count.  Note: _Calculate occurs every 1 sec
         //   Thus fastest is  1 Hz write (or for two Creep Obj, this will be 2 writes
@@ -591,7 +571,6 @@ static void Creep_Task ( void *pParam )
 
   } // End for i Loop thru CREEP_MAX_OBJ
 
-
   // Testing
 #ifdef CREEP_TEST
   /*vcast_dont_instrument_start*/
@@ -632,7 +611,6 @@ static void Creep_Task ( void *pParam )
 
 }
 
-
 /******************************************************************************
  * Function:    Creep_GetBinaryHdr()
  *
@@ -652,7 +630,6 @@ UINT16 Creep_GetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
   UINT16    i;
   CREEP_OBJ_BINHDR_PTR pCreepObjHdr;
   CREEP_OBJECT_PTR     pCreepObjCfg;
-
 
   // If buffer is smaller than what we need ASSERT as this is
   //  a development / design error.  If this get's into field
@@ -681,7 +658,6 @@ UINT16 Creep_GetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
 
   return (sizeof(CREEP_BINHDR));
 }
-
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -721,7 +697,6 @@ static void Creep_SensorProcessing ( CREEP_OBJECT_PTR pCreepObj,
   pCreepSensorVal->bFailed = pCreepSensorVal->row.bFailed || pCreepSensorVal->col.bFailed;
 
 }
-
 
 /******************************************************************************
  * Function:    Creep_ProcessSensor
@@ -864,7 +839,6 @@ static void Creep_ProcessSensor ( const CREEP_SENSOR *pSensor,
 
 }
 
-
 /******************************************************************************
  * Function:    Creep_Calculate
  *
@@ -1003,7 +977,6 @@ FLOAT64 Creep_Calculate ( CREEP_SENSOR_VAL_PTR pCreepSensorVal, UINT16 CreepTblI
 
 }
 
-
 /******************************************************************************
  * Function:    Creep_FindEntries
  *
@@ -1046,7 +1019,6 @@ void Creep_FindEntries( UINT16 *p1, UINT16 *p0, const FLOAT64 *pEntries,
   // Assert if i==entriesMax-1 !!! ????
 }
 
-
 /******************************************************************************
  * Function:    Creep_InterpolateVal
  *
@@ -1075,7 +1047,6 @@ FLOAT64 Creep_InterpolateVal( FLOAT64 y_1, FLOAT64 x_1, FLOAT64 y_0, FLOAT64 x_0
 
   return (z);
 }
-
 
 /******************************************************************************
  * Function:    Creep_RestoreAppData
@@ -1114,7 +1085,6 @@ BOOLEAN Creep_RestoreAppData( void )
 
 }
 
-
 /******************************************************************************
  * Function:    Creep_RestoreFaultHistory
  *
@@ -1132,7 +1102,6 @@ void Creep_RestoreFaultHistory( void )
 {
   RESULT result;
   BOOLEAN bOk;
-
 
   result = NV_Open(NV_CREEP_HISTORY);
   bOk = TRUE;
@@ -1154,7 +1123,6 @@ void Creep_RestoreFaultHistory( void )
   }
 
   m_Creep_Debug.nCreepFailBuffCnt = m_creepHistory.cnt;
-
 }
 
 /******************************************************************************
@@ -1215,7 +1183,6 @@ void Creep_UpdateCreepXAppData (UINT16 index_obj)
   NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
 }
 
-
 /******************************************************************************
  * Function:     Creep_ClearFaultFile
  *
@@ -1238,7 +1205,6 @@ void Creep_ClearFaultFile(TIMESTAMP *pTs)
 
   // Update App data
   NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
-
 }
 
 /******************************************************************************
@@ -1259,7 +1225,6 @@ CREEP_DEBUG_PTR Creep_GetDebug ( void )
   return ( (CREEP_DEBUG_PTR) &m_Creep_Debug );
 }
 
-
 /******************************************************************************
  * Function:    Creep_GetSensor
  *
@@ -1277,7 +1242,6 @@ CREEP_SENSOR_VAL_PTR Creep_GetSensor (UINT8 index_obj)
 {
   return ( (CREEP_SENSOR_VAL_PTR) &m_Creep_Sensors[index_obj] );
 }
-
 
 /******************************************************************************
  * Function:    Creep_GetStatus
@@ -1297,7 +1261,6 @@ CREEP_STATUS_PTR Creep_GetStatus (UINT8 index_obj)
   return ( (CREEP_STATUS_PTR) &m_Creep_Status[index_obj] );
 }
 
-
 /******************************************************************************
  * Function:     Creep_FileInit
  *
@@ -1313,19 +1276,14 @@ CREEP_STATUS_PTR Creep_GetStatus (UINT8 index_obj)
  *****************************************************************************/
 BOOLEAN Creep_FileInit(void)
 {
-
   // Init App data
   memset ( (void *) &m_Creep_AppData, 0, sizeof(CREEP_APP_DATA) );
-
   // Update EE APP Data crc16 to default crc16
   m_Creep_AppData.crc16 = CREEP_DEFAULT_CRC16;
-
   // Update App data
   NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
-
   return TRUE;
 }
-
 
 /******************************************************************************
  * Function:     Creep_FaultFileInit
@@ -1342,15 +1300,11 @@ BOOLEAN Creep_FileInit(void)
  *****************************************************************************/
 BOOLEAN Creep_FaultFileInit(void)
 {
-
   // Init App data
   memset ( (void *) &m_creepHistory, 0, sizeof(m_creepHistory) );
-
   CM_GetTimeAsTimestamp ( (TIMESTAMP *) &m_creepHistory.ts );
-
   // Update App data
   NV_Write(NV_CREEP_HISTORY, 0, (void *) &m_creepHistory, sizeof(m_creepHistory));
-
   return TRUE;
 }
 
@@ -1374,15 +1328,12 @@ void Creep_FailAllObjects ( UINT16 index_obj )
   CREEP_STATUS_PTR pStatus;
   CREEP_DATA_PTR pCreepData;
 
-
   for (i=0;i<CREEP_MAX_OBJ;i++)
   {
     pStatus = (CREEP_STATUS_PTR) &m_Creep_Status[i];
     pCreepData = (CREEP_DATA_PTR) &pStatus->data;
-
     pStatus->state = CREEP_STATE_FAULT_ER;
     pCreepData->creepFailures++;
-
     // Copy all update data cnt values (incl creepFailures) back to EE APP Obj
     m_Creep_AppData.data[i] = *pCreepData;
   }
@@ -1395,9 +1346,7 @@ void Creep_FailAllObjects ( UINT16 index_obj )
   snprintf (gse_OutLine, sizeof(gse_OutLine),
             "Creep Task: Creep Fault (Obj=%d) ! \r\n", index_obj);
   GSE_DebugStr(NORMAL,TRUE,gse_OutLine);
-
 }
-
 
 /******************************************************************************
  * Function:     Creep_CreateSummaryLog
@@ -1415,7 +1364,6 @@ static
 void Creep_CreateSummaryLog ( UINT16 index_obj )
 {
   CREEP_SUMMARY_LOG alog;
-
 
   alog.index = index_obj;
 
@@ -1437,7 +1385,6 @@ void Creep_CreateSummaryLog ( UINT16 index_obj )
                NULL);
 }
 
-
 /******************************************************************************
  * Function:     Creep_CreateFaultLog
  *
@@ -1456,7 +1403,6 @@ void Creep_CreateFaultLog ( CREEP_FAULT_TYPE type )
   CREEP_FAULT_OBJ_PTR obj_ptr;
   CREEP_FAULT_LOG_SUMMARY alog;
   UINT16 i;
-
 
   for (i=0;i<CREEP_MAX_OBJ;i++)
   {
@@ -1489,9 +1435,7 @@ void Creep_CreateFaultLog ( CREEP_FAULT_TYPE type )
   {
     Flt_SetStatus(m_Creep_Cfg.sysCondCBIT, creep_CBIT_TypeToSysLog[type].id, NULL, 0);
   }
-
 }
-
 
 /******************************************************************************
  * Function:     Creep_CreateSensorFailLog
@@ -1521,7 +1465,6 @@ void Creep_CreateSensorFailLog ( UINT16 index_obj )
                sizeof(CREEP_SENSOR_FAIL_LOG), NULL);
 }
 
-
 /******************************************************************************
  * Function:     Creep_CreatePBITLog
  *
@@ -1544,7 +1487,6 @@ void Creep_CreatePBITLog ( PBIT_FAIL_TYPE type, UINT16 expCRC, UINT16 calcCRC )
   CREEP_SUMMARY_LOG_PTR pdata;
   CREEP_DIAG_PTR pdiag;
   UINT16 i;
-
 
   alog.type = type;
   alog.expCRC = expCRC;
@@ -1582,9 +1524,7 @@ void Creep_CreatePBITLog ( PBIT_FAIL_TYPE type, UINT16 expCRC, UINT16 calcCRC )
   {
     Flt_SetStatus(m_Creep_Cfg.sysCondPBIT, creep_PBIT_TypeToSysLog[type].id, NULL, 0);
   }
-
 }
-
 
 /******************************************************************************
  * Function:     Creep_RestoreCfg
@@ -1605,7 +1545,6 @@ void Creep_RestoreCfg ( void )
   memcpy(&m_Creep_Cfg, &(CfgMgr_RuntimeConfigPtr()->CreepConfig), sizeof(m_Creep_Cfg));
   m_Creep_Cfg.pads[0] = 0;  // Dummy Call to fix LINT warning
 }
-
 
 /******************************************************************************
  * Function:     Creep_CheckCfgAndData
@@ -1628,9 +1567,7 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   UINT16 calcCRC, crc16;
   BOOLEAN bUpdateNV;
   UINT16 i;
-
   PBIT_FAIL_TYPE pbit_status;
-
 
   // Restore Creep Cfg
   // memcpy(&m_Creep_Cfg, &(CfgMgr_RuntimeConfigPtr()->CreepConfig), sizeof(m_Creep_Cfg));
@@ -1648,10 +1585,8 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   if (calcCRC != m_Creep_Cfg.crc16)
   {
     bOkCfgCrc = FALSE;
-
     // Record Sys log to indicate bad crc16
     pbit_status = PBIT_FAIL_CFG_CRC;
-
     // Do not clear creep cfg.  Leave it and on every power up we will get into this path,
     //   until user takes action to fix.
     //   For corrupted overall cfg, we should not enter this path, as default reloaded
@@ -1710,14 +1645,12 @@ BOOLEAN Creep_CheckCfgAndData ( void )
     {
       pbit_status = PBIT_FAIL_EE_APP_DATA;
     }
-
     // Clear EE APP Data.  Update crc16 to cfg crc16, if cfg is good, else use
     //   default crc16 (in this case we have double fault where EE APP DATA was bad and
     //   cfg crc16 was also bad).  Thus when, real cfg reloaded to fix creep cfg,
     //   another log will be recorded above.  Good.
     // Clear EE APP Data and update its crc16 to cfg crc16
     memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
-
     // Update EE APP Data crc16 to default crc16
     m_Creep_AppData.crc16 = CREEP_DEFAULT_CRC16;
     // If cfg crc16 is good then update EE APP Data to it
@@ -1725,11 +1658,9 @@ BOOLEAN Creep_CheckCfgAndData ( void )
     {
       m_Creep_AppData.crc16 = m_Creep_Cfg.crc16;
     }
-
     // Update App data in EEPROM
     // NV_Write(NV_CREEP_DATA, 0, (void *) &m_Creep_AppData, sizeof(CREEP_APP_DATA));
   }
-
 
   // Determine if we were interrupt by previous power cycle, this check is independent
   //   of checking the restore of EE APP DATA.
@@ -1766,13 +1697,11 @@ BOOLEAN Creep_CheckCfgAndData ( void )
 
   Creep_InitPersistentPcnt();
 
-
   // If PBIT failed, record log here
   if ( pbit_status != PBIT_OK)
   {
     // Create Creep PBIT Log
     Creep_CreatePBITLog ( pbit_status, m_Creep_Cfg.crc16, calcCRC );
-
     // Clear EE APP Data now, after PBIT log is recorded with what was in EE APP
     crc16 = m_Creep_AppData.crc16;
     memset ( (void *) &m_Creep_AppData, 0, sizeof(m_Creep_AppData) );
@@ -1806,9 +1735,7 @@ BOOLEAN Creep_CheckCfgAndData ( void )
   }
 
   return (bOk);
-
 }
-
 
 /******************************************************************************
  * Function:     Creep_InitPersistentPcnt
@@ -1851,9 +1778,7 @@ void Creep_InitPersistentPcnt ( void )
     m_Creep_Status[i].interval.nRateCounts =
           (INT16) (m_Creep_Cfg.creepObj[i].intervalRate_ms / CREEP_RATE_MS_TO_MIF_CNT);
   }
-
 }
-
 
 /******************************************************************************
  * Function:     Creep_AddToFaultBuff
@@ -1872,7 +1797,6 @@ void Creep_AddToFaultBuff ( SYS_APP_ID id )
 {
   CREEP_FAULT_BUFFER_PTR pbuff;
 
-
   if (m_creepHistory.cnt < CREEP_HISTORY_MAX)
   {
     pbuff = (CREEP_FAULT_BUFFER_PTR) &m_creepHistory.buff[m_creepHistory.cnt];
@@ -1884,11 +1808,6 @@ void Creep_AddToFaultBuff ( SYS_APP_ID id )
     m_Creep_Debug.nCreepFailBuffCnt = m_creepHistory.cnt;
   }
 }
-
-
-
-
-
 
 
 // Debug Functions
@@ -1926,10 +1845,14 @@ FLOAT32 SensorGetValue_Sim( SENSOR_INDEX id)
 /*vcast_dont_instrument_end*/
 #endif
 
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: Creep.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 1/28/15    Time: 1:31p
+ * Updated in $/software/control processor/code/application
+ * SCR 1234 - Code Review Updates
  * 
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 10/06/14   Time: 2:14p

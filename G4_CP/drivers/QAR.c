@@ -1,7 +1,9 @@
 #define QAR_BODY
 /******************************************************************************
-            Copyright (C) 2008 - 2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         QAR.c
 
@@ -9,7 +11,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 106 $  $Date: 9/03/14 5:12p $
+      $Revision: 107 $  $Date: 1/28/15 5:40p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -40,16 +42,16 @@
 /* Local Typedefs                                                            */
 /*****************************************************************************/
 typedef struct {
-  UINT16 Word[QAR_SF_MAX_SIZE];
-  UINT32 LastSubFrameUpdateTime;
+  UINT16 word[QAR_SF_MAX_SIZE];
+  UINT32 lastSubFrameUpdateTime;
 } QAR_SUBFRAME_DATA, *QAR_SUBFRAME_DATE_PTR;
 
 typedef struct {
-  UINT16 Tstp_val;
-  UINT16 Tstn_val;
-  UINT16 Bipp_exp;
-  UINT16 Biin_exp;
-  QAR_LOOPBACK_TEST TestEnum;
+  UINT16 tstp_val;
+  UINT16 tstn_val;
+  UINT16 bipp_exp;
+  UINT16 biin_exp;
+  QAR_LOOPBACK_TEST testEnum;
 } QAR_LOOPBACK_TEST_STRUCT;
 
 typedef struct {
@@ -65,24 +67,26 @@ static QAR_CTRL_REGISTER   *pQARCtrl;
 static QAR_STATUS_REGISTER *pQARStatus;
 static QAR_DATA            *pQARSubFrame;
 
-static QAR_SUBFRAME_DATA   QARFrame[QAR_SF_MAX];
-static QAR_SUBFRAME_DATA   QARFramePrevGood[QAR_SF_MAX];
+static QAR_SUBFRAME_DATA   m_QARFrame[QAR_SF_MAX];
+static QAR_SUBFRAME_DATA   m_QARFramePrevGood[QAR_SF_MAX];
 
-static QAR_STATE           QARState;
-static QAR_CONFIGURATION   QARCfg;
+static QAR_STATE           m_QARState;
+static QAR_CONFIGURATION   m_QARCfg;
 
-static QAR_CBIT_HEALTH_COUNTS QARCBITHealthStatus;
+static QAR_CBIT_HEALTH_COUNTS m_QARCBITHealthStatus;
 
-QAR_WORD_INFO              QARWordInfo[QAR_SF_MAX_SIZE];
-UINT16                     QARWordSensorCount;
+static QAR_WORD_INFO       m_QARWordInfo[QAR_SF_MAX_SIZE];
+static UINT16              nQARWordSensorCount;
 
-static char                GSE_OutLine[512];
+static CHAR                strGSE_OutLine[512];
 
 static BOOLEAN             m_BarkerErr;
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data);
+
 static QAR_SF QAR_FindCurrentGoodSF (UINT16 nIndex);
 static void QAR_RestoreStartupCfg (void);
 static void QAR_ReconfigureFPGAShadowRam (void);
@@ -102,7 +106,7 @@ static void QAR_MonitorTask (void *pParam);
 /*****************************************************************************/
 /* Local Constants                                                           */
 /*****************************************************************************/
-static QAR_LOOPBACK_TEST_STRUCT QARLBTest[] = {
+static QAR_LOOPBACK_TEST_STRUCT m_QARLBTest[] = {
   { 1, 0,  1, 0,  QAR_TEST_TSTP_HIGH },
   { 0, 1,  0, 1,  QAR_TEST_TSTN_HIGH },
   { 1, 1,  0, 0,  QAR_TEST_TSTPN_HIGH }
@@ -141,7 +145,7 @@ static QAR_LOOPBACK_TEST_STRUCT QARLBTest[] = {
 #endif
 
   // These must match the order in QAR.h FIELD_NAMES
-static FIELD_INFO FieldInfo[FN_MAX] = {
+static FIELD_INFO fieldInfo[FN_MAX] = {
     // Control Word
     { 0, 1},  // Resync          C_RESYNC
     { 1, 3},  // NumWords        C_NUM_WORDS
@@ -167,7 +171,7 @@ static FIELD_INFO FieldInfo[FN_MAX] = {
 
 // Internal blocks commented out because the FPGA v12 has a bug when data is coming in
 // during the powerup. (SCR 981)
-static const QAR_PBIT_INTERNAL_DPRAM FPGA_INTERNAL_DPRAM[FPGA_DPRAM_MAX_BLK] = {
+static const QAR_PBIT_INTERNAL_DPRAM m_FPGA_INTERNAL_DPRAM[FPGA_DPRAM_MAX_BLK] = {
   {SYS_QAR_PBIT_DPRAM, FPGA_QAR_SF_BUFFER1}//,
   //{SYS_QAR_PBIT_INTERNAL_DPRAM0, FPGA_QAR_INTERNAL_SF_BUFFER1},
   //{SYS_QAR_PBIT_INTERNAL_DPRAM1, FPGA_QAR_INTERNAL_SF_BUFFER3}
@@ -218,23 +222,24 @@ RESULT QAR_Initialize ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
 
 
    pdest = (UINT8 *) pdata;
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
 
    result = DRV_OK;
 
    // Set the global pointers to the QAR registers
-   pQARCtrlStatus      = (QAR_REGISTERS *) (FPGA_QAR_CONTROL);
-   pQARSubFrame        = (QAR_DATA *) (FPGA_QAR_SF_BUFFER1);
-   pQARCtrl            = &pQARCtrlStatus->Control;
-   pQARStatus          = &pQARCtrlStatus->Status;
+   pQARCtrlStatus      = (QAR_REGISTERS *)(FPGA_QAR_CONTROL);
+   pQARSubFrame        = (QAR_DATA *)(FPGA_QAR_SF_BUFFER1);
+   pQARCtrl            = &pQARCtrlStatus->control;
+   pQARStatus          = &pQARCtrlStatus->status;
 
    // Clear Variables
-   memset ( (void *) QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
-   memset ( (void *) QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
-   memset ( (void *) &QARState, 0, sizeof(QAR_STATE) );
-   memset ( (void *) &QARCfg, 0, sizeof(QAR_CONFIGURATION) );
-   memset ( (void *) &QARCBITHealthStatus, 0, sizeof(QAR_CBIT_HEALTH_COUNTS));
-   memset ( (void *) QARWordInfo, 0, sizeof(QAR_WORD_INFO) * QAR_SF_MAX_SIZE);
+   memset ( (void *) m_QARFrame, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
+   memset ( (void *) m_QARFramePrevGood, 0, sizeof(QAR_SUBFRAME_DATA) * (INT16)QAR_SF_MAX );
+   memset ( (void *) &m_QARState, 0, sizeof(QAR_STATE) );
+   memset ( (void *) &m_QARCfg, 0, sizeof(QAR_CONFIGURATION) );
+   memset ( (void *) &m_QARCBITHealthStatus, 0, sizeof(QAR_CBIT_HEALTH_COUNTS));
+   memset ( (void *) m_QARWordInfo, 0, sizeof(QAR_WORD_INFO) * QAR_SF_MAX_SIZE);
+   nQARWordSensorCount = 0;
 
    // PBIT FPGA Bad TBD
    if ( FPGA_GetStatus()->InitResult != DRV_OK )
@@ -267,11 +272,11 @@ RESULT QAR_Initialize ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
    // Set the overall system status
    if ( result == DRV_OK )
    {
-     pState->SystemStatus = QAR_STATUS_OK;
+     pState->systemStatus = QAR_STATUS_OK;
    }
    else
    {
-     pState->SystemStatus = QAR_STATUS_FAULTED_PBIT;
+     pState->systemStatus = QAR_STATUS_FAULTED_PBIT;
    }
 
 
@@ -302,73 +307,73 @@ RESULT QAR_Initialize ( SYS_APP_ID *SysLogId, void *pdata, UINT16 *psize)
  *****************************************************************************/
 void QAR_Init_Tasks (void)
 {
-  TCB TaskInfo;
-  QAR_SYS_PBIT_STARTUP_LOG StartupLog;
+  TCB tcbTaskInfo;
+  QAR_SYS_PBIT_STARTUP_LOG startupLog;
 
 
   // Restore User Cfg
-  memcpy(&QARCfg, &(CfgMgr_RuntimeConfigPtr()->QARConfig), sizeof(QARCfg));
+  memcpy(&m_QARCfg, &(CfgMgr_RuntimeConfigPtr()->QARConfig), sizeof(m_QARCfg));
 
   QAR_ReconfigureFPGAShadowRam();  // If QARCfg->Enable == TRUE, will enb QAR and QAR INT !
   QAR_ResetState();
 
-  if ( ( QARCfg.Enable == TRUE ) && ( QARState.SystemStatus == QAR_STATUS_OK) )
+  if ( ( m_QARCfg.enable == TRUE ) && ( m_QARState.systemStatus == QAR_STATUS_OK) )
   {
     // Create QAR Read Sub Frame Task
-    memset(&TaskInfo, 0, sizeof(TaskInfo));
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Read Sub Frame",_TRUNCATE);
-    TaskInfo.TaskID         = QAR_Read_Sub_Frame;
-    TaskInfo.Function       = QAR_ReadSubFrameTask;
-    TaskInfo.Priority       = taskInfo[QAR_Read_Sub_Frame].priority;
-    TaskInfo.Type           = taskInfo[QAR_Read_Sub_Frame].taskType;
-    TaskInfo.modes          = taskInfo[QAR_Read_Sub_Frame].modes;
-    TaskInfo.MIFrames       = taskInfo[QAR_Read_Sub_Frame].MIFframes;
-    TaskInfo.Rmt.InitialMif = taskInfo[QAR_Read_Sub_Frame].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[QAR_Read_Sub_Frame].MIFrate;
-    TaskInfo.Enabled        = TRUE;
-    TaskInfo.Locked         = FALSE;
-    TaskInfo.pParamBlock    = &QARState;
-    TmTaskCreate (&TaskInfo);
+    memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+    strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"QAR Read Sub Frame",_TRUNCATE);
+    tcbTaskInfo.TaskID         = QAR_Read_Sub_Frame;
+    tcbTaskInfo.Function       = QAR_ReadSubFrameTask;
+    tcbTaskInfo.Priority       = taskInfo[QAR_Read_Sub_Frame].priority;
+    tcbTaskInfo.Type           = taskInfo[QAR_Read_Sub_Frame].taskType;
+    tcbTaskInfo.modes          = taskInfo[QAR_Read_Sub_Frame].modes;
+    tcbTaskInfo.MIFrames       = taskInfo[QAR_Read_Sub_Frame].MIFframes;
+    tcbTaskInfo.Rmt.InitialMif = taskInfo[QAR_Read_Sub_Frame].InitialMif;
+    tcbTaskInfo.Rmt.MifRate    = taskInfo[QAR_Read_Sub_Frame].MIFrate;
+    tcbTaskInfo.Enabled        = TRUE;
+    tcbTaskInfo.Locked         = FALSE;
+    tcbTaskInfo.pParamBlock    = &m_QARState;
+    TmTaskCreate (&tcbTaskInfo);
 
     // Create QAR Monitor Task
-    memset(&TaskInfo, 0, sizeof(TaskInfo));
-    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"QAR Monitor",_TRUNCATE);
-    TaskInfo.TaskID         = QAR_Monitor;
-    TaskInfo.Function       = QAR_MonitorTask;
-    TaskInfo.Priority       = taskInfo[QAR_Monitor].priority;
-    TaskInfo.Type           = taskInfo[QAR_Monitor].taskType;
-    TaskInfo.modes          = taskInfo[QAR_Monitor].modes;
-    TaskInfo.MIFrames       = taskInfo[QAR_Monitor].MIFframes;
-    TaskInfo.Rmt.InitialMif = taskInfo[QAR_Monitor].InitialMif;
-    TaskInfo.Rmt.MifRate    = taskInfo[QAR_Monitor].MIFrate;
-    TaskInfo.Enabled        = TRUE;
-    TaskInfo.Locked         = FALSE;
-    TaskInfo.pParamBlock    = &QARState;
-    TmTaskCreate (&TaskInfo);
+    memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+    strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"QAR Monitor",_TRUNCATE);
+    tcbTaskInfo.TaskID         = QAR_Monitor;
+    tcbTaskInfo.Function       = QAR_MonitorTask;
+    tcbTaskInfo.Priority       = taskInfo[QAR_Monitor].priority;
+    tcbTaskInfo.Type           = taskInfo[QAR_Monitor].taskType;
+    tcbTaskInfo.modes          = taskInfo[QAR_Monitor].modes;
+    tcbTaskInfo.MIFrames       = taskInfo[QAR_Monitor].MIFframes;
+    tcbTaskInfo.Rmt.InitialMif = taskInfo[QAR_Monitor].InitialMif;
+    tcbTaskInfo.Rmt.MifRate    = taskInfo[QAR_Monitor].MIFrate;
+    tcbTaskInfo.Enabled        = TRUE;
+    tcbTaskInfo.Locked         = FALSE;
+    tcbTaskInfo.pParamBlock    = &m_QARState;
+    TmTaskCreate (&tcbTaskInfo);
   }
 
   // Update QAR Disabled status.  Note: DRV QAR_Initialize() must be called before this
   //   function.
-  if ( QARCfg.Enable == FALSE )
+  if ( m_QARCfg.enable == FALSE )
   {
-    if (QARState.SystemStatus != QAR_STATUS_OK)
+    if (m_QARState.systemStatus != QAR_STATUS_OK)
     {
-      QARState.SystemStatus = QAR_STATUS_DISABLED_FAULTED;
+      m_QARState.systemStatus = QAR_STATUS_DISABLED_FAULTED;
     }
     else
     {
-      QARState.SystemStatus = QAR_STATUS_DISABLED_OK;
+      m_QARState.systemStatus = QAR_STATUS_DISABLED_OK;
     }
   }
 
 
   FPGA_Configure();   // Force QAR FPGA Shadow Ram values to loaded into FPGA
 
-  if ( (QARCfg.Enable == TRUE) && (QARState.SystemStatus == QAR_STATUS_FAULTED_PBIT) )
+  if ( (m_QARCfg.enable == TRUE) && (m_QARState.systemStatus == QAR_STATUS_FAULTED_PBIT) )
   {
-    StartupLog.result = SYS_QAR_PBIT_FAIL;
-    Flt_SetStatus(QARCfg.PBITSysCond, SYS_ID_QAR_PBIT_DRV_FAIL,
-                  &StartupLog, sizeof(QAR_SYS_PBIT_STARTUP_LOG) );
+    startupLog.result = SYS_QAR_PBIT_FAIL;
+    Flt_SetStatus(m_QARCfg.pBITSysCond, SYS_ID_QAR_PBIT_DRV_FAIL,
+                  &startupLog, sizeof(QAR_SYS_PBIT_STARTUP_LOG) );
   }
 
 }
@@ -398,32 +403,6 @@ void QAR_Reframe (void)
    QAR_W( pQARCtrl, C_RESYNC, (UINT16)QAR_NORMAL_OPERATION);
 }
 
-
-/******************************************************************************
- * Function:     QAR_Reconfigure
- *
- * Description:  The QAR_Reconfigure function will reprogram all the
- *               configuration registers of the FPGA.
- *
- * Parameters:   None
- *
- * Returns:      None
- *
- * Notes:
- *  1) Reconfigure QAR based on current (or updated) QARCfg
- *
- *****************************************************************************/
-void QAR_Reconfigure (void)
-{
-   QAR_ReconfigureFPGAShadowRam();
-   QAR_ResetState();
-
-   FPGA_Configure();
-}
-
-
-
-
 /******************************************************************************
  * Function:     QAR_ProcessISR
  *
@@ -441,24 +420,24 @@ void QAR_Reconfigure (void)
 void QAR_ProcessISR(void)
 {
    QAR_STATE *pState;
-   UINT32 TickCount;
+   UINT32 nTickCount;
 
    // Set pointer to QAR State Container
-   pState = &QARState;
+   pState = &m_QARState;
 
-   TickCount = CM_GetTickCount();
+   nTickCount = CM_GetTickCount();
 
    if ( QAR_R(pQARStatus, S_FRAME_VALID) && !QAR_R( pQARStatus, S_LOST_SYNC) )
    {
-     if ( TickCount > (pState->LastIntTime + QAR_ALLOWED_INT_FREQ) )
+     if ( nTickCount > (pState->lastIntTime + QAR_ALLOWED_INT_FREQ) )
      {
-        pState->LastIntTime = TickCount;
+        pState->lastIntTime = nTickCount;
         pState->bGetNewSubFrame = TRUE;
      }
      else
      {
         // INT Occurred faster than 1 Hz !!!
-        pState->BadIntFreqCnt++;
+        pState->badIntFreqCnt++;
      }
 
      // Update Barker Err Indication
@@ -469,11 +448,11 @@ void QAR_ProcessISR(void)
    {
      if ( QAR_R( pQARStatus, S_LOST_SYNC) )
      {
-        pState->InterruptCntLOFS++;
+        pState->interruptCntLOFS++;
      }
    }
 
-   pState->InterruptCnt++;
+   pState->interruptCnt++;
 }
 
 
@@ -503,8 +482,8 @@ void QAR_ReadSubFrameTask( void *pParam )
    // Local Data
    UINT16    *pSrc;
    UINT16    i;
-   QAR_SF    NewFrame;
-   UINT32    CurrentFrame;
+   QAR_SF    newFrame;
+   UINT32    nCurrentFrame;
    QAR_STATE_PTR pState;
    UINT16        *pQARFrameWord;
    QAR_CONFIGURATION_PTR  pQARCfg;
@@ -526,59 +505,59 @@ void QAR_ReadSubFrameTask( void *pParam )
      if ( QAR_R(pQARStatus, S_FRAME_VALID) )
      {
        pState->bChanActive = TRUE;
-       pState->FrameSync   = TRUE;
-       pState->LossOfFrame = FALSE;
+       pState->frameSync   = TRUE;
+       pState->lossOfFrame = FALSE;
 
        // Must wait to see if the next frame loses sync on barker
        // before saving current sub-frame
        if ( ( pState->bGetNewSubFrame == TRUE ) &&
-           (( CM_GetTickCount() - pState->LastIntTime ) > LOFS_TIMEOUT_MS))
+           (( CM_GetTickCount() - pState->lastIntTime ) > LOFS_TIMEOUT_MS))
        {
          // Process the sub-frame and reset the flag
          pState->bGetNewSubFrame = FALSE;
 
          // Get the Current Frame being captured in the FPGA
-         CurrentFrame = QAR_R( pQARStatus, S_SUBFRAME);
+         nCurrentFrame = QAR_R( pQARStatus, S_SUBFRAME);
 
          // Now determine which frame is ready for processing
-         if ( CurrentFrame == (UINT32)QAR_SF1)
+         if ( nCurrentFrame == (UINT32)QAR_SF1)
          {
            // Set the new frame to Sub-Frame 4
-           NewFrame = QAR_SF4;
+           newFrame = QAR_SF4;
          }
          else
          {
            // The valid sub-frame is one less than what is
            // in the status register
-           NewFrame = (QAR_SF)(CurrentFrame - 1);
+           newFrame = (QAR_SF)(nCurrentFrame - 1);
          }
 
          // If the frame is 1 or 3 then copy buffer 1
-         if ( (NewFrame == QAR_SF1) ||  (NewFrame == QAR_SF3 ) )
+         if ( (newFrame == QAR_SF1) ||  (newFrame == QAR_SF3 ) )
          {
-           pSrc = (UINT16*)&pQARSubFrame->Buffer1;
+           pSrc = (UINT16*)&pQARSubFrame->buffer1;
          }
          else // the frame is 2 or 4 copy buffer 2
          {
-           pSrc = (UINT16*)&pQARSubFrame->Buffer2;
+           pSrc = (UINT16*)&pQARSubFrame->buffer2;
          }
 
-         pQARFrameWord = (UINT16 *) &QARFrame[NewFrame].Word[0];
+         pQARFrameWord = (UINT16 *) &m_QARFrame[newFrame].word[0];
 
          // Validate that Barker Code is what we want !
          // If we have LOFS, then 1 in 4 chance that we will encounter a Barker Code mismatch.
-         pQARCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
-         if (*pSrc != pQARCfg->BarkerCode[NewFrame] )
+         pQARCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
+         if (*pSrc != pQARCfg->barkerCode[newFrame] )
          {
            GSE_DebugStr(NORMAL,
                   TRUE,
                   "QAR_ReadSubFrame: Barker Code Mismatch (exp=%04X,act=%04X)",
-                  pQARCfg->BarkerCode[NewFrame],
+                  pQARCfg->barkerCode[newFrame],
                   *pSrc);
          }
 
          // Copy data from QAR Buffer to storage container
-         for (i=0; i < pState->TotalWords; i++)
+         for (i=0; i < pState->totalWords; i++)
          {
            *(pQARFrameWord + i) = *pSrc++;
          }
@@ -595,68 +574,68 @@ void QAR_ReadSubFrameTask( void *pParam )
             //       we would have Loss Frame Sync and never get to this point.
             if ( m_BarkerErr == TRUE )
             {
-              if (pState->BarkerError == FALSE )
+              if (pState->barkerError == FALSE )
               {
                 // Mark Status as "potentially" bad current SF
-                pState->bSubFrameOk[NewFrame] = FALSE;
+                pState->bSubFrameOk[newFrame] = FALSE;
                 // Note: If we loose sync after the 2nd bad BARKER we should
                 //  go out of sync.  When we get back into sync, this
                 //  SF data should still be marked "suspect" until
                 //  a new "potentially" good SF is received.
-                pState->BarkerError = TRUE;
-                pState->BarkerErrorCount++;
+                pState->barkerError = TRUE;
+                pState->barkerErrorCount++;
               }
               else
               {
                 // If we are still in sync on subsequent BARKER ERROR then
                 //  this SF is "potential" good.  Assume so.
-                pState->bSubFrameOk[NewFrame] = TRUE;
+                pState->bSubFrameOk[newFrame] = TRUE;
                 // Update Time
                 // pState->LastSubFrameUpdateTime[NewFrame] = CM_GetTickCount();
-                QARFrame[NewFrame].LastSubFrameUpdateTime = CM_GetTickCount();
+                m_QARFrame[newFrame].lastSubFrameUpdateTime = CM_GetTickCount();
                 // Update Last Good Sub Frame Read
-                pState->PreviousSubFrameOk = NewFrame;
+                pState->previousSubFrameOk = newFrame;
               }
             }
             else
             {
               // Mark Status as "potentially" good current SF
-              pState->bSubFrameOk[NewFrame] = TRUE;
+              pState->bSubFrameOk[newFrame] = TRUE;
               // Update Time
-              QARFrame[NewFrame].LastSubFrameUpdateTime = CM_GetTickCount();
+              m_QARFrame[newFrame].lastSubFrameUpdateTime = CM_GetTickCount();
               // Update Last Good Sub Frame Read
-              pState->PreviousSubFrameOk = NewFrame;
-              pState->BarkerError = FALSE;
+              pState->previousSubFrameOk = newFrame;
+              pState->barkerError = FALSE;
             }
 
             // If ->bSubFrameOk[] == TRUE then copy this data to "shadow" for
             //   processing in QAR_ReadWord() where last good data is always returned.
-            if ( pState->bSubFrameOk[NewFrame] == TRUE )
+            if ( pState->bSubFrameOk[newFrame] == TRUE )
             {
-              memcpy ( (void *) &QARFramePrevGood[NewFrame].Word[0],
-                       (void *) &QARFrame[NewFrame].Word[0],
-					    pState->TotalWords * sizeof(UINT16)
+              memcpy ( (void *) &m_QARFramePrevGood[newFrame].word[0],
+                       (void *) &m_QARFrame[newFrame].word[0],
+					    pState->totalWords * sizeof(UINT16)
 					  );
-              QARFramePrevGood[NewFrame].LastSubFrameUpdateTime = CM_GetTickCount();
-              pState->bSubFrameReceived[NewFrame] = TRUE;
+              m_QARFramePrevGood[newFrame].lastSubFrameUpdateTime = CM_GetTickCount();
+              pState->bSubFrameReceived[newFrame] = TRUE;
             }
 
             // Update the state data, this is what is used by the GetSnap and GetSubFrame
-            pState->PreviousFrame = pState->CurrentFrame;
-            pState->CurrentFrame  = NewFrame;
+            pState->previousFrame = pState->currentFrame;
+            pState->currentFrame  = newFrame;
 
          } // End of if -> S_FRAME_VALID && !S_LOST_SYNC
        } // End of if ->bGetNewSubFrame == TRUE
      } // End of if ->FrameValid == TRUE
      else
      {
-       pState->FrameSync       = FALSE;
+       pState->frameSync       = FALSE;
        pState->bGetNewSubFrame = FALSE;
        // FPGA indicates LossOfFrameSync only after SYNC has been established
        if ( QAR_R( pQARStatus, S_LOST_SYNC) )
        {
          // Only on transition from SYNC OK to SYNC BAD
-         if (pState->LossOfFrame == FALSE)
+         if (pState->lossOfFrame == FALSE)
          {
            // Reset frame received because we don't want stale data for
            // the start-snap when we resync
@@ -665,12 +644,12 @@ void QAR_ReadSubFrameTask( void *pParam )
            pState->bSubFrameReceived[QAR_SF3] = FALSE;
            pState->bSubFrameReceived[QAR_SF4] = FALSE;
 
-           pState->LossOfFrame       = TRUE;
-           pState->LossOfFrameCount++;  // Cnt instances of loss of frame sync
-           pState->CurrentFrame      = QAR_SF4;
-           pState->PreviousFrame     = QAR_SF4;
-           pState->LastServiced      = QAR_SF4;
-           pState->BarkerError       = FALSE;
+           pState->lossOfFrame       = TRUE;
+           pState->lossOfFrameCount++;  // Cnt instances of loss of frame sync
+           pState->currentFrame      = QAR_SF4;
+           pState->previousFrame     = QAR_SF4;
+           pState->lastServiced      = QAR_SF4;
+           pState->barkerError       = FALSE;
            m_BarkerErr               = FALSE;
          } // End of ->LossOfFrame == FALSE
        } // End of ->LossOfFrameSync indicates TRUE from FPGA
@@ -700,7 +679,7 @@ static
 void QAR_ReadSubFrameTaskShutdown(void)
 {
   // Set config to indicate disabled.
-  QARCfg.Enable = FALSE;
+  m_QARCfg.enable = FALSE;
 
   // Update FPGA Shadow RAM
   QAR_ReconfigureFPGAShadowRam();
@@ -742,22 +721,22 @@ UINT16 QAR_GetSubFrame ( void *pDest, UINT32 nop, UINT16 nMaxByteSize )
    ASSERT ( ((UINT32)pDest & 0x1) != 0x01 );
 
    nCnt = 0;
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
 
-   if ( pState->LastServiced != pState->CurrentFrame )
+   if ( pState->lastServiced != pState->currentFrame )
    {
      pbuf = (UINT16 *) pDest;
      nMaxWordSize = nMaxByteSize / sizeof(UINT16);
 
      nCnt = nMaxByteSize;
-     if ( pState->TotalWords <= nMaxWordSize )
+     if ( pState->totalWords <= nMaxWordSize )
      {
-        nCnt = pState->TotalWords * sizeof(UINT16);
+        nCnt = pState->totalWords * sizeof(UINT16);
      }
 
-     memcpy ( (void *) pbuf, (void *) &QARFrame[pState->CurrentFrame].Word[0],
+     memcpy ( (void *) pbuf, (void *) &m_QARFrame[pState->currentFrame].word[0],
               nCnt );
-     pState->LastServiced = pState->CurrentFrame;
+     pState->lastServiced = pState->currentFrame;
    }
 
    // nCnt = nCnt / sizeof(UINT16);   // Change back to word count from byte count !
@@ -802,21 +781,21 @@ UINT16 QAR_GetSubFrameDisplay ( void *pDest, QAR_SF *lastServiced, UINT16 nMaxBy
    ASSERT ( ((UINT32)pDest & 0x1) != 0x01 );
 
    nCnt = 0;
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
 
-   if ( *lastServiced != pState->CurrentFrame )
+   if ( *lastServiced != pState->currentFrame )
    {
      pbuf = (UINT16 *) pDest;
      nMaxWordSize = nMaxByteSize / sizeof(UINT16);
 
      nCnt = nMaxByteSize;
-     if ( pState->TotalWords <= nMaxWordSize )
+     if ( pState->totalWords <= nMaxWordSize )
      {
-        nCnt = pState->TotalWords * sizeof(UINT16);
+        nCnt = pState->totalWords * sizeof(UINT16);
      }
-     memcpy ( (void *) pbuf, (void *) &QARFrame[pState->CurrentFrame].Word[0],
+     memcpy ( (void *) pbuf, (void *) &m_QARFrame[pState->currentFrame].word[0],
               nCnt );
-     *lastServiced = pState->CurrentFrame;
+     *lastServiced = pState->currentFrame;
    }
 
    // nCnt = nCnt / sizeof(UINT16);   // Change back to word count from byte count !
@@ -864,13 +843,13 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
    // ASSERT() when pDest != WORD ALIGNED !!!
   ASSERT ( ((UINT32)pDest & 0x1) != 0x01 );
 
-  pState = (QAR_STATE_PTR) &QARState;
+  pState = (QAR_STATE_PTR) &m_QARState;
   pbuf = (UINT16 *) pDest;
   nMaxWordSize = nMaxByteSize / sizeof(UINT16);
 
   // From current Frame (4 SubFrames) move backwards to determine the last four
   //   SubFrames
-  currentSF = (SINT16) pState->CurrentFrame;
+  currentSF = (SINT16) pState->currentFrame;
   for (i=0;i<(UINT16)QAR_SF_MAX;i++)
   {
     nSubFrame[(SINT16)QAR_SF4 - i] = (QAR_SF) currentSF--;
@@ -883,9 +862,9 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
 
   // Determine Max Word Size to Return
   nMaxDestBuffWordSize = nMaxWordSize;
-  if ( nMaxWordSize > (UINT16)(QAR_SF_MAX * pState->TotalWords) )
+  if ( nMaxWordSize > (UINT16)(QAR_SF_MAX * pState->totalWords) )
   {
-    nMaxDestBuffWordSize = (UINT16)(QAR_SF_MAX * pState->TotalWords);
+    nMaxDestBuffWordSize = (UINT16)(QAR_SF_MAX * pState->totalWords);
   }
 
   // Copy all four (or as much as possible) into the Dest Buffer
@@ -897,10 +876,10 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
     // Only if Sub Frame has been received will we return the SF
     if ( pState->bSubFrameReceived[nSubFrame[i]] == TRUE )
     {
-      if ( (nCnt + pState->TotalWords) < nMaxDestBuffWordSize )
+      if ( (nCnt + pState->totalWords) < nMaxDestBuffWordSize )
       {
         // Copy entire sub frame
-        j = pState->TotalWords;
+        j = pState->totalWords;
       }
       else
       {
@@ -909,7 +888,7 @@ UINT16 QAR_GetFrameSnapShot ( void *pDest, UINT32 nop, UINT16 nMaxByteSize,
       }
       // Copy last sub frame based on nSubFrame[] calc above to determine the
       //    last four sub frames.
-      memcpy ( (void *) (pbuf + nCnt), (void *) &QARFrame[nSubFrame[i]].Word[0],
+      memcpy ( (void *) (pbuf + nCnt), (void *) &m_QARFrame[nSubFrame[i]].word[0],
                j * sizeof(UINT16) );
       nCnt = nCnt + j;
     }
@@ -955,31 +934,31 @@ void QAR_SyncTime( UINT32 chan )
 UINT16 QAR_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 {
    // Local Data
-   QAR_CHAN_HDR          ChanHdr;
+   QAR_CHAN_HDR          chanHdr;
    INT8                  *pBuffer;
    QAR_CONFIGURATION_PTR pCfg;
 
    // Initialize Local Data
-   pBuffer   = (INT8 *)(pDest) + sizeof(ChanHdr);  // Move to end of Channel File Hdr
-   pCfg    = &QARCfg;
+   pBuffer   = (INT8 *)(pDest) + sizeof(chanHdr);  // Move to end of Channel File Hdr
+   pCfg    = &m_QARCfg;
 
    // Update Chan file hdr
-   memset ( &ChanHdr, 0, sizeof(ChanHdr) );
+   memset ( &chanHdr, 0, sizeof(chanHdr) );
 
-   ChanHdr.TotalSize = sizeof(ChanHdr);
-   strncpy_safe( ChanHdr.Name, sizeof(ChanHdr.Name), pCfg->Name, _TRUNCATE );
-   ChanHdr.Protocol      = QAR_RAW;
-   ChanHdr.NumWords      = pCfg->NumWords;
-   ChanHdr.BarkerCode[0] = pCfg->BarkerCode[0];
-   ChanHdr.BarkerCode[1] = pCfg->BarkerCode[1];
-   ChanHdr.BarkerCode[2] = pCfg->BarkerCode[2];
-   ChanHdr.BarkerCode[3] = pCfg->BarkerCode[3];
+   chanHdr.totalSize = sizeof(chanHdr);
+   strncpy_safe( chanHdr.name, sizeof(chanHdr.name), pCfg->name, _TRUNCATE );
+   chanHdr.protocol      = QAR_RAW;
+   chanHdr.numWords      = pCfg->numWords;
+   chanHdr.barkerCode[0] = pCfg->barkerCode[0];
+   chanHdr.barkerCode[1] = pCfg->barkerCode[1];
+   chanHdr.barkerCode[2] = pCfg->barkerCode[2];
+   chanHdr.barkerCode[3] = pCfg->barkerCode[3];
 
    // Copy Chan file hdr to destination
    pBuffer = pDest;
-   memcpy ( pBuffer, &ChanHdr, sizeof(ChanHdr) );
+   memcpy ( pBuffer, &chanHdr, sizeof(chanHdr) );
 
-   return (ChanHdr.TotalSize);
+   return (chanHdr.totalSize);
 }
 
 /******************************************************************************
@@ -999,23 +978,23 @@ UINT16 QAR_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize )
 {
    // Local Data
-   QAR_SYS_HDR QARSysHdr;
+   QAR_SYS_HDR m_QARSysHdr;
    INT8        *pBuffer;
    UINT16      nTotal;
 
    // Initialize Local Data
    pBuffer    = (INT8 *)pDest;
    nTotal     = 0;
-   memset ( &QARSysHdr, 0, sizeof(QARSysHdr) );
+   memset ( &m_QARSysHdr, 0, sizeof(m_QARSysHdr) );
    // Check to make sure there is room in the buffer
-   if ( nMaxByteSize > sizeof (QARSysHdr) )
+   if ( nMaxByteSize > sizeof (m_QARSysHdr) )
    {
       // Copy the QAR name
-      strncpy_safe( QARSysHdr.Name, sizeof(QARSysHdr.Name), QARCfg.Name, _TRUNCATE );
+      strncpy_safe( m_QARSysHdr.name, sizeof(m_QARSysHdr.name), m_QARCfg.name, _TRUNCATE );
       // Increment the size
-      nTotal += sizeof (QARSysHdr);
+      nTotal += sizeof (m_QARSysHdr);
       // Copy the header to the buffer
-      memcpy ( pBuffer, &QARSysHdr, nTotal );
+      memcpy ( pBuffer, &m_QARSysHdr, nTotal );
    }
    // return the total written
    return ( nTotal );
@@ -1047,7 +1026,7 @@ void QAR_MonitorTask ( void *pParam )
    BOOLEAN      *pTimeOutFlag;
    QAR_SUBFRAME_DATE_PTR pQARFrame;
    UINT16       i;
-   UINT32       TempData;
+   UINT32       nTempData;
    UINT16       dataPresent;
 
    BOOLEAN      bStatusOk;
@@ -1075,58 +1054,58 @@ void QAR_MonitorTask ( void *pParam )
    // Only if QAR is enabled and not faulted PBIT shall QAR CBIT Monitor Task
    // process occur
    if ( ( pState->bQAREnable == TRUE ) &&
-        ( pState->SystemStatus != QAR_STATUS_FAULTED_PBIT) )
+        ( pState->systemStatus != QAR_STATUS_FAULTED_PBIT) )
    {
      // Monitor for Activity Data Present
      if ( dataPresent == QSR_DATA_PRESENT_VAL )
      {
         // Update Internal Data Present Flag
-        if ( pState->DataPresent == FALSE )
+        if ( pState->dataPresent == FALSE )
         {
-           LogWriteSystem (SYS_ID_QAR_DATA_PRESENT, LOG_PRIORITY_LOW, &TempData, 0, NULL);
-           pState->DataPresent = TRUE;
+           LogWriteSystem (SYS_ID_QAR_DATA_PRESENT, LOG_PRIORITY_LOW, &nTempData, 0, NULL);
+           pState->dataPresent = TRUE;
            GSE_DebugStr(NORMAL,TRUE,"QAR System Log: QAR Data Present Detected");
         }
      }
      else
      {
         // Update Internal Data Present Flag
-        if ( pState->DataPresent == TRUE )
+        if ( pState->dataPresent == TRUE )
         {
-           LogWriteSystem (SYS_ID_QAR_DATA_LOSS, LOG_PRIORITY_LOW, &TempData, 0, NULL);
-           pState->DataPresent = FALSE;
+           LogWriteSystem (SYS_ID_QAR_DATA_LOSS, LOG_PRIORITY_LOW, &nTempData, 0, NULL);
+           pState->dataPresent = FALSE;
            GSE_DebugStr(NORMAL,TRUE,"QAR System Log: QAR Data Present Lost");
 
-           pState->DataPresentLostCount++;
+           pState->dataPresentLostCount++;
         }
 
      } // End of else ->DataPresent indicate data not present
 
      // Update TimeOut Condition
-     pQarCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
+     pQarCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
 
      // Channel Data Loss Determination
      // Note: FPGA when data activity is loss, FPGA might not update FrameSync Flag !
      //       Should qualify Chan Loss as absent of either FrameSync or Data Present !
-     if ( (pState->FrameSync == FALSE) ||
+     if ( (pState->frameSync == FALSE) ||
           (dataPresent != QSR_DATA_PRESENT_VAL ) )
      {
 
         // Determine StartUp or Regular TimeOut
-        if (pState->LastActivityTime != 0)
+        if (pState->lastActivityTime != 0)
         {
           // Activity received, check for subsequent channel loss
-          nTimeOut = pQarCfg->ChannelTimeOut_s;
+          nTimeOut = pQarCfg->channelTimeOut_s;
           pTimeOutFlag = (BOOLEAN *) &pState->bChannelTimeOut;
         }
         else
         {
           // Activity never received, check for startup
-          nTimeOut = pQarCfg->ChannelStartup_s;
+          nTimeOut = pQarCfg->channelStartup_s;
           pTimeOutFlag = (BOOLEAN *) &pState->bChannelStartupTimeOut;
         }
 
-        if ( ((CM_GetTickCount() - pState->LastActivityTime) >
+        if ( ((CM_GetTickCount() - pState->lastActivityTime) >
               (nTimeOut * MILLISECONDS_PER_SECOND)) && (nTimeOut != QAR_DSB_TIMEOUT) )
         {
           if (*pTimeOutFlag != TRUE )
@@ -1155,12 +1134,12 @@ void QAR_MonitorTask ( void *pParam )
      } // End of Frame Not Sync or Data Not Present
      else
      {
-        pState->LastActivityTime = CM_GetTickCount();
+        pState->lastActivityTime = CM_GetTickCount();
 
         // Reset Flt_Status() if timeout condition had occurred
         if ( (pState->bChannelStartupTimeOut == TRUE) || (pState->bChannelTimeOut == TRUE) )
         {
-          Flt_ClrStatus(pQarCfg->ChannelSysCond);
+          Flt_ClrStatus(pQarCfg->channelSysCond);
         }
         pState->bChannelStartupTimeOut = FALSE;
         pState->bChannelTimeOut = FALSE;
@@ -1168,18 +1147,18 @@ void QAR_MonitorTask ( void *pParam )
 
 
      // Channel Loss of Sync Determination
-     if ( (pState->LossOfFrame == TRUE) &&
-          (pState->FrameState  != QAR_LOSF) )
+     if ( (pState->lossOfFrame == TRUE) &&
+          (pState->frameState  != QAR_LOSF) )
      {
-        LogWriteSystem (SYS_ID_QAR_SYNC_LOSS, LOG_PRIORITY_LOW, &TempData, 0, NULL);
-        pState->FrameState = QAR_LOSF;
+        LogWriteSystem (SYS_ID_QAR_SYNC_LOSS, LOG_PRIORITY_LOW, &nTempData, 0, NULL);
+        pState->frameState = QAR_LOSF;
         GSE_DebugStr(NORMAL,TRUE,"QAR System Log: QAR Loss of Frame Sync Detected");
      }
-     else if ( (pState->FrameSync == TRUE) &&
-               (pState->FrameState != QAR_SYNCD) )
+     else if ( (pState->frameSync == TRUE) &&
+               (pState->frameState != QAR_SYNCD) )
      {
-        LogWriteSystem (SYS_ID_QAR_SYNC, LOG_PRIORITY_LOW, &TempData, 0, NULL);
-        pState->FrameState = QAR_SYNCD;
+        LogWriteSystem (SYS_ID_QAR_SYNC, LOG_PRIORITY_LOW, &nTempData, 0, NULL);
+        pState->frameState = QAR_SYNCD;
         GSE_DebugStr(NORMAL,TRUE,"QAR System Log: QAR Frame Sync Detected");
         SystemLogResetLimitCheck(SYS_ID_QAR_DATA_PRESENT);
         SystemLogResetLimitCheck(SYS_ID_QAR_DATA_LOSS);
@@ -1189,16 +1168,16 @@ void QAR_MonitorTask ( void *pParam )
         {
            pState->bFrameSyncOnce = TRUE;  // We have synced at least once !
            // Reset TimeOuts
-           pQARFrame = (QAR_SUBFRAME_DATE_PTR) &QARFrame[QAR_SF1];
+           pQARFrame = (QAR_SUBFRAME_DATE_PTR) &m_QARFrame[QAR_SF1];
            for (i=0;i<(UINT16)QAR_SF_MAX;i++)
            {
-             pQARFrame->LastSubFrameUpdateTime = pState->LastActivityTime;
+             pQARFrame->lastSubFrameUpdateTime = pState->lastActivityTime;
              pQARFrame++;
            }
-           pQARFrame = (QAR_SUBFRAME_DATE_PTR) &QARFramePrevGood[QAR_SF1];
+           pQARFrame = (QAR_SUBFRAME_DATE_PTR) &m_QARFramePrevGood[QAR_SF1];
            for (i=0;i<(UINT16)QAR_SF_MAX;i++)
            {
-             pQARFrame->LastSubFrameUpdateTime = pState->LastActivityTime;
+             pQARFrame->lastSubFrameUpdateTime = pState->lastActivityTime;
              pQARFrame++;
            }
         }
@@ -1207,11 +1186,11 @@ void QAR_MonitorTask ( void *pParam )
      // Update Real time Status of QAR
      if (bStatusOk != TRUE)
      {
-       pState->SystemStatus = QAR_STATUS_FAULTED_CBIT;
+       pState->systemStatus = QAR_STATUS_FAULTED_CBIT;
      }
      else
      {
-       pState->SystemStatus = QAR_STATUS_OK;
+       pState->systemStatus = QAR_STATUS_OK;
      }
 
    } // QAR is enabled and QAR has not faulted PBIT
@@ -1232,14 +1211,14 @@ void QAR_MonitorTask ( void *pParam )
  *****************************************************************************/
 QAR_CBIT_HEALTH_COUNTS QAR_GetCBITHealthStatus ( void )
 {
-   QARCBITHealthStatus.SystemStatus = QARState.SystemStatus;
-   QARCBITHealthStatus.bQAREnable = QARState.bQAREnable;
-   QARCBITHealthStatus.FrameState = QARState.FrameState;
-   QARCBITHealthStatus.DataPresentLostCount = QARState.DataPresentLostCount;
-   QARCBITHealthStatus.LossOfFrameCount = QARState.LossOfFrameCount;
-   QARCBITHealthStatus.BarkerErrorCount = QARState.BarkerErrorCount;
+   m_QARCBITHealthStatus.systemStatus = m_QARState.systemStatus;
+   m_QARCBITHealthStatus.bQAREnable = m_QARState.bQAREnable;
+   m_QARCBITHealthStatus.frameState = m_QARState.frameState;
+   m_QARCBITHealthStatus.dataPresentLostCount = m_QARState.dataPresentLostCount;
+   m_QARCBITHealthStatus.lossOfFrameCount = m_QARState.lossOfFrameCount;
+   m_QARCBITHealthStatus.barkerErrorCount = m_QARState.barkerErrorCount;
 
-   return (QARCBITHealthStatus);
+   return (m_QARCBITHealthStatus);
 }
 
 
@@ -1263,13 +1242,13 @@ QAR_CBIT_HEALTH_COUNTS QAR_CalcDiffCBITHealthStatus ( QAR_CBIT_HEALTH_COUNTS Pre
 
   currentCount = QAR_GetCBITHealthStatus();
 
-  diffCount.SystemStatus         = currentCount.SystemStatus;
+  diffCount.systemStatus         = currentCount.systemStatus;
   diffCount.bQAREnable           = currentCount.bQAREnable;
-  diffCount.FrameState           = currentCount.FrameState;
-  diffCount.DataPresentLostCount = currentCount.DataPresentLostCount
-                                   - PrevCount.DataPresentLostCount;
-  diffCount.LossOfFrameCount     = currentCount.LossOfFrameCount - PrevCount.LossOfFrameCount;
-  diffCount.BarkerErrorCount     = currentCount.BarkerErrorCount - PrevCount.BarkerErrorCount;
+  diffCount.frameState           = currentCount.frameState;
+  diffCount.dataPresentLostCount = currentCount.dataPresentLostCount
+                                   - PrevCount.dataPresentLostCount;
+  diffCount.lossOfFrameCount     = currentCount.lossOfFrameCount - PrevCount.lossOfFrameCount;
+  diffCount.barkerErrorCount     = currentCount.barkerErrorCount - PrevCount.barkerErrorCount;
 
    return (diffCount);
 }
@@ -1292,19 +1271,19 @@ QAR_CBIT_HEALTH_COUNTS QAR_CalcDiffCBITHealthStatus ( QAR_CBIT_HEALTH_COUNTS Pre
 QAR_CBIT_HEALTH_COUNTS QAR_AddPrevCBITHealthStatus ( QAR_CBIT_HEALTH_COUNTS CurrCnt,
                                                      QAR_CBIT_HEALTH_COUNTS PrevCnt )
 {
-  QAR_CBIT_HEALTH_COUNTS AddCount;
+  QAR_CBIT_HEALTH_COUNTS addCount;
 
-  AddCount.SystemStatus = CurrCnt.SystemStatus;
-  AddCount.bQAREnable = CurrCnt.bQAREnable;
-  AddCount.FrameState = CurrCnt.FrameState;
-  AddCount.DataPresentLostCount = CurrCnt.DataPresentLostCount
-                                   + PrevCnt.DataPresentLostCount;
-  AddCount.LossOfFrameCount = CurrCnt.LossOfFrameCount
-                               + PrevCnt.LossOfFrameCount;
-  AddCount.BarkerErrorCount = CurrCnt.BarkerErrorCount
-                               + PrevCnt.BarkerErrorCount;
+  addCount.systemStatus = CurrCnt.systemStatus;
+  addCount.bQAREnable = CurrCnt.bQAREnable;
+  addCount.frameState = CurrCnt.frameState;
+  addCount.dataPresentLostCount = CurrCnt.dataPresentLostCount
+                                   + PrevCnt.dataPresentLostCount;
+  addCount.lossOfFrameCount = CurrCnt.lossOfFrameCount
+                               + PrevCnt.lossOfFrameCount;
+  addCount.barkerErrorCount = CurrCnt.barkerErrorCount
+                               + PrevCnt.barkerErrorCount;
 
-  return (AddCount);
+  return (addCount);
 }
 
 
@@ -1340,7 +1319,7 @@ void QAR_GetRegisters (QAR_REGISTERS *Registers)
  *****************************************************************************/
 QAR_STATE_PTR QAR_GetState ( void )
 {
-   return ( (QAR_STATE_PTR) &QARState );
+   return ( (QAR_STATE_PTR) &m_QARState );
 }
 
 /******************************************************************************
@@ -1380,15 +1359,15 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
 {
    QAR_WORD_INFO_PTR pWordInfo;
    QAR_SF sf;
-   UINT16 Cnt;
+   UINT16 nCnt;
 
-   Cnt = QARWordSensorCount;
-   pWordInfo = (QAR_WORD_INFO_PTR) &QARWordInfo[Cnt];
+   nCnt = nQARWordSensorCount;
+   pWordInfo = (QAR_WORD_INFO_PTR) &m_QARWordInfo[nCnt];
 
    // Parse gpA field
-   pWordInfo->WordSize     = (UINT16)(gpA & 0x0000000FUL);
-   pWordInfo->MSBPosition  = (UINT16)(gpA >> 4 ) & 0x0000000FUL;
-   pWordInfo->WordLocation = (UINT16)(gpA >> 16) & 0x00000FFFUL;
+   pWordInfo->wordSize     = (UINT16)(gpA & 0x0000000FUL);
+   pWordInfo->msbPosition  = (UINT16)(gpA >> 4 ) & 0x0000000FUL;
+   pWordInfo->wordLocation = (UINT16)(gpA >> 16) & 0x00000FFFUL;
    for (sf=QAR_SF1;sf<QAR_SF_MAX;sf++)
    {
      if ( ((gpA >>(8+(UINT32)sf)) & (0x00000001UL)) != 0x00 )
@@ -1403,27 +1382,27 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
 
    if ( ((gpA >> 12) & (0x00000001UL)) != 0x00 )
    {
-      pWordInfo->SignBit = TRUE;
+      pWordInfo->signBit = TRUE;
    }
    else
    {
-      pWordInfo->SignBit = FALSE;
+      pWordInfo->signBit = FALSE;
    }
 
-   if (pWordInfo->SignBit == TRUE)
+   if (pWordInfo->signBit == TRUE)
    {
      if ( ((gpA >> 13) & (0x00000001UL)) != 0x00 )
      {
-        pWordInfo->TwoComplement = TRUE;
+        pWordInfo->twoComplement = TRUE;
      }
      else
      {
-        pWordInfo->TwoComplement = FALSE;
+        pWordInfo->twoComplement = FALSE;
      }
    }
    else
    {
-      pWordInfo->TwoComplement = FALSE;
+      pWordInfo->twoComplement = FALSE;
    }
 
    // NOTE:  TBD provide validation where if signed value, assume bit 11 and
@@ -1432,19 +1411,19 @@ UINT16 QAR_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 nSensor)
 
    // Parse gpB field
    // pWordInfo->DataLossTime = (gpB & 0x0000FFFFUL) * 1000;  // In msec !
-   pWordInfo->DataLossTime = gpB;  // In msec !
+   pWordInfo->dataLossTime = gpB;  // In msec !
 
    // Update the sensor which requests this word definition
    pWordInfo->nSensor = nSensor;
 
    // Update QAR Sensor Count
-   QARWordSensorCount++;
+   nQARWordSensorCount++;
 
    // Once a QAR Sensor has been requested, set QAR to enable
    // QAR_Enable();
 
    // Return current index count
-   return(Cnt);
+   return(nCnt);
 
 }
 
@@ -1479,8 +1458,8 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
    SINT16            signBit;
 
 
-   pWordInfo = (QAR_WORD_INFO_PTR) &QARWordInfo[nIndex];
-   pState = (QAR_STATE_PTR) &QARState;
+   pWordInfo = (QAR_WORD_INFO_PTR) &m_QARWordInfo[nIndex];
+   pState = (QAR_STATE_PTR) &m_QARState;
 
    currentSF = QAR_FindCurrentGoodSF(nIndex);
 
@@ -1490,33 +1469,33 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
    if ( pState->bSubFrameOk[currentSF] == TRUE )
    {
       // word = QARFrame[currentSF][pWordInfo->WordLocation];
-      word = QARFrame[currentSF].Word[pWordInfo->WordLocation];
-      *tickCount = QARFrame[currentSF].LastSubFrameUpdateTime;
+      word = m_QARFrame[currentSF].word[pWordInfo->wordLocation];
+      *tickCount = m_QARFrame[currentSF].lastSubFrameUpdateTime;
    }
    else
    {
       // word = QARFramePrevGood[currentSF][pWordInfo->WordLocation];
-      word = QARFramePrevGood[currentSF].Word[pWordInfo->WordLocation];
-      *tickCount = QARFramePrevGood[currentSF].LastSubFrameUpdateTime;
+      word = m_QARFramePrevGood[currentSF].word[pWordInfo->wordLocation];
+      *tickCount = m_QARFramePrevGood[currentSF].lastSubFrameUpdateTime;
    }
 
    // Parse the word based on MSB Position and word size
    // Parse Data Bits before the param (could be param with multiple params embedded).
-   value = ((word << (15 - (pWordInfo->MSBPosition))) & 0x0000FFFFUL);
+   value = ((word << (15 - (pWordInfo->msbPosition))) & 0x0000FFFFUL);
    // Parse Data Bits after the param (could be param with multiple params embedded).
-   value = (value >> (16 - pWordInfo->WordSize));
+   value = (value >> (16 - pWordInfo->wordSize));
 
    // If Signed value, assume bit 11. NOTE: MSB Position should be bit 11 as well !
-   if ( pWordInfo->SignBit )
+   if ( pWordInfo->signBit )
    {
-      if ( pWordInfo->TwoComplement == TRUE )
+      if ( pWordInfo->twoComplement == TRUE )
       {
         // Determine if Sign Bit is set
-        signBit = ((word << (15 - pWordInfo->MSBPosition)) >> 15);
+        signBit = ((word << (15 - pWordInfo->msbPosition)) >> 15);
         if (signBit == 0x01 )
         {
           // Sign extend the value
-          for (k=0;k<(16 - pWordInfo->WordSize);k++)
+          for (k=0;k<(16 - pWordInfo->wordSize);k++)
           {
             value = value | (1<<(15-k));
           }
@@ -1527,15 +1506,15 @@ FLOAT32 QAR_ReadWord (UINT16 nIndex, UINT32 *tickCount)
       else
       {
         // MSB is sign value
-        signBit = ((word << (15 - pWordInfo->MSBPosition)) >> 15);
+        signBit = ((word << (15 - pWordInfo->msbPosition)) >> 15);
         if ( signBit == 0x01)
         {
           // "-1" to move one over from sign bit / filter it away !  AND
           // Parse Data Bits before the param (could be param with multiple params embedded).
-          value = ((word << (15 - (pWordInfo->MSBPosition - 1))) & 0x0000FFFFUL);
+          value = ((word << (15 - (pWordInfo->msbPosition - 1))) & 0x0000FFFFUL);
           // re-justify word, "-1" to account for the filtered out signed bit
           // Parse Data Bits after the param (could be param with multiple params embedded).
-          value = (value >> (16 - (pWordInfo->WordSize - 1)));
+          value = (value >> (16 - (pWordInfo->wordSize - 1)));
           value = value * ((-1) * signBit);
         }
       } // Else for Signed Magnitude value
@@ -1570,10 +1549,10 @@ BOOLEAN QAR_SensorTest (UINT16 nIndex)
    QAR_STATE_PTR     pState;
    QAR_SF            currentSF;
    UINT32            nTimeOut;
-   SYS_QAR_CBIT_FAIL_WORD_TIMEOUT_LOG  WordTimeoutLog;
+   SYS_QAR_CBIT_FAIL_WORD_TIMEOUT_LOG  wordTimeoutLog;
 
    bValid = FALSE;
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
 
    // Determine if any qar activity has been received and
    //   we have synced at least once !
@@ -1581,11 +1560,11 @@ BOOLEAN QAR_SensorTest (UINT16 nIndex)
    // time has not been updated or Frame Sync Once has not been set. This could
    // happen during powerup because the monitor function runs a 1Hz and the
    // Read sub-Frame runs much faster.
-   if ( (( pState->LastActivityTime != 0) && (pState->bFrameSyncOnce == TRUE)) ||
+   if ( (( pState->lastActivityTime != 0) && (pState->bFrameSyncOnce == TRUE)) ||
 	 ( pState->bChanActive == TRUE) )
    {
       bValid = TRUE;
-      pWordInfo = (QAR_WORD_INFO_PTR) &QARWordInfo[nIndex];
+      pWordInfo = (QAR_WORD_INFO_PTR) &m_QARWordInfo[nIndex];
 
       // Get current good SF
       currentSF = QAR_FindCurrentGoodSF(nIndex);
@@ -1593,32 +1572,32 @@ BOOLEAN QAR_SensorTest (UINT16 nIndex)
       // Calculate data loss time from "good" subframe buffer
       if ( pState->bSubFrameOk[currentSF] == TRUE )
       {
-        nTimeOut = QARFrame[currentSF].LastSubFrameUpdateTime;
+        nTimeOut = m_QARFrame[currentSF].lastSubFrameUpdateTime;
       }
       else
       {
-        nTimeOut = QARFramePrevGood[currentSF].LastSubFrameUpdateTime;
+        nTimeOut = m_QARFramePrevGood[currentSF].lastSubFrameUpdateTime;
       }
 
       // if ( (CM_GetTickCount() - pWordInfo->DataLossTime) > nTimeOut )
-      if ( ( CM_GetTickCount() - nTimeOut ) > pWordInfo->DataLossTime )
+      if ( ( CM_GetTickCount() - nTimeOut ) > pWordInfo->dataLossTime )
       {
         bValid = FALSE;
         if (pWordInfo->bFailed != TRUE)
         {
            pWordInfo->bFailed = TRUE;
 
-           sprintf (GSE_OutLine, "QAR_SensorTest: Word Timeout (S = %d)",
-                                 pWordInfo->nSensor);
-           GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
+           snprintf (strGSE_OutLine, sizeof(strGSE_OutLine),
+					 "QAR_SensorTest: Word Timeout (S = %d)", pWordInfo->nSensor);
+           GSE_DebugStr(NORMAL,TRUE,strGSE_OutLine);
 
-           WordTimeoutLog.result = SYS_QAR_WORD_TIMEOUT;
-           sprintf( WordTimeoutLog.FailMsg, "Xcptn: Word Timeout (S = %d)",
-                    pWordInfo->nSensor );
+           wordTimeoutLog.result = SYS_QAR_WORD_TIMEOUT;
+           snprintf( wordTimeoutLog.failMsg, sizeof(wordTimeoutLog.failMsg),
+					 "Xcptn: Word Timeout (S = %d)", pWordInfo->nSensor );
 
            // Log CBIT Here only on transition from data rx to no data rx
            LogWriteSystem( SYS_ID_QAR_CBIT_WORD_TIMEOUT_FAIL, LOG_PRIORITY_LOW,
-                          &WordTimeoutLog,
+                          &wordTimeoutLog,
                           sizeof(SYS_QAR_CBIT_FAIL_WORD_TIMEOUT_LOG), NULL );
         }
       }
@@ -1652,42 +1631,16 @@ BOOLEAN QAR_InterfaceValid (UINT16 nIndex)
    QAR_STATE_PTR     pState;
 
 
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
    bValid = FALSE;
 
-   if ( ( pState->SystemStatus == QAR_STATUS_OK) && (pState->bChanActive == TRUE))
+   if ( ( pState->systemStatus == QAR_STATUS_OK) && (pState->bChanActive == TRUE))
    {
       bValid = TRUE;
    }
 
    return bValid;
 
-}
-
-
-/******************************************************************************
- * Function:     QARwrite
- *
- * Description:  Write to FPGA QAR Registers
- *
- * Parameters:   addr - *addr FPGA QAR Register to access
- *               field - field Register Bit (parameter) to access
- *               data - data to set
- *
- * Returns:      none
- *
- * Notes:        none
- *
- *****************************************************************************/
-void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data)
-{
-    UINT16 value = *addr;
-    UINT16 mask  = MASK( FieldInfo[field].lsb, FieldInfo[field].size);
-
-    value = RESET_BITS( value, mask);
-    value |= FIELD( data, FieldInfo[field].lsb, FieldInfo[field].size);
-
-    *addr = value;
 }
 
 
@@ -1707,7 +1660,7 @@ void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data)
  *****************************************************************************/
 UINT16 QARread( volatile UINT16* addr, FIELD_NAMES field)
 {
-    return EXTRACT( *addr, FieldInfo[field].lsb, FieldInfo[field].size);
+    return EXTRACT( *addr, fieldInfo[field].lsb, fieldInfo[field].size);
 }
 
 
@@ -1775,10 +1728,35 @@ void QAR_CreateAllInternalLogs ( void )
 
 #endif
 
-
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
+
+/******************************************************************************
+ * Function:     QARwrite
+ *
+ * Description:  Write to FPGA QAR Registers
+ *
+ * Parameters:   addr - *addr FPGA QAR Register to access
+ *               field - field Register Bit (parameter) to access
+ *               data - data to set
+ *
+ * Returns:      none
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static
+void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data)
+{
+    UINT16 value = *addr;
+    UINT16 mask  = MASK( fieldInfo[field].lsb, fieldInfo[field].size);
+
+    value = RESET_BITS( value, mask);
+    value |= FIELD( data, fieldInfo[field].lsb, fieldInfo[field].size);
+
+    *addr = value;
+}
 
 /******************************************************************************
  * Function:     QAR_ReconfigureFPGAShadowRam
@@ -1798,7 +1776,7 @@ void QAR_ReconfigureFPGAShadowRam (void)
    QAR_CONFIGURATION_PTR   pQARCfg;
    FPGA_SHADOW_QAR_CFG_PTR pShadowQarCfg;
 
-   pQARCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
+   pQARCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
 
    // 03/10/2008 PLee Update to latest FPGA Rev 4 definition and
    //            updates to FGPA.h for #defines
@@ -1811,7 +1789,7 @@ void QAR_ReconfigureFPGAShadowRam (void)
    // Disable the QAR FPGA Interrupt on startup
    //   Will be reg Enabled either from ACS[] init or QAR Sensor
    //if (QARState.bQAREnable == TRUE) {
-   if ( pQARCfg->Enable == TRUE )
+   if ( pQARCfg->enable == TRUE )
    {
       FPGA_GetShadowRam()->IMR2 = (FPGA_GetShadowRam()->IMR2 & ~IMR2_QAR_SF) |
                                (IMR2_QAR_SF * IMR2_ENB_IRQ_VAL);
@@ -1828,23 +1806,23 @@ void QAR_ReconfigureFPGAShadowRam (void)
 
    // Set QAR format Bipolar or Harvard Biphase
    pShadowQarCfg->QCR = ( pShadowQarCfg->QCR & ~QCR_FORMAT ) |
-                        ( QCR_FORMAT * (UINT16)pQARCfg->Format );
+                        ( QCR_FORMAT * (UINT16)pQARCfg->format );
 
    // Set QAR words per Sub Frame
    pShadowQarCfg->QCR = ( pShadowQarCfg->QCR & ~QCR_BYTES_SF_FIELD ) |
-                        ( QCR_BYTES_SF * (UINT16)pQARCfg->NumWords );
+                        ( QCR_BYTES_SF * (UINT16)pQARCfg->numWords );
 
    // Set Barker Code 1
-   pShadowQarCfg->QSFCODE1 = ( pQARCfg->BarkerCode[QAR_SF1] & 0x0FFF );
+   pShadowQarCfg->QSFCODE1 = ( pQARCfg->barkerCode[QAR_SF1] & 0x0FFF );
 
    // Set Barker Code 2
-   pShadowQarCfg->QSFCODE2 = ( pQARCfg->BarkerCode[QAR_SF2] & 0x0FFF );
+   pShadowQarCfg->QSFCODE2 = ( pQARCfg->barkerCode[QAR_SF2] & 0x0FFF );
 
    // Set Barker Code 3
-   pShadowQarCfg->QSFCODE3 = ( pQARCfg->BarkerCode[QAR_SF3] & 0x0FFF );
+   pShadowQarCfg->QSFCODE3 = ( pQARCfg->barkerCode[QAR_SF3] & 0x0FFF );
 
    // Set Barker Code 4
-   pShadowQarCfg->QSFCODE4 = ( pQARCfg->BarkerCode[QAR_SF4] & 0x0FFF );
+   pShadowQarCfg->QSFCODE4 = ( pQARCfg->barkerCode[QAR_SF4] & 0x0FFF );
 
 }
 
@@ -1870,49 +1848,49 @@ void QAR_ResetState (void)
 
 
    // Intialize the Package State Data
-   pState = (QAR_STATE_PTR) &QARState;
+   pState = (QAR_STATE_PTR) &m_QARState;
 
    // Get current configuration
-   pQARCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
+   pQARCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
 
-   pState->CurrentFrame      = QAR_SF4;
-   pState->PreviousFrame     = QAR_SF4;
-   pState->LastServiced      = QAR_SF4;
+   pState->currentFrame      = QAR_SF4;
+   pState->previousFrame     = QAR_SF4;
+   pState->lastServiced      = QAR_SF4;
    // pState->TotalWords        = pow(2, (QARCfg.NumWords + 5));
-   pState->TotalWords        = 1 << ( (UINT16)QARCfg.NumWords + 5);
-   pState->LossOfFrameCount    = 0;
-   pState->FrameSync           = FALSE;
-   pState->LossOfFrame         = FALSE;
-   pState->FrameState          = QAR_NO_STATE;
-   pState->BarkerError         = FALSE;
-   pState->BarkerErrorCount    = 0;
-   pState->DataPresent         = FALSE;
-   pState->DataPresentLostCount = 0;
+   pState->totalWords        = 1 << ( (UINT16)m_QARCfg.numWords + 5);
+   pState->lossOfFrameCount    = 0;
+   pState->frameSync           = FALSE;
+   pState->lossOfFrame         = FALSE;
+   pState->frameState          = QAR_NO_STATE;
+   pState->barkerError         = FALSE;
+   pState->barkerErrorCount    = 0;
+   pState->dataPresent         = FALSE;
+   pState->dataPresentLostCount = 0;
 
 
    pState->bGetNewSubFrame    = FALSE;
-   pState->LastIntTime        = 0;
-   pState->BadIntFreqCnt      = 0;
+   pState->lastIntTime        = 0;
+   pState->badIntFreqCnt      = 0;
    for (i=QAR_SF1;i<QAR_SF_MAX;i++)
    {
       pState->bSubFrameOk[i] = TRUE;
       pState->bSubFrameReceived[i] = FALSE;
 
       // Clear Software SF Buffers
-      memset ( (void *) &QARFrame[i], 0x00, sizeof(QAR_SUBFRAME_DATA) );
+      memset ( (void *) &m_QARFrame[i], 0x00, sizeof(QAR_SUBFRAME_DATA) );
       // NOTE: LastSubFrameUpdateTime cleared !
    }
-   pState->PreviousSubFrameOk  = QAR_SF1;    // Start at the beginning !
+   pState->previousSubFrameOk  = QAR_SF1;    // Start at the beginning !
 
-   pState->bQAREnable = pQARCfg->Enable;
+   pState->bQAREnable = pQARCfg->enable;
 
-   pState->LastActivityTime = 0;
+   pState->lastActivityTime = 0;
    pState->bChannelStartupTimeOut = FALSE;
    pState->bChannelTimeOut = FALSE;
    pState->bChanActive = FALSE;
 
-   pState->InterruptCnt = 0;
-   pState->InterruptCntLOFS = 0;
+   pState->interruptCnt = 0;
+   pState->interruptCntLOFS = 0;
 
 }
 /******************************************************************************
@@ -1949,15 +1927,15 @@ static RESULT QAR_PBIT_LoopBack_Test(UINT8 *pdest, UINT16 *psize)
   for (i=0;i<((UINT8) QAR_TEST_TSTPN_MAX);i++)
   {
     // Write Values
-    QAR_W( pQARCtrl, C_TSTP, QARLBTest[i].Tstp_val);
-    QAR_W( pQARCtrl, C_TSTN, QARLBTest[i].Tstn_val);
+    QAR_W( pQARCtrl, C_TSTP, m_QARLBTest[i].tstp_val);
+    QAR_W( pQARCtrl, C_TSTN, m_QARLBTest[i].tstn_val);
 
     // Read and Compare Values
-    if ( (QAR_R( pQARStatus, S_BIIP) != STPU( QARLBTest[i].Bipp_exp, eTpQar2778)) ||
-         (QAR_R( pQARStatus, S_BIIN) != QARLBTest[i].Biin_exp) )
+    if ( (QAR_R( pQARStatus, S_BIIP) != STPU( m_QARLBTest[i].bipp_exp, eTpQar2778)) ||
+         (QAR_R( pQARStatus, S_BIIN) != m_QARLBTest[i].biin_exp) )
     {
        // Data Payload for QAR DRV PBIT LoopBack failure
-       memcpy ( pdest, &QARLBTest[i].TestEnum, sizeof(QAR_LOOPBACK_TEST) );
+       memcpy ( pdest, &m_QARLBTest[i].testEnum, sizeof(QAR_LOOPBACK_TEST) );
        *psize = sizeof(QAR_LOOPBACK_TEST);
        result = SYS_QAR_PBIT_LOOPBACK;
        break;
@@ -2034,7 +2012,7 @@ static RESULT QAR_PBIT_DPRAM_Test(UINT8 *pdest, UINT16 *psize)
 
   for (j=0;j<max;j++)
   {
-    pDpram = FPGA_INTERNAL_DPRAM[j].ptr;
+    pDpram = m_FPGA_INTERNAL_DPRAM[j].ptr;
 
     // Loop thru and write the data
     for (i=0;i<FPGA_QAR_BUFFER_SIZE;i++)
@@ -2042,7 +2020,7 @@ static RESULT QAR_PBIT_DPRAM_Test(UINT8 *pdest, UINT16 *psize)
       *pDpram++ = i;
     }
 
-    pDpram = FPGA_INTERNAL_DPRAM[j].ptr;
+    pDpram = m_FPGA_INTERNAL_DPRAM[j].ptr;
     for (i=0;i<FPGA_QAR_BUFFER_SIZE;i++)
     {
       if ( *pDpram != STPU( i, eTpQar3774))
@@ -2051,7 +2029,7 @@ static RESULT QAR_PBIT_DPRAM_Test(UINT8 *pdest, UINT16 *psize)
         *(UINT32*) pdest = i;
         *(UINT32*) (pdest + 4) = *pDpram;
         *psize = sizeof(UINT32) + sizeof(UINT32);
-        result = FPGA_INTERNAL_DPRAM[j].resultCode;
+        result = m_FPGA_INTERNAL_DPRAM[j].resultCode;
         j = max;  // Force outer loop to exit
         break;
       }
@@ -2067,7 +2045,7 @@ static RESULT QAR_PBIT_DPRAM_Test(UINT8 *pdest, UINT16 *psize)
   {
     for (j=0;j<max;j++)
     {
-      pDpram = FPGA_INTERNAL_DPRAM[j].ptr;
+      pDpram = m_FPGA_INTERNAL_DPRAM[j].ptr;
 
       // Loop thru and write the data
       for (i=0;i<FPGA_QAR_BUFFER_SIZE;i++)
@@ -2108,18 +2086,18 @@ QAR_SF QAR_FindCurrentGoodSF (UINT16 nIndex)
    SINT16            k;
    QAR_SF            i;
 
-   pWordInfo = (QAR_WORD_INFO_PTR) &QARWordInfo[nIndex];
-   pState = (QAR_STATE_PTR) &QARState;
+   pWordInfo = (QAR_WORD_INFO_PTR) &m_QARWordInfo[nIndex];
+   pState = (QAR_STATE_PTR) &m_QARState;
 
    // Find current SF
-   if ( pState->FrameSync == FALSE )
+   if ( pState->frameSync == FALSE )
    {
       // Use Previous Good SF recorded as current SF pointer
-      currentSF = pState->PreviousSubFrameOk;
+      currentSF = pState->previousSubFrameOk;
    }
    else
    {
-      currentSF = pState->CurrentFrame;
+      currentSF = pState->currentFrame;
    }
 
    // Find most recent SF for the wanted word from QAR sensor cfg SF
@@ -2165,22 +2143,21 @@ void QAR_RestoreStartupCfg ( void )
 {
    QAR_CONFIGURATION_PTR pQARCfg;
 
-   pQARCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
+   pQARCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
 
-   // TBD - This should be coming from the EEPROM
-   strncpy_safe(pQARCfg->Name, sizeof(pQARCfg->Name), "QAR",_TRUNCATE);
-   pQARCfg->Format   = QAR_BIPOLAR_RETURN_ZERO;
-   pQARCfg->NumWords = QAR_64_WORDS;
-   pQARCfg->BarkerCode[QAR_SF1] = QAR_SF1_BARKER;
-   pQARCfg->BarkerCode[QAR_SF2] = QAR_SF2_BARKER;
-   pQARCfg->BarkerCode[QAR_SF3] = QAR_SF3_BARKER;
-   pQARCfg->BarkerCode[QAR_SF4] = QAR_SF4_BARKER;
+   strncpy_safe(pQARCfg->name, sizeof(pQARCfg->name), "QAR",_TRUNCATE);
+   pQARCfg->format   = QAR_BIPOLAR_RETURN_ZERO;
+   pQARCfg->numWords = QAR_64_WORDS;
+   pQARCfg->barkerCode[QAR_SF1] = QAR_SF1_BARKER;
+   pQARCfg->barkerCode[QAR_SF2] = QAR_SF2_BARKER;
+   pQARCfg->barkerCode[QAR_SF3] = QAR_SF3_BARKER;
+   pQARCfg->barkerCode[QAR_SF4] = QAR_SF4_BARKER;
 
-   pQARCfg->ChannelStartup_s = SECONDS_20;  // 20 seconds
-   pQARCfg->ChannelTimeOut_s = SECONDS_10;  // 10 seconds
-   pQARCfg->ChannelSysCond = STA_CAUTION;
-   pQARCfg->PBITSysCond = STA_CAUTION;
-   pQARCfg->Enable = FALSE;
+   pQARCfg->channelStartup_s = SECONDS_20;  // 20 seconds
+   pQARCfg->channelTimeOut_s = SECONDS_10;  // 10 seconds
+   pQARCfg->channelSysCond = STA_CAUTION;
+   pQARCfg->pBITSysCond = STA_CAUTION;
+   pQARCfg->enable = FALSE;
 }
 
 
@@ -2203,20 +2180,20 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
   QAR_CONFIGURATION_PTR pQarCfg;
   SYS_APP_ID sysId = SYS_ID_QAR_CBIT_STARTUP_FAIL;
 
-  pQarCfg = (QAR_CONFIGURATION_PTR) &QARCfg;
+  pQarCfg = (QAR_CONFIGURATION_PTR) &m_QARCfg;
 
   // Note: Original switch implementation causes enumeration not checked errors
   //       replaced with if/else for the specific result types being checked
   if (SYS_QAR_STARTUP_TIMEOUT == resultType)
   {
      timeoutLog.result = resultType;
-     timeoutLog.cfg_timeout = pQarCfg->ChannelStartup_s;
+     timeoutLog.cfg_timeout = pQarCfg->channelStartup_s;
      sysId = SYS_ID_QAR_CBIT_STARTUP_FAIL;
   }
   else if (SYS_QAR_DATA_LOSS_TIMEOUT == resultType)
   {
      timeoutLog.result = resultType;
-     timeoutLog.cfg_timeout = pQarCfg->ChannelTimeOut_s;
+     timeoutLog.cfg_timeout = pQarCfg->channelTimeOut_s;
      sysId = SYS_ID_QAR_CBIT_DATA_LOSS_FAIL;
   }
   else
@@ -2225,7 +2202,7 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
      FATAL("Unrecognized Sys QAR resultType = %d", resultType);
   }
 
-  Flt_SetStatus(pQarCfg->ChannelSysCond, sysId, &timeoutLog, sizeof(QAR_TIMEOUT_LOG));
+  Flt_SetStatus(pQarCfg->channelSysCond, sysId, &timeoutLog, sizeof(QAR_TIMEOUT_LOG));
 
 }
 
@@ -2234,6 +2211,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 107  *****************
+ * User: John Omalley Date: 1/28/15    Time: 5:40p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1279 - Remove QAR Reconfigure functionality
  * 
  * *****************  Version 106  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:12p

@@ -2,8 +2,10 @@
 #define QAR_H
 
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
+  
+    ECCN:        9D991
 
     File:        QAR.h      
     
@@ -11,7 +13,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 53 $  $Date: 9/03/14 5:12p $    
+      $Revision: 54 $  $Date: 1/28/15 5:40p $    
     
 ******************************************************************************/
 
@@ -126,12 +128,6 @@ typedef enum
 
 typedef enum
 {
-   QAR_NO_FRAME_LOSS   = 0,
-   QAR_FRAME_SYNC_LOSS = 1
-} QAR_LOSS_STATUS;
-
-typedef enum
-{
    QAR_FRAME_INVALID = 0,
    QAR_FRAME_SYNC    = 1
 } QAR_SYNC_STATUS;
@@ -159,7 +155,7 @@ typedef enum
 typedef enum
 {
   QAR_GSE_ASCII    = 2, 
-  QAR_GSE_NONE     = 3, 
+  QAR_GSE_NONE     = 3 
 } QAR_OUTPUT_TYPE;
 
 typedef struct 
@@ -204,8 +200,8 @@ typedef struct
 
 typedef struct
 {
-   UINT16 Barker;
-   UINT16 Word[QAR_SF_MAX_SIZE - 1];
+   UINT16 barker;
+   UINT16 word[QAR_SF_MAX_SIZE - 1];
 }QAR_SF_BUFFER;
 
 /* 03/10/2008 PLee Updated to latest FPGA Rev 4
@@ -220,15 +216,15 @@ typedef struct
 
 typedef struct
 {
-   QAR_CTRL_REGISTER   Control;
-   QAR_STATUS_REGISTER Status;
-   UINT16              Barker[QAR_SF_MAX];
+   QAR_CTRL_REGISTER   control;
+   QAR_STATUS_REGISTER status;
+   UINT16              barker[QAR_SF_MAX];
 } QAR_REGISTERS;
 
 typedef struct
 {
-   QAR_SF_BUFFER       Buffer1;
-   QAR_SF_BUFFER       Buffer2;
+   QAR_SF_BUFFER       buffer1;
+   QAR_SF_BUFFER       buffer2;
 } QAR_DATA;
 
 typedef enum
@@ -238,21 +234,21 @@ typedef enum
 
 typedef struct
 {
-  QAR_FORMAT_CONTROL    Format;
-  QAR_NUM_WORDS_CONTROL NumWords;
-  UINT16                BarkerCode[QAR_SF_MAX];  
+  QAR_FORMAT_CONTROL    format;
+  QAR_NUM_WORDS_CONTROL numWords;
+  UINT16                barkerCode[QAR_SF_MAX];  
   
   // New P Lee 04/01/2008 
-  UINT32                ChannelStartup_s; // Startup period in seconds
-  UINT32                ChannelTimeOut_s; // Timeout period in seconds
+  UINT32                channelStartup_s; // Startup period in seconds
+  UINT32                channelTimeOut_s; // Timeout period in seconds
   // UINT16                ChannelSysCond; 
-  FLT_STATUS            ChannelSysCond; 
-  FLT_STATUS            PBITSysCond; 
+  FLT_STATUS            channelSysCond; 
+  FLT_STATUS            pBITSysCond; 
   
   
   // New P Lee 11/18/2008 
-  BOOLEAN               Enable;      // QAR Enable or Disable ! 
-  CHAR                  Name[QAR_MAX_NAME]; 
+  BOOLEAN               enable;      // QAR Enable or Disable ! 
+  CHAR                  name[QAR_MAX_NAME]; 
     
 } QAR_CONFIGURATION, *QAR_CONFIGURATION_PTR;
 
@@ -274,39 +270,39 @@ typedef enum
 
 typedef struct
 {
-   QAR_SF       CurrentFrame; 
-   QAR_SF       PreviousFrame;
-   QAR_SF       LastServiced; 
-   UINT16       TotalWords;
+   QAR_SF       currentFrame; 
+   QAR_SF       previousFrame;
+   QAR_SF       lastServiced; 
+   UINT16       totalWords;
    
-   BOOLEAN      LossOfFrame;  // Transition of SYNC Ok to SYNC Loss.
+   BOOLEAN      lossOfFrame;  // Transition of SYNC Ok to SYNC Loss.
                               //   Based on FOGA Frame Loss Status Bit. 
-   UINT32       LossOfFrameCount; // Instances that Frame Loss after a good 
+   UINT32       lossOfFrameCount; // Instances that Frame Loss after a good 
                                   //    SYNC has occurred.  Cnt of 
                                   //    transitions from SYNC OK to SYNC LOSS
-   BOOLEAN      BarkerError;  // Echo of FPGA BARKER Error Status Bit.  
+   BOOLEAN      barkerError;  // Echo of FPGA BARKER Error Status Bit.  
                               //   Cleared on Loss Of Frame 
-   UINT32       BarkerErrorCount; // Count of Barker Error Status.  Equivalent
+   UINT32       barkerErrorCount; // Count of Barker Error Status.  Equivalent
                                   //   to number of SF where Barker Error 
                                   //   is indicated. 
-   BOOLEAN      FrameSync;  // Echo of FPGA Frame Sync Status Bit.  Read during  
+   BOOLEAN      frameSync;  // Echo of FPGA Frame Sync Status Bit.  Read during  
                             //    Sub Frame read. Real time indication. 
-   QAR_SF_STATE FrameState; 
+   QAR_SF_STATE frameState; 
    
-   BOOLEAN      DataPresent; // Echo of FPGA Data Present Status Bit Flag. 
+   BOOLEAN      dataPresent; // Echo of FPGA Data Present Status Bit Flag. 
    // New P Lee 11/20/2008 
-   UINT32       DataPresentLostCount;  // Count of transitions from Data Present to Data Lost
+   UINT32       dataPresentLostCount;  // Count of transitions from Data Present to Data Lost
    // New P Lee 11/20/2008
    
    // New P Lee 03/28/2008 
-   QAR_SF       PreviousSubFrameOk;  // Last read good subframe 
+   QAR_SF       previousSubFrameOk;  // Last read good subframe 
    BOOLEAN      bGetNewSubFrame;  // When FPGA INT to indicate new SF, QAR_ISR() will 
                                   // set this flag.  QAR_ReadSubFrame() checks flag 
                                   // and read FPGA.  Expect / assume FPGA INT to be  
                                   // approx 1 sec, thus R/W conflict with flag 
                                   // should be avoided.  
-   UINT32       LastIntTime;   // Counter based on System Tick
-   UINT32       BadIntFreqCnt; // Count of # of INT occurring faster than 2 Hz ! 
+   UINT32       lastIntTime;   // Counter based on System Tick
+   UINT32       badIntFreqCnt; // Count of # of INT occurring faster than 2 Hz ! 
    // UINT32       LastSubFrameUpdateTime[QAR_SF_MAX];  // Last Update of SubFrame in 
                                                         // system tick time.   
    BOOLEAN      bSubFrameOk[QAR_SF_MAX]; // Subframe marked Ok or Bad. Init to OK on startup. 
@@ -316,7 +312,7 @@ typedef struct
    // New P Lee 04/01/2008 
    BOOLEAN      bQAREnable;   // QAR is user cfg to be enabled. Tracks QarCfg.enable
                               
-   UINT32       LastActivityTime;  // System clock time of last receive activity based on 
+   UINT32       lastActivityTime;  // System clock time of last receive activity based on 
                                    //   Data Present Bit of FPGA QAR Status ! 
                                    //   NOTE: == 0 on startup and no startup activity 
 
@@ -325,14 +321,14 @@ typedef struct
                                          //  NOTE: Set by QAR processing, cleared by 
                                          //        read of current state ! 
                                       
-   UINT32       InterruptCnt;      // Cnt num of Ints
-   UINT32       InterruptCntLOFS;  // Cnt num of Ints caused by LOFS
+   UINT32       interruptCnt;      // Cnt num of Ints
+   UINT32       interruptCntLOFS;  // Cnt num of Ints caused by LOFS
    
    // New P Lee 10/02/2009 
    BOOLEAN      bFrameSyncOnce;    // Flag to indicate QAR sync has been received at least once
                                    // since startup. 
    
-   QAR_SYSTEM_STATUS  SystemStatus; 
+   QAR_SYSTEM_STATUS  systemStatus; 
    BOOLEAN  bChanActive;         // TRUE on first channel activity FALSE on timeout
    
 } QAR_STATE, *QAR_STATE_PTR;
@@ -343,21 +339,21 @@ typedef struct
 typedef struct 
 {
    BOOLEAN bSubFrameData[QAR_SF_MAX];  // SubFrame(S) which contains data
-   UINT16 WordLocation;                // Last Word Location within sub frame. 
+   UINT16 wordLocation;                // Last Word Location within sub frame. 
                                        //   Since data return from FPGA are 1 sec subframe
                                        //   only the last word is the most recent !
                                        //   All other data will be ignored, thus if we 
                                        //   get spikes, an event could be triggered on these 
                                        //   spikes.  Recommend 3-4 sec duration for any 
                                        //   processing. 
-   UINT16 MSBPosition;   // MSB position of word 
+   UINT16 msbPosition;   // MSB position of word 
                          // To handle "packed" data words and disc bit processing 
-   UINT16 WordSize;      // Word size from MSB position. 
+   UINT16 wordSize;      // Word size from MSB position. 
                          // To handle "packed" data words and enum types 
-   UINT32 DataLossTime;  // In system tick time. Data Loss timeout exceedance value. 
-   BOOLEAN SignBit;      // Is the MSB a sign bit (note for Disc this must be 
+   UINT32 dataLossTime;  // In system tick time. Data Loss timeout exceedance value. 
+   BOOLEAN signBit;      // Is the MSB a sign bit (note for Disc this must be 
                          //    FALSE !
-   BOOLEAN TwoComplement; // If Signed value, is it represented by TwosComplement 
+   BOOLEAN twoComplement; // If Signed value, is it represented by TwosComplement 
                           //    or positive logic with sign value only ? 
                           // NOTE: we can no handle two embedded analog signed value !!
                           // NOTE: always assume signed value to be bit 11 !!
@@ -370,18 +366,18 @@ typedef struct
 #pragma pack(1)
 // QAR Log Data Payload Structures 
 typedef struct {
-  UINT32 ResultCode;    // 0x00180000, SYS_QAR_PBIT_LOOPBACK
-  UINT16 Test;          // Enum QAR_LOOPBACK_TEST
+  UINT32 resultCode;    // 0x00180000, SYS_QAR_PBIT_LOOPBACK
+  UINT16 test;          // Enum QAR_LOOPBACK_TEST
 } SYS_QAR_PBIT_FAIL_LOG_LOOPBACK_STRUCT;
 
 typedef struct {
-  UINT32 ResultCode;   // 0x00180001, SYS_QAR_PBIT_DPRAM
-  UINT16 ExpData;      // Expected Data
-  UINT16 ActualData;   // Actual Data
+  UINT32 resultCode;   // 0x00180001, SYS_QAR_PBIT_DPRAM
+  UINT16 expData;      // Expected Data
+  UINT16 actualData;   // Actual Data
 } SYS_QAR_PBIT_FAIL_LOG_DPRAM_STRUCT;
 
 typedef struct {
-  UINT32 ResultCode;   // 0x00180002, SYS_QAR_FPGA_BAD_STATE
+  UINT32 resultCode;   // 0x00180002, SYS_QAR_FPGA_BAD_STATE
 } SYS_QAR_PBIT_FAIL_LOG_FPGA_STRUCT;
 
 typedef struct 
@@ -398,41 +394,41 @@ typedef struct
 typedef struct 
 {
   RESULT result;      // 0x00184000, SYS_QAR_WORD_TIMEOUT
-  char FailMsg[QAR_WORD_TIMEOUT_FAIL_MSG_SIZE];
+  CHAR failMsg[QAR_WORD_TIMEOUT_FAIL_MSG_SIZE];
 } SYS_QAR_CBIT_FAIL_WORD_TIMEOUT_LOG; 
 
 
 // QAR CBIT Health Status 
 typedef struct 
 {
-  QAR_SYSTEM_STATUS SystemStatus; 
+  QAR_SYSTEM_STATUS systemStatus; 
   BOOLEAN           bQAREnable; 
 
-  QAR_SF_STATE FrameState; 
+  QAR_SF_STATE frameState; 
                           
-  UINT32       DataPresentLostCount;  
+  UINT32       dataPresentLostCount;  
                     // Count of transitions from Data Present to Data Lost  
                     
-  UINT32       LossOfFrameCount; // Instances that Frame Loss after a good 
+  UINT32       lossOfFrameCount; // Instances that Frame Loss after a good 
                                 //    SYNC has occurred.  Cnt of 
                                 //    transitions from SYNC OK to SYNC LOSS
-  UINT32       BarkerErrorCount; // Count of Barker Error Status.  Equivalent
+  UINT32       barkerErrorCount; // Count of Barker Error Status.  Equivalent
                                 //   to number of SF where Barker Error 
                                 //   is indicated. 
 } QAR_CBIT_HEALTH_COUNTS; 
 
 typedef struct
 {
-   CHAR Name[QAR_MAX_NAME];
+   CHAR name[QAR_MAX_NAME];
 } QAR_SYS_HDR;
 
 typedef struct
 {
-   UINT16                TotalSize;
-   CHAR                  Name[QAR_MAX_NAME];
-   QAR_PROTOCOL          Protocol;
-   QAR_NUM_WORDS_CONTROL NumWords;
-   UINT16                BarkerCode[QAR_SF_MAX];
+   UINT16                totalSize;
+   CHAR                  name[QAR_MAX_NAME];
+   QAR_PROTOCOL          protocol;
+   QAR_NUM_WORDS_CONTROL numWords;
+   UINT16                barkerCode[QAR_SF_MAX];
 } QAR_CHAN_HDR;
 #pragma pack()
 
@@ -460,8 +456,6 @@ EXPORT void         QAR_Reframe         (void);
 
 EXPORT void         QAR_Init_Tasks      (void); 
 
-EXPORT void         QAR_Reconfigure     (void);
-
 EXPORT UINT16       QAR_GetSubFrame     ( void *pDest, UINT32 nop, UINT16 nMaxByteSize ); 
 EXPORT UINT16       QAR_GetSubFrameDisplay ( void *pDest, QAR_SF *lastServiced, 
                                              UINT16 nMaxByteSize ); 
@@ -482,7 +476,6 @@ EXPORT BOOLEAN      QAR_SensorTest (UINT16 nIndex);
 EXPORT BOOLEAN      QAR_InterfaceValid (UINT16 nIndex); 
 EXPORT void         QAR_ProcessISR(void); 
 
-EXPORT void  QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data);
 EXPORT UINT16 QARread( volatile UINT16* addr, FIELD_NAMES field);
 
 EXPORT QAR_CBIT_HEALTH_COUNTS QAR_GetCBITHealthStatus ( void ); 
@@ -506,6 +499,11 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 54  *****************
+ * User: John Omalley Date: 1/28/15    Time: 5:40p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1279 - Remove QAR Reconfigure functionality
  * 
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:12p

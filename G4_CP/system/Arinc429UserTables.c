@@ -3,12 +3,14 @@
             Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
+
     File:        Arinc429UserTables.c
 
     Description: User commands related to the Arinc 429 Processing
 
 VERSION
-     $Revision: 51 $  $Date: 1/12/15 12:51p $
+     $Revision: 52 $  $Date: 1/28/15 5:59p $
 
 ******************************************************************************/
 #ifndef ARINC429MGR_BODY
@@ -93,12 +95,6 @@ static USER_HANDLER_RESULT Arinc429Msg_CfgTx(USER_DATA_TYPE DataType,
                                              UINT32 Index,
                                              const void *SetPtr,
                                              void **GetPtr);
-
-static USER_HANDLER_RESULT Arinc429Msg_Reconfigure(USER_DATA_TYPE DataType,
-                                                   USER_MSG_PARAM Param,
-                                                   UINT32 Index,
-                                                   const void *SetPtr,
-                                                   void **GetPtr);
 
 #ifdef GENERATE_SYS_LOGS
 static USER_HANDLER_RESULT Arinc429Msg_CreateLogs(USER_DATA_TYPE DataType,
@@ -846,7 +842,6 @@ static USER_MSG_TBL arinc429Root[] =
   {"STATUS",      arinc429StatusTbl,  NULL, NO_HANDLER_DATA},
   {"CFG",         arinc429CfgTbl,     NULL, NO_HANDLER_DATA},
   {"DEBUG",       arinc429DebugTbl,   NULL, NO_HANDLER_DATA},
-  {"RECONFIGURE", NO_NEXT_TABLE,  Arinc429Msg_Reconfigure, USER_TYPE_ACTION, USER_RO,               NULL, -1,-1, NO_LIMIT, NULL},
 #ifdef GENERATE_SYS_LOGS
   {"CREATELOGS",  NO_NEXT_TABLE,  Arinc429Msg_CreateLogs,  USER_TYPE_ACTION, USER_RO,               NULL, -1,-1, NULL},
 #endif
@@ -1005,7 +1000,7 @@ USER_HANDLER_RESULT Arinc429Msg_StateRx(USER_DATA_TYPE DataType,
            &m_Arinc429MgrBlock.Rx[Index],
            sizeof(ARINC429_SYS_RX_STATUS) );
 
-  arinc429DrvStatusTemp_Rx = *(Arinc429DrvRxGetCounts(Index));
+  arinc429DrvStatusTemp_Rx = *(Arinc429DrvRxGetCounts((UINT8)Index));
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -1054,7 +1049,7 @@ USER_HANDLER_RESULT Arinc429Msg_StateTx(USER_DATA_TYPE DataType,
            &m_Arinc429MgrBlock.Tx[Index],
            sizeof(ARINC429_SYS_TX_STATUS) );
 
-  arinc429DrvStatusTemp_Tx = *(Arinc429DrvTxGetCounts(Index));
+  arinc429DrvStatusTemp_Tx = *(Arinc429DrvTxGetCounts((UINT8)Index));
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
 
@@ -1237,45 +1232,6 @@ USER_HANDLER_RESULT Arinc429Msg_Cfg(USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
- * Function:    Arinc429Msg_Reconfigure
- *
- * Description: Executes the reconfigure function of Arinc429.c
- *
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used
- *                               for casting the data pointers
- *               [in/out] Param: Pointer to the configuration item to be read
- *                               or changed
- *               [in] Index:     Index parameter is used to reference the
- *                               specific item. Range is validated
- *                               by the user manager
- *               [in] SetPtr:    For write commands, a pointer to the data to
- *                               write to the configuration.
- *               [out] GetPtr:   For read commands, UserCfg function will set
- *                               this to the location of the data requested.
- *
- * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
- *                                 set.
- *
- * Notes:
- *
- *****************************************************************************/
-static
-USER_HANDLER_RESULT Arinc429Msg_Reconfigure(USER_DATA_TYPE DataType,
-                                            USER_MSG_PARAM Param,
-                                            UINT32 Index,
-                                            const void *SetPtr,
-                                            void **GetPtr)
-{
-
-  Arinc429DrvReconfigure();
-
-  return USER_RESULT_OK;
-
-}
-
-
-/******************************************************************************
  * Function:    Arinc429Msg_CreateLogs (arinc429.createlogs)
  *
  * Description: Create all the internally QAR system logs
@@ -1415,6 +1371,11 @@ USER_HANDLER_RESULT Arinc429Msg_ShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Arinc429UserTables.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: John Omalley Date: 1/28/15    Time: 5:59p
+ * Updated in $/software/control processor/code/system
+ * SCR 1279 - Removed Reconfigure command
  * 
  * *****************  Version 51  *****************
  * User: John Omalley Date: 1/12/15    Time: 12:51p
