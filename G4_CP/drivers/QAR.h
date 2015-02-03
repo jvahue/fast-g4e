@@ -13,7 +13,7 @@
                  software.  See the QAR.c module for a detailed description.
     
     VERSION
-      $Revision: 54 $  $Date: 1/28/15 5:40p $    
+      $Revision: 55 $  $Date: 2/03/15 5:40p $    
     
 ******************************************************************************/
 
@@ -476,6 +476,9 @@ EXPORT BOOLEAN      QAR_SensorTest (UINT16 nIndex);
 EXPORT BOOLEAN      QAR_InterfaceValid (UINT16 nIndex); 
 EXPORT void         QAR_ProcessISR(void); 
 
+#ifdef G4E
+EXPORT void  QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data);
+#endif
 EXPORT UINT16 QARread( volatile UINT16* addr, FIELD_NAMES field);
 
 EXPORT QAR_CBIT_HEALTH_COUNTS QAR_GetCBITHealthStatus ( void ); 
@@ -499,6 +502,11 @@ EXPORT UINT16 QAR_GetSystemHdr ( void *pDest, UINT16 nMaxByteSize );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.h $
+ * 
+ * *****************  Version 55  *****************
+ * User: Jeff Vahue   Date: 2/03/15    Time: 5:40p
+ * Updated in $/software/control processor/code/drivers
+ * SCR-1279: Export QarWrite for use in G4E only.
  * 
  * *****************  Version 54  *****************
  * User: John Omalley Date: 1/28/15    Time: 5:40p

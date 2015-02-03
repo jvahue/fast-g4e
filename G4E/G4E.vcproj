@@ -1836,6 +1836,26 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="..\G4_CP\system\GBSProtocol.c"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\system\GBSProtocol.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\system\GBSUserTables.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\G4_CP\system\GSE.c"
 					>
 				</File>
