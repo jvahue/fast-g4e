@@ -11,12 +11,12 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 3 $  $Date: 15-01-19 6:18p $
+      $Revision: 6 $  $Date: 15-02-03 4:48p $
 
 ******************************************************************************/
 
 #define GBS_TIMING_TEST 1
-#undef DTU_GBS_SIM 1
+#undef DTU_GBS_SIM
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -479,7 +479,7 @@ void GBSProtocol_Initialize ( void )
        &cmdRsp_Record[m_GBS_Ctl_Cfg.nPort][GBS_STATE_RECORD_ACK_NAK_INDEX].cmd[0]; 
 
 #ifdef DTU_GBS_SIM
-  m_GBS_Debug.DTU_GBS_SIM_SimLog = TRUE; 
+  m_GBS_Debug.DTU_GBS_SIM_SimLog = FALSE; 
 #endif  
   m_GBS_Debug.dnloadCode = GBS_DNLOAD_CODE_NOTUSED; 
     
@@ -526,8 +526,9 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   GBS_STATUS_PTR pStatus;
   GBS_DOWNLOAD_DATA_PTR pDownloadData;
   UINT16 sent_cnt;
-
-
+  DIO_OUT_OP dioOutput;
+  
+  
   // Check if multiplex is cfg.  Set pointers appropriately
   if ( (m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort) &&
        (m_GBS_Multi_Ctl.state == GBS_MULTI_SECONDARY) )
@@ -535,16 +536,20 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     pStatus = &m_GBS_Multi_Status;
     pDownloadData = &m_GBS_Multi_Download_Ptr;
     pStatus->multi_ch = TRUE; 
-    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, DIO_SetLow ); 
+    dioOutput = DIO_SetLow; 
   }
   else
   {
     pStatus = &m_GBS_Status[ch];
     pDownloadData = &m_GBS_Download_Ptr[ch];
     pStatus->multi_ch = FALSE; 
-    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, DIO_SetHigh );     
+    dioOutput = DIO_SetHigh; 
   }
-
+  
+  if ((m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort)) {
+    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, dioOutput );
+  }
+  
   // If Halt Rx, "reset"
   if ( *pDownloadData->bHalt == TRUE )
   {
@@ -2108,6 +2113,17 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 15-02-03   Time: 4:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol, fix dio out for Relay Switch control.
+ * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 15-02-03   Time: 2:53p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255, GBS Protocol.   Update "m_GBS_Debug.DTU_GBS_SIM_SimLog" to
+ * FALSE rather then TRUE. 
  * 
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:18p

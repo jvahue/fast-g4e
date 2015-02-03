@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 2 $  $Date: 15-01-19 6:19p $
+    $Revision: 3 $  $Date: 15-02-03 5:30p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -214,9 +214,9 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
 
 static USER_MSG_TBL gbsCtlMultiTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                         IndexRange DataLimit EnumTbl*/
-  {"STATE",           NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
+  {"STATE",            NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
   {"PRIMARY_PEND",     NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
-  {"SECONDARY_PEND",   NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending   -1,-1,  NO_LIMIT,NULL},
+  {"SECONDARY_PEND",   NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending,  -1,-1,  NO_LIMIT,NULL},
 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -710,6 +710,12 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 15-02-03   Time: 5:30p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol, Add "," to line 219.  For some reason compiled
+ * w/o this ",".  Need to add, though. 
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:19p

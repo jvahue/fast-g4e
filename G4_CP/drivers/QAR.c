@@ -11,7 +11,7 @@
                  QAR interface.
 
    VERSION
-      $Revision: 107 $  $Date: 1/28/15 5:40p $
+      $Revision: 108 $  $Date: 2/03/15 5:40p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -85,7 +85,9 @@ static BOOLEAN             m_BarkerErr;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+#ifndef G4E
 static void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data);
+#endif
 
 static QAR_SF QAR_FindCurrentGoodSF (UINT16 nIndex);
 static void QAR_RestoreStartupCfg (void);
@@ -1746,7 +1748,9 @@ void QAR_CreateAllInternalLogs ( void )
  * Notes:        none
  *
  *****************************************************************************/
+#ifndef G4E
 static
+#endif
 void QARwrite( volatile UINT16* addr, FIELD_NAMES field, UINT16 data)
 {
     UINT16 value = *addr;
@@ -2211,6 +2215,11 @@ static void QAR_CreateTimeOutSystemLog( RESULT resultType )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: QAR.c $
+ * 
+ * *****************  Version 108  *****************
+ * User: Jeff Vahue   Date: 2/03/15    Time: 5:40p
+ * Updated in $/software/control processor/code/drivers
+ * SCR-1279: Export QarWrite for use in G4E only.
  * 
  * *****************  Version 107  *****************
  * User: John Omalley Date: 1/28/15    Time: 5:40p
