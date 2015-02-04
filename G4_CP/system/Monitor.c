@@ -1,15 +1,15 @@
 #define MONITOR_BODY
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
- 
- 
+
+
   File:        Monitor.c
 
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 87 $  $Date: 1/13/15 6:16p $    
+      $Revision: 88 $  $Date: 2/03/15 7:15p $
 ******************************************************************************/
 
 
@@ -249,7 +249,7 @@ void MonitorInitialize (void)
 
     // Create the Monitor Task
     memset(&TaskInfo, 0, sizeof(TaskInfo));
-    strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"Monitor Task",_TRUNCATE);    
+    strncpy_safe(TaskInfo.Name,sizeof(TaskInfo.Name),"Monitor Task",_TRUNCATE);
     TaskInfo.TaskID         = Monitor_Task;
     TaskInfo.Function       = MonitorTask;
     TaskInfo.Priority       = taskInfo[Monitor_Task].priority;
@@ -351,7 +351,7 @@ TASK_INDEX MonitorGetTaskId (void)
 void MonitorPrintVersion (void)
 {
     CHAR Str[ARRAY_64];
- 
+
     GSE_PutLine ("\r\n");
     GSE_PutLine (PRODUCT_NAME);
     GSE_PutLine (" v");
@@ -365,7 +365,7 @@ void MonitorPrintVersion (void)
                               NV_GetFileName(NV_CFG_MGR),
                               NV_GetFileCRC (NV_CFG_MGR) );
     GSE_PutLine (Str);
-    GSE_PutLine ("\r\n");   
+    GSE_PutLine ("\r\n");
 }
 
 
@@ -410,7 +410,7 @@ static void MonitorTask (void* pPBlock)
     if( Cmd[0] != '\0')
     {
       CmdLen = strlen(Cmd);
-      // If "repeat last command" 
+      // If "repeat last command"
       if (Cmd[0] == '<')
       {
         strncpy_safe (Cmd, PrevCmdLen, PrevCmd, _TRUNCATE);
@@ -423,7 +423,7 @@ static void MonitorTask (void* pPBlock)
       }
 
       // Toggle the display of live data stream.
-      if ( Cmd[0] == ESC_CHAR )        
+      if ( Cmd[0] == ESC_CHAR )
       {
         GSE_ToggleDisplayLiveStream();
       }
@@ -441,7 +441,7 @@ static void MonitorTask (void* pPBlock)
           if (strncmp( CmdLower, "sys", 3) == 0)
           {
             MonitorSysCmds( CmdLower);
-          } 
+          }
           else
           {
             ASSERT( MessageHandlerCallback != NULL);
@@ -546,13 +546,13 @@ static void MonitorSysCmds( CHAR* Cmd)
     // sys.crc ----------------------------------------------------------
     else if (strcmp (Token[TOK1], "crc") == 0)
     {
-        MonitorPrintCRCs();        
+        MonitorPrintCRCs();
     }
     // sys.reboot -------------------------------------------------------
     else if (strcmp (Token[TOK1], "reboot") == 0)
     {
       WatchdogReboot(TRUE);
-    }    
+    }
     // sys.perf COMMAND FAMILY -------------------------------------------
     else if ( strcmp (Token[TOK1], "perf") == 0 )
     {
@@ -560,7 +560,7 @@ static void MonitorSysCmds( CHAR* Cmd)
     }
     /*
 #ifdef ENABLE_SYS_DUMP_MEM_CMD
-    else if (strcmp (Token[1], "dumpmem") == 0) 
+    else if (strcmp (Token[1], "dumpmem") == 0)
     {
         MonitorDumpMem(Token);
     }
@@ -605,7 +605,7 @@ static void MonitorSysGet(CHAR*  Token[])
         else if (strcmp (Token[TOK3], "timing") == 0)
         {
             MonitorGetTaskTiming();
-        }        
+        }
         else
         {
             // validate the parameter provided is a number
@@ -716,11 +716,11 @@ static void MonitorPrintCRCs(void)
   {
     if ( NV_GetFileCRC((NV_FILE_ID)i) != 0x0000 )
     {
-      sprintf( Str, " File # %02d %-32s\tCRC=%04X\r\n", i, 
+      sprintf( Str, " File # %02d %-32s\tCRC=%04X\r\n", i,
                                 NV_GetFileName((NV_FILE_ID)i),
                                 NV_GetFileCRC ((NV_FILE_ID)i) );
-      GSE_PutLine (Str);       
-    }              
+      GSE_PutLine (Str);
+    }
   }
 }
 
@@ -756,13 +756,13 @@ static void MonitorGetMem(CHAR* valueType, CHAR* address)
   if( (UINT32)pAddress >= RTC_VIRTUAL_BASE_ADDR &&
       (UINT32)pAddress <= EEPROM2_VIRTUAL_BASE_ADDR + EEPROM_SIZE )
   {
-     pAddress = MonitorGetNvRAM(*valueType, pAddress);   
+     pAddress = MonitorGetNvRAM(*valueType, pAddress);
   }
   else
   {
-  #ifdef WIN32 
+  #ifdef WIN32
 /*vcast_dont_instrument_start*/
-    pAddress = (void*)&sysMemoryCmds; 
+    pAddress = (void*)&sysMemoryCmds;
 /*vcast_dont_instrument_end*/
   #endif
   }
@@ -826,7 +826,7 @@ static void MonitorSetMem (CHAR* valueType, CHAR* address, CHAR* value, CHAR* fp
     UINT32  Value;
     void*   pAddress;
     FLOAT32* fPtr = (void*)&Value;
-    
+
     // If memory location is a 'virtual' address representing
     // data stored in EEPROM/RTC RAM, set it.
     pAddress = (void*)(strtoul(address, NULL, BASE_16));
@@ -864,7 +864,7 @@ static void MonitorSetMem (CHAR* valueType, CHAR* address, CHAR* value, CHAR* fp
       sprintf(Str,"Invalid type specifier. Use b,w,l,f.");
       GSE_PutLine(Str);
       setValue = FALSE;
-    }      
+    }
 
     if (TRUE == setValue)
     {
@@ -893,18 +893,18 @@ static BOOLEAN MonitorMemoryWrite( CHAR* address, UINT8 size, UINT32 value)
   if( (UINT32)address >= RTC_VIRTUAL_BASE_ADDR &&
       (UINT32)address <= (EEPROM2_VIRTUAL_BASE_ADDR + EEPROM_SIZE) )
   {
-    setValue = MonitorSetNvRAM( address, size, value);   
+    setValue = MonitorSetNvRAM( address, size, value);
   }
   else
-  {    
+  {
     char* pAddress;
 
-    ADDR_WIN32(pAddress, address); 
+    ADDR_WIN32(pAddress, address);
 
     setValue = TRUE;
-   
+
     ASSERT( ((size == sizeof(UINT8)) || (size == sizeof(UINT16)) || (size == sizeof(UINT32))) )
-     
+
     if (size == sizeof(UINT8))
     {
       *(UINT8*)pAddress = (UINT8)value;
@@ -917,7 +917,7 @@ static BOOLEAN MonitorMemoryWrite( CHAR* address, UINT8 size, UINT32 value)
     {
       *(UINT32*)pAddress = value;
     }
-    
+
   }
 
   return setValue;
@@ -954,7 +954,7 @@ static void MonitorSetRtc (CHAR* Tokens[])
 
   if(((DateTime.Second   <= 59))  &&
      ((DateTime.Minute   <= 59))  &&
-     ((DateTime.Hour     <= 23))  && 
+     ((DateTime.Hour     <= 23))  &&
      ((DateTime.Day      <= 31))  &&
      ((DateTime.Month    <= 12))  &&
      ((DateTime.Year     >= 2000) && (DateTime.Year <= MAX_YEAR) ) )
@@ -1012,7 +1012,7 @@ static void MonitorSetTaskPulse(CHAR* Token3, CHAR* Token4)
         {
             MonitorInvalidCommand( "TaskPulse: Invalid DOUT Specified [-1..3]");
         }
-        else 
+        else
         {
             Tm.pTaskList[TaskId]->timingPulse = dout;
         }
@@ -1085,11 +1085,11 @@ static void MonitorGetRtc (void)
 {
   TIMESTRUCT Time;
   INT8 Str[ARRAY_64];
-  
+
   GSE_PutLine ("\r\n");
 
   CM_GetRTCClock( &Time );
-  
+
   sprintf(Str,"\r\nCurrent RTC = %02d/%02d/%04d %02d:%02d:%02d\r\n",
                                                  Time.Month,
                                                  Time.Day,
@@ -1167,11 +1167,11 @@ static void MonitorGetTm (void)
   {
       memcpy( &dc, &Tm.mifDc[i], sizeof( dc));
       avgDc = (FLOAT32)((FLOAT32)(dc.cumExecTime/TTMR_HS_TICKS_PER_uS)/(FLOAT32)dc.exeCount);
-      sprintf( Str, "MIF%02d:  %8d %8d %8d %8.1f\r\n", 
-          i, 
-          dc.min/TTMR_HS_TICKS_PER_uS, 
-          dc.max/TTMR_HS_TICKS_PER_uS, 
-          dc.cur/TTMR_HS_TICKS_PER_uS, 
+      sprintf( Str, "MIF%02d:  %8d %8d %8d %8.1f\r\n",
+          i,
+          dc.min/TTMR_HS_TICKS_PER_uS,
+          dc.max/TTMR_HS_TICKS_PER_uS,
+          dc.cur/TTMR_HS_TICKS_PER_uS,
           avgDc);
       GSE_PutLine(Str);
   }
@@ -1442,10 +1442,10 @@ static void MonitorGetStackUsage (void)
   pStackTop = &__SP_INIT;   // point to top of stack
 
   // Initialize the percentage to protect against the divide by zero
-  // This condition is not possible if the linker directive file is 
+  // This condition is not possible if the linker directive file is
   // correct but we will protect against it anyway.
   StackPercent = 100.0;
-  
+
   stackSize = (UINT32)((UINT8*)pStackTop - (UINT8*)pStack);   // size of stack
 
   // search stack for end of pre-filled pattern
@@ -1456,7 +1456,7 @@ static void MonitorGetStackUsage (void)
 
   // calculate use size of stack
   stackUsed = (UINT32)((UINT8*)pStackTop - (UINT8*)pStack);   // amount of stack used
-  
+
   // Protect against divide by 0
   if (stackSize != 0)
   {
@@ -1591,7 +1591,7 @@ static void MonitorDumpMem(CHAR* Token[] )
   void*  pAddress;
   UINT16  size;
   BOOLEAN bWellKnownLocation = FALSE;
-  
+
   // Handle well-known memory areas
 
   // sys.dumpmem.nvcfg
@@ -1608,10 +1608,10 @@ static void MonitorDumpMem(CHAR* Token[] )
   }
 
 #ifdef WIN32
-  if (!bWellKnownLocation)  
+  if (!bWellKnownLocation)
   {
     pAddress = (void*)&sysMemoryCmds;
-  }  
+  }
 #endif
   DumpMemory(pAddress, size, NULL);
 
@@ -1627,8 +1627,8 @@ static void MonitorDumpMem(CHAR* Token[] )
  * Description: Read data from a location in EEPROM OR RTC NVRAM
  *
  * Parameters:  [in] dataType character representing the type of data.
- *              [in] pVirtualAddress pointer to a "virtual" address which is 
- *                   mapped to a physical address in EEPROM or RTC RAM 
+ *              [in] pVirtualAddress pointer to a "virtual" address which is
+ *                   mapped to a physical address in EEPROM or RTC RAM
  *
  * Returns:     Pointer to the data returned from EEPROM/RTC-RAM
  *
@@ -1640,7 +1640,7 @@ void* MonitorGetNvRAM(CHAR dataType, void* pVirtualAddress)
   static UINT8    Value8;
   static UINT16  Value16;
   static UINT32  Value32;
-  static FLOAT32 ValueFloat;   
+  static FLOAT32 ValueFloat;
   static void*   dataPtr;
   UINT16  size;
   UINT32 physAddr;
@@ -1653,22 +1653,22 @@ void* MonitorGetNvRAM(CHAR dataType, void* pVirtualAddress)
       size = sizeof(Value8);
       dataPtr = &Value8;
       break;
-    
+
     case 'w':
       size = sizeof(Value16);
       dataPtr = &Value16;
       break;
-    
+
     case 'l':
       size = sizeof(Value32);
       dataPtr = &Value32;
       break;
-    
+
     case 'f':
       size = sizeof(ValueFloat);
       dataPtr = &ValueFloat;
       break;
-    
+
     default:
       // Invalid, do nothing, return pointer "as-is"
       size = 0;
@@ -1676,19 +1676,19 @@ void* MonitorGetNvRAM(CHAR dataType, void* pVirtualAddress)
       success = FALSE;
       break;
   }
-  
+
   // Convert the virtual address to the corresponding
   // physical address for the NVRAM device.
 
-  if((UINT32)pVirtualAddress >= EEPROM2_VIRTUAL_BASE_ADDR && 
+  if((UINT32)pVirtualAddress >= EEPROM2_VIRTUAL_BASE_ADDR &&
      (UINT32)pVirtualAddress <= EEPROM2_VIRTUAL_BASE_ADDR + EEPROM_SIZE)
-  { 
-    // EEPROM2 
+  {
+    // EEPROM2
     physAddr =  0x10000000 + ( (UINT32)pVirtualAddress - EEPROM2_VIRTUAL_BASE_ADDR );
     pReadFunc = NV_EERead;
   }
-  else if( (UINT32)pVirtualAddress >= EEPROM1_VIRTUAL_BASE_ADDR && 
-           (UINT32)pVirtualAddress <= EEPROM1_VIRTUAL_BASE_ADDR + EEPROM_SIZE ) 
+  else if( (UINT32)pVirtualAddress >= EEPROM1_VIRTUAL_BASE_ADDR &&
+           (UINT32)pVirtualAddress <= EEPROM1_VIRTUAL_BASE_ADDR + EEPROM_SIZE )
   {
     // EEPROM1
     physAddr =  0x00000000 + ( (UINT32)pVirtualAddress - EEPROM1_VIRTUAL_BASE_ADDR );
@@ -1731,7 +1731,7 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
   INT16   i;
   UINT16  value16 = value;   // For width conversion.  This truncates the 32b
   UINT8   value8 = value;    // range, but that is okay b/c width is "size"
-  void*   dataPtr;           // Pointer to one of the above values.  
+  void*   dataPtr;           // Pointer to one of the above values.
   IO_RESULT writeSignal[2];  // Worse-case scenario, a long-word straddles sectors.
   UINT32  physAddr;
 
@@ -1740,7 +1740,7 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 
   const  UINT32 IoTimeLimit = TICKS_PER_Sec;
   BOOLEAN timeoutFlag;
-  UINT32 StartTime;   
+  UINT32 StartTime;
 
   dataPtr = &value;
   //Portable type width conversion.
@@ -1755,23 +1755,23 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 
   //dataPtr = size == 1 ? value8 : size == 2 ? value16 : &value;
   //dataPtr = (INT8*)dataPtr + 4-size;
-  
+
   // Convert the virtual address to the corresponding
   // physical offset on the appropriate NVRAM device.
   // Assign function pointer to the handler function.
-  
-  if ((UINT32)address >= EEPROM1_VIRTUAL_BASE_ADDR && 
-      (UINT32)address <=  EEPROM1_VIRTUAL_BASE_ADDR + EEPROM_SIZE) 
+
+  if ((UINT32)address >= EEPROM1_VIRTUAL_BASE_ADDR &&
+      (UINT32)address <=  EEPROM1_VIRTUAL_BASE_ADDR + EEPROM_SIZE)
   {
     // EEPROM1
     physAddr =  0x00000000 +
                 ( (UINT32)address - EEPROM1_VIRTUAL_BASE_ADDR);
     pWriteFunc = NV_EEWrite;
   }
-  else if ((UINT32)address >= EEPROM2_VIRTUAL_BASE_ADDR && 
+  else if ((UINT32)address >= EEPROM2_VIRTUAL_BASE_ADDR &&
            (UINT32)address <=  EEPROM2_VIRTUAL_BASE_ADDR + EEPROM_SIZE)
-  { 
-    // EEPROM2 
+  {
+    // EEPROM2
     physAddr =  0x10000000 +
                 ( (UINT32)address - EEPROM2_VIRTUAL_BASE_ADDR);
     pWriteFunc = NV_EEWrite;
@@ -1787,7 +1787,7 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
   //Init the semaphore flags.
   writeSignal[0] = IO_RESULT_READY;
   writeSignal[1] = IO_RESULT_READY;
-  
+
   // Write the data to the NV Memory device
   // Handle writes which straddle sectors with multiple writes.
   if (success && pWriteFunc != NULL)
@@ -1817,24 +1817,24 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
       }
 
       if(TimeoutEx(TO_CHECK, IoTimeLimit,&StartTime,NULL))
-      {        
+      {
         timeoutFlag = TRUE;
         success     = FALSE;
       }
     }
     while( !timeoutFlag && size > 0);
   }
-  
+
   // We need to ensure writing to NVRAM/EEPROM is complete before we exit so that
   // reads will show the correct data.
   // For WIN32 G4E emulation, force SpiManager to process queue entry(ies) holding the write.
   // For target build, wait until the semaphore indicates the SpiManager has completed.
   if (success)
-  {    
+  {
 #ifdef WIN32
     /*vcast_dont_instrument_start*/
     SPIMgr_UpdateEEProm(NULL);
-    SPIMgr_UpdateRTCNVRam(NULL); 
+    SPIMgr_UpdateRTCNVRam(NULL);
     /*vcast_dont_instrument_end*/
 #else
     // Set a timer to prevent infinite loop
@@ -1846,7 +1846,7 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
            writeSignal[1] != IO_RESULT_READY))
     {
       if(TimeoutEx(TO_CHECK, IoTimeLimit,&StartTime,NULL))
-      {        
+      {
         timeoutFlag = TRUE;
         success     = FALSE;
       }
@@ -1857,12 +1857,14 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
 }
 
 /*****************************************************************************
- * Function:    MonitorResetTaskTime
+ * Function:    MonitorSysPerf
  *
- * Description: Erase task times/counts for the indicated task
- *              sys.reset.counts.#TASKID
+ * Description: Base function for sys.perf.[reset|stats]
+ *              calls. This function verifies the remainder of the string
+ *              parses to 'reset.<task#>' or 'stats'. if not, an
+ *              unknown monitor perf command msg is displayed
  *
- * Parameters:  token3 - TaskId
+ * Parameters:  token2 - CHAR* should parse to 'reset.<task#>' or 'stats'
  *
  * Returns:     void
  *
@@ -1907,34 +1909,28 @@ static void MonitorSysPerfReset(CHAR* token3)
 {
   TCB*   pTask;
   UINT32 intSave;
-  INT32  taskId;  
-   
-  // Verify the task Id is in range, or '-1'
+  INT32  taskId;
+  CHAR*  pEnd;  
 
-  if ( isdigit( token3[0]) ||
-       (('-' == token3[0]) && ('1' == token3[1])) )
+  taskId = strtol(token3, &pEnd,  10);
+
+  // Verify the task Id is numeric and in range, or '-1'
+  if ( (pEnd != token3) && taskId >= -1 && taskId < MAX_TASKS)
   {
-    // convert task ID to task index, or -1
-    taskId = atoi( token3);
-
     if ( -1 == taskId )
-    {      
+    {
       // Disable collection, mark the taskId and reset the array size counter.
       // Don't clear counts for whomever may have been logging.
-      Tm.perfTask = taskId;      
-      Tm.nPerfCount = 0;      
-    }
-    else if( (taskId < -1) || (taskId >= MAX_TASKS) || (Tm.pTaskList[taskId] == NULL) )
-    {
-      MonitorInvalidCommand( "Invalid Task Id");
-    }
+      Tm.perfTask = taskId;
+      Tm.nPerfCount = 0;
+    }    
     else
-    { 
+    {
       // Reset the active count for the associated task and the perfdata area
       pTask = Tm.pTaskList[taskId];
       if ( pTask != NULL )
       {
-        intSave = __DIR();    
+        intSave = __DIR();
         pTask->lastExecutionTime    = 0;
         pTask->minExecutionTime     = UINT32MAX;
         pTask->maxExecutionTime     = 0;
@@ -1942,7 +1938,7 @@ static void MonitorSysPerfReset(CHAR* token3)
         pTask->executionCount       = 0;
         pTask->totExecutionTime     = 0;
         pTask->totExecutionTimeCnt  = 0;
-        
+
         if (RMT == pTask->Type)
         {
           pTask->Rmt.overrunCount     = 0;
@@ -1951,12 +1947,15 @@ static void MonitorSysPerfReset(CHAR* token3)
 
         // Clear out the accumulated totals
         // and set/disable collection
-        Tm.perfTask = taskId;        
-        //memset(&Tm.perfData, 0, sizeof(Tm.perfData));
+        Tm.perfTask = taskId;
         Tm.nPerfCount = 0;
         __RIR(intSave);
       }
     }
+  }
+  else
+  {
+    MonitorInvalidCommand( "Invalid Task Id");
   }
 }
 
@@ -1977,30 +1976,31 @@ static void MonitorSysPerfReset(CHAR* token3)
  ****************************************************************************/
 static void MonitorSysPerfStats(void)
 {
-  INT8   Str[ARRAY_128];
+  RESULT bResult = DRV_OK;
+  INT8   str[ARRAY_128];
   UINT32 i;
-  
+
   if (-1 != Tm.perfTask)
   {
-    snprintf(Str, ARRAY_128, "ExeCnt,Last,Min,Max,Tot,MaxExeMif\r\n");                         
-    GSE_PutLineBlocked(Str, TRUE);    
+    snprintf(str, ARRAY_128, "ExeCnt,Last,Min,Max,Tot,MaxExeMif\r\n");
+    GSE_PutLineBlocked(str, TRUE);
 
-    for ( i = 0; i < Tm.nPerfCount; ++i)
+    for ( i = 0; i < Tm.nPerfCount && (DRV_OK == bResult); ++i)
     {
-      snprintf(Str,ARRAY_128,"%d,%d,%d,%d,%d,%d\r\n",
+      snprintf(str,ARRAY_128,"%d,%d,%d,%d,%d,%d\r\n",
                               Tm.perfData[i].executionCount,
                               Tm.perfData[i].lastExecutionTime,
                               Tm.perfData[i].minExecutionTime,
                               Tm.perfData[i].maxExecutionTime,
-                              Tm.perfData[i].totExecutionTime,                              
+                              Tm.perfData[i].totExecutionTime,
                               Tm.perfData[i].maxExecutionMif);
-      GSE_PutLineBlocked(Str, TRUE);
+      bResult = GSE_PutLineBlocked(str, TRUE);
     }
   }
   else
   {
-    snprintf(Str, ARRAY_128, "Perf Monitoring not active,\n (use sys.perf.reset.<id>)");
-    GSE_PutLine(Str);
+    snprintf(str, ARRAY_128, "Perf Monitoring not active,\n (use sys.perf.reset.<id>)");
+    GSE_PutLine(str);
   }
 }
 
@@ -2008,372 +2008,377 @@ static void MonitorSysPerfStats(void)
  *  MODIFICATIONS
  *    $History: Monitor.c $
  * 
+ * *****************  Version 88  *****************
+ * User: Contractor V&v Date: 2/03/15    Time: 7:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Code Review compliance update
+ *
  * *****************  Version 87  *****************
  * User: Contractor V&v Date: 1/13/15    Time: 6:16p
  * Updated in $/software/control processor/code/system
  * SCR #1192 - Performance and timing added func sys.perf.reset and stats
- * 
+ *
  * *****************  Version 86  *****************
  * User: Contractor V&v Date: 12/10/14   Time: 7:53p
  * Updated in $/software/control processor/code/system
  * SCR #1192 - Performance and timing added func sys.reset.counts.<taskid>
- * 
+ *
  * *****************  Version 85  *****************
  * User: Melanie Jutras Date: 12-11-13   Time: 2:15p
  * Updated in $/software/control processor/code/system
  * SCR #1142 File Format Errors
- * 
+ *
  * *****************  Version 84  *****************
  * User: John Omalley Date: 12-11-12   Time: 2:09p
  * Updated in $/software/control processor/code/system
  * SCR 1099 - Code Review Updates
- * 
+ *
  * *****************  Version 83  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:43p
  * Updated in $/software/control processor/code/system
  * SCR #1142 Code Review Findings
- * 
+ *
  * *****************  Version 82  *****************
  * User: John Omalley Date: 10/11/11   Time: 4:38p
  * Updated in $/software/control processor/code/system
  * SCR 1078 - CR Update
- * 
+ *
  * *****************  Version 81  *****************
  * User: Contractor2  Date: 4/29/11    Time: 11:14a
  * Updated in $/software/control processor/code/system
  * SCR #478 Error: handling cmds multiples of GSE Cmd buffer size 128
- * 
+ *
  * *****************  Version 80  *****************
  * User: John Omalley Date: 10/18/10   Time: 10:21a
  * Updated in $/software/control processor/code/system
  * SCR 918 - Code Review Updates
- * 
+ *
  * *****************  Version 79  *****************
  * User: Peter Lee    Date: 10/14/10   Time: 1:56p
  * Updated in $/software/control processor/code/system
  * SCR #918 Misc code coverage updates.
- * 
+ *
  * *****************  Version 78  *****************
  * User: Jeff Vahue   Date: 9/21/10    Time: 5:49p
  * Updated in $/software/control processor/code/system
  * SCR #848 - Code Cov
- * 
+ *
  * *****************  Version 77  *****************
  * User: Jeff Vahue   Date: 9/10/10    Time: 6:29p
  * Updated in $/software/control processor/code/system
  * SCR# 866 - Monitor code needs to timeout on EEPROM write Q insert.
- * 
+ *
  * *****************  Version 76  *****************
  * User: Jeff Vahue   Date: 9/07/10    Time: 7:31p
  * Updated in $/software/control processor/code/system
  * SCR# 848 - Code Coverage
- * 
+ *
  * *****************  Version 75  *****************
  * User: Jim Mood     Date: 9/07/10    Time: 5:50p
  * Updated in $/software/control processor/code/system
  * SCR 820 sys.set.mem .b and .w in NV devices did not work
- * 
+ *
  * *****************  Version 74  *****************
  * User: Jeff Vahue   Date: 8/22/10    Time: 5:59p
  * Updated in $/software/control processor/code/system
  * SCR# 707 - Coverage Mod to eliminate WIN32 code
- * 
+ *
  * *****************  Version 73  *****************
  * User: Peter Lee    Date: 8/11/10    Time: 5:32p
  * Updated in $/software/control processor/code/system
- * SCR #777 Consolidate duplicate Program CRC. 
- * 
+ * SCR #777 Consolidate duplicate Program CRC.
+ *
  * *****************  Version 72  *****************
  * User: Contractor3  Date: 7/29/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR #698 - Fix code review findings
- * 
+ *
  * *****************  Version 71  *****************
  * User: Jeff Vahue   Date: 7/21/10    Time: 7:45p
  * Updated in $/software/control processor/code/system
  * SCR# 723 - remove duplicate code in memory write command
- * 
+ *
  * *****************  Version 70  *****************
  * User: Jeff Vahue   Date: 7/16/10    Time: 7:24p
  * Updated in $/software/control processor/code/system
  * Stub out code for memory dump for VectorCast
- * 
+ *
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 7/07/10    Time: 6:19p
  * Updated in $/software/control processor/code/system
  * SCR #636 add the ability to read/write EEPROM/RTC via the sys.g
- * 
+ *
  * *****************  Version 68  *****************
  * User: Contractor3  Date: 7/06/10    Time: 10:38a
  * Updated in $/software/control processor/code/system
  * SCR #672 - Changes based on Code Review.
- * 
+ *
  * *****************  Version 67  *****************
  * User: Contractor V&v Date: 6/22/10    Time: 6:25p
  * Updated in $/software/control processor/code/system
  * Misc- Cleanup build warnings
- * 
+ *
  * *****************  Version 66  *****************
  * User: Contractor V&v Date: 6/16/10    Time: 6:09p
  * Updated in $/software/control processor/code/system
  * SCR #636 add the ability to read/write EEPROM/RTC via the sys.g
- * 
+ *
  * *****************  Version 65  *****************
  * User: Contractor2  Date: 5/25/10    Time: 3:06p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
  * Removed ID translation table. Coding standard fixes
- * 
+ *
  * *****************  Version 64  *****************
  * User: Contractor V&v Date: 5/24/10    Time: 6:54p
  * Updated in $/software/control processor/code/system
  * SCR #585 Cfg File CRC changes from load to load
- * 
+ *
  * *****************  Version 63  *****************
  * User: Contractor2  Date: 5/11/10    Time: 12:55p
  * Updated in $/software/control processor/code/system
  * SCR #587 Change TmTaskCreate to return void
- * 
+ *
  * *****************  Version 62  *****************
  * User: Contractor2  Date: 5/06/10    Time: 2:05p
  * Updated in $/software/control processor/code/system
  * SCR #536 Avg Task Execution Time Incorrect
- * 
+ *
  * *****************  Version 61  *****************
  * User: Contractor2  Date: 4/27/10    Time: 1:38p
  * Updated in $/software/control processor/code/system
  * SCR 187: Degraded mode. Moved watchdog reset loop to WatchDog.c
- * 
+ *
  * *****************  Version 60  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:11p
  * Updated in $/software/control processor/code/system
  * SCR #317 Implement safe strncpy,SCR #70 Store/Restore interrupt
- * 
+ *
  * *****************  Version 59  *****************
  * User: Jeff Vahue   Date: 4/07/10    Time: 12:09p
  * Updated in $/software/control processor/code/system
  * SCR #534 - Cleanup Program CRC messages
- * 
+ *
  * *****************  Version 58  *****************
  * User: Contractor2  Date: 4/06/10    Time: 3:49p
  * Updated in $/software/control processor/code/system
  * SCR 524 - Implement stack usage display in bytes and percentage
- * 
+ *
  * *****************  Version 57  *****************
  * User: Jeff Vahue   Date: 4/05/10    Time: 10:01a
  * Updated in $/software/control processor/code/system
  * SCR #481 - add Vectorcast cmds to eliminate code coverage on code to
  * support WIN32 execution.
- * 
+ *
  * *****************  Version 56  *****************
  * User: Jeff Vahue   Date: 3/29/10    Time: 2:30p
  * Updated in $/software/control processor/code/system
  * SCR# 514 - sys.get/set.mem commands conversion of address value
- * 
+ *
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 3/29/10    Time: 1:55p
  * Updated in $/software/control processor/code/system
  * SCR# 514 - The ACS Packet size max value changed from 10000 to 2500.
  * The sys.get.mem command used strtol to convert the address pointer, s/b
  * strtoul.
- * 
+ *
  * *****************  Version 54  *****************
  * User: Contractor V&v Date: 3/19/10    Time: 4:31p
  * Updated in $/software/control processor/code/system
  * SCR #279 Making NV filenames uppercase
- * 
+ *
  * *****************  Version 53  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/system
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 52  *****************
  * User: Jeff Vahue   Date: 3/11/10    Time: 5:56p
  * Updated in $/software/control processor/code/system
  * SCR# 484 - MIF pulse  on any MIF#, not just MIF0
- * 
+ *
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 3/10/10    Time: 4:42p
  * Updated in $/software/control processor/code/system
  * SCR #464 Move Version Info into own file and support it.
- * 
+ *
  * *****************  Version 50  *****************
  * User: Contractor2  Date: 3/04/10    Time: 3:20p
  * Updated in $/software/control processor/code/system
  * SCR476 Memory Usage Display
- * 
+ *
  * *****************  Version 49  *****************
  * User: Contractor2  Date: 3/02/10    Time: 1:58p
  * Updated in $/software/control processor/code/system
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 48  *****************
  * User: Jeff Vahue   Date: 2/24/10    Time: 1:08p
  * Updated in $/software/control processor/code/system
  * SCR# 350 - remove unused data items.
- * 
+ *
  * *****************  Version 47  *****************
  * User: Jeff Vahue   Date: 2/17/10    Time: 1:42p
  * Updated in $/software/control processor/code/system
  * GH compiler warning fixes
- * 
+ *
  * *****************  Version 46  *****************
  * User: Jeff Vahue   Date: 2/17/10    Time: 1:27p
  * Updated in $/software/control processor/code/system
  * SCR# 364 - misc fixes for sys cmd changes
- * 
+ *
  * *****************  Version 45  *****************
  * User: Jeff Vahue   Date: 2/12/10    Time: 1:00p
  * Updated in $/software/control processor/code/system
  * SCR# 449 - cast UINT32 to enums to keep the compiler happy
- * 
+ *
  * *****************  Version 44  *****************
  * User: Jeff Vahue   Date: 2/12/10    Time: 12:44p
  * Updated in $/software/control processor/code/system
  * SCR# 449 - add cmd error report to sys.set.taskmode
- * 
+ *
  * *****************  Version 43  *****************
  * User: Jeff Vahue   Date: 2/12/10    Time: 12:30p
  * Updated in $/software/control processor/code/system
  * SCR #449 - Add control of system mode via user command, display system
  * mode, clean up sys.get.task.x processing, provide GHS target debugging
  * hook to bypass DT overrun code.
- * 
+ *
  * *****************  Version 42  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 2:17p
  * Updated in $/software/control processor/code/system
  * SCR# 441 - do not default sys.set/get.mem cmds to byte size when no
  * specifier is provided by the user.
- * 
+ *
  * *****************  Version 41  *****************
  * User: Jeff Vahue   Date: 2/09/10    Time: 11:10a
  * Updated in $/software/control processor/code/system
  * SCR# 412 - convert if/then/else to ASSERT
- * 
+ *
  * *****************  Version 40  *****************
  * User: Contractor V&v Date: 2/03/10    Time: 2:57p
  * Updated in $/software/control processor/code/system
  * SCR 279
- * 
+ *
  * *****************  Version 39  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 3:34p
  * Updated in $/software/control processor/code/system
  * Fix Lost Comment on revision 37
- * 
+ *
  * *****************  Version 38  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 3:18p
  * Updated in $/software/control processor/code/system
  * SCR# 434 - one more issue, timing pulse changed from on/off to an
  * integer and it was indexing into a ON_OFF string table for its value in
  * GetTask
- * 
+ *
  * *****************  Version 37  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 2:54p
  * Updated in $/software/control processor/code/system
  * SCR# 434 - fix a couple issues after some regression testing
- * 
+ *
  * *****************  Version 36  *****************
  * User: Jeff Vahue   Date: 2/01/10    Time: 1:40p
  * Updated in $/software/control processor/code/system
  * SCR# 434 - Pulse LSSx on task execution, clean up sys cmds and
  * processing
- * 
+ *
  * *****************  Version 35  *****************
  * User: Jeff Vahue   Date: 1/24/10    Time: 1:40p
  * Updated in $/software/control processor/code/system
  * SCR# 378 - clean up some Win32 memory read/write command processing
- * 
+ *
  * *****************  Version 34  *****************
  * User: Jeff Vahue   Date: 1/23/10    Time: 3:15p
  * Updated in $/software/control processor/code/system
  * SCR# 405
- * 
+ *
  * *****************  Version 33  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 5:09p
  * Updated in $/software/control processor/code/system
  * SCR# 397
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 1/13/10    Time: 4:58p
  * Updated in $/software/control processor/code/system
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:26p
  * Updated in $/software/control processor/code/system
  * SCR 145
- * 
+ *
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:11p
  * Updated in $/software/control processor/code/system
  * SCR# 326
- * 
+ *
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 12/18/09   Time: 1:35p
  * Updated in $/software/control processor/code/system
  * SCR# 378
- * 
+ *
  * *****************  Version 28  *****************
  * User: Jeff Vahue   Date: 12/17/09   Time: 12:12p
  * Updated in $/software/control processor/code/system
  * SCR #364 - INT8 -> CHAR, WIN32 updates fix sys.set.mem.f error
- * 
+ *
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 12/07/09   Time: 4:28p
  * Updated in $/software/control processor/code/system
  * SCR# 176 - remove redundant if from MonitorSetTaskEnable
- * 
+ *
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 12/03/09   Time: 4:59p
  * Updated in $/software/control processor/code/system
  * SCR# 350
- * 
+ *
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 12/01/09   Time: 5:16p
  * Updated in $/software/control processor/code/system
  * SCR #347 Time Sync Requirements
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 11/30/09   Time: 5:30p
  * Updated in $/software/control processor/code/system
  * Implement functions for accessing filenames and CRC
- * 
+ *
  * *****************  Version 23  *****************
  * User: Peter Lee    Date: 11/23/09   Time: 2:04p
  * Updated in $/software/control processor/code/system
  * Updates to support WIN32 version
- * 
+ *
  * *****************  Version 22  *****************
  * User: Contractor V&v Date: 11/18/09   Time: 3:53p
  * Updated in $/software/control processor/code/system
  * Implement SCR 196 ESC' sequence when outputting continuous data to GSE.
  * Implement SCR 145 Configuration CRC read command
- * 
- * 
+ *
+ *
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 4/29/09    Time: 4:16p
  * Updated in $/software/control processor/code/system
  * SCR #168 Update reference from time.h to alt_time.h
- * 
+ *
  * *****************  Version 20  *****************
  * User: Jim Mood     Date: 4/09/09    Time: 1:57p
  * Updated in $/control processor/code/system
  * Added sys.set.rtc.  Removed sys.set/get.date.  This feature now must be
  * handled by a User Manager command
- * 
+ *
  * *****************  Version 19  *****************
  * User: Jim Mood     Date: 4/07/09    Time: 10:13a
  * Updated in $/control processor/code/system
  * SCR# 161
- * 
+ *
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 10/07/08   Time: 3:23p
  * Updated in $/control processor/code/system
  * SCR #87 Function Prototype
- * 
+ *
  * *****************  Version 17  *****************
  * User: Jim Mood     Date: 8/26/08    Time: 11:28a
  * Updated in $/control processor/code/system
  * Removed DebugStr and moved implementation to Fault Mgr.  Updated file
- * header to the new "P&W ES" format.  
+ * header to the new "P&W ES" format.
  *
  ***************************************************************************/
