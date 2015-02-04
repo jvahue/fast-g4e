@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 2 $  $Date: 15-01-19 6:19p $
+      $Revision: 3 $  $Date: 15-02-04 1:17p $
 
 ******************************************************************************/
 
@@ -310,10 +310,10 @@ typedef struct
 #pragma pack(1)
 typedef struct 
 {
-  UINT16 cnt;    // Size of GBS Protocol file header
-  UINT16 completed; // 1=Retrieval Completed Successfully 
-                    // 0=Retrieval Not completed successfully 
-  UINT8 reserved[13]; // Reserved for future use
+  UINT16  cnt;       // Size of GBS Protocol file header
+  BOOLEAN completed; // 1=Retrieval Completed Successfully 
+                     // 0=Retrieval Not completed successfully 
+  UINT8 reserved[13];// Reserved for future use
 } GBS_FILE_HDR_DATA, *GBS_FILE_HDR_DATA_PTR; 
 #pragma pack()
 
@@ -364,6 +364,12 @@ EXPORT UINT16 GBSProtocol_SIM_Port ( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Peter Lee    Date: 15-02-04   Time: 1:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  UINT16 -> BOOLEAN for "completed" field of
+ * UART GBS Protocol File Header field. 
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:19p
