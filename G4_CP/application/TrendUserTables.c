@@ -1,14 +1,16 @@
 #define TREND_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+       Copyright (C) 2012 - 2015 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        TrendUserTables.c
 
-Description:   User command structures and functions for the trend processing
+  Description: User command structures and functions for the trend processing
 
-VERSION
-$Revision: 21 $  $Date: 12/05/14 4:33p $
+  VERSION
+    $Revision: 22 $  $Date: 2/05/15 10:48a $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -376,6 +378,11 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: John Omalley Date: 2/05/15    Time: 10:48a
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Code Review Updates
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:33p

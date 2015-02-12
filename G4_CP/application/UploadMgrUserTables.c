@@ -1,18 +1,20 @@
 #define UPLOADMGR_USERTABLE_BODY
 /******************************************************************************
-Copyright (C) 2007-2010 Pratt & Whitney Engine Services, Inc.
-All Rights Reserved. Proprietary and Confidential.
+        Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+              All Rights Reserved. Proprietary and Confidential.
 
-File:         UploadMgrUserTables.c
+  ECCN:         9D991
 
-Description:  Upload Manager encompasses the functionality required to
-package system logs and application (flight data) logs into
-files, transfer the files to the micro-server, and finally
-validate the files were received correctly by the
-micro-server and ground server.
+  File:         UploadMgrUserTables.c
 
-VERSION
-$Revision: 22 $  $Date: 12/05/14 3:59p $
+  Description:  Upload Manager encompasses the functionality required to
+                package system logs and application (flight data) logs into
+                files, transfer the files to the micro-server, and finally
+                validate the files were received correctly by the
+                micro-server and ground server.
+
+  VERSION
+     $Revision: 24 $  $Date: 2/10/15 3:54p $
 
 ******************************************************************************/
 #ifndef UPLOADMGR_BODY
@@ -104,7 +106,7 @@ static USER_ENUM_TBL upload_verify_state_enum[] =
 
 //For the user command to get verification table statistics
 static UINT32 m_TotalVerifyRows;
-static UINT32 m_FreeVerifyRows;
+//static UINT32 m_FreeVerifyRows;
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
@@ -134,7 +136,7 @@ static USER_MSG_TBL lookup_cmd[] =
 static USER_MSG_TBL vfy_cmd[] =
 {
   {"TBL_SIZE", NO_NEXT_TABLE,  UploadMgr_UserVfyRows,    USER_TYPE_UINT32,USER_RO,&m_TotalVerifyRows,  -1,-1,  NO_LIMIT, NULL },
-  {"TBL_FREE", NO_NEXT_TABLE,  UploadMgr_UserVfyRows,    USER_TYPE_UINT32,USER_RO,&m_FreeVerifyRows,   -1,-1,  NO_LIMIT, NULL },
+  {"TBL_FREE", NO_NEXT_TABLE,  UploadMgr_UserVfyRows,    USER_TYPE_UINT32,USER_RO,&m_FreeFVTRows,   -1,-1,  NO_LIMIT, NULL },
   {"FILE",     file_cmd,        NULL, NO_HANDLER_DATA},
   {"LOOKUP",   lookup_cmd,      NULL, NO_HANDLER_DATA},
   { NULL,      NULL,           NULL, NO_HANDLER_DATA}
@@ -315,27 +317,7 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyRows(USER_DATA_TYPE DataType,
                                           const void *SetPtr,
                                           void **GetPtr)
 {
-   INT32 i;
-   UPLOADMGR_FILE_VFY vfy_row;
-
-   m_FreeVerifyRows = 0;
-
-   //Scan the table for deleted slots.
-   for(i = 0; i < UPLOADMGR_VFY_TBL_MAX_ROWS; i++)
-   {
-      NV_Read(NV_UPLOAD_VFY_TBL,
-         VFY_ROW_TO_OFFSET(i),
-         &vfy_row,
-         sizeof(vfy_row));
-
-      if( VFY_STA_DELETED == vfy_row.State )
-      {
-         //Count em' up
-         m_FreeVerifyRows++;
-      }
-   }
-
-   //Return the value the parameter points to (either FreeVerifyRows or
+   //Return the value the parameter points to (either m_FreeFVTRows or
    //TotalVerifyRows which is set during init)
    *GetPtr = Param.Ptr;
 
@@ -407,6 +389,16 @@ static USER_HANDLER_RESULT UploadMgr_UserVfyIdxByFN(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: UploadMgrUserTables.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 2/10/15    Time: 3:54p
+ * Updated in $/software/control processor/code/application
+ * SCR 1266 - Standardize the FVT Free count retrieval
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 2/05/15    Time: 10:52a
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Code Review Updates
  * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12/05/14   Time: 3:59p

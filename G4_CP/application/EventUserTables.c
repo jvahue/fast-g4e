@@ -1,14 +1,16 @@
 #define EVENT_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2012-2014 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2012-2015 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        EventUserTables.c
 
-Description:   User command structures and functions for the event processing
+  Description: User command structures and functions for the event processing
 
-VERSION
-$Revision: 42 $  $Date: 1/23/15 7:53p $
+  VERSION
+     $Revision: 43 $  $Date: 2/05/15 10:44a $
 ******************************************************************************/
 #ifndef EVENT_BODY
 #error EventUserTables.c should only be included by Event.c
@@ -1517,6 +1519,11 @@ USER_HANDLER_RESULT Event_LastCleared   ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EventUserTables.c $
+ * 
+ * *****************  Version 43  *****************
+ * User: John Omalley Date: 2/05/15    Time: 10:44a
+ * Updated in $/software/control processor/code/application
+ * SCR 1188 - Code Review Updates
  * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 1/23/15    Time: 7:53p

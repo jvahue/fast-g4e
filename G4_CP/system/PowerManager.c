@@ -1,6 +1,6 @@
 #define POWERMANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
    File:         PowerManager.c
@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 68 $  $Date: 9/03/14 5:24p $
+   $Revision: 69 $  $Date: 2/11/15 7:40p $
 
 
 ******************************************************************************/
@@ -780,6 +780,8 @@ void PmTask (void* pPBlock)
 
    // Refresh the application busy status
     Pm.AppBusy = PmUpdateAppBusyStatus();
+    // Update the Halt completed bool here so it's available
+    Pm_Eeprom.bHaltCompleted = !Pm.AppBusy;
 
     switch (Pm.State)
     {
@@ -842,7 +844,8 @@ void PmTask (void* pPBlock)
         // .State should be PM_HALT
         // Don't need to update .bBattery should be set on init !
         // bPowerFailure should be set above
-        Pm_Eeprom.bHaltCompleted = TRUE;
+        // bHaltCompleted is set on entry to function.
+        
         NV_WriteNow( NV_PWR_MGR, 0, (void *) &Pm_Eeprom, sizeof(PM_EEPROM_DATA) );
 
         // Update Box Power On Usage before shutting Down !
@@ -1199,7 +1202,7 @@ void PmProcessPowerFailure (void)
 /******************************************************************************
 * Function:     PmUpdateAppBusyStatus
 *
-* Description:  Function to check the busy state of the recognized tasks
+* Description:  Function to check the busy state of the registered tasks
 *
 * Parameters:   none
 *
@@ -1213,26 +1216,30 @@ BOOLEAN PmUpdateAppBusyStatus(void)
 {
   INT32 busyCount = 0;
   INT32 i;
-  BOOLEAN bFlagUsable;
-  // check the de-referenced ptr for each registered entry and accumulate total IFF the system
-  // is in the correct usage mode for the associated task.
+  PM_BUSY_USAGE execMode;
+  BOOLEAN bFlagInUse;
+  
+  // Set the current exec mode ( FSM or Legacy) based on the latch control flag.
+  execMode = m_latchCtrl.bFsmActive ? PM_BUSY_FSM : PM_BUSY_LEGACY;
 
+  // check the de-referenced ptr for each registered entry and increment total IFF the system
+  // is in the correct usage mode for the associated task and the flag says busy.
   for(i = 0; i < (INT32)PM_MAX_BUSY; ++i)
   {
-    // Determine if the busy flag is valid/usable for use in the current mode
-    bFlagUsable = ( m_latchCtrl.bFsmActive &&
-                    (m_latchCtrl.task[i].usage == PM_BUSY_FSM ||
-                    m_latchCtrl.task[i].usage == PM_BUSY_ALL)) ||
-                  ( !m_latchCtrl.bFsmActive &&
-                    (m_latchCtrl.task[i].usage == PM_BUSY_LEGACY ||
-                     m_latchCtrl.task[i].usage == PM_BUSY_ALL)  )
-                    ? TRUE : FALSE;
+    // Determine if the busy flag is valid/usable in the current exec mode
+    bFlagInUse = ( (m_latchCtrl.task[i].usage == execMode) ||
+                   (m_latchCtrl.task[i].usage == PM_BUSY_ALL) )
+                   ? TRUE : FALSE;
 
-    busyCount += ( bFlagUsable                             &&
+    // if the busy flag for the task is applicable for current exec mode
+    // AND the flag is registered AND contains a true value, increment the busy count. 
+
+    busyCount += ( bFlagInUse                              &&
                    m_latchCtrl.task[i].pBusyFlag  != NULL  &&
                    *m_latchCtrl.task[i].pBusyFlag == TRUE)
                    ? 1:0;
   }
+  // If some task is busy return true.
   return (busyCount > 0);
 }
 
@@ -1349,6 +1356,11 @@ void PmPreInit(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: Contractor V&v Date: 2/11/15    Time: 7:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM Data fix to monitor eeprom busy
  * 
  * *****************  Version 68  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:24p

@@ -1,14 +1,16 @@
 #define TRIGGER_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
+  
+  ECCN:          9D991
 
-  File:        triggerUserTables.c
+  File:          triggerUserTables.c
 
-Description:   User command structures and functions for the trigger processing
+  Description:   User command structures and functions for the trigger processing
 
-VERSION
-$Revision: 33 $  $Date: 12/05/14 4:26p $
+  VERSION
+  $Revision: 34 $  $Date: 2/05/15 10:30a $
 ******************************************************************************/
 #ifndef TRIGGER_BODY
 #error triggerUserTables.c should only be included by trigger.c
@@ -457,6 +459,11 @@ static USER_HANDLER_RESULT Trigger_Valid(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: triggerUserTables.c $
+ * 
+ * *****************  Version 34  *****************
+ * User: John Omalley Date: 2/05/15    Time: 10:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Code Review Updates.
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:26p

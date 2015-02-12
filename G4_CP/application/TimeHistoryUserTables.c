@@ -1,14 +1,16 @@
 #define TIMEHISTORY_USERTABLES_BODY
 /******************************************************************************
-         Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2012 - 2015 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        TimeHistoryUserTables.c
 
 Description:   User command structures and functions for the event processing
 
 VERSION
-$Revision: 9 $  $Date: 12/05/14 4:31p $
+$Revision: 10 $  $Date: 2/10/15 3:59p $
 ******************************************************************************/
 #ifndef TIMEHISTORY_BODY
 #error TimeHistoryUserTables.c should only be included by TimeHistory.c
@@ -302,6 +304,11 @@ static USER_HANDLER_RESULT TH_FClose  ( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TimeHistoryUserTables.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 2/10/15    Time: 3:59p
+ * Updated in $/software/control processor/code/application
+ * SCR 1267 - Code Review Update
  * 
  * *****************  Version 9  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:31p

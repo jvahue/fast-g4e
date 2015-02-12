@@ -1,6 +1,6 @@
 #define CBIT_MANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:       CBITManager.c
@@ -8,7 +8,7 @@
     Description: File containing all functions related to Continuous Built In Test.
 
     VERSION
-      $Revision: 61 $  $Date: 9/03/14 5:15p $
+      $Revision: 62 $  $Date: 2/11/15 7:39p $
 
 ******************************************************************************/
 
@@ -794,17 +794,12 @@ static BOOLEAN CBITMgr_PWEHSEU_ShutDown( PM_APPSHUTDOWN_REASON reason )
     CBITMgrPWEHSEU_UpdateEepromData();
 
     // Update EEPROM with current run time data
-
-    if (PM_APPSHUTDOWN_NORMAL == reason || PM_APPSHUTDOWN_QUICK == reason)
+    if (PM_APPSHUTDOWN_NORMAL   == reason ||
+        PM_APPSHUTDOWN_QUICK    == reason ||
+        PM_APPSHUTDOWN_BUS_INTR == reason  )
     {
-      // For shutdown, use the WriteNow func to 'latch' into direct NVM writing mode.
-      NV_WriteNow( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-    }
-    else
-    {
-      // If not signalled for SHUTDOWN, write normally.
       NV_Write( NV_PWEH_CNTS_SEU, 0, &PwehSeuEepromData, sizeof(PWEH_SEU_EEPROM_DATA));
-    }
+    }    
   }
   return TRUE;
 }
@@ -1367,6 +1362,11 @@ void CBITMgrPWEHSEU_UpdateEepromData ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: CBITManager.c $
+ * 
+ * *****************  Version 62  *****************
+ * User: Contractor V&v Date: 2/11/15    Time: 7:39p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM Data fix to monitor eeprom busy
  * 
  * *****************  Version 61  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:15p

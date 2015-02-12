@@ -1,14 +1,16 @@
 #define ACTION_USERTABLE_BODY
 /******************************************************************************
-         Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2012 - 2015 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
 
-  File:        ActionManagerUserTables.c
+  ECCN:          9D991
 
-Description:   User command structures and functions for the sction processing
+  File:          ActionManagerUserTables.c
 
-VERSION
-$Revision: 15 $  $Date: 12/05/14 4:37p $
+  Description:   User command structures and functions for the sction processing
+
+   VERSION
+   $Revision: 16 $  $Date: 2/05/15 9:41a $
 ******************************************************************************/
 #ifndef ACTION_BODY
 #error ActionManagerUserTables.c should only be included by ActionManager.c
@@ -428,6 +430,11 @@ USER_HANDLER_RESULT Action_ClearLatch( USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ActionManagerUserTables.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 2/05/15    Time: 9:41a
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Code Review Updates
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:37p

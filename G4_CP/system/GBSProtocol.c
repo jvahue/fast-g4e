@@ -11,12 +11,12 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 6 $  $Date: 15-02-03 4:48p $
+      $Revision: 7 $  $Date: 15-02-06 7:17p $
 
 ******************************************************************************/
 
 #define GBS_TIMING_TEST 1
-#undef DTU_GBS_SIM
+#define DTU_GBS_SIM 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -31,7 +31,7 @@
 #include "NVMgr.h"
 #include "Assert.h"
 #include "ACS_Interface.h"
-#include "dio.h"
+#include "ActionManager.h"
 
 
 /*****************************************************************************/
@@ -79,6 +79,12 @@
         m_GBS_RxBuff[ch].cnt = 0;      \
         m_GBS_RxBuff[ch].cksum_pos = 0;\
         m_GBS_RxBuff[ch].cksum = 0
+
+
+#define GBS_ACTION_SECONDARY_SEL  ACTION_OFF
+#define GBS_ACTION_PRIMARY_SEL    ACTION_ON
+
+#define GBS_ACTIONS(a)   ( a & ACTION_ALL )
 
 
 /*****************************************************************************/
@@ -156,9 +162,13 @@ typedef struct {
                                 //   With Sim Log, blk size excludes CRC and Status.
                                 //   Have to acct for difference
 #endif        
-  UINT8 dnloadCode;             // Download Code for Debugging 
   UINT16 pad;                         
 } GBS_DEBUG_CTL, *GBS_DEBUG_CTL_PTR ; // Run Time Only
+
+typedef struct {
+  UINT8 dnloadCode;             // Download Code for Debugging   
+} GBS_DEBUG_DNLOAD, *GBS_DEBUG_DNLOAD_PTR; 
+
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -166,6 +176,7 @@ typedef struct {
 static GBS_CFG        m_GBS_Cfg[GBS_MAX_CH];
 static GBS_CTL_CFG    m_GBS_Ctl_Cfg;
 static GBS_DEBUG_CTL  m_GBS_Debug; 
+static GBS_DEBUG_DNLOAD m_GBS_DebugDnload[GBS_MAX_CH]; 
 
 static GBS_STATUS     m_GBS_Status[GBS_MAX_CH];
 static GBS_STATUS     m_GBS_Multi_Status;
@@ -216,6 +227,7 @@ static GBS_CMD_RSP cmdRsp_Confirm[GBS_CMD_RSP_MAX];  // Rec Retreived OK.  Confi
 static void GBS_RestoreAppData (void);
 static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary );
 static GBS_STATUS_PTR GBS_GetStatus (UINT16 index);
+static GBS_DEBUG_DNLOAD_PTR GBS_GetDebugDnload (UINT16 index);
 static GBS_STATUS_PTR GBS_GetSimStatus (void);
 static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void);
 
@@ -238,6 +250,8 @@ static UINT32 GBS_VerifyChkSum ( UINT16 ch, UINT16 type );
 
 static void GBS_RunningCksum (UINT16 ch, UINT16 type); 
 static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr );
+
+static void GBS_ChkMultiInstall ( GBS_STATUS_PTR pStatus ); 
 
 
 #include "GBSUserTables.c"
@@ -393,6 +407,9 @@ void GBSProtocol_Initialize ( void )
     m_GBS_RxBuff[i].cnt = 0;
     m_GBS_TxBuff[i].cnt = 0;
     m_GBS_Status[i].cntBlkSizeNVM = m_GBS_App_Data.pktCnt[i];
+    m_GBS_Status[i].RelayCksumNVM = m_GBS_App_Data.RelayCksum[i]; 
+    
+    m_GBS_DebugDnload[i].dnloadCode = m_GBS_Cfg[i].dnloadTypes[0];
   }
 
   m_GBS_Multi_Download.bWriteInProgress = TRUE;
@@ -408,6 +425,7 @@ void GBSProtocol_Initialize ( void )
                                                                  GBS_MAX_CH;
   m_GBS_Multi_Status.pDownloadData = &m_GBS_Multi_Download_Ptr;
   m_GBS_Multi_Status.cntBlkSizeNVM = m_GBS_App_Data.pktCnt_Multi;
+  m_GBS_Multi_Status.RelayCksumNVM = m_GBS_App_Data.RelayCksum_Multi;
   
   // Initialize Ptr for quicker runtime access
   for (i=0;i<GBS_MAX_CH;i++)
@@ -477,11 +495,12 @@ void GBSProtocol_Initialize ( void )
   
   m_GBS_Multi_Status.ptrACK_NAK = (UINT8 *) 
        &cmdRsp_Record[m_GBS_Ctl_Cfg.nPort][GBS_STATE_RECORD_ACK_NAK_INDEX].cmd[0]; 
+       
+  m_GBS_Multi_Ctl.nReqNum = ACTION_NO_REQ; 
 
 #ifdef DTU_GBS_SIM
   m_GBS_Debug.DTU_GBS_SIM_SimLog = FALSE; 
 #endif  
-  m_GBS_Debug.dnloadCode = GBS_DNLOAD_CODE_NOTUSED; 
     
 #ifdef GBS_TIMING_TEST
   /*vcast_dont_instrument_start*/
@@ -526,9 +545,9 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   GBS_STATUS_PTR pStatus;
   GBS_DOWNLOAD_DATA_PTR pDownloadData;
   UINT16 sent_cnt;
-  DIO_OUT_OP dioOutput;
-  
-  
+  UINT32 action; 
+
+
   // Check if multiplex is cfg.  Set pointers appropriately
   if ( (m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort) &&
        (m_GBS_Multi_Ctl.state == GBS_MULTI_SECONDARY) )
@@ -536,20 +555,23 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     pStatus = &m_GBS_Multi_Status;
     pDownloadData = &m_GBS_Multi_Download_Ptr;
     pStatus->multi_ch = TRUE; 
-    dioOutput = DIO_SetLow; 
+    action = GBS_ACTION_SECONDARY_SEL;
   }
   else
   {
     pStatus = &m_GBS_Status[ch];
     pDownloadData = &m_GBS_Download_Ptr[ch];
     pStatus->multi_ch = FALSE; 
-    dioOutput = DIO_SetHigh; 
+    action = GBS_ACTION_PRIMARY_SEL; 
   }
   
-  if ((m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort)) {
-    DIO_SetPin ( (DIO_OUTPUT) m_GBS_Ctl_Cfg.discPort, dioOutput );
+  if ((m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (ch == m_GBS_Ctl_Cfg.nPort))
+  {
+    m_GBS_Multi_Ctl.nReqNum = ActionRequest ( m_GBS_Multi_Ctl.nReqNum, 
+                                              GBS_ACTIONS(m_GBS_Ctl_Cfg.discAction), 
+                                              (ACTION_TYPE) action, FALSE, FALSE ); 
   }
-  
+
   // If Halt Rx, "reset"
   if ( *pDownloadData->bHalt == TRUE )
   {
@@ -576,6 +598,7 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
           pStatus->cntDnloadReq++; 
           pStatus->bDownloadInterrupted = TRUE; 
           pStatus->bCompleted = FALSE; 
+          pStatus->bRelayStuck = FALSE; 
           //m_GBS_Multi_Ctl.bSecondaryReqPending = FALSE; 
           GBS_ProcessStateRecord_Init(pStatus, TRUE);
           GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Download Start Request (Ch=%d)\r\n", 
@@ -616,6 +639,11 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   {
     result = UART_Transmit (ch, (const INT8*) &m_GBS_TxBuff[ch].buff[0], m_GBS_TxBuff[ch].cnt,
                              &sent_cnt);
+/* Debug  
+    GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Byte0=%d)\r\n", 
+               ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), m_GBS_TxBuff[ch].cnt,
+               m_GBS_TxBuff[ch].buff[0]);  
+// Debug */
     if (result == DRV_OK)
     {
       m_GBS_TxBuff[ch].cnt = 0;
@@ -698,6 +726,7 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
 {
   UINT16 nPort;
 
+
   // Set pointers for correct port channel and port type
   if (port != GBS_SIM_PORT_INDEX)
   {
@@ -733,6 +762,11 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
     {
       m_GBS_Multi_Ctl.bPrimaryReqPending = TRUE; // Pend PRIMARY
     }
+    // Clear the Multi Port Switch Stuck check vars
+    memset ( (void *) &m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_PRIMARY], 0, 
+             sizeof(GBS_MULTI_CHK) ); 
+    m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_PRIMARY].nvm_cksum =
+             m_GBS_Status[nPort].RelayCksumNVM; 
   } // end if ( (m_GBS_Multi_Cfg.bMultiplex == TRUE) && (m_GBS_Multi_Cfg.nPort == port) )
   else if ((m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (GBS_SIM_PORT_INDEX == port))
   {
@@ -747,6 +781,11 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
     {
       m_GBS_Multi_Ctl.bSecondaryReqPending = TRUE; // Pend Secondary
     }  
+    // Clear the Multi Port Switch Stuck check vars
+    memset ( (void *) &m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_SECONDARY], 0, 
+             sizeof(GBS_MULTI_CHK) ); 
+    m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_SECONDARY].nvm_cksum =
+             m_GBS_Multi_Status.RelayCksumNVM; 
   }
 
   if (m_GBS_Ctl_Cfg.bBuffRecStore == FALSE ) 
@@ -761,7 +800,7 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
     // U16 blksize and U16 blk# removed from pkts when in _RxBuffMultiRec buff
     *pData = &m_GBS_RxBuffMultiRec[nPort].buff[0];
   }
- 
+  
 }
 
 
@@ -784,16 +823,45 @@ BOOLEAN GBS_FileInit(void)
 
   // Init App data
   // Note: NV_Mgr will record log if data is corrupt
-  for (i = 0; i < GBS_MAX_CH; i++)
-  {
-    m_GBS_App_Data.pktCnt[i] = 0;
-  }
-  m_GBS_App_Data.pktCnt_Multi = 0;
+  memset ( (void *) &m_GBS_App_Data, 0, sizeof(m_GBS_App_Data) ); 
 
   // Update App data
   NV_Write(NV_GBS_DATA, 0, (void *) &m_GBS_App_Data, sizeof(m_GBS_App_Data));
 
   return TRUE;
+}
+
+
+/******************************************************************************
+ * Function:    GBSProtocol_DownloadClrHndl
+ *
+ * Description: Clears the NVM Rec Count to force Download of record on next 
+ *              Download Request
+ *
+ * Parameters:  Run - TRUE to clear NVM Rec Counts
+ *              param - Not Used. 
+ *
+ * Returns:     None
+ *
+ * Notes:       
+ *  - All GBS channel NVM Rec Cnt Cleared
+ *
+ *****************************************************************************/
+void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param )
+{
+  UINT16 i; 
+
+  if (Run) {
+
+    GBS_FileInit(); 
+    
+    for (i=0;i<GBS_MAX_CH;i++) {
+      m_GBS_Status[i].cntBlkSizeNVM = 0; 
+      m_GBS_Status[i].RelayCksumNVM = 0;
+    }
+    m_GBS_Multi_Status.cntBlkSizeNVM = 0; 
+    m_GBS_Multi_Status.RelayCksumNVM = 0;
+  }
 }
 
 
@@ -813,6 +881,7 @@ UINT16 GBSProtocol_SIM_Port ( void )
 {
   return ( m_GBS_Ctl_Cfg.nPort );
 }
+
 
 
 /*****************************************************************************/
@@ -840,6 +909,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
                                UINT8 *pData, UINT16 cnt)
 {
   UINT32 tick_ms;  
+  GBS_STATE_MULTI_ENUM multi; 
   
   tick_ms = CM_GetTickCount(); 
   
@@ -856,6 +926,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
         GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Download Start Request (Ch=%d)\r\n", 
                      (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);  
         pStatus->cntDnloadReq++;
+        pStatus->bRelayStuck = FALSE; 
       }
       break;
 
@@ -883,6 +954,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
 
     case GBS_STATE_CONFIRM:
       pStatus->state = GBS_ProcessStateSetConfirmEDU( pStatus, pData, cnt );
+#ifdef GBS_MULTI_DNLOADS    
       // If _CONFIRM is done, goto _DOWNLOAD again if looping thru Cmd Code is not complete
       //    Else, goto _COMPLETE.  NOTE: If Debug Cmd Code enb, goto _COMPLETE as well (thus
       //    exe the Debug Cmd Code only).  
@@ -890,12 +962,15 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
            (pStatus->cmdRecCodeIndex < GBS_MAX_DNLOAD_TYPES) && 
            (m_GBS_Cfg[pStatus->ch].dnloadTypes[pStatus->cmdRecCodeIndex] != 
             GBS_DNLOAD_CODE_NOTUSED) &&
-           (m_GBS_Debug.dnloadCode == GBS_DNLOAD_CODE_NOTUSED) )
+           (m_GBS_DebugDnload[pStatus->ch].dnloadCode == GBS_DNLOAD_CODE_NOTUSED) )
       { // Check if we have loop thru all cfg dnload code 
+        // NOTE:  Need to update this logic as GBS_DNLOAD_CODE_NOTUSED not used anymore
+        //        but set == to dnloadTypes[0] and if != use debug for one dnload
         GBS_CreateSummaryLog( pStatus, FALSE ); 
         pStatus->state = GBS_STATE_DOWNLOAD; 
         GBS_ProcessStateRecord_Init ( pStatus, FALSE );
       }
+#endif      
       break;
 
     case GBS_STATE_COMPLETE:
@@ -921,8 +996,8 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
 
   // If Cmd Seq failed, retry if # retries has not been exceeded
   if (pStatus->bCmdRspFailed == TRUE)
-  {
-    if (pStatus->nRetriesCurr == 0) // retries exhausted, cmd failed
+  { // retries exhausted, cmd failed or Relay Check failed 
+    if ( (pStatus->nRetriesCurr == 0) || (pStatus->bRelayStuck == TRUE) )
     {
       pStatus->bDownloadFailed = TRUE;
       pStatus->bCmdRspFailed = FALSE;
@@ -940,9 +1015,16 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
                 "GBS_Protocol: Comm Loss, Will Restart (Ch=%d,Rtry=%d,Delay=%d)\r\n",
                 (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch, 
                 pStatus->nRetriesCurr, m_GBS_Ctl_Cfg.restart_delay_ms);
-       pStatus->state = GBS_STATE_RESTART_DELAY; 
-       pStatus->restartDelay = tick_ms + m_GBS_Ctl_Cfg.restart_delay_ms; 
-       pStatus->bCmdRspFailed = FALSE; 
+      pStatus->state = GBS_STATE_RESTART_DELAY; 
+      pStatus->restartDelay = tick_ms + m_GBS_Ctl_Cfg.restart_delay_ms; 
+      pStatus->bCmdRspFailed = FALSE; 
+      // Clear the Multi Port Switch Stuck check vars
+      if ( (m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Ctl_Cfg.nPort) )
+      {
+        multi = (pStatus->multi_ch == TRUE) ? GBS_MULTI_SECONDARY : GBS_MULTI_PRIMARY; 
+        memset ( (void *) &m_GBS_Multi_Ctl.chkSwitch[multi], 0, sizeof(GBS_MULTI_CHK) ); 
+        m_GBS_Multi_Ctl.chkSwitch[multi].nvm_cksum = pStatus->RelayCksumNVM; 
+      }
     }
   } // end if ((pStatus->state != GBS_STATE_IDLE) && (pStatus->bCmdRspFailed == TRUE))
 
@@ -1216,8 +1298,6 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
                         (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch,
                         pStatus->cntBlkSizeNVM, pStatus->cntBlkSizeExp);          
         }
-
-         
         pStatus->cntBlkSizeExpDnNew = (m_GBS_Cfg[ch].dnloadTypes[index] == 
                                        GBS_DNLOAD_CODE_NEW) ? 
                                        pStatus->cntBlkSizeExp : pStatus->cntBlkSizeExpDnNew; 
@@ -1230,9 +1310,15 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
         // If all blk rx, then goto confirm if Ok, else just goto complete 
         if (pStatus->dataBlkState.cntBlkCurr >= pStatus->cntBlkSizeExp) {
           nextState = ((pStatus->dataBlkState.bFailed == TRUE) ||
-                       (pStatus->dataBlkState.cntStoreBad > 0)) ?  GBS_STATE_COMPLETE :
-                                                                   GBS_STATE_CONFIRM; 
+                       (pStatus->dataBlkState.cntStoreBad > 0) || 
+                       (m_GBS_Ctl_Cfg.bConfirm == FALSE)) ?  GBS_STATE_COMPLETE :
+                                                             GBS_STATE_CONFIRM;
+          pStatus->bCompleted = ((m_GBS_Ctl_Cfg.bConfirm == FALSE) && 
+                                 (pStatus->dataBlkState.bFailed == FALSE) &&
+                                 (pStatus->dataBlkState.cntStoreBad  == 0)) ? 
+                                 TRUE : pStatus->bCompleted;
         }
+        GBS_ChkMultiInstall ( pStatus ); 
       }
       
       if (nextState == GBS_STATE_DOWNLOAD) // If still in Rec Dnload mode, sent ACK/NAK
@@ -1330,9 +1416,11 @@ static void GBS_ProcessStateRecord_Init ( GBS_STATUS_PTR pStatus, BOOLEAN clearC
   pStatus->cmdRecCodeIndex = (clearCmdCodeIndex == TRUE) ? 0 : pStatus->cmdRecCodeIndex; 
   
   m_CmdReqBlk[ch].cmd = 0x5E;
-  m_CmdReqBlk[ch].code = (m_GBS_Debug.dnloadCode != GBS_DNLOAD_CODE_NOTUSED) ? 
-                          m_GBS_Debug.dnloadCode :
-                          m_GBS_Cfg[ch].dnloadTypes[pStatus->cmdRecCodeIndex]; 
+  m_CmdReqBlk[ch].code = ((m_GBS_DebugDnload[ch].dnloadCode != 
+                            m_GBS_Cfg[ch].dnloadTypes[0]) && 
+                           (clearCmdCodeIndex == TRUE)) ? 
+                          m_GBS_DebugDnload[ch].dnloadCode :
+                          m_GBS_Cfg[ch].dnloadTypes[pStatus->cmdRecCodeIndex];   
   memcpy ( (UINT8 *) &cmdRsp_Record[ch][GBS_STATE_RECORD_CODE_INDEX].cmd[0],
            &m_CmdReqBlk[ch], sizeof(GBS_CMD_REQ_BLK) );
   cmdRsp_Record[ch][GBS_STATE_RECORD_CODE_INDEX].cmdSize = sizeof(GBS_CMD_REQ_BLK);
@@ -1388,9 +1476,14 @@ static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus )
     if ( (m_GBS_Multi_Ctl.state == GBS_MULTI_SECONDARY) && 
          (pStatus->ch == m_GBS_Ctl_Cfg.nPort) ) {
       m_GBS_App_Data.pktCnt_Multi = pStatus->cntBlkSizeExpDnNew;
+      m_GBS_App_Data.RelayCksum_Multi = m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_SECONDARY].cksum; 
+      pStatus->RelayCksumNVM = m_GBS_App_Data.RelayCksum_Multi; 
     } // end of if MULTI set and SECONDARY active
     else {
       m_GBS_App_Data.pktCnt[pStatus->ch] = pStatus->cntBlkSizeExpDnNew;
+      m_GBS_App_Data.RelayCksum[pStatus->ch] = (pStatus->ch == m_GBS_Ctl_Cfg.nPort) ?
+           m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_PRIMARY].cksum : 0; 
+      pStatus->RelayCksumNVM =  m_GBS_App_Data.RelayCksum[pStatus->ch]; 
     } // end of else not MULTI and SECONDARY, thus straight channel 
     NV_Write ( NV_GBS_DATA, 0, (void *) &m_GBS_App_Data, sizeof(m_GBS_App_Data) ); 
   } // end if (pStatus->cntBlkSizeExp != pStatus->cntBlkSizeNVM) 
@@ -1411,11 +1504,18 @@ static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus )
       m_GBS_Multi_Ctl.state = (m_GBS_Multi_Ctl.bPrimaryReqPending == TRUE ) ? 
                               GBS_MULTI_PRIMARY : GBS_MULTI_SECONDARY;       
     }
+    m_GBS_DebugDnload[pStatus->ch].dnloadCode = 
+      ((m_GBS_Multi_Ctl.bPrimaryReqPending == FALSE) && 
+       (m_GBS_Multi_Ctl.bSecondaryReqPending == FALSE)) ? 
+       m_GBS_Cfg[pStatus->ch].dnloadTypes[0] : m_GBS_DebugDnload[pStatus->ch].dnloadCode;     
   } // end if (m_GBS_Multi_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Multi_Cfg.nPort)
+  else 
+  {
+    // m_GBS_DebugDnload[pStatus->ch].dnloadCode = GBS_DNLOAD_CODE_NOTUSED;
+    m_GBS_DebugDnload[pStatus->ch].dnloadCode = m_GBS_Cfg[pStatus->ch].dnloadTypes[0];
+  }
  
   GBS_CreateSummaryLog(pStatus, TRUE); // Create statistics summary log
-  
-  m_GBS_Debug.dnloadCode = GBS_DNLOAD_CODE_NOTUSED; 
   
   return (GBS_STATE_IDLE); 
 }
@@ -1645,12 +1745,12 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
           if (*pCnt == blkSize)  
           {
             // Test force checksum failure on Rec = 10 
-/*
-if ( (pBlkData->currBlkNum == 10) && (pStatus->multi_ch==TRUE) )
-  m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
-if ( (pBlkData->currBlkNum == 15) && (pStatus->multi_ch==FALSE) )
-  m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
-*/
+            /*
+            if ( (pBlkData->currBlkNum == 10) && (pStatus->multi_ch==TRUE) )
+              m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
+            if ( (pBlkData->currBlkNum == 15) && (pStatus->multi_ch==FALSE) )
+              m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
+            */
             // Test force checksum failure on Rec = 50 
             bGoodData = GBS_VerifyChkSum ( ch, GBS_CKSUM_REC_TYPE );
             if (bGoodData)
@@ -1766,6 +1866,12 @@ if ( (pBlkData->currBlkNum == 15) && (pStatus->multi_ch==FALSE) )
       case GBS_BLK_STATE_SAVING:
         if (*pDownloadData->bWriteInProgress == FALSE)
         {
+          /*
+          if ( (pBlkData->currBlkNum == 5) && (pStatus->multi_ch==TRUE) )
+            *pDownloadData->bWriteOk = FALSE; 
+          if ( (pBlkData->currBlkNum == 7) && (pStatus->multi_ch==FALSE) )
+            *pDownloadData->bWriteOk = FALSE; 
+          */  
           i = (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) ? pBlkData->cntBlkBuffering : 1; 
           pBlkData->cntStoreBad = (*pDownloadData->bWriteOk == FALSE) ?  
                                   i : pBlkData->cntStoreBad;
@@ -1821,6 +1927,7 @@ static void GBS_RestoreAppData (void)
 
 
   result = NV_Open(NV_GBS_DATA);
+  
   if ( result == SYS_OK ){
     NV_Read(NV_GBS_DATA, 0, (void *) &m_GBS_App_Data, sizeof(m_GBS_App_Data));
   }
@@ -1957,9 +2064,14 @@ static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary )
     log.nRestarts = pStatus->nRetriesCurr - m_GBS_Ctl_Cfg.restarts; 
     log.bCompleted = pStatus->bCompleted; 
     log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
+    log.bRelayStuck = pStatus->bRelayStuck; 
   }
   
+#ifdef GBS_MULTI_DNLOADS
   id = bSummary ? SYS_ID_UART_GBS_STATUS : SYS_ID_UART_GBS_BLK_STATUS; 
+#else
+  id = SYS_ID_UART_GBS_STATUS; 
+#endif  
   
   // Write the log
   LogWriteSystem (id, LOG_PRIORITY_LOW, &log, sizeof(log), NULL);
@@ -2057,6 +2169,60 @@ static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr )
 
 
 /******************************************************************************
+ * Function:    GBS_ChkMultiInstall
+ *
+ * Description: When multiplex is enabled, verify that the 4 install records from 
+ *              Primary and Second are not the same (should have diff ENG Serial, etc)
+ *
+ * Parameters:  pStatus -  ptr to GBS_STATUS data for specific chan
+ *
+ * Returns:     None
+ *
+ * Notes:       
+ *  - Adds the 1st 4 rec (Install Records) if cfg to do Multi Relay Stuck check
+ *  - If Install Rec are same for both EDU (based on checksum), then assume 
+ *    Relay Stuck and fail the Dnload
+ *
+ *****************************************************************************/
+static void GBS_ChkMultiInstall ( GBS_STATUS_PTR pStatus )
+{
+  GBS_MULTI_CHK_PTR pChk, pChkOther; 
+
+
+  if ( (m_GBS_Ctl_Cfg.bChkMultiInstall == TRUE) && (pStatus->dataBlkState.bFailed == FALSE) &&
+       (pStatus->dataBlkState.cntBlkRx <= GBS_MULTI_CHK_CNT) &&
+       (m_GBS_Ctl_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Ctl_Cfg.nPort) )
+  {
+    pChk = &m_GBS_Multi_Ctl.chkSwitch[m_GBS_Multi_Ctl.state]; 
+    if (pStatus->dataBlkState.cntBlkRx < GBS_MULTI_CHK_CNT)
+    { // Continue adding the first 4 install Rec checksum
+      pChk->cksum += m_GBS_RxBuff[pStatus->ch].cksum;
+      pChk->cnt++; 
+    }
+    else 
+    { // 4 Rec Received
+      pChk->cksum = (pChk->cksum == 0) ? ~pChk->cksum : pChk->cksum; 
+      pChkOther = (m_GBS_Multi_Ctl.state == GBS_MULTI_PRIMARY) ? 
+                        &m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_SECONDARY] :
+                        &m_GBS_Multi_Ctl.chkSwitch[GBS_MULTI_PRIMARY] ;
+      if ( ((pChkOther->cksum != GBS_MULTI_CHK_INIT) && (pChkOther->cksum == pChk->cksum)) ||
+           ((pChkOther->cksum == GBS_MULTI_CHK_INIT) && 
+            (pChkOther->nvm_cksum != GBS_MULTI_CHK_INIT) && 
+            (pChkOther->nvm_cksum == pChk->cksum)) )
+      {
+        pStatus->dataBlkState.bFailed = TRUE; 
+        pStatus->bRelayStuck = TRUE; 
+        GSE_DebugStr(NORMAL,TRUE, 
+                "GBS_Protocol: Relay Stuck (Ch=%d)\r\n",
+                (pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch);
+      }
+    } // end else 4 Rec Received
+  } // end if check MultiInstall 
+  
+} 
+
+
+/******************************************************************************
  * Function:    GBS_GetStatus
  *
  * Description: Utility function to request current GBS Status
@@ -2093,6 +2259,24 @@ static GBS_STATUS_PTR GBS_GetSimStatus (void)
 
 
 /******************************************************************************
+ * Function:    GBS_GetDebugDnload
+ *
+ * Description: Utility function to request current m_GBS_DebugDnload data
+ *
+ * Parameters:  index - index into m_GBS_DebugDnload data for specific chan
+ *
+ * Returns:     GBS_DEBUG_DNLOAD_PTR Ptr to m_GBS_DebugDnload Data
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static GBS_DEBUG_DNLOAD_PTR GBS_GetDebugDnload (UINT16 index)
+{
+  return ( (GBS_DEBUG_DNLOAD_PTR) &m_GBS_DebugDnload[index] );
+}
+
+
+/******************************************************************************
  * Function:    GBS_GetCtlStatus
  *
  * Description: Utility function to request current GBS Multi Ctl Status
@@ -2114,17 +2298,27 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
  * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
+ * 
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 15-02-03   Time: 4:48p
  * Updated in $/software/control processor/code/system
  * SCR #1255 GBS Protocol, fix dio out for Relay Switch control.
  * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 15-02-03   Time: 4:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol, fix dio out for Relay Switch control. 
+ *  
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 15-02-03   Time: 2:53p
  * Updated in $/software/control processor/code/system
  * SCR #1255, GBS Protocol.   Update "m_GBS_Debug.DTU_GBS_SIM_SimLog" to
  * FALSE rather then TRUE. 
- * 
+ *  
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:18p
  * Updated in $/software/control processor/code/system

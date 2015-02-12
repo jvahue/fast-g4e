@@ -3,13 +3,14 @@
             Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+  ECCN:        9D991
 
   File:        Monitor.c
 
   Description: GSE Communications port processing
 
   VERSION
-      $Revision: 88 $  $Date: 2/03/15 7:15p $
+      $Revision: 89 $  $Date: 2/05/15 10:26a $
 ******************************************************************************/
 
 
@@ -1864,7 +1865,7 @@ BOOLEAN MonitorSetNvRAM( CHAR* address, UINT8 size, UINT32 value)
  *              parses to 'reset.<task#>' or 'stats'. if not, an
  *              unknown monitor perf command msg is displayed
  *
- * Parameters:  token2 - CHAR* should parse to 'reset.<task#>' or 'stats'
+ * Parameters:  Token - CHAR* should parse to 'reset.<task#>' or 'stats'
  *
  * Returns:     void
  *
@@ -2007,6 +2008,11 @@ static void MonitorSysPerfStats(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
+ * 
+ * *****************  Version 89  *****************
+ * User: John Omalley Date: 2/05/15    Time: 10:26a
+ * Updated in $/software/control processor/code/system
+ * SCR 1192 - Code Review Updates
  * 
  * *****************  Version 88  *****************
  * User: Contractor V&v Date: 2/03/15    Time: 7:15p

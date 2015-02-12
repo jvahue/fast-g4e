@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 3 $  $Date: 15-02-03 5:30p $
+    $Revision: 4 $  $Date: 15-02-06 7:18p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -42,6 +42,7 @@ static GBS_CFG gbsCfgTemp;
 static GBS_CTL_CFG gbsCtlTemp;
 static GBS_MULTI_CTL gbsCtlStatusTemp; 
 static GBS_DEBUG_CTL gbsDebugTemp;
+static GBS_DEBUG_DNLOAD gbsDebugDnloadTemp; 
 
 
 /*****************************************************************************/
@@ -121,25 +122,15 @@ USER_ENUM_TBL gbsMultiStateStrs[] =
   { NULL,             0}
 };
 
-static
-USER_ENUM_TBL gbsLSSStrs[] =
-{
-  {"LSS0", GBS_LSS0},
-  {"LSS1", GBS_LSS1},
-  {"LSS2", GBS_LSS2},
-  {"LSS3", GBS_LSS3},
-  { NULL,  0}
-};
-
 
 // GBS *******************************************************************
 static USER_MSG_TBL gbsCmdCodeTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.   Data Type          Access   Parameter                             IndexRange DataLimit EnumTbl*/
-  {"CODE_0",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RO, (void *) &gbsCfgTemp.dnloadTypes[0],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
-  {"CODE_1",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[1],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
-  {"CODE_2",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[2],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
-  {"CODE_3",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[3],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
-  {"CODE_4",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[4],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+  {"CODE_0",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[0],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+//{"CODE_1",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[1],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+//{"CODE_2",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[2],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+//{"CODE_3",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[3],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
+//{"CODE_4",          NO_NEXT_TABLE, GBSMsg_CmdCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCfgTemp.dnloadTypes[4],  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -164,7 +155,7 @@ static USER_MSG_TBL gbsStatusTbl[] =
   {"DL_COMPLETED",    NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bCompleted,                  1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
   {"DL_REQ_CNT",      NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntDnloadReq,                1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL}, 
   {"BLK_NVM",         NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeNVM,               1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
- 
+  {"RELAY_STUCK",     NO_NEXT_TABLE, GBSMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bRelayStuck,                 1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 // GBS *******************************************************************
@@ -186,10 +177,20 @@ static USER_MSG_TBL gbsSimStatusTbl[] =
   {"DL_COMPLETED",    NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bCompleted,                  -1,-1,  NO_LIMIT,NULL}, 
   {"DL_REQ_CNT",      NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntDnloadReq,                -1,-1,  NO_LIMIT,NULL}, 
   {"BLK_NVM",         NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_UINT16,  USER_RO, (void *) &gbsStatusTemp.cntBlkSizeNVM,               -1,-1,  NO_LIMIT,NULL},
-
+  {"RELAY_STUCK",     NO_NEXT_TABLE, GBSMsg_SimStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsStatusTemp.bRelayStuck,                 -1,-1,  NO_LIMIT,NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 // GBS_SIM ***************************************************************
+
+
+// GBS_DEBUG ***************************************************************
+static USER_MSG_TBL gbsDebugTbl[] =
+{ /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                         IndexRange DataLimit EnumTbl*/
+  {"DNLOAD_CODE",     NO_NEXT_TABLE, GBSMsg_Status,    USER_TYPE_UINT8,   USER_RW, (void *) &gbsDebugDnloadTemp.dnloadCode,          1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+// GBS_DEBUG ***************************************************************
 
 
 // GBS_CTL ***************************************************************
@@ -197,7 +198,8 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
 { /*Str                Next Tbl Ptr   Handler Func.   Data Type          Access   Parameter                             IndexRange DataLimit EnumTbl*/
   {"MULTIPLEX",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bMultiplex,      -1,-1,  NO_LIMIT,NULL}, 
   {"MULTI_UART_PORT",  NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCtlTemp.nPort,           -1,-1,  NO_LIMIT,NULL}, 
-  {"MULTI_LSS",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_ENUM,    USER_RW, (void *) &gbsCtlTemp.discPort,        -1,-1,  NO_LIMIT,gbsLSSStrs}, 
+  {"MULTI_RELAY_CHECK",NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bChkMultiInstall,-1,-1,  NO_LIMIT,NULL},
+  {"MULTI_ACTION",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_ACT_LIST,USER_RW, (void *) &gbsCtlTemp.discAction,      -1,-1,  NO_LIMIT,NULL},   
   {"KEEPALIVE",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepAlive,      -1,-1,  NO_LIMIT,NULL}, 
   {"IDLE_TIMEOUT_MS",  NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.timeIdleOut,     -1,-1,  NO_LIMIT,NULL}, 
   //{"REC_RETRIES",    NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.retriesSingle,   -1,-1,  1,100,   NULL}, 
@@ -208,16 +210,16 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
   {"KEEP_BAD_REC",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepBadRec,     -1,-1,  NO_LIMIT,NULL}, 
   {"BUFF_RECS",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bBuffRecStore,   -1,-1,  NO_LIMIT,NULL}, 
   {"BUFF_RECS_SIZE",   NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cntBuffRecSize,  -1,-1,  NO_LIMIT,NULL},   
- 
+  {"CONFIRM_RECS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bConfirm,        -1,-1,  NO_LIMIT,NULL},   
+   
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL gbsCtlMultiTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                         IndexRange DataLimit EnumTbl*/
-  {"STATE",            NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
-  {"PRIMARY_PEND",     NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
-  {"SECONDARY_PEND",   NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending,  -1,-1,  NO_LIMIT,NULL},
-
+  {"STATE",           NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
+  {"PRIMARY_PEND",    NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
+  {"SECONDARY_PEND",  NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending,  -1,-1,  NO_LIMIT,NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -230,7 +232,7 @@ static USER_MSG_TBL gbsCtlStatusTbl[] =
 static USER_MSG_TBL gbsCtlDebugTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.         Data Type          Access                  Parameter                        IndexRange DataLimit EnumTbl*/
   {"CLEAR_NVM",       NO_NEXT_TABLE, GBSMsg_CtlDebugClear, USER_TYPE_ACTION,  USER_RO,                NULL,                            -1,-1,  NO_LIMIT,NULL},
-  {"DNLOAD_CODE",     NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_UINT8,   USER_RW,                &gbsDebugTemp.dnloadCode,        -1,-1,  NO_LIMIT,NULL},
+  //{"DNLOAD_CODE",   NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_UINT8,   USER_RW,                &gbsDebugTemp.dnloadCode,        -1,-1,  NO_LIMIT,NULL},
 #ifdef DTU_GBS_SIM  
   {"DTU_GBS_SIM_LOG", NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_BOOLEAN, USER_RW,                &gbsDebugTemp.DTU_GBS_SIM_SimLog,-1,-1,  NO_LIMIT,NULL},
 #endif  
@@ -260,6 +262,7 @@ static USER_MSG_TBL gbsProtocolRoot[] =
 {
   {"STATUS",gbsStatusTbl,  NULL,          NO_HANDLER_DATA},
   {"CFG",   gbsCfgTbl,     NULL,          NO_HANDLER_DATA},
+  {"DEBUG", gbsDebugTbl,   NULL,          NO_HANDLER_DATA},
 //{DISPLAY_CFG,            NO_NEXT_TABLE, EMU150Msg_ShowConfig,  USER_TYPE_ACTION,(USER_RO|USER_NO_LOG|USER_GSE) ,NULL     ,-1,-1,      NO_LIMIT, NULL},
   {NULL,                      NULL,          NULL,                  NO_HANDLER_DATA}
 };
@@ -318,8 +321,11 @@ USER_HANDLER_RESULT GBSMsg_Status(USER_DATA_TYPE DataType,
   result = USER_RESULT_OK;
 
   gbsStatusTemp = *GBS_GetStatus(Index);
+  gbsDebugDnloadTemp = *GBS_GetDebugDnload(Index); 
 
   result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+  
+  *GBS_GetDebugDnload(Index) = gbsDebugDnloadTemp; 
 
   return result;
 }
@@ -617,8 +623,10 @@ USER_HANDLER_RESULT GBSMsg_CtlDebugClear(USER_DATA_TYPE DataType,
   
   for (i=0;i<GBS_MAX_CH;i++) {
     m_GBS_Status[i].cntBlkSizeNVM = 0; 
+    m_GBS_Status[i].RelayCksumNVM = 0; 
   }
   m_GBS_Multi_Status.cntBlkSizeNVM = 0; 
+  m_GBS_Multi_Status.RelayCksumNVM = 0; 
 
   return result;
 }
@@ -711,12 +719,17 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
+ * 
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 15-02-03   Time: 5:30p
  * Updated in $/software/control processor/code/system
  * SCR #1255 GBS Protocol, Add "," to line 219.  For some reason compiled
  * w/o this ",".  Need to add, though. 
- * 
+ *  
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:19p
  * Updated in $/software/control processor/code/system
