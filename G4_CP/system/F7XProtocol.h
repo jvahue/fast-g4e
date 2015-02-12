@@ -2,8 +2,10 @@
 #define F7X_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        F7XProtocol.h
 
@@ -11,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 13 $  $Date: 11/11/14 4:00p $     
+      $Revision: 14 $  $Date: 2/05/15 9:50a $     
 
 ******************************************************************************/
 
@@ -427,6 +429,11 @@ EXPORT void F7XProtocol_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 2/05/15    Time: 9:50a
+ * Updated in $/software/control processor/code/system
+ * SCR 1267 - Code Review Update
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 11/11/14   Time: 4:00p

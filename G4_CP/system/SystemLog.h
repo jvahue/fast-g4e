@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 115 $  $Date: 15-01-19 6:22p $
+      $Revision: 116 $  $Date: 15-02-06 7:18p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -174,7 +174,7 @@ SYS_LOG_ID(SYS_ID_UART_F7X_NEW_DL_FOUND             ,0x5C20 ,0)\
 SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
 SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
 SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
-SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS               ,0x5C32 ,0)\
+/*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
 SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
 \
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
@@ -283,6 +283,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 116  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
  * 
  * *****************  Version 115  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:22p

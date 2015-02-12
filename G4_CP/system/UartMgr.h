@@ -9,7 +9,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 21 $  $Date: 15-01-11 10:20p $
+      $Revision: 22 $  $Date: 15-02-06 7:18p $
 
 ******************************************************************************/
 
@@ -81,6 +81,7 @@ typedef void    (*PROTOCOL_DOWNLOAD_HNDL) ( UINT8 port,
                                             UINT32  **pSize,
                                             UINT8   **pData );
 typedef BOOLEAN (*PROTOCOL_CH_READY_HNDL)  ( UINT16 ch );
+typedef void    (*PROTOCOL_DOWNLOAD_CLR_HNDL) ( BOOLEAN Run, INT32 param ); 
 
 
 /**********************************
@@ -285,6 +286,7 @@ typedef struct
   PROTOCOL_FILE_HDR      get_protocol_fileHdr;
   PROTOCOL_DOWNLOAD_HNDL download_protocol_hndl;
   PROTOCOL_CH_READY_HNDL get_protocol_ready_hndl;
+  PROTOCOL_DOWNLOAD_CLR_HNDL download_protocol_clr_hndl; 
 } UARTMGR_TASK_PARAMS, *UARTMGR_TASK_PARAMS_PTR;
 
 typedef struct
@@ -437,6 +439,7 @@ EXPORT void    UartMgr_FlushChannels      ( void );
 EXPORT UINT8*  UartMgr_DownloadRecord     ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSize,
                                             DL_WRITE_STATUS **pDL_WrStatus );
 EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
+EXPORT void    UartMgr_DownloadClr        ( BOOLEAN Run, INT32 param ); 
 
 #endif // UARTMGR_H
 
@@ -444,6 +447,11 @@ EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
  * 
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:20p

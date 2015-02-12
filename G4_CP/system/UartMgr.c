@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 57 $  $Date: 15-01-11 10:20p $
+      $Revision: 58 $  $Date: 15-02-06 7:18p $
 
 ******************************************************************************/
 
@@ -111,7 +111,9 @@ static  UINT16  UartMgr_ReadBuffSnapshotProtocol     ( void *pDest, UINT32 chan,
                                                        UINT16 nMaxByteSize,
                                                        BOOLEAN bBeginSnapshot,
                                                        UARTMGR_PROTOCOLS protocols );
-static BOOLEAN UartMgr_Protocol_ReadyOk_Hndl            ( UINT16 ch );
+static BOOLEAN UartMgr_Protocol_ReadyOk_Hndl         ( UINT16 ch );
+static void UartMgr_Download_Clr_NoneHndl            ( BOOLEAN Run, INT32 param ); 
+
 
 #include "UartMgrUserTables.c"   // Include the cmd table & functions
 
@@ -247,12 +249,14 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           break;
         case UARTMGR_PROTOCOL_EMU150:
           uartMgrBlock[i].exec_protocol = EMU150Protocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
           break;
         case UARTMGR_PROTOCOL_ID_PARAM:
@@ -260,6 +264,7 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
+          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_GBS:
@@ -267,6 +272,7 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = GBSProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = GBSProtocol_DownloadHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].download_protocol_clr_hndl = GBSProtocol_DownloadClrHndl;
           break;          
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
@@ -1298,6 +1304,30 @@ void UartMgr_DownloadStop ( UINT8 PortIndex )
 
 
 /******************************************************************************
+ * Function:    UartMgr_DownloadClr
+ *
+ * Description: For Dnload protocols that have "house cleaning" to perform 
+ *              that can be invoke via State Machine Transition
+ *
+ * Parameters:  Run - Not used, but passed to Protocol for specific operation
+ *              param - Not used, but passed to Protocol for specific operation
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+void UartMgr_DownloadClr ( BOOLEAN Run, INT32 param )
+{
+  UINT16 i; 
+  
+  for (i=0;i<UART_NUM_OF_UARTS;i++) {
+    uartMgrBlock[i].download_protocol_clr_hndl( Run, param ); 
+  }
+}
+
+
+/******************************************************************************
  * Function:    UartMgr_ClearDownloadState
  *
  * Description: Resets the download state back to IDLE
@@ -2126,11 +2156,35 @@ BOOLEAN UartMgr_Protocol_ReadyOk_Hndl ( UINT16 ch )
    return (TRUE);
 }
 
+/******************************************************************************
+ * Function:     UartMgr_Download_Clr_NoneHndl
+ *
+ * Description:  Function to handle UART protocols that don't have "house cleaning"
+ *               routine(s) that is exe via state machine transition. 
+ *
+ * Parameters:   Run - not used
+ *               param - not used 
+ *
+ * Returns:      none
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static
+void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
+{
+   FATAL("UartMgr: Protocol Does Not Have Download Clr Function",NULL);   
+}
 
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
  * 
  * *****************  Version 57  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:20p

@@ -1,6 +1,6 @@
 #define SYS_NVMGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
  File:       NVMgr.c
@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 78 $  $Date: 9/03/14 5:21p $
+    $Revision: 79 $  $Date: 2/11/15 7:40p $
 
 
 ******************************************************************************/
@@ -177,8 +177,8 @@ static NV_RUNTIME_INFO NV_RuntimeInfo[NV_MAX_FILE];
 //at initialization time.
 static INT32 NV_DevSpaceUsed[NV_MAX_DEV];
 
-//
-static BOOLEAN m_directWriteBusy;
+// Flag monitored by PM for determining EEPROM is/will be active.
+static BOOLEAN m_eeWriteBusy;
 
 //#define DEBUG_NVMGR_TASK
 
@@ -288,9 +288,9 @@ void NV_Init(void)
   }
 
   // Initialize the write-direct flag and register it with PM
-  m_directWriteBusy = FALSE;
+  m_eeWriteBusy = FALSE;
   // Register the directwrite busy flag to be used for Legacy and FSM
-  PmRegisterAppBusyFlag(PM_NVMGR_BUSY, &m_directWriteBusy, PM_BUSY_ALL);
+  PmRegisterAppBusyFlag(PM_NVMGR_BUSY, &m_eeWriteBusy, PM_BUSY_ALL);
 
   // Create the NV Manager Task
   memset(&tcb, 0, sizeof(tcb));
@@ -601,7 +601,7 @@ void NV_Write(NV_FILE_ID FileID, UINT32 Offset, const void* Data, UINT32 Size)
 
   BOOLEAN resetting = FALSE;
 
-  File = &NV_RuntimeInfo[FileID];
+  File = &NV_RuntimeInfo[FileID];  
 
   //File Open Check
   ASSERT_MESSAGE( File->IsOpen == TRUE, "%s: Attempt write on closed file.",
@@ -677,9 +677,16 @@ void NV_Write(NV_FILE_ID FileID, UINT32 Offset, const void* Data, UINT32 Size)
 
   // Flag the sector containing the CRC for updating.
   ++File->PrimaryDev->RefCount[CRCSector].ShadowCount;
+  
 
   File->PrimaryDev->Sem->Writing = FALSE;
   File->PrimaryDev->Sem->Written = TRUE;
+
+  // If the sector(s) are in the PRI EEPROM device, set EE Busy flag for PM
+  if ( DEV_EE_PRI == NV_FileInfo[FileID].PrimaryDevID)
+  {
+    m_eeWriteBusy = TRUE;
+  }  
 
   //*************** Update Backup copy ****************
 
@@ -717,9 +724,16 @@ void NV_Write(NV_FILE_ID FileID, UINT32 Offset, const void* Data, UINT32 Size)
 
     // All Writes Done: Flag the sector containing the CRC for updating.
     ++File->BackupDev->RefCount[CRCSector].ShadowCount;
-
+    
     File->BackupDev->Sem->Writing = FALSE;
     File->BackupDev->Sem->Written = TRUE;
+
+    // If the sector(s) are in the BKUP EEPROM device, set EE Busy flag for PM
+    if ( DEV_EE_BKUP == NV_FileInfo[FileID].BackupDevID)
+    {
+      m_eeWriteBusy = TRUE;
+    }
+
   }
 }
 
@@ -751,46 +765,58 @@ void NV_Write(NV_FILE_ID FileID, UINT32 Offset, const void* Data, UINT32 Size)
  *****************************************************************************/
 RESULT NV_WriteNow(NV_FILE_ID FileID, UINT32 Offset, void* Data, UINT32 Size)
 {
-  INT32  ShadowOffset, PhysicalOffset;
-  INT32  SizeWritten = 0, TotalWritten = 0;
-  UINT32 CRCOffset;
-  UINT8*  ShadowMem;
-  NV_DEV_WRITE_FUNC WriteFunc;
-  NV_FILE_TYPE FileType;
-  NV_RUNTIME_INFO* File;
-  RESULT result = SYS_OK;
-  UINT16 CRC;
+  INT32  shadowOffset;
+  INT32  physicalOffset;
+  INT32  sizeWritten = 0;
+  INT32  totalWritten = 0;
+  UINT32 crcOffset;
+  UINT8*  shadowMem;
 
-  File = &NV_RuntimeInfo[FileID];
+  NV_DEV_WRITE_FUNC pfWriteFunc;
+  NV_FILE_TYPE      fileType;
+  NV_RUNTIME_INFO*  pFileInfo;
+  RESULT result = SYS_OK;
+  UINT16 crc;
+  BOOLEAN currentEepromBusy;
+
+  pFileInfo = &NV_RuntimeInfo[FileID];
 
   //File Open Check
-  ASSERT_MESSAGE( File->IsOpen == TRUE, "%s: Attempt write on closed file.",
+  ASSERT_MESSAGE( pFileInfo->IsOpen == TRUE, "%s: Attempt write on closed file.",
     PromFileName[FileID]);
 
   //Boundary Check
-  ASSERT_MESSAGE( (Offset+Size) <= (File->Size-NV_CRC_SIZE),
+  ASSERT_MESSAGE( (Offset+Size) <= (pFileInfo->Size-NV_CRC_SIZE),
     "%s: write %d bytes beyond EOF",
-    PromFileName[FileID], (File->Size-NV_CRC_SIZE) - (Offset+Size));
+    PromFileName[FileID], (pFileInfo->Size-NV_CRC_SIZE) - (Offset+Size));
 
-  // Signal that the
-  m_directWriteBusy = TRUE;
+  // Save the value of the EEPROM busy flag for restoring later.
+  currentEepromBusy = m_eeWriteBusy;
 
-  for(FileType = NV_PRIMARY; FileType < NV_FILE_TYPE_MAX; FileType++)
+  // Signal that the EEPROM is busy
+  // Only need to check if the pri is on EE.
+   // Backup (if any) will also be on EE
+  if ( DEV_EE_PRI == NV_FileInfo[FileID].PrimaryDevID )
+  {    
+    m_eeWriteBusy = TRUE;
+  }
+
+  for(fileType = NV_PRIMARY; fileType < NV_FILE_TYPE_MAX; fileType++)
   {
     //Setup pointers to the requested device, either Primary or Backup
-    if(NV_PRIMARY == FileType)
+    if(NV_PRIMARY == fileType)
     {
-      ShadowOffset   = File->PrimaryOffset;
-      PhysicalOffset = File->PrimaryOffset + File->PrimaryDev->Offset;
-      ShadowMem      = File->PrimaryDev->ShadowMem;
-      WriteFunc      = File->PrimaryDev->Write;
+      shadowOffset   = pFileInfo->PrimaryOffset;
+      physicalOffset = pFileInfo->PrimaryOffset + pFileInfo->PrimaryDev->Offset;
+      shadowMem      = pFileInfo->PrimaryDev->ShadowMem;
+      pfWriteFunc    = pFileInfo->PrimaryDev->Write;
     }//Do backup only if a backup is defined
-    else if(File->BackupDev != NULL)
+    else if(pFileInfo->BackupDev != NULL)
     {
-      ShadowOffset   = File->BackupOffset;
-      PhysicalOffset = File->BackupOffset + File->BackupDev->Offset;
-      ShadowMem      = File->BackupDev->ShadowMem;
-      WriteFunc      = File->BackupDev->Write;
+      shadowOffset   = pFileInfo->BackupOffset;
+      physicalOffset = pFileInfo->BackupOffset + pFileInfo->BackupDev->Offset;
+      shadowMem      = pFileInfo->BackupDev->ShadowMem;
+      pfWriteFunc    = pFileInfo->BackupDev->Write;
     }
     else
     {//Not the primary and no backup defined.
@@ -798,50 +824,51 @@ RESULT NV_WriteNow(NV_FILE_ID FileID, UINT32 Offset, void* Data, UINT32 Size)
     }
 
     //Copy data and CRC to shadow
-    memcpy(&ShadowMem[ShadowOffset+Offset],Data,Size);
+    memcpy(&shadowMem[shadowOffset+Offset],Data,Size);
 
-    CRC = CalculateCheckSum( File->CheckMethod,
-                             &ShadowMem[ShadowOffset],
-                             File->Size-NV_CRC_SIZE );
+    crc = CalculateCheckSum( pFileInfo->CheckMethod,
+                             &shadowMem[shadowOffset],
+                             pFileInfo->Size-NV_CRC_SIZE );
 
-    CRCOffset = ShadowOffset+File->Size-NV_CRC_SIZE;
-    *(UINT16*)&ShadowMem[CRCOffset] = CRC;
+    crcOffset = shadowOffset+pFileInfo->Size - NV_CRC_SIZE;
+    *(UINT16*)&shadowMem[crcOffset] = crc;
 
     // Instruct the SpiManager to stop processing thru queues and send
     // subsequent writes directly to NVRAM.
     SPIMgr_SetModeDirectToDevice();
 
     //Write data to External NV memory
-    for(TotalWritten = 0;TotalWritten < Size;)
+    for(totalWritten = 0;totalWritten < Size;)
     {
-      SizeWritten = WriteFunc(&ShadowMem[ShadowOffset+Offset+TotalWritten],
-          PhysicalOffset+Offset+TotalWritten,Size-TotalWritten,NULL);
+      sizeWritten = pfWriteFunc(&shadowMem[shadowOffset + Offset + totalWritten],
+          physicalOffset + Offset + totalWritten, Size - totalWritten,NULL);
       //If write fatal error
-      if(-1 == SizeWritten)
+      if(-1 == sizeWritten)
       {
         result = SYS_NV_WRITE_DRIVER_FAIL;
         break;
       }
-      TotalWritten += SizeWritten;
+      totalWritten += sizeWritten;
     }
 
     //Write CRC to EExternal NV memory
-    for(TotalWritten = 0;TotalWritten < NV_CRC_SIZE;)
+    for(totalWritten = 0;totalWritten < NV_CRC_SIZE;)
     {
-      SizeWritten = WriteFunc(&ShadowMem[ShadowOffset+File->Size-NV_CRC_SIZE],
-                              PhysicalOffset+File->Size-NV_CRC_SIZE+TotalWritten,
-                              NV_CRC_SIZE-TotalWritten,NULL);
+      sizeWritten = pfWriteFunc(&shadowMem[shadowOffset + pFileInfo->Size - NV_CRC_SIZE],
+                                physicalOffset + pFileInfo->Size - NV_CRC_SIZE + totalWritten,
+                                NV_CRC_SIZE - totalWritten,NULL);
       //If write fatal error
-      if(-1 == SizeWritten)
+      if(-1 == sizeWritten)
       {
         result = SYS_NV_WRITE_DRIVER_FAIL;
         break;
       }
-      TotalWritten += SizeWritten;
+      totalWritten += sizeWritten;
     }
   }
 
-  m_directWriteBusy = FALSE;
+  // Restore the value of the EEPROM busy flag to its prior state.
+  m_eeWriteBusy = currentEepromBusy;
 
   return result;
 }
@@ -1323,6 +1350,8 @@ void NV_MgrTask(void *pParam)
   static const NV_DEV_INFO* CurrentDev;
   static NV_TASK_STATE NVTaskState;
 
+  INT32 sectCnt;
+
 #ifdef DEBUG_NVMGR_TASK
 /*vcast_dont_instrument_start*/
   CHAR* DevName[] = {"DEV_NONE","DEV_RTC_PRI", "DEV_EE_PRI ", "DEV_EE_BKUP "};
@@ -1336,7 +1365,7 @@ void NV_MgrTask(void *pParam)
       /*vcast_dont_instrument_start*/
       GSE_DebugStr(NORMAL, TRUE, "NVTaskState: NV_TASK_SEARCH");
       /*vcast_dont_instrument_end*/
-#endif
+#endif      
       //FOR each device in the device list
       for(Dev = 0; Dev < NV_MAX_DEV; Dev++)
       {
@@ -1349,6 +1378,30 @@ void NV_MgrTask(void *pParam)
           CurrentDev->Sem->Written = FALSE;
           break;
         }
+      }
+
+      // if the Dev search did not detect EEPROM dev's as having been written, 
+      // take this opportunity to check if their sectors are up-to-date ( READY).
+      // Only do this if the flag was set AND SpiManager is not in direct mode
+      // so we don't clear the flag during a WriteNow.
+      if ( (DEV_EE_PRI != Dev && DEV_EE_BKUP != Dev) && m_eeWriteBusy )
+      {
+        sectCnt = NV_SECTOR_ARRAY_SIZE(NV_DevInfo[DEV_EE_PRI].Size,
+                                       NV_DevInfo[DEV_EE_PRI].SectorSize);
+        for (i = 0; i < sectCnt; ++i)
+        {
+          if ( IO_RESULT_READY != NV_DevInfo[DEV_EE_PRI].sectorIoResult[i]  ||
+               IO_RESULT_READY != NV_DevInfo[DEV_EE_BKUP].sectorIoResult[i] )
+          {
+            break;
+          }
+        }
+
+        // If all sectors came up as 'READY', then then EEPROM is not active.
+        if (i == sectCnt)
+        {
+          m_eeWriteBusy = FALSE;          
+        }        
       }
       break;
 
@@ -1374,22 +1427,25 @@ void NV_MgrTask(void *pParam)
         if( CurrentDev->RefCount[i].NvRAMCount != CurrentDev->RefCount[i].ShadowCount )
         {
           // Dirty Sector offset is the sector # x sector size.
-          DirtySectorOffset = (i * DevSectorSize);
+          DirtySectorOffset = (i * DevSectorSize);          
 
+          // Update the sector based on its previous write state.
           switch(CurrentDev->sectorIoResult[i])
           {
             case IO_RESULT_PENDING:
-              // This sector is already en-queued, but not sent.
-              // Nothing to do since queue entry is pointing to the "changed" data.
+              // This sector is already en-queued for writing, but not yet sent.
+              // Nothing to do since queue entry is already pointing to the newly "changed" data.
+              // Just sync the ref counts.
               CurrentDev->RefCount[i].NvRAMCount = CurrentDev->RefCount[i].ShadowCount;
               break;
 
             case IO_RESULT_READY:
-              // The write has completed (TRANSMITTED->READY)
+              // Any previous write has completed (transitioned from TRANSMITTED->READY)
               // Fall-through, handle same as transmitted...
+              // Deliberate Fall-through
             case IO_RESULT_TRANSMITTED:
               // This sector is not en-queued OR is already on the way to EEPROM.
-              // Either way, we need to en-queue the sector to send out the change.
+              // Either way, we need to en-queue the sector to send out the new change.
 
               // Stay in write state
               NVTaskState = NV_TASK_WRITE;
@@ -1437,7 +1493,7 @@ void NV_MgrTask(void *pParam)
       if(CurrentDev->Sem->Writing)
       {
         NVTaskState = NV_TASK_WRITE;
-      }
+      }      
       break;
 
     default:
@@ -1711,6 +1767,11 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.c $
+ * 
+ * *****************  Version 79  *****************
+ * User: Contractor V&v Date: 2/11/15    Time: 7:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM Data fix to monitor eeprom busy
  * 
  * *****************  Version 78  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:21p

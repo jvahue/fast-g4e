@@ -13,9 +13,12 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 3 $  $Date: 15-02-04 1:17p $
+      $Revision: 4 $  $Date: 15-02-06 7:18p $
 
 ******************************************************************************/
+
+// Allow Multiple Download Requests
+// #define GBS_MULTI_DNLOADS 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -45,17 +48,17 @@
 #define GBS_TIMEOUT_RETRIES   4
 
 #define GBS_RESTART_SETEDU_MODE  3
-#define GBS_MULTIPLE_RETRIES 12 // Max of 12
+#define GBS_MULTIPLE_RETRIES  12 // Max of 12
 #define GBS_RESTART_DELAY_MS  CM_DELAY_IN_MSEC(10000)
 #define GBS_CMD_DELAY_MS      CM_DELAY_IN_MSEC(100)
 
-                            /*0,  1,  2,  3,  4*/ /* dnloadTypes */
-#define GBS_CFG_DEFAULT     0x5,GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED,\
-                                GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED
+                              /*0,  1,  2,  3,  4*/ /* dnloadTypes */
+#define GBS_CFG_DEFAULT        0x5,GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED,\
+                               GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED
 
 #define GBS_MULTI_CFG_DEFAULT  FALSE,                /* bMultiplex */\
                                1,                    /* nPort */\
-                               GBS_LSS0,             /* discAddr */\
+                               0,                    /* discAction */\
                                FALSE,                /* bKeepAlive */\
                                GBS_IDLE_TIMEOUT,     /* timeOut */\
                                GBS_TIMEOUT_RETRIES,  /* retriesSingle */\
@@ -65,8 +68,9 @@
                                GBS_CMD_DELAY_MS,         /* cmd_delay_ms */\
                                TRUE,                     /* bKeepBadRec */\
                                FALSE,                    /* bBuffRecStore */\
-                               1000                      /* cntBuffRecSize */
-
+                               1000,                     /* cntBuffRecSize */\
+                               TRUE,                     /* bConfirm */\
+                               TRUE                      /* bChkMultiInstall */
 
 #define GBS_CFGS_DEFAULT    GBS_CFG_DEFAULT, \
                             GBS_CFG_DEFAULT, \
@@ -79,19 +83,11 @@
                                  Package Typedefs
 ******************************************************************************/
 
-typedef enum {  // Note: if DIO_OUTPUT_LIST changes
-  GBS_LSS0, 
-  GBS_LSS1,
-  GBS_LSS2, 
-  GBS_LSS3, 
-  GBS_MAX_ENUM
-} GBS_LSS_ENUM; 
-
 typedef struct {
   BOOLEAN bMultiplex;   // TRUE = Two EDU multiplex onto same UART channel
   UINT8 nPort;          // Physical UART Port for Multiplex EDU data
-  GBS_LSS_ENUM discPort;// Port / Identifier for discrete to switch when
-                        //   comm with two EDU(s)
+  UINT32 discAction;    // To switch between Multiplex Devices, LSSX must be toggled
+                        //   Control of LSSX will be thru Action Mgr
   BOOLEAN bKeepAlive;   // Send Keep Alive Cmd with GMT Time
 
   UINT32 timeIdleOut;   // TBD add more timeouts
@@ -103,10 +99,13 @@ typedef struct {
   BOOLEAN bKeepBadRec;  // TRUE keep bad CRC record
   BOOLEAN bBuffRecStore; // Enb the buffering of small records for storage
   UINT32 cntBuffRecSize; // When buffering of rec enb, the size to flush
+  BOOLEAN bConfirm;      // TRUE allow confirm of recs when Rx Completes w/o err
+  BOOLEAN bChkMultiInstall; // TRUE check the 4 install rec to ensure PRIMARY / SEC are diff.  
+                            //     Check to ensure relay switched between the two EDU
 } GBS_CTL_CFG, *GBS_CTL_CFG_PTR;
 
 typedef struct {
-  UINT8 dnloadTypes[GBS_MAX_DNLOAD_TYPES];  // default is Dnload Type = 4
+  UINT8 dnloadTypes[GBS_MAX_DNLOAD_TYPES];  // default is Dnload Type = 5 for New Records
 } GBS_CFG, *GBS_CFG_PTR;
 
 typedef GBS_CFG GBS_CFGS[GBS_MAX_CH];
@@ -114,6 +113,8 @@ typedef GBS_CFG GBS_CFGS[GBS_MAX_CH];
 typedef struct {
   UINT16 pktCnt[GBS_MAX_CH];
   UINT16 pktCnt_Multi;
+  UINT32 RelayCksum[GBS_MAX_CH]; 
+  UINT32 RelayCksum_Multi; 
 } GBS_APP_DATA;
 
 
@@ -274,15 +275,29 @@ typedef struct {
   UINT32 restartDelay;    // Restart Delay Timer 
   
   UINT32 cntBadCRCRow;    // Consecutive Cnt of Bad CRC In Row 
-                            
+  
+  UINT8 debugDnLoadCode;  // Debug Download Code for each GBS Channel 
+  BOOLEAN bRelayStuck; // TRUE if Multiple Relay Stuck test fails (if test enabled)
+  
+  UINT32 RelayCksumNVM;   // Cksum of 1st 4 Install Rec used for Relay Stuck Check
 } GBS_STATUS, *GBS_STATUS_PTR;
 
+
+#define GBS_MULTI_CHK_INIT 0  // Initialize 
+#define GBS_MULTI_CHK_CNT  4
+
+typedef struct {
+  UINT16 cnt;
+  UINT32 cksum;
+  UINT32 nvm_cksum; // stored from previous successful download
+} GBS_MULTI_CHK, *GBS_MULTI_CHK_PTR; 
 
 typedef struct {
   GBS_STATE_MULTI_ENUM state;   // _PRIMARY or _SECONDARY
   BOOLEAN bPrimaryReqPending;   // Data Mgr Primary Ch Req Dnload
   BOOLEAN bSecondaryReqPending; // Data Mgr Secondary Ch Req Dnload
-
+  INT8 nReqNum;  // Action Mgr Req # for LSS control
+  GBS_MULTI_CHK chkSwitch[GBS_MULTI_MAX];
 } GBS_MULTI_CTL, *GBS_MULTI_CTL_PTR ;
 
 
@@ -304,16 +319,17 @@ typedef struct
   UINT32 nBadStore; 
   
   UINT32 nRestarts;    // # times retrieval had to restart from the top
+  BOOLEAN bRelayStuck; // TRUE if Multiple Relay Stuck test fails (if test enabled)
 } GBS_STATUS_LOG, *GBS_STATUS_LOG_PTR;
 #pragma pack()
 
 #pragma pack(1)
 typedef struct 
 {
-  UINT16  cnt;       // Size of GBS Protocol file header
-  BOOLEAN completed; // 1=Retrieval Completed Successfully 
-                     // 0=Retrieval Not completed successfully 
-  UINT8 reserved[13];// Reserved for future use
+  UINT16 cnt;         // Size of GBS Protocol file header
+  BOOLEAN completed;  // 1=Retrieval Completed Successfully 
+                      // 0=Retrieval Not completed successfully 
+  UINT8 reserved[13]; // Reserved for future use
 } GBS_FILE_HDR_DATA, *GBS_FILE_HDR_DATA_PTR; 
 #pragma pack()
 
@@ -358,6 +374,7 @@ EXPORT void GBSProtocol_DownloadHndl ( UINT8 port,
                                        UINT8   **pData );
                                        
 EXPORT UINT16 GBSProtocol_SIM_Port ( void ); 
+EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param ); 
 
 
 #endif // GBS_PROTOCOL_H
@@ -365,12 +382,17 @@ EXPORT UINT16 GBSProtocol_SIM_Port ( void );
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
  * 
+ * *****************  Version 4  *****************
+ * User: Peter Lee    Date: 15-02-06   Time: 7:18p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Additional Update Item #7. 
+ * 
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 15-02-04   Time: 1:17p
  * Updated in $/software/control processor/code/system
  * SCR #1255 GBS Protocol.  UINT16 -> BOOLEAN for "completed" field of
  * UART GBS Protocol File Header field. 
- * 
+ *  
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:19p
  * Updated in $/software/control processor/code/system
