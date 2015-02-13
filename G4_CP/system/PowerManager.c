@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 69 $  $Date: 2/11/15 7:40p $
+   $Revision: 70 $  $Date: 2/12/15 7:22p $
 
 
 ******************************************************************************/
@@ -817,13 +817,13 @@ void PmTask (void* pPBlock)
           Pm.PmStateTimer = 0;
 
           // Update Pm_Eeprom values
+
           Pm_Eeprom.State = Pm.State;
           CM_GetTimeAsTimestamp( &Pm_Eeprom.StateTrans_Time );
+          
           // Don't need to update .bBattery should be set on init !
           // bPowerFailure should be set above
-          // bHaltCompleted should be FALSE
-          NV_Write( NV_PWR_MGR, 0, (void *) &Pm_Eeprom,
-                    sizeof(PM_EEPROM_DATA) );
+          // bHaltCompleted should be FALSE         
 
           // Clear State Timer for next state usage.
           Pm.PmStateTimer = 0;
@@ -1356,6 +1356,12 @@ void PmPreInit(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Contractor V&v Date: 2/12/15    Time: 7:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM remove write to Pwrmgr  file during
+ * shutdown
  * 
  * *****************  Version 69  *****************
  * User: Contractor V&v Date: 2/11/15    Time: 7:40p
