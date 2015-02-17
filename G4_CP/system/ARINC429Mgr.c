@@ -11,7 +11,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 63 $  $Date: 1/29/15 4:51p $
+     $Revision: 64 $  $Date: 2/17/15 3:55p $
 
 ******************************************************************************/
 
@@ -3150,7 +3150,7 @@ void Arinc429MgrDetermineSSMFailure ( UINT32 *pFailCount, UINT8 TotalTests, char
 
    // If the MaxCount is still zero then the label is not being
    // transmitted.  FailIndex == END_OF_FAIL_COUNT.
-   snprintf ( pMsg, sizeof(Arinc429_ErrMsg[FailIndex]), "%s", Arinc429_ErrMsg[FailIndex] );
+   snprintf ( pMsg, ARINC429_SSM_FAIL_MSG_SIZE, "%s", Arinc429_ErrMsg[FailIndex] );
 }
 
 /*****************************************************************************/
@@ -3717,6 +3717,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
  * 
+ * *****************  Version 64  *****************
+ * User: John Omalley Date: 2/17/15    Time: 3:55p
+ * Updated in $/software/control processor/code/system
+ * SCR 1261 - ModFix for Code Review Update injected error
+ * 
  * *****************  Version 63  *****************
  * User: John Omalley Date: 1/29/15    Time: 4:51p
  * Updated in $/software/control processor/code/system
@@ -3725,7 +3730,7 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  * *****************  Version 62  *****************
  * User: John Omalley Date: 1/19/15    Time: 11:02a
  * Updated in $/software/control processor/code/system
- * SCR 1276 - Code Review Updates
+ * SCR 1261 - Code Review Updates
  * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 4/17/14    Time: 2:04p
