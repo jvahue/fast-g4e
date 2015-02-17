@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 7 $  $Date: 15-02-06 7:17p $
+      $Revision: 8 $  $Date: 15-02-17 1:06p $
 
 ******************************************************************************/
 
@@ -1354,7 +1354,9 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
           //   before allowing ACK/NAK (needed for retries where prev ACK/NAK not
           //   seen by EDU).
           if ( (pStatus->dataBlkState.state != GBS_BLK_STATE_SAVING) && 
-               ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) )
+               ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) &&
+               (pStatus->dataBlkState.bFailed != TRUE) )
+               
           {
             memcpy ( (UINT8 *) &m_GBS_TxBuff[ch].buff[0], (UINT8 *) &cmdRsp_ptr->cmd[0],
                      cmdRsp_ptr->cmdSize );
@@ -2297,6 +2299,12 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 15-02-17   Time: 1:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Update to don't send ACK when waiting for 20
+ * sec IDLE timeout (to force EDU to exist GBS mode) when download failed.
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:17p
