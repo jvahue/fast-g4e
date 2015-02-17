@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 8 $  $Date: 15-02-17 1:06p $
+      $Revision: 9 $  $Date: 15-02-17 5:06p $
 
 ******************************************************************************/
 
@@ -139,7 +139,7 @@ typedef struct {
 #define GBS_KA_DATE_SIZE 3
 #define GBS_KA_CODE  0xFE
 #define GBS_KA_LRU_SEL 0x9B
-#define GBS_KA_DATE_BASE_YR 1900 // This needs to be confirmed
+#define GBS_KA_DATE_BASE_YR 2000 // This needs to be confirmed
 #define GBS_KA_CKSUM_EXCL 2
 
 #pragma pack(1)
@@ -2133,7 +2133,7 @@ static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr )
     // Create GMT 
     // 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
     // x x x s s s s s s m m  m  m  m  m  h  h  h  h  h  x  x  x  x
-    data = (time_s.Second & 0x3F) | (time_s.Minute & 0x3F << 6) | 
+    data = (time_s.Second & 0x3F) | ((time_s.Minute & 0x3F) << 6) | 
            ((time_s.Hour & 0x1F) << 12 ); 
     data = data << 3; 
     byte_ptr = (UINT8 *) &data; // Big Endian 
@@ -2161,7 +2161,7 @@ static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr )
     byte_ptr = (UINT8 *) &msg.code; 
     data = 0; 
     for (i=0;i<sizeof(GBS_KEEPALIVE_MSG) - GBS_KA_CKSUM_EXCL;i++) {
-      data = *byte_ptr + data; 
+      data = *byte_ptr++ + data; 
     }
     msg.cksum = data & 0xFF;  // cksum is only 8 bits
     
@@ -2299,6 +2299,15 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 15-02-17   Time: 5:06p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol. 
+ * b) KeepAlive updates, 
+ * - fix checksum at end of data
+ * - minutes field incorrect
+ * - base yr as confirmed on UTFlight is 2000 not 1900.  
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 15-02-17   Time: 1:06p
