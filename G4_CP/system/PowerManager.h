@@ -11,7 +11,7 @@
                   the aircraft Bus or Battery power supplies.
 
     VERSION
-    $Revision: 37 $  $Date: 9/03/14 5:26p $
+    $Revision: 38 $  $Date: 2/17/15 7:40p $
 
 ******************************************************************************/
 
@@ -162,6 +162,7 @@ typedef struct
     BOOLEAN       bBattery;               // System Battery Configuration
     BOOLEAN       bHaltCompleted;         // Flag to indicate HALT processing completed
                                           //   successfully.
+    UINT16        appBusyFlags;           // Packed 16 bit word containing m_latchCtrl data
 } PM_EEPROM_DATA;
 
 // PM_LOG_TYPES
@@ -322,6 +323,11 @@ EXPORT void PmSetFsmActive(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.h $
+ * 
+ * *****************  Version 38  *****************
+ * User: Contractor V&v Date: 2/17/15    Time: 7:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM added appflag states to PwrMgr file 
  * 
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 9/03/14    Time: 5:26p

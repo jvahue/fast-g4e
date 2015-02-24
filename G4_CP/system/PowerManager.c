@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 70 $  $Date: 2/12/15 7:22p $
+   $Revision: 71 $  $Date: 2/17/15 7:40p $
 
 
 ******************************************************************************/
@@ -85,6 +85,7 @@ static PM_LATCH_CTRL m_latchCtrl;    // Control structure for task busy flags
 
 static BOOLEAN  m_FSMAppBusy;
 POWERMANAGER_CFG m_PowerManagerCfg;
+
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -291,6 +292,11 @@ void PmInitializePowerManager(void)
       pmInternalLog.bBattery = Pm_Eeprom.bBattery;
       pmInternalLog.bHaltCompleted = Pm_Eeprom.bHaltCompleted;
 
+      // Display the contents of the app busy flags from the shutdown
+      GSE_DebugStr(NORMAL,TRUE,
+                   "PM App Busy Flags at last shutdown: 0x%08X \r\n",
+                   Pm_Eeprom.appBusyFlags);
+
       // Determine last power off condition.
       if ( (Pm_Eeprom.bPowerFailure == TRUE) || ( Pm_Eeprom.State != PM_HALT ) )
       {
@@ -335,7 +341,7 @@ void PmInitializePowerManager(void)
         pmInternalLog.bPowerFailure = FALSE;
 
         // Set Power Off Data
-        powerOffData.Reserved = 0;
+        powerOffData.Reserved = Pm_Eeprom.appBusyFlags;
 
         // Set Halt Completed Processing Flag
         powerOffData.bHaltCompleted = Pm_Eeprom.bHaltCompleted;
@@ -1103,7 +1109,7 @@ void PmBatteryProcess ( void )
       if (++Pm.PmStateTimer > Pm.battLatchTime )
       {
          // Log SYS_ID_PM_FORCED_SHUTDOWN_LOG
-         powerForceShutDownData.Reserved = 0;
+         powerForceShutDownData.Reserved = Pm_Eeprom.appBusyFlags;
          LogWriteSystem( SYS_ID_PM_FORCED_SHUTDOWN_LOG, LOG_PRIORITY_LOW,
                          &powerForceShutDownData, sizeof(PM_LOG_DATA_FORCE_SHUTDOWN),
                          NULL);
@@ -1215,12 +1221,17 @@ static
 BOOLEAN PmUpdateAppBusyStatus(void)
 {
   INT32 busyCount = 0;
+  INT32 prevCount = 0;
   INT32 i;
   PM_BUSY_USAGE execMode;
   BOOLEAN bFlagInUse;
+  UINT16  appBusyFlags;
   
   // Set the current exec mode ( FSM or Legacy) based on the latch control flag.
   execMode = m_latchCtrl.bFsmActive ? PM_BUSY_FSM : PM_BUSY_LEGACY;
+
+  // Reset the packed busy flags, set bit 15 if FSM is enabled.
+  appBusyFlags = (PM_BUSY_FSM == execMode) ? 0x8000 : 0x0000;  
 
   // check the de-referenced ptr for each registered entry and increment total IFF the system
   // is in the correct usage mode for the associated task and the flag says busy.
@@ -1233,13 +1244,21 @@ BOOLEAN PmUpdateAppBusyStatus(void)
 
     // if the busy flag for the task is applicable for current exec mode
     // AND the flag is registered AND contains a true value, increment the busy count. 
-
+    prevCount = busyCount;
     busyCount += ( bFlagInUse                              &&
                    m_latchCtrl.task[i].pBusyFlag  != NULL  &&
                    *m_latchCtrl.task[i].pBusyFlag == TRUE)
                    ? 1:0;
+
+    // if a busyCount was updated, set the corresponding state bit in the busyflag word
+    if ( prevCount < busyCount )
+    {
+      appBusyFlags = appBusyFlags | (0x0001 << (i));
+    }
   }
-  // If some task is busy return true.
+
+  Pm_Eeprom.appBusyFlags = appBusyFlags;
+  // If some task is busy return true.  
   return (busyCount > 0);
 }
 
@@ -1351,11 +1370,16 @@ void PmPreInit(void)
   {
     m_latchCtrl.task[i].pBusyFlag = NULL;
     m_latchCtrl.task[i].usage     = PM_BUSY_NONE;
-  }
+  }   
 }
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 71  *****************
+ * User: Contractor V&v Date: 2/17/15    Time: 7:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - Primary != Back EEPROM added appflag states to PwrMgr file 
  * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 2/12/15    Time: 7:22p
