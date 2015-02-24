@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 9 $  $Date: 15-02-17 5:06p $
+      $Revision: 10 $  $Date: 15-02-18 11:42a $
 
 ******************************************************************************/
 
@@ -139,7 +139,7 @@ typedef struct {
 #define GBS_KA_DATE_SIZE 3
 #define GBS_KA_CODE  0xFE
 #define GBS_KA_LRU_SEL 0x9B
-#define GBS_KA_DATE_BASE_YR 2000 // This needs to be confirmed
+#define GBS_KA_DATE_BASE_YR 2000 // Confirmed on 02/12/15 UTFlight 2000EX
 #define GBS_KA_CKSUM_EXCL 2
 
 #pragma pack(1)
@@ -2063,11 +2063,12 @@ static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary )
   log.nBlkRxErrTotal = pStatus->dataBlkState.cntBlkBadTotal;
   log.nBadStore = pStatus->dataBlkState.cntStoreBad; 
   if (bSummary == TRUE) {  // Summary log Info
-    log.nRestarts = pStatus->nRetriesCurr - m_GBS_Ctl_Cfg.restarts; 
+    log.nRestarts = m_GBS_Ctl_Cfg.restarts - pStatus->nRetriesCurr; 
     log.bCompleted = pStatus->bCompleted; 
     log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
     log.bRelayStuck = pStatus->bRelayStuck; 
   }
+  log.ch = (pStatus->multi_ch == TRUE) ? GBS_SIM_PORT_INDEX : pStatus->ch;   
   
 #ifdef GBS_MULTI_DNLOADS
   id = bSummary ? SYS_ID_UART_GBS_STATUS : SYS_ID_UART_GBS_BLK_STATUS; 
@@ -2299,6 +2300,12 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 15-02-18   Time: 11:42a
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  
+ * c) Update Summary Log fields (retries, ch)
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 15-02-17   Time: 5:06p
