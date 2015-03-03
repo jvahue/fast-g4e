@@ -103,6 +103,7 @@ FASTII.ld
 ..\system\EMU150Protocol.c
 ..\system\WatchDog.c
 ..\system\IDParamProtocol.c
+..\system\GBSProtocol.c
 ..\test\etm.c
 D:\knowlogic\FAST\dev\CP_Coverage\CP_Cov1\c_cover_ioPWES.c
 D:\knowlogic\FAST\dev\CP\test\TestPoints.c
