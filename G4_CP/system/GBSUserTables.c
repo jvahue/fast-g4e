@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 4 $  $Date: 15-02-06 7:18p $
+    $Revision: 5 $  $Date: 15-03-02 6:39p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -85,12 +85,13 @@ static USER_HANDLER_RESULT GBSMsg_CtlDebugClear ( USER_DATA_TYPE DataType,
                                                   UINT32 Index,
                                                   const void *SetPtr,
                                                   void **GetPtr );
-                                                  
+#ifdef DTU_GBS_SIM                                                    
 static USER_HANDLER_RESULT GBSMsg_CtlDebug   ( USER_DATA_TYPE DataType,
                                                USER_MSG_PARAM Param,
                                                UINT32 Index,
                                                const void *SetPtr,
-                                               void **GetPtr );                                                  
+                                               void **GetPtr );
+#endif
 
 /*
 static USER_HANDLER_RESULT GBSMsg_ShowConfig ( USER_DATA_TYPE DataType,
@@ -615,18 +616,10 @@ USER_HANDLER_RESULT GBSMsg_CtlDebugClear(USER_DATA_TYPE DataType,
                                          void **GetPtr)
 {
   USER_HANDLER_RESULT result ;
-  UINT16 i; 
-
-  result = USER_RESULT_OK;
-
-  GBS_FileInit(); 
   
-  for (i=0;i<GBS_MAX_CH;i++) {
-    m_GBS_Status[i].cntBlkSizeNVM = 0; 
-    m_GBS_Status[i].RelayCksumNVM = 0; 
-  }
-  m_GBS_Multi_Status.cntBlkSizeNVM = 0; 
-  m_GBS_Multi_Status.RelayCksumNVM = 0; 
+  result = USER_RESULT_OK;
+  
+  GBSProtocol_DownloadClrHndl ( TRUE, NULL ); 
 
   return result;
 }
@@ -657,6 +650,8 @@ USER_HANDLER_RESULT GBSMsg_CtlDebugClear(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
+#ifdef DTU_GBS_SIM  
+/*vcast_dont_instrument_start*/
 static
 USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
@@ -676,6 +671,8 @@ USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
 
   return result;
 }
+/*vcast_dont_instrument_end*/
+#endif  
 
 /******************************************************************************
 * Function:    GBSMsg_ShowConfig
@@ -718,6 +715,16 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 15-03-02   Time: 6:39p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * 
+ * 9) Updates 
+ * a) comment out #define DTU_GBS_SIM 1
+ * c) vcast_dont_instrument for converage
+ * d) GBSMsg_CtlDebugClear() calls GBSProtocol_DownloadClrHndl()
  * 
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p

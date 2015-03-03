@@ -1,9 +1,10 @@
 #ifndef POWERMANAGER_H
 #define POWERMANAGER_H
-
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9E991
 
     File:         PowerManager.h
 
@@ -11,7 +12,7 @@
                   the aircraft Bus or Battery power supplies.
 
     VERSION
-    $Revision: 38 $  $Date: 2/17/15 7:40p $
+    $Revision: 39 $  $Date: 3/02/15 3:16p $
 
 ******************************************************************************/
 
@@ -323,6 +324,11 @@ EXPORT void PmSetFsmActive(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.h $
+ * 
+ * *****************  Version 39  *****************
+ * User: John Omalley Date: 3/02/15    Time: 3:16p
+ * Updated in $/software/control processor/code/system
+ * SCR 1055 - Code Review Update.
  * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 2/17/15    Time: 7:40p

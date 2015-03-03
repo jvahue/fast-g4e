@@ -11,12 +11,12 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 10 $  $Date: 15-02-18 11:42a $
+      $Revision: 11 $  $Date: 15-03-02 6:36p $
 
 ******************************************************************************/
 
 #define GBS_TIMING_TEST 1
-#undef DTU_GBS_SIM
+//#define DTU_GBS_SIM 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -119,11 +119,11 @@ typedef struct {
   UINT8 spare;
   UINT8 dateTime[4]; // Not Used
   UINT8 cycleCnt;    // Not Used
-#ifdef DTU_GBS_SIM  
+//#ifdef DTU_GBS_SIM  
   // TEST TO WORK WITH DTU SIMULATOR WHERE EXPECT 10 OR 12 BYTES FOR THIS MSG  
   UINT8 pad[2];      
   // TEST TO WORK WITH DTU SIMULATOR WHERE EXPECT 10 OR 12 BYTES FOR THIS MSG 
-#endif 
+//#endif 
 } GBS_CMD_REQ_BLK, *GBS_CMD_REQ_BLK_PTR;
 
 typedef struct {
@@ -175,7 +175,9 @@ typedef struct {
 /*****************************************************************************/
 static GBS_CFG        m_GBS_Cfg[GBS_MAX_CH];
 static GBS_CTL_CFG    m_GBS_Ctl_Cfg;
-static GBS_DEBUG_CTL  m_GBS_Debug; 
+#ifdef DTU_GBS_SIM
+  static GBS_DEBUG_CTL  m_GBS_Debug; 
+#endif          
 static GBS_DEBUG_DNLOAD m_GBS_DebugDnload[GBS_MAX_CH]; 
 
 static GBS_STATUS     m_GBS_Status[GBS_MAX_CH];
@@ -499,7 +501,9 @@ void GBSProtocol_Initialize ( void )
   m_GBS_Multi_Ctl.nReqNum = ACTION_NO_REQ; 
 
 #ifdef DTU_GBS_SIM
+  /*vcast_dont_instrument_start*/
   m_GBS_Debug.DTU_GBS_SIM_SimLog = FALSE; 
+  /*vcast_dont_instrument_end*/
 #endif  
     
 #ifdef GBS_TIMING_TEST
@@ -639,11 +643,13 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   {
     result = UART_Transmit (ch, (const INT8*) &m_GBS_TxBuff[ch].buff[0], m_GBS_TxBuff[ch].cnt,
                              &sent_cnt);
-/* Debug  
+// Debug  
+/*
     GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Byte0=%d)\r\n", 
                ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), m_GBS_TxBuff[ch].cnt,
                m_GBS_TxBuff[ch].buff[0]);  
-// Debug */
+*/               
+// Debug
     if (result == DRV_OK)
     {
       m_GBS_TxBuff[ch].cnt = 0;
@@ -819,8 +825,6 @@ void GBSProtocol_DownloadHndl ( UINT8 port,
  *****************************************************************************/
 BOOLEAN GBS_FileInit(void)
 {
-  UINT16 i;
-
   // Init App data
   // Note: NV_Mgr will record log if data is corrupt
   memset ( (void *) &m_GBS_App_Data, 0, sizeof(m_GBS_App_Data) ); 
@@ -1027,7 +1031,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
       }
     }
   } // end if ((pStatus->state != GBS_STATE_IDLE) && (pStatus->bCmdRspFailed == TRUE))
-
+  
 }
 
 
@@ -1160,7 +1164,7 @@ static GBS_STATE_ENUM GBS_ProcessStateSetConfirmEDU ( GBS_STATUS_PTR pStatus, UI
       } // end if Time Out expired
     } // end else check for time out and retries
   } // end if (cmdRsp_ptr->nCmdToCmdDelay < tick_ms
-
+  
   return (nextState);
 }
 
@@ -1354,9 +1358,8 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
           //   before allowing ACK/NAK (needed for retries where prev ACK/NAK not
           //   seen by EDU).
           if ( (pStatus->dataBlkState.state != GBS_BLK_STATE_SAVING) && 
-               ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) &&
+               ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) && 
                (pStatus->dataBlkState.bFailed != TRUE) )
-               
           {
             memcpy ( (UINT8 *) &m_GBS_TxBuff[ch].buff[0], (UINT8 *) &cmdRsp_ptr->cmd[0],
                      cmdRsp_ptr->cmdSize );
@@ -1722,11 +1725,13 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
         { // If bytes Rx > expected then we have a problem 
           blkSize = pBlkData->currBlkSize + GBS_BLK_OH; // Expect blk sz not to incl OH
 #ifdef DTU_GBS_SIM
+          /*vcast_dont_instrument_start*/
           if (m_GBS_Debug.DTU_GBS_SIM_SimLog == TRUE) {
             // Temp.  Add '8' to be used with DTU GBS SIM as SIM + '4' for U16 Blk#,Size
             //   blk size does not inlude CRC and STATUS at the end          
             blkSize = pBlkData->currBlkSize + GBS_BLK_OH + GBS_CKSUM_EXCL;  
           }
+          /*vcast_dont_instrument_end*/
 #endif          
           // blkSize = pBlkData->currBlkSize + GBS_BLK_OH;  
           // blkSize = pBlkData->currBlkSize + GBS_BLK_OH + GBS_CKSUM_EXCL;  
@@ -1746,14 +1751,6 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
                        
           if (*pCnt == blkSize)  
           {
-            // Test force checksum failure on Rec = 10 
-            /*
-            if ( (pBlkData->currBlkNum == 10) && (pStatus->multi_ch==TRUE) )
-              m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
-            if ( (pBlkData->currBlkNum == 15) && (pStatus->multi_ch==FALSE) )
-              m_GBS_RxBuff[ch].cnt = m_GBS_RxBuff[ch].cnt - 2; 
-            */
-            // Test force checksum failure on Rec = 50 
             bGoodData = GBS_VerifyChkSum ( ch, GBS_CKSUM_REC_TYPE );
             if (bGoodData)
             { // Store Data and trans to _STATE_SAVING
@@ -2068,7 +2065,7 @@ static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary )
     log.bDownloadInterrupted = pStatus->bDownloadInterrupted; 
     log.bRelayStuck = pStatus->bRelayStuck; 
   }
-  log.ch = (pStatus->multi_ch == TRUE) ? GBS_SIM_PORT_INDEX : pStatus->ch;   
+  log.ch = (pStatus->multi_ch == TRUE) ? GBS_SIM_PORT_INDEX : pStatus->ch; 
   
 #ifdef GBS_MULTI_DNLOADS
   id = bSummary ? SYS_ID_UART_GBS_STATUS : SYS_ID_UART_GBS_BLK_STATUS; 
@@ -2301,6 +2298,15 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
  * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 15-03-02   Time: 6:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  
+ * 9) Updates 
+ * a) comment out #define DTU_GBS_SIM 1
+ * b) keep pad[2] for GBS_CMD_REQ_BLK as tested on 2000EX
+ * c) vcast_dont_instrument for converage
+ *
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 15-02-18   Time: 11:42a
  * Updated in $/software/control processor/code/system
@@ -2315,7 +2321,7 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  * - fix checksum at end of data
  * - minutes field incorrect
  * - base yr as confirmed on UTFlight is 2000 not 1900.  
- * 
+ *
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 15-02-17   Time: 1:06p
  * Updated in $/software/control processor/code/system
