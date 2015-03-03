@@ -10,7 +10,7 @@
                  shutdown of applications on powerdown.
 
    VERSION
-   $Revision: 71 $  $Date: 2/17/15 7:40p $
+   $Revision: 72 $  $Date: 3/02/15 6:47p $
 
 
 ******************************************************************************/
@@ -293,9 +293,11 @@ void PmInitializePowerManager(void)
       pmInternalLog.bHaltCompleted = Pm_Eeprom.bHaltCompleted;
 
       // Display the contents of the app busy flags from the shutdown
+      /*
       GSE_DebugStr(NORMAL,TRUE,
                    "PM App Busy Flags at last shutdown: 0x%08X \r\n",
                    Pm_Eeprom.appBusyFlags);
+      */
 
       // Determine last power off condition.
       if ( (Pm_Eeprom.bPowerFailure == TRUE) || ( Pm_Eeprom.State != PM_HALT ) )
@@ -1375,6 +1377,12 @@ void PmPreInit(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: PowerManager.c $
+ * 
+ * *****************  Version 72  *****************
+ * User: Contractor V&v Date: 3/02/15    Time: 6:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1055 - commented out DebugStr displaying app busy bits from last
+ * poweroff.
  * 
  * *****************  Version 71  *****************
  * User: Contractor V&v Date: 2/17/15    Time: 7:40p

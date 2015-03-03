@@ -10,7 +10,7 @@
     Description:
 
     VERSION
-    $Revision: 8 $  $Date: 11/09/12 6:16p $
+    $Revision: 9 $  $Date: 15-03-02 6:55p $
 
 ******************************************************************************/
 
@@ -25,6 +25,7 @@
 #include "MsStsCtl.h"
 #include "DIOMgr.h"
 #include "FASTMgr.h"
+#include "UartMgr.h"
 
 /*****************************************************************************/
 /* Software Specific Includes                                                */
@@ -85,7 +86,8 @@ FSM_TASK_ITEM(ACFG, FALSE,       0,      AC_FSMAutoRun,           AC_FSMGetState
 FSM_TASK_ITEM(RFON, FALSE,       0,      FAST_FSMRfRun,           FAST_FSMRfGetState)\
 FSM_TASK_ITEM(DOUT, TRUE,        4,      DIOMgr_FSMRunDIO,        DIOMgr_FSMGetStateDIO)\
 FSM_TASK_ITEM(LACH, FALSE,       0,      PmFSMAppBusyRun,         PmFSMAppBusyGetState)\
-FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFALSE)
+FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFALSE)\
+FSM_TASK_ITEM(UCLR, FALSE,       0,      UartMgr_DownloadClr,     FSM_GetStateFALSE)
 
 
 
@@ -117,6 +119,13 @@ FSM_TASK_ITEM(ENDF, FALSE,       0,      FAST_FSMEndOfFlightRun,  FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 15-03-02   Time: 6:55p
+ * Updated in $/software/control processor/code/application
+ * SCR #1255 GBS Protocol
+ * 9) Updates 
+ * e) Add UCLR to FAST State Machine
  * 
  * *****************  Version 8  *****************
  * User: Jim Mood     Date: 11/09/12   Time: 6:16p
