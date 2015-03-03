@@ -97,6 +97,7 @@ FASTII.ld
 ..\system\EMU150Protocol.c
 ..\system\WatchDog.c
 ..\system\IDParamProtocol.c
+..\system\GBSProtocol.c
 ..\test\etm.c
 
 
