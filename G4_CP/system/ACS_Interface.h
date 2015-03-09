@@ -1,15 +1,17 @@
 #ifndef ACS_INTERFACE_H
 #define ACS_INTERFACE_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9E991
 
     File:        ACS_Interface.h
     
     Description: All data elements required for an ACS are defined here.
     
     VERSION
-      $Revision: 6 $  $Date: 12-11-12 4:30p $     
+      $Revision: 7 $  $Date: 3/09/15 10:53a $     
     
 ******************************************************************************/
 
@@ -25,14 +27,14 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#define ACS_CONFIG_DEFAULT    "None",         /* Model              */\
-                              "FAST-None",    /* ACS ID             */\
-                              LOG_PRIORITY_3, /* ACS Priority       */\
-                              ACS_PORT_NONE,  /* ACS Port Type      */\
-                              0,              /* Port Index         */\
-                              1000,           /* Packet Size in Ms  */\
-                              STA_NORMAL,     /* System Condition   */\
-                              ACS_RECORD      /* ACS Mode           */
+#define ACS_CONFIG_DEFAULT    "None",           /* Model              */\
+                              "FAST-None",      /* ACS ID             */\
+                              LOG_PRIORITY_3,   /* ACS Priority       */\
+                              ACS_PORT_NONE,    /* ACS Port Type      */\
+                              ACS_PORT_INDEX_0, /* Port Index         */\
+                              1000,             /* Packet Size in Ms  */\
+                              STA_NORMAL,       /* System Condition   */\
+                              ACS_RECORD        /* ACS Mode           */
                               
 //Default configuration for the sensors
 #define ACS_CONFIGS_DEFAULT    {ACS_CONFIG_DEFAULT},\
@@ -57,6 +59,16 @@ typedef enum
    ACS_PORT_UART,
    ACS_PORT_MAX
 } ACS_PORT_TYPE;
+
+typedef enum
+{
+   ACS_PORT_INDEX_0,
+   ACS_PORT_INDEX_1,
+   ACS_PORT_INDEX_2,
+   ACS_PORT_INDEX_3,
+   ACS_PORT_INDEX_10 = 10 /* Virtual Port for Multiplexing single UART Channel */
+   // This enumeration must fit in an UINT8 so don't make value larger than 255
+} ACS_PORT_INDEX;
 
 typedef enum
 {
@@ -89,14 +101,14 @@ typedef enum
 // Definition of an ACS configuration.
 typedef struct
 {
-  CHAR          sModel[MAX_ACS_NAME];
-  CHAR          sID[MAX_ACS_NAME];
-  LOG_PRIORITY  priority;
-  ACS_PORT_TYPE portType;
-  UINT8         nPortIndex;
-  UINT16        nPacketSize_ms;
-  FLT_STATUS    systemCondition;
-  ACS_MODE      mode;
+  CHAR           sModel[MAX_ACS_NAME];
+  CHAR           sID[MAX_ACS_NAME];
+  LOG_PRIORITY   priority;
+  ACS_PORT_TYPE  portType;
+  ACS_PORT_INDEX nPortIndex;
+  UINT16         nPacketSize_ms;
+  FLT_STATUS     systemCondition;
+  ACS_MODE       mode;
 } ACS_CONFIG;
 #pragma pack()
 
@@ -132,6 +144,11 @@ typedef ACS_CONFIG ACS_CONFIGS[MAX_ACS_CONFIG];
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ACS_Interface.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 3/09/15    Time: 10:53a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Changed Port Index to an enumeration for values 0,1,2,3,10
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 12-11-12   Time: 4:30p

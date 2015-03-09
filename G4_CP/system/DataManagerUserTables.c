@@ -1,16 +1,17 @@
 #define DATAMNG_USERTABLE_BODY
 /******************************************************************************
-Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
-All Rights Reserved. Proprietary and Confidential.
+        Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+             All Rights Reserved. Proprietary and Confidential.
 
-File:        DataManagerUserTables.c
+   ECCN:        9E991
 
-Description: The data manager contains the functions used to record
-             data from the various interfaces.
+   File:        DataManagerUserTables.c
 
+   Description: The data manager contains the functions used to record
+                data from the various interfaces.
 
-VERSION
-$Revision: 26 $  $Date: 15-01-11 10:20p $ 
+   VERSION
+      $Revision: 27 $  $Date: 3/09/15 10:57a $ 
 
 ******************************************************************************/
 
@@ -147,6 +148,18 @@ USER_ENUM_TBL priorityTbl[] =
    { NULL,0              }
 };
 
+// ACS Port Index
+static
+USER_ENUM_TBL acsPortIndex[] =
+{
+   { "0",  ACS_PORT_INDEX_0 },
+   { "1",  ACS_PORT_INDEX_1 },
+   { "2",  ACS_PORT_INDEX_2 },
+   { "3",  ACS_PORT_INDEX_3 },
+   { "10", ACS_PORT_INDEX_10 },
+   { NULL, 0                 }
+};
+
 // Data Manager Table
 static
 USER_MSG_TBL dataManagerStatusCmd [] =
@@ -166,7 +179,7 @@ static USER_MSG_TBL acsCmd [] =
   { "ID"            , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_STR   , USER_RW , configTemp.sID,               0,MAX_ACS_CONFIG-1, 0,MAX_ACS_NAME, NULL },
   { "PRIORITY"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.priority,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       priorityTbl },
   { "PORTTYPE"      , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.portType,         0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsPortType },
-  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT8 , USER_RW , &configTemp.nPortIndex,       0,MAX_ACS_CONFIG-1, 0,10,           NULL       },
+  { "PORTINDEX"     , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.nPortIndex,       0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsPortIndex},
   { "PACKETSIZE_MS" , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_UINT16, USER_RW , &configTemp.nPacketSize_ms,   0,MAX_ACS_CONFIG-1, 500,4000,       NULL        },
   { "SYSCOND"       , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.systemCondition,  0,MAX_ACS_CONFIG-1, NO_LIMIT,       Flt_UserEnumStatus },
   { "MODE"          , NO_NEXT_TABLE , DataMgr_UserCfg,  USER_TYPE_ENUM  , USER_RW , &configTemp.mode,             0,MAX_ACS_CONFIG-1, NO_LIMIT,       acsMode     },
@@ -576,6 +589,11 @@ USER_HANDLER_RESULT DataMgr_ACS_Status (USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: DataManagerUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 3/09/15    Time: 10:57a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Updated Port Index to an enumeration to handle 0,1,2,3,10
  * 
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:20p

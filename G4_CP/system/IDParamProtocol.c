@@ -10,7 +10,7 @@
                  Handler
 
     VERSION
-      $Revision: 9 $  $Date: 14-12-04 4:17p $
+      $Revision: 10 $  $Date: 15-03-04 4:52p $
 
 ******************************************************************************/
 
@@ -242,7 +242,7 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
 void IDParamProtocol_Initialize ( void )
 {
   UINT16 i,j;
-  TCB TaskInfo;
+  TCB tcbTaskInfo;
 
   memset ( (void *) &m_IDParam_Status, 0, sizeof(m_IDParam_Status) );
   memset ( (void *) &m_IDParam_Cfg, 0, sizeof(m_IDParam_Cfg) );
@@ -306,20 +306,20 @@ void IDParamProtocol_Initialize ( void )
   }
 
   // Create F7X Protocol Display Task
-  memset(&TaskInfo, 0, sizeof(TaskInfo));
-  strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name), "ID Param Display Debug",_TRUNCATE);
-  TaskInfo.TaskID         = IDParam_Disp_Debug;
-  TaskInfo.Function       = IDParamProtocol_Display_Task;
-  TaskInfo.Priority       = taskInfo[IDParam_Disp_Debug].priority;
-  TaskInfo.Type           = taskInfo[IDParam_Disp_Debug].taskType;
-  TaskInfo.modes          = taskInfo[IDParam_Disp_Debug].modes;
-  TaskInfo.MIFrames       = taskInfo[IDParam_Disp_Debug].MIFframes;
-  TaskInfo.Rmt.InitialMif = taskInfo[IDParam_Disp_Debug].InitialMif;
-  TaskInfo.Rmt.MifRate    = taskInfo[IDParam_Disp_Debug].MIFrate;
-  TaskInfo.Enabled        = TRUE;
-  TaskInfo.Locked         = FALSE;
-  TaskInfo.pParamBlock    = NULL;
-  TmTaskCreate (&TaskInfo);
+  memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
+  strncpy_safe(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name), "ID Param Display Debug",_TRUNCATE);
+  tcbTaskInfo.TaskID      = IDParam_Disp_Debug;
+  tcbTaskInfo.Function    = IDParamProtocol_Display_Task;
+  tcbTaskInfo.Priority    = taskInfo[IDParam_Disp_Debug].priority;
+  tcbTaskInfo.Type        = taskInfo[IDParam_Disp_Debug].taskType;
+  tcbTaskInfo.modes       = taskInfo[IDParam_Disp_Debug].modes;
+  tcbTaskInfo.MIFrames    = taskInfo[IDParam_Disp_Debug].MIFframes;
+  tcbTaskInfo.Rmt.InitialMif = taskInfo[IDParam_Disp_Debug].InitialMif;
+  tcbTaskInfo.Rmt.MifRate = taskInfo[IDParam_Disp_Debug].MIFrate;
+  tcbTaskInfo.Enabled     = TRUE;
+  tcbTaskInfo.Locked      = FALSE;
+  tcbTaskInfo.pParamBlock = NULL;
+  TmTaskCreate (&tcbTaskInfo);
 
   // Update ID Param Debug
   memset ( (void *) &m_IDParam_Debug, 0, sizeof(m_IDParam_Debug) );
@@ -679,7 +679,11 @@ void IDParamProtocol_InitUartMgrData( UINT16 ch, void *uart_data_ptr )
  *
  * Returns:     None
  *
- * Notes:       None
+ * Notes:       
+ *  1) If not format display as, raw data
+ *     0x0000 0x0001 ... 0x000F
+ *     0x0010 0x0011 ... 0x001F
+ *  2) If formatted display call IDParamProtocol_DisplayFormatted() for display
  *
  *****************************************************************************/
 void IDParamProtocol_Display_Task ( void *pParam )
@@ -711,7 +715,8 @@ void IDParamProtocol_Display_Task ( void *pParam )
         for (i=0;i<(loopCnt);i++) // Loop thru the 16 word line
         {
           snprintf (  (char *) m_IDParam_DebugStr, sizeof(m_IDParam_DebugStr),
-                     "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x\r\n",
+                     "%04x %04x %04x %04x %04x %04x %04x %04x %04x %04x %04x "
+                     "%04x %04x %04x %04x %04x\r\n",
                      *(pData +  0), *(pData +  1), *(pData +  2), *(pData +  3),
                      *(pData +  4), *(pData +  5), *(pData +  6), *(pData +  7),
                      *(pData +  8), *(pData +  9), *(pData + 10), *(pData + 11),
@@ -752,7 +757,6 @@ void IDParamProtocol_Display_Task ( void *pParam )
  *
  * Notes:
  *  1) Used for debugging only
- *
  *
  *****************************************************************************/
 void IDParamProtocol_DsbLiveStream(void)
@@ -799,7 +803,13 @@ BOOLEAN IDParamProtocol_Ready(UINT16 ch)
  *
  * Returns:     TRUE if New Packet Found
  *
- * Notes:       none
+ * Notes:       
+ *  1) Searches for SYNC WORD first
+ *  2) Next buffer bytes until Expected Pkt Size reached
+ *  3) When Pkt Size met
+ *      - verify checksum
+ *      - verify pkt format
+ *  4) If pkt Ok, then call process pkt
  *
  *****************************************************************************/
 static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
@@ -876,7 +886,8 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
           bContinueSearch = FALSE;
           // Indirect way of handling 0x8000 not seen in 1st word. If we are currently SYNC
           // and we don't
-          // find 0x800 to move to ID_PARAM_SEARCH_PACKET_SIZE, then we must have lost sync.
+          // find 0x8000 to move to ID_PARAM_SEARCH_PACKET_SIZE, then must have lost sync.
+          // check MSB for 0x80 of the 0x8000 sync word 
           if (( pStatus->sync == TRUE) && (*buff_ptr->pRd != 0x80) && (buff_ptr->cnt > 0) &&
               (bPktBad == FALSE))
           {
@@ -990,7 +1001,8 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
  *
  * Returns:     UINT16 calculated checksum
  *
- * Notes:       none
+ * Notes:       
+ *  1) Per Definition of ID Param Checksum, bit #0 forced to '1' always.
  *
  *****************************************************************************/
 static UINT16 IDParamProtocol_CalcFrameChksum( UINT16 *pData, UINT16 word_cnt  )
@@ -1055,7 +1067,13 @@ static BOOLEAN IDParamProtocol_ConfirmFrameFmt ( ID_PARAM_FRAME_HDR_PTR pFrameHd
  *
  * Returns:     none
  *
- * Notes:       none
+ * Notes:       
+ *  1) From the Elem ID / Pos in the Frame Hdr, create / update internal map
+ *     of Elem ID and Pos mapping   
+ *  2) Check if this Elem ID is a "scrolling" ID.  If so, call func to 
+ *     create / update scroll param id mapping table
+ *  3) If this Elem ID is not request (i.e. from Sensor or UartMgr) then 
+ *     don't associate with internal map table
  *
  *****************************************************************************/
 static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
@@ -1119,7 +1137,7 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
   { // Check that this element ID at this pos has not changed !
     if ( frameData_ptr->data[index].elementID != elemID )
     {
-      // Increment some counter here / sys log ?
+      // Increment Elem ID changed counter.  Will not record sys log. 
       m_IDParam_Status[ch].frameType[frameType].cntElemIDPosChanged++;
     }
   } // end else elementID != ID_PARAM_NOT_USED
@@ -1137,7 +1155,9 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
  *
  * Returns:     none
  *
- * Notes:       none
+ * Notes:       
+ *  1) Parse the Param data values from the frame
+ *  2) Parse the Scroll ID Param data value from frame
  *
  *****************************************************************************/
 static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
@@ -1234,7 +1254,9 @@ static void IDParamProtocol_ProcFrame( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
  *
  * Returns:     none
  *
- * Notes:       none
+ * Notes:       
+ *  1) idle time exceed, flush and reset buff, so old data won't be processed
+ *  2) rec sys log when sync loss 
  *
  *****************************************************************************/
 static void IDParamProtocol_CheckSyncLoss( BOOLEAN bNewData, UINT16 ch,
@@ -1375,7 +1397,10 @@ static BOOLEAN IDParamProtocol_CheckScrollID( UINT16 elemID, UINT16 ch, UINT16 p
  *
  * Returns:     none
  *
- * Notes:       none
+ * Notes:       
+ *   1) From the Scroll ID Cfg, determine if this Elem ID is a scroll ID
+ *   2) If Scroll ID param, then create / update internal table mapping of 
+ *      Elem ID and Position in data frame
  *
  *****************************************************************************/
 static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
@@ -1479,7 +1504,15 @@ static void IDParamProtocol_ProcScollID( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
  *
  * Returns:     None
  *
- * Notes:       None
+ * Notes:       
+ *  1) Display Format:
+ *      Sync=0xFFFF
+ *      Num Elements=0xFFFF
+ *      Element Pos=0xFFFF
+ *      Element ID=0xFFFF
+ *      W000=0xFFFF W001=0xFFFF W002=0xFFFF W003=0xFFFF W004=0xFFFF W005=0xFFFF W006=0xFFFF
+ *      W007=0xFFFF W008=0xFFFF ...
+ *        FrameCnt=1234
  *
  *****************************************************************************/
 static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_ptr,
@@ -1523,7 +1556,7 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
     m_IDParam_DebugStr[0] = '\0'; ;
     for (j=0;j<ID_PARAM_DBG_FMT_WORDS_PER_LINE;j++) // loop thru each element
     {
-      sprintf ( (char *) strBuff, "W%03d=0x%04x  ", k++, *(pData + j) );
+      snprintf ( (char *) strBuff, sizeof(strBuff), "W%03d=0x%04x  ", k++, *(pData + j) );
       strcat ( (char *) m_IDParam_DebugStr, (const char *) strBuff );
     }
     GSE_PutLine( (const char *) m_IDParam_DebugStr );
@@ -1556,6 +1589,11 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 15-03-04   Time: 4:52p
+ * Updated in $/software/control processor/code/system
+ * Updates from Code Review.  No functional / "real" code changes. 
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 14-12-04   Time: 4:17p

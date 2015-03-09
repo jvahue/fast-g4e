@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 5 $  $Date: 15-03-02 6:39p $
+    $Revision: 6 $  $Date: 3/09/15 2:40p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -118,8 +118,8 @@ USER_ENUM_TBL gbsStateStrs[] =
 static
 USER_ENUM_TBL gbsMultiStateStrs[] =
 {
-  {"MULTI_PRIMARY",   GBS_MULTI_PRIMARY},
-  {"MULTI_SECONDARY", GBS_MULTI_SECONDARY},
+  {"PRIMARY",   GBS_MULTI_PRIMARY},
+  {"SECONDARY", GBS_MULTI_SECONDARY},
   { NULL,             0}
 };
 
@@ -715,6 +715,11 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 3/09/15    Time: 2:40p
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Updated the GBS MULTI enum values
  * 
  * *****************  Version 5  *****************
  * User: Peter Lee    Date: 15-03-02   Time: 6:39p

@@ -8,11 +8,11 @@
     Description: Routines to support the user commands for ID Param Protocol CSC
 
     VERSION
-    $Revision: 7 $  $Date: 14-12-04 4:17p $
+    $Revision: 8 $  $Date: 15-03-04 4:52p $
 
 ******************************************************************************/
 #ifndef ID_PARAM_PROTOCOL_BODY
-#error IDParamUserTables.c should only be included by UartMgr.c
+#error IDParamUserTables.c should only be included by IDParamProtocol.c
 #endif
 
 /*****************************************************************************/
@@ -454,7 +454,10 @@ static USER_HANDLER_RESULT IDParamIDSMsg_Status(USER_DATA_TYPE DataType,
   USER_HANDLER_RESULT result;
   ID_PARAM_FRAME_PTR frameData_ptr;
   ID_PARAM_FRAME_DATA_PTR frameElem_ptr;
-  UINT16 i, cnt, len, scrollCnt;
+  UINT16 i;
+  UINT16 cnt;
+  UINT16 len;
+  UINT16 scrollCnt;
   CHAR buff[ID_PARAM_LC_BUFF_MAX];
 
 
@@ -592,6 +595,7 @@ static USER_HANDLER_RESULT IDParamMsg_ShowConfig(USER_DATA_TYPE DataType,
     if (pCfgTable->pNext == NO_NEXT_TABLE) // Level 3 Items
     {
       snprintf(  label, sizeof(label), "\r\n%s%s =", branchName, pCfgTable->MsgStr);
+      // Add additional 15 for spaces of indentation 
       PadString(label, USER_MAX_MSG_STR_LEN + 15);
       result = USER_RESULT_ERROR;
       if (User_OutputMsgString( label, FALSE )) {
@@ -716,6 +720,11 @@ static USER_HANDLER_RESULT IDParamMsg_Debug(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamUserTables.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 15-03-04   Time: 4:52p
+ * Updated in $/software/control processor/code/system
+ * Updates from Code Review.  No functional / "real" code changes. 
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 14-12-04   Time: 4:17p

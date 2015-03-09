@@ -1,7 +1,9 @@
 #define DATA_MNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9E991
 
     File:        DataManager.c
 
@@ -9,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 98 $  $Date: 11/18/14 1:45p $
+      $Revision: 99 $  $Date: 3/09/15 10:55a $
 
 ******************************************************************************/
 
@@ -121,7 +123,7 @@ static UINT16 DataMgrBuildFailLog( UINT32 Channel, DATA_MNG_INFO *pDMInfo,
 
 static void DataMgrDownloadTask( void *pParam );
 
-static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
+static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, ACS_PORT_INDEX PortIndex,
                                      DL_STATUS *pStatus, UINT32 *pSize,
                                      DL_WRITE_STATUS **pDL_WrStatus );
 static UINT32 DataMgrSaveDLRecord ( DATA_MNG_INFO *pDMInfo, UINT8 Channel,
@@ -353,7 +355,8 @@ UINT16 DataMgrGetHeader (INT8 *pDest, LOG_ACS_FIELD ACS, UINT16 nMaxByteSize )
 
       if ( (ACS_PORT_NONE != pDMInfo->acs_Config.portType) && (pDMParam->pGetDataHdr != NULL) )
       {
-         cnt = pDMParam->pGetDataHdr( pBuffer, pDMInfo->acs_Config.nPortIndex, nMaxByteSize);
+         cnt = pDMParam->pGetDataHdr( pBuffer, (UINT32)pDMInfo->acs_Config.nPortIndex, 
+                                      nMaxByteSize);
       }
 
       // Update Data hdr
@@ -473,7 +476,7 @@ void DataMgrStopDownload ( void )
          switch (pDMInfo->acs_Config.portType)
          {
             case ACS_PORT_UART:
-               UartMgr_DownloadStop(pDMInfo->acs_Config.nPortIndex);
+               UartMgr_DownloadStop((UINT8)pDMInfo->acs_Config.nPortIndex);
                break;
             case ACS_PORT_NONE:
             case ACS_PORT_ARINC429:
@@ -581,7 +584,7 @@ BOOLEAN DataMgrStartDownload( void )
             strncpy_safe(startLog.id,    sizeof(startLog.id),
                          pDMInfo->acs_Config.sID,    _TRUNCATE);
             startLog.portType  = pDMInfo->acs_Config.portType;
-            startLog.portIndex = pDMInfo->acs_Config.nPortIndex;
+            startLog.portIndex = (UINT8)pDMInfo->acs_Config.nPortIndex;
 
             LogWriteSystem(APP_DM_DOWNLOAD_STARTED, LOG_PRIORITY_LOW,
                            &startLog, sizeof(startLog), NULL);
@@ -777,7 +780,7 @@ static void DataMgrTask( void *pParam )
    ASSERT( NULL != pDMParam->pGetData);
 
    // Empty the SW FIFO and discard the data
-   nSize = pDMParam->pGetData( dmTempBuffer, pDMInfo->acs_Config.nPortIndex,
+   nSize = pDMParam->pGetData( dmTempBuffer, (UINT32)pDMInfo->acs_Config.nPortIndex,
                               sizeof(dmTempBuffer));
 
    // Is the Recording Active?
@@ -1056,7 +1059,7 @@ static void DataMgrNewBuffer( DATA_MNG_TASK_PARMS *pDMParam,
 
            // Set the Timestamp for the next packet
            CM_GetTimeAsTimestamp( &(pDMInfo->msgBuf[pDMInfo->nCurrentBuffer].packetTs));
-           pDMParam->pDoSync( pDMInfo->acs_Config.nPortIndex );
+           pDMParam->pDoSync( (UINT32)pDMInfo->acs_Config.nPortIndex );
         }
     }
 }
@@ -1101,7 +1104,7 @@ static void DataMgrGetSnapShot ( DATA_MNG_INFO *pDMInfo, GET_SNAP GetSnap,
    bStartSnap = (DM_START_SNAP == eType) ? TRUE : FALSE;
 
    // Get A data snapshot
-   nCnt = GetSnap( pMsgBuf->packet.data, pDMInfo->acs_Config.nPortIndex,
+   nCnt = GetSnap( pMsgBuf->packet.data, (UINT32)pDMInfo->acs_Config.nPortIndex,
        MAX_BUFF_SIZE, bStartSnap);
 
    pMsgBuf->packet.checksum = ChecksumBuffer(pMsgBuf->packet.data, nCnt, 0xFFFFFFFF);
@@ -1721,7 +1724,7 @@ void DataMgrDLSaveAndChangeState(DATA_MNG_INFO *pDMInfo, DM_PACKET_TYPE Type, UI
  * Notes:        None.
  *
  *****************************************************************************/
-static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
+static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, ACS_PORT_INDEX PortIndex,
                                      DL_STATUS *pStatus, UINT32 *pSize,
                                      DL_WRITE_STATUS **pDL_WrStatus )
 {
@@ -1731,7 +1734,7 @@ static UINT8* DataMgrRequestRecord ( ACS_PORT_TYPE PortType, UINT8 PortIndex,
    switch (PortType)
    {
       case ACS_PORT_UART:
-         pSrc = UartMgr_DownloadRecord ( PortIndex, pStatus, pSize, pDL_WrStatus );
+         pSrc = UartMgr_DownloadRecord ( (UINT8)PortIndex, pStatus, pSize, pDL_WrStatus );
          break;
 
       case ACS_PORT_NONE:
@@ -1934,6 +1937,11 @@ BOOLEAN DataMgrIsFFDInhibtMode( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.c $
+ * 
+ * *****************  Version 99  *****************
+ * User: John Omalley Date: 3/09/15    Time: 10:55a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Updated Port Index to an enumeration to handle 0,1,2,3,10
  * 
  * *****************  Version 98  *****************
  * User: John Omalley Date: 11/18/14   Time: 1:45p
