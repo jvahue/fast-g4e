@@ -4,13 +4,15 @@
             Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9E991
+
     File:        DataManager.h
 
     Description: The data manager contains the functions used to record
                  data from the various interfaces.
 
     VERSION
-      $Revision: 45 $  $Date: 1/12/15 1:21p $
+      $Revision: 46 $  $Date: 3/09/15 10:57a $
 
 ******************************************************************************/
 
@@ -237,6 +239,11 @@ EXPORT void       DataMgrSetRecStateChangeEvt(INT32 tag,void (*func)(INT32,BOOLE
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DataManager.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 3/09/15    Time: 10:57a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 - Updated Port Index to an enumeration to handle 0,1,2,3,10
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 1/12/15    Time: 1:21p
