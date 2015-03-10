@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 4 $  $Date: 15-02-06 7:18p $
+      $Revision: 6 $  $Date: 15-03-09 9:54p $
 
 ******************************************************************************/
 
@@ -45,7 +45,7 @@
 
 
 #define GBS_IDLE_TIMEOUT      CM_DELAY_IN_MSEC(500)
-#define GBS_TIMEOUT_RETRIES   4
+#define GBS_TIMEOUT_RETRIES   3
 
 #define GBS_RESTART_SETEDU_MODE  3
 #define GBS_MULTIPLE_RETRIES  12 // Max of 12
@@ -90,7 +90,7 @@ typedef struct {
                         //   Control of LSSX will be thru Action Mgr
   BOOLEAN bKeepAlive;   // Send Keep Alive Cmd with GMT Time
 
-  UINT32 timeIdleOut;   // TBD add more timeouts
+  UINT32 timeIdleOut;   // idle timeout
   UINT32 retriesSingle; // Max retries before moving onto next cmd
   UINT32 retriesMulti;  // Max retries before restarting dnload
   UINT32 restarts;      // Max restart before declaring dnload failed
@@ -113,8 +113,8 @@ typedef GBS_CFG GBS_CFGS[GBS_MAX_CH];
 typedef struct {
   UINT16 pktCnt[GBS_MAX_CH];
   UINT16 pktCnt_Multi;
-  UINT32 RelayCksum[GBS_MAX_CH]; 
-  UINT32 RelayCksum_Multi; 
+  UINT32 relayCksum[GBS_MAX_CH]; 
+  UINT32 relayCksum_Multi; 
 } GBS_APP_DATA;
 
 
@@ -149,7 +149,7 @@ CMD, RESP, CFG(Send?), TIMEOUT, RETRY
 typedef enum {
   GBS_RSP_NONE, // No response expected
   GBS_RSP_ACK,  // Resp is ACK (i.e. cmd(HS) <- rsp(ACK)
-  GBS_RSP_BLK,  // Block response to a command
+  GBS_RSP_BLK   // Block response to a command
 } GBS_RSP_TYPE;
 
 typedef struct {
@@ -279,7 +279,7 @@ typedef struct {
   UINT8 debugDnLoadCode;  // Debug Download Code for each GBS Channel 
   BOOLEAN bRelayStuck; // TRUE if Multiple Relay Stuck test fails (if test enabled)
   
-  UINT32 RelayCksumNVM;   // Cksum of 1st 4 Install Rec used for Relay Stuck Check
+  UINT32 relayCksumNVM;   // Cksum of 1st 4 Install Rec used for Relay Stuck Check
 } GBS_STATUS, *GBS_STATUS_PTR;
 
 
@@ -381,6 +381,12 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 15-03-09   Time: 9:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Updates, IDLE 20 after BlkReq failed.  Update
+ * Retries from 4 to 3. 
  * 
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p
