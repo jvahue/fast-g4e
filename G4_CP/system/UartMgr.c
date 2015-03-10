@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 58 $  $Date: 15-02-06 7:18p $
+      $Revision: 59 $  $Date: 15-03-10 6:33p $
 
 ******************************************************************************/
 
@@ -1322,7 +1322,9 @@ void UartMgr_DownloadClr ( BOOLEAN Run, INT32 param )
   UINT16 i; 
   
   for (i=0;i<UART_NUM_OF_UARTS;i++) {
-    uartMgrBlock[i].download_protocol_clr_hndl( Run, param ); 
+    if ( uartMgrBlock[i].download_protocol_clr_hndl != UartMgr_Download_Clr_NoneHndl ) {
+      uartMgrBlock[i].download_protocol_clr_hndl( Run, param ); 
+    }
   }
 }
 
@@ -2180,6 +2182,12 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: Peter Lee    Date: 15-03-10   Time: 6:33p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Fix FSM UartMgr_DownloadClr() to only exe
+ * protocol if Download Hndl exists. 
  * 
  * *****************  Version 58  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p
