@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 59 $  $Date: 15-03-10 6:33p $
+      $Revision: 60 $  $Date: 15-03-11 12:30p $
 
 ******************************************************************************/
 
@@ -242,6 +242,7 @@ void UartMgr_Initialize (void)
       uartCfg.TxFIFO = NULL;
       // Init UartMgrBlock[] struct
       uartMgrBlock[i].nChannel = i;
+      uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
       switch ( pUartMgrCfg->protocol )
       {
         case UARTMGR_PROTOCOL_F7X_N_PARAM:
@@ -249,14 +250,12 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           break;
         case UARTMGR_PROTOCOL_EMU150:
           uartMgrBlock[i].exec_protocol = EMU150Protocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
           break;
         case UARTMGR_PROTOCOL_ID_PARAM:
@@ -264,7 +263,6 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
-          uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_GBS:
@@ -1314,16 +1312,20 @@ void UartMgr_DownloadStop ( UINT8 PortIndex )
  *
  * Returns:     None
  *
- * Notes:       None
+ * Notes:      
+ *  - Start @ UART ch 1 as ch 0 is allocated to GSE
+ *  - On first occurence of GBS Protocol, call _DonwloadClrHndl once, then exit.
+ *    Clears all channels set for GBS Protocol
  *
  *****************************************************************************/
 void UartMgr_DownloadClr ( BOOLEAN Run, INT32 param )
 {
   UINT16 i; 
   
-  for (i=0;i<UART_NUM_OF_UARTS;i++) {
-    if ( uartMgrBlock[i].download_protocol_clr_hndl != UartMgr_Download_Clr_NoneHndl ) {
+  for (i=1;i<UART_NUM_OF_UARTS;i++) {
+    if ( uartMgrBlock[i].download_protocol_clr_hndl == GBSProtocol_DownloadClrHndl ) {
       uartMgrBlock[i].download_protocol_clr_hndl( Run, param ); 
+      break; // Exit for loop on first occurance
     }
   }
 }
@@ -2182,6 +2184,14 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 60  *****************
+ * User: Peter Lee    Date: 15-03-11   Time: 12:30p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Clear NVM cnt thru FSM issues.  
+ * a) Uart[0] reserved for GSE
+ * b) Can't call NV_Write() multiple times in MIF with same data.  Crashes
+ * for some reason.  
  * 
  * *****************  Version 59  *****************
  * User: Peter Lee    Date: 15-03-10   Time: 6:33p
