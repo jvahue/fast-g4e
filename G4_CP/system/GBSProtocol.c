@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 13 $  $Date: 15-03-09 9:54p $
+      $Revision: 14 $  $Date: 15-03-13 4:17p $
 
 ******************************************************************************/
 
@@ -643,8 +643,8 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   {
     result = UART_Transmit ( (UINT8) ch, (const INT8*) &m_GBS_TxBuff[ch].buff[0], 
                              (UINT16) m_GBS_TxBuff[ch].cnt, &sent_cnt);
-// Debug  
-/*
+// Debug
+/*  
     GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Byte0=%d)\r\n", 
                ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), m_GBS_TxBuff[ch].cnt,
                m_GBS_TxBuff[ch].buff[0]);  
@@ -1623,6 +1623,7 @@ static BOOLEAN GBS_ProcessBlkSize ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr 
         // Reset timeout to give full "20 sec"
         pStatus->msCmdTimer = pStatus->cmdRsp_ptr->nRetryTimeOut + CM_GetTickCount();
         pStatus->nCmdRetriesCurr = pStatus->cmdRsp_ptr->nRetries; 
+        GBS_FLUSH_RXBUFF;  // Flush Rx Buffer
       } // end if ( ++pStatus->cntBlkSizeBad <= GBS_BLK_SIZE_BAD_MAX )
     } // end if (bGoodData == FALSE)
   } // end if (pStatus->cntBlkSizeBad <= GBS_BLK_SIZE_BAD_MAX)
@@ -1870,12 +1871,6 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
       case GBS_BLK_STATE_SAVING:
         if (*pDownloadData->bWriteInProgress == FALSE)
         {
-          /*
-          if ( (pBlkData->currBlkNum == 5) && (pStatus->multi_ch==TRUE) )
-            *pDownloadData->bWriteOk = FALSE; 
-          if ( (pBlkData->currBlkNum == 7) && (pStatus->multi_ch==FALSE) )
-            *pDownloadData->bWriteOk = FALSE; 
-          */  
           i = (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) ? pBlkData->cntBlkBuffering : 1; 
           pBlkData->cntStoreBad = (*pDownloadData->bWriteOk == FALSE) ?  
                                   i : pBlkData->cntStoreBad;
@@ -2303,11 +2298,27 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
  * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 15-03-13   Time: 4:17p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  
+ * V&V findings: 
+ * 
+ * c) Call to GBS_FLUSH_RXBUFF needed if Blk Info pkt fails chksum.  Else,
+ * cksum buffer 3x in Row (10ms each) and exhausts the retries and don't
+ * send NAK. 
+ * 
+ * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 15-03-09   Time: 9:54p
  * Updated in $/software/control processor/code/system
  * SCR #1255 GBS Protocol.  Updates, IDLE 20 after BlkReq failed.  Update
  * Retries from 4 to 3. 
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 15-03-09   Time: 9:30p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 15-03-02   Time: 6:36p
