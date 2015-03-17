@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 14 $  $Date: 15-03-13 4:17p $
+      $Revision: 15 $  $Date: 15-03-17 4:47p $
 
 ******************************************************************************/
 
@@ -1804,7 +1804,8 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
           if (bGoodData == FALSE) // Too Large, Too Small, Cksum Bad
           { // Reset timeout and indicate 1 bad rec in row
             pBlkData->cntBlkBadTotal++; 
-            if (++pBlkData->cntBlkBadInRow >= (m_GBS_Ctl_Cfg.retriesMulti + 1)) 
+            if (++pBlkData->cntBlkBadInRow >= ((m_GBS_Ctl_Cfg.retriesMulti + 1) * 
+                                                GBS_TIMEOUT_RETRIES))
             { // Fail this retrieval !!! Just time out after 20 sec and "Restart" again
               pBlkData->bFailed = TRUE; 
               GSE_DebugStr(NORMAL,TRUE, 
@@ -2297,6 +2298,16 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 15-03-17   Time: 4:47p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.
+ * 
+ * 13) V&V Finding
+ * a) SRS-4883 "bad record stored... in row".  Implemented is "bad record
+ * retrieved.. in row", where each bad record stored involves 1 tre and 3
+ * retries,  vs just retries in row. 
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 15-03-13   Time: 4:17p
