@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 7 $  $Date: 15-03-09 9:30p $
+    $Revision: 8 $  $Date: 15-03-17 1:24p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -198,7 +198,7 @@ static USER_MSG_TBL gbsDebugTbl[] =
 static USER_MSG_TBL gbsCtlCfgTbl[] =
 { /*Str                Next Tbl Ptr   Handler Func.   Data Type          Access   Parameter                             IndexRange DataLimit EnumTbl*/
   {"MULTIPLEX",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bMultiplex,      -1,-1,  NO_LIMIT,NULL}, 
-  {"MULTI_UART_PORT",  NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCtlTemp.nPort,           -1,-1,  NO_LIMIT,NULL}, 
+  {"MULTI_UART_PORT",  NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT8,   USER_RW, (void *) &gbsCtlTemp.nPort,           -1,-1,  1,3,     NULL}, 
   {"MULTI_RELAY_CHECK",NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bChkMultiInstall,-1,-1,  NO_LIMIT,NULL},
   {"MULTI_ACTION",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_ACT_LIST,USER_RW, (void *) &gbsCtlTemp.discAction,      -1,-1,  NO_LIMIT,NULL},   
   {"KEEPALIVE",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepAlive,      -1,-1,  NO_LIMIT,NULL}, 
@@ -210,7 +210,7 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
   {"CMD_DELAY_MS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cmd_delay_ms,    -1,-1,  NO_LIMIT,NULL},   
   {"KEEP_BAD_REC",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepBadRec,     -1,-1,  NO_LIMIT,NULL}, 
   {"BUFF_RECS",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bBuffRecStore,   -1,-1,  NO_LIMIT,NULL}, 
-  {"BUFF_RECS_SIZE",   NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cntBuffRecSize,  -1,-1,  NO_LIMIT,NULL},   
+  {"BUFF_RECS_SIZE",   NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cntBuffRecSize,  -1,-1,  1,65536,NULL},   
   {"CONFIRM_RECS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bConfirm,        -1,-1,  NO_LIMIT,NULL},   
    
   {NULL,NULL,NULL,NO_HANDLER_DATA}
@@ -715,6 +715,14 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 15-03-17   Time: 1:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * GSE Review AI
+ * a) Add min/max limit for "multi_uart_port" and "buff_recs_size" 
+ * b) Def for Cmd_To_Cmd_Delay to 0 ms from 100 ms
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 15-03-09   Time: 9:30p

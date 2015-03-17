@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 6 $  $Date: 15-03-09 9:54p $
+      $Revision: 7 $  $Date: 15-03-17 1:24p $
 
 ******************************************************************************/
 
@@ -50,7 +50,7 @@
 #define GBS_RESTART_SETEDU_MODE  3
 #define GBS_MULTIPLE_RETRIES  12 // Max of 12
 #define GBS_RESTART_DELAY_MS  CM_DELAY_IN_MSEC(10000)
-#define GBS_CMD_DELAY_MS      CM_DELAY_IN_MSEC(100)
+#define GBS_CMD_DELAY_MS      CM_DELAY_IN_MSEC(0)
 
                               /*0,  1,  2,  3,  4*/ /* dnloadTypes */
 #define GBS_CFG_DEFAULT        0x5,GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED,\
@@ -381,6 +381,14 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 15-03-17   Time: 1:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * GSE Review AI
+ * a) Add min/max limit for "multi_uart_port" and "buff_recs_size" 
+ * b) Def for Cmd_To_Cmd_Delay to 0 ms from 100 ms
  * 
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 15-03-09   Time: 9:54p
