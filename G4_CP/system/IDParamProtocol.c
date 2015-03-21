@@ -1,8 +1,10 @@
 #define ID_PARAM_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9E991
 
     File:        IDParamProtocol.c
 
@@ -10,7 +12,7 @@
                  Handler
 
     VERSION
-      $Revision: 10 $  $Date: 15-03-04 4:52p $
+      $Revision: 11 $  $Date: 3/19/15 10:40a $
 
 ******************************************************************************/
 
@@ -248,7 +250,7 @@ void IDParamProtocol_Initialize ( void )
   memset ( (void *) &m_IDParam_Cfg, 0, sizeof(m_IDParam_Cfg) );
 
   // Add an entry in the user message handler table for F7X Cfg Items
-  User_AddRootCmd(&IDParamProtocolRootTblPtr);
+  User_AddRootCmd(&idParamProtocolRootTblPtr);
 
   // Copy data from CfgMgr, to be used as the run time
   memcpy( (void *) &m_IDParam_Cfg, (const void *) &CfgMgr_RuntimeConfigPtr()->IDParamConfig,
@@ -1589,6 +1591,11 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 3/19/15    Time: 10:40a
+ * Updated in $/software/control processor/code/system
+ * SCR 1263 - Code Review Updates
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 15-03-04   Time: 4:52p
