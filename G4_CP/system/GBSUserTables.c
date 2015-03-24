@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 8 $  $Date: 15-03-17 1:24p $
+    $Revision: 9 $  $Date: 15-03-24 5:04p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -219,8 +219,8 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
 static USER_MSG_TBL gbsCtlMultiTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.     Data Type          Access   Parameter                                         IndexRange DataLimit EnumTbl*/
   {"STATE",           NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_ENUM,    USER_RO, (void *) &gbsCtlStatusTemp.state,                 -1,-1,  NO_LIMIT,gbsMultiStateStrs},
-  {"PRIMARY_PEND",    NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
-  {"SECONDARY_PEND",  NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending,  -1,-1,  NO_LIMIT,NULL},
+  //{"PRIMARY_PEND",    NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bPrimaryReqPending,    -1,-1,  NO_LIMIT,NULL},
+  //{"SECONDARY_PEND",  NO_NEXT_TABLE, GBSMsg_CtlStatus, USER_TYPE_BOOLEAN, USER_RO, (void *) &gbsCtlStatusTemp.bSecondaryReqPending,  -1,-1,  NO_LIMIT,NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -715,6 +715,21 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * 
+ * 14) V&V findings and GSE/LOG Review AI
+ * a) Remove GSE-4067, 4068
+ * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
+ * review. 
+ * b) Update"cnt" to "size" for LOG-2831
+ * c) Add /*vcast_dont_instrument_start*/
+ * d) Fix 'BAD' record in row before Restart
+ * 
+ * 
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 15-03-17   Time: 1:24p

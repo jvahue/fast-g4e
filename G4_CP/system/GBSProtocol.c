@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 15 $  $Date: 15-03-17 4:47p $
+      $Revision: 17 $  $Date: 15-03-24 5:04p $
 
 ******************************************************************************/
 
@@ -373,9 +373,9 @@ void GBSProtocol_Initialize ( void )
   UINT16 i,j;
   GBS_CMD_RSP_PTR cmdRsp_ptr;
 
-  memset (&m_GBS_Status, 0, sizeof(m_GBS_Status) );
-  memset (&m_GBS_Download_Ptr, 0, sizeof(m_GBS_Download_Ptr) );
-  memset (&m_GBS_Download, 0, sizeof(m_GBS_Download) );
+  memset (m_GBS_Status, 0, sizeof(m_GBS_Status) );
+  memset (m_GBS_Download_Ptr, 0, sizeof(m_GBS_Download_Ptr) );
+  memset (m_GBS_Download, 0, sizeof(m_GBS_Download) );
   memset (&m_GBS_Multi_Download_Ptr, 0, sizeof(m_GBS_Multi_Download_Ptr) );
   memset (&m_GBS_Multi_Download, 0, sizeof(m_GBS_Multi_Download) );
   memset (&m_GBS_Multi_Status, 0, sizeof(m_GBS_Multi_Status) );
@@ -389,7 +389,7 @@ void GBSProtocol_Initialize ( void )
   GBS_RestoreAppData();
   
   // Retrieve GBS Cfg
-  memcpy(&m_GBS_Cfg, &(CfgMgr_RuntimeConfigPtr()->GBSConfigs), sizeof(m_GBS_Cfg));
+  memcpy(m_GBS_Cfg, CfgMgr_RuntimeConfigPtr()->GBSConfigs, sizeof(m_GBS_Cfg));
   memcpy(&m_GBS_Ctl_Cfg, &(CfgMgr_RuntimeConfigPtr()->GBSCtlConfig),
          sizeof(m_GBS_Ctl_Cfg));
 
@@ -684,12 +684,12 @@ UINT16 GBSProtocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size, UINT16 ch
                                           &m_GBS_Multi_Status; 
   memset ( (UINT8 *) &data, 0, sizeof(data) );
   
-  data.cnt = (max_size < sizeof(data)) ? max_size : sizeof(data); 
+  data.size = (max_size < sizeof(data)) ? max_size : sizeof(data); 
   data.completed = pStatus->bCompleted; 
   
-  memcpy (dest, (UINT8 *) &data, data.cnt); 
+  memcpy (dest, (UINT8 *) &data, data.size); 
 
-  return (data.cnt);
+  return (data.size);
 }
 
 
@@ -958,7 +958,8 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
 
     case GBS_STATE_CONFIRM:
       pStatus->state = GBS_ProcessStateSetConfirmEDU( pStatus, pData, cnt );
-#ifdef GBS_MULTI_DNLOADS    
+#ifdef GBS_MULTI_DNLOADS  
+      /*vcast_dont_instrument_start*/
       // If _CONFIRM is done, goto _DOWNLOAD again if looping thru Cmd Code is not complete
       //    Else, goto _COMPLETE.  NOTE: If Debug Cmd Code enb, goto _COMPLETE as well (thus
       //    exe the Debug Cmd Code only).  
@@ -974,6 +975,7 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
         pStatus->state = GBS_STATE_DOWNLOAD; 
         GBS_ProcessStateRecord_Init ( pStatus, FALSE );
       }
+      /*vcast_dont_instrument_end*/
 #endif      
       break;
 
@@ -994,7 +996,9 @@ static void GBS_ProcessRxData( GBS_STATUS_PTR pStatus, GBS_DOWNLOAD_DATA_PTR pDo
       }
       break;
 
+    case GBS_STATE_MAX:
     default:
+      FATAL("Invald GBS Protocol state = %d", pStatus->state); 
       break;
   }
 
@@ -1104,8 +1108,9 @@ static GBS_STATE_ENUM GBS_ProcessStateSetConfirmEDU ( GBS_STATUS_PTR pStatus, UI
         bCmdCompleted = cmdRsp_ptr->rspHndl( pData, cnt, (UINT32) pStatus );
         break;
 
+      case GBS_RSP_BLK:
       default:
-        // FATAL() not such case for this MODE
+        FATAL("Invald GBS Protocol respType = %d", cmdRsp_ptr->respType); 
         break;
     }
 
@@ -1275,8 +1280,9 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
         bCmdCompleted = cmdRsp_ptr->rspHndl( pData, cnt, (UINT32) pStatus );
         break;
 
+      case GBS_RSP_ACK:
       default:
-        // FATAL() not such case for this MODE
+        FATAL("Invald GBS Protocol respType = %d", cmdRsp_ptr->respType); 
         break;
     }
 
@@ -1841,7 +1847,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
                 // Have to remove U16 Blk# and U16 BlkSize from 
                 // *pCnt = *pCnt - GBS_CKSUM_REC_START; 
                 // Don't want to remove OH, because it might not be OH is thisc ase 
-                pBlkData->cntBlkBadInRow = 0;  // Got good record
+                // pBlkData->cntBlkBadInRow = 0;  // Got good record
                 pStatus->cntBadCRCRow = 0; 
                 *pDownloadData->bNewRec = TRUE; 
                 pBlkData->state = GBS_BLK_STATE_SAVING; 
@@ -2069,7 +2075,9 @@ static void GBS_CreateSummaryLog ( GBS_STATUS_PTR pStatus, BOOLEAN bSummary )
   log.ch = (pStatus->multi_ch == TRUE) ? GBS_SIM_PORT_INDEX : pStatus->ch; 
   
 #ifdef GBS_MULTI_DNLOADS
+  /*vcast_dont_instrument_start*/
   id = bSummary ? SYS_ID_UART_GBS_STATUS : SYS_ID_UART_GBS_BLK_STATUS; 
+  /*vcast_dont_instrument_end*/
 #else
   id = SYS_ID_UART_GBS_STATUS; 
 #endif  
@@ -2298,6 +2306,26 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * 
+ * 14) V&V findings and GSE/LOG Review AI
+ * a) Remove GSE-4067, 4068
+ * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
+ * review. 
+ * b) Update"cnt" to "size" for LOG-2831
+ * c) Add /*vcast_dont_instrument_start*/
+ * d) Fix 'BAD' record in row before Restart
+ * 
+ * 
+ * 
+ * *****************  Version 16  *****************
+ * User: Peter Lee    Date: 15-03-23   Time: 11:34a
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Code review changes. 
  * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 15-03-17   Time: 4:47p
