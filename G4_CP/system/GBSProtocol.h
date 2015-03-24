@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 9 $  $Date: 15-03-24 5:04p $
+      $Revision: 10 $  $Date: 15-03-24 5:31p $
 
 ******************************************************************************/
 
@@ -382,6 +382,11 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
  * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Remove extra comment delimiters in footer. 
+ * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:04p
  * Updated in $/software/control processor/code/system
@@ -392,10 +397,8 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
  * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
  * review. 
  * b) Update"cnt" to "size" for LOG-2831
- * c) Add /*vcast_dont_instrument_start*/
+ * c) Add vcast_dont_instrument_start
  * d) Fix 'BAD' record in row before Restart
- * 
- * 
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 15-03-23   Time: 11:34a

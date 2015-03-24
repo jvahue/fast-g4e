@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 17 $  $Date: 15-03-24 5:04p $
+      $Revision: 19 $  $Date: 15-03-24 5:29p $
 
 ******************************************************************************/
 
@@ -2307,6 +2307,16 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
  * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Remove extra comment deliminters from footer
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Remove extra comment from footer history. 
+ * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:04p
  * Updated in $/software/control processor/code/system
@@ -2317,10 +2327,8 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
  * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
  * review. 
  * b) Update"cnt" to "size" for LOG-2831
- * c) Add /*vcast_dont_instrument_start*/
+ * c) Add vcast_dont_instrument_start
  * d) Fix 'BAD' record in row before Restart
- * 
- * 
  * 
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 15-03-23   Time: 11:34a
