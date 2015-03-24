@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 9 $  $Date: 15-03-24 5:04p $
+    $Revision: 10 $  $Date: 15-03-24 5:31p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -716,6 +716,11 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
  * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Remove extra comment delimiters in footer. 
+ * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:04p
  * Updated in $/software/control processor/code/system
@@ -726,10 +731,8 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
  * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
  * review. 
  * b) Update"cnt" to "size" for LOG-2831
- * c) Add /*vcast_dont_instrument_start*/
+ * c) Add vcast_dont_instrument_start
  * d) Fix 'BAD' record in row before Restart
- * 
- * 
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 15-03-17   Time: 1:24p
