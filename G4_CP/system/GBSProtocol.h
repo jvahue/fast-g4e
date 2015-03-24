@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 7 $  $Date: 15-03-17 1:24p $
+      $Revision: 9 $  $Date: 15-03-24 5:04p $
 
 ******************************************************************************/
 
@@ -235,7 +235,7 @@ typedef struct {
   UINT16 ch;             // Physical Uart Channel
   
   BOOLEAN multi_ch;      // TRUE if this is the Multiplex Ch
-  BOOLEAN spare; 
+  //BOOLEAN spare; 
 
   GBS_STATE_ENUM state;  // GBS Xfer/Comm State
 
@@ -276,7 +276,7 @@ typedef struct {
   
   UINT32 cntBadCRCRow;    // Consecutive Cnt of Bad CRC In Row 
   
-  UINT8 debugDnLoadCode;  // Debug Download Code for each GBS Channel 
+  //UINT8 debugDnLoadCode;// Debug Download Code for each GBS Channel 
   BOOLEAN bRelayStuck; // TRUE if Multiple Relay Stuck test fails (if test enabled)
   
   UINT32 relayCksumNVM;   // Cksum of 1st 4 Install Rec used for Relay Stuck Check
@@ -326,7 +326,7 @@ typedef struct
 #pragma pack(1)
 typedef struct 
 {
-  UINT16 cnt;         // Size of GBS Protocol file header
+  UINT16 size;        // Size of GBS Protocol file header
   BOOLEAN completed;  // 1=Retrieval Completed Successfully 
                       // 0=Retrieval Not completed successfully 
   UINT8 reserved[13]; // Reserved for future use
@@ -381,6 +381,26 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 15-03-24   Time: 5:04p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol
+ * 
+ * 14) V&V findings and GSE/LOG Review AI
+ * a) Remove GSE-4067, 4068
+ * gbs_ctl.status.multi.primary_pend/secondary_pend from AI #8 of GSE
+ * review. 
+ * b) Update"cnt" to "size" for LOG-2831
+ * c) Add /*vcast_dont_instrument_start*/
+ * d) Fix 'BAD' record in row before Restart
+ * 
+ * 
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 15-03-23   Time: 11:34a
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  Code review changes. 
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 15-03-17   Time: 1:24p
