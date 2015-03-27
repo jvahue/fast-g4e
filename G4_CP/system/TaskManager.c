@@ -1,10 +1,12 @@
 #define TASK_MANAGER_BODY
 
 /******************************************************************************
-            Copyright (C) 2009-2011 Pratt & Whitney Engine Services, Inc.
+         Copyright (C) 2003-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    File:       TaskManager.c
+   ECCN:        9D991
+
+   File:        TaskManager.c
 
    Description: Executive Task Manager functions
    
@@ -22,7 +24,7 @@
    TmScheduleTask             Force a specific RMT task for dispatch ASAP
   
  VERSION
-      $Revision: 68 $  $Date: 1/13/15 6:16p $
+      $Revision: 70 $  $Date: 3/24/15 1:13p $
 
 ******************************************************************************/
 
@@ -1051,6 +1053,16 @@ void TmDispatchDtTasks (void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TaskManager.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Contractor V&v Date: 3/24/15    Time: 1:13p
+ * Updated in $/software/control processor/code/system
+ * SCR-1192 Added File: to documenation banner.
+ * 
+ * *****************  Version 69  *****************
+ * User: Contractor V&v Date: 3/23/15    Time: 1:57p
+ * Updated in $/software/control processor/code/system
+ * SCR-1192 CR updates to Module header for date.
  * 
  * *****************  Version 68  *****************
  * User: Contractor V&v Date: 1/13/15    Time: 6:16p
