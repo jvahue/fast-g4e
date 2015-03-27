@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 19 $  $Date: 15-03-24 5:29p $
+      $Revision: 20 $  $Date: 15-03-25 7:22p $
 
 ******************************************************************************/
 
@@ -81,8 +81,8 @@
         m_GBS_RxBuff[ch].cksum = 0
 
 
-#define GBS_ACTION_SECONDARY_SEL  ACTION_OFF
-#define GBS_ACTION_PRIMARY_SEL    ACTION_ON
+#define GBS_ACTION_SECONDARY_SEL  ACTION_ON
+#define GBS_ACTION_PRIMARY_SEL    ACTION_OFF
 
 #define GBS_ACTIONS(a)   ( a & ACTION_ALL )
 
@@ -631,6 +631,12 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
         m_GBS_Multi_Ctl.state = (m_GBS_Multi_Ctl.bPrimaryReqPending == TRUE ) ? 
                                 GBS_MULTI_PRIMARY : GBS_MULTI_SECONDARY;       
       }
+      // Set Multiplex Mode to PRIMARY if no one is pending.  Allow Relay to be set to 
+      //   ACTION_OFF (assoc with PRIMARY) so that Relay can be "de-energized". 
+      m_GBS_Multi_Ctl.state =  ( (m_GBS_Multi_Ctl.bSecondaryReqPending == FALSE) && 
+                                 (m_GBS_Multi_Ctl.bPrimaryReqPending == FALSE) ) ? 
+                                 GBS_MULTI_PRIMARY :  m_GBS_Multi_Ctl.state; 
+      
     } // end if (m_GBS_Multi_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Multi_Cfg.nPort)
   }
   else 
@@ -1520,6 +1526,11 @@ static GBS_STATE_ENUM GBS_ProcessStateComplete ( GBS_STATUS_PTR pStatus )
       ((m_GBS_Multi_Ctl.bPrimaryReqPending == FALSE) && 
        (m_GBS_Multi_Ctl.bSecondaryReqPending == FALSE)) ? 
        m_GBS_Cfg[pStatus->ch].dnloadTypes[0] : m_GBS_DebugDnload[pStatus->ch].dnloadCode;     
+    // Set Multiplex Mode to PRIMARY if no one is pending.  Allow Relay to be set to ACTION_OFF 
+    //   (assoc with PRIMARY) so that Relay can be "de-energized". 
+    m_GBS_Multi_Ctl.state =  ( (m_GBS_Multi_Ctl.bSecondaryReqPending == FALSE) && 
+                               (m_GBS_Multi_Ctl.bPrimaryReqPending == FALSE) ) ? 
+                               GBS_MULTI_PRIMARY :  m_GBS_Multi_Ctl.state; 
   } // end if (m_GBS_Multi_Cfg.bMultiplex == TRUE) && (pStatus->ch == m_GBS_Multi_Cfg.nPort)
   else 
   {
@@ -1880,7 +1891,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
         {
           i = (m_GBS_Ctl_Cfg.bBuffRecStore == TRUE) ? pBlkData->cntBlkBuffering : 1; 
           pBlkData->cntStoreBad = (*pDownloadData->bWriteOk == FALSE) ?  
-                                  i : pBlkData->cntStoreBad;
+                                  (i + pBlkData->cntStoreBad) : pBlkData->cntStoreBad;
           pBlkData->cntBlkBuffering = 0; // Clear buffering cnt on store 
           pBuffManyRec->cnt = 0;         // Clear Multi Rec Buff
           pBuffManyRec->data_index = 0;  // Clear Mulit Rec Buff
@@ -2306,6 +2317,18 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 15-03-25   Time: 7:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol Updates
+ * 
+ * a) SDD Review AI #6. The ->cntStoreBad is incorrectly updated.
+ * Currently "=1" but s/b "=+1" for each occurrence. 
+ * b) SDD Review AI #13.  PRIMARY s/b ACTION_OFF, and SECONDARY s/b
+ * ACTION_ON. 
+ * c) SDD Review AI #13, After SECONDARY retrieval switch back to PRIMARY
+ * to set ACTION_OFF. 
  * 
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:29p
