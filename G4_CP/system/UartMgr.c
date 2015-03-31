@@ -8,7 +8,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 60 $  $Date: 15-03-11 12:30p $
+      $Revision: 61 $  $Date: 15-03-30 10:23a $
 
 ******************************************************************************/
 
@@ -641,7 +641,7 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 param, UINT16 nSensor
                   &m_UartMgr_WordInfo[ch][m_UartMgr_WordSensorCount[ch]];
 
   uart_data_ptr = (UARTMGR_PARAM_DATA_PTR)
-                  &m_UartMgr_Data[ch];
+                  m_UartMgr_Data[ch];
 
   // Determine Protocol
   switch ( protocol )
@@ -1038,7 +1038,7 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
 
   UINT16 cnt;
   
-  nPort = (chan != GBS_SIM_PORT_INDEX) ? chan : GBSProtocol_SIM_Port();
+  nPort = (chan != GBS_SIM_PORT_INDEX) ? (UINT16) chan : GBSProtocol_SIM_Port();
 
   pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[nPort];  
 
@@ -1175,7 +1175,7 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
   
   if (PortIndex == GBS_SIM_PORT_INDEX)
   {
-    nPort = GBSProtocol_SIM_Port();
+    nPort = (UINT8) GBSProtocol_SIM_Port();
     pUartMgrBlock = (UARTMGR_TASK_PARAMS_PTR) &uartMgrBlock[nPort];
     pUartMgrDownload = (UARTMGR_DOWNLOAD_PTR) &m_UartMgr_Download_GBS_SIM;  
   }
@@ -1322,7 +1322,7 @@ void UartMgr_DownloadClr ( BOOLEAN Run, INT32 param )
 {
   UINT16 i; 
   
-  for (i=1;i<UART_NUM_OF_UARTS;i++) {
+  for (i=1;i< (UINT16) UART_NUM_OF_UARTS;i++) {
     if ( uartMgrBlock[i].download_protocol_clr_hndl == GBSProtocol_DownloadClrHndl ) {
       uartMgrBlock[i].download_protocol_clr_hndl( Run, param ); 
       break; // Exit for loop on first occurance
@@ -2184,6 +2184,11 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 61  *****************
+ * User: Peter Lee    Date: 15-03-30   Time: 10:23a
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates
  * 
  * *****************  Version 60  *****************
  * User: Peter Lee    Date: 15-03-11   Time: 12:30p

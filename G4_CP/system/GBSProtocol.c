@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 20 $  $Date: 15-03-25 7:22p $
+      $Revision: 22 $  $Date: 15-03-31 6:00p $
 
 ******************************************************************************/
 
@@ -1157,7 +1157,7 @@ static GBS_STATE_ENUM GBS_ProcessStateSetConfirmEDU ( GBS_STATUS_PTR pStatus, UI
           pStatus->bCmdRspFailed = TRUE; // retries exhausted, cmd failed
         }
         else {
-          memcpy ( (UINT8 *) &m_GBS_TxBuff[ch].buff[0], (UINT8 *) &cmdRsp_ptr->cmd[0],
+          memcpy ( (UINT8 *) m_GBS_TxBuff[ch].buff, (UINT8 *) &cmdRsp_ptr->cmd[0],
                    cmdRsp_ptr->cmdSize );
           m_GBS_TxBuff[ch].cnt = cmdRsp_ptr->cmdSize;
           pStatus->nCmdRetriesCurr--;
@@ -1371,9 +1371,10 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
           //   seen by EDU).
           if ( (pStatus->dataBlkState.state != GBS_BLK_STATE_SAVING) && 
                ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) && 
+               ((tick_ms - pStatus->lastRxTime_ms) > m_GBS_Ctl_Cfg.timeIdleOut) &&
                (pStatus->dataBlkState.bFailed != TRUE) )
           {
-            memcpy ( (UINT8 *) &m_GBS_TxBuff[ch].buff[0], (UINT8 *) &cmdRsp_ptr->cmd[0],
+            memcpy ( (UINT8 *) m_GBS_TxBuff[ch].buff, (UINT8 *) &cmdRsp_ptr->cmd[0],
                      cmdRsp_ptr->cmdSize );
             m_GBS_TxBuff[ch].cnt = cmdRsp_ptr->cmdSize;
           }
@@ -2317,6 +2318,18 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 15-03-31   Time: 6:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255  GBS Protocol Implementation. 
+ * 
+ * 16) From V&V.  Don't send ACK/NAK during IDLE Timeout Period.  
+ * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 15-03-30   Time: 10:34a
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates
  * 
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 15-03-25   Time: 7:22p
