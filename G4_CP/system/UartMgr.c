@@ -1,14 +1,16 @@
 #define UART_MGR_BODY
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        UartMgr.c
 
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 61 $  $Date: 15-03-30 10:23a $
+      $Revision: 63 $  $Date: 4/01/15 10:34a $
 
 ******************************************************************************/
 
@@ -441,6 +443,7 @@ static void UartMgr_Task (void *pParam)
     // Update ByteCnt Status
     pUartMgrStatus->portByteCnt += cnt;
 
+    ASSERT( NULL != pUartMgrBlock->exec_protocol);
     // Call Serial Protocol Handler
     bNewChanData = pUartMgrBlock->exec_protocol( (UINT8 *) m_UartMgr_RawBuffer[nChannel],
       cnt,
@@ -601,6 +604,7 @@ void UartMgr_BITTask ( void *pParam )
  *                     1 - F7X-N-Parameter
  *                     2 - EMU 150
  *                     3 - ID Parameter
+ *                     4 - GBS
  *                     255 to 1 - Not Used
  *     bits 10 to  8: Selects the uart channel
  *                    000b - ch 0 (Allocated to GSE, not valid !)
@@ -818,6 +822,8 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
     pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[ch][uartdata_index];
     pRunTimeData = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
 
+    ASSERT( NULL != pUartMgrBlock->get_protocol_ready_hndl );
+    
     if (((CM_GetTickCount() - pRunTimeData->rxTime) > pWordInfo->dataloss_time) &&
         ((pRunTimeData->rxTime != 0) || (pUartMgrBlock->get_protocol_ready_hndl(ch) == TRUE)))
     {
@@ -1045,6 +1051,8 @@ UINT16 UartMgr_GetFileHdr ( void *pDest, UINT32 chan, UINT16 nMaxByteSize )
   // Update protocol file hdr first !
   pdest = (UINT8 *) pDest;
   pdest = (pdest + sizeof(UARTMGR_FILE_HDR));  // Move to end of UartMgr File Hdr
+  
+  ASSERT( NULL != pUartMgrBlock->get_protocol_fileHdr);
   cnt = pUartMgrBlock->get_protocol_fileHdr( pdest, nMaxByteSize - sizeof(UARTMGR_FILE_HDR),
                                              (UINT16)chan );
 
@@ -1205,6 +1213,7 @@ UINT8* UartMgr_DownloadRecord ( UINT8 PortIndex, DL_STATUS *pStatus, UINT32 *pSi
       // Go to next state
       pUartMgrDownload->state = UARTMGR_DOWNLOAD_GET_REC;
 
+      ASSERT( NULL != pUartMgrBlock->download_protocol_hndl );
       pUartMgrBlock->download_protocol_hndl ( PortIndex,
                                               &pUartMgrDownload->bStartDownload,
                                               &pUartMgrDownload->bDownloadCompleted,
@@ -2184,6 +2193,16 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 63  *****************
+ * User: John Omalley Date: 4/01/15    Time: 10:34a
+ * Updated in $/software/control processor/code/system
+ * SCR 1287 - Added asserts for NULL function pointers.
+ * 
+ * *****************  Version 62  *****************
+ * User: John Omalley Date: 4/01/15    Time: 8:51a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 Code Review Updates
  * 
  * *****************  Version 61  *****************
  * User: Peter Lee    Date: 15-03-30   Time: 10:23a
