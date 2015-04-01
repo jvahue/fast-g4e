@@ -1,15 +1,17 @@
 #ifndef UARTMGR_H
 #define UARTMGR_H
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        UartMgr.h
 
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 22 $  $Date: 15-02-06 7:18p $
+      $Revision: 23 $  $Date: 4/01/15 8:54a $
 
 ******************************************************************************/
 
@@ -447,6 +449,11 @@ EXPORT void    UartMgr_DownloadClr        ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 4/01/15    Time: 8:54a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 Code Review Update
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p

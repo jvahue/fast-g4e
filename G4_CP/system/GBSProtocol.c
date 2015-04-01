@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 22 $  $Date: 15-03-31 6:00p $
+      $Revision: 24 $  $Date: 15-04-01 1:44p $
 
 ******************************************************************************/
 
@@ -1857,7 +1857,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
                   pBlkData->cntBlkBuffering++; 
                 }
                 // Have to remove U16 Blk# and U16 BlkSize from 
-                // *pCnt = *pCnt - GBS_CKSUM_REC_START; 
+                *pCnt = *pCnt - GBS_CKSUM_REC_START; 
                 // Don't want to remove OH, because it might not be OH is thisc ase 
                 // pBlkData->cntBlkBadInRow = 0;  // Got good record
                 pStatus->cntBadCRCRow = 0; 
@@ -1919,6 +1919,7 @@ static BOOLEAN GBS_ProcessBlkRec ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr )
         break; 
         
       default: 
+        FATAL("Invald GBS Protocol Rec Proccess state = %d", pBlkData->state); 
         break;
   
     } // end of switch (pBlkData->state) 
@@ -2318,6 +2319,22 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Peter Lee    Date: 15-04-01   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  
+ * 18) From V&V, for storing 'bad' rec, remove the Blk # and Blk Size to
+ * be consistent with storing good rec process.
+ * 
+ * *****************  Version 23  *****************
+ * User: Peter Lee    Date: 15-04-01   Time: 11:26a
+ * Updated in $/software/control processor/code/system
+ * SCR #1255 GBS Protocol.  
+ * 
+ * 17) From V&V statement coverage
+ * a) Break w/o FATAL
+ * 
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 15-03-31   Time: 6:00p

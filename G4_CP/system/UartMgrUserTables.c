@@ -1,7 +1,9 @@
 #define UARTMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        UartMgrUserTables.c
 
@@ -10,7 +12,7 @@
     Note:
 
     VERSION
-    $Revision: 22 $  $Date: 15-01-11 10:21p $
+    $Revision: 23 $  $Date: 4/01/15 9:31a $
 
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -535,6 +537,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 4/01/15    Time: 9:31a
+ * Updated in $/software/control processor/code/system
+ * SCR 1255 Code Review Updates
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:21p
