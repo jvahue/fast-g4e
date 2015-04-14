@@ -1,14 +1,16 @@
 #define MSSC_BODY
 /******************************************************************************
-            Copyright (C) 2008-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         MSStsCtl.c
 
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 66 $  $Date: 12/02/14 2:27p $
+      $Revision: 67 $  $Date: 4/14/15 2:34p $
 
 ******************************************************************************/
 
@@ -48,8 +50,7 @@ static MSSC_STS_STATUS     m_MsStsSta;
 static TIMESTRUCT          m_MsTime;
 static BOOLEAN             m_IsOnGround;
 static BOOLEAN             m_IsClientConnected;
-static BOOLEAN             m_TimeSynced;          // TRUE if PWEH MS app synced MS to remote
-                                                  // time server
+
 static BOOLEAN             m_clockDriftChecked;   // Has one-time, System/MS clock drift
                                                   // been checked.
 static BOOLEAN             m_CompactFlashMounted; // Is the CF mounted.
@@ -438,25 +439,6 @@ void MSSC_GetGSMSignalStrength(CHAR* str)
 void MSSC_GetMsPwVer(CHAR* str)
 {
   strncpy_safe(str, MSSC_CFG_STR_MAX_LEN, m_GetMSInfoRsp.PWEHVer, _TRUNCATE);
-}
-
-
-
-/******************************************************************************
- * Function:    MSSC_GetMSTimeSynced()
- *
- * Description: Returns the TimeSynced value from the PWEH ms app
- *
- * Parameters:  none
- *
- * Returns:     TRUE: PWEH ms app had synced to a remote time server
- *
- * Notes:       none
- *
- *****************************************************************************/
-BOOLEAN MSSC_GetMSTimeSynced( void )
-{
-  return m_TimeSynced;
 }
 
 
@@ -941,14 +923,12 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
 
     if(!m_MssimVersionError)
     {
-      m_TimeSynced = pRspData->TimeSynched;
       m_IsClientConnected  = pRspData->ClientConnected;
       m_IsVPNConnected = pRspData->VPNConnected;
       m_CompactFlashMounted = pRspData->CompactFlashMounted;
     }
     else
     {
-      m_TimeSynced =          FALSE;
       m_IsClientConnected =   FALSE;
       m_IsVPNConnected =      FALSE;
       m_CompactFlashMounted = FALSE;
@@ -1040,6 +1020,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 67  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 66  *****************
  * User: Contractor V&v Date: 12/02/14   Time: 2:27p
