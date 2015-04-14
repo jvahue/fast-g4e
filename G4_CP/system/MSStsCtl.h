@@ -1,15 +1,17 @@
 #ifndef MSSC_H
 #define MSSC_H
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         MSStsCtl.h
 
     Description: MicroServer Status and Control.
 
     VERSION
-      $Revision: 26 $  $Date: 12-11-12 10:57a $
+      $Revision: 27 $  $Date: 4/14/15 2:34p $
 
 ******************************************************************************/
 
@@ -149,7 +151,6 @@ EXPORT void MSSC_SendGSMCfgCmd(void);
 EXPORT BOOLEAN MSSC_GetIsVPNConnected(void);
 EXPORT BOOLEAN MSSC_GetIsCompactFlashMounted(void);
 EXPORT BOOLEAN MSSC_GetIsAlive(void);
-EXPORT BOOLEAN MSSC_GetMSTimeSynced(void);
 
 EXPORT MSSC_STS_STATUS MSSC_GetSTS(void);
 EXPORT MSSC_XFR_STATUS MSSC_GetXFR(void);
@@ -169,6 +170,11 @@ EXPORT void               MSSC_GetMsPwVer(CHAR* str);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.h $
+ * 
+ * *****************  Version 27  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 12-11-12   Time: 10:57a

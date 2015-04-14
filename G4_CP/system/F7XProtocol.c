@@ -1,8 +1,10 @@
 #define F7X_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2011 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        F7XProtocol.c
 
@@ -10,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 22 $  $Date: 12-11-15 10:49a $     
+      $Revision: 23 $  $Date: 4/14/15 2:34p $     
 
 ******************************************************************************/
 
@@ -749,25 +751,6 @@ F7X_STATUS_PTR F7XProtocol_GetStatus (UINT8 index)
   return ( (F7X_STATUS_PTR) &m_F7X_Status[index] ); 
 }
 
-
-/******************************************************************************
- * Function:    F7XProtocol_GetCfg
- *
- * Description: Utility function to request current F7XProtocol[index] Cfg
- *
- * Parameters:  index - Uart Port Index 
- *
- * Returns:     Ptr to F7X Cfg data
- *
- * Notes:       None 
- *
- *****************************************************************************/
-F7X_DUMPLIST_CFG_PTR F7XProtocol_GetCfg (UINT8 index)
-{
-  return ( (F7X_DUMPLIST_CFG_PTR) &m_F7X_DumplistCfg[index] ); 
-}
-
-
 /******************************************************************************
  * Function:    F7XProtocol_GetDebug
  *
@@ -784,25 +767,6 @@ F7X_DEBUG_PTR F7XProtocol_GetDebug (void)
 {
   return ( (F7X_DEBUG_PTR) &m_F7X_Debug ); 
 }
-
-
-/******************************************************************************
- * Function:    F7XProtocol_GetParamList
- *
- * Description: Utility function to request current F7XProtocol[index] Cfg
- *
- * Parameters:  None 
- *
- * Returns:     Ptr to F7X Cfg data
- *
- * Notes:       None 
- *
- *****************************************************************************/
-F7X_PARAM_LIST_PTR F7XProtocol_GetParamList (void)
-{
-  return ( (F7X_PARAM_LIST_PTR) &m_F7X_ParamListCfg ); 
-}
-
 
 /******************************************************************************
  * Function:    F7XProtocol_GetParamEntryList
@@ -1998,6 +1962,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 22  *****************
  * User: John Omalley Date: 12-11-15   Time: 10:49a

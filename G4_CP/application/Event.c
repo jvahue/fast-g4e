@@ -1,7 +1,9 @@
 #define EVENT_BODY
 /******************************************************************************
-           Copyright (C) 2012-2014 Pratt & Whitney Engine Services, Inc.
+           Copyright (C) 2012-2015 Pratt & Whitney Engine Services, Inc.
               All Rights Reserved. Proprietary and Confidential.
+
+   ECCN:        9D991
 
    File:        event.c
 
@@ -37,7 +39,7 @@
    Note:
 
  VERSION
- $Revision: 47 $  $Date: 11/20/14 3:05p $
+ $Revision: 48 $  $Date: 4/14/15 2:31p $
 
 ******************************************************************************/
 
@@ -246,15 +248,6 @@ void EventsInitialize ( void )
    {
      // read the data into local working buffer
      NV_Read( NV_EVENT_HISTORY, 0, &m_EventHistory, sizeof( m_EventHistory));
-
-     // If the data is un-initialized as indicated by the 'last cleared' timestamp
-     // contains default EEPROM values... init the file.
-     if ( m_EventHistory.tsLastCleared.Timestamp == 0xFFFFFFFF)
-     {
-       //GSE_DebugStr(NORMAL, TRUE, "EventBuff in default state..Initialize");
-       // clear and reset the event hist buffer
-       EventInitHistoryBuffer();
-     }
    }
 
    // Create Event Task - DT
@@ -2015,8 +2008,9 @@ BOOLEAN EventTableIsEntered(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTable
             sizeof(pTableData->tsTblHystStartTime));
   }
 
-  #if 0
-if (bEnterTable)
+#if 0
+  /*vcast_dont_instrument_start*/
+  if (bEnterTable)
   {
     GSE_DebugStr(NORMAL,TRUE,
         "DBG-Entered Table %d, snsrValue: %6.4f, minValue: %6.4f, hystValue: %6.4f, T/A: %d",
@@ -2026,6 +2020,7 @@ if (bEnterTable)
         pTableCfg->tblHyst.fHystEntry,
         pTableCfg->tblHyst.nTransientAllowance_ms);
   }
+  /*vcast_dont_instrument_end*/
 #endif
   return bEnterTable;
 }
@@ -2066,18 +2061,20 @@ BOOLEAN EventTableIsExited(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableD
               ( pTableCfg->fTableEntryValue - pTableCfg->tblHyst.fHystExit ));
   }
 
+#if 0
+  /*vcast_dont_instrument_start*/
   if (bEnded)
   {
-   #if 0
- GSE_DebugStr( NORMAL,TRUE,
+     GSE_DebugStr( NORMAL,TRUE,
       "DBG-Exited  Table %d, snsrValue: %6.4f, minValue: %6.4f, hystValue: %6.4f, TblDur: %d",
                   pTableData->nTableIndex,
                   pTableData->fCurrentSensorValue,
                   pTableCfg->fTableEntryValue,
                   pTableCfg->tblHyst.fHystEntry,
                   pTableData->nTotalDuration_ms);
-#endif
   }
+  /*vcast_dont_instrument_end*/
+#endif
   return bEnded;
 }
 
@@ -2085,6 +2082,11 @@ BOOLEAN EventTableIsExited(EVENT_TABLE_CFG *pTableCfg, EVENT_TABLE_DATA *pTableD
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Event.c $
+ * 
+ * *****************  Version 48  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:31p
+ * Updated in $/software/control processor/code/application
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 11/20/14   Time: 3:05p

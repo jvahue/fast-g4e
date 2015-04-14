@@ -13,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 14 $  $Date: 2/05/15 9:50a $     
+      $Revision: 15 $  $Date: 4/14/15 2:34p $     
 
 ******************************************************************************/
 
@@ -407,10 +407,6 @@ EXPORT void F7XProtocol_Initialize ( void );
 EXPORT F7X_STATUS_PTR F7XProtocol_GetStatus (UINT8 index); 
 EXPORT F7X_DEBUG_PTR F7XProtocol_GetDebug (void); 
 
-EXPORT F7X_DUMPLIST_CFG_PTR F7XProtocol_GetCfg (UINT8 index); 
-EXPORT F7X_PARAM_LIST_PTR F7XProtocol_GetParamList (void); 
-//EXPORT F7X_PARAM_PTR F7XProtocol_GetParamEntryList (UINT16 entry);
-
 EXPORT void F7XDispDebug_Task ( void *pParam ); 
 
 EXPORT BOOLEAN F7XProtocol_SensorSetup ( UINT32 gpA, UINT32 gpB, UINT8 param, 
@@ -429,6 +425,11 @@ EXPORT void F7XProtocol_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 14  *****************
  * User: John Omalley Date: 2/05/15    Time: 9:50a

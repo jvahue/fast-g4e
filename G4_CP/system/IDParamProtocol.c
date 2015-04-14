@@ -12,7 +12,7 @@
                  Handler
 
     VERSION
-      $Revision: 11 $  $Date: 3/19/15 10:40a $
+      $Revision: 12 $  $Date: 4/14/15 2:34p $
 
 ******************************************************************************/
 
@@ -981,7 +981,7 @@ static BOOLEAN IDParamProtocol_FrameSearch( ID_PARAM_RAW_BUFFER_PTR buff_ptr,
         break;
 
       default:
-        // ASSERT if we get here
+        FATAL("Unsupported ID Param State = %d", buff_ptr->stateSearch); 
         break;
 
     } // End switch ( buff_ptr->stateSearch )
@@ -1135,14 +1135,6 @@ static void IDParamProtocol_ProcElemID( ID_PARAM_FRAME_HDR_PTR pFrameHdr,
     }
     pFrameTypeStats->cntElement++;  // Update element update count
   } // end of if elementID == ID_PARAM_NOT_USED
-  else
-  { // Check that this element ID at this pos has not changed !
-    if ( frameData_ptr->data[index].elementID != elemID )
-    {
-      // Increment Elem ID changed counter.  Will not record sys log. 
-      m_IDParam_Status[ch].frameType[frameType].cntElemIDPosChanged++;
-    }
-  } // end else elementID != ID_PARAM_NOT_USED
 }
 
 
@@ -1591,6 +1583,11 @@ static void IDParamProtocol_DisplayFormatted ( ID_PARAM_FRAME_BUFFER_PTR frame_p
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: IDParamProtocol.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 4/14/15    Time: 2:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1289 - Removed Dead Code
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 3/19/15    Time: 10:40a
