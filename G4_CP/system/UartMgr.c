@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 63 $  $Date: 4/01/15 10:34a $
+      $Revision: 64 $  $Date: 15-04-14 7:15p $
 
 ******************************************************************************/
 
@@ -825,7 +825,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
     ASSERT( NULL != pUartMgrBlock->get_protocol_ready_hndl );
     
     if (((CM_GetTickCount() - pRunTimeData->rxTime) > pWordInfo->dataloss_time) &&
-        ((pRunTimeData->rxTime != 0) || (pUartMgrBlock->get_protocol_ready_hndl(ch) == TRUE)))
+        (pUartMgrBlock->get_protocol_ready_hndl(ch) == TRUE))
     {
       // Update Log once per transition occurance !
       if (pWordInfo->bFailed == FALSE)
