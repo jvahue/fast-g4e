@@ -15,7 +15,7 @@ conjunction with the Environment Test Control (ETC) Windows Application to
 perform Environmental Testing.
 
 VERSION
-$Revision: 2 $  $Date: 9/15/09 5:33p $   
+$Revision: 3 $  $Date: 7/14/15 10:27a $   
 
 ******************************************************************************/
 
@@ -27,6 +27,8 @@ $Revision: 2 $  $Date: 9/15/09 5:33p $
 /* Software Specific Includes                                                */
 /*****************************************************************************/
 #include "alt_basic.h"
+
+#include "PowerManager.h"
 
 /******************************************************************************
 Package Defines
@@ -111,11 +113,16 @@ Package Exports Functions
 EXPORT void InitEtm(void);
 
 EXPORT void HeartbeatFailSignal(void);
-EXPORT BOOLEAN EnvNormalShutDown(void);
+EXPORT BOOLEAN EnvNormalShutDown(PM_APPSHUTDOWN_REASON reason);
 
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: Etm.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: Jeff Vahue   Date: 7/14/15    Time: 10:27a
+ * Updated in $/software/control processor/code/test
+ * Update to run with v2.1.0
  * 
  * *****************  Version 2  *****************
  * User: Jeff Vahue   Date: 9/15/09    Time: 5:33p

@@ -2194,6 +2194,12 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
  *  MODIFICATIONS
  *    $History: UartMgr.c $
  * 
+ * *****************  Version 64  *****************
+ * User: Peter Lee    Date: 15-04-14   Time: 7:15p
+ * Updated in $/software/control processor/code/system
+ * SCR #1289 - UartMgr_Protocol_ReadyOk_Hndl() not executed.  Update code
+ * in UartMgr_SensorTest() to exe _Hndl() function.
+ * 
  * *****************  Version 63  *****************
  * User: John Omalley Date: 4/01/15    Time: 10:34a
  * Updated in $/software/control processor/code/system

@@ -160,7 +160,7 @@ NV_EVENT_HISTORY   - High level history of Event processing.
 NV_FILE(NV_BOX_CFG,        "Status Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,  (1 KB)), \
 NV_FILE(NV_PWR_ON_CNTS_EE, "Power-On Counts EE",   DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_PWR_ON_CNTS_RTC,"Power-On Counts RTC",  DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      12), \
-NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (92 KB)),\
+NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (93 KB)),\
 NV_FILE(NV_UPLOAD_VFY_TBL, "Upload Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  UploadMgr_InitFileVfyTbl,    18176),\
 NV_FILE(NV_FAULT_LOG,      "Fault Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Flt_InitFltBuf          ,      256),\
 NV_FILE(NV_PWR_MGR,        "Power Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  PmFileInit              ,      256),\

@@ -9,7 +9,7 @@ File: Etm.c
 Description: The file implements the Environmental Test Manager (ETM)
 
 VERSION
-$Revision: 14 $  $Date: 4/14/11 7:04p $
+$Revision: 15 $  $Date: 7/14/15 10:27a $
 
 ******************************************************************************/
 #ifdef ENV_TEST
@@ -17,6 +17,8 @@ $Revision: 14 $  $Date: 4/14/11 7:04p $
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
+#include <stdio.h>
+
 #include "mcf548x_gpio.h"
 #include "math.h"
 
@@ -153,7 +155,7 @@ typedef struct TestInfoTag {
 // Test Control Structure
 TestControl testControl;
 UINT32 lastRunState = FALSE;
-UINT32 rateScheduler = 0; 
+UINT32 rateScheduler = 0;
 UINT32 msStartupCountDown;
 
 // Edit buffer for Test results
@@ -175,7 +177,7 @@ UINT32 spRx[MAX_SP] = {0,0,0};       // Rx byte count SP port specific
 UINT32 spFrames = 0;                 // Number of Sp Rx Frames
 BYTE spExp = 0;
 BYTE spAct = 0;
-                    
+
 // A429 Test
 static FpgaRegInfo regRxInfo[A429_RX_CHAN] = {
     { FPGA_429_RX1_FIFO_STATUS, FPGA_429_RX1_LSW, FPGA_429_RX1_MSW},
@@ -216,10 +218,10 @@ DioPattern dioPattern[16] = {
 
 UINT32 gpioSetAt;
 UINT32 gpioSetIndex;
-UINT32 lssWr; 
+UINT32 lssWr;
 UINT32 lssRd;
 UINT32 lssOverCurrent;
-UINT32 gpioWr; 
+UINT32 gpioWr;
 UINT32 gpioRd;
 
 //--------------------------------------------------------------------------------------------------
@@ -252,28 +254,28 @@ USER_HANDLER_RESULT EtmUserMsg(USER_DATA_TYPE DataType,
                                const void *SetPtr,
                                void **GetPtr);
 
+USER_HANDLER_RESULT EtmShowA429(USER_DATA_TYPE DataType,
+                               USER_MSG_PARAM Param,
+                               UINT32 Index,
+                               const void *SetPtr,
+                               void **GetPtr);
+
 static USER_MSG_TBL result[] =
 {
-    { "PASS",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RO,
-    &tempResults.pass, 0, eMaxTestId, NULL },
-    { "FAIL",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RO,
-    &tempResults.fail, 0, eMaxTestId, NULL },
-    { "MSG",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_STR,    USER_RO,
-    &tempResults.msg, 0, eMaxTestId, NULL },
+    { "PASS",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RO, &tempResults.pass, 0, eMaxTestId, 0, 0, NULL },
+    { "FAIL",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RO, &tempResults.fail, 0, eMaxTestId, 0, 0, NULL },
+    { "MSG",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_STR,    USER_RO, &tempResults.msg,  0, eMaxTestId, 0, 0, NULL },
     { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL etm[] =
 {
-    { "ACTIVE",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_BOOLEAN, USER_RW,
-    &testControl.active, -1, -1, NULL },
-    { "TESTS",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW,
-    &testControl.tests, -1, -1, NULL },
-    { "RESET",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW,
-    &testControl.reset, -1, -1, NULL },
-    { "MS_STARTUP", NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW,
-    &testControl.msStartupTimer, -1, -1, NULL },
+    { "ACTIVE",  NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_BOOLEAN, USER_RW,   &testControl.active,         -1, -1, 0, 0, NULL },
+    { "TESTS",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW,    &testControl.tests,          -1, -1, 0, 0, NULL },
+    { "RESET",   NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW,    &testControl.reset,          -1, -1, 0, 0, NULL },
+    { "MS_STARTUP", NO_NEXT_TABLE, EtmUserMsg, USER_TYPE_UINT32, USER_RW, &testControl.msStartupTimer, -1, -1, 0, 0, NULL },
     { "RESULTS", result, NULL,  NO_HANDLER_DATA},
+    { "A429",   NO_NEXT_TABLE, EtmShowA429, USER_TYPE_ACTION, USER_RW, &testControl.msStartupTimer, -1, -1, 0, 0, NULL },
     { NULL    , NO_NEXT_TABLE, NULL, NO_HANDLER_DATA }
 };
 
@@ -328,7 +330,7 @@ void InitEtm(void)
 
     USER_MSG_TBL etmTblPtr = { "ETM", etm, NULL, NO_HANDLER_DATA};
 
-    // bring back last test state active (and enabled tests)/inactive 
+    // bring back last test state active (and enabled tests)/inactive
     memcpy( &testControl, &CfgMgr_ConfigPtr()->etm, sizeof( testControl));
 
     // check for normal shutdown
@@ -364,8 +366,8 @@ void InitEtm(void)
 
     // Create ETM Task - DT
     memset(&TaskInfo, 0, sizeof(TaskInfo));
-    strcpy(TaskInfo.Name, "ETM");
-    TaskInfo.TaskID           = TP_SUPPORT_DT1;
+    strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name), "ETM", _TRUNCATE);
+    TaskInfo.TaskID           = (TASK_INDEX)TP_SUPPORT_DT1;
     TaskInfo.Function         = EnvTestMgr;
     TaskInfo.Priority         = taskInfo[TP_SUPPORT_DT1].priority;
     TaskInfo.Type             = taskInfo[TP_SUPPORT_DT1].taskType;
@@ -398,7 +400,7 @@ void InitEtm(void)
 * Notes:
 *
 *****************************************************************************/
-BOOLEAN EnvNormalShutDown(void)
+BOOLEAN EnvNormalShutDown(PM_APPSHUTDOWN_REASON reason)
 {
     *STATIC_RAM = ~UNEXPECTED_RESET;
     return TRUE;
@@ -487,7 +489,7 @@ static void EnvTestMgr( void *pParam)
 
             // run the DIO Test
             SetGpio();
-            // get DOUT wraparounds 
+            // get DOUT wraparounds
             GetGpio();
         }
 
@@ -541,11 +543,11 @@ static void ResetEtm( void)
     // Serial Port Init
     memset( spTxValue, 0, sizeof(spTxValue));
     memset( spRxExpected, 0, sizeof(spRxExpected));
-    memset( spFail, 0, sizeof(spFail)); 
-    memset( spFailHw, 0, sizeof(spFailHw)); 
+    memset( spFail, 0, sizeof(spFail));
+    memset( spFailHw, 0, sizeof(spFailHw));
     memset( spFail0, 0, sizeof(spFail0));
     memset( spTx, 0, sizeof(spTx));
-    memset( spRx, 0, sizeof(spRx)); 
+    memset( spRx, 0, sizeof(spRx));
     spFrames = 0;
     spExp = 0;
     spAct = 0;
@@ -600,10 +602,10 @@ static void ResetEtm( void)
     // Init GPIO test
     gpioSetAt = 0;   // filled in with elapsed frames CM_GetTickCount
     gpioSetIndex = 0;
-    lssWr = 0; 
+    lssWr = 0;
     lssRd = 0;
     lssOverCurrent = 0;
-    gpioWr = 0; 
+    gpioWr = 0;
     gpioRd = 0;
 
     // Init SDRAM Pattern Test
@@ -612,11 +614,11 @@ static void ResetEtm( void)
     doingPatternTest = 1;
     ramPatFail = 0;
     ramAddFail = 0;
-    ramPatExp = 0;          
-    ramPatAct = 0;          
-    ramPatLocation = NULL;  
-    ramAddPat = 0;          
-    ramAddLine = 0;        
+    ramPatExp = 0;
+    ramPatAct = 0;
+    ramPatLocation = NULL;
+    ramAddPat = 0;
+    ramAddLine = 0;
 
 
     // indicate we need to wait for the MS to be alive
@@ -664,7 +666,7 @@ static void TestState( BOOLEAN run)
         ACS2_TxEnb,
         ACS3_TxEnb
     };
-    
+
     TASK_ID tasks[] = {
         //QAR_Read_Sub_Frame,   // We want this on, it does the real Rxing we get Display
         Arinc429_Process_Msgs,  // Don't read the 429Rx Data
@@ -683,7 +685,7 @@ static void TestState( BOOLEAN run)
 
         // Enable Arinc 429 Power
         DIO_SetPin(ARINC429_Pwr, run ? DIO_SetHigh : DIO_SetLow);
-        
+
         // ensure the 429 loopback is off
         FPGA_W( FPGA_429_LOOPBACK_CONTROL, 0);
 
@@ -786,7 +788,7 @@ static void GetSp( void)
                     {
                         if ( spFrames > 5)
                         {
-                            ++spFail[i];   
+                            ++spFail[i];
                             ++testInfo.spFail[i];
                             spExp = spRxExpected[i];
                             spAct = actual;
@@ -893,15 +895,18 @@ static void Get429( void)
 
                 // remove the parity
                 actual = ((msw << 16) | lsw) & 0x7FFFFFFF;
-                
+
                 // keep track of where the TX buffer might be
-                --a429TxBufferCount[i];
+                if (a429TxBufferCount[i] >= 1)
+                {
+                    --a429TxBufferCount[i];
+                }
 
                 if ( actual != a429RxExpected[i])
                 {
                     if ( a429Frames > 50)
                     {
-                        ++a429Fail[i];   
+                        ++a429Fail[i];
                         ++testInfo.a429[i];
                     }
                     // no parity on expected
@@ -931,9 +936,9 @@ static void Get429( void)
 *     1. the right barker code is present.
 *     2. each value is incremented by one starting.
 *     3. The right sub-frame is read
-*     4. The same frame is not present three calls in a 
+*     4. The same frame is not present three calls in a
 *
-* 
+*
 * Verify the barker code.
 * Parameters: None
 * Returns: None
@@ -944,7 +949,7 @@ static void Get717( void)
 {
     static const UINT16 frameStartValue[QAR_SF_MAX] = {1, 0x401, 0x801, 0xC01};
     static const UINT16 barker[QAR_SF_MAX] = {0x247, 0x5b8, 0xa47, 0xdb8};
-    
+
     UINT16 i;
     UINT16 expected;
     UINT16 data[QAR_SF_MAX_SIZE];
@@ -1368,7 +1373,7 @@ static void Average( FLOAT32* avg, FLOAT32 value)
 * build the debug messages
 * Parameters: None
 * Returns: None
-* Notes: All Responses MUST start with a '>' as the ETC uses this to ID msg 
+* Notes: All Responses MUST start with a '>' as the ETC uses this to ID msg
 * responses
 *
 *****************************************************************************/
@@ -1448,7 +1453,7 @@ static void UpdateTestStatus( void)
                 if ( testControl.results[i].fail == 0)
                 {
                     snprintf( testControl.results[i].msg,
-                        MAX_MSG_SIZE, ">1:0x%08X 2:0x%08X 3:0x%08X 4:0x%08X", 
+                        MAX_MSG_SIZE, ">1:0x%08X 2:0x%08X 3:0x%08X 4:0x%08X",
                         a429RxExpected[0],
                         a429RxExpected[1],
                         a429RxExpected[2],
@@ -1458,7 +1463,7 @@ static void UpdateTestStatus( void)
                 else
                 {
                     snprintf( testControl.results[i].msg,
-                        MAX_MSG_SIZE, ">Fail/0s 1:%d/%d 2:%d/%d 3:%d/%d 4:%d/%d %d", 
+                        MAX_MSG_SIZE, ">Fail/0s 1:%d/%d 2:%d/%d 3:%d/%d 4:%d/%d %d",
                         a429Fail[0], a429Fail0[0],
                         a429Fail[1], a429Fail0[1],
                         a429Fail[2], a429Fail0[2],
@@ -1533,7 +1538,7 @@ static void UpdateTestStatus( void)
                 {
                     snprintf( testControl.results[i].msg,
                         MAX_MSG_SIZE, ">Write:0x%X - Read:0x%X : OverCurrent: %d",
-                        lssWr, 
+                        lssWr,
                         lssRd,
                         lssOverCurrent);
                 }
@@ -1746,69 +1751,99 @@ USER_HANDLER_RESULT EtmUserMsg(USER_DATA_TYPE DataType,
 }
 
 /******************************************************************************
+* Function:     EtmUserMsg
+* Description:
+* Parameters:
+* Returns:
+* Notes:
+*
+*****************************************************************************/
+USER_HANDLER_RESULT EtmShowA429(USER_DATA_TYPE DataType,
+                               USER_MSG_PARAM Param,
+                               UINT32 Index,
+                               const void *SetPtr,
+                               void **GetPtr)
+{
+    GSE_DebugStr(DBGOFF, TRUE,"TxWord[0]=%6d, TxWord[1]=%d\n", a429Tx[0], a429Tx[1]);
+    
+    GSE_DebugStr(DBGOFF, TRUE,"What     0      1      2      3");
+    GSE_DebugStr(DBGOFF, TRUE,"-------- ------ ------ ------ ------");
+    GSE_DebugStr(DBGOFF, TRUE,"RxCnt    %6d %6d %6d %6d", testInfo.a429Words[0], testInfo.a429Words[1], testInfo.a429Words[2], testInfo.a429Words[3]);
+    GSE_DebugStr(DBGOFF, TRUE,"RxExp    %6d %6d %6d %6d", a429RxExpected[0],     a429RxExpected[1],     a429RxExpected[2],     a429RxExpected[3]);
+    GSE_DebugStr(DBGOFF, TRUE,"TxFifo   %6d %6d %6d %6d", a429TxBufferCount[0],  a429TxBufferCount[1],  a429TxBufferCount[2],  a429TxBufferCount[3]);
+    
+    return USER_RESULT_OK;
+}
+
+/******************************************************************************
 *  MODIFICATIONS
 *    $History: Etm.c $
  * 
+ * *****************  Version 15  *****************
+ * User: Jeff Vahue   Date: 7/14/15    Time: 10:27a
+ * Updated in $/software/control processor/code/test
+ * Update to run with v2.1.0
+ *
  * *****************  Version 14  *****************
  * User: Jeff Vahue   Date: 4/14/11    Time: 7:04p
  * Updated in $/software/control processor/EnvTest/code/test
  * Fix DIO Tests and QAR Test
- * 
+ *
  * *****************  Version 13  *****************
  * User: Jeff Vahue   Date: 4/13/11    Time: 1:06p
  * Updated in $/software/control processor/code/test
  * Update Env Test Software to work with code release v1.0.0
- * 
+ *
  * *****************  Version 12  *****************
  * User: Jeff Vahue   Date: 7/19/10    Time: 6:50p
  * Updated in $/software/control processor/code/test
  * SCR# 707 - Code Coverage TP
- * 
+ *
  * *****************  Version 11  *****************
  * User: Jeff Vahue   Date: 6/18/10    Time: 3:20p
  * Updated in $/software/control processor/code/test
  * Make the ETM code compatible with the current verison of the
  * Operational code.
- * 
+ *
  * *****************  Version 10  *****************
  * User: Contractor V&v Date: 4/07/10    Time: 5:12p
  * Updated in $/software/control processor/code/test
  * SCR #70 Store/Restore interrupt level
- * 
+ *
  * *****************  Version 9  *****************
  * User: Jeff Vahue   Date: 3/23/10    Time: 3:36p
  * Updated in $/software/control processor/code/test
  * SCR# 496 - move gse to system
- * 
+ *
  * *****************  Version 8  *****************
  * User: Jeff Vahue   Date: 3/12/10    Time: 4:55p
  * Updated in $/software/control processor/code/test
  * SCR# 483 - Function Names
- * 
+ *
  * *****************  Version 7  *****************
  * User: Contractor2  Date: 3/02/10    Time: 2:09p
  * Updated in $/software/control processor/code/test
  * SCR# 472 - Fix file/function header
- * 
+ *
  * *****************  Version 6  *****************
  * User: Jeff Vahue   Date: 2/26/10    Time: 3:01p
  * Updated in $/software/control processor/code/test
  * SCR# 429 - change DIO_ReadPin to return the pin state
- * 
+ *
  * *****************  Version 5  *****************
  * User: Jeff Vahue   Date: 1/15/10    Time: 5:16p
  * Updated in $/software/control processor/code/test
  * SCR# 397
- * 
+ *
  * *****************  Version 4  *****************
  * User: Contractor V&v Date: 1/05/10    Time: 4:28p
  * Updated in $/software/control processor/code/test
- * 
+ *
  * *****************  Version 3  *****************
  * User: Jeff Vahue   Date: 12/22/09   Time: 2:12p
  * Updated in $/software/control processor/code/test
  * SCR# 326
- * 
+ *
  * *****************  Version 2  *****************
  * User: Jeff Vahue   Date: 9/15/09    Time: 5:33p
  * Updated in $/software/control processor/code/test
