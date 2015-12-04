@@ -9,7 +9,7 @@ File: Etm.c
 Description: The file implements the Environmental Test Manager (ETM)
 
 VERSION
-$Revision: 15 $  $Date: 7/14/15 10:27a $
+$Revision: 16 $  $Date: 11/19/15 5:17p $
 
 ******************************************************************************/
 #ifdef ENV_TEST
@@ -1778,6 +1778,11 @@ USER_HANDLER_RESULT EtmShowA429(USER_DATA_TYPE DataType,
 /******************************************************************************
 *  MODIFICATIONS
 *    $History: Etm.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 11/19/15   Time: 5:17p
+ * Updated in $/software/control processor/code/test
+ * Updates to ETM for New MS testing
  * 
  * *****************  Version 15  *****************
  * User: Jeff Vahue   Date: 7/14/15    Time: 10:27a

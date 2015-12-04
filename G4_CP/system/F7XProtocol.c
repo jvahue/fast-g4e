@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 23 $  $Date: 4/14/15 2:34p $     
+      $Revision: 25 $  $Date: 11/30/15 6:56p $     
 
 ******************************************************************************/
 
@@ -27,8 +27,8 @@
 /*****************************************************************************/
 /* Software Specific Includes                                                */
 /*****************************************************************************/
-#include "F7XProtocol.h"
 #include "UartMgr.h"
+#include "F7XProtocol.h"
 #include "ClockMgr.h"
 #include "GSE.h"
 #include "NVMgr.h"
@@ -94,8 +94,22 @@ static F7X_DISP_DEBUG_TASK_PARMS F7XDispDebugBlock;
 
 static F7X_APP_DATA m_F7X_AppData[UART_NUM_OF_UARTS]; 
 
+static F7X_GENERAL_CFG m_F7X_GeneralCfg[UART_NUM_OF_UARTS]; 
+
+static F7X_ESN_STATUS m_F7X_EsnStatus[UART_NUM_OF_UARTS]; 
+
 static char GSE_OutLine[128];
 
+#define F7X_TIMING_TEST 1
+// Test Timing
+#ifdef F7X_TIMING_TEST
+  #define F7X_TIMING_BUFF_MAX 200
+  UINT32 m_F7XTiming_Buff[F7X_TIMING_BUFF_MAX];
+  UINT32 m_F7XTiming_Start;
+  UINT32 m_F7XTiming_End;
+  UINT16 m_F7XTiming_Index;
+#endif
+// Test Timing
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -111,6 +125,7 @@ static void F7XProtocol_UpdateUartMgrData( UINT16 ch, UARTMGR_PARAM_DATA_PTR dat
                                            UARTMGR_WORD_INFO_PTR word_info_ptr); 
 static void F7XProtocol_RestoreAppData( void ); 
 static F7X_PARAM_PTR F7XProtocol_GetParamEntryList (UINT16 entry);
+static void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr );
 
 #include "F7XUserTables.c"
 
@@ -556,6 +571,7 @@ void F7XProtocol_Initialize ( void )
   memcpy(m_F7X_DumplistCfg, CfgMgr_RuntimeConfigPtr()->F7XConfig, sizeof(m_F7X_DumplistCfg));
   memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), 
          sizeof(m_F7X_ParamListCfg)); 
+  memcpy(m_F7X_GeneralCfg, CfgMgr_RuntimeConfigPtr()->F7XGeneralCfg, sizeof(m_F7X_GeneralCfg) ); 
   
   // Update runtime var of Param Translation Table 
   // Clear all entries to default 
@@ -595,6 +611,7 @@ void F7XProtocol_Initialize ( void )
     pStatus->nIndexCfg = F7X_DUMPLIST_NOT_RECOGNIZED_INDEX; 
     pStatus++; 
   }
+  memset (m_F7X_EsnStatus, 0, sizeof(m_F7X_EsnStatus) ); 
   
   // Create F7X Protocol Display Task
   memset(&TaskInfo, 0, sizeof(TaskInfo));
@@ -612,6 +629,18 @@ void F7XProtocol_Initialize ( void )
   TaskInfo.pParamBlock    = &F7XDispDebugBlock;
   TmTaskCreate (&TaskInfo);
   
+  
+#ifdef F7X_TIMING_TEST
+  /*vcast_dont_instrument_start*/
+  for (i=0;i<F7X_TIMING_BUFF_MAX;i++)
+  {
+    m_F7XTiming_Buff[i] = 0;
+  }
+  m_F7XTiming_Index = 0;
+  m_F7XTiming_Start = 0;
+  m_F7XTiming_End = 0;
+  /*vcast_dont_instrument_end*/
+#endif
 }
 
 
@@ -641,16 +670,13 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
 {
   UARTMGR_PARAM_DATA_PTR   data_ptr; 
   UARTMGR_WORD_INFO_PTR    word_info_ptr; 
-  
   F7X_STATUS_PTR           status_ptr; 
   F7X_RAW_BUFFER_PTR       buff_ptr;
-  
   UINT8 *dest_ptr; 
   UINT8 *end_ptr; 
-  
   BOOLEAN bNewData; 
-  
   UINT16 i; 
+  F7X_OPTION_CFG_PTR optionCfg_ptr; 
   
  
   bNewData = FALSE; 
@@ -717,9 +743,13 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       
       // Update Uart Mgr Data 
       F7XProtocol_UpdateUartMgrData( ch, data_ptr, word_info_ptr); 
-      
+ 
+      // Currently only one option. In future if more options, decode in init and set flags. 
+      optionCfg_ptr = (F7X_OPTION_CFG_PTR) &m_F7X_GeneralCfg[ch].option;
+      if (optionCfg_ptr->esn_enb == TRUE) {
+        F7XProtocol_ESN_Decode( ch, optionCfg_ptr );
+      }
     }
-    
     
     // If no new frame update individual data loss calculation and update Uart Mgr 
     //    Data struct for validity 
@@ -1092,6 +1122,26 @@ UINT16 F7XProtocol_ReturnFileHdr ( UINT8 *dest, const UINT16 max_size, UINT16 ch
 }
 
 
+/******************************************************************************
+ * Function:    F7XProtocol_GetESN
+ *
+ * Description: Utility function to return the ESN decoded from the input data
+ *
+ * Parameters:  ch - UART Channel 
+ *              *esn_ptr - Pointer to buff to return ESN "XX0000" 
+ *              cnt - Max char to return the the buff in *esn_ptr 
+ *
+ * Returns:     TRUE if ESN was decoded from the input data once on this power up
+ *
+ * Notes:       None 
+ *
+ *****************************************************************************/
+BOOLEAN F7XProtocol_GetESN( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
+{
+  strncpy_safe ( esn_ptr, cnt, m_F7X_EsnStatus[ch].esn, _TRUNCATE ); 
+  
+  return ( m_F7X_EsnStatus[ch].bDecoded ); 
+}
 
 /******************************************************************************
  * Function:    F7XProtocol_Decoder_NotSynced()
@@ -1904,6 +1954,94 @@ void F7XProtocol_RestoreAppData( void )
   }
 }
 
+
+/******************************************************************************
+ * Function:    F7XProtocol_ESN_Decode
+ *
+ * Description: Utility function to decode the ESN from the N-Param Dumplist
+ *
+ * Parameters:  ch - UART chan 
+ *              option - F7X_OPTION_CFG with GPA for decode info
+ *
+ * Returns:     none
+ *
+ * Notes:       
+ *  - Decodes a 6 char ESN with format "XX0000" where "XX" is 2 alpha char code
+ *    and 0000 are 4 alpha digit from 0000 to 9999
+ *  - An ESN is consider valid if the value has been received at least 20 times 
+ *    not necessary in a row (allows a few packets to be recieved). 
+ *    Normally at 20 Hz, this will take 1 sec to "sync" up. 
+ *  - For alph char checks lower case and upper case
+ *
+ *****************************************************************************/
+static 
+void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
+{
+  F7X_ESN_STATUS_PTR pEsnStatus; 
+  F7X_DATA_FRAME_PTR pFrame; 
+  UINT16 esn_raw[F7X_ESN_CHAR_RAW_MAX + 1]; 
+  UINT16 *pWord0, *pWord1, *pWord2;
+ 
+ m_F7XTiming_Start = TTMR_GetHSTickCount(); 
+  
+  pEsnStatus = (F7X_ESN_STATUS_PTR) &m_F7X_EsnStatus[ch]; 
+  pFrame = (F7X_DATA_FRAME_PTR) &m_F7X_DataFrame[ch]; 
+  
+  // Get the raw ESN char from buffer.  
+  pWord2 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W2(optionCfg_ptr->esn_gpa)];
+  pWord1 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W1(optionCfg_ptr->esn_gpa)];
+  pWord0 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W0(optionCfg_ptr->esn_gpa)];
+  
+  // Ensure the format is "XX0000" else exit
+  if ( (((F7X_ESN_MSB(*pWord2) >= 'A') && (F7X_ESN_MSB(*pWord2) <= 'Z')) ||
+        ((F7X_ESN_MSB(*pWord2) >= 'a') && (F7X_ESN_MSB(*pWord2) <= 'z'))) &&
+       (((F7X_ESN_LSB(*pWord2) >= 'A') && (F7X_ESN_LSB(*pWord2) <= 'Z')) ||
+        ((F7X_ESN_LSB(*pWord2) >= 'a') && (F7X_ESN_LSB(*pWord2) <= 'z'))) &&
+        ((F7X_ESN_MSB(*pWord1) >= '0') && (F7X_ESN_MSB(*pWord1) <= '9'))  &&
+        ((F7X_ESN_LSB(*pWord1) >= '0') && (F7X_ESN_LSB(*pWord1) <= '9'))  &&
+        ((F7X_ESN_MSB(*pWord0) >= '0') && (F7X_ESN_MSB(*pWord0) <= '9'))  &&
+        ((F7X_ESN_LSB(*pWord0) >= '0') && (F7X_ESN_LSB(*pWord0) <= '9')) )
+  {
+    // Copy ESN to temp buff to determine if we have reach threshold to keep / indicate as new
+    // yes.. '_0' maps to '2'
+    esn_raw[0] = *pWord2; 
+    esn_raw[1] = *pWord1;
+    esn_raw[2] = *pWord0;
+    esn_raw[F7X_ESN_CHAR_RAW_MAX] = '\0'; // Append NULL termination
+    if (strncmp((const CHAR * ) &esn_raw, pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX) == 0)
+    {
+      if (pEsnStatus->nCntSync < F7X_ESN_SYNC_THRES)
+      {
+        if (++pEsnStatus->nCntSync >= F7X_ESN_SYNC_THRES)
+        {
+          strncpy_safe ( pEsnStatus->esn, F7X_ESN_CHAR_MAX, pEsnStatus->esn_sync, _TRUNCATE ); 
+          pEsnStatus->nCntNew++; 
+          pEsnStatus->bDecoded = TRUE; 
+        } // end if (pEsnStatus->nCntSync >= F7X_ESN_SYNC_THRES)
+      } // end if ->nCntSync < F7X_ESN_SYNC_THRES
+      // else do nothing as we have sync
+    } // end if esn is same as previous
+    else 
+    { // esn has changed since last one or init case
+      pEsnStatus->nCntSync = 0; // Clear to '0'
+      strncpy_safe ( pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX, (const CHAR *) &esn_raw, 
+                     _TRUNCATE ); 
+      pEsnStatus->nCntChanged++; 
+    } // end else esn changed since last one
+  } // end if format "XX0000" is correct
+  else 
+  {
+    pEsnStatus->nCntBad++; 
+  }
+  
+m_F7XTiming_End = TTMR_GetHSTickCount();
+m_F7XTiming_Buff[m_F7XTiming_Index] = (m_F7XTiming_End - m_F7XTiming_Start);
+m_F7XTiming_Index = (++m_F7XTiming_Index) % F7X_TIMING_BUFF_MAX; 
+  
+}
+
+
+
 /******************************************************************************
  * Function:     F7XProtocol_FileInit
  *
@@ -1962,6 +2100,17 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Peter Lee    Date: 11/30/15   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC processing. Update to ESN processing. Ref AI-6 of APAC
+ * Mgr PRD.
+ * 
+ * *****************  Version 24  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 9:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN update to support APAC Processing
  * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 4/14/15    Time: 2:34p

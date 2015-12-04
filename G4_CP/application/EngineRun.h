@@ -11,7 +11,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 29 $  $Date: 12/13/12 3:08p $
+      $Revision: 31 $  $Date: 11/11/15 11:49a $
 
 ******************************************************************************/
 
@@ -55,6 +55,14 @@
                            ENGRUN_DEFAULT /* EngineRun[MAX_ENGINES] */
 
 #define ENGINERUN_UNUSED   255
+
+#define ENG_SERIALNO_DEFAULT   ENG_SN_PORT_NONE,     /* portType       */\
+                               ENG_SN_PORT_INDEX_1   /* portIndex      */
+
+#define ENG_SERIALNO_CFG_DEFAULT    ENG_SERIALNO_DEFAULT,   /* engine 0 */\
+                                    ENG_SERIALNO_DEFAULT,   /* engine 1 */\
+                                    ENG_SERIALNO_DEFAULT,   /* engine 2 */\
+                                    ENG_SERIALNO_DEFAULT    /* engine 3 */
 
 /******************************************************************************
                                Package Typedefs
@@ -166,6 +174,46 @@ typedef struct
 
 typedef ENGRUN_CFG ENGRUN_CFGS[MAX_ENGINES];
 
+
+/* ESN Bus Processing */
+#define ENG_ESN_MAX_LEN 7  // 6 char + NULL 
+#define ENG_ESN_CHECK_RATE   500 // 500 ms or 2 Hz
+typedef enum
+{
+  ENG_SN_PORT_NONE,
+  ENG_SN_PORT_ARINC429,  // Reserved for future. Not used today
+  ENG_SN_PORT_PORT_QAR,  // Reserved for future. Not used today
+  ENG_SN_PORT_UART,
+  ENG_SN_PORT_MAX
+} ENG_SN_PORT_TYPE;
+
+typedef enum
+{
+  ENG_SN_PORT_INDEX_0 = 0,  //NOTE: ENUM val should max Ch Index of Port Type
+  ENG_SN_PORT_INDEX_1,      //      i.e. _INDEX_1 enum value s/b "1" for Port Type UART ch "1"
+  ENG_SN_PORT_INDEX_2,
+  ENG_SN_PORT_INDEX_3,
+  END_SN_PORT_INDEX_10 = 10 /* Virtual Port for Multiplexing single UART Channel */ 
+  // Reserved for future. 
+  // This enumeration must fit in an UINT8 so don't make value larger than 255
+} ENG_SN_PORT_INDEX;
+
+typedef struct 
+{
+  ENG_SN_PORT_TYPE portType; 
+  ENG_SN_PORT_INDEX portIndex; 
+} ENG_SN_CFG, *ENG_SN_CFG_PTR; 
+
+typedef struct
+{
+  CHAR esn[ENG_ESN_MAX_LEN];
+  
+  UINT32 check_tick;    // Check / decode ESN at a slower periodic rate
+  UINT32 nCntChanged;   // Count ESN changed    
+} ENG_SN_STATUS, *ENG_SN_STATUS_PTR;
+
+typedef ENG_SN_CFG ENG_SN_CFGS[MAX_ENGINES];
+
 /******************************************************************************
                              Package Exports
 ******************************************************************************/
@@ -205,11 +253,24 @@ EXPORT ENGINE_FILE_HDR* EngRunGetFileHeader        ( void );
 EXPORT void             EngRunSetRecStateChangeEvt ( INT32 tag,void (*func)(INT32,BOOLEAN));
 EXPORT BOOLEAN          EngReInitFile              ( void );
 
+EXPORT BOOLEAN          EngRunGetSN                ( UINT8 engId, CHAR *esn_ptr, UINT8 cnt );
+
 #endif // ENGINERUN_H
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 31  *****************
+ * User: Peter Lee    Date: 11/11/15   Time: 11:49a
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 Default new eng_sn.portindex to "1" instead of "0" as UART
+ * port 0 not available. 
+ * 
+ * *****************  Version 30  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:46p
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 APAC, ESN updates
  * 
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p

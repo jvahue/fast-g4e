@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 19 $  $Date: 12/12/12 6:24p $
+  $Revision: 20 $  $Date: 15-10-13 1:43p $
 
 ******************************************************************************/
 
@@ -73,6 +73,7 @@ typedef enum
   EVAL_CALLER_TYPE_PARSE,    // Do not insert into !P tables during the parse of a Cfg
   EVAL_CALLER_TYPE_TRIGGER,
   EVAL_CALLER_TYPE_EVENT,
+  EVAL_CALLER_TYPE_APAC, 
   /*--- Add new types above this line ----*/
   MAX_EVAL_CALLER_TYPE
 }EVAL_CALLER_TYPE;
@@ -158,6 +159,11 @@ EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:43p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1304 APAC Processing Initial Check In
  * 
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 6:24p

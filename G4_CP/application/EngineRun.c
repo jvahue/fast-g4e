@@ -9,7 +9,7 @@
     Description:
 
    VERSION
-      $Revision: 51 $  $Date: 12/28/12 5:51p $
+      $Revision: 52 $  $Date: 11/05/15 6:45p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -38,6 +38,8 @@
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
+typedef BOOLEAN (*ESN_HNDL)      ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
+
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -51,6 +53,10 @@ static ENGINE_FILE_HDR m_EngineInfo;
 
 static void (*m_event_func)(INT32,BOOLEAN) = NULL;
 static INT32 m_event_tag                   = 0;
+
+static ENG_SN_CFG     m_engineSerialNoCfg[MAX_ENGINES];
+static ENG_SN_STATUS  m_engineSerialNoStatus[MAX_ENGINES];
+static ESN_HNDL       m_esn_hndl[MAX_ENGINES];
 
 
 // Include cmd tables and functions here after local dependencies are declared.
@@ -72,6 +78,7 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 
 static void EngRunUpdateRunData  ( ENGRUN_DATA* pErData );
 static void EngRunWriteRunLog    ( ER_REASON reason, ENGRUN_DATA* pErData );
+static void EngRunCheckESN       ( void ); 
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -245,6 +252,33 @@ void EngRunInitialize(void)
     }
   }
 
+  // Init Engine Serial Number from Bus Data Structures
+  User_AddRootCmd(&rootEngSerialNoMsg);
+
+  memset(m_engineSerialNoCfg, 0, sizeof(m_engineSerialNoCfg));
+  memset(m_engineSerialNoStatus, 0, sizeof(m_engineSerialNoStatus));
+  memcpy( m_engineSerialNoCfg,
+          CfgMgr_RuntimeConfigPtr()->EngineSerialNoConfigs,
+          sizeof(m_engineSerialNoCfg) );
+  for (i=0;i<MAX_ENGINES;i++) 
+  {
+    strncpy_safe(m_engineSerialNoStatus[i].esn, ENG_ESN_MAX_LEN, "000000", _TRUNCATE);
+    switch ( m_engineSerialNoCfg[i].portType )
+    {
+      case ENG_SN_PORT_UART: 
+        m_esn_hndl[i] = UartMgr_ReadESN;
+        break;
+        
+      case ENG_SN_PORT_ARINC429:
+      case ENG_SN_PORT_PORT_QAR:
+      case ENG_SN_PORT_NONE: 
+        m_esn_hndl[i] = NULL; 
+        break; 
+    } // end switch ( m_engineSerialNoCfg[i].portType )
+    // Set next check rate with each eng offset but 10 msec to dist processing
+    m_engineSerialNoStatus[i].check_tick = CM_GetTickCount() + ENG_ESN_CHECK_RATE + (i * 10); 
+  } // end for i=0;i<MAX_ENGINES;i++)
+  
   // Create EngineRun Task - DT
   memset(&taskBlock, 0, sizeof(taskBlock));
   strncpy_safe(taskBlock.Name, sizeof(taskBlock.Name),"EngineRun Task",_TRUNCATE);
@@ -399,6 +433,33 @@ BOOLEAN EngReInitFile ( void )
   return TRUE;
 }
 
+/******************************************************************************
+ * Function:     EngRunGetSN
+ *
+ * Description:  Returns the current ESN decode from bus
+ *
+ * Parameters:   [in] engId - engine index
+ *               [in] *esn_ptr - ptr to buff to return ESN decoded from bus
+ *               [in] cnt - return buff size
+ *
+ * Returns:      TRUE - if ESN has been decoded from bus
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+BOOLEAN EngRunGetSN ( UINT8 engId, CHAR *esn_ptr, UINT8 cnt )
+{
+  BOOLEAN bOk = FALSE; 
+  
+  if ( m_engineSerialNoStatus[engId].nCntChanged > 0 ) {
+    memcpy ( esn_ptr, m_engineSerialNoStatus[engId].esn, cnt ); 
+    bOk = TRUE; 
+  }
+  
+  return (bOk);
+}
+
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -456,6 +517,9 @@ static void EngRunTask(void* pParam)
       is_active_last = is_active;
     }
   }
+  
+  EngRunCheckESN();
+  
 }
 
 /******************************************************************************
@@ -944,9 +1008,59 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
   }
 }
 
+
+/******************************************************************************
+ * Function:     EngRunCheckESN
+ *
+ * Description:  Check ESN decode from bus when feature is enabled for each eng
+ *
+ * Parameters:   None
+ *
+ * Returns:      None
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static void EngRunCheckESN( void )
+{
+  UINT32 tick; 
+  UINT16 i; 
+  CHAR esn[ENG_ESN_MAX_LEN];  
+  
+  tick = CM_GetTickCount();
+  
+  // Loop thru all 4 Eng Cfg and determine if decode of ESN from bus is enabled
+  for (i=0;i<MAX_ENGINES;i++)
+  {
+    if (tick >= m_engineSerialNoStatus[i].check_tick)
+    {
+      if (m_engineSerialNoCfg[i].portType != ENG_SN_PORT_NONE)
+      { // NOTE: Currently only UART port has ESN decode logic
+        if (m_esn_hndl[i](m_engineSerialNoCfg[i].portIndex, &esn[0], ENG_ESN_MAX_LEN) == TRUE)
+        { // Have ESN to process
+          if (strncmp ( m_engineSerialNoStatus[i].esn, esn, ENG_ESN_MAX_LEN) != 0)
+          { // ESN has changed.
+            memcpy ( m_engineSerialNoStatus[i].esn, esn, ENG_ESN_MAX_LEN); // quicker with memcpy
+            m_engineSerialNoStatus[i].nCntChanged++;
+          } // end if esn has changed
+        } // end if ESN exists
+      } // end if (m_engSerialNoCfg[i].portType != ENG_SN_PORT_NONE)
+      // Set next check rate with each eng offset but 10 msec to dist processing
+      m_engineSerialNoStatus[i].check_tick = ENG_ESN_CHECK_RATE + tick + (i * 10);
+    } // end if ( tick >= m_engSerialNoStatus[i].check_tick )
+  } // end for (i=0;i<MAX_ENGINES;i++)
+  
+}
+  
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:45p
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 APAC, ESN updates
  * 
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:51p

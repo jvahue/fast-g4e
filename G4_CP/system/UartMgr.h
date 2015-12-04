@@ -11,7 +11,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 23 $  $Date: 4/01/15 8:54a $
+      $Revision: 25 $  $Date: 15-10-19 10:29p $
 
 ******************************************************************************/
 
@@ -84,6 +84,13 @@ typedef void    (*PROTOCOL_DOWNLOAD_HNDL) ( UINT8 port,
                                             UINT8   **pData );
 typedef BOOLEAN (*PROTOCOL_CH_READY_HNDL)  ( UINT16 ch );
 typedef void    (*PROTOCOL_DOWNLOAD_CLR_HNDL) ( BOOLEAN Run, INT32 param ); 
+typedef BOOLEAN (*PROTOCOL_READ)          (void *pDest, UINT32 chan, 
+                                           UINT16 Direction, 
+                                           UINT16 nMaxByteSize);
+typedef void    (*PROTOCOL_WRITE)         (void *pDest, UINT32 chan, 
+                                           UINT16 Direction, 
+                                           UINT16 nMaxByteSize);
+typedef BOOLEAN (*PROTOCOL_GET_ESN_HNDL)   ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );                                            
 
 
 /**********************************
@@ -96,6 +103,7 @@ typedef enum
   UARTMGR_PROTOCOL_EMU150,
   UARTMGR_PROTOCOL_ID_PARAM,
   UARTMGR_PROTOCOL_GBS,
+  UARTMGR_PROTOCOL_PWC_DISPLAY,
   UARTMGR_PROTOCOL_MAX
 } UARTMGR_PROTOCOLS;
 
@@ -289,6 +297,10 @@ typedef struct
   PROTOCOL_DOWNLOAD_HNDL download_protocol_hndl;
   PROTOCOL_CH_READY_HNDL get_protocol_ready_hndl;
   PROTOCOL_DOWNLOAD_CLR_HNDL download_protocol_clr_hndl; 
+  PROTOCOL_READ          read_protocol;
+  PROTOCOL_WRITE         write_protocol;
+  UARTMGR_PROTOCOLS      protocol_ID;
+  PROTOCOL_GET_ESN_HNDL  get_protocol_esn; 
 } UARTMGR_TASK_PARAMS, *UARTMGR_TASK_PARAMS_PTR;
 
 typedef struct
@@ -434,6 +446,7 @@ EXPORT UINT16  UartMgr_SensorSetup        ( UINT32 gpA, UINT32 gpB,
 EXPORT UINT16  UartMgr_ReadBuffer         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
 EXPORT UINT16  UartMgr_ReadBufferSnapshot ( void *pDest, UINT32 chan, UINT16 nMaxByteSize,
                                             BOOLEAN bBeginSnapshot );
+EXPORT BOOLEAN UartMgr_ReadESN            ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );                                             
 EXPORT void    UartMgr_ResetBufferTimeCnt ( UINT32 chan );
 EXPORT UINT16  UartMgr_GetFileHdr         ( void *pDest, UINT32 chan, UINT16 nMaxByteSize );
 EXPORT UINT16  UartMgr_GetSystemHdr       ( void *pDest, UINT16 nMaxByteSize );
@@ -442,6 +455,11 @@ EXPORT UINT8*  UartMgr_DownloadRecord     ( UINT8 PortIndex, DL_STATUS *pStatus,
                                             DL_WRITE_STATUS **pDL_WrStatus );
 EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 EXPORT void    UartMgr_DownloadClr        ( BOOLEAN Run, INT32 param ); 
+EXPORT BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
+                            UINT16 nMaxByteSize);
+EXPORT void UartMgr_Write(void *pDest, UINT32 chan, UINT16 Direction,
+                          UINT16 nMaxByteSize);
+EXPORT BYTE UartMgr_GetPort(UINT32 chan);
 
 #endif // UARTMGR_H
 
@@ -449,6 +467,16 @@ EXPORT void    UartMgr_DownloadClr        ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 25  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 10:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN support for APAC Processing
+ * 
+ * *****************  Version 24  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
  * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 4/01/15    Time: 8:54a

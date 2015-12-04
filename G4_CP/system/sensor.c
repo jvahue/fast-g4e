@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 93 $  $Date: 1/19/15 12:03p $
+      $Revision: 100 $  $Date: 12/03/15 5:59p $
 
 ******************************************************************************/
 
@@ -137,10 +137,14 @@ static FLOAT32       SensorMaxReject     ( FLOAT32 fVal,
 static FLOAT32       SensorSlope         ( FLOAT32 fVal, SENSOR_CONFIG *pConfig,
                                            SENSOR *pSensor);
 
-static void          SensorsLiveDataTask ( void *pParam );
+static void          SensorsLiveDataTask     ( void *pParam );
 static void          SensorDumpASCIILiveData ( LD_DEST_ENUM dest );
 static void          SensorDumpBinaryLiveData( LD_DEST_ENUM dest );
 static void          SensorInitializeLiveData( void );
+
+//---- Function implementations for Virtual sensors to play nice with physical sensors
+static FLOAT32 SensorVirtualGetValue      ( UINT16 nIndex, UINT32 *null );
+static BOOLEAN SensorVirtualInterfaceValid( UINT16 nIndex );
 
 static const CHAR *sensorFailureNames[MAX_FAILURE+1] =
 {
@@ -259,14 +263,14 @@ void SensorsInitialize( void)
 BOOLEAN SensorIsValid( SENSOR_INDEX Sensor )
 {
   BOOLEAN bValid;
-  
+
   bValid = FALSE;
-  
+
   if ( (Sensor < MAX_SENSORS) && Sensors[Sensor].bValueIsValid )
   {
       bValid = TRUE;
   }
-    
+
   // returns the sensor validity
   return (bValid);
 }
@@ -288,9 +292,9 @@ BOOLEAN SensorIsValid( SENSOR_INDEX Sensor )
 BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
 {
   BOOLEAN bUsed;
-  
+
   bUsed = FALSE;
-  
+
   if ((Sensor < MAX_SENSORS) && (m_SensorCfg[Sensor].type != UNUSED))
   {
      bUsed = TRUE;
@@ -314,9 +318,9 @@ BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
 FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
 {
   FLOAT32 fValue;
-  
+
   fValue = 0;
-  
+
   if (Sensor < MAX_SENSORS)
   {
      fValue = Sensors[Sensor].fValue;
@@ -341,9 +345,9 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
 UINT32 SensorGetLastUpdateTime( SENSOR_INDEX Sensor)
 {
   UINT32 nTickTime;
-  
+
   nTickTime = 0;
-    
+
   if (Sensor < MAX_SENSORS)
   {
     nTickTime = Sensors[Sensor].lastUpdateTick;
@@ -368,9 +372,9 @@ UINT32 SensorGetLastUpdateTime( SENSOR_INDEX Sensor)
 FLOAT32 SensorGetPreviousValue( SENSOR_INDEX Sensor )
 {
    FLOAT32 fPriorValue;
-   
+
    fPriorValue = 0;
-    
+
    if ( Sensor < MAX_SENSORS )
    {
      fPriorValue = Sensors[Sensor].fPriorValue;
@@ -777,7 +781,7 @@ static void SensorsConfigure (void)
             break;
          case SAMPLE_ANALOG:
             // Set the interface index and the function pointers for the ADC
-            Sensors[i].nInterfaceIndex  = pSensorCfg->nInputChannel;
+            Sensors[i].nInterfaceIndex   = pSensorCfg->nInputChannel;
             Sensors[i].pGetSensorData    = ADC_GetValue;
             Sensors[i].pTestSensor       = ADC_SensorTest;
             Sensors[i].pInterfaceActive  = SensorNoInterface;
@@ -802,6 +806,40 @@ static void SensorsConfigure (void)
             Sensors[i].pTestSensor      = UartMgr_SensorTest;
             Sensors[i].pInterfaceActive = UartMgr_InterfaceValid;
             break;
+
+         case SAMPLE_VIRTUAL:
+            // GPA word contains the packed sensor indexes(A and B) and
+	    // the type(operation)
+            Sensors[i].vSnsrA  =
+	       (SENSOR_INDEX)UNPACK_VIRTUAL_SNRA( pSensorCfg->generalPurposeA);
+            Sensors[i].vSnsrB  =
+	       (SENSOR_INDEX)UNPACK_VIRTUAL_SNRB( pSensorCfg->generalPurposeA);
+            Sensors[i].vOpType =
+	       (VIRTUALTYPE) UNPACK_VIRTUAL_TYPE( pSensorCfg->generalPurposeA);
+
+            //Validate the config of the Virtual sensor
+            ASSERT_MESSAGE( (TRUE == SensorIsUsed(Sensors[i].vSnsrA)),
+                            "Virtual Sensor[%d] - Sensor A Not Configured", i);
+            ASSERT_MESSAGE( (TRUE == SensorIsUsed(Sensors[i].vSnsrB)),
+                            "Virtual Sensor[%d] - Sensor B Not Configured", i);
+            ASSERT_MESSAGE( Sensors[i].vSnsrA != i,
+                            "Virtual Sensor[%d] - Sensor A Self Ref Error", i);
+            ASSERT_MESSAGE( Sensors[i].vSnsrB != i,
+                            "Virtual Sensor[%d] - Sensor B Self Ref Error", i);
+            ASSERT_MESSAGE( (Sensors[i].vOpType > VIRTUAL_UNUSED &&
+                            Sensors[i].vOpType < VIRTUAL_MAX),
+                            "Virtual Sensor[%d] - Type Error: %d",
+                            i, Sensors[i].vOpType );
+
+            // Setup info unique to Virtual sensors.
+            // Use our sensor index as the interface so the virtual sensor info can be
+            // retrieved from SensorCfg[nSensorIndex] at run time.
+            Sensors[i].nInterfaceIndex  = Sensors[i].nSensorIndex;
+            Sensors[i].pGetSensorData   = SensorVirtualGetValue;
+            Sensors[i].pTestSensor      = SensorNoTest;
+            Sensors[i].pInterfaceActive = SensorVirtualInterfaceValid;
+            break;
+
         case MAX_SAMPLETYPE:
         default:
             // FATAL ERROR WITH CONFIGURATION
@@ -959,12 +997,12 @@ static void SensorsUpdateTask( void *pParam )
             // Reload the sample countdown
             pSensor->nSampleCountdown = pSensor->nSampleCounts;
             // Read the sensor
-            SensorRead( pConfig, pSensor );            
+            SensorRead( pConfig, pSensor );
 
             // If this sensor is in the livedata map, update it
             snsrMapIdx = m_liveDataMap[nSensor];
             if ( SENSOR_UNUSED != snsrMapIdx)
-            {              
+            {
               m_liveDataBuffer.sensor[snsrMapIdx].fValue        = pSensor->fValue;
               m_liveDataBuffer.sensor[snsrMapIdx].bValueIsValid = pSensor->bValueIsValid;
             }
@@ -995,11 +1033,12 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
    FLOAT32  filterVal;
    UINT32   lastUpdateTick;
 
-   ASSERT( NULL != pSensor->pGetSensorData );
-   ASSERT( NULL != pSensor->pInterfaceActive );
-   ASSERT( NULL != pSensor->pTestSensor );
 
-   // Make sure the sensors interface is active
+    ASSERT( NULL != pSensor->pGetSensorData );
+    ASSERT( NULL != pSensor->pInterfaceActive );
+    ASSERT( NULL != pSensor->pTestSensor );
+
+   // Make sure the sensors interface was not disabled on a previous call and is active
    if ( TRUE == pSensor->pInterfaceActive(pSensor->nInterfaceIndex) )
    {
       // Preset TickCount to current time.  For bus i/f type, TickCount will be
@@ -1008,8 +1047,8 @@ static void SensorRead( SENSOR_CONFIG *pConfig, SENSOR *pSensor )
       lastUpdateTick = CM_GetTickCount();
 
       // Read the Sensor data from the configured interface
-      fVal      = pSensor->pGetSensorData(pSensor->nInterfaceIndex,
-                                          &lastUpdateTick);
+      fVal = pSensor->pGetSensorData(pSensor->nInterfaceIndex,
+                                     &lastUpdateTick);
 
       // Check if calibration is configured for sensor
       if (pConfig->calibration.type != NONE)
@@ -2077,7 +2116,7 @@ static void SensorDumpASCIILiveData(LD_DEST_ENUM dest)
 
   // Initialize local data
   memset(str,0, sizeof(str));
-  
+
   snprintf(str, sizeof(str), "#77");
 
   // Loop through all sensors
@@ -2239,26 +2278,151 @@ static void SensorInitializeLiveData(void)
   m_liveDataBuffer.count = nCount;
 }
 
+/******************************************************************************
+ * Function:     SensorVirtualGetValue
+ *
+ * Description:  Calculates and returns the current value of the sensor using
+ *               the configured virtualType(i.e. arithmetic operation)
+ *
+ * Parameters:   nIndex - index into the SensorConfig structure for the sensor
+ *                        configuration. This contains the sensors ( A and B) and the
+ *                        operation to be performed
+ *               *null -  Not used - definition required by common interface.
+ *
+ * Returns:      FLOAT32 the requested value as the result of the virtual type operation
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static FLOAT32 SensorVirtualGetValue ( UINT16 nIndex, UINT32 *null )
+{
+  FLOAT32 fVal = 0.f;
+  SENSOR* pData    = &Sensors[nIndex];
+  SENSOR* pSensorA = &Sensors[pData->vSnsrA];
+  SENSOR* pSensorB = &Sensors[pData->vSnsrB];
+
+  switch( pData->vOpType )
+  {
+    case VIRTUAL_ADD:
+      fVal = pSensorA->fValue + pSensorB->fValue;
+      break;
+
+    case VIRTUAL_DIFF:
+      fVal = pSensorA->fValue - pSensorB->fValue;
+      break;
+
+    case VIRTUAL_MULT:
+      fVal = pSensorA->fValue * pSensorB->fValue;
+      break;
+
+    case VIRTUAL_DIV:
+      // Check for potential divide by zero, flag sensor as invalid
+      if(pSensorB->fValue != 0.f)
+      {
+        fVal = pSensorA->fValue / pSensorB->fValue;
+      }
+      else
+      {
+        fVal = pData->fPriorValue;
+        pData->bValueIsValid = FALSE;
+      }
+      break;
+
+    case VIRTUAL_MAX:
+	case VIRTUAL_UNUSED:
+    default:
+      FATAL("Unsupported VIRTUALTYPE = %d", pData->vOpType );
+      break;
+  }
+  return fVal;
+}
+
+
+/******************************************************************************
+ * Function:     SensorVirtualInterfaceValid
+ *
+ * Description:  Returns the validity of the virtual sensor's interface
+ *               as the logical AND of the validity of the two referenced sensors A and B
+ *
+ * Parameters:   nIndex - index into the SensorConfig structure for the sensor
+ *                        configuration. This contains the sensors ( A and B)
+ *
+ *
+ * Returns:      TRUE if both Sensor A and Sensor B are valid, otherwise FALSE
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
+{
+  BOOLEAN bValid = TRUE;
+
+  ASSERT(nIndex < MAX_SENSORS);
+
+  // The virtual sensor is valid IFF both of it's referenced sensors are valid.
+  // Use the value validity of the component sensors  as this sensors validity
+    bValid = Sensors[ Sensors[nIndex].vSnsrA].bValueIsValid &&
+             Sensors[ Sensors[nIndex].vSnsrB].bValueIsValid;
+  return bValid;
+}
+
+
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
  * 
+ * *****************  Version 100  *****************
+ * User: Contractor V&v Date: 12/03/15   Time: 5:59p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 CR compliance.
+ * 
+ * *****************  Version 99  *****************
+ * User: Contractor V&v Date: 12/03/15   Time: 11:50a
+ * Updated in $/software/control processor/code/system
+ * SCR #1300 - Code Review compliance update
+ *
+ * *****************  Version 98  *****************
+ * User: Contractor V&v Date: 11/05/15   Time: 6:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Switch to ENUM types vs UINT8
+ *
+ * *****************  Version 97  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Use ASSERT instead of log msg and invalidated
+ * sensors
+ *
+ * *****************  Version 96  *****************
+ * User: Contractor V&v Date: 9/23/15    Time: 1:21p
+ * Updated in $/software/control processor/code/system
+ * P100 Update for virtual sensor validation and error logging
+ *
+ * *****************  Version 95  *****************
+ * User: Contractor V&v Date: 9/09/15    Time: 6:42p
+ * Updated in $/software/control processor/code/system
+ * P100 Update for virtual sensor validation and error logging.
+ *
+ * *****************  Version 94  *****************
+ * User: Contractor V&v Date: 8/26/15    Time: 7:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Implement the Deferred Virtual Sensor Requirements
+ *
  * *****************  Version 93  *****************
  * User: John Omalley Date: 1/19/15    Time: 12:03p
  * Updated in $/software/control processor/code/system
  * SCR 1276 - Code Review Updates
- * 
+ *
  * *****************  Version 92  *****************
  * User: John Omalley Date: 12/11/14   Time: 11:59a
  * Updated in $/software/control processor/code/system
  * SCR 1276 - Wrapped sensor utilities with a check for vaild sensor
  * index.
- * 
+ *
  * *****************  Version 91  *****************
  * User: Contractor V&v Date: 11/20/14   Time: 7:25p
  * Updated in $/software/control processor/code/system
  * SCR #1262 -  LiveData CP to MS  Code Review changes
- * 
+ *
  * *****************  Version 90  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p
  * Updated in $/software/control processor/code/system

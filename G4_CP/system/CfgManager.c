@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 77 $  $Date: 1/12/15 12:57p $
+    $Revision: 82 $  $Date: 11/19/15 4:12p $
 
 ******************************************************************************/
 
@@ -87,6 +87,8 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           {F7X_PROTOCOL_DEFAULT},
                                           // F7X Protocol Param config
                                           {F7X_PROTOCOL_PARAM_DEFAULT},
+                                          // F7X Protocol General config
+                                          {F7X_GENERAL_DEFAULT_CFGS},
                                           // EMU150 Protocol config
                                           {EMU150_CFG_DEFAULT},
                                           // FAST State Machine config
@@ -101,6 +103,8 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           {TIMEHISTORY_DEFAULT},
                                           // ENGINERUN Config
                                           {ENGRUN_CFG_DEFAULT},
+                                          // ENGINE SERIAL NO Config
+                                          {ENG_SERIALNO_CFG_DEFAULT},
                                           // CYCLE Config
                                           {CYCLE_CFG_DEFAULT},
                                           // TREND Config
@@ -112,7 +116,13 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           // GBS Multiplexed Config
                                           {GBS_MULTI_CFG_DEFAULT},
                                           // GBS Configs
-                                          {GBS_CFGS_DEFAULT}
+                                          {GBS_CFGS_DEFAULT},
+                                          // PWC Disp Config
+                                          {PWCDISP_CFG_DEFAULT},
+                                          // Disp Processing App Config
+                                          {DISPLAY_CFG_DEFAULT},
+                                          // APAC Config
+                                          {APAC_CFG_DEFAULT}
                                           //...more configuration data goes
                                           //   here
 #ifdef ENV_TEST
@@ -736,6 +746,31 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 82  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for Display Processing Application
+ * 
+ * *****************  Version 81  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC, ESN updates
+ * 
+ * *****************  Version 80  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 10:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN support for APAC Processing 
+ * 
+ * *****************  Version 79  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing Initial Check In
+ * 
+ * *****************  Version 78  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
  * 
  * *****************  Version 77  *****************
  * User: John Omalley Date: 1/12/15    Time: 12:57p

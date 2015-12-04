@@ -12,7 +12,7 @@
     Note:
 
     VERSION
-    $Revision: 23 $  $Date: 4/01/15 9:31a $
+    $Revision: 24 $  $Date: 10/02/15 9:55a $
 
 ******************************************************************************/
 #ifndef UART_MGR_BODY
@@ -90,6 +90,7 @@ static USER_ENUM_TBL uartMgrProtocolStrs[] =
   {"ID_PARAM",    UARTMGR_PROTOCOL_ID_PARAM},
   {"EMU150",      UARTMGR_PROTOCOL_EMU150},
   {"GBS",         UARTMGR_PROTOCOL_GBS},
+  {"PWCDISP",     UARTMGR_PROTOCOL_PWC_DISPLAY},
   {NULL,          0}
 };
 
@@ -537,6 +538,11 @@ USER_HANDLER_RESULT UartMgrMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgrUserTables.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
  * 
  * *****************  Version 23  *****************
  * User: John Omalley Date: 4/01/15    Time: 9:31a

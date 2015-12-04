@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for F7X Protocol CSC
 
     VERSION
-    $Revision: 19 $  $Date: 1/28/15 12:00p $
+    $Revision: 21 $  $Date: 11/30/15 6:56p $
 
 ******************************************************************************/
 #ifndef F7X_PROTOCOL_BODY
@@ -78,12 +78,25 @@ static USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
                                                       const void *SetPtr,
                                                       void **GetPtr);
 
+static USER_HANDLER_RESULT F7XMsg_GeneralCfg(USER_DATA_TYPE DataType,
+                                             USER_MSG_PARAM Param,
+                                             UINT32 Index,
+                                             const void *SetPtr,
+                                             void **GetPtr);
+
+static USER_HANDLER_RESULT F7XMsg_OptionESN(USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr);
 
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
 static F7X_STATUS f7XStatusTemp;
 static F7X_DUMPLIST_CFG f7XCfgTemp;
+static F7X_GENERAL_CFG f7XGeneralCfgTemp; 
+static F7X_ESN_STATUS f7XOptionESNTemp;
 
 static F7X_PARAM_LIST f7XParamListTemp;
 static F7X_PARAM f7XParamEntryTemp;
@@ -91,9 +104,30 @@ static F7X_PARAM f7XParamEntryTemp;
 static F7X_DEBUG f7XDebugTemp;
 
 
+/*****************************************************************************/
+/* Local Constants                                                           */
+/*****************************************************************************/
+
+
 /*****************************************/
 /* User Table Defintions                 */
 /*****************************************/
+static USER_MSG_TBL f7XOptionESNTbl[] =
+{ /*Str               Next Tbl Ptr    Handler Func.     Data Type          Access   Parameter                               IndexRange             DataLimit    EnumTbl*/
+  {"VAL",             NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_STR,     USER_RO, (void *) &f7XOptionESNTemp.esn,         1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_SYNC",        NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntSync,    1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_CHANGED",     NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntChanged, 1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_NEW",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntNew,     1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_BAD",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntBad,     1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL f7XOptionStatusTbl[] =
+{
+  {"ESN",             f7XOptionESNTbl,   NULL,   NO_HANDLER_DATA},  
+  {NULL,NULL,NULL,NO_HANDLER_DATA}
+};
+
 static USER_MSG_TBL f7XStatusTbl[] =
 {
   {"SYNC",            NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &f7XStatusTemp.sync,         1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
@@ -104,6 +138,7 @@ static USER_MSG_TBL f7XStatusTbl[] =
   {"FRAME_CNT",       NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &f7XStatusTemp.nFrames,      1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
   {"RESYNC_CNT",      NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &f7XStatusTemp.nResyncs,     1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
   {"LAST_FRAME_TIME", NO_NEXT_TABLE, F7XMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &f7XStatusTemp.lastFrameTime,1,UART_NUM_OF_UARTS-1,NO_LIMIT,NULL},
+  {"OPTION",          f7XOptionStatusTbl,   NULL,   NO_HANDLER_DATA},  
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -276,10 +311,24 @@ static USER_MSG_TBL f7XParamCfgTbl[] =
   {NULL,              NULL,                 NULL,               NO_HANDLER_DATA}
 };
 
+static USER_MSG_TBL f7XOptionCfgTbl[] =
+{ /*Str        Next Tbl Ptr       Handler Func.       Data Type          Access    Parameter                                       IndexRange               DataLimit    EnumTbl*/
+  {"ESN_ENB",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_BOOLEAN, USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_enb,  1,UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
+  {"ESN_GPA",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_HEX32,   USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_gpa,  1,UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
+  {NULL,       NULL,              NULL, NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL f7XGeneralCfgTbl[] =
+{ /*Str        Next Tbl Ptr       Handler Func.       Data Type           Access      Parameter                            IndexRange     DataLimit           EnumTbl*/
+  {"OPTION",   f7XOptionCfgTbl,   NULL, NO_HANDLER_DATA},
+  {NULL,       NULL,              NULL, NO_HANDLER_DATA}
+};
+
 static USER_MSG_TBL f7XProtocolRoot[] =
 {
-  {"STATUS",f7XStatusTbl,NULL,NO_HANDLER_DATA},
-  {"DEBUG" ,f7XDebugTbl ,NULL,NO_HANDLER_DATA},
+  {"STATUS",f7XStatusTbl,      NULL,NO_HANDLER_DATA},
+  {"CFG",   f7XGeneralCfgTbl,  NULL,NO_HANDLER_DATA},
+  {"DEBUG" ,f7XDebugTbl,       NULL,NO_HANDLER_DATA},
 /*
 #ifdef GENERATE_SYS_LOGS
   {"CREATELOGS",NO_NEXT_TABLE,Arinc429Msg_CreateLogs,   USER_TYPE_ACTION, USER_RO,               NULL, -1,-1, NULL},
@@ -289,10 +338,10 @@ static USER_MSG_TBL f7XProtocolRoot[] =
 };
 
 static USER_MSG_TBL f7XDumpListRoot[] =
-{ /*Str            Next Tbl Ptr    Handler Func.             Data Type          Access                        Parameter     IndexRange  DataLimit    EnumTbl*/
-  {"CFG",          f7XCfgTbl,     NULL,                      NO_HANDLER_DATA},
-  {DISPLAY_CFG,    NO_NEXT_TABLE, F7XMsg_DumpListShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,        -1,-1,      NO_LIMIT,    NULL},
-  {NULL,           NULL,          NULL,                      NO_HANDLER_DATA}
+{ /*Str            Next Tbl Ptr       Handler Func.              Data Type          Access                        Parameter     IndexRange  DataLimit    EnumTbl*/
+  {"CFG",          f7XCfgTbl,         NULL,                      NO_HANDLER_DATA},
+  {DISPLAY_CFG,    NO_NEXT_TABLE,     F7XMsg_DumpListShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,        -1,-1,      NO_LIMIT,    NULL},
+  {NULL,           NULL,              NULL,                      NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL f7XParamRoot[] =
@@ -588,6 +637,105 @@ USER_HANDLER_RESULT F7XMsg_ParamEntryList(USER_DATA_TYPE DataType,
 
 }
 
+
+/******************************************************************************
+ * Function:    F7XMsg_GeneralCfg
+ *
+ * Description: Called by the User.c module from the reference to this fucntion
+ *              in the user message tables above.
+ *              Retrieves and set the latest F7X General Cfg Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed sucessfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:       none
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT F7XMsg_GeneralCfg(USER_DATA_TYPE DataType,
+                                      USER_MSG_PARAM Param,
+                                      UINT32 Index,
+                                      const void *SetPtr,
+                                      void **GetPtr)
+{
+  USER_HANDLER_RESULT result;
+  
+  result = USER_RESULT_OK; 
+
+  memcpy(&f7XGeneralCfgTemp, &CfgMgr_ConfigPtr()->F7XGeneralCfg[Index], sizeof(f7XGeneralCfgTemp));
+  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+  
+  // If performing a "set" and it was successful, write the update.
+  if(SetPtr != NULL && USER_RESULT_OK == result)
+  {
+    memcpy(&CfgMgr_ConfigPtr()->F7XGeneralCfg[Index], &f7XGeneralCfgTemp, sizeof(f7XGeneralCfgTemp));
+
+    CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(), &CfgMgr_ConfigPtr()->F7XGeneralCfg[Index],
+                           sizeof(f7XGeneralCfgTemp));
+  }
+  
+  return (result); 
+}
+
+
+/******************************************************************************
+ * Function:    F7XMsg_Status
+ *
+ * Description: Called by the User.c module from the reference to this fucntion
+ *              in the user message tables above.
+ *              Retrieves the latest F7X Status Data
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:     USER_RESULT_OK:    Processed sucessfully
+ *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
+ *                                 set.
+ *
+ * Notes:
+ *
+*****************************************************************************/
+static
+USER_HANDLER_RESULT F7XMsg_OptionESN(USER_DATA_TYPE DataType,
+                                     USER_MSG_PARAM Param,
+                                     UINT32 Index,
+                                     const void *SetPtr,
+                                     void **GetPtr)
+{
+  USER_HANDLER_RESULT result ;
+
+  result = USER_RESULT_OK;
+
+  f7XOptionESNTemp = m_F7X_EsnStatus[Index];
+
+  result = User_GenericAccessor (DataType, Param, Index, SetPtr, GetPtr);
+
+  return result;
+}  
+  
+
 /******************************************************************************
 * Function:    F7XMsg_DumpListShowConfig
 *
@@ -796,6 +944,17 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 11/30/15   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC processing. Update to ESN processing. Ref AI-6 of APAC
+ * Mgr PRD.
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 9:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN update to support APAC Processing
  * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 1/28/15    Time: 12:00p

@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 16 $  $Date: 1/26/13 3:12p $
+  $Revision: 25 $  $Date: 12/03/15 6:04p $
 
 *******************************************************************************/
 
@@ -45,6 +45,8 @@
 // TREND CONFIGURATION DEFAULT
 //*****************************************************************************
 #define STABILITY_DEFAULT            SENSOR_UNUSED, /* sensorIndex       */\
+                                             FALSE, /* bDelay            */\
+                                                 0, /* absOutlier_ms     */\
                                                0.f, /* criteria.lower    */\
                                                0.f, /* criteria.uper     */\
                                                0.f  /* criteria.variance */
@@ -68,9 +70,11 @@
                                    STABILITY_DEFAULT
 
 #define TREND_DEFAULT "Unused",                   /* &trendName[MAX_TREND_NAME] */\
+                      FALSE,                      /* bCommanded */\
                       TREND_1HZ,                  /* Rate */\
                       0,                          /* nOffset_ms */\
                       1,                          /* nSamplePeriod_s */\
+                      -1,                         /* nOffsetStability_s */\
                       ENGRUN_UNUSED,              /* engineRunId */\
                       1,                          /* maxTrends */\
                       TRIGGER_UNUSED,             /* startTrigger */\
@@ -83,10 +87,12 @@
                       CYCLE_UNUSED,               /* nCycleD */\
                       0x00000000,                 /* nAction */\
                       0,                          /* stabilityPeriod_s */\
-                      STABILITY_CRITERIA_DEFAULT /* Stability[MAX_STAB_SENSORS] */
+                      STB_STRGY_INCRMNTL,         /* stableStrategy */\
+                      STABILITY_CRITERIA_DEFAULT  /* stability[MAX_STAB_SENSORS] */
 
 
 #define TREND_CFG_DEFAULT TREND_DEFAULT,\
+                          TREND_DEFAULT,\
                           TREND_DEFAULT,\
                           TREND_DEFAULT,\
                           TREND_DEFAULT,\
@@ -114,16 +120,43 @@ typedef enum
    TREND_2      = 2,
    TREND_3      = 3,
    TREND_4      = 4,
-   MAX_TRENDS   = 5,
+   TREND_5      = 5,
+   MAX_TRENDS   = 6,
    TREND_UNUSED = 255
 } TREND_INDEX;
 
 typedef enum
 {
-  TREND_STATE_INACTIVE,
-  TREND_STATE_MANUAL,
-  TREND_STATE_AUTO
-}TREND_STATE;
+  TR_TYPE_INACTIVE,
+  TR_TYPE_STANDARD_MANUAL,
+  TR_TYPE_STANDARD_AUTO,
+  TR_TYPE_COMMANDED
+}TREND_TYPE;  // formerly TREND_STATE
+
+// APAC Commands Proc flags
+typedef enum
+{
+  APAC_CMD_COMPL,
+  APAC_CMD_START,
+  APAC_CMD_STOP
+}APAC_CMD;
+
+
+// The Stability State of a Commanded Trend
+typedef enum
+{
+  STB_STATE_IDLE,   // The trend is not active or testing for stability
+  STB_STATE_READY,  // The trend is started and is checking if stability criteria is met.
+  STB_STATE_SAMPLE, // The trend has met stability criteria and is actively sampling.
+  MAX_STB_STATE
+}STABILITY_STATE;
+
+typedef enum
+{
+  SMPL_RSLT_UNK = 0,   // The previous sample status has been cleared
+  SMPL_RSLT_SUCCESS,   // The previous sample completed.
+  SMPL_RSLT_FAULTED    // The previous sample faulted before completion.
+}SAMPLE_RESULT;
 
 typedef enum
 {
@@ -135,7 +168,20 @@ typedef enum
   STAB_SNSR_VARIANCE_ERROR  // The sensor reading is outside configured variance
 } STABILITY_STATUS;
 
+// Stability determination Strategy
+typedef enum
+{
+  STB_STRGY_INCRMNTL = 0, // Default - Compares current sensor value to prev value +/- variance
+  STB_STRGY_ABSOLUTE,     // Compares current sensor value to  Absolute base value +/- variance
+  MAX_STB_STRGY
+}STB_STRATEGY;
 
+typedef enum
+{
+  TREND_CMD_OK,             // The command has been accepted
+  TREND_NOT_CONFIGURED,     // The Trend is not configured
+  TREND_NOT_COMMANDABLE     // The Trend is not configured to be commanded.
+} TREND_CMD_RESULT;
 
 #pragma pack(1)
 
@@ -155,7 +201,6 @@ typedef struct
   FLOAT32      fAvgValue;
 }TREND_SENSORS;
 
-
 //***************************************
 // Stability structure and sub-structures
 
@@ -168,32 +213,43 @@ typedef struct
 
 typedef struct
 {
-  SENSOR_INDEX     sensorIndex;
-  STABILITY_RANGE  criteria;
+  SENSOR_INDEX sensorIndex;   /* The index of the sensor being checked                    */
+  BOOLEAN      bDelayed;      /* Delay testing stability until after nOffsetStability_s   */
+  UINT16       absOutlier_ms; /* For STB_STRGY_ABSOLUTE: The time in mSec sensor values   */
+                              /* may be outside the variance before considered unstable   */
+  STABILITY_RANGE  criteria;  /* Stability criteria for the sensor                        */
 }STABILITY_CRITERIA;
 
 typedef struct
 {
-  UINT16           stableCnt;                   /* Count of stable sensors observed      */
-  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
-  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
-  STABILITY_STATUS status   [MAX_STAB_SENSORS];    /* The status of the stability sensor */
+  UINT16           stableCnt;                   /* Count of stable sensors observed   */
+  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors          */
+  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor      */
+  STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor */
 }STABILITY_DATA_LOG;
 
 //****************************
 // Logging structures
 
+// A subset of STABILITY_CRITERIA to allow it to vary independently of what the log needs.
 typedef struct
 {
-   TREND_INDEX trendIndex;                       /* The Id of this trend                     */
-   TREND_STATE type;                             /* The type/state of trend manual vs auto   */
+  SENSOR_INDEX     sensorIndex;  /* The index of the sensor being checked                    */
+  STABILITY_RANGE  criteria;     /* Stability criteria for the sensor                        */
+}STABILITY_CRIT_LOG;
+
+
+typedef struct
+{
+  TREND_INDEX trendIndex;                       /* The Id of this trend                     */
+  TREND_TYPE type;                              /* The type/state of trend manual vs auto   */
 }TREND_START_LOG;
 
 // TREND_LOG
 typedef struct
 {
   TREND_INDEX   trendIndex;                      /* The Id of this trend                     */
-  TREND_STATE   type;                            /* The type/state of trend manual vs auto   */
+  TREND_TYPE    type;                            /* The type/state of trend manual vs auto   */
   UINT32        nSamples;                        /* The number of samples taken during trend */
   TREND_SENSORS sensor[MAX_TREND_SENSORS];       /* The stats for the configured sensors     */
   CYCLE_COUNT   cycleCounts[MAX_TREND_CYCLES];   /* The counts of the configured cycles      */
@@ -202,29 +258,33 @@ typedef struct
 typedef struct
 {
   TREND_INDEX        trendIndex;              /* The Id of this trend                        */
-  STABILITY_CRITERIA crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
+  STABILITY_CRIT_LOG crit[MAX_STAB_SENSORS];  /* The configured criteria range for the trend */
   STABILITY_DATA_LOG data;                    /* The max observed stability data during      */
 }TREND_ERROR_LOG;                             /* the UNDETECTED OR FAILED TREND              */
-
 
 // TREND_CFG
 typedef struct
 {
    CHAR          trendName[MAX_TREND_NAME+1]; /* the name of the trend                       */
+
+   BOOLEAN       bCommanded;         /* TRUE - trend must be started by API-call        */
+                                     /* FALSE - (default) trend is  STANDARD(AUTO or MANUAL) */
    /* Trend execution control */
    TREND_RATE    rate;               /* Rate in ms at which trend is run.                    */
    UINT32        nOffset_ms;         /* Offset in millisecs this object runs within it's MIF */
    /* Sampling control */
    UINT16        nSamplePeriod_s;    /* # seconds over which a trend will sample (1-3600)    */
+   INT32         nOffsetStability_s; /* Offset from start of sampling in 1sec intervals      */
    ENGRUN_INDEX  engineRunId;        /* EngineRun for this trend 0,1,2,3 or ENGINE_ANY       */
-   UINT16        maxTrends;          /* Max # of stable/auto trends to be recorded.          */
-   TRIGGER_INDEX startTrigger;       /* Starting trigger                                     */
+   UINT16        maxTrends;          /* Max # of stable/auto-trends to be recorded.          */
+   TRIGGER_INDEX startTrigger;       /* Starting trigger for STD-MANUAL trend                */
    TRIGGER_INDEX resetTrigger;       /* Ending trigger                                       */
    UINT32        trendInterval_s;    /* 0 - 86400 (24Hrs)                                    */
-   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sensors for this Trend  */
+   BITARRAY128   sensorMap;          /* Bit map of flags of up-to 32 sampled sensors         */
    CYCLE_INDEX   cycle[MAX_TREND_CYCLES]; /* Ids of cycle whose cnt are logged by this trend.*/
    UINT8         nAction;            /* Action to annunciate during the trend                */
    UINT16        stabilityPeriod_s;  /* Stability period for sensor(0-3600) in 1sec intervals*/
+   STB_STRATEGY  stableStrategy;     /* Method used to determine stability of sensor         */
    STABILITY_CRITERIA stability[MAX_STAB_SENSORS]; /* Stability criteria for this trend      */
 }TREND_CFG;
 
@@ -251,53 +311,118 @@ typedef struct
 
 typedef struct
 {
-    UINT16           stableCnt;                   /* Count of stable sensors observed      */
-    FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors             */
-    FLOAT32          snsrVar  [MAX_STAB_SENSORS]; /* Variance value when variance exceeded */
-    BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor         */
-    STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor    */
+  UINT16           stableCnt;                   /* Count of stable sensors observed          */
+  FLOAT32          snsrValue[MAX_STAB_SENSORS]; /* Prior readings of sensors                 */
+  FLOAT32          snsrVar  [MAX_STAB_SENSORS]; /* Variance value when variance exceeded     */
+  BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor             */
+  STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor        */
 }STABILITY_DATA;
 
+// Substructure collecting working vars for determining the stability state of a sensor
+// using Absolute Stability method.
 typedef struct
+{
+  FLOAT32 lowerValue;      /* min variance value for absolute ref value             */
+  FLOAT32 upperValue;      /* max variance value for absolute ref value             */
+  UINT16  outLierCnt;      /* current count of consecutive outlier values           */
+  UINT16  outLierMax;      /* Max allowed consecutive outliers from CFG             */
+  UINT32  stableDurMs;     /* Number of mSec the sensor has been continuously stable*/
+  UINT32  lastStableChkMs; /* Last time (system run time) this sensor was checked   */
+}ABS_STABILITY;
+
+
+
+typedef struct
+{
+  SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS];
+}TREND_SAMPLE_DATA;
+
+// Not-typical typedef used here to fwd decl TREND_DATA.
+// This is necessary because TREND_DATA structure contains a member 'pStabilityFunc', which is
+// a ptr-to-func containing a param of type TREND_DATA.
+typedef struct TREND_DATA TREND_DATA;
+typedef BOOLEAN (* STABILITY_FUNC)(TREND_CFG* pCfg, TREND_DATA* pData,
+                                   INT32 snsr, BOOLEAN bDoVarCheck);
+struct TREND_DATA
 {
   // Run control
   TREND_INDEX  trendIndex;          /* Index for 'this' trend.                               */
   INT16        nRateCounts;         /* Countdown interval for this trend                     */
-  INT16        nRateCountdown;      /* Countdown in msec until next execution of this trend  */
+  INT16        nRateCountdown;      /* Countdown in mSec until next execution of this trend  */
 
   // State/status info
-  BOOLEAN      bAutoTrendStabFailed;/* Flag used to track an autotrend has failed            */
-
+  BOOLEAN      bTrendStabilityFailed;/* Flag used to track if an active AUTO/COMMANDED trend
+                                        has failed to maintain stability during SAMPLE       */
   // Reset trigger handling.
-  BOOLEAN      bEnabled;            /* Indicates rst-trigger is enabled for detection        */
+  BOOLEAN      bEnabled;            /* For Auto-Trend: Indicates reset-trigger is enabled
+                                                       for detection.                        */
   BOOLEAN      bResetInProg;        /* Latch flag for handling Reset processing              */
   // States and counts
-  TREND_STATE  trendState;          /* Current trend type                                    */
+  TREND_TYPE   trendState;          /* Type of trend currently executing(i.e. reason started)*/
   ER_STATE     prevEngState;        /* last op mode for trending                             */
-  UINT16       trendCnt;            /* # of all trends ( stability and trigger since Reset   */
-  UINT16       autoTrendCnt;        /* # of autotrends since Reset (0 -> TREND_CFG.maxTrends)*/
+  UINT16       trendCnt;            /* # of all trends(AUTO, MANUAL & COMMANDED) since Reset */
+  UINT16       autoTrendCnt;        /* # of AUTO trends since Reset(0 -> TREND_CFG.maxTrends)*/
   // Action Manager ID
   INT8         nActionReqNum;       /* Action Id for the LSS Request                         */
   // Trend instance sampling
   UINT32       nSamplesPerPeriod;   /* The number of samples taken during a sampling period  */
-  UINT32       masterSampleCnt;     /* Counts of samples take this period each SNSR_SUMMARY
+  UINT32       masterSampleCnt;     /* Counts of samples taken this period. Each SNSR_SUMMARY
                                        has it own value which matches this value             */
-
   // Interval handling
   UINT32       lastIntervalCheckMs; /* Starting time (CM_GetTickCount()                      */
   UINT32       timeSinceLastTrendMs;/* time since last trend                                 */
 
   // Stability handling
-  UINT16       nStabExpectedCnt;  /* Expected count based on configured.                     */
-  UINT32       lastStabCheckMs;   /* Starting time (CM_GetTickCount()                        */
-  UINT32       nTimeStableMs;     /* Time in ms the stability-sensors have been stable.      */
-  STABILITY_DATA curStability;    /* Current stability                                       */
-  STABILITY_DATA maxStability;    /* Max observed stable sensors and count                   */
+  STABILITY_FUNC pStabilityFunc;    /* Ptr to function used to verify stability              */
+  UINT16         nStabExpectedCnt;  /* Expected count(# of configured stability sensors)     */
+  UINT32         lastStabCheckMs;   /* Starting time (CM_GetTickCount()                      */
+  UINT32         nTimeStableMs;     /* Time in ms ALL stability-sensors have been stable.    */
+  STABILITY_DATA curStability;      /* Current stability                                     */
+  STABILITY_DATA maxStability;      /* Max observed stable sensors and count                 */
+
+  // when STB_STRGY_ABSOLUTE is defined, working data for tracking a stability sensor
+  ABS_STABILITY absoluteStability[MAX_STAB_SENSORS];
 
   // Monitored sensors during trends.
-  UINT16       nTotalSensors;     /* Count of sensors used in SnsrSummary                    */
+  UINT16       nTotalSensors;                  /* Count of sensors used in SnsrSummary       */
   SNSR_SUMMARY snsrSummary[MAX_TREND_SENSORS]; /* Storage for max, average and counts.       */
-} TREND_DATA;
+  SNSR_SUMMARY endSummary [MAX_TREND_SENSORS]; /* Storage for stats during  end-phase        */
+  UINT32       delayedStbStartMs;              /* Tick count after which delayed stb sensrs are
+                                                  checked                                    */
+  // Stability State info.
+  STABILITY_STATE stableState;            /* The current stability state of the trend        */
+  STABILITY_STATE prevStableState;        /* The prior stability state of the trend          */
+
+  UINT32        stableStateStartMs;       /* Starting time CM_GetTickCount() of  stableState */
+  SAMPLE_RESULT lastSampleResult;         /* The result of the last attempt to Sample        */
+  // Commanded trend stable hist.
+  UINT32 cmdStabilityDurMs;              /* Dur trend was stable(taken from nTimeStableMs)   */
+
+  // APAC command pending
+  APAC_CMD      apacCmd;                  /* APAC command to be processed.                   */
+ }; //typedef struct TREND_DATA
+
+
+// APAC sensor stability history
+typedef struct
+{
+  SENSOR_INDEX sensorID[MAX_STAB_SENSORS];
+  BOOLEAN      bStable[MAX_STAB_SENSORS];
+}STABLE_HISTORY;
+
+
+#if defined (TREND_BODY)
+// Trend index enumeration for other modules which ref TrendIndex
+USER_ENUM_TBL trendIndexType[] =
+{ { "0"  , TREND_0   }, { "1"  , TREND_1   }, { "2"  , TREND_2   },
+  { "3"  , TREND_3   }, { "4"  , TREND_4   }, { "5"  , TREND_5   },
+  { "UNUSED", TREND_UNUSED }, { NULL, 0 }
+};
+#else
+// Export the triggerIndex enum table
+EXPORT USER_ENUM_TBL trendIndexType[];
+#endif
+
 
 /******************************************************************************
                                       Package Exports
@@ -320,21 +445,73 @@ typedef struct
 EXPORT void   TrendInitialize   ( void );
 EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 
+// APAC interface functions
+EXPORT BOOLEAN TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart, TREND_CMD_RESULT* rslt);
+EXPORT void    TrendGetStabilityState( TREND_INDEX idx, STABILITY_STATE* pStabState,
+                                       UINT32* pDurMs,  SAMPLE_RESULT* pSampleResult);
+EXPORT BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHist);
+EXPORT void    TrendGetSampleData      ( TREND_INDEX idx, TREND_SAMPLE_DATA* pStabilityData);
+
 #endif // TREND_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
  * 
+ * *****************  Version 25  *****************
+ * User: Contractor V&v Date: 12/03/15   Time: 6:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 CR compliance changes
+ * 
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 11/30/15   Time: 3:34p
+ * Updated in $/software/control processor/code/application
+ * CodeReview compliance change - no logic changes.
+ *
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 11/09/15   Time: 2:58p
+ * Updated in $/software/control processor/code/application
+ * Fixed abs stable count off-by-one bug and consolidation struct
+ *
+ * *****************  Version 22  *****************
+ * User: Contractor V&v Date: 11/05/15   Time: 6:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Formal Implementation of variance outlier tolerance
+ *
+ * *****************  Version 21  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 5:50p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - StabilityHistory and cmd buffering
+ *
+ * *****************  Version 20  *****************
+ * User: Contractor V&v Date: 10/21/15   Time: 7:07p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - StabilityHistory and cmd buffering
+ *
+ * *****************  Version 19  *****************
+ * User: Contractor V&v Date: 10/19/15   Time: 6:27p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - APAC updates for API and stability calc
+ *
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:43p
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 APAC Processing Initial Check In
+ *
+ * *****************  Version 17  *****************
+ * User: Contractor V&v Date: 10/05/15   Time: 6:35p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - P100 Trend Processing Updates initial update
+ *
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 1/26/13    Time: 3:12p
  * Updated in $/software/control processor/code/application
  * SCR# 1197 - proper handling of stability sensor variance failure
  * reporting
- * 
+ *
  * *****************  Version 15  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 4:30p
  * Updated in $/software/control processor/code/application
- * SCR #1107 Code Review 
+ * SCR #1107 Code Review
  *
  * *****************  Version 14  *****************
  * User: Contractor V&v Date: 11/29/12   Time: 4:19p

@@ -14,7 +14,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 116 $  $Date: 15-02-06 7:18p $
+      $Revision: 125 $  $Date: 11/19/15 4:26p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -71,8 +71,15 @@ SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB483, 0)\
 \
 SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
 SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
-SYS_LOG_ID(APP_ID_TREND_AUTO_FAILED                 ,0xB503 ,0)\
-SYS_LOG_ID(APP_ID_TREND_AUTO_NOT_DETECTED           ,0xB504 ,0)\
+SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB503 ,0)\
+SYS_LOG_ID(APP_ID_TREND_NOT_DETECTED                ,0xB504 ,0)\
+SYS_LOG_ID(APP_ID_TREND_SUBSAMPLE_END               ,0xB505 ,0)/*Trend End-sample collection*/\
+\
+SYS_LOG_ID(APP_ID_APAC_SUMMARY                      ,0xB600 ,0)\
+SYS_LOG_ID(APP_ID_APAC_START                        ,0xB601 ,0)\
+SYS_LOG_ID(APP_ID_APAC_ABORT_NCR                    ,0xB602 ,0)\
+SYS_LOG_ID(APP_ID_APAC_FAILURE                      ,0xB603 ,0)\
+SYS_LOG_ID(APP_ID_APAC_VLD_MANUAL                   ,0xB604 ,0)\
 \
 SYS_LOG_ID(DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL        ,0x0500 ,0)\
 SYS_LOG_ID(DRV_ID_TTMR_PBIT_REG_INIT_FAIL           ,0x0700 ,0)\
@@ -175,7 +182,11 @@ SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
 SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
 SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
 /*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
+SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
 SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
+\
+SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
+SYS_LOG_ID(SYS_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
 \
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
@@ -283,6 +294,51 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 125  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:26p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for the Display Processing App
+ * 
+ * *****************  Version 124  *****************
+ * User: Contractor V&v Date: 11/17/15   Time: 2:37p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - Delete unused vSensor config log msg - use ASSERT now
+ * 
+ * *****************  Version 123  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 5:49p
+ * Updated in $/software/control processor/code/system
+ * APAC updates to standarize log names
+ * 
+ * *****************  Version 122  *****************
+ * User: Peter Lee    Date: 15-10-23   Time: 4:58p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing additional updates
+ * 
+ * *****************  Version 121  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 10:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing remove DUP definition
+ * 
+ * *****************  Version 120  *****************
+ * User: Contractor V&v Date: 10/19/15   Time: 6:25p
+ * Updated in $/software/control processor/code/system
+ * SCR #1300 - P100 Add log for end-summar
+ * 
+ * *****************  Version 119  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing Initial Check In
+ * 
+ * *****************  Version 118  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
+ * 
+ * *****************  Version 117  *****************
+ * User: Contractor V&v Date: 9/23/15    Time: 1:22p
+ * Updated in $/software/control processor/code/system
+ * P100 Update for virtual sensor validation and error logging
  * 
  * *****************  Version 116  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p

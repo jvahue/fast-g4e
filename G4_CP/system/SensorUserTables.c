@@ -8,7 +8,7 @@
     Description: User Interface for Sensor Runtime Processing
 
     VERSION
-       $Revision: 35 $  $Date: 1/19/15 12:20p $
+       $Revision: 39 $  $Date: 12/03/15 5:59p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -124,6 +124,7 @@ USER_ENUM_TBL sensorType[]      =  { { "UNUSED"  , UNUSED          },
                                      { "ANALOG"  , SAMPLE_ANALOG   },
                                      { "DISCRETE", SAMPLE_DISCRETE },
                                      { "UART"    , SAMPLE_UART     },
+                                     { "VIRTUAL" , SAMPLE_VIRTUAL  },
                                      { NULL,       0               }
                                    };
 static
@@ -155,6 +156,16 @@ USER_ENUM_TBL filterType[]      =  { { "NONE"       , FILTERNONE     },
                                      { "SLOPE"      , SLOPEFILTER    },
                                      { NULL         , 0              }
                                    };
+
+static
+USER_ENUM_TBL virtualType[]     =  { { "UNUSED"     , VIRTUAL_UNUSED},
+                                     { "ADD"        , VIRTUAL_ADD   },
+                                     { "DIFF"       , VIRTUAL_DIFF  },
+                                     { "MULT"       , VIRTUAL_MULT  },
+                                     { "DIV"        , VIRTUAL_DIV   },
+                                     { NULL         , 0             }
+                                   };
+
 
 // Sensor User Configuration Support
 
@@ -547,7 +558,7 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
   // msg is included.
 
   // Write out an entry for each defined sensor which is configured for LiveData
-  for (sensorIdx = SENSOR_0; sensorIdx < MAX_SENSORS && result; ++sensorIdx)
+  for (sensorIdx = SENSOR_0; ((INT32)sensorIdx < (INT32)MAX_SENSORS) && result; ++sensorIdx)
   {
     if( SensorIsUsed(sensorIdx) && pSnsrCfg[sensorIdx].bInspectInclude )
     {
@@ -573,7 +584,7 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
   {
     snprintf(buff, sizeof(buff), "No sensors configured for LiveData");
     result = User_OutputMsgString( buff, FALSE);
-  }  
+  }
 
   return (result) ? USER_RESULT_OK : USER_RESULT_ERROR;
 }
@@ -586,32 +597,53 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
  * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 12/03/15   Time: 5:59p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 CR compliance.
+ *
+ * *****************  Version 38  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Use ASSERT instead of log msg and invalidated
+ * sensors
+ *
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 9/09/15    Time: 6:42p
+ * Updated in $/software/control processor/code/system
+ * P100 Update for virtual sensor validation and error logging
+ *
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 8/26/15    Time: 7:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Implement the Deferred Virtual Sensor Requirements
+ *
  * *****************  Version 35  *****************
  * User: John Omalley Date: 1/19/15    Time: 12:20p
  * Updated in $/software/control processor/code/system
  * SCR 1262 - Code Review Updates
- * 
+ *
  * *****************  Version 34  *****************
  * User: John Omalley Date: 11/20/14   Time: 9:55a
  * Updated in $/software/control processor/code/system
  * SCR 1262 - Removed GSE limitations on livedata commands.
- * 
+ *
  * *****************  Version 33  *****************
  * User: John Omalley Date: 11/19/14   Time: 4:57p
  * Updated in $/software/control processor/code/system
  * SCR 1267 - Livedata cfg had GSE only set so the values could never be
  * set in a normal configuration through the MS.
- * 
+ *
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 11/19/14   Time: 4:50p
  * Updated in $/software/control processor/code/system
  * SCR #1262 -  LiveData CP to MS remove finalize in GetList function
- * 
+ *
  * *****************  Version 31  *****************
  * User: Contractor V&v Date: 11/17/14   Time: 6:15p
  * Updated in $/software/control processor/code/system
  * SCR #1262 - LiveData CP to MS Modfix formatting tweaks for V&V
- * 
+ *
  * *****************  Version 30  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p
  * Updated in $/software/control processor/code/system

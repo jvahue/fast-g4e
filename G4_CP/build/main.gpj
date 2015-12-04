@@ -35,6 +35,8 @@ FASTII.ld
 ..\application\Timehistory.c
 ..\application\trend.c
 ..\application\Creep.c
+..\application\APACMgr.c
+..\application\DispProcessingApp.c
 ..\drivers\ADC.c
 ..\drivers\Assert.c
 ..\drivers\BusTO.c
@@ -83,6 +85,7 @@ FASTII.ld
 ..\system\Monitor.c
 ..\system\NVMgr.c
 ..\system\PowerManager.c
+..\system\PWCDispProtocol.c
 ..\system\QARManager.c
 ..\system\SpiManager.c
 ..\system\SystemLog.c
