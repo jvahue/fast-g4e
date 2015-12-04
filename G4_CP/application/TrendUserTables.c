@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 22 $  $Date: 2/05/15 10:48a $
+    $Revision: 31 $  $Date: 12/03/15 6:04p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -27,7 +27,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#undef  TREND_TEST
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -36,6 +36,14 @@
 /* Local Variables                                                           */
 /*****************************************************************************/
 // See Local Variables below Function Prototypes Section
+#ifdef TREND_TEST
+const char* trendCmdString[] =
+{
+  "TREND_CMD_OK",             // The command has been accepted
+  "TREND_NOT_CONFIGURED",     // The Trend is not configured
+  "TREND_NOT_COMMANDABLE",    // The Trend is not configured to be commanded.
+};
+#endif
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -59,6 +67,30 @@ static USER_HANDLER_RESULT Trend_ShowConfig( USER_DATA_TYPE DataType,
                                           UINT32 Index,
                                           const void *SetPtr,
                                           void **GetPtr );
+#ifdef TREND_TEST
+static USER_HANDLER_RESULT Trend_Start( USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr );
+static USER_HANDLER_RESULT Trend_Stop( USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr );
+
+static USER_HANDLER_RESULT Trend_DsplyStabilityHist     ( USER_DATA_TYPE DataType,
+                                                   USER_MSG_PARAM Param,
+                                                   UINT32 Index,
+                                                   const void *SetPtr,
+                                                   void **GetPtr );
+
+static USER_HANDLER_RESULT Trend_DsplySampleData( USER_DATA_TYPE DataType,
+                                                   USER_MSG_PARAM Param,
+                                                   UINT32 Index,
+                                                   const void *SetPtr,
+                                                   void **GetPtr );
+#endif
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -70,15 +102,6 @@ static USER_HANDLER_RESULT Trend_ShowConfig( USER_DATA_TYPE DataType,
 static TREND_CFG         m_ConfigTrendTemp;      // Trend Configuration temp Storage
 
 static TREND_DATA        m_StateTrendTemp;       // Trend State Temp Storage
-
-
-static USER_ENUM_TBL trendType[]   =
-{
-   { "0"  , TREND_0   }, { "1"  ,  TREND_1   }, {  "2"  , TREND_2   },
-   { "3"  , TREND_3   }, { "4"  ,  TREND_4   }, { "UNUSED", TREND_UNUSED },
-   { NULL, 0}
-};
-
 
 static USER_ENUM_TBL trendRateType[] =
 {
@@ -106,13 +129,35 @@ static USER_ENUM_TBL trendEngRunIdEnum[] =
 
 static USER_ENUM_TBL trendStateEnum[] =
 {
-  { "INACTIVE"      , TREND_STATE_INACTIVE  },
-  { "MANUAL_TREND"  , TREND_STATE_MANUAL    },
-  { "AUTO_TREND"    , TREND_STATE_AUTO      },
+  { "INACTIVE"       , TR_TYPE_INACTIVE       },
+  { "MANUAL_TREND"   , TR_TYPE_STANDARD_MANUAL},
+  { "AUTO_TREND"     , TR_TYPE_STANDARD_AUTO  },
+  { "COMMANDED_TREND", TR_TYPE_COMMANDED      },
   { NULL,  0 }
 };
 
+static USER_ENUM_TBL trendStabStateEnum[] =
+{
+  { "IDLE",   STB_STATE_IDLE  },
+  { "READY" , STB_STATE_READY },
+  { "SAMPLE", STB_STATE_SAMPLE},
+  { NULL,  0  }
+};
 
+static USER_ENUM_TBL trendStableRuleEnum[] =
+{
+  { "INCREMENTAL", STB_STRGY_INCRMNTL},
+  { "ABSOLUTE",    STB_STRGY_ABSOLUTE},
+  { NULL,  0                         }
+};
+
+static USER_ENUM_TBL trendSampleResultEnum[] =
+{
+  { "UNKNOWN",  SMPL_RSLT_UNK    },
+  { "SUCCESS",  SMPL_RSLT_SUCCESS},
+  { "FAULTED",  SMPL_RSLT_FAULTED},
+  { NULL,  0                     }
+};
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
@@ -120,12 +165,14 @@ static USER_ENUM_TBL trendStateEnum[] =
 #define DECL_TREND_STAB_TBL_ENTRY( n )\
   static USER_MSG_TBL trendStabTbl##n [] =\
 {\
-  /*Str          Next Tbl Ptr   Handler Func     Data Type          Access    Parameter                                       IndexRange           DataLimit     EnumTbl*/\
-  {"SENSORID",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_ENUM,    USER_RW,  &m_ConfigTrendTemp.stability[n].sensorIndex,      0,(MAX_TRENDS-1),    NO_LIMIT,     SensorIndexType },\
-  {"LOWER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.lower,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"UPPER",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.upper,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  {"VARIANCE",   NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.variance,0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
-  { NULL,        NULL,          NULL, NO_HANDLER_DATA}\
+  /*Str             Next Tbl Ptr   Handler Func     Data Type          Access    Parameter                                          IndexRange          DataLimit     EnumTbl*/\
+  {"SENSORID",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_ENUM,    USER_RW,  &m_ConfigTrendTemp.stability[n].sensorIndex,      0,(MAX_TRENDS-1),    NO_LIMIT,     SensorIndexType },\
+  {"DELAYED",       NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_BOOLEAN, USER_RW,  &m_ConfigTrendTemp.stability[n].bDelayed,         0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"VAR_OUTLIER_MS",NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_UINT16,  USER_RW,  &m_ConfigTrendTemp.stability[n].absOutlier_ms,    0,(MAX_TRENDS-1),    0,60000,      NULL            },\
+  {"LOWER",         NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.lower,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"UPPER",         NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.upper,   0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  {"VARIANCE",      NO_NEXT_TABLE, Trend_UserCfg,   USER_TYPE_FLOAT,   USER_RW,  &m_ConfigTrendTemp.stability[n].criteria.variance,0,(MAX_TRENDS-1),    NO_LIMIT,     NULL            },\
+  { NULL,           NULL,          NULL,            NO_HANDLER_DATA}\
 }
 
   /* TREND STABILITY CRITERIA ELEMENTS 0 - 15 */
@@ -173,9 +220,11 @@ static USER_MSG_TBL trendCmd [] =
 {
   /* Str              Next Tbl Ptr               Handler Func.          Data Type          Access     Parameter                           IndexRange           DataLimit            EnumTbl*/
   { "NAME",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_STR,     USER_RW,   m_ConfigTrendTemp.trendName,          0,(MAX_TRENDS-1),    0,MAX_TREND_NAME,    NULL                 },
+  { "COMMANDED",      NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_BOOLEAN, USER_RW,   &m_ConfigTrendTemp.bCommanded,        0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "RATE",           NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.rate,              0,(MAX_TRENDS-1),    NO_LIMIT,            trendRateType        },
   { "RATEOFFSET_MS",  NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT32,  USER_RW,   &m_ConfigTrendTemp.nOffset_ms,        0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "SAMPLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.nSamplePeriod_s,   0,(MAX_TRENDS-1),    1,3600,              NULL                 },
+  { "OFFSETSTABLE_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_INT32,   USER_RW,   &m_ConfigTrendTemp.nOffsetStability_s,0,(MAX_TRENDS-1),    -1,3599,             NULL                 },
   { "ENGINEID",       NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.engineRunId,       0,(MAX_TRENDS-1),    NO_LIMIT,            trendEngRunIdEnum    },
   { "MAXSAMPLECOUNT", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.maxTrends,         0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STARTTRIGID",    NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.startTrigger,      0,(MAX_TRENDS-1),    0,MAX_TRIGGERS,      triggerIndexType     },
@@ -188,29 +237,39 @@ static USER_MSG_TBL trendCmd [] =
   { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
-  { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                 },
+  { "STABILITY_STRGY",NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.stableStrategy,    0,(MAX_TRENDS-1),    NO_LIMIT,            trendStableRuleEnum},
+  { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                   },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
 
 
 static USER_MSG_TBL trendStatus [] =
 {
-  /* Str                 Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                              IndexRange           DataLimit   EnumTbl*/
-   { "STATE",            NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   trendStateEnum    },
-   { "ENG_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.prevEngState,          0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
-   { "TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.trendCnt,              0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "AT_TRENDCOUNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.autoTrendCnt,          0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESINCELAST_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.timeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+  /* Str                    Next Tbl Ptr       Handler Func.    Data Type          Access     Parameter                              IndexRange           DataLimit   EnumTbl*/
+   { "STATE",               NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.trendState,            0,(MAX_TRENDS-1),    NO_LIMIT,   trendStateEnum    },
+   { "ENG_STATE",           NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.prevEngState,          0,(MAX_TRENDS-1),    NO_LIMIT,   engineRunStateEnum},
+   { "TRENDCOUNT",          NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.trendCnt,              0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "AT_TRENDCOUNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.autoTrendCnt,          0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESINCELAST_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.timeSinceLastTrendMs,  0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    // Stability data
-   { "STABILITY_CNT",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { "TIMESTABLE_MS",    NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.nTimeStableMs,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
-   { NULL,               NULL,              NULL ,           NO_HANDLER_DATA }
+   { "STABILITY_CNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "TIMESTABLE_MS",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.nTimeStableMs,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "STABLE_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.stableState,           0,(MAX_TRENDS-1),    NO_LIMIT,   trendStabStateEnum},
+   { "STABLESTATESTART_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.stableStateStartMs,    0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
+   { "LAST_SAMPLE_RESULT",  NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.lastSampleResult,      0,(MAX_TRENDS-1),    NO_LIMIT,   trendSampleResultEnum},
+   { NULL,                  NULL,              NULL ,           NO_HANDLER_DATA }
 };
 
 static USER_MSG_TBL trendRoot [] =
-{ /* Str            Next Tbl Ptr       Handler Func.        Data Type          Access            Parameter      IndexRange   DataLimit  EnumTbl*/
+{ /* Str            Next Tbl Ptr       Handler Func.        Data Type          Access                    Parameter       IndexRange     DataLimit  EnumTbl*/
    { "CFG",         trendCmd     ,     NULL,                NO_HANDLER_DATA},
    { "STATUS",      trendStatus  ,     NULL,                NO_HANDLER_DATA},
+#ifdef TREND_TEST
+   { "START",       NO_NEXT_TABLE,     Trend_Start,          USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG,   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
+   { "STOP",        NO_NEXT_TABLE,     Trend_Stop,           USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG,   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
+   { "GET_HIST",    NO_NEXT_TABLE,     Trend_DsplyStabilityHist,    USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG,   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
+   { "GET_SAMPLE",  NO_NEXT_TABLE,     Trend_DsplySampleData,USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG,   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
+#endif
    { DISPLAY_CFG,   NO_NEXT_TABLE,     Trend_ShowConfig,    USER_TYPE_ACTION,  USER_RO|USER_GSE|USER_NO_LOG, NULL,          -1, -1,      NO_LIMIT,  NULL},
    { NULL,          NULL,              NULL,                NO_HANDLER_DATA}
 };
@@ -300,7 +359,6 @@ static USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
 *
 * Notes:
 ******************************************************************************/
-
 static USER_HANDLER_RESULT Trend_State(USER_DATA_TYPE DataType,
                                   USER_MSG_PARAM Param,
                                   UINT32 Index,
@@ -375,25 +433,216 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
    return result;
 }
 
+#ifdef TREND_TEST
+/*vcast_dont_instrument_start*/
+/******************************************************************************
+ * Function:     Trend_Start()
+ *
+ * Description:  Test function to simulate call to start a command trend
+ *
+ * Parameters:   USER_DATA_TYPE DataType
+ *               USER_MSG_PARAM Param
+ *               UINT32         Index
+ *               const void     *SetPtr
+ *               void           **GetPtr
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT Trend_Start(USER_DATA_TYPE DataType, USER_MSG_PARAM Param,
+                                UINT32 Index, const void *SetPtr, void **GetPtr)
+{
+   TREND_CMD_RESULT cmdResult;
+   TrendAppStartTrend( (TREND_INDEX)Index, TRUE, &cmdResult);
+   GSE_DebugStr(NORMAL, TRUE, "Trend[%d] Start API call returned: %s"NL,
+                               Index, trendCmdString[cmdResult]);
+   return USER_RESULT_OK;
+}
+
+/******************************************************************************
+ * Function:     Trend_Stop()
+ *
+ * Description:  Test function to simulate call to start a command trend
+ *
+ * Parameters:   USER_DATA_TYPE DataType
+ *               USER_MSG_PARAM Param
+ *               UINT32         Index
+ *               const void     *SetPtr
+ *               void           **GetPtr
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType, USER_MSG_PARAM Param,
+                                UINT32 Index, const void *SetPtr, void **GetPtr)
+{
+  TREND_CMD_RESULT cmdResult;
+  TrendAppStartTrend( (TREND_INDEX)Index, FALSE, &cmdResult);
+  GSE_DebugStr(NORMAL, TRUE, "Trend[%d] Stop API call returned: %s"NL,
+                              Index, trendCmdString[cmdResult]);
+  return USER_RESULT_OK;
+}
+
+/******************************************************************************
+ * Function:     Trend_DsplyStabilityHist()
+ *
+ * Description:  Test function to simulate call to TrendGetStabilityHistory
+ *
+ * Parameters:   USER_DATA_TYPE DataType
+ *               USER_MSG_PARAM Param
+ *               UINT32         Index
+ *               const void     *SetPtr
+ *               void           **GetPtr
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT Trend_DsplyStabilityHist(USER_DATA_TYPE DataType, USER_MSG_PARAM Param,
+                                             UINT32 Index, const void *SetPtr, void **GetPtr)
+{
+  UINT16 i;
+  STABLE_HISTORY stbHist;
+  if ( TrendGetStabilityHistory( (TREND_INDEX)Index, &stbHist ) )
+  {
+    for( i = 0; i < MAX_STAB_SENSORS; ++i)
+    {
+      if (SENSOR_UNUSED == stbHist.sensorID[i])
+      {
+        break;
+      }
+
+      GSE_DebugStr(NORMAL, TRUE, "Entry[%d]: Snsr: %d Stable: %s", i, stbHist.sensorID[i],
+        TRUE == stbHist.bStable[i] ? "TRUE" : "FALSE");
+    }
+  }
+  else
+  {
+    GSE_DebugStr(NORMAL, TRUE, "Trend[%d] No stats available."NL, Index);
+  }
+  return USER_RESULT_OK;
+}
+
+/******************************************************************************
+ * Function:     Trend_DsplyStabilityHist()
+ *
+ * Description:  Test function to simulate call to TrendGetSampleData and display results
+ *
+ * Parameters:   USER_DATA_TYPE DataType
+ *               USER_MSG_PARAM Param
+ *               UINT32         Index
+ *               const void     *SetPtr
+ *               void           **GetPtr
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT Trend_DsplySampleData(USER_DATA_TYPE DataType,USER_MSG_PARAM Param,
+                                              UINT32 Index,const void *SetPtr, void **GetPtr)
+{
+  UINT16 i;
+  TREND_SAMPLE_DATA sampleData;
+
+  TrendGetSampleData( (TREND_INDEX)Index, &sampleData );
+
+  for( i = 0; i < MAX_TREND_SENSORS; ++i)
+  {
+    if (SENSOR_UNUSED == sampleData.snsrSummary[i].SensorIndex)
+    {
+      break;
+    }
+    GSE_DebugStr(NORMAL, FALSE,
+      "Entry[%d]:\r\n  Snsr: %d\r\n  SmplCnt: %d\r\n  Vld: %s\r\n  tmin: %d %d\r\n  minVal: %8.2f\r\n  tmax: %d %d\r\n  maxVal: %8.2f\r\n  avgVal: %8.2f\r\n  totVal: %8.2f"NL,
+          i,
+          sampleData.snsrSummary[i].SensorIndex,
+          sampleData.snsrSummary[i].nSampleCount,
+          (sampleData.snsrSummary[i].bValid == 1) ? "TRUE":"FALSE",
+          sampleData.snsrSummary[i].timeMinValue.Timestamp,
+          sampleData.snsrSummary[i].timeMinValue.MSecond,
+          sampleData.snsrSummary[i].fMinValue,
+          sampleData.snsrSummary[i].timeMaxValue.Timestamp,
+          sampleData.snsrSummary[i].timeMaxValue.MSecond,
+          sampleData.snsrSummary[i].fMaxValue,
+          sampleData.snsrSummary[i].fAvgValue,
+          sampleData.snsrSummary[i].fTotal);
+
+  }
+  return USER_RESULT_OK;
+}
+/*vcast_dont_instrument_start*/
+#endif
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
  * 
+ * *****************  Version 31  *****************
+ * User: Contractor V&v Date: 12/03/15   Time: 6:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 CR compliance changes
+ * 
+ * *****************  Version 30  *****************
+ * User: Contractor V&v Date: 11/30/15   Time: 3:34p
+ * Updated in $/software/control processor/code/application
+ * CodeReview compliance change - no logic changes.
+ *
+ * *****************  Version 29  *****************
+ * User: Contractor V&v Date: 11/17/15   Time: 11:53a
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Added limits to offset for sampling and outliners, misc
+ * debug updates
+ *
+ * *****************  Version 28  *****************
+ * User: Contractor V&v Date: 11/09/15   Time: 2:58p
+ * Updated in $/software/control processor/code/application
+ * Fixed abs stable count off-by-one bug and consolidation struct
+ *
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 11/05/15   Time: 6:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Formal Implementation of variance outlier tolerance
+ *
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 5:50p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - StabilityHistory and cmd buffering
+ *
+ * *****************  Version 25  *****************
+ * User: Contractor V&v Date: 10/21/15   Time: 7:07p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - StabilityHistory and cmd buffering
+ *
+ * *****************  Version 24  *****************
+ * User: Contractor V&v Date: 10/19/15   Time: 6:27p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - APAC updates for API and stability calc
+ *
+ * *****************  Version 23  *****************
+ * User: Contractor V&v Date: 10/05/15   Time: 6:35p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - P100 Trend Processing Updates initial update
+ *
  * *****************  Version 22  *****************
  * User: John Omalley Date: 2/05/15    Time: 10:48a
  * Updated in $/software/control processor/code/application
  * SCR 1267 - Code Review Updates
- * 
+ *
  * *****************  Version 21  *****************
  * User: John Omalley Date: 12/05/14   Time: 4:33p
  * Updated in $/software/control processor/code/application
  * SCR 1267 - Updated showcfg access type
- * 
+ *
  * *****************  Version 20  *****************
  * User: Contractor V&v Date: 13-01-08   Time: 12:00p
  * Updated in $/software/control processor/code/application
  * SCR #1197  Added comment for magic 3
- * 
+ *
  * *****************  Version 19  *****************
  * User: Contractor V&v Date: 12/28/12   Time: 5:51p
  * Updated in $/software/control processor/code/application

@@ -8,7 +8,7 @@ File:          EngineRunUserTables.c
 Description:
 
 VERSION
-$Revision: 26 $  $Date: 12/13/12 3:08p $
+$Revision: 27 $  $Date: 11/05/15 6:46p $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -38,6 +38,9 @@ $Revision: 26 $  $Date: 12/13/12 3:08p $
 
 static ENGRUN_CFG      m_CfgTemp;
 static ENGRUN_DATA     m_DataTemp;
+static ENG_SN_CFG      m_EngSerialCfgTemp;
+static ENG_SN_STATUS   m_EngSerialStatusTemp;
+
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -72,6 +75,19 @@ static USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
                                           const void *SetPtr,
                                           void **GetPtr);
 
+static USER_HANDLER_RESULT  EngSerialNoCfg( USER_DATA_TYPE DataType,
+                                            USER_MSG_PARAM Param,
+                                            UINT32 Index,
+                                            const void *SetPtr,
+                                            void **GetPtr);
+
+static USER_HANDLER_RESULT  EngSerialNoStatus(USER_DATA_TYPE DataType,
+                                              USER_MSG_PARAM Param,
+                                              UINT32 Index,
+                                              const void *SetPtr,
+                                              void **GetPtr);
+
+
 /*****************************************************************************/
 /* User command tables                                                       */
 /*****************************************************************************/
@@ -102,6 +118,25 @@ static USER_ENUM_TBL engRunRateType[] =
   { "20HZ"   , ER_20HZ         },
   { "50HZ"   , ER_50HZ         },
   { NULL     , 0               }
+};
+
+static
+USER_ENUM_TBL engSNPortTypeStrs[] =
+{
+  {"NONE",     ENG_SN_PORT_NONE},
+  {"UART",     ENG_SN_PORT_UART},
+  { NULL,      0}
+};
+
+static
+USER_ENUM_TBL engSNPortIndexStrs[] =
+{
+//{"0",    ENG_SN_PORT_INDEX_0 }, // Future support
+  {"1",    ENG_SN_PORT_INDEX_1 },
+  {"2",    ENG_SN_PORT_INDEX_2 },
+  {"3",    ENG_SN_PORT_INDEX_3 },
+//{"10",   ENG_SN_PORT_INDEX_10}, // Future support
+  {NULL,   0}
 };
 
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
@@ -199,8 +234,6 @@ static USER_MSG_TBL engIdCmd[] =
    {NULL,     NULL,          NULL,          NO_HANDLER_DATA}
 };
 
-
-
 static USER_MSG_TBL engInfoCmd[] =
 {
    /*Str             Next Tbl Ptr   Handler Func   Data Type          Access    Parameter                    IndexRange         DataLimit             EnumTbl       */
@@ -218,9 +251,33 @@ static USER_MSG_TBL engRunCmd [] =
   {DISPLAY_CFG,     NO_NEXT_TABLE,    EngRunShowConfig, USER_TYPE_ACTION,    (USER_RO|USER_NO_LOG|USER_GSE)  ,NULL,      -1,-1,      NO_LIMIT,   NULL   },
   { NULL,           NULL,             NULL,             NO_HANDLER_DATA}
 };
+
+static USER_MSG_TBL engSerialNoCfgCmd [] =
+{
+  /*Str             Next Tbl Ptr        Handler Func      Data Type             Access      Parameter                        IndexRange          DataLimit     EnumTbl*/
+  {"PORTTYPE",      NO_NEXT_TABLE,      EngSerialNoCfg,   USER_TYPE_ENUM,       USER_RW,    &m_EngSerialCfgTemp.portType,    0, MAX_ENGINES-1,   NO_LIMIT,     engSNPortTypeStrs },
+  {"PORTINDEX",     NO_NEXT_TABLE,      EngSerialNoCfg,   USER_TYPE_ENUM,       USER_RW,    &m_EngSerialCfgTemp.portIndex,   0, MAX_ENGINES-1,   NO_LIMIT,     engSNPortIndexStrs },
+  { NULL,           NULL,               NULL,             NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL engSerialNoSatusCmd [] =
+{
+  /*Str             Next Tbl Ptr     Handler Func         Data Type            Access       Parameter                    IndexRange          DataLimit             EnumTbl*/
+  {"ESN",           NO_NEXT_TABLE,   EngSerialNoStatus,   USER_TYPE_STR,       USER_RO,     &m_EngSerialStatusTemp.esn,  0, MAX_ENGINES-1,   0, ENG_ESN_MAX_LEN,   engSNPortIndexStrs },
+  { NULL,           NULL,            NULL,                NO_HANDLER_DATA}
+};
+
+static USER_MSG_TBL engSerialNoCmd [] =
+{
+  /*Str             Next Tbl Ptr          Handler Func      Data Type             Access                         Parameter   IndexRange  DataLimit   EnumTbl*/
+  {"CFG",           engSerialNoCfgCmd,    NULL,             NO_HANDLER_DATA,                                                                                },
+  {"STATUS",        engSerialNoSatusCmd,  NULL,             NO_HANDLER_DATA,                                                                                },
+  { NULL,           NULL,                 NULL,             NO_HANDLER_DATA}
+};
 #pragma ghs endnowarning
 
 static USER_MSG_TBL rootEngRunMsg = {"ENG",engRunCmd, NULL,NO_HANDLER_DATA};
+static USER_MSG_TBL rootEngSerialNoMsg = {"ENG_SN", engSerialNoCmd, NULL,NO_HANDLER_DATA};
 
 
 /*****************************************************************************/
@@ -380,7 +437,7 @@ static USER_HANDLER_RESULT EngSPUserInfo(USER_DATA_TYPE DataType,
 /******************************************************************************
 * Function:     EngRunState
 *
-* Description:  Handles User Manager requests to retrieve the current Event
+* Description:  Handles User Manager requests to retrieve the current Engine
 *               status.
 *
 * Parameters:   [in] DataType:  C type of the data to be read or changed, used
@@ -412,6 +469,100 @@ static USER_HANDLER_RESULT EngRunState(USER_DATA_TYPE DataType,
    result = USER_RESULT_ERROR;
 
    memcpy(&m_DataTemp, &m_engineRunData[Index], sizeof(m_DataTemp));
+
+   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+
+   return result;
+}
+
+/******************************************************************************
+ * Function:     EngSerialNoCfg
+ *
+ * Description:  User message handler to set/get configuration items of the
+ *               Engine Serial Number object
+ *
+ * Parameters:   [in] DataType:  C type of the data to be read or changed, used
+ *                               for casting the data pointers
+ *               [in/out] Param: Pointer to the configuration item to be read
+ *                               or changed
+ *               [in] Index:     Index parameter is used to reference the
+ *                               specific sensor to change.  Range is validated
+ *                               by the user manager
+ *               [in] SetPtr:    For write commands, a pointer to the data to
+ *                               write to the configuration.
+ *               [out] GetPtr:   For read commands, UserCfg function will set
+ *                               this to the location of the data requested.
+ *
+ * Returns:      USER_RESULT_OK:    Processed successfully
+ *               USER_RESULT_ERROR: Error processing command.
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT EngSerialNoCfg(USER_DATA_TYPE DataType,
+                                          USER_MSG_PARAM Param,
+                                          UINT32 Index,
+                                          const void *SetPtr,
+                                          void **GetPtr)
+{
+ USER_HANDLER_RESULT result = USER_RESULT_OK;
+
+  memcpy(&m_EngSerialCfgTemp,
+         &CfgMgr_ConfigPtr()->EngineSerialNoConfigs[Index],
+         sizeof(m_EngSerialCfgTemp));
+
+  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
+
+  if(SetPtr != NULL && USER_RESULT_OK == result)
+  {
+    // Copy the updated temp  back to the shadow ram store.
+    memcpy(&CfgMgr_ConfigPtr()->EngineSerialNoConfigs[Index],
+           &m_EngSerialCfgTemp,
+           sizeof(m_EngSerialCfgTemp));
+
+    // Persist the CfgMgr's updated copy back to EEPROM.
+    CfgMgr_StoreConfigItem( CfgMgr_ConfigPtr(),
+                            &CfgMgr_ConfigPtr()->EngineSerialNoConfigs[Index],
+                            sizeof(m_EngSerialCfgTemp) );
+  }
+  return result;
+}
+
+/******************************************************************************
+* Function:     EngSerialNoStatus
+*
+* Description:  Handles User Manager requests to retrieve the current Engine 
+*               Serial No status.
+*
+* Parameters:   [in] DataType:  C type of the data to be read or changed, used
+*                               for casting the data pointers
+*               [in/out] Param: Pointer to the configuration item to be read
+*                               or changed
+*               [in] Index:     Index parameter is used to reference the
+*                               specific sensor to change.  Range is validated
+*                               by the user manager
+*               [in] SetPtr:    For write commands, a pointer to the data to
+*                               write to the configuration.
+*               [out] GetPtr:   For read commands, UserCfg function will set
+*                               this to the location of the data requested.
+
+*
+* Returns:      USER_HANDLER_RESULT
+*
+* Notes:
+*****************************************************************************/
+
+static USER_HANDLER_RESULT EngSerialNoStatus(USER_DATA_TYPE DataType,
+                                             USER_MSG_PARAM Param,
+                                             UINT32 Index,
+                                             const void *SetPtr,
+                                             void **GetPtr)
+{
+   USER_HANDLER_RESULT result;
+
+   result = USER_RESULT_ERROR;
+
+   memcpy(&m_EngSerialStatusTemp, &m_engineSerialNoStatus[Index], sizeof(m_EngSerialStatusTemp));
 
    result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
 
@@ -482,6 +633,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:46p
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 APAC, ESN updates
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 12/13/12   Time: 3:08p

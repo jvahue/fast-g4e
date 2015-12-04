@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 64 $  $Date: 15-04-14 7:15p $
+      $Revision: 67 $  $Date: 11/19/15 4:28p $
 
 ******************************************************************************/
 
@@ -115,7 +115,7 @@ static  UINT16  UartMgr_ReadBuffSnapshotProtocol     ( void *pDest, UINT32 chan,
                                                        UARTMGR_PROTOCOLS protocols );
 static BOOLEAN UartMgr_Protocol_ReadyOk_Hndl         ( UINT16 ch );
 static void UartMgr_Download_Clr_NoneHndl            ( BOOLEAN Run, INT32 param ); 
-
+static BOOLEAN UartMgr_Get_ESN_NoneHndl              ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
 
 #include "UartMgrUserTables.c"   // Include the cmd table & functions
 
@@ -211,6 +211,7 @@ void UartMgr_Initialize (void)
   EMU150Protocol_Initialize();
   IDParamProtocol_Initialize();
   GBSProtocol_Initialize(); 
+  PWCDispProtocol_Initialize();
   
 
   //Add an entry in the user message handler table
@@ -252,12 +253,14 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].get_protocol_esn = F7XProtocol_GetESN;
           break;
         case UARTMGR_PROTOCOL_EMU150:
           uartMgrBlock[i].exec_protocol = EMU150Protocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
           break;
         case UARTMGR_PROTOCOL_ID_PARAM:
@@ -265,6 +268,7 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
+          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_GBS:
@@ -272,8 +276,18 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr = GBSProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = GBSProtocol_DownloadHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
           uartMgrBlock[i].download_protocol_clr_hndl = GBSProtocol_DownloadClrHndl;
           break;          
+        case UARTMGR_PROTOCOL_PWC_DISPLAY:
+          uartMgrBlock[i].exec_protocol           = PWCDispProtocol_Handler;
+          uartMgrBlock[i].read_protocol           = PWCDispProtocol_Read_Handler;
+          uartMgrBlock[i].write_protocol          = PWCDispProtocol_Write_Handler;
+          uartMgrBlock[i].get_protocol_fileHdr    = PWCDispProtocol_ReturnFileHdr;
+          uartMgrBlock[i].download_protocol_hndl  = UartMgr_Download_NoneHndl;
+          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+	  uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
+          break;
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through
@@ -1339,6 +1353,24 @@ void UartMgr_DownloadClr ( BOOLEAN Run, INT32 param )
   }
 }
 
+/******************************************************************************
+ * Function:     UartMgr_ReadESN
+ *
+ * Description:  Returns the ESN decoded by the protocol (if available)
+ *
+ * Parameters:   ch - Uart Ch Protocol to request ESN from 
+ *               *esn_ptr - Ptr where ESN will be returned to App
+ *               cnt - Max char to return to the *esn_ptr
+ *
+ * Returns:      TRUE - if ESN has been decoded "once" from bus on this power up
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+BOOLEAN UartMgr_ReadESN ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
+{
+  return ( uartMgrBlock[ch].get_protocol_esn( ch, esn_ptr, cnt ) );
+}
 
 /******************************************************************************
  * Function:    UartMgr_ClearDownloadState
@@ -1375,6 +1407,83 @@ void UartMgr_ClearDownloadState ( UINT8 PortIndex )
   pUartMgrDownload->bHalt = FALSE;
 
   pUartMgrDownload->bNewRec = FALSE;
+}
+
+/******************************************************************************
+ * Function:    UartMgr_GetPort
+ *
+ * Description: Utility function that returns a protocol UART port.
+ *
+ * Parameters:  chan         - The UART channel
+ *
+ * Returns:     BYTE port    - The UART port
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+
+BYTE UartMgr_GetPort(UINT32 chan)
+{
+  UINT16 i;
+  BYTE port;
+  for (i = 1; i < (UINT8)UART_NUM_OF_UARTS; i++)
+  {
+      if (uartMgrBlock[i].protocol_ID == chan)
+      {
+	  port = i;
+      }
+  }
+  return(port);
+}
+
+/******************************************************************************
+ * Function:    UartMgr_Read
+ *
+ * Description: Utility function that allows a protocol to communicate in
+ *              simple fixed message formats with its application.
+ *
+ * Parameters:  *pDest       - The destination to Read the Data store into
+ *              chan         - The UART channel
+ *              Direction    - FALSE -> RX or TRUE -> TX
+ *              nMaxByteSize - The total size in bytes being Read
+ *
+ * Returns:     BOOLEAN bStatus - Verifying New Data Available
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
+                     UINT16 nMaxByteSize)
+{
+  BYTE port = UartMgr_GetPort(chan);
+  BOOLEAN bStatus;
+
+  bStatus = uartMgrBlock[port].read_protocol(pDest, port, Direction,
+                                             nMaxByteSize);
+  return (bStatus);
+}
+
+/******************************************************************************
+ * Function:    UartMgr_Write
+ *
+ * Description: Utility function that allows a protocol to communicate in
+ *              simple fixed message formats with its application.
+ *
+ * Parameters:  *pDest       - The destination to Read the Data store into
+ *              chan         - The UART channel
+ *              Direction    - FALSE -> RX or TRUE -> TX
+ *              nMaxByteSize - The total size in bytes being Read
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+void UartMgr_Write(void *pDest, UINT32 chan, UINT16 Direction, 
+                   UINT16 nMaxByteSize)
+{
+  BYTE port = UartMgr_GetPort(chan);
+  uartMgrBlock[port].write_protocol(pDest, port, Direction, nMaxByteSize);
 }
 
 
@@ -2189,10 +2298,47 @@ void UartMgr_Download_Clr_NoneHndl ( BOOLEAN Run, INT32 param )
    FATAL("UartMgr: Protocol Does Not Have Download Clr Function",NULL);   
 }
 
+/******************************************************************************
+ * Function:     UartMgr_Get_ESN_NoneHndl
+ *
+ * Description:  Function to handle UART protocols that don't have get ESN 
+ *               routine(s). 
+ *
+ * Parameters:   ch - not used
+ *               *esn_ptr - not used
+ *               cnt - not used
+ *
+ * Returns:      BOOLEAN not used
+ *
+ * Notes:        none
+ *
+ *****************************************************************************/
+static
+BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
+{
+   FATAL("UartMgr: Protocol Does Not Have Get ESN Function",NULL);
+   return FALSE;
+}
+
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 67  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:28p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for the Display Processing App
+ * 
+ * *****************  Version 66  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 10:29p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN support for APAC Processing
+ * 
+ * *****************  Version 65  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
  * 
  * *****************  Version 64  *****************
  * User: Peter Lee    Date: 15-04-14   Time: 7:15p

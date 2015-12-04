@@ -17,7 +17,7 @@
                   defines for user data access (ie. USER_RO)
 
     VERSION
-    $Revision: 48 $  $Date: 10/22/14 6:26p $
+    $Revision: 51 $  $Date: 11/19/15 4:10p $
 
 ******************************************************************************/
 
@@ -39,7 +39,7 @@
 
 //Number of different commands at the root level (i.e. the string before the
 //first "." delimiter)
-#define USER_MAX_ROOT_CMDS 40
+#define USER_MAX_ROOT_CMDS 43
 
 #define USER_MSG_READ_ONLY          "Error: Read Only Command"
 #define USER_MSG_WRITE_ONLY         "Error: Write Only Command"
@@ -108,10 +108,10 @@ typedef enum{
   USER_TYPE_UINT8,
   USER_TYPE_UINT16,
   USER_TYPE_UINT32,
-  //USER_TYPE_INT8,
+  USER_TYPE_INT8,
   //USER_TYPE_INT16,
   USER_TYPE_INT32,
-  //USER_TYPE_HEX8,
+  USER_TYPE_HEX8,
   USER_TYPE_HEX16,
   USER_TYPE_HEX32,
   //USER_TYPE_ENUM8,
@@ -281,11 +281,25 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
  *  MODIFICATIONS
  *    $History: User.h $
  * 
+ * *****************  Version 51  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:10p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates for Display Processing Application
+ * 
+ * *****************  Version 50  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:46p
+ * Updated in $/software/control processor/code/application
+ * SCR #1304 APAC, ESN updates
+ * 
+ * *****************  Version 49  *****************
+ * User: Contractor V&v Date: 8/26/15    Time: 7:19p
+ * Updated in $/software/control processor/code/application
+ *
  * *****************  Version 48  *****************
  * User: Contractor V&v Date: 10/22/14   Time: 6:26p
  * Updated in $/software/control processor/code/application
  * SCR #1271 - Initialization of ACTION list exceeds field size
- * 
+ *
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 12/20/12   Time: 5:36p
  * Updated in $/software/control processor/code/application

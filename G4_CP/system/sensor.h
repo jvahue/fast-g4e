@@ -10,7 +10,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 48 $  $Date: 11/03/14 5:21p $
+      $Revision: 52 $  $Date: 11/05/15 6:31p $
 
 ******************************************************************************/
 
@@ -66,7 +66,7 @@
                               0,                       /* SignalDuration_ms  */\
                               FALSE,                   /* bInspectInclude    */\
                               0,                       /* GeneralPurposeA    */\
-                              0                        /* GeneralPurposeB    */
+                              0,                       /* GeneralPurposeB    */
 
 //Default configuration for the sensors
 #define SENSOR_CONFIGS_DEFAULT {SENSOR_CONFIG_DEFAULT},\
@@ -215,6 +215,11 @@
 #define LD_DELIM    2
 #define GETLIST_BUFF_SIZE (LD_SNSR_LEN + MAX_SENSORNAME + MAX_SENSORUNITS + LD_DELIM)
 
+// Macro to unpack Virtual sensor info from a GPA word
+#define UNPACK_VIRTUAL_SNRA(word)((word & 0x0000FF00) >> 8)
+#define UNPACK_VIRTUAL_SNRB(word)((word & 0x000000FF))
+#define UNPACK_VIRTUAL_TYPE(word)((word & 0x00070000) >> 16)
+
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -289,9 +294,9 @@ typedef enum
     SAMPLE_DISCRETE,         /* Discrete Data      */
     SAMPLE_UART,             /* Uart Data          */
     //SAMPLE_SERIAL,
-    //SAMPLE_VIRTUAL,
+    SAMPLE_VIRTUAL,          /* Sensor is Virtual  */
     /*-end-of-list-*/
-    MAX_SAMPLETYPE         /* For validation */
+    MAX_SAMPLETYPE           /* For validation */
 } SAMPLETYPE;
 
 typedef enum
@@ -344,6 +349,17 @@ typedef enum
     RATE_FAILURE,            /* Rate Failure      */
     MAX_FAILURE
 } SENSORFAILURE;
+
+// Virtual sensor type(operation)
+typedef enum
+{
+  VIRTUAL_UNUSED = 0,
+  VIRTUAL_ADD,
+  VIRTUAL_DIFF,
+  VIRTUAL_MULT,
+  VIRTUAL_DIV,
+  VIRTUAL_MAX
+}VIRTUALTYPE;
 
 typedef FLOAT32 (*GET_SENSOR) (UINT16, UINT32* );
 typedef BOOLEAN (*RUN_TEST) (UINT16);
@@ -433,6 +449,7 @@ typedef struct
    UINT32         nRate_ms;   /* Rate in milliseconds to output live data */
 }SENSOR_LD_CONFIG;
 #pragma pack()
+
 //A type for an array of the maximum number of sensors
 //Used for storing sensor configurations in the configuration manager
 typedef SENSOR_CONFIG SENSOR_CONFIGS[MAX_SENSORS];
@@ -490,6 +507,9 @@ typedef struct
     GET_SENSOR        pGetSensorData;               /* Pointer to function to get data   */
     RUN_TEST          pTestSensor;                  /* Ptr to func that tests the sensor */
     INTERFACE_ACTIVE  pInterfaceActive;             /* Ptr to func that tests activity   */
+    VIRTUALTYPE       vOpType;                      /* The op to perform on input A and B*/
+    SENSOR_INDEX      vSnsrA;                       /* The index of input sensor A       */
+    SENSOR_INDEX      vSnsrB;                       /* The index of input sensor B       */
 } SENSOR;
 
 // Storage container definition for Sensor failure log
@@ -520,7 +540,6 @@ typedef struct
    BOOLEAN    configured;
    SENSOR_HDR sensor;
 } SENSOR_ETM_HDR;
-
 
 #pragma pack()
 
@@ -568,6 +587,27 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
  *  MODIFICATIONS
  *    $History: sensor.h $
  * 
+ * *****************  Version 52  *****************
+ * User: Contractor V&v Date: 11/05/15   Time: 6:31p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Switch to ENUM types vs UINT8
+ * 
+ * *****************  Version 51  *****************
+ * User: Contractor V&v Date: 11/02/15   Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Use ASSERT instead of log msg and invalidated 
+ * sensors
+ * 
+ * *****************  Version 50  *****************
+ * User: Contractor V&v Date: 9/09/15    Time: 6:42p
+ * Updated in $/software/control processor/code/system
+ * P100 Update for virtual sensor validation and error logging.
+ * 
+ * *****************  Version 49  *****************
+ * User: Contractor V&v Date: 8/26/15    Time: 7:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - P100 Implement the Deferred Virtual Sensor Requirements
+ *
  * *****************  Version 48  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:21p
  * Updated in $/software/control processor/code/system

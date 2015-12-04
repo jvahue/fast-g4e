@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 55 $  $Date: 1/12/15 1:10p $
+ $Revision: 60 $  $Date: 11/19/15 4:12p $
 
 ******************************************************************************/
 
@@ -36,6 +36,7 @@
 #include "MSFileXfr.h"
 #include "UartMgr.h"
 #include "F7XProtocol.h"
+#include "PWCDispProtocol.h"
 #include "EMU150Protocol.h"
 #include "FASTStateMgr.h"
 #include "Event.h"
@@ -47,6 +48,8 @@
 #include "Creep.h"
 #include "IDParamProtocol.h"
 #include "GBSProtocol.h"
+#include "APACMgr.h"
+#include "DispProcessingApp.h"
 #ifdef ENV_TEST
 #include "Etm.h"
 #endif
@@ -123,6 +126,8 @@ typedef struct
     F7X_DUMPLIST_CFGS       F7XConfig;
     // F7X Protocol Param configuration
     F7X_PARAM_LIST          F7XParamConfig;
+    // F7X Protocol Option configuration
+    F7X_GENERAL_CFGS        F7XGeneralCfg; 
     // EMU150 Protocol configuration
     EMU150_CFG              EMU150Config;
     // FAST State Machine configuration
@@ -137,6 +142,8 @@ typedef struct
     TIMEHISTORY_CONFIG      TimeHistoryConfig;
     // ENGINERUN Configuration
     ENGRUN_CFGS             EngineRunConfigs;
+    // ENGINE SERIAL NO Configuration
+    ENG_SN_CFGS             EngineSerialNoConfigs;
     // CYCLE Configuration
     CYCLE_CFGS              CycleConfigs;
     // TREND Configuration
@@ -149,6 +156,12 @@ typedef struct
     GBS_CTL_CFG             GBSCtlConfig;
     // GBS Param Protocol Configuration
     GBS_CFGS                GBSConfigs;
+    // PWC Disp Param Protocol Configuration
+    PWCDISP_CFG             PWCDispConfig;
+    // Display Processing App Configuration
+    DISPLAY_SCREEN_CONFIG   DispProcAppConfig;
+    // APAC Configuration
+    APAC_CFG                APACConfig;    
 #ifdef ENV_TEST
     TestControl             etm;
 #endif
@@ -207,6 +220,31 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 60  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:12p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for Display Processing Application
+ * 
+ * *****************  Version 59  *****************
+ * User: Peter Lee    Date: 11/05/15   Time: 6:46p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC, ESN updates
+ * 
+ * *****************  Version 58  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 10:10p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN support for APAC Processing 
+ * 
+ * *****************  Version 57  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing Initial Check In
+ * 
+ * *****************  Version 56  *****************
+ * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR - 1302 Added PWC Display Protocol
  * 
  * *****************  Version 55  *****************
  * User: John Omalley Date: 1/12/15    Time: 1:10p

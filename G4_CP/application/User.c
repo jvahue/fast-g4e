@@ -43,7 +43,7 @@
 
 
    VERSION
-   $Revision: 121 $  $Date: 1/19/15 2:37p $
+   $Revision: 123 $  $Date: 11/19/15 4:10p $
 
 ******************************************************************************/
 
@@ -840,8 +840,8 @@ USER_MSG_TBL* User_TraverseCmdTables(INT8* MsgTokPtr, USER_MSG_TBL* CmdMsgTbl, I
 static
 BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
                               INT32 Index, INT8* SetStr, INT8* RspStr, UINT32 Len)
-  {    
-    UINT32 tempInt[USER_DATA_TYPE_MAX_WORDS]; // Store up to USER_TYPE_128_LIST. See Notes.  
+  {
+    UINT32 tempInt[USER_DATA_TYPE_MAX_WORDS]; // Store up to USER_TYPE_128_LIST. See Notes.
     void* setPtr = tempInt;
     void* getPtr = tempInt;
     USER_RANGE min,max;
@@ -849,7 +849,7 @@ BOOLEAN User_ExecuteSingleMsg(USER_MSG_TBL* MsgTbl,USER_MSG_SOURCES source,
 
     if (User_ValidateMessage(MsgTbl,source,Index,RspStr,SetStr, Len))
     {
-      //SetStr is the string after the "=" delimiter.  If it is present 
+      //SetStr is the string after the "=" delimiter.  If it is present
       //this is a "set" command to write a value.
       if(SetStr != NULL)
       {
@@ -1266,13 +1266,13 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
   //For numerical types, test the sign and base
   switch(Type)
   {
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
     case USER_TYPE_HEX16:
     case USER_TYPE_UINT16:
     case USER_TYPE_HEX32:
     case USER_TYPE_UINT32:
-    //case USER_TYPE_INT8:
+    case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     //case USER_TYPE_INT32:
     if ( strncmp("0X",SetStr,2) == 0)
@@ -1312,7 +1312,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     table*/
   switch(Type)
   {
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_UINT8:
       /*UINT8 type, check min/max bounds incl. the max value a uint8 can
         represent.  Value also must be positive*/
@@ -1378,7 +1378,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       // NOTE: if adding new USER_TYPE_xxxx_LIST, update how byteCnt is assigned below.
       //*********************************************************************************
 
-      // Clear the receiving bit field based on the byteCnt of specific USER_TYPE 
+      // Clear the receiving bit field based on the byteCnt of specific USER_TYPE
       byteCnt = (USER_TYPE_ACT_LIST == Type) ? sizeof(UINT32) : sizeof(BITARRAY128);
       memset((UINT32*)*SetPtr, 0, byteCnt );
 
@@ -1541,9 +1541,11 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
       }
       break;
 
-    case USER_TYPE_ENUM:
+    case USER_TYPE_ENUM: //lint -fallthrough
     //case USER_TYPE_ENUM16:
     //case USER_TYPE_ENUM8:
+      result = TRUE;
+
       //find the string the the table and return its corresponding integer value
       ASSERT(MsgEnumTbl != NULL);
       for(i = 0; MsgEnumTbl[i].Str != NULL; i++)
@@ -1552,20 +1554,30 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
         {
           if(USER_TYPE_ENUM == Type)
           {
+            ASSERT_MESSAGE( (MsgEnumTbl[i].Num <= UINT32_MAX),
+                           "Enum Table value: %d exceeds USER_TYPE_ENUM: %d",
+                           MsgEnumTbl[i].Num, UINT32_MAX);
             **(UINT32**)SetPtr = MsgEnumTbl[i].Num;
           }
-          //else if(USER_TYPE_ENUM16 == Type)
-          //{
-          //  **(UINT16**)SetPtr = (UINT16)MsgEnumTbl[i].Num;
-          //}
-          //else /*Type is ENUM8*/
-          //{
-          //  **(UINT8**)SetPtr = (UINT8)MsgEnumTbl[i].Num;
-          //}
+          /*else if(USER_TYPE_ENUM8 == Type)
+          {
+            ASSERT_MESSAGE( (MsgEnumTbl[i].Num <= UINT8_MAX),
+              "Enum Table value: %d exceeds USER_TYPE_ENUM8: %d",
+              MsgEnumTbl[i].Num, UINT8_MAX);
+            **(UINT8**)SetPtr = (UINT8)MsgEnumTbl[i].Num;
+          }
+          else if(USER_TYPE_ENUM16 == Type)
+          {
+            ASSERT_MESSAGE( (MsgEnumTbl[i].Num <= UINT16_MAX),
+                           "Enum Table value: %d exceeds USER_TYPE_ENUM16: %d",
+                           MsgEnumTbl[i].Num, UINT16_MAX);
+                           **(UINT16**)SetPtr = (UINT16)MsgEnumTbl[i].Num;
+          }*/
           result = TRUE;
           break;
         }
       }
+
       //If the string could not be found, return an error
       if(MsgEnumTbl[i].Str == NULL)
       {
@@ -1636,13 +1648,13 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     //  sprintf(GetStr,"%d",*(UINT16*)GetPtr);
     //  break;
 
-    //case USER_TYPE_INT8:
-    //  sprintf(GetStr,"%d",*(UINT8*)GetPtr);
-    //  break;
+    case USER_TYPE_INT8:
+      snprintf(GetStr,(INT32)Len, "%d",*(UINT8*)GetPtr);
+      break;
 
-    //case USER_TYPE_HEX8:
-    //  snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
-    //  break;
+    case USER_TYPE_HEX8:
+      snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
+      break;
 
     case USER_TYPE_HEX16:
       snprintf(GetStr, (INT32)Len, "0x%04X",*(UINT16*)GetPtr);
@@ -1683,28 +1695,33 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       strncpy_safe(GetStr,(INT32)Len,*(BOOLEAN*)GetPtr ? "ON" : "OFF", _TRUNCATE);
       break;
 
-    case USER_TYPE_ENUM:
+
+    //case USER_TYPE_ENUM8:// Fallthrough
     //case USER_TYPE_ENUM16:
-    //case USER_TYPE_ENUM8:
+    case USER_TYPE_ENUM:
+
       ASSERT(MsgEnumTbl != NULL);
 
       //find the number in the the table and return its corresponding string
       for(i = 0; MsgEnumTbl[i].Str != NULL; i++)
       {
-        if(MsgEnumTbl[i].Num == *(UINT32*)GetPtr)
+        if( MsgEnumTbl[i].Num == *(UINT32*)GetPtr)
         {
-          strncpy_safe(GetStr,(INT32)Len, MsgEnumTbl[i].Str, _TRUNCATE);
+          strncpy_safe(GetStr,Len, MsgEnumTbl[i].Str, _TRUNCATE);
           break;
         }
-        //Cast based on enum width.
-        //if( MsgEnumTbl[i].Num ==
-        //    (Type == USER_TYPE_ENUM ? *(UINT32*)GetPtr :
-        //     Type == USER_TYPE_ENUM16 ? *(UINT16*)GetPtr : *(UINT8*)GetPtr) )
-        //if ( MsgEnumTbl[i].Num == *(UINT32*)GetPtr)
+        ////Cast based on enum width for pseudo-enums.
+        //if( MsgEnumTbl[i].Num == (Type == USER_TYPE_ENUM ? *(UINT32*)GetPtr
+        //                                                 : *(UINT8*)GetPtr) )
+        // //    Type == USER_TYPE_ENUM16 ? *(UINT16*)GetPtr : *(UINT8*)GetPtr) )
         //{
+        //  ASSERT_MESSAGE( MsgEnumTbl[i].Num <= (Type == USER_TYPE_ENUM ? UINT32_MAX
+        //                                                               : UINT8_MAX),
+        //                 "Enum Table value exceeds range for type: %d", MsgEnumTbl[i].Num);
         //  strncpy_safe(GetStr,Len, MsgEnumTbl[i].Str, _TRUNCATE);
         //  break;
         //}
+
       }
 
       //If the string could not be found, return an error
@@ -1763,7 +1780,7 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
   switch(Type)
   {
     case USER_TYPE_UINT8:
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
       Min->Uint = noLimit ? 0          : Min->Uint;
       Max->Uint = noLimit ? UINT8_MAX  : MIN(UINT8_MAX,Max->Uint);
       break;
@@ -1780,10 +1797,10 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
       Max->Uint = noLimit ? UINT32_MAX : MIN(UINT32_MAX,Max->Uint);
       break;
 
-    //case USER_TYPE_INT8:
-    //  Min->Sint = NoLimit ? INT8_MIN   : MAX(INT8_MIN,Min->Sint);
-    //  Max->Sint = NoLimit ? INT8_MAX   : MIN(INT8_MAX,Max->Sint);
-    //  break;
+    case USER_TYPE_INT8:
+      Min->Sint = noLimit ? INT8_MIN   : MAX(INT8_MIN,Min->Sint);
+      Max->Sint = noLimit ? INT8_MAX   : MIN(INT8_MAX,Max->Sint);
+      break;
 
     //case USER_TYPE_INT16:
     //  Min->Sint = NoLimit ? INT16_MIN  : MAX(INT16_MIN,Min->Sint);
@@ -1877,7 +1894,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
               Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
-    //case USER_TYPE_HEX8:
+    case USER_TYPE_HEX8:
     case USER_TYPE_HEX16:
     case USER_TYPE_HEX32:
       snprintf(RspStr,destLength,
@@ -1885,7 +1902,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
                Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
-    //case USER_TYPE_INT8:
+    case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     case USER_TYPE_INT32:
       snprintf(RspStr,destLength,USER_MSG_CMD_CONVERSION_ERR"valid range is %d to %d.%s",
@@ -1925,7 +1942,9 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
              USER_MSG_CMD_CONVERSION_ERR"valid set is [ON,OFF]",_TRUNCATE);
       break;
 
+    // lint - fallthrough
     case USER_TYPE_ENUM:
+    //case USER_TYPE_ENUM8:
       if(Enum != NULL)
       {
         strncpy_safe(RspStr,(INT32)destLength,
@@ -2345,7 +2364,9 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
     // Set the param data with the data at the SetPtr
     switch(DataType)
     {
+      //lint -fallthrough
       case USER_TYPE_UINT8:
+      //case USER_TYPE_ENUM8:
         *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
         break;
 
@@ -2388,16 +2409,18 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(BOOLEAN *) Param.Ptr = *(BOOLEAN*)SetPtr;
         break;
 
-     /*
+     
       case USER_TYPE_INT8:
+      
+     /*
       case USER_TYPE_INT16:
       case USER_TYPE_ENUM8:
       case USER_TYPE_ENUM16:
      */
 
-      //case USER_TYPE_HEX8:
-      //  *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
-      //  break;
+      case USER_TYPE_HEX8:
+        *(UINT8*)Param.Ptr = *(UINT8*)SetPtr;
+        break;
 
       case USER_TYPE_INT32:
         *(INT32*)Param.Ptr = *(INT32*)SetPtr;
@@ -3030,11 +3053,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
   UINT32* word = destPtr;
   BOOLEAN status = TRUE;
 
-  
-  
+
+
   if (type == USER_TYPE_ACT_LIST)
   {
-    // verify only bit 0-7, 12-19, 27 and 31 are on    
+    // verify only bit 0-7, 12-19, 27 and 31 are on
     status = ((word[0] & ~0x880ff0ff) != 0) ? FALSE : TRUE;
   }
   else
@@ -3078,7 +3101,7 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
       {
         status = FALSE;
       }
-    }  
+    }
     else
     {
       // range for other types (USER_TYPE_128_LIST) is min/max bit set
@@ -3088,9 +3111,9 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
         status = FALSE;
       }
     }
-  } // process bit lists, 
+  } // process bit lists,
 
-  
+
 
   return status;
 }
@@ -3099,41 +3122,51 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
  *  MODIFICATIONS
  *    $History: User.c $
  * 
+ * *****************  Version 123  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:10p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates for Display Processing Application
+ * 
+ * *****************  Version 122  *****************
+ * User: Contractor V&v Date: 8/26/15    Time: 7:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1299 - P100 Implement the Deferred Virtual Sensor Requirements
+ *
  * *****************  Version 121  *****************
  * User: John Omalley Date: 1/19/15    Time: 2:37p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - Updates per Code Review
- * 
+ *
  * *****************  Version 120  *****************
  * User: John Omalley Date: 12/11/14   Time: 1:13p
  * Updated in $/software/control processor/code/application
  * SCR 1167 - User Min length for strings incorrect
- * 
+ *
  * *****************  Version 119  *****************
  * User: Contractor V&v Date: 11/17/14   Time: 6:16p
  * Updated in $/software/control processor/code/application
  * SCR #1262 - LiveData CP to MS found existing bug, fixed
- * 
+ *
  * *****************  Version 118  *****************
  * User: John Omalley Date: 11/14/14   Time: 9:45a
  * Updated in $/software/control processor/code/application
  * SCR 1267 - Made "showcfg" command RO
- * 
+ *
  * *****************  Version 117  *****************
  * User: Contractor V&v Date: 10/22/14   Time: 6:26p
  * Updated in $/software/control processor/code/application
  * SCR #1271 - Initialization of ACTION list exceeds field size
- * 
+ *
  * *****************  Version 116  *****************
  * User: John Omalley Date: 4/07/14    Time: 11:54a
  * Updated in $/software/control processor/code/application
  * SCR 1212 - Fixed Range check in User_ValidateMessage() function
- * 
+ *
  * *****************  Version 115  *****************
  * User: John Omalley Date: 13-01-21   Time: 3:46p
  * Updated in $/software/control processor/code/application
  * SCR 1219 - Misc Creep User Table Updates
- * 
+ *
  * *****************  Version 114  *****************
  * User: Contractor V&v Date: 1/04/13    Time: 3:13p
  * Updated in $/software/control processor/code/application

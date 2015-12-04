@@ -12,7 +12,7 @@
                  to this module.
 
    VERSION
-    $Revision: 69 $  $Date: 1/12/15 1:51p $
+    $Revision: 73 $  $Date: 11/19/15 4:32p $
 
 ******************************************************************************/
 
@@ -160,7 +160,7 @@ NV_EVENT_HISTORY   - High level history of Event processing.
 NV_FILE(NV_BOX_CFG,        "Status Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,  (1 KB)), \
 NV_FILE(NV_PWR_ON_CNTS_EE, "Power-On Counts EE",   DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  NULL                    ,     256), \
 NV_FILE(NV_PWR_ON_CNTS_RTC,"Power-On Counts RTC",  DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      12), \
-NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (93 KB)),\
+NV_FILE(NV_CFG_MGR,        "Configuration Manager",DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  CfgMgr_FileInit         ,  (93 KB)),/*94532 Needed*/\
 NV_FILE(NV_UPLOAD_VFY_TBL, "Upload Manager",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  UploadMgr_InitFileVfyTbl,    18176),\
 NV_FILE(NV_FAULT_LOG,      "Fault Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Flt_InitFltBuf          ,      256),\
 NV_FILE(NV_PWR_MGR,        "Power Manager",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  PmFileInit              ,      256),\
@@ -181,7 +181,10 @@ NV_FILE(NV_CREEP_DATA,     "Creep Data",           DEV_EE_PRI,   DEV_EE_BKUP,  C
 NV_FILE(NV_CREEP_CNTS_RTC, "Creep Cnts RTC",       DEV_RTC_PRI,  DEV_NONE,     CM_CRC16,  NULL                    ,      20), \
 NV_FILE(NV_CREEP_HISTORY,  "Creep Fault History",  DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, Creep_FaultFileInit     ,    1024), \
 NV_FILE(NV_EVENT_HISTORY,  "Event History Buffer", DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  EventInitHistoryBuffer  ,     512), \
-NV_FILE(NV_GBS_DATA,       "GBS App Data",         DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  GBS_FileInit            ,     256)
+NV_FILE(NV_GBS_DATA,       "GBS App Data",         DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  GBS_FileInit            ,     256), \
+NV_FILE(NV_DISPPROC_CFG,   "Display Processing",   DEV_EE_PRI,   DEV_EE_BKUP,  CM_CRC16,  DispProcessingApp_FileInit,   256), \
+NV_FILE(NV_APAC_HIST,      "APAC Hist Data",       DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, APACMgr_FileInitHist    ,    1508), \
+NV_FILE(NV_APAC_NVM,       "APAC NVM Data",        DEV_EE_PRI,   DEV_EE_BKUP,  CM_CSUM16, APACMgr_FileInitNVM     ,     256)
 
 
 /******************************************************************************
@@ -398,6 +401,26 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 73  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for the Diplay Processing App
+ * 
+ * *****************  Version 72  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 9:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 Additional APAC Processing development
+ * 
+ * *****************  Version 71  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 3:00p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing.  Update Cfg NVM size to 93KB from 92KB. 
+ * 
+ * *****************  Version 70  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing Initial Check In
  * 
  * *****************  Version 69  *****************
  * User: John Omalley Date: 1/12/15    Time: 1:51p

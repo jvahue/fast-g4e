@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 122 $  $Date: 9/22/14 6:49p $
+     $Revision: 124 $  $Date: 11/19/15 4:32p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -39,6 +39,7 @@
 #include "event.h"
 #include "ActionManager.h"
 #include "Creep.h"
+#include "DispProcessingApp.h"
 
 #ifdef STE_TP
   #include "TestPoints.h"
@@ -510,6 +511,9 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
 
   STARTUP_ID(sysStartupId++);
   Creep_Initialize(degradedMode);
+  
+  STARTUP_ID(sysStartupId++);
+  APACMgr_Initialize();
 
 
 #ifdef ENV_TEST
@@ -557,6 +561,9 @@ static void Im_Application_Initialize(void)
 
   STARTUP_ID(appStartupId++);
   TH_Init();
+
+  STARTUP_ID(appStartupId++);
+  DispProcessingApp_Initialize();
 
   STARTUP_ID(appStartupId);
 }
@@ -771,6 +778,16 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 124  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Updates for the Diplay Processing App
+ * 
+ * *****************  Version 123  *****************
+ * User: Peter Lee    Date: 15-10-13   Time: 1:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC Processing Initial Check In
  * 
  * *****************  Version 122  *****************
  * User: Contractor V&v Date: 9/22/14    Time: 6:49p

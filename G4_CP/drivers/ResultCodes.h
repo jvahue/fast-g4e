@@ -19,7 +19,7 @@
  *                different types of error reporting from different drivers
  *
  *  VERSION
- *    $Revision: 59 $  $Date: 12-11-02 12:48p $
+ *    $Revision: 60 $  $Date: 11/19/15 4:10p $
  *
  *
 ******************************************************************************/
@@ -183,7 +183,18 @@ RESULT_CODE(SYS_UART_DATA_LOSS_TIMEOUT                 , 0x002A1000)\
 RESULT_CODE(SYS_UART_WORD_TIMEOUT                      , 0x002A4000)\
 RESULT_CODE(SYS_UART_F7X_NEW_DL_FOUND                  , 0x002A8000)\
 RESULT_CODE(SYS_UART_F7X_DL_NOT_RECOGNIZED             , 0x002A9000)\
-RESULT_CODE(SYS_UART_PBIT_UART_OPEN_FAIL               , 0x002AF000)
+RESULT_CODE(SYS_UART_PBIT_UART_OPEN_FAIL               , 0x002AF000)\
+RESULT_CODE(SYS_DISPLAY_APP_TIMEOUT                    , 0x002B0000)\
+RESULT_CODE(SYS_DISPLAY_APP_ENTER_BUTTON               , 0x002B1000)\
+RESULT_CODE(SYS_DISPLAY_APP_MANUAL_ABORT               , 0x002B2000)\
+RESULT_CODE(SYS_DISPLAY_APP_PBIT_ACTIVE                , 0x002B3000)\
+RESULT_CODE(SYS_DISPLAY_APP_PBIT_PASS                  , 0x002B3100)\
+RESULT_CODE(SYS_DISPLAY_APP_INOP_MON_FAULT             , 0x002B3200)\
+RESULT_CODE(SYS_DISPLAY_APP_INOP_SIGNAL_FAULT          , 0x002B3300)\
+RESULT_CODE(SYS_DISPLAY_APP_RX_COM_FAULT               , 0x002B3400)\
+RESULT_CODE(SYS_DISPLAY_APP_DISPLAY_FAULT              , 0x002B3500)\
+RESULT_CODE(SYS_DISPLAY_APP_DIAGNOSTIC_MODE            , 0x002B3600)\
+RESULT_CODE(SYS_DISPLAY_APP_D_HLTH_UNKNOWN             , 0x002B3700)
 
 /******************************************************************************
                                    Package Typedefs
@@ -222,6 +233,11 @@ EXPORT const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.h $
+ * 
+ * *****************  Version 60  *****************
+ * User: John Omalley Date: 11/19/15   Time: 4:10p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Updates for Display Processing Application
  * 
  * *****************  Version 59  *****************
  * User: Melanie Jutras Date: 12-11-02   Time: 12:48p

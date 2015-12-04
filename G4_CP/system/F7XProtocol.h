@@ -13,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 15 $  $Date: 4/14/15 2:34p $     
+      $Revision: 17 $  $Date: 11/30/15 6:56p $     
 
 ******************************************************************************/
 
@@ -241,8 +241,18 @@
   { DR_NO_RANGE_SCALE, DR_EVERY_CHANGE_TOL, F7X_PARAM_NO_TIMEOUT }, /* Not Used    - 000*/\
   }
 
-
 #define F7X_DUMPLIST_NOT_RECOGNIZED_INDEX 255
+
+
+#define F7X_GENERAL_DEFAULT \
+        FALSE,           /* esn_enb */\
+        0x00000000       /* esn_gpa */
+
+#define F7X_GENERAL_DEFAULT_CFGS \
+        F7X_GENERAL_DEFAULT,  /* CH 0 - Not Used */\
+        F7X_GENERAL_DEFAULT,  /* CH 1  */\
+        F7X_GENERAL_DEFAULT,  /* CH 2  */\
+        F7X_GENERAL_DEFAULT   /* CH 3  */
 
 
 #define DR_ONE_VALUE_TOL    100.0f
@@ -286,6 +296,41 @@ typedef struct
 //A type for an array of the maximum number of uarts
 //Used for storing f7x configurations in the configuration manager
 typedef F7X_DUMPLIST_CFG F7X_DUMPLIST_CFGS[F7X_MAX_DUMPLISTS];
+
+typedef struct {
+  BOOLEAN esn_enb;     // ESN decode enable
+  UINT32 esn_gpa;      // ESN General Purpose A Register
+} F7X_OPTION_CFG, *F7X_OPTION_CFG_PTR; 
+
+typedef struct {
+  F7X_OPTION_CFG option;
+} F7X_GENERAL_CFG, *F7X_GENERAL_CFG_PTR;
+
+typedef F7X_GENERAL_CFG F7X_GENERAL_CFGS[UART_NUM_OF_UARTS];
+
+#define F7X_ESN_CHAR_MAX 7  // 6 CHAR + NULL term. 
+#define F7X_ESN_CHAR_RAW_MAX 3  // Three 16-bit words encode the ESN
+//#define F7X_ESN_CHAR_2  2
+//#define F7X_ESN_CHAR_1  1
+//#define F7X_ESN_CHAR_0  0
+#define F7X_ESN_GPA_W2(x) ( (x & 0x00FF0000) >> 16 )
+#define F7X_ESN_GPA_W1(x) ( (x & 0x0000FF00) >>  8 )
+#define F7X_ESN_GPA_W0(x) ( (x & 0x000000FF) )
+#define F7X_ESN_MSB(x) ( (x & 0xFF00) >> 8 )
+#define F7X_ESN_LSB(x) ( (x & 0x00FF) )
+#define F7X_ESN_SYNC_THRES  20  // The same ESN val must be decoded at least 20 times
+                                //  before considered "real'. At 20 Hz, this normally is 
+                                //  1 sec. 
+typedef struct 
+{
+  BOOLEAN bDecoded;  // ESN has been decoded once from the bus for this curr pwr up
+  CHAR esn[F7X_ESN_CHAR_MAX];  // ESN in format "XX0000" where "XX" - Eng Code Alph Char
+  CHAR esn_sync[F7X_ESN_CHAR_MAX];  // ESN temp before threshold exceed to indicate new ESN
+  UINT32 nCntSync;   // If esn_sync has not changed for threshold, indicate new ESN
+  UINT32 nCntChanged;// Cnt of the # times ESN raw has changed.  
+  UINT32 nCntNew;    // Cnt of the # times ESN has changed.  1 = first time sync. After thres. 
+  UINT32 nCntBad;    // Cnt of the # times ESN has bad format decoded. 
+} F7X_ESN_STATUS, *F7X_ESN_STATUS_PTR; 
 
 
 
@@ -418,6 +463,7 @@ EXPORT BOOLEAN F7XProtocol_FileInit(void);
 
 EXPORT void F7XProtocol_DisableLiveStream(void);
 
+EXPORT BOOLEAN F7XProtocol_GetESN ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
 
 #endif // F7X_PROTOCOL_H               
 
@@ -425,6 +471,17 @@ EXPORT void F7XProtocol_DisableLiveStream(void);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 11/30/15   Time: 6:56p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 APAC processing. Update to ESN processing. Ref AI-6 of APAC
+ * Mgr PRD.
+ * 
+ * *****************  Version 16  *****************
+ * User: Peter Lee    Date: 15-10-19   Time: 9:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1304 ESN update to support APAC Processing
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 4/14/15    Time: 2:34p
