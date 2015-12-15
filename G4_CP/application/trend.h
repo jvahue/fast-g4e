@@ -11,7 +11,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 25 $  $Date: 12/03/15 6:04p $
+  $Revision: 27 $  $Date: 12/11/15 5:29p $
 
 *******************************************************************************/
 
@@ -38,8 +38,6 @@
 #define MAX_TREND_CYCLES   4
 
 #define ONE_SEC_IN_MILLSECS  1000u
-#define SECS_PER_DAY         86400
-
 
 //*****************************************************************************
 // TREND CONFIGURATION DEFAULT
@@ -316,6 +314,9 @@ typedef struct
   FLOAT32          snsrVar  [MAX_STAB_SENSORS]; /* Variance value when variance exceeded     */
   BOOLEAN          validity [MAX_STAB_SENSORS]; /* Validity state of each sensor             */
   STABILITY_STATUS status   [MAX_STAB_SENSORS]; /* The status of the stability sensor        */
+  // Stability duration vars
+  UINT32 stableDurMs[MAX_STAB_SENSORS]; /* Number of mSec sensor has been continuously stable*/
+  UINT32 lastStableChkMs[MAX_STAB_SENSORS];/* Last (system run time) this sensor was checked */
 }STABILITY_DATA;
 
 // Substructure collecting working vars for determining the stability state of a sensor
@@ -326,8 +327,8 @@ typedef struct
   FLOAT32 upperValue;      /* max variance value for absolute ref value             */
   UINT16  outLierCnt;      /* current count of consecutive outlier values           */
   UINT16  outLierMax;      /* Max allowed consecutive outliers from CFG             */
-  UINT32  stableDurMs;     /* Number of mSec the sensor has been continuously stable*/
-  UINT32  lastStableChkMs; /* Last time (system run time) this sensor was checked   */
+//  UINT32  stableDurMs;     /* Number of mSec the sensor has been continuously stable*/
+//  UINT32  lastStableChkMs; /* Last time (system run time) this sensor was checked   */
 }ABS_STABILITY;
 
 
@@ -396,7 +397,7 @@ struct TREND_DATA
   UINT32        stableStateStartMs;       /* Starting time CM_GetTickCount() of  stableState */
   SAMPLE_RESULT lastSampleResult;         /* The result of the last attempt to Sample        */
   // Commanded trend stable hist.
-  UINT32 cmdStabilityDurMs;              /* Dur trend was stable(taken from nTimeStableMs)   */
+  UINT32 cmdStabilityDurMs;               /* Dur trend was stable(taken from nTimeStableMs)  */
 
   // APAC command pending
   APAC_CMD      apacCmd;                  /* APAC command to be processed.                   */
@@ -457,11 +458,21 @@ EXPORT void    TrendGetSampleData      ( TREND_INDEX idx, TREND_SAMPLE_DATA* pSt
  *  MODIFICATIONS
  *    $History: trend.h $
  * 
+ * *****************  Version 27  *****************
+ * User: Contractor V&v Date: 12/11/15   Time: 5:29p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 Trend.debug section and stablie duration changed to all
+ * 
+ * *****************  Version 26  *****************
+ * User: Contractor V&v Date: 12/07/15   Time: 3:10p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - CR compliance update, enabled trend debug cmds
+ *
  * *****************  Version 25  *****************
  * User: Contractor V&v Date: 12/03/15   Time: 6:04p
  * Updated in $/software/control processor/code/application
  * SCR #1300 CR compliance changes
- * 
+ *
  * *****************  Version 24  *****************
  * User: Contractor V&v Date: 11/30/15   Time: 3:34p
  * Updated in $/software/control processor/code/application

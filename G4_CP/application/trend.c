@@ -11,7 +11,7 @@
    Note:
 
  VERSION
- $Revision: 41 $  $Date: 12/03/15 6:04p $
+ $Revision: 45 $  $Date: 12/11/15 5:29p $
 
 ******************************************************************************/
 
@@ -501,8 +501,8 @@ BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHi
       pSnsrStableHist->sensorID[i] = pCfg->stability[i].sensorIndex;
 
       pSnsrStableHist->bStable[i] =
-        (pData->absoluteStability[i].stableDurMs == 0) ||
-        (pData->absoluteStability[i].stableDurMs  < pData->cmdStabilityDurMs)
+        (pData->curStability.stableDurMs[i] == 0) ||
+        (pData->curStability.stableDurMs[i]  < pData->cmdStabilityDurMs)
          ? FALSE : TRUE;
 
 #ifdef TREND_DEBUG
@@ -547,7 +547,8 @@ void TrendGetSampleData( TREND_INDEX idx, TREND_SAMPLE_DATA* pTrndSampleData )
 {
   ASSERT(NULL != pTrndSampleData);
   // copy all the sensor summaries to the caller.
-  memcpy(pTrndSampleData->snsrSummary, &m_TrendData[idx].endSummary,  sizeof(TREND_SAMPLE_DATA));
+  memcpy(pTrndSampleData->snsrSummary, m_TrendData[idx].endSummary, 
+		 sizeof(TREND_SAMPLE_DATA));
 }
 
 /*****************************************************************************/
@@ -1000,7 +1001,8 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
     pData->curStability.snsrValue[i] = FLT_MAX;
     pData->curStability.validity[i]  = FALSE;
     pData->curStability.status[i]    = STAB_UNKNOWN;
- // pData->curStability.snsrStableDurMs[i] is handled above in TrendClearSensorStabilityHistory
+    pData->curStability.lastStableChkMs[i] = 0;
+    pData->curStability.stableDurMs[i]     = 0;
   }
   // Init the maxStability observed with the initialized contents of curStability
   memcpy(&pData->maxStability, &pData->curStability, sizeof(pData->maxStability) );
@@ -1022,9 +1024,7 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
     pAbsVar->upperValue = 0.f;
     pAbsVar->outLierCnt = 0;
     pAbsVar->outLierMax =
-       (UINT16) pCfg->rate * pCfg->stability->absOutlier_ms / ONE_SEC_IN_MILLSECS;
-    pAbsVar->lastStableChkMs = 0;
-    pAbsVar->stableDurMs = 0;
+       (UINT16) (pCfg->rate * pCfg->stability[i].absOutlier_ms) / ONE_SEC_IN_MILLSECS;    
   }
 
   pData->delayedStbStartMs = 0;
@@ -1074,8 +1074,9 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
   INT32   i;
   BOOLEAN bChkVarFlag;
   BOOLEAN bSnsrStable;
-  STABILITY_CRITERIA* pStabCrit;
-  ABS_STABILITY* pAbsVar;
+  STABILITY_CRITERIA* pStabCrit;  
+  UINT32* pStableDurMs;
+  UINT32* pDurLastCheckMs;
 
   ASSERT(NULL != pData->pStabilityFunc);
 
@@ -1088,7 +1089,9 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
   for (i = 0; i < pData->nStabExpectedCnt; ++i)
   {
     pStabCrit = &pCfg->stability[i];
-    pAbsVar   = &pData->absoluteStability[i];
+    
+    pStableDurMs    = &pData->curStability.stableDurMs[i];
+    pDurLastCheckMs = &pData->curStability.lastStableChkMs[i];
 
     // Default the current stability sensor to GOOD, modify as needed.
     pData->curStability.status[i] = STAB_OK;
@@ -1116,22 +1119,18 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
         bSnsrStable = (pData->pStabilityFunc(pCfg, pData, i, bChkVarFlag));
         //************************************************
 
-        // For Absolute stability, maintain the continuous time this snsr has been stable
-        if (STB_STRGY_ABSOLUTE == pCfg->stableStrategy)
+        // Maintain the continuous time this snsr has been stable        
+        if(bSnsrStable)
         {
-          if(bSnsrStable)
-          {
-            // Update total times this sensor has been stable since last reset.
-            TrendUpdateTimeElapsed(timeNow, &pAbsVar->lastStableChkMs, &pAbsVar->stableDurMs);
-          }
-          else
-          {
-            // On failing stability, reset the continuous time.
-            pAbsVar->stableDurMs     = 0;
-            pAbsVar->lastStableChkMs = 0;
-          }
+          // Update total times this sensor has been stable since last reset.
+          TrendUpdateTimeElapsed(timeNow, pDurLastCheckMs, pStableDurMs);
         }
-
+        else
+        {
+          // On failing stability, reset the continuous time.
+          *pStableDurMs   = 0;
+          pDurLastCheckMs = 0;
+        }
       }
       else
       {
@@ -1963,6 +1962,26 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
  *  MODIFICATIONS
  *    $History: trend.c $
  * 
+ * *****************  Version 45  *****************
+ * User: Contractor V&v Date: 12/11/15   Time: 5:29p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 Trend.debug section and stablie duration changed to all
+ * 
+ * *****************  Version 44  *****************
+ * User: Contractor V&v Date: 12/10/15   Time: 3:49p
+ * Updated in $/software/control processor/code/application
+ * SCR # 1300 CR Compliance changes.
+ * 
+ * *****************  Version 43  *****************
+ * User: Contractor V&v Date: 12/07/15   Time: 6:06p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 CR review fixes for recently enabled debug functions
+ * 
+ * *****************  Version 42  *****************
+ * User: Contractor V&v Date: 12/07/15   Time: 3:10p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - CR compliance update, enabled trend debug cmds
+ *
  * *****************  Version 41  *****************
  * User: Contractor V&v Date: 12/03/15   Time: 6:04p
  * Updated in $/software/control processor/code/application

@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 100 $  $Date: 12/03/15 5:59p $
+      $Revision: 101 $  $Date: 12/10/15 3:48p $
 
 ******************************************************************************/
 
@@ -934,7 +934,7 @@ static void SensorReset( SENSOR_INDEX Sensor)
     pSensor->nNextSample      = 0;
     pSensor->nCurrentSamples  = 0;
     pSensor->nSampleCounts    = (INT16)(MIFs_PER_SECOND / pSensorConfig->sampleRate);
-    pSensor->nSampleCountdown = (pSensorConfig->nSampleOffset_ms / MIF_PERIOD_mS)+1;
+    pSensor->nSampleCountdown = (INT16)((pSensorConfig->nSampleOffset_ms / MIF_PERIOD_mS)+1);
     pSensor->bOutofRange      = FALSE;
     pSensor->bRangeFail       = FALSE;
     pSensor->nRangeTimeout_ms = 0;
@@ -2370,6 +2370,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 101  *****************
+ * User: Contractor V&v Date: 12/10/15   Time: 3:48p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 CR compliance changes.
  * 
  * *****************  Version 100  *****************
  * User: Contractor V&v Date: 12/03/15   Time: 5:59p
