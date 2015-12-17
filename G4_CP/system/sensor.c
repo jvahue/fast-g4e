@@ -145,6 +145,8 @@ static void          SensorInitializeLiveData( void );
 //---- Function implementations for Virtual sensors to play nice with physical sensors
 static FLOAT32 SensorVirtualGetValue      ( UINT16 nIndex, UINT32 *null );
 static BOOLEAN SensorVirtualInterfaceValid( UINT16 nIndex );
+static BOOLEAN SensorVirtualSensorTest    ( UINT16 nIndex );
+
 
 static const CHAR *sensorFailureNames[MAX_FAILURE+1] =
 {
@@ -836,7 +838,7 @@ static void SensorsConfigure (void)
             // retrieved from SensorCfg[nSensorIndex] at run time.
             Sensors[i].nInterfaceIndex  = Sensors[i].nSensorIndex;
             Sensors[i].pGetSensorData   = SensorVirtualGetValue;
-            Sensors[i].pTestSensor      = SensorNoTest;
+            Sensors[i].pTestSensor      = SensorVirtualSensorTest;
             Sensors[i].pInterfaceActive = SensorVirtualInterfaceValid;
             break;
 
@@ -2276,6 +2278,38 @@ static void SensorInitializeLiveData(void)
   }
   // Save the count of sensors in the list and the time this collection was stored.
   m_liveDataBuffer.count = nCount;
+}
+
+/******************************************************************************
+ * Function:     SensorVirtualSensorTest
+ *
+ * Description:  Verifies the virtual sensor's input are/still valid
+ *               itself
+ *
+ * Parameters:   nIndex - index into m_sensorCfg[] containing the
+ *                        the sensor to be checked.
+ *
+ * Returns:      FALSE - the sensor has invalid input
+ *               TRUE  - the sensor inputs are valid
+ *
+ * Notes:        This test is used to determine if inputs are valid/invalid               
+ *
+ *****************************************************************************/
+BOOLEAN SensorVirtualSensorTest (UINT16 nIndex)
+{
+  BOOLEAN bResult = TRUE;
+  SENSOR* pData    = &Sensors[nIndex];
+  //SENSOR* pSensorA = &Sensors[pData->vSnsrA];
+  SENSOR* pSensorB = &Sensors[pData->vSnsrB];
+
+  if(VIRTUAL_DIV == pData->vOpType && 0.f == pSensorB->fValue)
+  {
+    bResult = FALSE;
+  }
+
+  // Add additional tests here..
+  
+  return bResult;
 }
 
 /******************************************************************************

@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 34 $  $Date: 12/11/15 5:29p $
+    $Revision: 35 $  $Date: 12/15/15 5:06p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -237,7 +237,7 @@ static USER_MSG_TBL trendCmd [] =
   { "CYCLED",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.cycle[3],          0,(MAX_TRENDS-1),    NO_LIMIT,            cycleEnumType        },
   { "ACTION",         NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT8,   USER_RW,   &m_ConfigTrendTemp.nAction,           0,(MAX_TRENDS-1),    NO_LIMIT,            NULL                 },
   { "STABLEPERIOD_S", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_UINT16,  USER_RW,   &m_ConfigTrendTemp.stabilityPeriod_s, 0,(MAX_TRENDS-1),    0,3600,              NULL                 },
-  { "STABILITY_STRGY",NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.stableStrategy,    0,(MAX_TRENDS-1),    NO_LIMIT,            trendStableRuleEnum},
+  { "STABILITY_MODE", NO_NEXT_TABLE,            Trend_UserCfg,          USER_TYPE_ENUM,    USER_RW,   &m_ConfigTrendTemp.stableStrategy,    0,(MAX_TRENDS-1),    NO_LIMIT,            trendStableRuleEnum},
   { "STABILITY",      stabCritTbl,              NULL,                   NO_HANDLER_DATA,                                                                                                                   },
   { NULL,             NULL,                     NULL,                   NO_HANDLER_DATA }
 };
@@ -255,7 +255,6 @@ static USER_MSG_TBL trendStatus [] =
    { "STABILITY_CNT",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT16,  USER_RO,   &m_StateTrendTemp.curStability.stableCnt,0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "TIMESTABLE_MS",       NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.nTimeStableMs,         0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "STABLE_STATE",        NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.stableState,           0,(MAX_TRENDS-1),    NO_LIMIT,   trendStabStateEnum},
-   { "STABLESTATESTART_MS", NO_NEXT_TABLE,     Trend_State,     USER_TYPE_UINT32,  USER_RO,   &m_StateTrendTemp.stableStateStartMs,    0,(MAX_TRENDS-1),    NO_LIMIT,   NULL              },
    { "LAST_SAMPLE_RESULT",  NO_NEXT_TABLE,     Trend_State,     USER_TYPE_ENUM,    USER_RO,   &m_StateTrendTemp.lastSampleResult,      0,(MAX_TRENDS-1),    NO_LIMIT,   trendSampleResultEnum},
    { NULL,                  NULL,              NULL ,           NO_HANDLER_DATA }
 };
@@ -588,6 +587,11 @@ static USER_HANDLER_RESULT Trend_DsplySampleData(USER_DATA_TYPE DataType,USER_MS
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Contractor V&v Date: 12/15/15   Time: 5:06p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 updated/deleted GSE trend.cfg as identified in review.
  * 
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p
