@@ -359,91 +359,6 @@
 				ExcludedFromBuild="false"
 			/>
 		</Configuration>
-		<Configuration
-			Name="DEBUG_ETM|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="1"
-			CharacterSet="0"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="false"
-				ValidateParameters="false"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\G4_CP\application&quot;;&quot;$(SolutionDir)\G4_CP\drivers&quot;;&quot;$(SolutionDir)\G4_CP\drivers\hwdef&quot;;&quot;$(SolutionDir)\G4_CP\HWemulation&quot;;&quot;$(SolutionDir)\G4_CP\system&quot;;&quot;$(SolutionDir)\G4_CP\test&quot;;&quot;$(SolutionDir)\G4E&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;G4E;BTI_OFF;ENV_TEST"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="4"
-				DisableSpecificWarnings="4068;4100;4985;4996"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				OutputFile="$(SolutionDir)$(ProjectName).exe"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy $(TargetPath) $(SolutionDir)\..\..\scripts\bin"
-			/>
-		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -470,14 +385,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="DEBUG_TP|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DEBUG_ETM|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -532,14 +439,6 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DEBUG_ETM|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -564,14 +463,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="DEBUG_TP|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DEBUG_ETM|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -667,8 +558,88 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgr.c"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgr.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgr_Interface.c"
+					>
 					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Target|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DEBUG_TP|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgr_Interface.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgr_Tables.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\APACMgrUserTables.c"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Target|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="DEBUG_TP|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -711,8 +682,20 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\DispProcessingApp.c"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\DispProcessingApp.h"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\application\DispProcessingUserTables.c"
+					>
 					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
+						Name="Release|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -767,14 +750,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\application\Event.c"
@@ -819,14 +794,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\application\FASTMgr.c"
@@ -865,14 +832,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -927,14 +886,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\application\MSFileXfr.c"
@@ -973,14 +924,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1031,14 +974,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\application\trend.c"
@@ -1069,14 +1004,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1121,14 +1048,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1547,14 +1466,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\ARINC429Mgr.c"
@@ -1585,14 +1496,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1643,14 +1546,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\CBITManager.c"
@@ -1689,14 +1584,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1763,14 +1650,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\DataManager.c"
@@ -1809,14 +1688,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -1867,14 +1738,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\EMU150Protocol.c"
@@ -1911,14 +1774,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\F7XProtocol.c"
@@ -1949,14 +1804,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2015,14 +1862,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\FaultUserTables.c"
@@ -2053,14 +1892,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2111,14 +1942,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\GBSProtocol.c"
@@ -2141,14 +1964,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2193,14 +2008,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2253,14 +2060,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2343,14 +2142,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\NVMgr.c"
@@ -2403,14 +2194,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\G4_CP\system\PWCDispProtocol.c"
+					>
+				</File>
+				<File
+					RelativePath="..\G4_CP\system\PWCDispProtocol.h"
+					>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\QARManager.c"
@@ -2455,14 +2246,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\sensor.c"
@@ -2501,14 +2284,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2583,14 +2358,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\system\UartMgr.c"
@@ -2621,14 +2388,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2675,30 +2434,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DEBUG_ETM|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\G4_CP\test\Etm.c"
-					>
-					<FileConfiguration
-						Name="DEBUG_TP|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="..\G4_CP\test\Etm.h"
-					>
 				</File>
 				<File
 					RelativePath="..\G4_CP\test\TestPoints.c"
