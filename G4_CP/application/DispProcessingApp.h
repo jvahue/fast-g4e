@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 2 $  $Date: 15-12-02 6:38p $     
+      $Revision: 3 $  $Date: 12/18/15 11:09a $     
 
 ******************************************************************************/
 
@@ -399,11 +399,17 @@ EXPORT void                      DispProcAppDebug_Task(void *param);
 EXPORT DISPLAY_SCREEN_STATUS_PTR DispProcessingApp_GetStatus(void);
 EXPORT DISPLAY_DEBUG_PTR         DispProcessingApp_GetDebug(void);
 EXPORT DISPLAY_SCREEN_CONFIG_PTR DispProcessingApp_GetCfg(void);
+EXPORT void                      DispProcApp_DisableLiveStream(void);
 #endif // DISPLAY_PROCESSING_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:09a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from PSW Contractor
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-12-02   Time: 6:38p

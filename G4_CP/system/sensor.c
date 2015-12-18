@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 101 $  $Date: 12/10/15 3:48p $
+      $Revision: 102 $  $Date: 12/17/15 6:38p $
 
 ******************************************************************************/
 
@@ -2404,6 +2404,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 102  *****************
+ * User: Contractor V&v Date: 12/17/15   Time: 6:38p
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 bug fix - added SensorTest impl for vSensor keep it invalid
  * 
  * *****************  Version 101  *****************
  * User: Contractor V&v Date: 12/10/15   Time: 3:48p
