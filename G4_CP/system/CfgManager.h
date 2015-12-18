@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 60 $  $Date: 11/19/15 4:12p $
+ $Revision: 61 $  $Date: 12/16/15 1:54p $
 
 ******************************************************************************/
 
@@ -58,8 +58,8 @@
                                  Package Defines
 ******************************************************************************/
 #define TEXT_BUF_SIZE 64
-#define SYS_HDR_VERSION 3
-#define ETM_HDR_VERSION 1
+#define SYS_HDR_VERSION 4
+#define ETM_HDR_VERSION 2
 
 
 
@@ -220,6 +220,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 61  *****************
+ * User: John Omalley Date: 12/16/15   Time: 1:54p
+ * Updated in $/software/control processor/code/system
+ * SCR 1310 - Updated the Binary File Header Version for v3.0.0 release
  * 
  * *****************  Version 60  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:12p

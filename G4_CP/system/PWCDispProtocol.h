@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 2 $  $Date: 11/19/15 4:31p $     
+      $Revision: 3 $  $Date: 12/18/15 11:10a $     
 
 ******************************************************************************/
 
@@ -281,12 +281,18 @@ EXPORT void    PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan,
                                              UINT16 nMaxByteSize);
 EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest, 
                                              const UINT16 max_size, UINT16 ch);
+EXPORT void    PWCDispProtocol_DisableLiveStream(void);
 
 #endif // PWCDISP_PROTOCOL_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:10a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Updates from PSW Contractor
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:31p

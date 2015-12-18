@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 35 $  $Date: 1/29/15 4:14p $
+     $Revision: 36 $  $Date: 12/18/15 11:19a $
 
 ******************************************************************************/
 
@@ -441,6 +441,12 @@ void GSE_ToggleDisplayLiveStream(void)
   // Disable F7X output stream
   F7XProtocol_DisableLiveStream();
 
+  // Disable Display Navigation output stream
+  DispProcApp_DisableLiveStream();
+
+  // Disable PWC Display Protocol output stream
+  PWCDispProtocol_DisableLiveStream();
+
   // Disable ID Param output stream
   IDParamProtocol_DsbLiveStream();
 
@@ -675,6 +681,10 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:19a
+ * Updated in $/software/control processor/code/system
  * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 1/29/15    Time: 4:14p

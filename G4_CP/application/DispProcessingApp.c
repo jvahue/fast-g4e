@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 2 $  $Date: 15-12-02 6:38p $     
+      $Revision: 3 $  $Date: 12/18/15 11:09a $     
 
 ******************************************************************************/
 
@@ -237,12 +237,12 @@ static DISPLAY_STATE MenuStateTbl[DISPLAY_SCREEN_COUNT] =
 /*M17*/{"11111111111122222 RETRY?", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  M29,  A0,   A20,       12, 13, -1, -1, -1, -1},
 /*M19*/{"11111111111 22222 UTC   ", A0,      A0,        A13,       A0,         A0,         A0,         A3,   A4,  M3,   A0,   A5,  A0,   NO_ACTION, 14, 15, -1, -1, -1, -1},
 /*M20*/{"11111 222 334 55555 6666", A0,      A0,        A13,       A0,         A0,         A0,         A6,   A7,  A2,   A0,   A0,  A0,   NO_ACTION, 16, 17, -1, -1, -1, -1},
-/*M21*/{"DBL CLICK   Rate     112", A0,      A0,        A13,       A0,         A0,         A0,         A9,  A10,  M4,   A0,  A11,  A0,   NO_ACTION, 18, 21, -1, -1, -1, -1},
+/*M21*/{"DBL CLICK   RATE     112", A0,      A0,        A13,       A0,         A0,         A0,         A9,  A10,  M4,   A0,  A11,  A0,   NO_ACTION, 18, 21, -1, -1, -1, -1},
 /*M23*/{"PRFRM MANUALPAC   READY?", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  A17,  A0,   NO_ACTION, -1, -1, -1, -1, -1, -1},
-/*M24*/{"VALIDATE PACTO COMPUTED?", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  A25,  A0,   NO_ACTION, -1, -1, -1, -1, -1, -1},
-/*M25*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  A26,  A0,   NO_ACTION,  3,  4,  5,  8,  6,  7},
-/*M26*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, A26,  A26,  A27,  A0,   NO_ACTION,  9, 10, 11,  8, -1, -1},
-/*M27*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, A25,  A25,  A27,  A0,   NO_ACTION, 19, 10, 11,  8, -1, -1},
+/*M24*/{"VALIDATE PACTO COMPUTED?", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  A24,  A0,   NO_ACTION, -1, -1, -1, -1, -1, -1},
+/*M25*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0,  A0,   A0,  A25,  A0,   NO_ACTION,  3,  4,  5,  8,  6,  7},
+/*M26*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, A26,  A26,  A27,  A0,   NO_ACTION, 20, 10, 11,  8, -1, -1},
+/*M27*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, A25,  A25,  A27,  A0,   NO_ACTION, 20, 10, 11,  8, -1, -1},
 /*M28*/{"VALID KEYS:             ", A0,      A0,         A0,       A0,         A0,         A0,         A0,   A0,  A0,   A0,   A0,  A0,   A0,        -1, -1, -1, -1, -1, -1},
 /*M29*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, M30,  M30,  A28,  A0,   NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M30*/{"TO BE INITIALIZED       ", A0,      A0,        A13,       A0,         A0,         A0,         A0,   A0, M29,  M29,  A28,  A0,   NO_ACTION, -1, -1, -1, -1, -1, -1},
@@ -484,13 +484,13 @@ void Init_SpecialCharacterStrings()
   pScreen  = (DISPLAY_STATE_PTR) &MenuStateTbl[0];
   pButtons = (DISPLAY_ENUM_TABLE_PTR) &ValidButtonTable[0];
   
-  snprintf((pScreen + M1)->menuString,  sizeof((pScreen + M1)->menuString), 
+  snprintf((pScreen + M1)->menuString,  sizeof((pScreen + M1)->menuString) +1, 
            "ETM ACTIVE  %c%c CMD?     ",  0x04, 0x02);
-  snprintf((pScreen + M2)->menuString,  sizeof((pScreen + M2)->menuString), 
+  snprintf((pScreen + M2)->menuString,  sizeof((pScreen + M2)->menuString) +1, 
            "ETM ACTIVE  %c%c RUN PAC? ",  0x04, 0x02);
-  snprintf((pScreen + M3)->menuString,  sizeof((pScreen + M3)->menuString), 
+  snprintf((pScreen + M3)->menuString,  sizeof((pScreen + M3)->menuString) +1, 
            "ETM ACTIVE  %c%c RCL PAC? ",  0x04, 0x02);
-  snprintf((pScreen + M4)->menuString,  sizeof((pScreen + M4)->menuString), 
+  snprintf((pScreen + M4)->menuString,  sizeof((pScreen + M4)->menuString) +1, 
            "ETM ACTIVE  %c%c SETTINGS?",  0x04, 0x02);
   snprintf((pScreen + M12)->menuString, sizeof((pScreen + M12)->menuString) +1,
 	   "E1NG  23333%cE4ITT 5 666C",   0x25);
@@ -501,9 +501,9 @@ void Init_SpecialCharacterStrings()
   snprintf((pScreen + M25)->menuString, sizeof((pScreen + M25)->menuString) +1,
 	   "E1NG  23333%cE4ITT 5 666C",   0x25);
   snprintf((pScreen + M26)->menuString, sizeof((pScreen + M26)->menuString) +1,
-	   "VLID E1APAC?2 3444%c 555C",   0x25);
+	   "VLID PAC E1?2 3444%c 555C",   0x25);
   snprintf((pScreen + M27)->menuString, sizeof((pScreen + M27)->menuString) +1,
-	   "INVLD E1PAC?2 3444%c 555C",   0x25);
+	   "NVLD PAC E1?2 3444%c 555C",   0x25);
   snprintf((pScreen + M29)->menuString,(sizeof((pScreen + M29)->menuString)+1),
        "100%cNr NORMLCONFIRM?  %c%c", 0x25, 0x04, 0x02);
   snprintf((pScreen + M30)->menuString,(sizeof((pScreen + M30)->menuString)+1),
@@ -2198,9 +2198,33 @@ UINT16 DispProcessingApp_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
   
   return(fileHdr.size);
 }
+/******************************************************************************
+* Function:     DispProcApp_DisableLiveStream
+*
+* Description:  Disables the outputting the live stream for the Display 
+*               Processing App
+*
+* Parameters:   None
+*
+* Returns:      None.
+*
+* Notes:
+*  1) Used for debugging only
+*
+*
+*****************************************************************************/
+void DispProcApp_DisableLiveStream(void)
+{
+    m_DispProcApp_Debug.bDebug = FALSE;
+}
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:09a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from PSW Contractor
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-12-02   Time: 6:38p

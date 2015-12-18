@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 2 $  $Date: 11/19/15 4:31p $     
+      $Revision: 3 $  $Date: 12/18/15 11:10a $     
 
 ******************************************************************************/
 
@@ -1230,8 +1230,8 @@ static void PWCDispDebug_TX(void *pParam)
   // Display DCRATE
   memcpy(subString, (pName + DC_RATE)->name, 15);
   snprintf((char *)m_Str, 15, "%s", subString);
-  snprintf((char *) subString, 8, " =%03d\r\n",
-           pStatus->packetContents[4+DC_RATE]);
+  snprintf((char *) subString, 11, " =%03d ms\r\n",
+           (INT8)(pStatus->packetContents[4+DC_RATE]) * 2);
   strcat((char *)m_Str, (const char*)subString);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
@@ -1431,6 +1431,26 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
   return(fileHdr.size);
 }
 
+/******************************************************************************
+* Function:     PWCDispProtocol_DisableLiveStream
+*
+* Description:  Disables the outputting the live stream for the PWC Display
+*               Protocol.
+*
+* Parameters:   None
+*
+* Returns:      None.
+*
+* Notes:
+*  1) Used for debugging only
+*
+*
+*****************************************************************************/
+void PWCDispProtocol_DisableLiveStream(void)
+{
+    m_PWCDisp_Debug.bDebug = FALSE;
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -1438,6 +1458,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:10a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Updates from PSW Contractor
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:31p
