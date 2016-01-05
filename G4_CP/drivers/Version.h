@@ -11,7 +11,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 72 $  $Date: 3/30/15 10:25a $
+      $Revision: 73 $  $Date: 12/18/15 11:27a $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -25,10 +25,10 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#define VER_FUNC    "2"       // FN - Functional Build
-#define VER_MAJOR   "1"       // MJ - Major Functional Change
+#define VER_FUNC    "3"       // FN - Functional Build
+#define VER_MAJOR   "0"       // MJ - Major Functional Change
 #define VER_MINOR   "0"       // MN - Minor Functional Change
-#define DEV_BUILD   ""   // ER - Development Build = "" for release
+#define DEV_BUILD   "ER20151218"   // ER - Development Build = "" for release
 
 /******************************************************************************
                                  Package Typedefs
@@ -68,6 +68,10 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 73  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:27a
+ * Updated in $/software/control processor/code/drivers
  * 
  * *****************  Version 72  *****************
  * User: John Omalley Date: 3/30/15    Time: 10:25a

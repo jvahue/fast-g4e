@@ -1,16 +1,16 @@
 #define APAC_MGR_BODY
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        9E991
+    ECCN:        9D991
 
     File:        APACMgr.c
 
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 9 $  $Date: 11/16/15 7:08p $
+      $Revision: 10 $  $Date: 1/04/16 6:20p $
 
 ******************************************************************************/
 
@@ -248,9 +248,9 @@ static const APAC_STATE_RUN_STR APAC_STATE_RUN_STR_BUFF_CONST[APAC_RUN_STATE_MAX
 {
   "IDLE        ",// APAC_RUN_STATE_IDLE
   "NOT LOW     ",// APAC_RUN_STATE_HIGE_LOW
-  "STABILIZING ",// APAC_RUN_STATE_STABILIZE
-  "SAMPLING    ",// APAC_RUN_STATE_SAMPLING
-  "COMPUTING   ",// APAC_RUN_STATE_COMPUTING
+  "STABILIZING.",// APAC_RUN_STATE_STABILIZE
+  "SAMPLING....",// APAC_RUN_STATE_SAMPLING
+  "COMPUTING...",// APAC_RUN_STATE_COMPUTING
   "COMMIT      ",// APAC_RUN_STATE_COMMIT
   "FAULT       " // APAC_RUN_STATE_FAULT
 };
@@ -2179,6 +2179,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:20p
+ * Updated in $/software/control processor/code/application
+ * SCR 1308 - Updated per AI #12, added missing "..."
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 11/16/15   Time: 7:08p

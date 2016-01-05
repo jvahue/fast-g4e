@@ -2,10 +2,10 @@
 #define PWCDISP_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        PWCDispProtocol.h
 
@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 3 $  $Date: 12/18/15 11:10a $     
+      $Revision: 4 $  $Date: 1/04/16 6:22p $     
 
 ******************************************************************************/
 
@@ -50,7 +50,6 @@
 #define PWCDISP_RX_PACKET_ID           0x11
 #define PWCDISP_TX_PACKET_ID           0x01
 #define D_HLTH_BYTE_INDEX                 4 // D_HLTH byte Payload position
-                                     
 #define RX_PROTOCOL                       0 //For use in Debug
 #define TX_PROTOCOL                       1 //For use in Debug
 #define DISPLAY_APP_REQUEST               2 //For special requests from the
@@ -125,13 +124,6 @@ typedef enum
   PWCDISP_TX_ELEMENT_CNT_COMPLETE
 }UARTMGR_TX_PWCDISP_ELEMENT_COMPLETE;
 
-typedef enum
-{
-  TX_START_FLAG,
-  INVALID_D_HLTH_TIMER,
-  DISPLAY_APP_REQUESTS_COUNT
-}UARTMGR_DISPLAY_APP_REQUESTS;
-
 /********************/
 /*   Data Storage   */
 /********************/
@@ -169,7 +161,6 @@ typedef struct
   UINT32      lastSyncTime;
   UINT32      syncCnt;
   UINT32      invalidSyncCnt;
-  UINT32      dispHealthTimer;
   UINT32      lastFrameTime; 
   UINT32      rx_SyncLossCnt;  
   TIMESTAMP   lastFrameTS; //RX time in TS format for snap shot recording
@@ -185,7 +176,6 @@ typedef struct
   UINT32      lastFrameTime; 
   TIMESTAMP   lastFrameTS; //TX time in TS format for snap shot recording
   UINT8       txTimer;
-  BOOLEAN     bTX_StartFlag;
 }PWCDISP_TX_STATUS, *PWCDISP_TX_STATUS_PTR;
 
 /*********************
@@ -224,8 +214,19 @@ typedef struct
 typedef struct
 {
   UINT32 lastFrameTime;
-  UINT32 cntResync;
+  UINT32 validSyncCnt;
+  UINT32 invalidSyncCnt;
 }PWCDISP_INVALID_PACKET_LOG;
+#pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+  UINT32 lastFrameTime;
+  UINT8  packetContents[PWCDISP_TX_MSG_SIZE];
+  UINT32 validPacketCnt;
+  UINT32 invalidPacketCnt;
+}PWCDISP_DISPLAY_PACKET_ERROR_LOG;
 #pragma pack()
 /*********************
 *   Miscellaneous    *
@@ -271,6 +272,7 @@ EXPORT BOOLEAN PWCDispProtocol_SensorSetup(UINT32 gpA, UINT32 gpB, UINT8 param,
 
 EXPORT void    PWCDispDebug_Task(void *pParam);
 EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
+EXPORT void    TranslateArrows(char charString[], UINT16 length);
 EXPORT void    PWCDispProtocol_SetRXDebug(void);
 EXPORT void    PWCDispProtocol_SetTXDebug(void);
 EXPORT BOOLEAN PWCDispProtocol_Read_Handler(void *pDest, UINT32 chan, 
@@ -288,6 +290,11 @@ EXPORT void    PWCDispProtocol_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:10a
