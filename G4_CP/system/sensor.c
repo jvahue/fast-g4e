@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 102 $  $Date: 12/17/15 6:38p $
+      $Revision: 103 $  $Date: 12/18/15 11:30a $
 
 ******************************************************************************/
 
@@ -2284,18 +2284,18 @@ static void SensorInitializeLiveData(void)
  * Function:     SensorVirtualSensorTest
  *
  * Description:  Verifies the virtual sensor's input are/still valid
- *               itself
  *
- * Parameters:   nIndex - index into m_sensorCfg[] containing the
+ * Parameters:   nIndex - index into Sensors[] data array containing the
  *                        the sensor to be checked.
  *
  * Returns:      FALSE - the sensor has invalid input
  *               TRUE  - the sensor inputs are valid
  *
- * Notes:        This test is used to determine if inputs are valid/invalid               
+ * Notes:        This test is used to determine if inputs continue to be
+ *               valid/invalid during self-heal testing.      
  *
  *****************************************************************************/
-BOOLEAN SensorVirtualSensorTest (UINT16 nIndex)
+static BOOLEAN SensorVirtualSensorTest (UINT16 nIndex)
 {
   BOOLEAN bResult = TRUE;
   SENSOR* pData    = &Sensors[nIndex];
@@ -2404,6 +2404,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 103  *****************
+ * User: Contractor V&v Date: 12/18/15   Time: 11:30a
+ * Updated in $/software/control processor/code/system
+ * SCR #1299 - Code Review update for SensorVirtualTestSensor func.
  * 
  * *****************  Version 102  *****************
  * User: Contractor V&v Date: 12/17/15   Time: 6:38p

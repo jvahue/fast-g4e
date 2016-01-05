@@ -2,8 +2,10 @@
 #define SYSTEMLOG_H
 
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        SystemLog.h
 
@@ -14,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 125 $  $Date: 11/19/15 4:26p $
+      $Revision: 126 $  $Date: 1/04/16 6:21p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -183,6 +185,7 @@ SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
 SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
 /*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
 SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
+SYS_LOG_ID(SYS_ID_UART_PWCDISP_TXPACKET_FAIL        ,0x5C34 ,10)\
 SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
 \
 SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
@@ -294,6 +297,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 126  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Performance Software Updates
  * 
  * *****************  Version 125  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:26p

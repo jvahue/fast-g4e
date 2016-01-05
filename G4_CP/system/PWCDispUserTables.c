@@ -1,9 +1,9 @@
 #define PWCDISP_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        PWCDispUserTables.c
 
@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 2 $  $Date: 11/19/15 4:31p $
+    $Revision: 3 $  $Date: 1/04/16 6:22p $
 
 ******************************************************************************/
 #ifndef PWCDISP_PROTOCOL_BODY
@@ -108,7 +108,6 @@ static USER_MSG_TBL PWCDispRXStatusTbl[] =
   {"LAST_SYNC_PERIOD", NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.lastSyncPeriod, -1, -1,    NO_LIMIT, NULL},
   {"LAST_SYNC",        NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.lastSyncTime,   -1, -1,    NO_LIMIT, NULL},
   {"SYNC_CNT",         NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.syncCnt,        -1, -1,    NO_LIMIT, NULL},
-  {"INVALID_D_HLTH",   NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.dispHealthTimer,-1, -1,    NO_LIMIT, NULL},
   {"INVALID_SYNC_CNT", NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.invalidSyncCnt, -1, -1,    NO_LIMIT, NULL},
   {"LAST_FRAME_TIME",  NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &PWCDispRXStatusTemp.lastFrameTime,  -1, -1,    NO_LIMIT, NULL},
   {"MSG_CONTENTS",     PWCDispRXParamTbl, NULL,            NO_HANDLER_DATA},
@@ -455,6 +454,11 @@ static USER_HANDLER_RESULT PWCDispmsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispUserTables.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:31p

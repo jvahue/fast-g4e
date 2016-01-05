@@ -4,7 +4,7 @@
             Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        PWCDispProtocol.c
 
@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 3 $  $Date: 12/18/15 11:10a $     
+      $Revision: 4 $  $Date: 1/04/16 6:22p $     
 
 ******************************************************************************/
 
@@ -126,11 +126,6 @@ static UARTMGR_PROTOCOL_STORAGE m_PWCDisp_DataStore[4]; // RX/TX Data Storage.
                                                         // 1 - TX_PROTOCOL
                                                         // 2 - Requests From Disp App
                                                         // 3 - Requests From Protocol
-//static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RequestFromProtocol;
-static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RequestFromApp[DISPLAY_APP_REQUESTS_COUNT];
-// {USER_TYPE_BOOLEAN, NULL, 1, 1} //bTX_StartFlag 
-// {USER_TYPE_UINT32,  NULL, 1, 1} //dispHealthTimer
-
 // TX Temporary Data Store
 static UARTMGR_PROTOCOL_DATA    m_PWCDisp_TXData[PWCDISP_TX_ELEMENT_CNT_COMPLETE];
 // RX Temporary Data Store
@@ -172,8 +167,8 @@ static void    PWCDispProtocol_UpdateUartMgr(void);
 static void    PWCDispProtocol_Resync(void);
 static BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr);
 static void    PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket);
+static void    PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket);
 static BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr);
-static void    PWCDispProtocol_ReadAppRequests(void);
 static BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
                                                 PWCDISP_RAW_TX_BUFFER_PTR tx_buff_ptr);
 static void    PWCDispDebug_RX(void *pParam);
@@ -360,9 +355,6 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   tx_param_ptr    = (PWCDISP_TX_PARAM_LIST_PTR) &m_PWCDisp_TXParamList;
   dest_ptr        = rx_buff_ptr-> pWr;
   end_ptr         = (UINT8 *) &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF]; 
-
-  // Update status for any special requests from the Display Processing App
-  PWCDispProtocol_ReadAppRequests();
   
   // If there is new data or still data left in the buffer to check.
   if((cnt > 0) || (rx_buff_ptr->cnt > 4))
@@ -398,32 +390,25 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   //Begin Processing TX message packets every 10 MIF Frames
   if(tx_status_ptr->txTimer % 10 == 0)
   {    
-    //D_HLTH must == 0x00 at least once before TX processing can begin
-    if(tx_status_ptr->bTX_StartFlag == TRUE)
+    //Request new data from Display Processing Application
+    bTXFrame = PWCDispProtocol_ReadTXData(tx_param_ptr);
+    //Verify that all characters are approved and encode packet contents
+    bBadTXPacket =
+	PWCDispProtocol_TXCharacterCheck(tx_param_ptr, tx_buff_ptr);
+    //Update TX Debug Frame if there is new data.
+    if (m_PWCDisp_Debug.bNewTXFrame != TRUE)
     {
-      //Request new data from Display Processing Application
-      bTXFrame = PWCDispProtocol_ReadTXData(tx_param_ptr);
-      //Verify that all characters are approved and encode packet contents
-      bBadTXPacket =
-	  PWCDispProtocol_TXCharacterCheck(tx_param_ptr, tx_buff_ptr);
-      //Update TX Debug Frame if there is new data.
-      if (m_PWCDisp_Debug.bNewTXFrame != TRUE)
-      {
-        m_PWCDisp_Debug.bNewTXFrame = bTXFrame;
-      }
-      if(bBadTXPacket != TRUE)
-      {
-        UART_Transmit(UartMgr_GetPort(UARTMGR_PROTOCOL_PWC_DISPLAY), 
-                     (const INT8*) &tx_buff_ptr->data[0], 
-                     PWCDISP_MAX_RAW_TX_BUF, &sent_cnt);
-      }
+      m_PWCDisp_Debug.bNewTXFrame = bTXFrame;
     }
-    
-    //Reset txTimer
-    //If there is a bad packet the timer will reset to 10 in order to refresh
-    //the tx data ASAP
-    tx_status_ptr->txTimer = (bBadTXPacket != TRUE) ? 1 : 10;
-    
+    if(bBadTXPacket != TRUE)
+    {
+      UART_Transmit(UartMgr_GetPort(UARTMGR_PROTOCOL_PWC_DISPLAY), 
+                   (const INT8*) &tx_buff_ptr->data[0], 
+                   PWCDISP_MAX_RAW_TX_BUF, &sent_cnt);
+    }
+    //Reset txTimer. If there is a bad packet the timer will reset to 10 in 
+    //order to refresh the tx data ASAP
+    tx_status_ptr->txTimer = (bBadTXPacket != TRUE) ? 1 : 10; 
   }
   else
   {
@@ -694,9 +679,9 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         // Begin scanning for header while there is space for a message header
         while (src_ptr < end_ptr && bLookingForMsg == TRUE)
         { 
-          if (*src_ptr       == PWCDISP_SYNC_BYTE1                &&
-              *(src_ptr + 1) == PWCDISP_SYNC_BYTE2                &&
-              *(src_ptr + 2) == PWCDISP_MAX_RX_LIST_SIZE          &&
+          if (*src_ptr       == PWCDISP_SYNC_BYTE1       &&
+              *(src_ptr + 1) == PWCDISP_SYNC_BYTE2       &&
+              *(src_ptr + 2) == PWCDISP_MAX_RX_LIST_SIZE &&
               *(src_ptr + 3) == PWCDISP_RX_PACKET_ID)
           {
             // Discontinue searching for message header
@@ -849,12 +834,48 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
     pStatus->invalidSyncCnt++;
     if (pStatus->rx_SyncLossCnt > pCfg->packetErrorMax)
     {
-      invalidPktLog.cntResync     = pStatus->syncCnt;
+      invalidPktLog.validSyncCnt  = pStatus->syncCnt;
+      invalidPktLog.invalidSyncCnt = pStatus->invalidSyncCnt;
       invalidPktLog.lastFrameTime = pStatus->lastFrameTime;
       LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
                      &invalidPktLog, sizeof(PWCDISP_INVALID_PACKET_LOG), NULL);
       pStatus->rx_SyncLossCnt = 0;
     }
+  }
+}
+
+/******************************************************************************
+* Function:    PWCDispProtocol_ValidTXPacket
+*
+* Description: Function to update statuses and logs of invalid or corrupt
+*              TX packets from the Display.
+*
+* Parameters:  bBadPacket - flag to indicate the validity of an RX packet
+*
+* Returns:     None
+*
+* Notes:       None
+*
+*****************************************************************************/
+static
+void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
+{
+  PWCDISP_DISPLAY_PACKET_ERROR_LOG invalidPktLog;
+  PWCDISP_TX_STATUS_PTR pStatus;
+  
+  pStatus = (PWCDISP_TX_STATUS_PTR)&m_PWCDisp_TXStatus;
+
+  // Display Packet was deemed invalid. Record logs.
+  if(bBadPacket == TRUE)
+  {
+    memcpy(invalidPktLog.packetContents, pStatus->packetContents, 
+           PWCDISP_TX_MSG_SIZE);
+    invalidPktLog.lastFrameTime = pStatus->lastFrameTime;
+    invalidPktLog.validPacketCnt = pStatus->validPacketCnt;
+    invalidPktLog.invalidPacketCnt = pStatus->invalidPacketCnt;
+    LogWriteSystem(SYS_ID_UART_PWCDISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
+                   &invalidPktLog, sizeof(PWCDISP_DISPLAY_PACKET_ERROR_LOG), 
+                   NULL);    
   }
 }
 
@@ -911,44 +932,6 @@ BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr)
     tx_param_ptr->doubleClickRate = (INT8) pCurrentData->data.Int;    
   }
   return(bNewData);
-}
-
-/******************************************************************************
- * Function:    PWCDispProtocol_ReadAppRequests
- *
- * Description: Function to Read any special communication requests from the
- *              Display Processing Application.
- *
- * Parameters:  None
- *
- * Returns:     None
- *
- * Notes:       None
- *
- *****************************************************************************/
-static 
-void PWCDispProtocol_ReadAppRequests(void)
-{
-  // Acquire character Parameters from the Display Processing Application
-  UARTMGR_PROTOCOL_DATA_PTR pData;
-  PWCDISP_TX_STATUS_PTR pTxStatus;
-  PWCDISP_RX_STATUS_PTR pRxStatus;
-  BOOLEAN bNewData;
-
-  pTxStatus = (PWCDISP_TX_STATUS_PTR)&m_PWCDisp_TXStatus;
-  pRxStatus = (PWCDISP_RX_STATUS_PTR)&m_PWCDisp_RXStatus;
-  pData = (UARTMGR_PROTOCOL_DATA_PTR)&m_PWCDisp_RequestFromApp;
-  bNewData = PWCDispProtocol_Read_Handler(pData, UARTMGR_PROTOCOL_PWC_DISPLAY,
-	                                      DISPLAY_APP_REQUEST,
-                                          DISPLAY_APP_REQUESTS_COUNT);
-
-  // Aquire new data if available
-  if (bNewData == TRUE)
-  {
-    pTxStatus->bTX_StartFlag   = (BOOLEAN)(pData + TX_START_FLAG)->data.Int;  
-    pRxStatus->dispHealthTimer = 
-             (UINT32)(pData + INVALID_D_HLTH_TIMER)->data.Int;
-  }
 }
 
 /******************************************************************************
@@ -1013,7 +996,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
         for(i = 0; i < PWCDISP_MAX_CHAR_PARAMS; i++)
         {
           // If the character is not approved abort loop and report bad packet
-          if(*data > 0x7F)
+          if(*data > 0x7F && bBadTXPacket != TRUE)
              {
                bBadTXPacket = TRUE;
                pStatus->invalidPacketCnt++;
@@ -1056,6 +1039,8 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
   // Update status, reset stateCheck switch, and return bBadTXPacket
   memcpy(pStatus->packetContents, tx_buff_ptr->data, PWCDISP_TX_MSG_SIZE);
   stateCheck = PWCDISP_PARAM_ENCODE_CHARACTERS;
+  // Record a System Log if the Packet is bad.
+  PWCDispProtocol_ValidTXPacket(bBadTXPacket);
   return(bBadTXPacket);
 }
 
@@ -1088,6 +1073,49 @@ void PWCDispDebug_Task(void *pParam)
     {
       PWCDispDebug_TX(pParam);
     }
+  }
+}
+
+
+/******************************************************************************
+* Function:    TranslateArrows
+*
+* Description: Utility Function to replace Hex directional characters with 
+*              "v,^,<,>,@"
+*
+* Parameters:  char   charString[] - The string to be edited.
+*              UINT16 length       - The length of the string to be edited.
+*
+* Returns:     none
+*
+* Notes:       none
+*
+*****************************************************************************/
+void TranslateArrows(char charString[], UINT16 length)
+{
+  int i;
+  for (i = 0; i < length; i++)
+  {
+    switch(charString[i])
+    {
+      case 0x02:
+        charString[i] = '>';
+        break;
+      case 0x04:
+        charString[i] = '<';
+        break;
+      case 0x01:
+        charString[i] = '^';
+        break;
+      case 0x03:
+        charString[i] = 'v';
+        break;
+      case 0x05:
+        charString[i] = '@';
+        break;
+      default:
+        break;
+    };
   }
 }
 
@@ -1240,6 +1268,7 @@ static void PWCDispDebug_TX(void *pParam)
   // Display LINE 1
   memcpy(m_Str, &(pStatus->packetContents[4]), 12);
   m_Str[12] = '\0';
+  TranslateArrows((char *)m_Str, 12);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
   m_Str[0] = NULL;
@@ -1247,6 +1276,7 @@ static void PWCDispDebug_TX(void *pParam)
   // Display LINE 2
   memcpy(m_Str, &(pStatus->packetContents[16]), 12);
   m_Str[12] = '\0';
+  TranslateArrows((char *)m_Str, 12);
   GSE_PutLine((const char*)m_Str);
   GSE_PutLine("\r\n\n");
 
@@ -1458,6 +1488,11 @@ void PWCDispProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:10a

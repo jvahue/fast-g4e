@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 2 $  $Date: 15-12-02 6:38p $
+    $Revision: 3 $  $Date: 1/04/16 6:19p $
 
 ******************************************************************************/
 #ifndef DISPLAY_PROCESSING_BODY
@@ -96,7 +96,6 @@ static USER_MSG_TBL DispProcAppStatusTbl[] =
 static USER_MSG_TBL DispProcAppCfgTbl[] =
 {
   /*Str                      Next Tbl Ptr   Handler Func.          Data Type         Access   Parameter                                          Index   DataLimit EnumTbl*/
-  {"DEFAULT_DCRATE",         NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_INT8,   USER_RW, (void *) &DispProcAppCfgTemp.defaultDCRATE,        -1, -1, NO_LIMIT, NULL},
   {"INVALID_BUTTON_TIME_MS", NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.invalidButtonTime_ms, -1, -1, NO_LIMIT, NULL},
   {"AUTO_ABORT_TIME_S",      NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.autoAbortTime_s,      -1, -1, NO_LIMIT, NULL},
   {"NO_HS_TIMEOUT_S",        NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.no_HS_Timeout_s,      -1, -1, NO_LIMIT, NULL},
@@ -336,6 +335,11 @@ static USER_HANDLER_RESULT DispProcessingApp_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingUserTables.c $
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from Performance Software
  * 
  * *****************  Version 2  *****************
  * User: Peter Lee    Date: 15-12-02   Time: 6:38p
