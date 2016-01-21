@@ -11,7 +11,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 45 $  $Date: 12-12-11 4:27p $
+      $Revision: 46 $  $Date: 1/21/16 4:35p $
 ******************************************************************************/
 
 
@@ -33,6 +33,8 @@
 ******************************************************************************/
 #define PIN_LABEL_LEN 24
 #define DEBOUNCE_PERIOD_MS 50
+#define DISP_DISCRETE_BASE 0x3179ff34 
+#define DISP_GPIO_0 (volatile UINT8 *)(DISP_DISCRETE_BASE + 0x00)
 #ifndef WIN32
     #define DIO_R(a) *(a)
     #define DIO_W(a,m,o) (*(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m)))
@@ -97,39 +99,47 @@ DIO_PIN(WLAN_WOW_Enb,    DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR
 DIO_PIN(SW_PFEN_Sta,     DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FECI2C,0x08)\
 /*FPGA GPIO input.  Typecast 16-bit GPIO_1 reg to fit in 8-bit ptr type. Should think about\
   adding reg width column in the future if more 16-but registers are needed*/\
-DIO_PIN(FFD_Enb,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        (void*)FPGA_GPIO_1, FPGA_GPIO_1_FFDI)
+DIO_PIN(FFD_Enb,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        FPGA_GPIO_1, FPGA_GPIO_1_FFDI)\
+DIO_PIN(DispDisc0,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x00)\
+DIO_PIN(DispDisc1,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x01)\
+DIO_PIN(DispDisc2,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x02)\
+DIO_PIN(DispDisc3,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x03)\
+DIO_PIN(DispDisc4,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x04)\
+DIO_PIN(DispDisc5,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x05)\
+DIO_PIN(DispDisc6,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x06)\
+DIO_PIN(DispDisc7,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x07)
 
 
 #define DIO_OUTPUTS_LIST \
-/*  Name (<24 chars)....Dir     Init   Peripheral Access Method  PODR addr         BitMask*/\
-DIO_PIN(LSS0,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x10)\
-DIO_PIN(LSS1,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x20)\
-DIO_PIN(LSS2,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x40)\
-DIO_PIN(LSS3,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x80)\
-DIO_PIN(FPGAReconfig,   DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x20)\
-DIO_PIN(WLANEnb,        DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x40)\
-DIO_PIN(GSMEnb,         DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x80)\
-DIO_PIN(TP73,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1L, 0x40)\
-DIO_PIN(LiBattToADC,    DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1L, 0x80)\
-DIO_PIN(TP67,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x01)\
-DIO_PIN(TP68,           DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x02)\
-DIO_PIN(ARINC429_Pwr,   DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x04)\
-DIO_PIN(LED_CFG,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x08)\
-DIO_PIN(LED_FLT,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x10)\
-DIO_PIN(SW_PFEN1,       DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x01)\
-DIO_PIN(SW_PFEN2,       DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x02)\
-DIO_PIN(FPGARst,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x04)\
-DIO_PIN(LED_XFR,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x08)\
-DIO_PIN(LED_STS,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x10)\
-DIO_PIN(PowerHold,      DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x04)\
-DIO_PIN(GSE_TxEnb,      DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x08)\
-DIO_PIN(ACS1_DX,        DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x40)\
-DIO_PIN(ACS1_TxEnb,     DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x80)\
-DIO_PIN(ACS2_DX,        DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x04)\
-DIO_PIN(ACS2_TxEnb,     DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x08)\
-DIO_PIN(ACS3_DX,        DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x40)\
-DIO_PIN(ACS3_TxEnb,     DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x80)\
-DIO_PIN(MSRst,          DIO_Out, ON,   DIO_TMR2, DIO_NOT_APPLIC, NULL                   ,0xFF)\
+/*  Name (<24 chars).... Dir      Init  Peripheral Access Method  PODR addr         BitMask*/\
+DIO_PIN(LSS0,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x10)\
+DIO_PIN(LSS1,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x20)\
+DIO_PIN(LSS2,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x40)\
+DIO_PIN(LSS3,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC0L, 0x80)\
+DIO_PIN(FPGAReconfig,    DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x20)\
+DIO_PIN(WLANEnb,         DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x40)\
+DIO_PIN(GSMEnb,          DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1H, 0x80)\
+DIO_PIN(TP73,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1L, 0x40)\
+DIO_PIN(LiBattToADC,     DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_FEC1L, 0x80)\
+DIO_PIN(TP67,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x01)\
+DIO_PIN(TP68,            DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x02)\
+DIO_PIN(ARINC429_Pwr,    DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x04)\
+DIO_PIN(LED_CFG,         DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x08)\
+DIO_PIN(LED_FLT,         DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBR, 0x10)\
+DIO_PIN(SW_PFEN1,        DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x01)\
+DIO_PIN(SW_PFEN2,        DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x02)\
+DIO_PIN(FPGARst,         DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x04)\
+DIO_PIN(LED_XFR,         DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x08)\
+DIO_PIN(LED_STS,         DIO_Out, ON,   DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PCIBG, 0x10)\
+DIO_PIN(PowerHold,       DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x04)\
+DIO_PIN(GSE_TxEnb,       DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x08)\
+DIO_PIN(ACS1_DX,         DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x40)\
+DIO_PIN(ACS1_TxEnb,      DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC1PSC0,0x80)\
+DIO_PIN(ACS2_DX,         DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x04)\
+DIO_PIN(ACS2_TxEnb,      DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x08)\
+DIO_PIN(ACS3_DX,         DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x40)\
+DIO_PIN(ACS3_TxEnb,      DIO_Out, OFF,  DIO_GPIO, DIO_NOT_APPLIC, &MCF_GPIO_PODR_PSC3PSC2,0x80)\
+DIO_PIN(MSRst,           DIO_Out, ON,   DIO_TMR2, DIO_NOT_APPLIC, NULL                   ,0xFF)\
 /* Note: for ACS1_232_485 control,\
          DIO Init does not actually init this pin, there is code in FPGA Init*/\
 /*reference SCR #601 */\
@@ -176,6 +186,7 @@ typedef enum{
   DIO_GPIO,
   DIO_TMR2,
   DIO_FPGA,
+  DIO_DISP,
 }DIO_PERIPHERAL;
 
 typedef enum{         // How should discrete values be accessed.
@@ -254,6 +265,9 @@ EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
 EXPORT  void    DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState );
 
 EXPORT  void    DIO_UpdateDiscreteInputs ( void );
+EXPORT  void    DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax);
+EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
+EXPORT  void    DIO_DispValidationFlags(const char* flagAddress);
 
 #endif // DIO_H
 
@@ -261,6 +275,11 @@ EXPORT  void    DIO_UpdateDiscreteInputs ( void );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:35p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1302 - Display Protocol Discrete Inputs
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 12-12-11   Time: 4:27p

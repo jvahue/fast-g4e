@@ -10,11 +10,11 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 10 $  $Date: 1/04/16 6:20p $
+      $Revision: 14 $  $Date: 1/19/16 2:28p $
 
 ******************************************************************************/
 
-#define APAC_TIMING_TEST 1
+//#define APAC_TIMING_TEST 1
 //#define APAC_TEST_SIM 1
 
 /*****************************************************************************/
@@ -139,7 +139,8 @@ static void APACMgr_Task ( void *pParam ) ;
 static void APACMgr_Running ( void );
 
 static void APACMgr_errMsg_Computing ( BOOLEAN bPaltCalc, BOOLEAN bITTMax, BOOLEAN bNgMax,
-                                       BOOLEAN bTqCorr, BOOLEAN bOAT, BOOLEAN bMargin);
+                                       BOOLEAN bTqCorr, BOOLEAN bOAT, BOOLEAN bITTMg, 
+                                       BOOLEAN bNGMg);
 static void APACMgr_errMsg_HIGE_LoW ( BOOLEAN bTqCrit, BOOLEAN bGndCrit );
 static void APACMgr_errMsg_Create ( const CHAR *title );
 
@@ -167,7 +168,6 @@ static void APACMgr_CheckCfg ( void );
 static void APACMgr_InitDispNames ( void );
 
 // TEST
-
 #ifdef APAC_TEST_SIM
 static UINT32 test_menu_invld_timeout_val;
 static UINT32 simNextTick;
@@ -247,7 +247,8 @@ static const APAC_PALT_COEFF_TBL APAC_PALT_COEFF_CONST_TBL =
 static const APAC_STATE_RUN_STR APAC_STATE_RUN_STR_BUFF_CONST[APAC_RUN_STATE_MAX] =
 {
   "IDLE        ",// APAC_RUN_STATE_IDLE
-  "NOT LOW     ",// APAC_RUN_STATE_HIGE_LOW
+  "INCREASE TQ.",// APAC_RUN_STATE_INCREASE_TQ
+  "DECR GND SPD",// APAC_RUN_STATE_DECR_GND_SPD
   "STABILIZING.",// APAC_RUN_STATE_STABILIZE
   "SAMPLING....",// APAC_RUN_STATE_SAMPLING
   "COMPUTING...",// APAC_RUN_STATE_COMPUTING
@@ -259,13 +260,6 @@ static const APAC_INSTALL_ENUM m_APAC_Tbl_Mapping[APAC_NR_SEL_MAX][INLET_CFG_MAX
 {
   { APAC_INSTALL_100_NORMAL, APAC_INSTALL_100_EAPS, APAC_INSTALL_100_IBF },
   { APAC_INSTALL_102_NORMAL, APAC_INSTALL_102_EAPS, APAC_INSTALL_102_IBF }
-};
-
-static const APAC_INLET_CFG_STR APAC_INLET_CFG_STR_CONST[INLET_CFG_MAX] =
-{
-  {APAC_INLET_CHART_BASIC_STR, APAC_INLET_ISSUE_BASIC_STR},
-  {APAC_INLET_CHART_EAPS_STR, APAC_INLET_ISSUE_EAPS_STR},
-  {APAC_INLET_CHART_IBF_STR, APAC_INLET_ISSUE_IBF_STR}
 };
 
 static const CHAR APAC_CAT_STR[APAC_NR_SEL_MAX] =
@@ -332,7 +326,7 @@ static const APAC_CFG_CHECK APAC_CFG_CHECK_TBL[] =
 {
   {&m_APAC_Cfg.snsr.idxBaroPres, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.BAROPRES"},
   {&m_APAC_Cfg.snsr.idxBaroCorr, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.BAROCORR"},
-  {&m_APAC_Cfg.snsr.idxGndSpeed, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.GNDSPD"},
+  {&m_APAC_Cfg.snsr.idxNR102_100, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.NR102_100"},
 
   {&m_APAC_Cfg.eng[APAC_ENG_1].idxITT, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "ENG[0].ITT"},
   {&m_APAC_Cfg.eng[APAC_ENG_1].idxNg, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "ENG[0].NG"},
@@ -377,6 +371,17 @@ static const CHAR *APAC_VLD_STR_CONST[] =
   APAC_VLD_STR_CYCLE,  // APAC_VLD_REASON_CYCLE
   APAC_VLD_STR_NVM     // APAC_VLD_REASON_NVM
 };
+
+// NOTE: APAC_VLD_REASON_ENUM changes, the ordering below must change as well to match
+static const UINT16 APAC_VLD_BIT_ENCODE_CONST[] = 
+{
+  0x0000,              // APAC_VLD_REASON_NONE
+  0x0001,              // APAC_VLD_REASON_50HRS
+  0x0002,              // APAC_VLD_REASON_ESN
+  0x0004,              // APAC_VLD_REASON_CFG
+  0x0008,              // APAC_VLD_REASON_CYCLE
+  0x0010               // APAC_VLD_REASON_NVM
+}; 
 
 #include "APACMgr_Interface.c"
 #include "APACMgrUserTables.c"
@@ -503,7 +508,7 @@ void APACMgr_Initialize ( void )
   simNextTick = CM_GetTickCount() + simStateDelay[simState];
 #endif
 // Test
-
+  
 }
 
 
@@ -534,7 +539,7 @@ BOOLEAN APACMgr_FileInitHist(void)
 /******************************************************************************
  * Function:     APACMgr_FileInitNVM
  *
- * Description:  Reset the file to the initial state.
+ * Description:  Reset the file to the initial state if APAC NVM Data is bad
  *
  * Parameters:   none
  *
@@ -550,21 +555,24 @@ BOOLEAN APACMgr_FileInitNVM(void)
 
   // Init App data
   memset ( (void *) &m_APAC_NVM, 0, sizeof(m_APAC_NVM) );
+  
+  m_APAC_NVM.cfgCRC = NV_GetFileCRC(NV_CFG_MGR);
+  
   for (i=APAC_ENG_1;i<APAC_ENG_MAX;i++) {
      eng_nvm_ptr = (APAC_DATA_ENG_NVM_PTR) &m_APAC_NVM.eng[i];
     // Update ESN to "unitialized" state
     strncpy_safe (eng_nvm_ptr->esn, APAC_ESN_MAX_LEN, APAC_ESN_DEFAULT, _TRUNCATE );
     if ( m_APAC_Cfg.enabled == TRUE ) { // Only when APAC Processing is enb
-      m_APAC_VLD_Log.msg[0] = NULL;  // APAC_VLD_REASON_NVM has no msg in log
+      snprintf (m_APAC_VLD_Log.msg,sizeof(m_APAC_VLD_Log.msg),"E%d:",i);
       APACMgr_NVMUpdate ( i, APAC_VLD_REASON_NVM, &m_APAC_VLD_Log );
     }
+    else  { // Either NVM corrupted when APAC not enb or factory reset, just reset data
+      NV_Write(NV_APAC_NVM, 0, (void *) &m_APAC_NVM, sizeof(m_APAC_NVM));
+    }
   }
-
-  m_APAC_NVM.cfgCRC = NV_GetFileCRC(NV_CFG_MGR);
-
+  
   return TRUE;
 }
-
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -704,7 +712,9 @@ static void APACMgr_Running (void)
 
   switch ( m_APAC_Status.run_state )
   {
-    case APAC_RUN_STATE_HIGE_LOW:
+    case APAC_RUN_STATE_INCREASE_TQ:
+    case APAC_RUN_STATE_DECR_GND_SPD:
+      
       // Execute HIGE_LOW criteria to determine if cond met ?
       bResult =  (BOOLEAN) EvalExeExpression ( EVAL_CALLER_TYPE_APAC,
                                       (INT32) m_APAC_Status.eng_uut,
@@ -716,6 +726,9 @@ static void APACMgr_Running (void)
                                       &m_APAC_Cfg.eng[m_APAC_Status.eng_uut].sc_GndCrit,
                                       (BOOLEAN *) &validity );
       bResult1 = bResult1 && validity;
+      // .run_state used for status display on menu for "INCREASE TQ." or "DECR GND SPD"
+      m_APAC_Status.run_state = (bResult == FALSE) ? APAC_RUN_STATE_INCREASE_TQ : 
+                                                     APAC_RUN_STATE_DECR_GND_SPD ; 
       if ( (bResult == TRUE) && (bResult1 == TRUE) )
       {
         // Kick off trend object
@@ -860,10 +873,10 @@ static void APACMgr_Running (void)
         } // end if calculation was SUCCESS
         else
         { // Failure detected.
-          // Note: APACMgr_errMsg_Computing ( bPAMB, bITTMax, bNgMax, bTqDelta, bOAT, Margin )
-          bResult = bResult6 && bResult7;
+          // Note: APACMgr_errMsg_Computing ( bPAMB, bITTMax, bNgMax, bTqDelta, bOAT, bITTMg, 
+          //                                  bNGMg )
           APACMgr_errMsg_Computing( bResult1, bResult2, bResult3, bResult4, bResult5,
-                                    bResult );
+                                    bResult6, bResult7 );
           APACMgr_LogFailure();
           m_APAC_Status.run_state = APAC_RUN_STATE_FAULT;
           GSE_DebugStr(NORMAL,TRUE,
@@ -899,7 +912,8 @@ static void APACMgr_Running (void)
  *              bNgMax - FALSE if Ng Max Calc failed
  *              bTqCorr - FALSE if Tq Corrected Calc failed
  *              bOAT - FALSE if OAT is out of range
- *              bMargin - FALSE if ITT or Ng Margin Calc is out of range
+ *              bITTMg - FALSE if ITT Margin Calc is out of range
+ *              bNGMg - FALSE if Ng Margin Calc is out of range
  *
  * Returns:     None
  *
@@ -908,14 +922,16 @@ static void APACMgr_Running (void)
  *
  *****************************************************************************/
 static void APACMgr_errMsg_Computing ( BOOLEAN bPaltCalc, BOOLEAN bITTMax, BOOLEAN bNgMax,
-                                       BOOLEAN bTqCorr, BOOLEAN bOAT, BOOLEAN bMargin)
+                                       BOOLEAN bTqCorr, BOOLEAN bOAT, BOOLEAN bITTMg, 
+                                       BOOLEAN bNGMg)
 {
   m_APAC_Snsr_Status[APAC_SNSR_TQCORR].bNotOk = (bTqCorr == FALSE) ? TRUE : FALSE;
   m_APAC_Snsr_Status[APAC_SNSR_ITTMAX].bNotOk = (bITTMax == FALSE) ? TRUE : FALSE;
   m_APAC_Snsr_Status[APAC_SNSR_NGMAX].bNotOk = (bNgMax == FALSE) ? TRUE : FALSE;
   m_APAC_Snsr_Status[APAC_SNSR_PALT_CALC].bNotOk = (bPaltCalc == FALSE) ? TRUE : FALSE;
   m_APAC_Snsr_Status[APAC_SNSR_OAT].bNotOk = (bOAT == FALSE) ? TRUE : FALSE;
-  m_APAC_Snsr_Status[APAC_SNSR_MARGIN].bNotOk = (bMargin == FALSE) ? TRUE : FALSE;
+  m_APAC_Snsr_Status[APAC_SNSR_ITTMG].bNotOk = (bITTMg == FALSE) ? TRUE : FALSE;
+  m_APAC_Snsr_Status[APAC_SNSR_NGMG].bNotOk = (bNGMg == FALSE) ? TRUE : FALSE;
 
   APACMgr_errMsg_Create( APAC_ERRMSG_TITLE_COMPUTE );
 }
@@ -1005,6 +1021,8 @@ static void APACMgr_errMsg_Setup ( BOOLEAN eng1, BOOLEAN eng2, BOOLEAN eaps_ibf_
   APAC_ERRMSG_ENTRY_PTR entry_ptr;
 
   memset ( (void *) &m_APAC_ErrMsg, 0, sizeof(m_APAC_ErrMsg) );
+  strncpy ( (char *) m_APAC_ErrMsg.title.entry, APAC_ERRMSG_TITLE_SETUP,
+            APAC_MENU_DISPLAY_CHAR_MAX );
   entry_ptr = (APAC_ERRMSG_ENTRY_PTR) m_APAC_ErrMsg.list;
 
   if ( (eng1 && eng2) || (!eng1 && !eng2) )
@@ -1096,17 +1114,26 @@ static void APACMgr_LogSummary ( APAC_COMMIT_ENUM commit )
 {
   APAC_SUMMARY_LOG alog;
   APAC_ENG_STATUS_PTR eng_ptr;
+  APAC_TBL_PTR tbl_ptr;
+  APAC_INSTALL_ENUM tblIdx;
+  
 
   m_APAC_Status.eng[m_APAC_Status.eng_uut].commit = commit;
 
   eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[m_APAC_Status.eng_uut];
+  
+  tblIdx = m_APAC_Tbl_Mapping[m_APAC_Status.nr_sel][m_APAC_Cfg.inletCfg];
+  tbl_ptr = (APAC_TBL_PTR) &m_APAC_Tbl[APAC_ITT][tblIdx];  
 
   alog.eng_uut = m_APAC_Status.eng_uut;
   memcpy ( (void *) alog.esn, (void *) eng_ptr->esn, APAC_ESN_MAX_LEN);
   alog.nr_sel = m_APAC_Status.nr_sel;
   alog.inletCfg = m_APAC_Cfg.inletCfg;
+  alog.chart_rev_str[APAC_INLET_CHART_REV_1ST_CHAR] = 
+                    tbl_ptr->chart_rev_str[APAC_INLET_CHART_REV_1ST_CHAR];
   alog.manual = eng_ptr->vld.set;
   alog.reason = eng_ptr->vld.reason;
+  alog.reason_summary = eng_ptr->vld.reason_summary; 
   alog.engHrs_prev_s = eng_ptr->hrs.prev_s;
   alog.engHrs_curr_s = eng_ptr->hrs.curr_s;
   alog.ittMargin = eng_ptr->itt.margin;
@@ -1157,6 +1184,7 @@ static void APACMgr_LogEngStart ( void )
   alog.inletCfg = m_APAC_Cfg.inletCfg;
   alog.manual = eng_ptr->vld.set;
   alog.reason = eng_ptr->vld.reason;
+  alog.reason_summary = eng_ptr->vld.reason_summary;
   alog.engHrs_prev_s = eng_ptr->hrs.prev_s;
   alog.engHrs_curr_s = eng_ptr->hrs.curr_s;
 
@@ -1204,6 +1232,16 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit )
   APAC_ABORT_NCR_LOG alog;
 
   alog.commit = commit;
+  alog.eng_uut = m_APAC_Status.eng_uut; 
+  
+  alog.reason = (m_APAC_Status.eng_uut == APAC_ENG_MAX) ?
+                 m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason :
+                 APAC_VLD_REASON_NONE ;
+   
+  alog.reason_summary = (m_APAC_Status.eng_uut == APAC_ENG_MAX) ?
+                 m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason_summary :
+                 APAC_VLD_REASON_NONE ;
+   
   LogWriteETM (APP_ID_APAC_ABORT_NCR, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
 
@@ -1231,7 +1269,7 @@ static void APACMgr_ClearStatus (void)
   m_APAC_Status.ts_start.Timestamp = 0;
   m_APAC_Status.ts_start.MSecond = 0;
   for (i=0;i<(UINT16) APAC_ENG_MAX;i++) {
-    m_APAC_Status.eng[i].commit = APAC_COMMIT_NCR;
+    m_APAC_Status.eng[i].commit = APAC_COMMIT_MAX;
     memset ( (void *) &m_APAC_Status.eng[i].common, 0, sizeof(APAC_ENG_CALC_COMMON) );
     memset ( (void *) &m_APAC_Status.eng[i].itt, 0, sizeof(APAC_ENG_CALC_DATA) );
     memset ( (void *) &m_APAC_Status.eng[i].ng,  0, sizeof(APAC_ENG_CALC_DATA) );
@@ -1458,12 +1496,13 @@ BOOLEAN APACMgr_RestoreAppDataNVM ( void )
     for (i=APAC_ENG_1;i<APAC_ENG_MAX;i++) {
       m_APAC_Status.eng[i].hrs.prev_s = m_APAC_NVM.eng[i].hrs_s;
       if (reason[i] != APAC_VLD_REASON_NONE) {
-        snprintf (m_APAC_VLD_Log.msg,sizeof(m_APAC_VLD_Log.msg),"E%d: curr=0x%04X,prev=0x%04X",
-                   i, crc, prev_crc );
+       snprintf (m_APAC_VLD_Log.msg,sizeof(m_APAC_VLD_Log.msg),"E%d: curr=0x%04X,prev=0x%04X",
+                  i, crc, prev_crc );
         APACMgr_NVMUpdate( i, reason[i], &m_APAC_VLD_Log );
       }
       m_APAC_Status.eng[i].vld.set = m_APAC_NVM.eng[i].vld;
       m_APAC_Status.eng[i].vld.reason = m_APAC_NVM.eng[i].vld_reason;
+      m_APAC_Status.eng[i].vld.reason_summary = m_APAC_NVM.eng[i].vld_reason_summary;
     } // end for loop thru engs and if need to update __NVMUpdate()
   } // end else NVM Data retrieved
 
@@ -1642,8 +1681,10 @@ void APACMgr_NVMUpdate ( APAC_ENG_ENUM eng_uut, APAC_VLD_REASON_ENUM reason,
 
   if ( reason != APAC_VLD_REASON_NONE ) {
     eng_ptr->vld.set = eng_nvm_ptr->vld = TRUE;  // Set manual validate flag
+    eng_nvm_ptr->vld_reason_summary |= APAC_VLD_BIT_ENCODE_CONST[reason]; 
     // Rec Sys Log
     plog->reason = reason;
+    plog->reason_summary = eng_nvm_ptr->vld_reason_summary;
     LogWriteETM (APP_ID_APAC_VLD_MANUAL, LOG_PRIORITY_LOW, plog,
                  sizeof(m_APAC_VLD_Log), NULL);
   }
@@ -1651,8 +1692,10 @@ void APACMgr_NVMUpdate ( APAC_ENG_ENUM eng_uut, APAC_VLD_REASON_ENUM reason,
     // On Manual Validate Action, reset the next 50 hrs
     eng_ptr->hrs.prev_s = eng_nvm_ptr->hrs_s = eng_ptr->hrs.start_s;
     eng_ptr->vld.set = eng_nvm_ptr->vld = FALSE; // Clr manual validate flag
+    eng_nvm_ptr->vld_reason_summary = APAC_VLD_BIT_ENCODE_CONST[reason]; // reason == NONE
   }
   eng_ptr->vld.reason = eng_nvm_ptr->vld_reason = reason;
+  eng_ptr->vld.reason_summary = eng_nvm_ptr->vld_reason_summary; 
   // Update App data
   NV_Write(NV_APAC_NVM, 0, (void *) &m_APAC_NVM, sizeof(m_APAC_NVM));
 
@@ -1765,8 +1808,11 @@ static void APACMgr_InitDispNames ( void )
   snprintf ( strTemp, APAC_SNSR_NAME_CHAR_MAX, "%-5s", m_APAC_Cfg.names.gndcrit );
   strncpy_safe ( m_APAC_Snsr_Status[APAC_SNSR_GNDCRIT].str, APAC_SNSR_NAME_CHAR_MAX,
                  strTemp, _TRUNCATE);
-  snprintf ( strTemp, APAC_SNSR_NAME_CHAR_MAX, "%-5s", m_APAC_Cfg.names.margin );
-  strncpy_safe ( m_APAC_Snsr_Status[APAC_SNSR_MARGIN].str, APAC_SNSR_NAME_CHAR_MAX,
+  snprintf ( strTemp, APAC_SNSR_NAME_CHAR_MAX, "%-5s", m_APAC_Cfg.names.ittMg );
+  strncpy_safe ( m_APAC_Snsr_Status[APAC_SNSR_ITTMG].str, APAC_SNSR_NAME_CHAR_MAX,
+                 strTemp, _TRUNCATE);
+  snprintf ( strTemp, APAC_SNSR_NAME_CHAR_MAX, "%-5s", m_APAC_Cfg.names.ngMg );
+  strncpy_safe ( m_APAC_Snsr_Status[APAC_SNSR_NGMG].str, APAC_SNSR_NAME_CHAR_MAX,
                  strTemp, _TRUNCATE);
 
   // Loop thru Trend Sensor Names and Pad with <space> char.
@@ -2179,6 +2225,29 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 1/19/16    Time: 2:28p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #3.1 
+ * *apac.status.eng.commit[0/1] default*
+ * GSE indicates value is set to None on startup, code returns NCR
+ * 
+ * 
+ * *****************  Version 13  *****************
+ * User: Peter Lee    Date: 1/19/16    Time: 11:37a
+ * Updated in $/software/control processor/code/application
+ * SCR #1309 Item #3.  Remove 'apac.cfg.snsr.gndspd'  as not needed.
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 1/18/16    Time: 5:49p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308. Various Updates from Reviews and Enhancements
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 1/16/16    Time: 6:50p
+ * Updated in $/software/control processor/code/application
+ * SCR #1309 Item #2. NVMgr warning msg on startup for APAC Mgr. 
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 1/04/16    Time: 6:20p

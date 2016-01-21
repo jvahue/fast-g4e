@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 7 $  $Date: 11/17/15 9:27a $
+      $Revision: 9 $  $Date: 1/19/16 11:37a $
 
 ******************************************************************************/
 
@@ -64,7 +64,8 @@
 
 #define APAC_SNSR_CFG_DEFAULT  SENSOR_UNUSED,         /* PAMB      Sensor Index, Not Init */\
                                SENSOR_UNUSED,         /* BaroPress Sensor Index, Not Init */\
-                               SENSOR_UNUSED          /* Gnd Spd   Sensor Index, Not Init */
+                               SENSOR_UNUSED          /* Nr 102 or 100 Disc Sel, Not Init */\
+
 
 #define APAC_TIMEOUT_CFG_DEFAULT  APAC_TIMEOUT_HIGELOW_SEC, /* Timeout HIGELow */\
                                   APAC_TIMEOUT_STABLE_SEC   /* Timeout Stable  */
@@ -81,8 +82,9 @@
                                    "ITTMX",          /* ittMax   */\
                                    "NGMX ",          /* ngMax    */\
                                    "TQCRT",          /* TQCRIT   */\
-                                   "GNCRT",          /* GNDCRIT  */\
-                                   "MARGN"           /* MARGIN   */
+                                   "GSCRT",          /* GNDCRIT  */\
+                                   "ITTMG",          /* ittMargin*/\
+                                   "NGMG "           /* ngMargin */ 
 
 #define APAC_SNSR_TREND_NAME_CFG_DEFAULT   \
                                    "TS000",          /* snsr 00 */\
@@ -94,7 +96,7 @@
                                    "TS006",          /* snsr 06 */\
                                    "TS007",          /* snsr 07 */\
                                    "TS008",          /* snsr 08 */\
-                                   "TS019",          /* snsr 09 */\
+                                   "TS009",          /* snsr 09 */\
                                    "TS010",          /* snsr 10 */\
                                    "TS011",          /* snsr 11 */\
                                    "TS012",          /* snsr 12 */\
@@ -113,23 +115,18 @@
                             FALSE                         /* enabled */
 
 
+#define APAC_ERRMSG_TITLE_SETUP       "CONFIG ERROR"
 #define APAC_ERRMSG_TITLE_HIGE_LOW    "PAC NO START"
-#define APAC_ERRMSG_TITLE_STABILIZING "PAC NO STABL"
-#define APAC_ERRMSG_TITLE_SAMPLING    "PAC NO STABL"
+#define APAC_ERRMSG_TITLE_STABILIZING "PAC NOT STBL"
+#define APAC_ERRMSG_TITLE_SAMPLING    "PAC NOT STBL"
 #define APAC_ERRMSG_TITLE_COMPUTE     "COMPUTE ERR "
-
-#define APAC_INLET_CHART_BASIC_STR    "BASIC"
-#define APAC_INLET_ISSUE_BASIC_STR    "F"
-#define APAC_INLET_CHART_EAPS_STR     "EAPS "
-#define APAC_INLET_ISSUE_EAPS_STR     "B"
-#define APAC_INLET_CHART_IBF_STR      "IBF "
-#define APAC_INLET_ISSUE_IBF_STR      "A"
-
 
 #define APAC_ENG_IDLE_SET   1.0f
 #define APAC_ENG_FLT_SET    1.0f
 
 #define APAC_EAPS_IBF_SET   1.0f
+
+#define APAC_NR102_SET      1.0f 
 
 #define APAC_SETUP_ENGMD  "ENGMD"
 #define APAC_SETUP_EAPS   "EAPS "
@@ -253,7 +250,7 @@ typedef struct {
 typedef struct {
   SENSOR_INDEX idxBaroPres;
   SENSOR_INDEX idxBaroCorr;
-  SENSOR_INDEX idxGndSpeed;
+  SENSOR_INDEX idxNR102_100;  // NR102 or 100 Discrete Select
 } APAC_SNSR_CFG, *APAC_SNSR_CFG_PTR;
 
 typedef struct {
@@ -279,7 +276,8 @@ typedef struct {
   CHAR ngMax[APAC_SNSR_NAME_CHAR_MAX];
   CHAR tqcrit[APAC_SNSR_NAME_CHAR_MAX];
   CHAR gndcrit[APAC_SNSR_NAME_CHAR_MAX];
-  CHAR margin[APAC_SNSR_NAME_CHAR_MAX];
+  CHAR ittMg[APAC_SNSR_NAME_CHAR_MAX];
+  CHAR ngMg[APAC_SNSR_NAME_CHAR_MAX];
 } APAC_SNSR_NAMES_CFG, *APAC_SNSR_NAMES_CFG_PTR;
 
 typedef struct {
@@ -307,7 +305,8 @@ typedef enum {
 
 typedef enum {
   APAC_RUN_STATE_IDLE,
-  APAC_RUN_STATE_HIGE_LOW,
+  APAC_RUN_STATE_INCREASE_TQ,
+  APAC_RUN_STATE_DECR_GND_SPD,
   APAC_RUN_STATE_STABILIZE,
   APAC_RUN_STATE_SAMPLING,
   APAC_RUN_STATE_COMPUTING,
@@ -355,6 +354,8 @@ typedef struct {
   BOOLEAN set;    // Manual validate has been flagged.  Flag stored in NVM until
                   //   clr when VLD commit sel.
   APAC_VLD_REASON_ENUM reason;
+  UINT16 reason_summary;  // All Manual Validate Reasons since last Man Validate. 
+                          //      Ref APAC_VLD_BIT_ENCODE_CONST[]
 } APAC_ENG_VLD_STATUS;
 
 typedef struct {
@@ -426,6 +427,11 @@ typedef struct {
   FLOAT32 tq_max; // Max Range for TqDelta for Ng for this oat value entry, ref tables
 } APAC_TBL_ENTRY, *APAC_TBL_ENTRY_PTR;
 
+#define APAC_INLET_CHART_MAX_LEN   6  //  5 + '\0'
+#define APAC_INLET_CHART_PART_LEN  40 // 39 + '\0' 
+#define APAC_INLET_CHART_REV_LEN   2  //  1 + '\0'
+#define APAC_INLET_CHART_REV_1ST_CHAR  0 
+#define APAC_INLET_CHART_NR_LEN    4  //  3 + '\0'
 typedef struct {
   APAC_TBL_ENTRY p[APAC_TBL_MAX_ENTRIES];
   FLOAT32 param_min;  // ITTmax or Ngmax min acceptable value, reject if lower
@@ -434,6 +440,10 @@ typedef struct {
   //FLOAT32 tq_rjct_max;  // TqDelta max acceptable value, reject if higher
   BOOLEAN minEq;  // "tq_min" value is ">=" when TRUE.  "tq_max" value is "<=" when FALSE
   UINT8 numEntries;   // Number of entries in the table
+  CHAR inlet_str[APAC_INLET_CHART_MAX_LEN];  // "BASIC", "EAPS ", "IBF  "
+  CHAR chart_partnum_str[APAC_INLET_CHART_PART_LEN]; //"ICN-39-A-155000-A-A0126-12214-A-03-1"
+  CHAR chart_rev_str[APAC_INLET_CHART_REV_LEN];  // "F", "B", "C"
+  CHAR chart_nr_str[APAC_INLET_CHART_NR_LEN];    // "102" or "100" 
 } APAC_TBL, *APAC_TBL_PTR;
 
 typedef struct {
@@ -486,8 +496,9 @@ typedef enum {
   APAC_SNSR_NGMAX,           // 7
   APAC_SNSR_TQCRIT,          // 8
   APAC_SNSR_GNDCRIT,         // 9
-  APAC_SNSR_MARGIN,          // 10
-  APAC_SNSR_MAX              // 11
+  APAC_SNSR_ITTMG,           // 10
+  APAC_SNSR_NGMG,            // 11
+  APAC_SNSR_MAX              // 12
 } APAC_SNSR_ENUM;
 
 typedef struct {
@@ -523,7 +534,9 @@ typedef struct {
   APAC_ENG_CALC_COMMON common;
   APAC_ENG_CALC_DATA itt;
   APAC_ENG_CALC_DATA ng;
-  TIMESTAMP ts_start;         // TimeStamp of Start of Test (link to APAC START LOG)
+  CHAR chart_rev_str[APAC_INLET_CHART_REV_LEN];  // "F", "B", "C" 
+  UINT16 reason_summary;   // All Manual Validate Reasons since last Man Validate. 
+                           //      Ref APAC_VLD_BIT_ENCODE_CONST[]
 } APAC_SUMMARY_LOG, *APAC_SUMMARY_LOG_PTR;
 
 typedef struct {
@@ -533,12 +546,18 @@ typedef struct {
   APAC_INLET_CFG_ENUM inletCfg;  // Inlet selection from cfg
   BOOLEAN manual;             // Manual Verification
   APAC_VLD_REASON_ENUM reason;// Manual Verification Reason
+  UINT16 reason_summary;      // All Manual Validate Reasons since last Man Validate. 
+                              //      Ref APAC_VLD_BIT_ENCODE_CONST[]
   UINT32 engHrs_curr_s;       // Current Eng Hrs Cycle time
   UINT32 engHrs_prev_s;       // Previous (last manual validation) Eng Hrs Cycle Time
 } APAC_ENG_START_LOG, *APAC_ENG_START_LOG_PTR;
 
 typedef struct {
-  APAC_COMMIT_ENUM commit;  // ABORT,NCR only
+  APAC_COMMIT_ENUM commit;     // ABORT,NCR only
+  APAC_ENG_ENUM eng_uut;       // Engine Under Test.  If APAC_ENG_MAX then Eng not selected
+  APAC_VLD_REASON_ENUM reason; // Pending Manual Validate Reason (if any and if eng selected)
+  UINT16 reason_summary;       // All Manual Validate Reasons since last Man Validate. 
+                               //      Ref APAC_VLD_BIT_ENCODE_CONST[]
 } APAC_ABORT_NCR_LOG, *APAC_ABORT_NCR_LOG_PTR;
 
 typedef struct {
@@ -550,6 +569,8 @@ typedef struct {
 typedef struct {
   APAC_VLD_REASON_ENUM reason;
   CHAR msg[APAC_VLD_REASON_LOG_STR_MAX];
+  UINT16 reason_summary;      // BIT encoding of all previous Manual Validate requests. 
+                              //    Ref APAC_VLD_BIT_ENCODE_CONST[] 
 } APAC_VLD_LOG, *APAC_VLD_LOG_PTR;
 #pragma pack()
 
@@ -582,6 +603,8 @@ typedef struct {
                  //   50 hrs exceed = Curr Eng Hrs - Prev Eng Hrs
   BOOLEAN vld;                     // Manual Validate is flagged
   APAC_VLD_REASON_ENUM vld_reason; // Manual Validate Reason
+  UINT16 vld_reason_summary;       // All Manual Validate Reasons since last Man Validate. 
+                                   //      Ref APAC_VLD_BIT_ENCODE_CONST[]
 } APAC_DATA_ENG_NVM, *APAC_DATA_ENG_NVM_PTR;
 
 typedef struct {
@@ -652,6 +675,16 @@ EXPORT BOOLEAN APACMgr_FileInitNVM( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 1/19/16    Time: 11:37a
+ * Updated in $/software/control processor/code/application
+ * SCR #1309 Item #3.  Remove 'apac.cfg.snsr.gndspd'  as not needed.
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 1/18/16    Time: 5:49p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308. Various Updates from Reviews and Enhancements
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 11/17/15   Time: 9:27a

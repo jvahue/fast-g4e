@@ -12,7 +12,7 @@
               provided.
 
  VERSION
-     $Revision: 36 $  $Date: 12/18/15 11:19a $
+     $Revision: 37 $  $Date: 1/21/16 4:31p $
 
 ******************************************************************************/
 
@@ -445,7 +445,7 @@ void GSE_ToggleDisplayLiveStream(void)
   DispProcApp_DisableLiveStream();
 
   // Disable PWC Display Protocol output stream
-  PWCDispProtocol_DisableLiveStream();
+  PWCDispProtocol_DisableLiveStrm();
 
   // Disable ID Param output stream
   IDParamProtocol_DsbLiveStream();
@@ -681,6 +681,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:31p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Fixed naming convention per code review tool
  * 
  * *****************  Version 36  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:19a

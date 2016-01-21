@@ -2,7 +2,7 @@
 #define PWCDISP_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 4 $  $Date: 1/04/16 6:22p $     
+      $Revision: 5 $  $Date: 1/21/16 4:33p $     
 
 ******************************************************************************/
 
@@ -42,21 +42,15 @@
                                             // app
 #define PWCDISP_MAX_CHAR_PARAMS          24 // Max number of disp characters
 #define PWCDISP_MAX_RX_LIST_SIZE          7 // RX Payload Packet size
-#define PWCDISP_MAX_TX_LIST_SIZE         26 // TX Payload Packet size
+#define PWCDISP_MAX_TX_LIST_SIZE         26 // TX Payload Packet size with ID
 #define PWCDISP_RX_MAX_MSG_SIZE          12 // Full RX Packet size
 #define PWCDISP_TX_MSG_SIZE              31 // Full TX Packet size
 #define PWCDISP_SYNC_BYTE1             0x55
 #define PWCDISP_SYNC_BYTE2             0xAA
 #define PWCDISP_RX_PACKET_ID           0x11
 #define PWCDISP_TX_PACKET_ID           0x01
-#define D_HLTH_BYTE_INDEX                 4 // D_HLTH byte Payload position
 #define RX_PROTOCOL                       0 //For use in Debug
 #define TX_PROTOCOL                       1 //For use in Debug
-#define DISPLAY_APP_REQUEST               2 //For special requests from the
-                                            //Display App
-#define PWCDISP_PROTOCOL_REQUEST          3 //For special requests from the
-                                            //PWC Display Protocol
-#define PWCDISP_CHARS_PER_LINE           21 //Max debug characters per line
 #define PWCDISP_CFG_DEFAULT             \
      PWCDISP_PACKET_ERROR_MAX
 /******************************************************************************
@@ -130,13 +124,12 @@ typedef enum
 
 typedef union
 {
-  UINT32 Int;
-  UINT8 *Ptr;
+  UINT32 value;
+  UINT8 *pPointer;
 }PACKET_DATA;
 
 typedef struct
 {
-  USER_DATA_TYPE   dataType;  //Data Type
   PACKET_DATA      data;      //The actual data 
   INT32            indexMin;  //Minimum array index
   INT32            indexMax;  //Maximum array index
@@ -259,18 +252,16 @@ typedef struct
 ******************************************************************************/
 EXPORT BOOLEAN PWCDispProtocol_Handler(UINT8 *data, UINT16 cnt, UINT16 ch, 
                                        void *runtime_data_ptr, void *info_ptr);
-EXPORT void PWCDispProtocol_Initialize(void);
+EXPORT void    PWCDispProtocol_Initialize(void);
 
 EXPORT PWCDISP_RX_STATUS_PTR PWCDispProtocol_GetRXStatus (void);
 EXPORT PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus (void);
 
-EXPORT PWCDISP_DEBUG_PTR PWCDispProtocol_GetDebug (void);
-EXPORT PWCDISP_CFG_PTR PWCDispProtocol_GetCfg(void);
-
-EXPORT BOOLEAN PWCDispProtocol_SensorSetup(UINT32 gpA, UINT32 gpB, UINT8 param,
-                                           void *info_ptr );
+EXPORT PWCDISP_DEBUG_PTR     PWCDispProtocol_GetDebug (void);
+EXPORT PWCDISP_CFG_PTR       PWCDispProtocol_GetCfg(void);
 
 EXPORT void    PWCDispDebug_Task(void *pParam);
+EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
 EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
 EXPORT void    TranslateArrows(char charString[], UINT16 length);
 EXPORT void    PWCDispProtocol_SetRXDebug(void);
@@ -283,7 +274,6 @@ EXPORT void    PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan,
                                              UINT16 nMaxByteSize);
 EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest, 
                                              const UINT16 max_size, UINT16 ch);
-EXPORT void    PWCDispProtocol_DisableLiveStream(void);
 
 #endif // PWCDISP_PROTOCOL_H
 
@@ -291,10 +281,10 @@ EXPORT void    PWCDispProtocol_DisableLiveStream(void);
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
  * 
- * *****************  Version 4  *****************
- * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:33p
  * Updated in $/software/control processor/code/system
- * SCR 1302 - Performance Software Updates
+ * SCR 1302 - Added discrete processing and code review updates
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:10a

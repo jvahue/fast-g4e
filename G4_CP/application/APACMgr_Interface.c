@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 9 $  $Date: 15-12-02 5:54p $
+      $Revision: 10 $  $Date: 1/18/16 5:49p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -72,8 +72,8 @@ static CHAR gse_OutLine1[128];
  * Description: Returns the current FAST APAC Configuration
  *
  * Parameters:  *msg1 - "BASIC", "EAPS", "IBF"
- *              *msg2 - "F", "B", "A"
- *              *msg3 - Not used
+ *              *msg2 - "F", "B", "C"
+ *              *msg3 - "102", "100"
  *              *msg4 - Not used
  *              option - Not used
  *
@@ -96,19 +96,29 @@ static CHAR gse_OutLine1[128];
 BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                             APAC_IF_ENUM option )
 {
-  ASSERT ( m_APAC_Status.state == APAC_STATE_IDLE );
-
-  memcpy ( (void *) msg1, APAC_INLET_CFG_STR_CONST[m_APAC_Cfg.inletCfg].chart,
-            APAC_MENU_DISPLAY_CHAR_MAX);
-  memcpy ( (void *) msg2, APAC_INLET_CFG_STR_CONST[m_APAC_Cfg.inletCfg].issue,
-            APAC_MENU_DISPLAY_CHAR_MAX);
-
+  APAC_TBL_PTR tbl_ptr;
+  APAC_INSTALL_ENUM tblIdx;
+  
   // Clear APAC status
   APACMgr_ClearStatus();
+  
+  // Read from NR102_100 sensor to determine 102 or 100. Ignore SensorIsValid() for disc?
+  m_APAC_Status.nr_sel = (SensorGetValue(m_APAC_Cfg.snsr.idxNR102_100) == APAC_NR102_SET) ?
+                         APAC_NR_SEL_102 : APAC_NR_SEL_100 ;
+  
+  // from APAC_TBL m_APAC_Tbl[APAC_PARAM_MARGIN_MAX][APAC_INSTALL_MAX]
+  //   get chart inlet, chart issue and chart nr strings
+  // NOTE:  Use ITT table as the NG table has same data for these fields
+  tblIdx = m_APAC_Tbl_Mapping[m_APAC_Status.nr_sel][m_APAC_Cfg.inletCfg];
+  tbl_ptr = (APAC_TBL_PTR) &m_APAC_Tbl[APAC_ITT][tblIdx];  
+ 
+  memcpy ( (void *) msg1, tbl_ptr->inlet_str, APAC_MENU_DISPLAY_CHAR_MAX);
+  memcpy ( (void *) msg2, tbl_ptr->chart_rev_str, APAC_MENU_DISPLAY_CHAR_MAX);
+  memcpy ( (void *) msg3, tbl_ptr->chart_nr_str, APAC_MENU_DISPLAY_CHAR_MAX);
 
   m_APAC_Status.state = APAC_STATE_TEST_INPROGRESS;
 
-  APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Config(m1=%s,m2=%s)\r\n", msg1, msg2);
+  APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Config(m1=%s,m2=%s,m3=%s)\r\n",msg1,msg2,msg3);
 
   return (TRUE);
 }
@@ -138,6 +148,7 @@ BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 BOOLEAN APACMgr_IF_Select ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                             APAC_IF_ENUM option )
 {
+/*  
   ASSERT ( (option == APAC_IF_NR100) || (option == APAC_IF_NR102) );
   // run_state is either APAC_RUN_STATE_IDLE for 1st time or successful prev test
   //                     APAC_RUN_STATE_FAULT for failed prev test
@@ -150,7 +161,7 @@ BOOLEAN APACMgr_IF_Select ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 
   APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Select(o=%d)-cat='%c'\r\n",
                    option, APAC_CAT_STR[m_APAC_Status.nr_sel]);
-
+*/
   return (TRUE);
 }
 
@@ -243,9 +254,8 @@ BOOLEAN APACMgr_IF_Setup ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
     m_APAC_Status.eng_uut = (eng1) ? APAC_ENG_1 : APAC_ENG_2;
     APACMgr_LogEngStart();
 
-    APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Setup( )-eng=%c,chrt=%s\r\n",
-                     APAC_ENG_POS_STR[m_APAC_Status.eng_uut],
-                     APAC_INLET_CFG_STR_CONST[m_APAC_Cfg.inletCfg].chart);
+    APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Setup( )-eng=%c\r\n",
+                     APAC_ENG_POS_STR[m_APAC_Status.eng_uut]);
   }
 
   return (ok);
@@ -285,7 +295,7 @@ BOOLEAN APACMgr_IF_Setup ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
  *                  scrolling at INVALID_BUTTON_TIME rate multiple Errors
  *
  *   M15 ErrTitle - "COMPUTE ERR"
- *       ErrItem  - "TQDEL","OAT","ITT","NG"
+ *       ErrItem  - "PALT","ITTMX","NGMX ","TQCOR","OAT  ","ITTMG","NGMG "
  *
  *****************************************************************************/
 BOOLEAN APACMgr_IF_ErrMsg ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
@@ -410,7 +420,7 @@ BOOLEAN APACMgr_IF_RunningPAC ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
   // Kick start APAC Run Testing if test is currently not running.
   if ( m_APAC_Status.run_state == APAC_RUN_STATE_IDLE )
   {
-    m_APAC_Status.run_state = APAC_RUN_STATE_HIGE_LOW;
+    m_APAC_Status.run_state = APAC_RUN_STATE_INCREASE_TQ;
     m_APAC_Status.timeout_ms  = CM_GetTickCount() +
                                 CM_DELAY_IN_SECS(m_APAC_Cfg.timeout.hIGELow_sec);
   }
@@ -616,7 +626,7 @@ BOOLEAN APACMgr_IF_HistoryData ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
   ts = m_APAC_Hist.entry[idx].ts;
   if ( (ts.Timestamp == APAC_HIST_BLANK) && (ts.MSecond == APAC_HIST_BLANK) ) {
     CM_GetTimeAsTimestamp(&ts); // History list is empty, get current date time
-    snprintf(msg2, APAC_MENU_DISPLAY_CHAR_MAX, "%s %s   ", APAC_HIST_NONE, APAC_HIST_UTC);
+    snprintf(msg2, APAC_MENU_DISPLAY_CHAR_MAX, "%s       ", APAC_HIST_NONE);
     blank = TRUE;
   }
   CM_ConvertTimeStamptoTimeStruct( &ts, &timeStruct );
@@ -928,6 +938,11 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 1/18/16    Time: 5:49p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308. Various Updates from Reviews and Enhancements
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 15-12-02   Time: 5:54p

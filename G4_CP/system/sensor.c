@@ -25,7 +25,7 @@
     Notes:
 
     VERSION
-      $Revision: 103 $  $Date: 12/18/15 11:30a $
+      $Revision: 104 $  $Date: 1/21/16 4:33p $
 
 ******************************************************************************/
 
@@ -790,9 +790,9 @@ static void SensorsConfigure (void)
             break;
          case SAMPLE_DISCRETE:
             // Set the interface index and the function pointers for the Discretes
-            Sensors[i].nInterfaceIndex  = pSensorCfg->nInputChannel;
+            Sensors[i].nInterfaceIndex   = pSensorCfg->nInputChannel;
             Sensors[i].pGetSensorData    = DIO_GetValue;
-            Sensors[i].pTestSensor       = SensorNoTest;
+            Sensors[i].pTestSensor       = DIO_SensorTest;
             Sensors[i].pInterfaceActive  = SensorNoInterface;
             break;
          case SAMPLE_UART:
@@ -2404,6 +2404,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 104  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:33p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Discrete processing from display updates
  * 
  * *****************  Version 103  *****************
  * User: Contractor V&v Date: 12/18/15   Time: 11:30a
