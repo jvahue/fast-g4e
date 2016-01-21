@@ -1,4 +1,4 @@
-#define DISPLAY_PROCESSING_USERTABLES_BODY
+#define DISPLAY_PROC_USERTABLES_BODY
 /******************************************************************************
             Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 3 $  $Date: 1/04/16 6:19p $
+    $Revision: 4 $  $Date: 1/21/16 4:40p $
 
 ******************************************************************************/
 #ifndef DISPLAY_PROCESSING_BODY
@@ -64,63 +64,63 @@ static USER_HANDLER_RESULT DispProcessingApp_Debug(USER_DATA_TYPE DataType,
 /* Local Variables                                                           */
 /*****************************************************************************/
 
-static DISPLAY_SCREEN_STATUS DispProcAppStatusTemp;
-static DISPLAY_SCREEN_CONFIG DispProcAppCfgTemp;
-static DISPLAY_DEBUG         DispProcAppDebugTemp;
+static DISPLAY_SCREEN_STATUS dispProcAppStatusTemp;
+static DISPLAY_SCREEN_CONFIG dispProcAppCfgTemp;
+static DISPLAY_DEBUG         dispProcAppDebugTemp;
 
 
 /*****************************************/
 /* User Table Definitions                */
 /*****************************************/
 
-static USER_MSG_TBL DispProcAppStatusTbl[] = 
+static USER_MSG_TBL dispProcAppStatusTbl[] = 
 {
   /*Str                Next Tbl Ptr   Handler Func.             Data Type          Access   Parameter                                       Index   DataLimit EnumTbl*/
-  {"CURRENT_SCREEN",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &DispProcAppStatusTemp.currentScreen,  -1, -1, NO_LIMIT, screenIndexType},
-  {"PREVIOUS_SCREEN",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &DispProcAppStatusTemp.previousScreen, -1, -1, NO_LIMIT, screenIndexType},
-  {"NEXT_SCREEN",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &DispProcAppStatusTemp.nextScreen,     -1, -1, NO_LIMIT, screenIndexType},
-  {"D_HLTH_CODE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &DispProcAppStatusTemp.displayHealth,  -1, -1, NO_LIMIT, NULL},
-  {"PBIT_COMPLETE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &DispProcAppStatusTemp.bPBITComplete,  -1, -1, NO_LIMIT, NULL},
-  {"BUTTON_ENABLE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &DispProcAppStatusTemp.bButtonEnable,  -1, -1, NO_LIMIT, NULL},
-  {"APAC_PROCESSING",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &DispProcAppStatusTemp.bAPACProcessing,-1, -1, NO_LIMIT, NULL},
-  {"BUTTON_INPUT",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &DispProcAppStatusTemp.buttonInput,    -1, -1, NO_LIMIT, buttonIndexType},
-  {"INVALID_BUTTON",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &DispProcAppStatusTemp.bInvalidButton, -1, -1, NO_LIMIT, NULL},
-  {"INVALID_D_HLTH",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &DispProcAppStatusTemp.dispHealthTimer,-1, -1, NO_LIMIT, NULL},
-  {"LAST_FRAME_TIME",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &DispProcAppStatusTemp.lastFrameTime,  -1, -1, NO_LIMIT, NULL},
-  {"DISP_PART_NUMBER", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &DispProcAppStatusTemp.partNumber,     -1, -1, NO_LIMIT, NULL},
-  {"DISP_VERSION_NUM", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &DispProcAppStatusTemp.versionNumber,  -1, -1, NO_LIMIT, NULL},
-  {"MSG_CONTENTS",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &DispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
+  {"CURRENT_SCREEN",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.currentScreen,  -1, -1, NO_LIMIT, screenIndexType},
+  {"PREVIOUS_SCREEN",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.previousScreen, -1, -1, NO_LIMIT, screenIndexType},
+  {"NEXT_SCREEN",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.nextScreen,     -1, -1, NO_LIMIT, screenIndexType},
+  {"D_HLTH_CODE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.displayHealth,  -1, -1, NO_LIMIT, NULL},
+  {"PBIT_COMPLETE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bPBITComplete,  -1, -1, NO_LIMIT, NULL},
+  {"BUTTON_ENABLE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bButtonEnable,  -1, -1, NO_LIMIT, NULL},
+  {"APAC_PROCESSING",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bAPACProcessing,-1, -1, NO_LIMIT, NULL},
+  {"BUTTON_INPUT",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.buttonInput,    -1, -1, NO_LIMIT, buttonIndexType},
+  {"INVALID_BUTTON",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bInvalidButton, -1, -1, NO_LIMIT, NULL},
+  {"INVALID_D_HLTH",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.dispHealthTimer,-1, -1, NO_LIMIT, NULL},
+  {"LAST_FRAME_TIME",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.lastFrameTime,  -1, -1, NO_LIMIT, NULL},
+  {"DISP_PART_NUMBER", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.partNumber,     -1, -1, NO_LIMIT, NULL},
+  {"DISP_VERSION_NUM", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.versionNumber,  -1, -1, NO_LIMIT, NULL},
+  {"MSG_CONTENTS",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
   {NULL,               NULL,          NULL,                     NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL DispProcAppCfgTbl[] =
+static USER_MSG_TBL dispProcAppCfgTbl[] =
 {
   /*Str                      Next Tbl Ptr   Handler Func.          Data Type         Access   Parameter                                          Index   DataLimit EnumTbl*/
-  {"INVALID_BUTTON_TIME_MS", NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.invalidButtonTime_ms, -1, -1, NO_LIMIT, NULL},
-  {"AUTO_ABORT_TIME_S",      NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.autoAbortTime_s,      -1, -1, NO_LIMIT, NULL},
-  {"NO_HS_TIMEOUT_S",        NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &DispProcAppCfgTemp.no_HS_Timeout_s,      -1, -1, NO_LIMIT, NULL},
-  {NULL,                  NULL,          NULL,                  NO_HANDLER_DATA}
+  {"INVALID_BUTTON_TIME_MS", NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.invalidButtonTime_ms, -1, -1, NO_LIMIT, NULL},
+  {"AUTO_ABORT_TIME_S",      NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.autoAbortTime_s,      -1, -1, NO_LIMIT, NULL},
+  {"NO_HS_TIMEOUT_S",        NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.no_HS_Timeout_s,      -1, -1, NO_LIMIT, NULL},
+  {NULL,                     NULL,          NULL,                  NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL DispProcAppDebugTbl[] =
+static USER_MSG_TBL dispProcAppDebugTbl[] =
 {
   /*Str         Next Tbl Ptr   Handler Func.            Data Type          Access              Parameter                                  Index   DataLimit EnumTbl*/
-  {"ENABLE",    NO_NEXT_TABLE, DispProcessingApp_Debug, USER_TYPE_BOOLEAN, (USER_RW|USER_GSE), (void *) &DispProcAppDebugTemp.bDebug,     -1, -1, NO_LIMIT, NULL},
+  {"ENABLE",    NO_NEXT_TABLE, DispProcessingApp_Debug, USER_TYPE_BOOLEAN, (USER_RW|USER_GSE), (void *) &dispProcAppDebugTemp.bDebug,     -1, -1, NO_LIMIT, NULL},
   {NULL,        NULL,          NULL,                    NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL DispProcAppRoot[] = 
+static USER_MSG_TBL dispProcAppRoot[] = 
 {
-  /*Str         Next Tbl Ptr          Handler Func. Data Type*/
-  {"STATUS",    DispProcAppStatusTbl, NULL,         NO_HANDLER_DATA},
-  {"Debug",     DispProcAppDebugTbl,  NULL,         NO_HANDLER_DATA},
-  {"CFG",       DispProcAppCfgTbl,    NULL,         NO_HANDLER_DATA},
-  {DISPLAY_CFG, NO_NEXT_TABLE, DispProcessingApp_ShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL, -1, -1, NO_LIMIT, NULL},
-  {NULL,        NULL,                 NULL,         NO_HANDLER_DATA}
+  /*Str         Next Tbl Ptr          Handler Func.                 Data Type*/
+  {"STATUS",    dispProcAppStatusTbl, NULL,                         NO_HANDLER_DATA},
+  {"Debug",     dispProcAppDebugTbl,  NULL,                         NO_HANDLER_DATA},
+  {"CFG",       dispProcAppCfgTbl,    NULL,                         NO_HANDLER_DATA},
+  {DISPLAY_CFG, NO_NEXT_TABLE,        DispProcessingApp_ShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL, -1, -1, NO_LIMIT, NULL},
+  {NULL,        NULL,                 NULL,                         NO_HANDLER_DATA}
 };
 
-static USER_MSG_TBL DispProcAppRootTblPtr = 
-{"DISPLAYAPP", DispProcAppRoot, NULL, NO_HANDLER_DATA};
+static USER_MSG_TBL dispProcAppRootTblPtr = 
+{"DISPLAYAPP", dispProcAppRoot, NULL, NO_HANDLER_DATA};
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -171,7 +171,7 @@ USER_HANDLER_RESULT DispProcessingApp_Status(USER_DATA_TYPE DataType,
 
   result = USER_RESULT_OK;
   
-  DispProcAppStatusTemp = *DispProcessingApp_GetStatus();
+  dispProcAppStatusTemp = *DispProcessingApp_GetStatus();
   
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   
@@ -216,14 +216,14 @@ USER_HANDLER_RESULT DispProcessingApp_Cfg(USER_DATA_TYPE DataType,
   result = USER_RESULT_OK;
   
   // Determine which array element
-  memcpy(&DispProcAppCfgTemp, &CfgMgr_ConfigPtr()->DispProcAppConfig, 
-         sizeof(DispProcAppCfgTemp));
+  memcpy(&dispProcAppCfgTemp, &CfgMgr_ConfigPtr()->DispProcAppConfig, 
+         sizeof(dispProcAppCfgTemp));
          
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   
   if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    memcpy(&CfgMgr_ConfigPtr()->DispProcAppConfig, &DispProcAppCfgTemp,
+    memcpy(&CfgMgr_ConfigPtr()->DispProcAppConfig, &dispProcAppCfgTemp,
            sizeof(DISPLAY_SCREEN_CONFIG));
            
     CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(), 
@@ -270,11 +270,11 @@ USER_HANDLER_RESULT DispProcessingApp_Debug(USER_DATA_TYPE DataType,
   
   result = USER_RESULT_OK;
   
-  DispProcAppDebugTemp = *DispProcessingApp_GetDebug();
+  dispProcAppDebugTemp = *DispProcessingApp_GetDebug();
   
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
   
-  *DispProcessingApp_GetDebug() = DispProcAppDebugTemp;
+  *DispProcessingApp_GetDebug() = dispProcAppDebugTemp;
   
   return result;
 }
@@ -324,7 +324,7 @@ static USER_HANDLER_RESULT DispProcessingApp_ShowConfig(USER_DATA_TYPE DataType,
   
   if(User_OutputMsgString(label, FALSE))
   {
-    pCfgTable = DispProcAppCfgTbl;
+    pCfgTable = dispProcAppCfgTbl;
 
     result = User_DisplayConfigTree(branchName, pCfgTable, 0, 0, NULL);
   }
@@ -336,15 +336,10 @@ static USER_HANDLER_RESULT DispProcessingApp_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: DispProcessingUserTables.c $
  * 
- * *****************  Version 3  *****************
- * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:40p
  * Updated in $/software/control processor/code/application
- * SCR 1303 - Updates from Performance Software
- * 
- * *****************  Version 2  *****************
- * User: Peter Lee    Date: 15-12-02   Time: 6:38p
- * Updated in $/software/control processor/code/application
- * SCR #1303 Display App Updates from Jeremy.  
+ * SCR 1312 - Updates from user feedback on navigation
  * 
  * *****************  Version 1  *****************
  * User: Jeremy Hester Date: 10/5/15    Time: 11:20p

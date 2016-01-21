@@ -27,7 +27,7 @@
            RTC
 
    VERSION
-    $Revision: 79 $  $Date: 2/11/15 7:40p $
+    $Revision: 80 $  $Date: 1/18/16 5:36p $
 
 
 ******************************************************************************/
@@ -56,6 +56,7 @@
 #include "CBITManager.h"
 #include "PowerManager.h"
 #include "F7XProtocol.h"
+#include "APACMgr.h"
 
 #include "TestPoints.h"
 
@@ -1767,6 +1768,13 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.c $
+ * 
+ * *****************  Version 80  *****************
+ * User: Peter Lee    Date: 1/18/16    Time: 5:36p
+ * Updated in $/software/control processor/code/system
+ * SCR #1309 Item #2   APAC NVM Data Mismatch FileCRC: x00FF Computed:
+ * xFD02 [18:20:34.000] APAC NVM Data Mismatch FileCRC: x00FF Computed:
+ * xFD02 
  * 
  * *****************  Version 79  *****************
  * User: Contractor V&v Date: 2/11/15    Time: 7:40p

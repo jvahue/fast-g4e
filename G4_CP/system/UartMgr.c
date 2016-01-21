@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 67 $  $Date: 11/19/15 4:28p $
+      $Revision: 68 $  $Date: 1/21/16 4:34p $
 
 ******************************************************************************/
 
@@ -286,7 +286,7 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].get_protocol_fileHdr    = PWCDispProtocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl  = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-	  uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
+	      uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
           break;
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
@@ -2324,6 +2324,11 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 68  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:34p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code review updates
  * 
  * *****************  Version 67  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:28p

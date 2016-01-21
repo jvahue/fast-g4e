@@ -17,7 +17,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 56 $  $Date: 12/12/12 7:20p $
+   $Revision: 57 $  $Date: 1/21/16 4:35p $
 
 
 ******************************************************************************/
@@ -152,6 +152,8 @@ STATIC DIO_CONFIG dio_OutputPins[DIO_MAX_OUTPUTS] = { DIO_OUTPUTS_LIST };
 
 STATIC DIO_CONFIG dio_InputPins[DIO_MAX_INPUTS]   = { DIO_INPUTS_LIST };
 
+STATIC volatile UINT8* displayValidationFlag = NULL;
+
 #undef DIO_PIN
 
 static BOOLEAN bDIO_OutputShadow[DIO_MAX_OUTPUTS];
@@ -203,7 +205,7 @@ static void DIO_DebounceState(DIO_INPUT Pin, BOOLEAN State,
                                           UINT32 currentTimeMs);
 static DIO_PORT_DATA* DIO_AddPortToList(volatile UINT8* addr);
 static void DIO_CheckWrapAround( void );
-static BOOLEAN DIO_InitPin  ( const DIO_CONFIG *PinConfig );
+static BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig); 
 /*****************************************************************************/
 /* Public Functions                                                          */
 /*****************************************************************************/
@@ -436,12 +438,26 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
     case DIO_RAW:   //Read the value directly off the register and mask the bit
       if(dio_InputPins[Pin].peripheral == DIO_FPGA)
       {
-        value16 = DIO_R16( (UINT16 *)dio_FilteredPins[Pin].portData->portAddr );
+        value16 = DIO_R16((UINT16 *)dio_FilteredPins[Pin].portData->portAddr);
         bState = ( value16 & dio_InputPins[Pin].pinMask) ? ON : OFF;
+      }
+      else if(dio_InputPins[Pin].peripheral == DIO_DISP)
+      {
+        if (dio_InputPins[Pin].dataReg == NULL)
+        {
+          bState = OFF;
+        }
+        else
+        {
+          value = DIO_R(dio_InputPins[Pin].dataReg + 
+                        dio_InputPins[Pin].pinMask);
+          bState = (value) ? ON : OFF;
+        }
       }
       else
       {
-        value = DIO_R( dio_FilteredPins[Pin].portData->portAddr + DIO_GPIO_PPDSDR_OFFSET );
+        value = DIO_R( dio_FilteredPins[Pin].portData->portAddr + 
+                       DIO_GPIO_PPDSDR_OFFSET );
         bState = ( value & dio_InputPins[Pin].pinMask) ? ON : OFF;
       }
       break;
@@ -775,6 +791,22 @@ BOOLEAN DIO_InitPin(const DIO_CONFIG *PinConfig)
     }
 
   }
+  else if (DIO_DISP == PinConfig->peripheral)
+  {
+    //Set data output value
+    switch (PinConfig->bInitialState)
+    {
+      case ON:
+        set_val = (UINT8) DIO_SetHigh;
+        break;
+      case OFF:
+        set_val = (UINT8) DIO_SetLow;
+        break;
+      default:
+        FATAL("Unsupported InitialState = %d", PinConfig->bInitialState);
+        break;
+    }
+  }
 
   if (!bInitOk)
   {
@@ -920,7 +952,6 @@ void DIO_InitShadowRegFPGA( UINT32 mask, UINT32 value )
 
 }
 
-
 /*****************************************************************************
  * Function:    DioRegCheck_Init
  *
@@ -995,7 +1026,6 @@ void DioRegCheck_Init( void )
   regData.Addr2 = &dioShadowData_FPGA.value2;
   regData.size = sizeof(UINT16);
   bInitOk &= RegAdd ( &regData );
-
 
   // Setup DioShadowOutputPinReg[] for quicker run time access
   pPinConfig = &dio_OutputPins[0];
@@ -1188,9 +1218,95 @@ static void DIO_CheckWrapAround( void)
   }
 }
 
+/*****************************************************************************
+* Function:    DIO_DispProtocolSetAddress
+*
+* Description: Update the virtual register for the Display Discrete DIO Inputs
+*
+* Parameters:  const char* address - The address of local Display Discrete 
+*                                    storage.
+*              UINT16 discreteMax -  The maximum number of Display Discretes
+*
+* Returns:     None
+*
+* Notes:       None
+****************************************************************************/
+void DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax)
+{
+  UINT16 i = 0, j = 0;
+  for (i = 0; i < DIO_MAX_INPUTS; i++)
+  {
+    if (dio_InputPins[i].peripheral == DIO_DISP &&
+        j < discreteMax)
+    {
+      dio_InputPins[i].dataReg = (vuint8 *)(void*)(&address[0]);
+    }
+  }
+}
+
+/*****************************************************************************
+* Function:    DIO_DispValidationFlags
+*
+* Description: Update the validation flag address for display discrete
+*              DIO Inputs.
+*
+* Parameters:  const char* flagAddress - The address of local Display Discrete
+*                                        storage.
+*
+* Returns:     None
+*
+* Notes:       None
+****************************************************************************/
+void DIO_DispValidationFlags(const char* flagAddress)
+{
+    displayValidationFlag = (vuint8 *)(void*)(flagAddress);
+}
+
+/*****************************************************************************
+* Function:    DIO_SensorTest
+*
+* Description: Returns whether or not DIO input is considered valid or 
+*              invalid by sensor.c.
+*
+* Parameters:  UINT16 nIndex - Index of the DIO channel
+*
+* Returns:     BOOLEAN bValid - Valid(TRUE) or Invalid(FALSE).
+*
+* Notes:       None
+****************************************************************************/
+BOOLEAN DIO_SensorTest(UINT16 nIndex)
+{
+  BOOLEAN bValid;
+  DIO_PERIPHERAL peripheralID;
+
+  peripheralID = dio_InputPins[nIndex].peripheral;
+  bValid = TRUE;
+
+  //There is Validity to Check for the Display Discretes
+  switch(peripheralID)
+  {
+    case DIO_DISP:
+      // Return status flag or NULL if status flag has not been initialized
+      bValid = (displayValidationFlag != NULL) ? 
+               DIO_R(displayValidationFlag) : FALSE;
+      break;
+    case DIO_GPIO:
+    case DIO_FPGA:
+    case DIO_TMR2:
+    default:
+      break;
+  }
+  return(bValid);
+}
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 57  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:35p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1302 - Display Protocol Discrete Inputs
  * 
  * *****************  Version 56  *****************
  * User: Contractor V&v Date: 12/12/12   Time: 7:20p

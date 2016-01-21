@@ -2,7 +2,7 @@
 #define DISPLAY_PROCESSING_H
 
 /******************************************************************************
-            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 4 $  $Date: 1/04/16 6:19p $     
+      $Revision: 5 $  $Date: 1/21/16 4:40p $     
 
 ******************************************************************************/
 
@@ -40,10 +40,13 @@
                                             // containing nonzero values after
                                             // PBIT                   = 3  sec.
 #define DISPLAY_DEFAULT_DCRATE        0 //Double Click Rate Default
-
+#define DBLCLICK_TIMEOUT             50 // default double click time in ticks.
+                                        // to be combined with saved dblclk time.
 #define MAX_SCREEN_SIZE              24 // Total sum of characters on lines 
                                         // one and two
-#define MAX_ACTIONS_COUNT            32 // Maximum number of actions
+#define MAX_ACTIONS_COUNT            29 // Maximum number of actions
+#define MAX_SCREEN_VARIABLE_COUNT    16 // Maximum number of screen variables
+#define HOME_SCREEN                   1 // The designated Home Screen
 #define DCRATE_CONVERSION            25 // Conversion from clicks to byte value
                                         // of DCRATE. (clicks to ms/2)
 #define INVBUTTON_TIME_CONVERSION    10 // Conversion from ms to 10 * ms
@@ -55,7 +58,7 @@
 #define DISCRETE_STATE_COUNT          8 // Total number of possible discretes
 #define DISPLAY_DCRATE_MAX            5 // The maximum value (from 1 to 5) of
                                         // DCRATE on screen M21.
-#define DISPLAY_VALID_BUTTONS         6 // The current total number of valid
+#define DISPLAY_VALID_BUTTONS        12 // The current total number of valid
                                         // push buttons.
 
 #define DISPLAY_CFG_DEFAULT           \
@@ -86,15 +89,8 @@ typedef enum
   A11, A12, A13, A14, A15,
   A16, A17, A18, A19, A20,
   A21, A22, A23, A24, A25,
-  A26, A27, A28, A29, A30,
-  A31, NO_ACTION
+  A26, A27, A28, NO_ACTION
 }DISPLAY_SCREEN_ENUM;
-
-typedef enum
-{
-  INCOMING,
-  OUTGOING
-} DISPLAY_ACTION_DIRECTION;
 
 typedef BOOLEAN (*SCREEN_ACTION)();
 
@@ -122,22 +118,8 @@ typedef enum
 
 typedef enum
 {
-  DISC_ZERO,
-  DISC_ONE,
-  DISC_TWO,
-  DISC_THREE,
-  DISC_FOUR,
-  DISC_FIVE,
-  DISC_SIX,
-  DISC_SEVEN,
-  DISPLAY_DISCRETES_COUNT
-}DISPLAY_DISCRETES;
-
-typedef enum
-{
   DISPLAY_LOG_TIMEOUT,
   DISPLAY_LOG_TRANSITION,
-  DISPLAY_LOG_MANUAL_ABORT,
   DISPLAY_LOG_PBIT_ACTIVE,
   DISPLAY_LOG_PBIT_PASS,
   DISPLAY_LOG_INOP_MON_FAULT,
@@ -154,14 +136,14 @@ typedef enum
 
 typedef struct
 {
-  UINT16   ID;
-  CHAR     Name[24];
-  UINT16   Size;
-}DISPLAY_ENUM_TABLE, *DISPLAY_ENUM_TABLE_PTR;
+  DISPLAY_BUTTON_STATES   id;
+  CHAR                    name[24];
+  UINT16                  size;
+}DISPLAY_BUTTON_TABLE, *DISPLAY_BUTTON_TABLE_PTR;
 
 typedef struct
 {
-  UINT8*   Name;
+  UINT8* name;
 }DISPLAY_CHAR_TABLE, *DISPLAY_CHAR_TABLE_PTR;
 
 /********************************/
@@ -183,7 +165,7 @@ typedef struct
 
 typedef struct
 {
-  char                      menuString[24];
+  CHAR                      menuString[24];
   DISPLAY_SCREEN_ENUM       dblUpScreen;
   DISPLAY_SCREEN_ENUM       dblDownScreen;
   DISPLAY_SCREEN_ENUM       dblLeftScreen;
@@ -196,7 +178,7 @@ typedef struct
   DISPLAY_SCREEN_ENUM       rightScreen;
   DISPLAY_SCREEN_ENUM       enterScreen;
   DISPLAY_SCREEN_ENUM       eventScreen;
-  DISPLAY_SCREEN_ENUM       NoButtonInput;
+  DISPLAY_SCREEN_ENUM       noButtonInput;
   INT8                      var1;
   INT8                      var2;
   INT8                      var3;
@@ -231,7 +213,6 @@ typedef struct
 typedef struct
 {
   UINT16      size;
-  INT8        defaultDCRATE;
   UINT32      invalidButtonTime_ms;
   UINT32      autoAbortTime_s;
   UINT32      no_HS_Timeout_s;
@@ -285,6 +266,7 @@ typedef struct
 typedef struct
 {
   DISPLAY_LOG_RESULT_ENUM  result;
+  UINT16                   previousScreen;
   UINT16                   currentScreen;
   DISPLAY_BUTTON_STATES    buttonPressed;
   BOOLEAN                  bReset;
@@ -294,7 +276,7 @@ typedef struct
 {
   DISPLAY_LOG_RESULT_ENUM    result;
   UINT32                     no_HS_Timeout_s;
-  UINT8                      D_HLTHcode;    //The D_HLTH Hex code
+  UINT8                      d_HLTHcode;    //The D_HLTH Hex code
   TIMESTAMP                  lastFrameTime;
 }DISPLAY_DHLTH_LOG;
 #pragma pack()
@@ -314,33 +296,41 @@ typedef struct
 /******************************************************************************
                                  Package Exports
 ******************************************************************************/
+#undef EXPORT
+#if defined ( DISPLAY_PROCESSING_BODY )
+
+#define EXPORT
+#else
+#define EXPORT extern
+
+#endif
+
 #if defined (DISPLAY_PROCESSING_BODY)
 // Screen index enumeration for modules which ref Display Processing App
 USER_ENUM_TBL screenIndexType[] =
-{ {   "M00",M00 }, {"M01", M01 }, {"M02", M02 }, 
-  {   "M03",M03 }, {"M04", M04 }, {"M05", M05 }, 
-  {   "M06",M06 }, {"M07", M07 }, {"M08", M08 }, 
-  {   "M09",M09 }, {"M10", M10 }, {"M11", M11 }, 
-  {   "M12",M12 }, {"M13", M13 }, {"M14", M14 }, 
-  {   "M15",M15 }, {"M16", M16 }, {"M17", M17 }, 
-  {   "M18",M18 }, {"M19", M19 }, {"M20", M20 }, 
-  {   "M21",M21 }, {"M22", M22 }, {"M23", M23 }, 
-  {   "M24",M24 }, {"M25", M25 }, {"M26", M26 }, 
-  {   "M27",M27 }, {"M28", M28 }, {"M29", M29 }, 
-  {   "M30",M30 },
+{ { "M00",M00 }, {"M01", M01 }, {"M02", M02 }, 
+  { "M03",M03 }, {"M04", M04 }, {"M05", M05 }, 
+  { "M06",M06 }, {"M07", M07 }, {"M08", M08 }, 
+  { "M09",M09 }, {"M10", M10 }, {"M11", M11 }, 
+  { "M12",M12 }, {"M13", M13 }, {"M14", M14 }, 
+  { "M15",M15 }, {"M16", M16 }, {"M17", M17 }, 
+  { "M18",M18 }, {"M19", M19 }, {"M20", M20 }, 
+  { "M21",M21 }, {"M22", M22 }, {"M23", M23 }, 
+  { "M24",M24 }, {"M25", M25 }, {"M26", M26 }, 
+  { "M27",M27 }, {"M28", M28 }, {"M29", M29 }, 
+  { "M30",M30 },
   { "UNUSED", DISPLAY_SCREEN_COUNT }, 
-  {   "A00",A00 }, {"A01", A01 }, {"A02", A02 },
-  {   "A03",A03 }, {"A04", A04 }, {"A05", A05 },
-  {   "A06",A06 }, {"A07", A07 }, {"A08", A08 },
-  {   "A09",A09 }, {"A10", A10 }, {"A11", A11 },
-  {   "A12",A12 }, {"A13", A13 }, {"A14", A14 },
-  {   "A15",A15 }, {"A16", A16 }, {"A17", A17 },
-  {   "A18",A18 }, {"A19", A19 }, {"A20", A20 },
-  {   "A21",A21 }, {"A22", A22 }, {"A23", A23 },
-  {   "A24",A24 }, {"A25", A25 }, {"A26", A26 },
-  {   "A27", A27}, {"A28", A28 }, {"A29", A29 },
-  {   "A30", A30}, {"A31", A31 },
-  {   "NO_ACTION", NO_ACTION },   { NULL, 0 }
+  { "A00",A00 }, {"A01", A01 }, {"A02", A02 },
+  { "A03",A03 }, {"A04", A04 }, {"A05", A05 },
+  { "A06",A06 }, {"A07", A07 }, {"A08", A08 },
+  { "A09",A09 }, {"A10", A10 }, {"A11", A11 },
+  { "A12",A12 }, {"A13", A13 }, {"A14", A14 },
+  { "A15",A15 }, {"A16", A16 }, {"A17", A17 },
+  { "A18",A18 }, {"A19", A19 }, {"A20", A20 },
+  { "A21",A21 }, {"A22", A22 }, {"A23", A23 },
+  { "A24",A24 }, {"A25", A25 }, {"A26", A26 },
+  { "A27", A27}, {"A28", A28 },
+  { "NO_ACTION", NO_ACTION },   { NULL, 0 }
 };
 #else
 // Export the triggerIndex enum table
@@ -375,19 +365,9 @@ USER_ENUM_TBL buttonIndexType[] =
 // Export the triggerIndex enum table
 EXPORT USER_ENUM_TBL buttonIndexType[];
 #endif
-
-
-#undef EXPORT
-
-#if defined ( DISPLAY_PROCESSING_BODY )
-   #define EXPORT
-#else
-   #define EXPORT extern
-#endif
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
-
 
 /******************************************************************************
                              Package Exports Functions
@@ -395,14 +375,13 @@ EXPORT USER_ENUM_TBL buttonIndexType[];
 
 EXPORT void                      DispProcessingApp_Initialize(void);
 EXPORT void                      DispProcessingApp_Handler(void *pParam);
-EXPORT BOOLEAN                   DispProcessingApp_FileInit(void);
+EXPORT void                      DispProcessingApp_FileInit(void);
 EXPORT UINT16                    DispProcessingApp_ReturnFileHdr(UINT8 *dest, 
                                                          const UINT16 max_size,
                                                          UINT16 ch);
 EXPORT void                      DispProcAppDebug_Task(void *param);
 EXPORT DISPLAY_SCREEN_STATUS_PTR DispProcessingApp_GetStatus(void);
 EXPORT DISPLAY_DEBUG_PTR         DispProcessingApp_GetDebug(void);
-EXPORT DISPLAY_SCREEN_CONFIG_PTR DispProcessingApp_GetCfg(void);
 EXPORT void                      DispProcApp_DisableLiveStream(void);
 #endif // DISPLAY_PROCESSING_H
 
@@ -410,20 +389,10 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
  * 
- * *****************  Version 4  *****************
- * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 1/21/16    Time: 4:40p
  * Updated in $/software/control processor/code/application
- * SCR 1303 - Updates from Performance Software
- * 
- * *****************  Version 3  *****************
- * User: John Omalley Date: 12/18/15   Time: 11:09a
- * Updated in $/software/control processor/code/application
- * SCR 1303 - Updates from PSW Contractor
- * 
- * *****************  Version 2  *****************
- * User: Peter Lee    Date: 15-12-02   Time: 6:38p
- * Updated in $/software/control processor/code/application
- * SCR #1303 Display App Updates from Jeremy.  
+ * SCR 1312 - Updates from user feedback on navigation
  *
  * *****************  Version 1  *****************
  * User: Jeremy Hester    Date: 9/22/2015    Time: 8:17a

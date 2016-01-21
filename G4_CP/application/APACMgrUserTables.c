@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 8 $  $Date: 11/17/15 9:27a $
+    $Revision: 11 $  $Date: 1/19/16 5:12p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -197,7 +197,8 @@ static
 USER_ENUM_TBL apacRunStateStrs[] =
 {
   {"IDLE",        APAC_RUN_STATE_IDLE},
-  {"HIGE_LOW",    APAC_RUN_STATE_HIGE_LOW},
+  {"INCREASE_TQ", APAC_RUN_STATE_INCREASE_TQ},
+  {"DECR_GND_SPD",APAC_RUN_STATE_DECR_GND_SPD},
   {"STABILIZING", APAC_RUN_STATE_STABILIZE},
   {"SAMPLING",    APAC_RUN_STATE_SAMPLING},
   {"COMPUTING",   APAC_RUN_STATE_COMPUTING},
@@ -297,7 +298,7 @@ static USER_MSG_TBL apacMgr_SnsrTbl[] =
 { /*Str         Next Tbl Ptr     Handler Func.    Data Type          Access    Parameter                                  IndexRange         DataLimit    EnumTbl*/
   {"BAROPRES",  NO_NEXT_TABLE,   APACMgr_Cfg,     USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.snsr.idxBaroPres,    -1,-1,             NO_LIMIT,    SensorIndexType},
   {"BAROCORR",  NO_NEXT_TABLE,   APACMgr_Cfg,     USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.snsr.idxBaroCorr,    -1,-1,             NO_LIMIT,    SensorIndexType},
-  {"GNDSPD",    NO_NEXT_TABLE,   APACMgr_Cfg,     USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.snsr.idxGndSpeed,    -1,-1,             NO_LIMIT,    SensorIndexType},
+  {"NR102",     NO_NEXT_TABLE,   APACMgr_Cfg,     USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.snsr.idxNR102_100,   -1,-1,             NO_LIMIT,    SensorIndexType},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -441,6 +442,7 @@ static USER_MSG_TBL apacMgr_EngStatusTbl[] =
   {"COMMIT",    NO_NEXT_TABLE,          APACMgr_EngStatus,   USER_TYPE_ENUM,    USER_RO,  (void *) &statusAPAC_EngTemp.commit,        0,APAC_ENG_MAX-1,   NO_LIMIT,            apacCommitStrs},
   {"VLD_PEND",  NO_NEXT_TABLE,          APACMgr_EngStatus,   USER_TYPE_BOOLEAN, USER_RO,  (void *) &statusAPAC_EngTemp.vld.set,       0,APAC_ENG_MAX-1,   NO_LIMIT,            NULL},
   {"VLD_REASON",NO_NEXT_TABLE,          APACMgr_EngStatus,   USER_TYPE_ENUM,    USER_RO,  (void *) &statusAPAC_EngTemp.vld.reason,    0,APAC_ENG_MAX-1,   NO_LIMIT,            vldReasonStrs},
+  {"VLD_REASON_SUMMARY",NO_NEXT_TABLE,  APACMgr_EngStatus,   USER_TYPE_HEX16,   USER_RO,  (void *) &statusAPAC_EngTemp.vld.reason_summary,  0,APAC_ENG_MAX-1,   NO_LIMIT,      NULL},
   {"DATA",      apacMgr_EngDataTbl,     NULL,                NO_HANDLER_DATA },
   {"ITT",       apacMgr_EngDataITTTbl,  NULL,                NO_HANDLER_DATA },
   {"NG",        apacMgr_EngDataNGTbl,   NULL,                NO_HANDLER_DATA },
@@ -1475,6 +1477,22 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 1/19/16    Time: 5:12p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #14.2. Change "apac.cfg.snsr.nr102_100" to
+ * "apac.cfg.snsr.nr102"
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 1/19/16    Time: 11:37a
+ * Updated in $/software/control processor/code/application
+ * SCR #1309 Item #3.  Remove 'apac.cfg.snsr.gndspd'  as not needed.
+ * 
+ * *****************  Version 9  *****************
+ * User: Peter Lee    Date: 1/18/16    Time: 5:49p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308. Various Updates from Reviews and Enhancements
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 11/17/15   Time: 9:27a
