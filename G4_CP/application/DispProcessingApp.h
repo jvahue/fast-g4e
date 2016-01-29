@@ -2,7 +2,7 @@
 #define DISPLAY_PROCESSING_H
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 5 $  $Date: 1/21/16 4:40p $     
+      $Revision: 7 $  $Date: 1/29/16 12:02p $     
 
 ******************************************************************************/
 
@@ -40,12 +40,16 @@
                                             // containing nonzero values after
                                             // PBIT                   = 3  sec.
 #define DISPLAY_DEFAULT_DCRATE        0 //Double Click Rate Default
-#define DBLCLICK_TIMEOUT             50 // default double click time in ticks.
-                                        // to be combined with saved dblclk time.
+#define DBLCLICK_TIMEOUT             50 // default dbl click time in ticks. To
+                                        // be combined with saved dblclk time.
 #define MAX_SCREEN_SIZE              24 // Total sum of characters on lines 
-                                        // one and two
+                                        // one and two.
+#define MAX_LINE_LENGTH              12 // Total sum of characters on one line.
 #define MAX_ACTIONS_COUNT            29 // Maximum number of actions
 #define MAX_SCREEN_VARIABLE_COUNT    16 // Maximum number of screen variables
+#define MAX_VARIABLES_PER_SCREEN      6 // Max number of variables per screen
+#define MAX_SUBSTRING_SIZE           16 // The maximum debug temporary string 
+                                        // size.
 #define HOME_SCREEN                   1 // The designated Home Screen
 #define DCRATE_CONVERSION            25 // Conversion from clicks to byte value
                                         // of DCRATE. (clicks to ms/2)
@@ -60,12 +64,30 @@
                                         // DCRATE on screen M21.
 #define DISPLAY_VALID_BUTTONS        12 // The current total number of valid
                                         // push buttons.
+#define D_HLTH_ACTIVE              0x00 // Display is transmitting packets with 
+                                        // valid data.
+#define D_HLTH_DIAGNOSTIC          0x40 // Unit is displaying diagnostic info
+#define D_HLTH_PBIT_ACTIVE         0x80 // Unit is performing the lamp test
+#define D_HLTH_PBIT_PASS           0x88 // Unit has passed PBIT
+#define D_HLTH_INOP_SIGNAL_FAULT   0xC3 // Unit not receiving discrete monitor
+                                        // indication but is receiving packets
+#define D_HLTH_COM_RX_FAULT        0xCC // Unit receiving discrete monitor 
+                                        // indication, but no packets
+#define D_HLTH_MON_INOP_FAULT      0xCF // Unit not receiving discrete monitor
+                                        // indication and no packets
+#define D_HLTH_DISPLAY_FAULT       0xFF // Unit has failed readback CBIT and 
+                                        // the screen is blanked
+#define DEFAULT_PART_NUMBER        0x01 // The default Part Number
+#define DEFAULT_VERSION_NUMBER_MJR 0x01 // The default Major Version Number
+#define DEFAULT_VERSION_NUMBER_MNR 0x00 // The default Minor Version Number
+#define CHANGED_CHARACTER          0x2A
+#define ACTION_ENUM_OFFSET          100 // The offset between actions and 
+                                        // menu screen enumerator values
 
 #define DISPLAY_CFG_DEFAULT           \
         DISPLAY_INVALID_BUTTON_TIME,  \
         DISPLAY_AUTO_ABORT_TIME,      \
         PWCDISP_DISPLAY_HEALTH_WAIT_MAX  
-
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -373,7 +395,7 @@ EXPORT USER_ENUM_TBL buttonIndexType[];
                              Package Exports Functions
 ******************************************************************************/
 
-EXPORT void                      DispProcessingApp_Initialize(void);
+EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
 EXPORT void                      DispProcessingApp_Handler(void *pParam);
 EXPORT void                      DispProcessingApp_FileInit(void);
 EXPORT UINT16                    DispProcessingApp_ReturnFileHdr(UINT8 *dest, 
@@ -388,6 +410,16 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 1/29/16    Time: 12:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #18 Call DispProcessing Init thru APAC Mgr
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 1/29/16    Time: 9:42a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Display Processing Updates for DIO
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:40p

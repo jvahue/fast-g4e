@@ -1,8 +1,10 @@
 #define DIO_BODY
 
 /******************************************************************************
-            Copyright (C) 2007 - 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007 - 2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        DIO.c
 
@@ -17,7 +19,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 57 $  $Date: 1/21/16 4:35p $
+   $Revision: 58 $  $Date: 1/29/16 9:00a $
 
 
 ******************************************************************************/
@@ -58,6 +60,7 @@
 // WA Testing Constants
 #define MAX_WA_FAILS 3
 #define MAX_WRAPAROUNDS  4
+#define MAX_DISPLAY_DISCRETES 8
 
 #define DIO_MAX_OUTPUTS_LIMIT  32  // DIO_MAX_OUTPUTS must be < 32
 #define DIO_MAX_INPUTS_LIMIT  32   // DIO_MAX_INPUTS must be < 32
@@ -152,8 +155,22 @@ STATIC DIO_CONFIG dio_OutputPins[DIO_MAX_OUTPUTS] = { DIO_OUTPUTS_LIST };
 
 STATIC DIO_CONFIG dio_InputPins[DIO_MAX_INPUTS]   = { DIO_INPUTS_LIST };
 
-STATIC volatile UINT8* displayValidationFlag = NULL;
+STATIC DIO_DISPLAY_SENSOR_STATUS m_DisplayDiscretes[MAX_DISPLAY_DISCRETES] =
+{
+  {(UINT16)DispDisc0, 0, 0, FALSE},
+  {(UINT16)DispDisc1, 0, 0, FALSE},
+  {(UINT16)DispDisc2, 0, 0, FALSE},
+  {(UINT16)DispDisc3, 0, 0, FALSE},
+  {(UINT16)DispDisc4, 0, 0, FALSE},
+  {(UINT16)DispDisc5, 0, 0, FALSE},
+  {(UINT16)DispDisc6, 0, 0, FALSE},
+  {(UINT16)DispDisc7, 0, 0, FALSE},
+};
 
+STATIC volatile UINT8* displayValidationFlag      = NULL;
+STATIC volatile UINT8* displayHealth              = NULL;
+STATIC volatile UINT8* displayStatus              = NULL;
+                                                  
 #undef DIO_PIN
 
 static BOOLEAN bDIO_OutputShadow[DIO_MAX_OUTPUTS];
@@ -443,16 +460,9 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
       }
       else if(dio_InputPins[Pin].peripheral == DIO_DISP)
       {
-        if (dio_InputPins[Pin].dataReg == NULL)
-        {
-          bState = OFF;
-        }
-        else
-        {
-          value = DIO_R(dio_InputPins[Pin].dataReg + 
-                        dio_InputPins[Pin].pinMask);
-          bState = (value) ? ON : OFF;
-        }
+        value = DIO_R(dio_InputPins[Pin].dataReg + 
+                      dio_InputPins[Pin].pinMask);
+        bState = (value) ? ON : OFF;
       }
       else
       {
@@ -1231,7 +1241,10 @@ static void DIO_CheckWrapAround( void)
 *
 * Notes:       None
 ****************************************************************************/
-void DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax)
+void DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax,
+                                const char* flagAddress, 
+                                const char* d_HLTHAddress,
+                                const char* dispStatus)
 {
   UINT16 i = 0, j = 0;
   for (i = 0; i < DIO_MAX_INPUTS; i++)
@@ -1242,24 +1255,9 @@ void DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax)
       dio_InputPins[i].dataReg = (vuint8 *)(void*)(&address[0]);
     }
   }
-}
-
-/*****************************************************************************
-* Function:    DIO_DispValidationFlags
-*
-* Description: Update the validation flag address for display discrete
-*              DIO Inputs.
-*
-* Parameters:  const char* flagAddress - The address of local Display Discrete
-*                                        storage.
-*
-* Returns:     None
-*
-* Notes:       None
-****************************************************************************/
-void DIO_DispValidationFlags(const char* flagAddress)
-{
-    displayValidationFlag = (vuint8 *)(void*)(flagAddress);
+  displayValidationFlag = (vuint8 *)(void*)(flagAddress);
+  displayHealth         = (vuint8 *)(void*)(d_HLTHAddress);
+  displayStatus         = (vuint8 *)(void*)(dispStatus);
 }
 
 /*****************************************************************************
@@ -1278,6 +1276,8 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
 {
   BOOLEAN bValid;
   DIO_PERIPHERAL peripheralID;
+  DIO_DISPLAY_FAIL_LOG displayLog;
+  DIO_DISPLAY_SENSOR_STATUS_PTR pDisp;
 
   peripheralID = dio_InputPins[nIndex].peripheral;
   bValid = TRUE;
@@ -1286,9 +1286,25 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
   switch(peripheralID)
   {
     case DIO_DISP:
+      pDisp = (DIO_DISPLAY_SENSOR_STATUS_PTR)&m_DisplayDiscretes
+              [nIndex - (UINT16)DispDisc0];
+
       // Return status flag or NULL if status flag has not been initialized
-      bValid = (displayValidationFlag != NULL) ? 
-               DIO_R(displayValidationFlag) : FALSE;
+      bValid = DIO_R(displayValidationFlag);
+      ++(pDisp->testCnt);
+
+      if (!bValid && pDisp->bValid)
+      {
+        displayLog.discreteID    = pDisp->id;
+        displayLog.displayHealth = DIO_R(displayHealth);
+        displayLog.failCount     = ++(pDisp->failCnt);
+        displayLog.totalTests    = pDisp->testCnt;
+        displayLog.failReason    = 
+          (DIO_DISPLAY_LOG_RESULT_ENUM)(DIO_R(displayStatus));
+        LogWriteSystem(SYS_ID_DIO_DISPLAY_FAIL, LOG_PRIORITY_LOW,
+                       &displayLog, sizeof(DIO_DISPLAY_FAIL_LOG), NULL);
+      }
+      pDisp->bValid = bValid;
       break;
     case DIO_GPIO:
     case DIO_FPGA:
@@ -1302,6 +1318,11 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: John Omalley Date: 1/29/16    Time: 9:00a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 57  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:35p

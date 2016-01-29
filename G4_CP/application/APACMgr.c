@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 14 $  $Date: 1/19/16 2:28p $
+      $Revision: 15 $  $Date: 1/29/16 12:02p $
 
 ******************************************************************************/
 
@@ -34,7 +34,7 @@
 #include "GSE.h"
 #include "Assert.h"
 
-
+EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
@@ -326,7 +326,7 @@ static const APAC_CFG_CHECK APAC_CFG_CHECK_TBL[] =
 {
   {&m_APAC_Cfg.snsr.idxBaroPres, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.BAROPRES"},
   {&m_APAC_Cfg.snsr.idxBaroCorr, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.BAROCORR"},
-  {&m_APAC_Cfg.snsr.idxNR102_100, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.NR102_100"},
+  {&m_APAC_Cfg.snsr.idxNR102_100, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "SNSR.NR102"},
 
   {&m_APAC_Cfg.eng[APAC_ENG_1].idxITT, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "ENG[0].ITT"},
   {&m_APAC_Cfg.eng[APAC_ENG_1].idxNg, sizeof(SENSOR_INDEX), SENSOR_UNUSED, "ENG[0].NG"},
@@ -500,6 +500,9 @@ void APACMgr_Initialize ( void )
   m_APAC_Cycle_Check_tick = (tick + 50) + APAC_CYCLE_CHECK_TICK;  // Offset by 50 ms
 
   APACMgr_InitDataAvgStructs();
+  
+  // Call Display Processing App and Info that APAC is enb or dsb
+  DispProcessingApp_Initialize(m_APAC_Cfg.enabled);
 
 // Test
 #ifdef APAC_TEST_SIM
@@ -2225,6 +2228,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 1/29/16    Time: 12:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #18 Call DispProcessing Init thru APAC Mgr
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 1/19/16    Time: 2:28p

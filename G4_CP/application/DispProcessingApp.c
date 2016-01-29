@@ -1,10 +1,10 @@
 #define DISPLAY_PROCESSING_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        DispProcessingApp.c
 
@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 5 $  $Date: 1/21/16 4:40p $     
+      $Revision: 7 $  $Date: 1/29/16 12:02p $     
 
 ******************************************************************************/
 
@@ -36,7 +36,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-
+#define PWCDISP_RX_FREQUENCY_TEST 15  //MAX time between RX messages
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -110,13 +110,15 @@ static DISPLAY_SCREEN_CONFIG  m_DispProcApp_Cfg;
 static DISPLAY_RX_INFORMATION m_DispProcRX_Info;
 static DISPLAY_APP_DATA       m_DispProcApp_AppData;
 static DISPLAY_DEBUG          m_DispProcApp_Debug;
-static UINT16                 auto_Abort_Timer     = 0;
-static UINT16                 invalid_Button_Timer = 0;
-static UINT16                 dblClickTimer        = 0;
-static BOOLEAN                dblClickFlag = FALSE;
-static BOOLEAN                bValidatePAC = FALSE;
-static BOOLEAN                bPACDecision = FALSE;
-static BOOLEAN                bLogLimiter  = FALSE;
+static UINT16                 auto_Abort_Timer      = 0;
+static UINT16                 invalid_Button_Timer  = 0;
+static UINT16                 dblClickTimer         = 0;
+static UINT16                 newDataTimer          = 0;
+static BOOLEAN                dblClickFlag          = FALSE;
+static BOOLEAN                bValidatePAC          = FALSE;
+static BOOLEAN                bPACDecision          = FALSE;
+static BOOLEAN                bLogLimiter           = FALSE;
+static BOOLEAN                discreteDIOStatusFlag = FALSE;
 
 static DISPLAY_DEBUG_TASK_PARAMS dispProcAppDisplayDebugBlock;
 static DISPLAY_APP_TASK_PARAMS   dispProcAppBlock;
@@ -126,7 +128,8 @@ static DISPLAY_BUTTON_STATES prevButtonState = NO_PUSH_BUTTON_DATA;
 static UINT16 invalidButtonTime_Converted; //converted to ticks
 static UINT16 autoAbortTime_Converted;     //converted to ticks
 static UINT16 no_HS_Timeout_Converted;     //converted to ticks
-DISPLAY_SCREEN_ENUM invalidButtonScreen;
+static UINT8 dio_Validity_Status = (UINT8)DIO_DISPLAY_HEALTH_CODE_FAIL;
+static DISPLAY_SCREEN_ENUM invalidButtonScreen;
 
 static DISPLAY_BUTTON_TABLE validButtonTable[DISPLAY_VALID_BUTTONS] =
 {
@@ -144,7 +147,7 @@ static DISPLAY_BUTTON_TABLE validButtonTable[DISPLAY_VALID_BUTTONS] =
   {EVENT_DBLCLICK,"", 2}
 };
 
-static UINT8 m_Str[40];
+static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
 
 /********************************/
 /*      Enumerator Tables       */
@@ -309,14 +312,14 @@ static DISPLAY_ACTION_TABLE m_ActionTable[MAX_ACTIONS_COUNT] =
  *
  * Description: Initializes the Display Processing Application functionality 
  *
- * Parameters:  None
+ * Parameters:  bEnable - Enable Disp Processing Tasks if APAC enabled
  *
  * Returns:     None
  *
  * Notes:       None
  *
  *****************************************************************************/
-void DispProcessingApp_Initialize(void)
+void DispProcessingApp_Initialize(BOOLEAN bEnable)
 {  
   DISPLAY_SCREEN_STATUS_PTR pStatus = 
       (DISPLAY_SCREEN_STATUS_PTR) &m_DispProcApp_Status;
@@ -333,77 +336,85 @@ void DispProcessingApp_Initialize(void)
   m_DispProcApp_Status.currentScreen  = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
   m_DispProcApp_Status.previousScreen = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
   m_DispProcApp_Status.nextScreen     = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
-  m_DispProcApp_Status.displayHealth  = 0x80;
+  m_DispProcApp_Status.displayHealth  = D_HLTH_PBIT_ACTIVE;
 
   User_AddRootCmd(&dispProcAppRootTblPtr);
 
   memcpy(&m_DispProcApp_Cfg, &CfgMgr_RuntimeConfigPtr()->DispProcAppConfig,
       sizeof(m_DispProcApp_Cfg));
-
+  // Set the DIO address and Sensor validation flag for the Display Discretes.
   DIO_DispProtocolSetAddress((const char*)&m_DispProcRX_Info.discreteState[0],
-                             DISCRETE_STATE_COUNT);
-
+                             DISCRETE_STATE_COUNT,
+                             (const char*)&discreteDIOStatusFlag,
+                             (const char*)&m_DispProcApp_Status.displayHealth,
+                             (const char*)&dio_Validity_Status);
   // Restore App Data
   DispProcessingApp_RestoreAppData();
   savedDCRATE = m_DispProcApp_AppData.lastDCRate;
   // Assign the Invalid button time to the APAC Manager
   APACMgr_IF_InvldDelayTimeOutVal(&m_DispProcApp_Cfg.invalidButtonTime_ms);
   // Convert configurable times to ticks.
-  invalidButtonTime_Converted    = (UINT16)(m_DispProcApp_Cfg.invalidButtonTime_ms 
-                                   / INVBUTTON_TIME_CONVERSION);
-  autoAbortTime_Converted        = (UINT16)(m_DispProcApp_Cfg.autoAbortTime_s 
-                                   * AUTO_ABORT_CONVERSION);
-  no_HS_Timeout_Converted        = (UINT16)(m_DispProcApp_Cfg.no_HS_Timeout_s 
-                                   * NO_HS_TIMEOUT_CONVERSION);
+  invalidButtonTime_Converted = (UINT16)(m_DispProcApp_Cfg.invalidButtonTime_ms
+                                / INVBUTTON_TIME_CONVERSION);
+  autoAbortTime_Converted     = (UINT16)(m_DispProcApp_Cfg.autoAbortTime_s 
+                                * AUTO_ABORT_CONVERSION);
+  no_HS_Timeout_Converted     = (UINT16)(m_DispProcApp_Cfg.no_HS_Timeout_s 
+                                * NO_HS_TIMEOUT_CONVERSION);
 
   m_DispProcApp_Debug.bDebug     = FALSE;
   m_DispProcApp_Debug.bNewFrame  = FALSE;
   
   // Initialize Character Strings that require specific formatting.
   Init_SpecialCharacterStrings();
-  
-  m_DispProcRX_Info.partNumber       = 0x01;
-  m_DispProcRX_Info.versionNumber[0] = 0x01; 
-  m_DispProcRX_Info.versionNumber[1] = 0x00;
-  m_DispProcRX_Info.displayHealth    = 0x80;
+
+  m_DispProcRX_Info.displayHealth = D_HLTH_PBIT_ACTIVE;
+  m_DispProcRX_Info.partNumber    = DEFAULT_PART_NUMBER;
+  m_DispProcRX_Info.versionNumber[VERSION_MAJOR_NUMBER] = 
+    DEFAULT_VERSION_NUMBER_MJR;
+  m_DispProcRX_Info.versionNumber[VERSION_MINOR_NUMBER] = 
+    DEFAULT_VERSION_NUMBER_MNR;
   
   // Update Status
   CM_GetTimeAsTimestamp((TIMESTAMP *) &pStatus->lastFrameTS);
   pStatus->lastFrameTime = CM_GetTickCount();
 
   // Create Display Processing App Task
-  memset(&dispTaskInfo, 0, sizeof(dispTaskInfo));
-  strncpy_safe(dispTaskInfo.Name, sizeof(dispTaskInfo.Name),
-               "Display Processing Application", _TRUNCATE);
-  dispTaskInfo.TaskID         = DispProcApp_Handler;
-  dispTaskInfo.Function       = DispProcessingApp_Handler;
-  dispTaskInfo.Priority       = taskInfo[DispProcApp_Handler].priority;
-  dispTaskInfo.Type           = taskInfo[DispProcApp_Handler].taskType;
-  dispTaskInfo.modes          = taskInfo[DispProcApp_Handler].modes;
-  dispTaskInfo.MIFrames       = taskInfo[DispProcApp_Handler].MIFframes;
-  dispTaskInfo.Rmt.InitialMif = taskInfo[DispProcApp_Handler].InitialMif;
-  dispTaskInfo.Rmt.MifRate    = taskInfo[DispProcApp_Handler].MIFrate;
-  dispTaskInfo.Enabled        = TRUE;
-  dispTaskInfo.Locked         = FALSE;
-  dispTaskInfo.pParamBlock    = &dispProcAppBlock;
-  TmTaskCreate(&dispTaskInfo);
-  
-  // Create Display Processing App Display Task
-  memset(&debugTaskInfo, 0, sizeof(debugTaskInfo));
-  strncpy_safe(debugTaskInfo.Name, sizeof(debugTaskInfo.Name),
-               "Display Processing Debug",_TRUNCATE);
-  debugTaskInfo.TaskID         = DispProcApp_Debug;
-  debugTaskInfo.Function       = DispProcAppDebug_Task;
-  debugTaskInfo.Priority       = taskInfo[DispProcApp_Debug].priority;
-  debugTaskInfo.Type           = taskInfo[DispProcApp_Debug].taskType;
-  debugTaskInfo.modes          = taskInfo[DispProcApp_Debug].modes;
-  debugTaskInfo.MIFrames       = taskInfo[DispProcApp_Debug].MIFframes;
-  debugTaskInfo.Rmt.InitialMif = taskInfo[DispProcApp_Debug].InitialMif;
-  debugTaskInfo.Rmt.MifRate    = taskInfo[DispProcApp_Debug].MIFrate;
-  debugTaskInfo.Enabled        = TRUE;
-  debugTaskInfo.Locked         = FALSE;
-  debugTaskInfo.pParamBlock    = &dispProcAppDisplayDebugBlock;
-  TmTaskCreate (&debugTaskInfo);
+  if (bEnable)
+  {
+    // Create Display Processing App Task
+    memset(&dispTaskInfo, 0, sizeof(dispTaskInfo));
+    strncpy_safe(dispTaskInfo.Name, sizeof(dispTaskInfo.Name),
+                 "Display Processing Application", _TRUNCATE);
+    dispTaskInfo.TaskID         = DispProcApp_Handler;
+    dispTaskInfo.Function       = DispProcessingApp_Handler;
+    dispTaskInfo.Priority       = taskInfo[DispProcApp_Handler].priority;
+    dispTaskInfo.Type           = taskInfo[DispProcApp_Handler].taskType;
+    dispTaskInfo.modes          = taskInfo[DispProcApp_Handler].modes;
+    dispTaskInfo.MIFrames       = taskInfo[DispProcApp_Handler].MIFframes;
+    dispTaskInfo.Rmt.InitialMif = taskInfo[DispProcApp_Handler].InitialMif;
+    dispTaskInfo.Rmt.MifRate    = taskInfo[DispProcApp_Handler].MIFrate;
+    dispTaskInfo.Enabled        = TRUE;
+    dispTaskInfo.Locked         = FALSE;
+    dispTaskInfo.pParamBlock    = &dispProcAppBlock;
+    TmTaskCreate(&dispTaskInfo);
+    
+    // Create Display Processing App Display Task
+    memset(&debugTaskInfo, 0, sizeof(debugTaskInfo));
+    strncpy_safe(debugTaskInfo.Name, sizeof(debugTaskInfo.Name),
+                 "Display Processing Debug",_TRUNCATE);
+    debugTaskInfo.TaskID         = DispProcApp_Debug;
+    debugTaskInfo.Function       = DispProcAppDebug_Task;
+    debugTaskInfo.Priority       = taskInfo[DispProcApp_Debug].priority;
+    debugTaskInfo.Type           = taskInfo[DispProcApp_Debug].taskType;
+    debugTaskInfo.modes          = taskInfo[DispProcApp_Debug].modes;
+    debugTaskInfo.MIFrames       = taskInfo[DispProcApp_Debug].MIFframes;
+    debugTaskInfo.Rmt.InitialMif = taskInfo[DispProcApp_Debug].InitialMif;
+    debugTaskInfo.Rmt.MifRate    = taskInfo[DispProcApp_Debug].MIFrate;
+    debugTaskInfo.Enabled        = TRUE;
+    debugTaskInfo.Locked         = FALSE;
+    debugTaskInfo.pParamBlock    = &dispProcAppDisplayDebugBlock;
+    TmTaskCreate (&debugTaskInfo);
+  }
 }
 
 
@@ -452,7 +463,7 @@ void DispProcessingApp_Handler(void *pParam)
   { // Update Previous screen
     pStatus->previousScreen = pStatus->currentScreen;
 
-    while((UINT16)pStatus->nextScreen >= 100)
+    while((UINT16)pStatus->nextScreen >= ACTION_ENUM_OFFSET)
     { // If the next screen requires an action process the action.
       pStatus->nextScreen = PerformAction(pStatus->nextScreen);
     }
@@ -461,6 +472,8 @@ void DispProcessingApp_Handler(void *pParam)
     pScreen = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) + 
               (UINT16)pStatus->currentScreen);
     FormatCharacterString(pScreen);
+    pScreen = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) +
+        (UINT16)pStatus->currentScreen);
   }
   bLogLimiter = (pStatus->buttonInput != NO_PUSH_BUTTON_DATA ||
                  frameScreen != pStatus->currentScreen) 
@@ -642,7 +655,7 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
   if(bNewData == TRUE)
   {
     // Check to see if all new button presses are FALSE and update bButtonReset
-    for(i = 1; i <= 12; i++)
+    for(i = 1; i <= DISPLAY_VALID_BUTTONS; i++)
     {
       if((BOOLEAN)(pData + i)->data.value != FALSE)
       {
@@ -655,9 +668,9 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
     {
       for (i = 0; i < BUTTON_STATE_COUNT; i++)
       {
-        if( i > 4)
+        if( i >= UNUSED1_BUTTON)
         {
-          if(i == 7)
+          if(i == EVENT_BUTTON)
           {
             pDest->buttonState[i]   = 
               (BOOLEAN)(pData + (UINT16)BUTTONSTATE_EVENT)->data.value;
@@ -700,7 +713,7 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
     
     pDest->partNumber = (UINT8)((pData + (UINT16)PART_NUMBER)->data.value);
     pStatus->partNumber = pDest->partNumber;
-    
+
     pDest->versionNumber[VERSION_MAJOR_NUMBER] = 
      (UINT8) ((pData + (UINT16)VERSION_NUMBER)->data.value >> 4);
 
@@ -708,6 +721,17 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
     
     pDest->versionNumber[VERSION_MINOR_NUMBER] = (UINT8)tempChar >> 4;
     pStatus->versionNumber = (UINT8)(pData+(UINT16)VERSION_NUMBER)->data.value;
+    newDataTimer = 0;
+  }
+  else
+  {
+    //set the discrete DIO Status Flag to FALSE if no RX messages are received
+    //within 150 ms.
+    if(++newDataTimer >= PWCDISP_RX_FREQUENCY_TEST)
+    {
+      discreteDIOStatusFlag = FALSE; 
+      dio_Validity_Status   = (UINT8)DIO_DISPLAY_NO_DATA_FAIL;
+    }
   }
   // As soon as D_HLTH is received as 0x00 for the first time, Display Pbit is
   // considered to be completed and the protocol is allowed to transmit.
@@ -789,7 +813,7 @@ DISPLAY_SCREEN_ENUM PerformAction(DISPLAY_SCREEN_ENUM nextAction)
   DISPLAY_ACTION_TABLE_PTR pAction;
 
   pAction = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-            ((UINT16)nextAction - 100);
+            ((UINT16)nextAction - ACTION_ENUM_OFFSET);
   return(pAction->action() == TRUE ? pAction->retTrue : pAction->retFalse);
 }
 
@@ -816,7 +840,7 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pCfg    = (DISPLAY_SCREEN_CONFIG_PTR)&m_DispProcApp_Cfg;
 
-  if(dispHealth == 0x00) 
+  if(dispHealth == D_HLTH_ACTIVE) 
   {
     pStatus->dispHealthTimer = 0;
     if (bNewData == TRUE)
@@ -825,27 +849,31 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
       pStatus->bPBITComplete   = TRUE;
       pStatus->bButtonEnable   = TRUE;
       pStatus->bD_HLTHReset    = TRUE;
+      discreteDIOStatusFlag    = TRUE;
+      dio_Validity_Status      = (UINT8)DIO_DISPLAY_VALID;
     }
-    if (pStatus->bPBITComplete == TRUE &&
-        pStatus->displayHealth != dispHealth)
+    if (pStatus->displayHealth != dispHealth)
     { 
       pStatus->displayHealth = dispHealth;
       pStatus->bNewDebugData = TRUE;
     }
   }
   // For critical D_HLTH codes, call D_HLTH inspector 
-  else if (dispHealth == 0xcc || dispHealth == 0xc3 ||
-           dispHealth == 0xcf || dispHealth == 0xff)
+  else if (dispHealth == D_HLTH_COM_RX_FAULT      || 
+           dispHealth == D_HLTH_INOP_SIGNAL_FAULT ||
+           dispHealth == D_HLTH_MON_INOP_FAULT    || 
+           dispHealth == D_HLTH_DISPLAY_FAULT)
   {
     if(pStatus->displayHealth != dispHealth) //Fresh critical D_HLTH code.
     {
-      DispProcessingApp_D_HLTHResult(dispHealth, 0);
-
-      // Update the Debug Display when D_HLTH is nonzero too long.
+      // Update the Debug Display, Status, and Log
       pStatus->displayHealth = dispHealth;
-      pStatus->bButtonEnable = FALSE;
       pStatus->bNewDebugData = TRUE;
+      DispProcessingApp_D_HLTHResult(dispHealth, 0);
     }
+    pStatus->bButtonEnable = FALSE;
+    discreteDIOStatusFlag  = FALSE;
+    dio_Validity_Status    = (UINT8)DIO_DISPLAY_HEALTH_CODE_FAIL;
   }
   // Set timer for PBIT and diagnostic D_HLTH codes
   else
@@ -857,16 +885,17 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
       DispProcessingApp_D_HLTHResult(dispHealth, pCfg->no_HS_Timeout_s);
 
       // Update the Debug Display when D_HLTH is nonzero too long.
-      pStatus->bNewDebugData = TRUE;
+      pStatus->bNewDebugData   = TRUE;
   	  //Reset log timer
   	  pStatus->dispHealthTimer = 0;
-      pStatus->bD_HLTHReset = FALSE;
+      pStatus->bD_HLTHReset    = FALSE;
   	}
     else if (pStatus->bD_HLTHReset == TRUE)
   	{
   	  pStatus->dispHealthTimer++;
   	}
     pStatus->bButtonEnable = FALSE;
+    discreteDIOStatusFlag  = FALSE;
   }
 }
 
@@ -891,25 +920,25 @@ void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
   DISPLAY_DHLTH_LOG       displayHealthTOLog;
   switch (dispHealth)
   {
-    case 0x80:
+    case D_HLTH_PBIT_ACTIVE:
       result = DISPLAY_LOG_PBIT_ACTIVE;
       break;
-    case 0x88:
+    case D_HLTH_PBIT_PASS:
       result = DISPLAY_LOG_PBIT_PASS;
       break;
-    case 0xCF:
+    case D_HLTH_MON_INOP_FAULT:
       result = DISPLAY_LOG_INOP_MON_FAULT;
       break;
-    case 0xC3:
+    case D_HLTH_INOP_SIGNAL_FAULT:
       result = DISPLAY_LOG_INOP_SIGNAL_FAULT;
       break;
-    case 0xCC:
+    case D_HLTH_COM_RX_FAULT:
       result = DISPLAY_LOG_RX_COM_FAULT;
       break;
-    case 0xFF:
+    case D_HLTH_DISPLAY_FAULT:
       result = DISPLAY_LOG_DISPLAY_FAULT;
       break;
-    case 0x40:
+    case D_HLTH_DIAGNOSTIC:
       result = DISPLAY_LOG_DIAGNOSTIC_MODE;
       break;
     default:
@@ -990,20 +1019,17 @@ static BOOLEAN InvalidButtonInput()
   DISPLAY_STATE_PTR         pScreen, pInvalidScreen;
   DISPLAY_BUTTON_TABLE_PTR    pButtons;
   DISPLAY_SCREEN_ENUM       checkState;
-  UINT16                    i, size, charCount, min, max;
-  CHAR                      strInsert[24] = "";
+  UINT16                    i, size, charCount, max;
+  CHAR                      strInsert[MAX_SCREEN_SIZE] = "";
 
   pStatus         = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pAction         = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-                    ((UINT16)pStatus->nextScreen - 100);
+                    ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen         = (DISPLAY_STATE_PTR)&menuStateTbl[0] + 
                     (UINT16)pAction->retFalse;
-  pInvalidScreen  = (DISPLAY_STATE_PTR)&menuStateTbl[0] + 
-                    (UINT16)invalidButtonScreen;
   pButtons        = (DISPLAY_BUTTON_TABLE_PTR)&validButtonTable[0];
   size            = MAX_SCREEN_SIZE / 2;
   charCount       = 0;
-  min             = 12;
 
   if (invalid_Button_Timer >= invalidButtonTime_Converted)
   {
@@ -1018,12 +1044,14 @@ static BOOLEAN InvalidButtonInput()
     invalidButtonScreen = (pStatus->previousScreen != pAction->retFalse) 
                         ? pStatus->previousScreen : invalidButtonScreen;
     // return to M28 regardless of button press
-    pAction->retTrue  = pAction->retFalse;
+    pAction->retTrue        = pAction->retFalse;
     pStatus->bInvalidButton = TRUE;
     // Increment the invalid button timer
     invalid_Button_Timer++;
   }
-
+  //Update Invalid Screen Pointer
+  pInvalidScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] +
+      (UINT16)invalidButtonScreen;
   // Perform check to see what buttons are valid and add them to display.
   for (i = 0; i < DISPLAY_VALID_BUTTONS; i++)
   {
@@ -1049,13 +1077,13 @@ static BOOLEAN InvalidButtonInput()
     pButtons++;
   }
   // Update Max
-  max = min + (charCount - 1);
+  max = size + (charCount - 1);
 
-  for (i = min; i < MAX_SCREEN_SIZE; i++)
+  for (i = size; i < MAX_SCREEN_SIZE; i++)
   {
     if (i <= max)
     {
-      pScreen->menuString[i] = strInsert[i - min];
+      pScreen->menuString[i] = strInsert[i - size];
     }
     else
     {
@@ -1087,7 +1115,7 @@ static BOOLEAN GetConfig()
   pStatus   = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pVar      = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   pAction   = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-              ((UINT16)pStatus->nextScreen - 100);
+              ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen   = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   ac_Cfg    = pVar + pScreen->var1;
   power     = pVar + pScreen->var2;
@@ -1119,7 +1147,7 @@ static BOOLEAN RecallDate()
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pVar    = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   pAction = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-            ((UINT16)pStatus->nextScreen - 100);
+            ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   date    = pVar + pScreen->var1;
   time    = pVar + pScreen->var2;
@@ -1184,7 +1212,7 @@ static BOOLEAN RecallPAC()
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pVar    = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   pAction = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-            ((UINT16)pStatus->nextScreen - 100);
+            ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   line1   = pVar + pScreen->var1;
   line2   = pVar + pScreen->var2;
@@ -1252,12 +1280,12 @@ static BOOLEAN SavedDoubleClick()
   pData   = (DISPLAY_APP_DATA_PTR)&m_DispProcApp_AppData;
   pVar    = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   pAction = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-            ((UINT16)pStatus->nextScreen - 100);
+            ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   dcRate  = pVar + pScreen->var1;
   changed = pVar + pScreen->var2;
   
-  if (pStatus->previousScreen != pStatus->currentScreen)
+  if (pStatus->previousScreen != pAction->retTrue)
   {
     scaledDCRATE = savedDCRATE;
   }
@@ -1280,7 +1308,7 @@ static BOOLEAN SavedDoubleClick()
   else
   {
     snprintf((char *)(changed)->strInsert,
-             sizeof((changed)->strInsert), "%c", 0x2A);
+             sizeof((changed)->strInsert), "%c", CHANGED_CHARACTER);
   }
   return(TRUE);
 }
@@ -1433,7 +1461,7 @@ static BOOLEAN RunningPAC()
   
   pStatus    = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pAction    = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-               ((UINT16)pStatus->nextScreen - 100);
+               ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen    = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retFalse;
   pVar       = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   pac_Status = pVar + pScreen->var1;
@@ -1504,7 +1532,7 @@ static BOOLEAN ErrorMessage()
   
   pStatus    = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pAction    = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-               ((UINT16)pStatus->nextScreen - 100);
+               ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen    = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   pVar       = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   error_Msg  = pVar + pScreen->var1;
@@ -1537,7 +1565,7 @@ static BOOLEAN AquirePACData()
   
   pStatus    = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pAction    = (DISPLAY_ACTION_TABLE_PTR)&m_ActionTable[0] + 
-               ((UINT16)pStatus->nextScreen - 100);
+               ((UINT16)pStatus->nextScreen - ACTION_ENUM_OFFSET);
   pScreen    = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   pVar       = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
   eng_Num    = pVar + pScreen->var1;
@@ -1570,28 +1598,17 @@ static BOOLEAN AquirePACData()
  *****************************************************************************/
 static BOOLEAN PACDecision()
 {
+  APAC_IF_ENUM decision;
+
   if (bValidatePAC == FALSE)
   {
-    if(bPACDecision == TRUE)
-    {
-      return(APACMgr_IF_ResultCommit(NULL,NULL,NULL,NULL,APAC_IF_ACPT));
-    }
-    else
-    {
-      return(APACMgr_IF_ResultCommit(NULL,NULL,NULL,NULL,APAC_IF_RJCT));
-    }
+    decision = (bPACDecision == TRUE) ? APAC_IF_ACPT : APAC_IF_RJCT;
   }
   else
   {
-    if(bPACDecision == TRUE)
-    {
-      return(APACMgr_IF_ResultCommit(NULL,NULL,NULL,NULL,APAC_IF_VLD));
-    }
-    else
-    {
-      return(APACMgr_IF_ResultCommit(NULL, NULL, NULL, NULL, APAC_IF_INVLD));
-    }
+    decision = (bPACDecision == TRUE) ? APAC_IF_VLD : APAC_IF_INVLD;
   }
+  return(APACMgr_IF_ResultCommit(NULL, NULL, NULL, NULL, decision));
 }
 
 /******************************************************************************
@@ -1627,7 +1644,7 @@ static BOOLEAN PACAcceptOrValidate()
 static BOOLEAN PACRejectORInvalidate()
 {
     bPACDecision = FALSE;
-    return(TRUE);
+    return(bPACDecision);
 }
 
 /******************************************************************************
@@ -1690,6 +1707,7 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
   
   pRX_Info       = (DISPLAY_RX_INFORMATION_PTR)&m_DispProcRX_Info;
   pData          = (DISPLAY_APP_DATA_PTR)&m_DispProcApp_AppData;
+                   //Convert lastDCRate to Ticks.
   lastDCRate     = (pData->lastDCRate * DCRATE_CONVERSION * 2) / 10;
   buttonState    = NO_PUSH_BUTTON_DATA;
   dblButtonState = NO_PUSH_BUTTON_DATA;
@@ -1710,7 +1728,7 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
       }
       if(pRX_Info->dblClickState[i] == TRUE)
       {
-        dblButtonState = (DISPLAY_BUTTON_STATES)(i + 8);
+        dblButtonState = (DISPLAY_BUTTON_STATES)(i + BUTTON_STATE_COUNT);
         dblTrueCnt++;
       }
     }
@@ -1810,13 +1828,13 @@ void FormatCharacterString(DISPLAY_STATE_PTR pScreen)
 {
   DISPLAY_VARIABLE_TABLE_PTR   pVar;
   UINT8                        i, j; 
-  INT8                         varIndex[6];
+  INT8                         varIndex[MAX_VARIABLES_PER_SCREEN];
   varIndex[0] = pScreen->var1; varIndex[3] = pScreen->var4;
   varIndex[1] = pScreen->var2; varIndex[4] = pScreen->var5;
   varIndex[2] = pScreen->var3; varIndex[5] = pScreen->var6;
   pVar = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
 
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < MAX_VARIABLES_PER_SCREEN; i++)
   {
     if (varIndex[i] != -1)
     {
@@ -1946,7 +1964,7 @@ void NoButtonData(void)
   
   for(i = 0; i < BUTTON_STATE_COUNT; i++)
   {
-    pbutton->buttonState[i] = FALSE;
+    pbutton->buttonState[i]   = FALSE;
     pbutton->dblClickState[i] = FALSE;
   }
 }
@@ -1978,7 +1996,7 @@ void DispProcAppDebug_Task(void *param)
       DISPLAY_STATE_PTR          pScreen;
       DISPLAY_APP_DATA_PTR       pData;
       DISPLAY_RX_INFORMATION_PTR pRXInfo;
-      UINT8                      subString1[16], subString2[16], i;
+      UINT8                      subString1[MAX_SUBSTRING_SIZE], i;
       
       pStatus     = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
       pMenuID     = (DISPLAY_CHAR_TABLE_PTR)&displayScreenTbl[0];
@@ -1990,74 +2008,71 @@ void DispProcAppDebug_Task(void *param)
       m_Str[0]    = NULL;
       
       // Display the Current Screen ID
-      snprintf((char*)subString2, 4, 
-               (const char*)(pMenuID+(UINT16)pStatus->currentScreen)->name);
-      snprintf((char *)m_Str, 19, "CurrentScreen   = ");
-      snprintf((char *)subString1, 4, "%s\r\n", subString2);
+      snprintf((char *)m_Str, DISP_PRINT_PARAM("CurrentScreen   = "));
+      snprintf((char *)subString1, DISP_PRINT_PARAMF("%s\r\n", 
+               (pMenuID + (UINT16)pStatus->currentScreen)->name));
       strcat((char *)m_Str, (const char *)subString1);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n");
       m_Str[0] = NULL;
       
       // Display the Previous Screen ID
-      snprintf((char*)subString2, 4, 
-               (const char*)(pMenuID + (UINT16)pStatus->previousScreen)->name);
-      snprintf((char *)m_Str, 19, "PreviousScreen  = ");
-      snprintf((char *)subString1, 4, "%s\r\n", subString2);
+      snprintf((char *)m_Str, DISP_PRINT_PARAM("PreviousScreen  = "));
+      snprintf((char *)subString1, DISP_PRINT_PARAMF("%s\r\n", 
+               (pMenuID + (UINT16)pStatus->previousScreen)->name));
       strcat((char *)m_Str, (const char *)subString1);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n\n");
       m_Str[0] = NULL;
       
       // Display the completion status of PBIT
-      snprintf((char *)m_Str, 22, "PBITComplete?   = %d\r\n", 
-               pStatus->bPBITComplete);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("PBITComplete?   = %d\r\n", 
+               pStatus->bPBITComplete));
       GSE_PutLine((const char *)m_Str);
 
       // Display the D_HLTH hexadecimal code
-      snprintf((char *)m_Str, 25, "D_HLTHCode?     = 0x%02x\r\n",
-               pStatus->displayHealth);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("D_HLTHCode?     = 0x%02x\r\n",
+               pStatus->displayHealth));
       GSE_PutLine((const char *)m_Str);
       
       // Display whether Transmission is currently enabled
-      snprintf((char *)m_Str, 22, "ButtonEnable?   = %d\r\n", 
-               pStatus->bButtonEnable);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("ButtonEnable?   = %d\r\n", 
+               pStatus->bButtonEnable));
       GSE_PutLine((const char *)m_Str);
       
       // Display whether or not APAC Processing is in progress
-      snprintf((char *)m_Str, 22, "APACProcessing? = %d\r\n",
-               pStatus->bAPACProcessing);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("APACProcessing? = %d\r\n",
+               pStatus->bAPACProcessing));
       GSE_PutLine((const char *)m_Str);
       
       // Display whether the button that is pressed is invalid or not
-      snprintf((char *)m_Str, 21, "Invalid Key?    = %d\r\n",
-               pStatus->bInvalidButton);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("Invalid Key?    = %d\r\n",
+               pStatus->bInvalidButton));
       GSE_PutLine((const char *)m_Str);
       m_Str[0] = NULL;
       
       // Display the Button Pressed
-      snprintf((char *)subString2, 17, 
-               (const char*)(pButtonID + (UINT16)pDebug->buttonInput)->name);
-      snprintf((char *)m_Str, 19, "ButtonInput?    = ");
-      snprintf((char *)subString1, sizeof(subString1), "%s", subString2);
+      snprintf((char *)m_Str, DISP_PRINT_PARAM("ButtonInput?    = "));
+      snprintf((char *)subString1, sizeof(subString1), "%s", 
+               (pButtonID + (UINT16)pDebug->buttonInput)->name);
       strcat((char *)m_Str, (const char *)subString1);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n");
       m_Str[0] = NULL;
       
       // Display the current Double Click Rate
-      snprintf((char *)m_Str, 24, "DoubleClickRate = %d\r\n", 
-               pData->lastDCRate);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("DoubleClickRate = %d\r\n",
+               pData->lastDCRate));
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n");
       
       // Display the Part Number
-      snprintf((char *)m_Str, 25, "Part Number     = 0x%02x\r\n", 
-               pRXInfo->partNumber);
+      snprintf((char*)m_Str, DISP_PRINT_PARAMF("Part Number     = 0x%02x\r\n",
+               pRXInfo->partNumber));
       GSE_PutLine((const char *)m_Str);
       
       // Display The Version Number Major.Minor
-      snprintf((char *)m_Str, 45, "VersionNumber   = %d.%d\r\n", 
+      snprintf((char*)m_Str, DISP_PRINT_PARAM("VersionNumber   = %d.%d\r\n"),
                pRXInfo->versionNumber[0], pRXInfo->versionNumber[1]);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n");
@@ -2065,10 +2080,10 @@ void DispProcAppDebug_Task(void *param)
       for (i = 0; i < (UINT16)DISCRETE_STATE_COUNT; i++)
       {
         // Display the active discretes
-        snprintf((char *)subString1, 17, (const char*)(pDiscreteID + i)->name);
-        snprintf((char *)m_Str, 16, "%s", subString1);
-        snprintf((char *)subString1, 5, " = %d", 
-                 (pRXInfo)->discreteState[i]);
+        snprintf((char *)m_Str, sizeof(m_Str), 
+                 (const char*)(pDiscreteID + i)->name);
+        snprintf((char*)subString1, 
+                 DISP_PRINT_PARAMF(" = %d", (pRXInfo)->discreteState[i]));
         strcat((char *)m_Str, (const char *)subString1);
         GSE_PutLine((const char *)m_Str);
         GSE_PutLine("\r\n");
@@ -2077,18 +2092,19 @@ void DispProcAppDebug_Task(void *param)
       
       // Display Menu Screen Line 1
       GSE_PutLine("\r\n");
-      snprintf((char *)m_Str, 13, (const char *)&(pScreen + 
+      snprintf((char *)m_Str, (UINT16)(MAX_LINE_LENGTH + 1), 
+               (const char *)&(pScreen + 
                (UINT16)pStatus->currentScreen)->menuString[0]);
-      TranslateArrows((char *)m_Str, 12);
+      TranslateArrows((char *)m_Str, (UINT16)MAX_LINE_LENGTH);
       GSE_PutLine((const char *) m_Str);
       GSE_PutLine("\r\n");
       m_Str[0] = NULL;
       
       // Display Menu Screen Line 2
-      //snprintf((char *)m_Str, 13, (const char *)&(pScreen + 
-      //         (UINT16)pStatus->currentScreen)->menuString[12]);
-      memcpy((void*)m_Str, (const void*)&(pScreen + (UINT16)pStatus->currentScreen)->menuString[12], 12);
-      TranslateArrows((char *)m_Str, 12);
+      memcpy((void*)m_Str, (const void*)&(pScreen + 
+             (UINT16)pStatus->currentScreen)->menuString[MAX_LINE_LENGTH], 
+             MAX_LINE_LENGTH);
+      TranslateArrows((char *)m_Str, MAX_LINE_LENGTH);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n\n");
       
@@ -2241,6 +2257,16 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 1/29/16    Time: 12:02p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #18 Call DispProcessing Init thru APAC Mgr
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 1/29/16    Time: 9:42a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Display Processing Updates for DIO
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:40p

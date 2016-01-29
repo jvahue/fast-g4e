@@ -1,6 +1,6 @@
 #define UART_MGR_BODY
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 68 $  $Date: 1/21/16 4:34p $
+      $Revision: 69 $  $Date: 1/29/16 8:54a $
 
 ******************************************************************************/
 
@@ -619,6 +619,7 @@ void UartMgr_BITTask ( void *pParam )
  *                     2 - EMU 150
  *                     3 - ID Parameter
  *                     4 - GBS
+ *                     5 - PWC Display
  *                     255 to 1 - Not Used
  *     bits 10 to  8: Selects the uart channel
  *                    000b - ch 0 (Allocated to GSE, not valid !)
@@ -673,6 +674,7 @@ UINT16 UartMgr_SensorSetup (UINT32 gpA, UINT32 gpB, UINT16 param, UINT16 nSensor
     case UARTMGR_PROTOCOL_NONE:
     case UARTMGR_PROTOCOL_EMU150:
     case UARTMGR_PROTOCOL_GBS:
+    case UARTMGR_PROTOCOL_PWC_DISPLAY:
     case UARTMGR_PROTOCOL_MAX:
     default:
       // This is a configuration error
@@ -2320,10 +2322,14 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
    return FALSE;
 }
 
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: John Omalley Date: 1/29/16    Time: 8:54a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 68  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:34p
