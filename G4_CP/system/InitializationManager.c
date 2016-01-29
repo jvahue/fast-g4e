@@ -10,7 +10,7 @@
                System and Application.
 
  VERSION
-     $Revision: 124 $  $Date: 11/19/15 4:32p $
+     $Revision: 125 $  $Date: 1/29/16 1:45p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -512,10 +512,6 @@ static void Im_System_Initialize(BOOLEAN degradedMode)
   STARTUP_ID(sysStartupId++);
   Creep_Initialize(degradedMode);
   
-  STARTUP_ID(sysStartupId++);
-  APACMgr_Initialize();
-
-
 #ifdef ENV_TEST
 /*vcast_dont_instrument_start*/
   InitEtm();
@@ -561,9 +557,9 @@ static void Im_Application_Initialize(void)
 
   STARTUP_ID(appStartupId++);
   TH_Init();
-
+  
   STARTUP_ID(appStartupId++);
-  DispProcessingApp_Initialize();
+  APACMgr_Initialize();
 
   STARTUP_ID(appStartupId);
 }
@@ -778,6 +774,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 125  *****************
+ * User: Peter Lee    Date: 1/29/16    Time: 1:45p
+ * Updated in $/software/control processor/code/system
+ * SCR #1308 Item #18 Call DispProcessing Init thru APAC Mgr
  * 
  * *****************  Version 124  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:32p
