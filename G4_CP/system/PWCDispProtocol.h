@@ -2,7 +2,7 @@
 #define PWCDISP_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 5 $  $Date: 1/21/16 4:33p $     
+      $Revision: 6 $  $Date: 1/29/16 8:57a $     
 
 ******************************************************************************/
 
@@ -45,6 +45,12 @@
 #define PWCDISP_MAX_TX_LIST_SIZE         26 // TX Payload Packet size with ID
 #define PWCDISP_RX_MAX_MSG_SIZE          12 // Full RX Packet size
 #define PWCDISP_TX_MSG_SIZE              31 // Full TX Packet size
+#define MAX_DEBUG_STRING_SIZE            40 // The maximum debug string size
+#define MAX_STORAGE_ITEMS                 4 // The max amount of storage items
+                                            // between the display and the app
+#define TX_TIMER_OFFSET                   2 // Arbitrary 2 in order to ensure 
+                                            // that rx and tx handling are on
+                                            // different frames.
 #define PWCDISP_SYNC_BYTE1             0x55
 #define PWCDISP_SYNC_BYTE2             0xAA
 #define PWCDISP_RX_PACKET_ID           0x11
@@ -53,6 +59,9 @@
 #define TX_PROTOCOL                       1 //For use in Debug
 #define PWCDISP_CFG_DEFAULT             \
      PWCDISP_PACKET_ERROR_MAX
+
+#define DISP_PRINT_PARAM(a) sizeof(a), (const char*)a
+#define DISP_PRINT_PARAMF(a,b) sizeof(a), (const char*)a, b
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -280,6 +289,11 @@ EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 1/29/16    Time: 8:57a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:33p

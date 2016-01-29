@@ -16,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 126 $  $Date: 1/04/16 6:21p $
+      $Revision: 127 $  $Date: 1/29/16 8:58a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -190,6 +190,7 @@ SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
 \
 SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
 SYS_LOG_ID(SYS_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
+SYS_LOG_ID(SYS_ID_DIO_DISPLAY_FAIL                  ,0xB720 ,0)\
 \
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
 SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
@@ -297,6 +298,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 127  *****************
+ * User: John Omalley Date: 1/29/16    Time: 8:58a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 126  *****************
  * User: John Omalley Date: 1/04/16    Time: 6:21p

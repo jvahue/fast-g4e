@@ -1,9 +1,11 @@
 #ifndef DIO_H
 #define DIO_H
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+  ECCN:        9D991
+	       
   File:        DIO.h
 
   Description: This header file includes the variables and funtions necessary
@@ -11,7 +13,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 46 $  $Date: 1/21/16 4:35p $
+      $Revision: 47 $  $Date: 1/29/16 9:01a $
 ******************************************************************************/
 
 
@@ -195,6 +197,13 @@ typedef enum{         // How should discrete values be accessed.
   DIO_FILTERED        // Used the filtered value from the debounced table.
 }DIO_ACC_METHOD;
 
+typedef enum
+{
+  DIO_DISPLAY_VALID,            // Display Sensor Data valid
+  DIO_DISPLAY_HEALTH_CODE_FAIL, // Display Health code failure
+  DIO_DISPLAY_NO_DATA_FAIL      // Display not receiving new data
+}DIO_DISPLAY_LOG_RESULT_ENUM;
+
 //Defines the configuration a single discrete input/output
 typedef struct {
   CHAR name[PIN_LABEL_LEN];  //Pin label (for reporting errors, status, etc)
@@ -222,7 +231,12 @@ typedef struct {             // Structure for storing hysteresis info for DIN
   DIO_PORT_DATA* portData;   // Pointer to the DIO_PORT_DATA containing data for this discrete.
 }DIO_DEBOUNCED;
 
-
+typedef struct {
+  UINT16  id;
+  UINT16  testCnt;
+  UINT16  failCnt;
+  BOOLEAN bValid;
+}DIO_DISPLAY_SENSOR_STATUS, *DIO_DISPLAY_SENSOR_STATUS_PTR;
 
 #pragma pack(1)
 typedef struct {
@@ -237,6 +251,14 @@ typedef struct {
   DIO_INPUT  dinPin;
   BOOLEAN    inputWAState;
 } DIO_WRAPAROUND_FAIL_LOG;
+
+typedef struct {
+  UINT16                      discreteID;
+  DIO_DISPLAY_LOG_RESULT_ENUM failReason;
+  UINT32                      failCount;
+  UINT32                      totalTests;
+  UINT8                       displayHealth;
+} DIO_DISPLAY_FAIL_LOG;
 #pragma pack()
 
 /******************************************************************************
@@ -265,9 +287,11 @@ EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
 EXPORT  void    DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState );
 
 EXPORT  void    DIO_UpdateDiscreteInputs ( void );
-EXPORT  void    DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax);
+EXPORT  void    DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax,
+                                           const char* flagAddress,
+                                           const char* d_HLTHAddress,
+                                           const char* dispStatus);
 EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
-EXPORT  void    DIO_DispValidationFlags(const char* flagAddress);
 
 #endif // DIO_H
 
@@ -275,6 +299,11 @@ EXPORT  void    DIO_DispValidationFlags(const char* flagAddress);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 47  *****************
+ * User: John Omalley Date: 1/29/16    Time: 9:01a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 46  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:35p

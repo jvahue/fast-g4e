@@ -1,10 +1,10 @@
 #define PWCDISP_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        PWCDispProtocol.c
 
@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 5 $  $Date: 1/21/16 4:33p $     
+      $Revision: 6 $  $Date: 1/29/16 8:56a $     
 
 ******************************************************************************/
 
@@ -35,11 +35,20 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define PWCDISP_MAX_RAW_RX_BUF      512 //MAX raw Buffer size for RX Packets
+#define PWCDISP_MAX_RAW_RX_BUF     512  //MAX raw Buffer size for RX Packets
 #define PWCDISP_MAX_RAW_TX_BUF      31  //MAX raw Buffer size for TX Packets
 #define PWCDISP_TX_FREQUENCY        10  //MAX time between TX messages
-#define PWCDISP_RX_FREQUENCY         5  //MAX time between RX messages
-
+#define PWCDISP_HEADER_SIZE          4  //Header size of tx/rx messages
+#define PWCDISP_UNUSED_BIT1          5  //Unused bit 1 from RX message.
+#define PWCDISP_EVENT_OFFSET         2  //Event button offset from unused bits 
+#define PWCDISP_MAX_LINE_LENGTH     12  //Max display line length.
+#define PWCDISP_PARAM_NAMES_LENGTH  15  //Max char length for 
+                                        //PWCDISP_PARAM_NAMES
+#define UP_ARROW                  0x01  //Designated Hex value for up arrow
+#define RIGHT_ARROW               0x02  //Designated Hex value for right arrow
+#define DOWN_ARROW                0x03  //Designated Hex value for down arrow
+#define LEFT_ARROW                0x04  //Designated Hex value for left arrow
+#define ENTER_DOT                 0x05  //Designated Hex value for enter dot
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -62,6 +71,36 @@ typedef enum
   PWCDISP_PARAM_ENCODE_CHARACTERS,
   PWCDISP_PARAM_ENCODE_CHECKSUM
 }PWCDISP_PARAM_ENCODE_ENUM;
+
+typedef enum
+{
+  PWCDISP_RX_PARAM_SYNC1,
+  PWCDISP_RX_PARAM_SYNC2,
+  PWCDISP_RX_PARAM_SIZE,
+  PWCDISP_RX_PARAM_PACKETID,
+  PWCDISP_RX_PARAM_BUTTON_STATE,
+  PWCDISP_RX_PARAM_DBL_CLK_STATE,
+  PWCDISP_RX_PARAM_DISCRETE_STATE,
+  PWCDISP_RX_PARAM_D_HLTH_STATE,
+  PWCDISP_RX_PARAM_PART_NUMBER,
+  PWCDISP_RX_PARAM_VERSION_NUMBER,
+  PWCDISP_RX_PARAM_CHKSUM_HIGH,
+  PWCDISP_RX_PARAM_CHKSUM_LOW,
+  PWCDISP_RX_PARAM_COUNT
+}PWCDISP_RX_PARAM;
+
+typedef enum
+{
+  PWCDISP_TX_PARAM_SYNC1,
+  PWCDISP_TX_PARAM_SYNC2,
+  PWCDISP_TX_PARAM_SIZE,
+  PWCDISP_TX_PARAM_PACKETID,
+  PWCDISP_TX_PARAM_CHARDATA,
+  PWCDISP_TX_PARAM_DCRATE = PWCDISP_MAX_CHAR_PARAMS+PWCDISP_TX_PARAM_CHARDATA,
+  PWCDISP_TX_PARAM_CHKSUM_HIGH,
+  PWCDISP_TX_PARAM_CHKSUM_LOW,
+  PWCDISP_TX_PARAM_COUNT
+}PWCDISP_TX_PARAM;
 
 /********************/
 /*      RXData      */
@@ -102,28 +141,29 @@ typedef struct
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
-static PWCDISP_RX_STATUS                   m_PWCDisp_RXStatus;
-static PWCDISP_TX_STATUS                   m_PWCDisp_TXStatus;
-                                           
-static PWCDISP_RAW_RX_BUFFER               m_PWCDisp_RXBuff;
-static PWCDISP_RX_DATA_FRAME               m_PWCDisp_RXDataFrame;
-                                           
-static PWCDISP_RAW_TX_BUFFER               m_PWCDisp_TXBuff;
+static PWCDISP_RX_STATUS                 m_PWCDisp_RXStatus;
+static PWCDISP_TX_STATUS                 m_PWCDisp_TXStatus;
+                                         
+static PWCDISP_RAW_RX_BUFFER             m_PWCDisp_RXBuff;
+static PWCDISP_RX_DATA_FRAME             m_PWCDisp_RXDataFrame;
+                                         
+static PWCDISP_RAW_TX_BUFFER             m_PWCDisp_TXBuff;
 
-static PWCDISP_TX_PARAM_LIST               m_PWCDisp_TXParamList;
-                                           
-static PWCDISP_CFG                         m_PWCDisp_Cfg;
-static PWCDISP_DEBUG                       m_PWCDisp_Debug;
-                                           
-static PWCDISP_DISPLAY_DEBUG_TASK_PARAMS   pwcDisplayDebugBlock;
+static PWCDISP_TX_PARAM_LIST             m_PWCDisp_TXParamList;
+                                         
+static PWCDISP_CFG                       m_PWCDisp_Cfg;
+static PWCDISP_DEBUG                     m_PWCDisp_Debug;
+                                         
+static PWCDISP_DISPLAY_DEBUG_TASK_PARAMS pwcDisplayDebugBlock;
 
-static PWCDISP_PARAM_ENCODE_ENUM           stateCheck = PWCDISP_PARAM_ENCODE_HEADER;
+static PWCDISP_PARAM_ENCODE_ENUM         stateCheck = PWCDISP_PARAM_ENCODE_HEADER;
 
-static UARTMGR_PROTOCOL_STORAGE m_PWCDisp_DataStore[4]; // RX/TX Data Storage.
-                                                        // 0 - RX_PROTOCOL
-                                                        // 1 - TX_PROTOCOL
-                                                        // 2 - Requests From Disp App
-                                                        // 3 - Requests From Protocol
+static UARTMGR_PROTOCOL_STORAGE m_PWCDisp_DataStore[MAX_STORAGE_ITEMS];
+                                                 // RX/TX Data Storage.
+                                                 // 0 - RX_PROTOCOL
+                                                 // 1 - TX_PROTOCOL
+                                                 // 2 - Requests From Disp App
+                                                 // 3 - Requests From Protocol
 // TX Temporary Data Store
 static UARTMGR_PROTOCOL_DATA    m_PWCDisp_TXData[PWCDISP_TX_ELEMENT_CNT_COMPLETE];
 // RX Temporary Data Store
@@ -156,9 +196,7 @@ static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT] =
   {NULL, 1,    1}      //VERSION_NUMBER
 };
 
-static UINT8 m_Str[30];
-static BOOLEAN discreteDIOStatusFlag = FALSE;
-static UINT16  rxDIOTimer = 0;
+static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -166,6 +204,8 @@ static UINT16  rxDIOTimer = 0;
 static void    PWCDispProtocol_UpdateUartMgr(void);
 static void    PWCDispProtocol_Resync(void);
 static BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr);
+static void    PWCDispProtocol_UpdateRdPtr(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr,
+                                           UINT16 bytesScanned);
 static void    PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket);
 static void    PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket);
 static BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr);
@@ -180,7 +220,7 @@ static void    PWCDispDebug_TX(void *pParam);
 /*****************************************************************************/
 typedef struct
 {
-  UINT8 name[15];
+  UINT8 name[PWCDISP_PARAM_NAMES_LENGTH];
 } PWCDISP_PARAM_NAMES, *PWCDISP_PARAM_NAMES_PTR;
 
 static 
@@ -273,8 +313,6 @@ void PWCDispProtocol_Initialize ( void )
   // Restore User Cfg
   memcpy(&m_PWCDisp_Cfg, &CfgMgr_RuntimeConfigPtr()->PWCDispConfig, 
          sizeof(m_PWCDisp_Cfg));
-  
-  DIO_DispValidationFlags((const char*)&discreteDIOStatusFlag);
 
   // Update Start up Debug
   m_PWCDisp_Debug.bDebug       = FALSE;
@@ -292,8 +330,7 @@ void PWCDispProtocol_Initialize ( void )
   pTXStatus = (PWCDISP_TX_STATUS_PTR) &m_PWCDisp_TXStatus;
   CM_GetTimeAsTimestamp((TIMESTAMP *) &pTXStatus->lastFrameTS);
   pTXStatus->lastFrameTime = CM_GetTickCount();
-  pTXStatus->txTimer = 2; // Abitrary 2 in order to insure that RX and TX take
-                           // place on seperate frames.
+  pTXStatus->txTimer = TX_TIMER_OFFSET; 
   
   // Create PWC Display Protocol Display Task
   memset(&pwcTaskInfo, 0, sizeof(pwcTaskInfo));
@@ -358,7 +395,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   end_ptr         = (UINT8 *) &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF]; 
   
   // If there is new data or still data left in the buffer to check.
-  if((cnt > 0) || (rx_buff_ptr->cnt > 4))
+  if((cnt > 0) || (rx_buff_ptr->cnt > PWCDISP_HEADER_SIZE))
   {
     // Copy any data into buffer
     for (i=0; i<cnt; i++)
@@ -386,14 +423,6 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     
     // Attempt to synchronize and decode RX raw buffer
     bNewData = PWCDispProtocol_FrameSearch(rx_buff_ptr);
-    rxDIOTimer = 0;
-  }
-  else
-  {
-    //set the discrete DIO Status Flag to FALSE if no RX messages are received
-    //within 50 ms.
-    discreteDIOStatusFlag = (++rxDIOTimer > PWCDISP_RX_FREQUENCY) ? 
-                             FALSE : discreteDIOStatusFlag;
   }
   
   //Begin Processing TX message packets every 10 MIF Frames
@@ -417,7 +446,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     }
     //Reset txTimer. If there is a bad packet the timer will reset to 10 in 
     //order to refresh the tx data ASAP
-    tx_status_ptr->txTimer = (bBadTXPacket != TRUE) ? 1 : 10; 
+    tx_status_ptr->txTimer = (bBadTXPacket != TRUE) ? 1 : PWCDISP_TX_FREQUENCY;
   }
   else
   {
@@ -547,10 +576,11 @@ void PWCDispProtocol_UpdateUartMgr(void)
   for (i = 0; i < size; i++)
   {
     // Account for default 0 bits
-    if (i == 5)
+    if (i == PWCDISP_UNUSED_BIT1)
     {
       (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> (i + 2)) & (0x01));
+        (BOOLEAN)((frame_ptr->data[cnt] >> 
+          (i + PWCDISP_EVENT_OFFSET)) & (0x01));
     }
     else
     {
@@ -566,10 +596,10 @@ void PWCDispProtocol_UpdateUartMgr(void)
   for (i = 0; i < size; i++)
   {
     // Account for default 0 bits
-    if (i == 5)
+    if (i == PWCDISP_UNUSED_BIT1)
     {
       (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> (i + 2)) & (0x01));
+        (BOOLEAN)((frame_ptr->data[cnt] >> (i + PWCDISP_EVENT_OFFSET)) & (0x01));
     }
     else
     {
@@ -665,7 +695,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
   bLookingForMsg  = TRUE;
   bBadPacket      = FALSE;
   src_ptr         = (UINT8 *) &buff[0];
-  end_ptr         = (UINT8 *) &buff[rx_buff_ptr->cnt - 3];
+  end_ptr         = (UINT8 *) &buff[rx_buff_ptr->cnt-(PWCDISP_HEADER_SIZE-1)];
   stateSearch     = PWCDISP_PARAMSRCH_HEADER;
   pStatus         = (PWCDISP_RX_STATUS_PTR)&m_PWCDisp_RXStatus;
   frame_ptr       = &m_PWCDisp_RXDataFrame;
@@ -709,12 +739,14 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         }
         // Header found. Begin Data extraction.
         if(bLookingForMsg == FALSE &&
-          ((src_ptr + (PWCDISP_RX_MAX_MSG_SIZE - 1)) < (end_ptr + 3))) 
+          ((src_ptr + (UINT16)(PWCDISP_RX_PARAM_COUNT - 1)) < 
+           (end_ptr + (PWCDISP_HEADER_SIZE-1)))) 
         {
           stateSearch = PWCDISP_PARAMSRCH_EXTRACT_DATA;
         }
         else if (bLookingForMsg == FALSE && 
-                ((src_ptr + (PWCDISP_RX_MAX_MSG_SIZE - 1)) >= (end_ptr + 3)))
+                ((src_ptr + (UINT16)(PWCDISP_RX_PARAM_COUNT - 1)) >= 
+                 (end_ptr + (PWCDISP_HEADER_SIZE-1))))
         {
           stateSearch =PWCDISP_PARAMSRCH_UPDATE_BUFFER;
         }
@@ -727,14 +759,16 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
 
       case PWCDISP_PARAMSRCH_EXTRACT_DATA:
         // Save sync_word, size, and checksum to Frame Buffer
-        frame_ptr->sync_word = (*src_ptr << 8) | (*(src_ptr + 1));
-        frame_ptr->size      = *(src_ptr + 2);
-        frame_ptr->chksum    = (*(src_ptr + (frame_ptr->size + 3)) << 8) |
-                               (*(src_ptr + (frame_ptr->size + 4)));
+        frame_ptr->sync_word = (*src_ptr << 8) | 
+                               (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_SYNC2));
+        frame_ptr->size      = *(src_ptr + (UINT16)PWCDISP_RX_PARAM_SIZE);
+        frame_ptr->chksum    = 
+          (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_CHKSUM_HIGH) << 8) |
+          (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_CHKSUM_LOW));
         
         // Adjust buffer position to Packet ID
-        src_ptr += 3;
-        i += 3;
+        src_ptr += (UINT16)PWCDISP_RX_PARAM_PACKETID;
+        i += (UINT16)PWCDISP_RX_PARAM_PACKETID;
 
         // Add data to Frame buffer
         for (k = 0; k < frame_ptr->size; k++)
@@ -768,7 +802,6 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
 		                            pStatus->lastSyncTime);
           pStatus->lastSyncTime   = CM_GetTickCount();
           bNewData = TRUE;
-          discreteDIOStatusFlag = TRUE;
 
           // New RX frame. Update RX Packet Contents.
           memcpy(pStatus->packetContents, src_ptr - (PWCDISP_RX_MAX_MSG_SIZE - 2),
@@ -786,24 +819,21 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         }
         else
         {
-          // Checksum is incorrect. Invalid/Corrupt message/No message
+          // Checksum is incorrect. Invalid message/No message
           // continue scanning for message header.
           stateSearch = PWCDISP_PARAMSRCH_HEADER;
+          if(pStatus->sync == TRUE)
+          {
+            // Lost sync. Increment invalid packet
+            pStatus->sync               = FALSE;
+            bBadPacket                  = TRUE;
+            m_PWCDisp_Debug.bNewRXFrame = TRUE;
+          }
         }
         break;
       case PWCDISP_PARAMSRCH_UPDATE_BUFFER:
         bContinueSearch = FALSE;
-        rx_buff_ptr->cnt -= i;
-
-        // Update the pRd pointer.
-        for (k = 0; k < i; k++)
-        {
-          rx_buff_ptr->pRd++;
-          if (rx_buff_ptr->pRd >= &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF])
-          {
-              rx_buff_ptr->pRd = &rx_buff_ptr->data[0];
-          }
-        }
+        PWCDispProtocol_UpdateRdPtr(rx_buff_ptr, i);
         break;
     }
   }
@@ -811,6 +841,38 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
   PWCDispProtocol_ValidRXPacket(bBadPacket);
 
   return (bNewData);
+}
+
+/******************************************************************************
+* Function:    PWCDispProtocol_UpdateRdPtr
+*
+* Description: Utility Function to update a given rx read buffer based on the
+*              amount of bytes scanned.
+*
+* Parameters:  rx_buff_ptr - The Raw RX buffer structure pointer
+*              bytesScanned - The total number of bytes scanned.
+*
+* Returns:     None
+*
+* Notes:       None
+*
+*****************************************************************************/
+static
+void PWCDispProtocol_UpdateRdPtr(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr, 
+                                 UINT16 bytesScanned)
+{
+  UINT16 k;
+  rx_buff_ptr->cnt -= bytesScanned;
+
+  // Update the pRd pointer.
+  for (k = 0; k < bytesScanned; k++)
+  {
+    rx_buff_ptr->pRd++;
+    if (rx_buff_ptr->pRd >= &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF])
+    {
+        rx_buff_ptr->pRd = &rx_buff_ptr->data[0];
+    }
+  }
 }
 
 /******************************************************************************
@@ -839,7 +901,6 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
   // Message was deemed invalid. Update status and record any necessary logs.
   if(bBadPacket == TRUE)
   {
-    discreteDIOStatusFlag = FALSE;
     pStatus->rx_SyncLossCnt++;
     pStatus->invalidSyncCnt++;
     if (pStatus->rx_SyncLossCnt > pCfg->packetErrorMax)
@@ -992,17 +1053,17 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
     {
       case PWCDISP_PARAM_ENCODE_HEADER:
         // Set the Header of the message buffer on the first TX packet check
-        *buff       = PWCDISP_SYNC_BYTE1;
-        *(buff + 1) = PWCDISP_SYNC_BYTE2;
-        *(buff + 2) = PWCDISP_MAX_TX_LIST_SIZE;
-        *(buff + 3) = PWCDISP_TX_PACKET_ID;
+        *(buff + (UINT16)PWCDISP_TX_PARAM_SYNC1)    = PWCDISP_SYNC_BYTE1;
+        *(buff + (UINT16)PWCDISP_TX_PARAM_SYNC2)    = PWCDISP_SYNC_BYTE2;
+        *(buff + (UINT16)PWCDISP_TX_PARAM_SIZE)     = PWCDISP_MAX_TX_LIST_SIZE;
+        *(buff + (UINT16)PWCDISP_TX_PARAM_PACKETID) = PWCDISP_TX_PACKET_ID;
         // Ready Character Check and Encoding
         stateCheck = PWCDISP_PARAM_ENCODE_CHARACTERS;
         break;
       
       case PWCDISP_PARAM_ENCODE_CHARACTERS:
         // set pointer to the first non header byte in the buffer
-        buff += 4; 
+        buff += (UINT16)PWCDISP_TX_PARAM_CHARDATA; 
         for(i = 0; i < PWCDISP_MAX_CHAR_PARAMS; i++)
         {
           // If the character is not approved abort loop and report bad packet
@@ -1034,7 +1095,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
           checksum += *buff++;
         }
         // Encode Checksum into Raw Buffer
-        *buff       = (UINT8) ((checksum >> 8) & 0xFF);//NOTE: Need to make sure this works
+        *buff       = (UINT8) ((checksum >> 8) & 0xFF);
         *(buff + 1) = (UINT8) (checksum & 0xFF);
         
         // End Loop
@@ -1109,19 +1170,19 @@ void TranslateArrows(char charString[], UINT16 length)
   {
     switch(charString[i])
     {
-      case 0x02:
+      case (UINT16) RIGHT_ARROW:
         charString[i] = '>';
         break;
-      case 0x04:
+      case (UINT16) LEFT_ARROW:
         charString[i] = '<';
         break;
-      case 0x01:
+      case (UINT16) UP_ARROW:
         charString[i] = '^';
         break;
-      case 0x03:
+      case (UINT16) DOWN_ARROW:
         charString[i] = 'v';
         break;
-      case 0x05:
+      case (UINT16) ENTER_DOT:
         charString[i] = '@';
         break;
       default:
@@ -1156,34 +1217,37 @@ static void PWCDispDebug_RX(void *pParam)
   pName     = (PWCDISP_PARAM_NAMES_PTR)&pwcDisp_RX_Param_Names[0];
 
   
-  pStatus->chksum = ((UINT16)pStatus->packetContents[10] << 8) |
-                    ((UINT16)pStatus->packetContents[11]);
-  
-  m_Str[0] = NULL;
+  pStatus->chksum = ((UINT16)pStatus->packetContents
+                      [(UINT16)PWCDISP_RX_PARAM_CHKSUM_HIGH] << 8) |
+                    ((UINT16)pStatus->packetContents
+                      [(UINT16)PWCDISP_RX_PARAM_CHKSUM_LOW]);
 
   // Display Address Checksum
-  sprintf((char *) m_Str, "\r\nChksum=0x%04x\r\n", pStatus->chksum);
+  m_Str[0] = NULL;
+  snprintf((char *) m_Str, 
+    DISP_PRINT_PARAMF("\r\nChksum         =0x%04x\r\n", pStatus->chksum));
   GSE_PutLine((const char *)m_Str);
   
   // Display Size
-  sprintf((char *)m_Str, "Size=%d\r\n", pStatus->payloadSize);
+  snprintf((char *)m_Str, 
+    DISP_PRINT_PARAMF("Size           =%d\r\n", pStatus->payloadSize));
   GSE_PutLine((const char * )m_Str);
 
   
   // Display Raw Buffer
   // Display Sync Byte 1
-  sprintf((char *)m_Str, "SYNC1          =0x%02x\r\n",
-	  pStatus->packetContents[0]);
+  snprintf((char *)m_Str, DISP_PRINT_PARAMF("SYNC1          =0x%02x\r\n",
+	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC1]));
   GSE_PutLine( (const char *) m_Str );
     
   // Display Sync Byte 2
-  sprintf((char *)m_Str, "SYNC2          =0x%02x\r\n",
-	  pStatus->packetContents[1]);
+  snprintf((char *)m_Str, DISP_PRINT_PARAMF("SYNC2          =0x%02x\r\n",
+	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC2]));
   GSE_PutLine( (const char *) m_Str );
   
   // Display Size Byte
-  sprintf((char *)m_Str, "SIZE_BYTE      =0x%02x\r\n",
-	 pStatus->packetContents[2]);
+  snprintf((char *)m_Str, DISP_PRINT_PARAMF("SIZE_BYTE      =0x%02x\r\n",
+	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SIZE]));
   GSE_PutLine( (const char *) m_Str );
 
   m_Str[0] = NULL;
@@ -1191,10 +1255,9 @@ static void PWCDispDebug_RX(void *pParam)
   //Display Payload Contents
   for( i = 0; i < PWCDISP_MAX_RX_LIST_SIZE; i++)
   {
-    snprintf((char *)subString, 15, "%s", (const char*)((pName + i)->name));
-    snprintf((char *)m_Str, 15, "%s", subString);
-    snprintf((char *)subString, 9, " =0x%02x\r\n", 
-             pStatus->packetContents[i+3]);
+    snprintf((char *)m_Str, DISP_PRINT_PARAM((pName + i)->name));
+    snprintf((char*)subString, DISP_PRINT_PARAMF(" =0x%02x\r\n",
+      pStatus->packetContents[i + (UINT16)PWCDISP_RX_PARAM_PACKETID]));
     strcat((char *)m_Str, (const char *)subString);
     GSE_PutLine((const char *) m_Str);
     m_Str[0] = NULL;
@@ -1238,18 +1301,18 @@ static void PWCDispDebug_TX(void *pParam)
     m_Str[0] = NULL;
   // Display Raw Buffer
   // Display Sync byte 1
-  sprintf((char *) m_Str, "\r\nSYNC1          =0x%02x\r\n",
-	  pStatus->packetContents[0]);
+  snprintf((char *) m_Str, DISP_PRINT_PARAMF("\r\nSYNC1          =0x%02x\r\n",
+	  pStatus->packetContents[0]));
   GSE_PutLine((const char *)m_Str);
     
   // Display Sync byte 2
-  sprintf((char *) m_Str, "SYNC2          =0x%02x\r\n",
-	  pStatus->packetContents[1]);
+  snprintf((char *) m_Str, DISP_PRINT_PARAMF("SYNC2          =0x%02x\r\n",
+	  pStatus->packetContents[1]));
   GSE_PutLine((const char *) m_Str);
     
   // Display Size
-  sprintf((char *) m_Str, "SIZE           =0x%02x\r\n",
-	  pStatus->packetContents[2]);
+  snprintf((char *) m_Str, DISP_PRINT_PARAMF("SIZE           =0x%02x\r\n",
+	  pStatus->packetContents[2]));
   GSE_PutLine((const char *) m_Str);
     
   m_Str[0] = NULL;
@@ -1257,10 +1320,10 @@ static void PWCDispDebug_TX(void *pParam)
   // Display Packet ID and Character list
   for(i = 0; i < (UINT16)PWCDISP_TX_ELEMENT_CNT_COMPLETE - 1; i++)
   {
-    snprintf((char *)subString, 15, "%s", (const char *)(pName + i)->name);
-    snprintf((char *)m_Str, 15, "%s", subString);
-    snprintf((char *)subString, 9, " =0x%02x\r\n",
-	    pStatus->packetContents[i+4]);
+    //snprintf((char *)subString, 15, "%s", (const char *)(pName + i)->name);
+    snprintf((char *)m_Str, DISP_PRINT_PARAM((pName + i)->name));
+    snprintf((char *)subString, DISP_PRINT_PARAMF(" =0x%02x\r\n",
+	    pStatus->packetContents[i+(UINT16)PWCDISP_TX_PARAM_CHARDATA]));
     strcat((char *)m_Str, (const char *)subString);
     GSE_PutLine((const char *) m_Str);
     m_Str[0] = NULL;
@@ -1268,34 +1331,37 @@ static void PWCDispDebug_TX(void *pParam)
   GSE_PutLine("\r\n");
     
   // Display DCRATE
-  snprintf((char *)subString, 15, "%s", 
-           (const char *)(pName + (UINT16)DC_RATE)->name);
-  snprintf((char *)m_Str, 15, "%s", subString);
-  snprintf((char *) subString, 11, " =%03d ms\r\n",
-           (INT8)(pStatus->packetContents[4 + (UINT16)DC_RATE]) * 2);
+  //snprintf((char *)subString, 15, "%s", 
+  //         (const char *)(pName + (UINT16)DC_RATE)->name);
+  snprintf((char *)m_Str, DISP_PRINT_PARAM((pName + (UINT16)DC_RATE)->name));
+  snprintf((char *) subString, DISP_PRINT_PARAMF(" =%03d ms\r\n",
+           (INT8)(pStatus->packetContents
+           [(UINT16)PWCDISP_TX_PARAM_CHARDATA + (UINT16)DC_RATE]) * 2));//TODO Add conversion here
   strcat((char *)m_Str, (const char*)subString);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
   m_Str[0] = NULL;
 
   // Display LINE 1
-  snprintf((char *)m_Str, 13, "%s", 
-           (const char *)&(pStatus->packetContents[4]));
-  TranslateArrows((char *)m_Str, 12);
+  snprintf((char *)m_Str, PWCDISP_MAX_LINE_LENGTH + 1, "%s", 
+           (const char *)&(pStatus->packetContents
+           [(UINT16)PWCDISP_TX_PARAM_CHARDATA]));
+  TranslateArrows((char *)m_Str, PWCDISP_MAX_LINE_LENGTH);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
   m_Str[0] = NULL;
 
   // Display LINE 2
-  snprintf((char *)m_Str, 13, "%s", 
-           (const char *)&(pStatus->packetContents[16]));
-  TranslateArrows((char *)m_Str, 12);
+  snprintf((char *)m_Str, PWCDISP_MAX_LINE_LENGTH + 1, "%s",
+           (const char *)&(pStatus->packetContents
+           [(UINT16)PWCDISP_TX_PARAM_CHARDATA + PWCDISP_MAX_LINE_LENGTH]));
+  TranslateArrows((char *)m_Str, PWCDISP_MAX_LINE_LENGTH);
   GSE_PutLine((const char*)m_Str);
   GSE_PutLine("\r\n\n");
 
   // Display TX last packet period
-  snprintf((char *)m_Str, 33, "LAST_PACKET_PERIOD =%10d\r\n",
-      pStatus->lastPacketPeriod);
+  snprintf((char *)m_Str, MAX_DEBUG_STRING_SIZE, 
+           "LAST_PACKET_PERIOD =%10d\r\n", pStatus->lastPacketPeriod);
   GSE_PutLine((const char *)m_Str);
   GSE_PutLine("\r\n\n");
   
@@ -1480,6 +1546,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 1/29/16    Time: 8:56a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Display Protocol Updates
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:33p
