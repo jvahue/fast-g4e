@@ -1,7 +1,9 @@
 #define TREND_BODY
 /******************************************************************************
-           Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
-              All Rights Reserved. Proprietary and Confidential.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
+               All Rights Reserved. Proprietary and Confidential.
+
+   ECCN:        9D991
 
    File:        trend.c
 
@@ -11,7 +13,7 @@
    Note:
 
  VERSION
- $Revision: 45 $  $Date: 12/11/15 5:29p $
+ $Revision: 46 $  $Date: 2/01/16 5:16p $
 
 ******************************************************************************/
 
@@ -47,7 +49,11 @@
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
-
+typedef struct
+{
+  BOOLEAN bIsUsed;
+  BOOLEAN bIsValid;
+}SENSOR_INFO_TEMP;
 /*****************************************************************************/
 /* Local Variables                                                           */
 /*****************************************************************************/
@@ -547,7 +553,7 @@ void TrendGetSampleData( TREND_INDEX idx, TREND_SAMPLE_DATA* pTrndSampleData )
 {
   ASSERT(NULL != pTrndSampleData);
   // copy all the sensor summaries to the caller.
-  memcpy(pTrndSampleData->snsrSummary, m_TrendData[idx].endSummary, 
+  memcpy(pTrndSampleData->snsrSummary, m_TrendData[idx].endSummary,
 		 sizeof(TREND_SAMPLE_DATA));
 }
 
@@ -832,6 +838,9 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
   SNSR_SUMMARY  *pSummaryItem;
   TREND_LOG*    pLog;
   SYS_APP_ID    logId;
+  SENSOR_INFO_TEMP  snsrStore[MAX_SENSORS];
+  SENSOR_INFO_TEMP* pSnsrStore;
+  SENSOR_INDEX  snsrIdx;
 
   // If a trend was in progress, create a log, otherwise return.
   if (pData->trendState > TR_TYPE_INACTIVE )
@@ -865,12 +874,28 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
         // Set a pointer the summary item(sensor)
         pSummaryItem = &(pSummary[i]);
 
+        snsrIdx = pSummaryItem->SensorIndex;
+
+        // Set pointer to the table entries for this sensor's use and valid state.
+        pSnsrStore  = &(snsrStore[snsrIdx]);
+
+
+        // For first log, set the use/validity entries in the table thru the pointer
+        // then use the  stored values for this and subsequent logs to avoid
+        // calling the funcs again.
+        if (0 == j)
+        {
+           pSnsrStore->bIsValid = SensorIsUsedEx(snsrIdx, &pSnsrStore->bIsUsed );
+          //pSnsrStore->bIsUsed  = SensorIsUsed(snsrIdx);
+          //pSnsrStore->bIsValid = SensorIsValid(snsrIdx);
+        }
+
         // Check the sensor is used
-        if ( SensorIsUsed((SENSOR_INDEX)pSummaryItem->SensorIndex ) )
+        if ( pSnsrStore->bIsUsed )
         {
           // Only some of the sensor stats are used for trend logging
           pLog->sensor[i].sensorIndex = pSummaryItem->SensorIndex;
-          pLog->sensor[i].bValid      = SensorIsValid((SENSOR_INDEX)pSummaryItem->SensorIndex);
+          pLog->sensor[i].bValid      = pSnsrStore->bIsValid;
           pLog->sensor[i].fMaxValue   = pSummaryItem->fMaxValue;
           pLog->sensor[i].fAvgValue   = pSummaryItem->fAvgValue;
         }
@@ -1024,7 +1049,7 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
     pAbsVar->upperValue = 0.f;
     pAbsVar->outLierCnt = 0;
     pAbsVar->outLierMax =
-       (UINT16) (pCfg->rate * pCfg->stability[i].absOutlier_ms) / ONE_SEC_IN_MILLSECS;    
+       (UINT16) (pCfg->rate * pCfg->stability[i].absOutlier_ms) / ONE_SEC_IN_MILLSECS;
   }
 
   pData->delayedStbStartMs = 0;
@@ -1074,7 +1099,9 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
   INT32   i;
   BOOLEAN bChkVarFlag;
   BOOLEAN bSnsrStable;
-  STABILITY_CRITERIA* pStabCrit;  
+  BOOLEAN bIsUsed;
+  BOOLEAN bIsValid;
+  STABILITY_CRITERIA* pStabCrit;
   UINT32* pStableDurMs;
   UINT32* pDurLastCheckMs;
 
@@ -1089,16 +1116,19 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
   for (i = 0; i < pData->nStabExpectedCnt; ++i)
   {
     pStabCrit = &pCfg->stability[i];
-    
+
     pStableDurMs    = &pData->curStability.stableDurMs[i];
     pDurLastCheckMs = &pData->curStability.lastStableChkMs[i];
 
     // Default the current stability sensor to GOOD, modify as needed.
     pData->curStability.status[i] = STAB_OK;
 
-    if ( SensorIsUsed(pStabCrit->sensorIndex) )
+    // Get the is-defined and validity state of this sensor
+    bIsValid = SensorIsUsedEx(pStabCrit->sensorIndex, &bIsUsed);
+
+    if ( bIsUsed )
     {
-      if ( SensorIsValid(pStabCrit->sensorIndex))
+      if ( bIsValid )
       {
         // If this sensor's stability criteria is configured for delayed-sampling, don't verify
         // variance until in the SAMPLE stable-state AND the offset-delay period has elapsed.
@@ -1119,7 +1149,7 @@ static BOOLEAN TrendCheckStability( TREND_CFG* pCfg, TREND_DATA* pData, UINT32 t
         bSnsrStable = (pData->pStabilityFunc(pCfg, pData, i, bChkVarFlag));
         //************************************************
 
-        // Maintain the continuous time this snsr has been stable        
+        // Maintain the continuous time this snsr has been stable
         if(bSnsrStable)
         {
           // Update total times this sensor has been stable since last reset.
@@ -1961,6 +1991,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:16p
+ * Updated in $/software/control processor/code/application
+ * SCR #1192 - Perf Enhancment improvements 
  * 
  * *****************  Version 45  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p

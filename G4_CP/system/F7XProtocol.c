@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 25 $  $Date: 11/30/15 6:56p $     
+      $Revision: 26 $  $Date: 1/30/16 7:37p $     
 
 ******************************************************************************/
 
@@ -100,7 +100,7 @@ static F7X_ESN_STATUS m_F7X_EsnStatus[UART_NUM_OF_UARTS];
 
 static char GSE_OutLine[128];
 
-#define F7X_TIMING_TEST 1
+// #define F7X_TIMING_TEST 1
 // Test Timing
 #ifdef F7X_TIMING_TEST
   #define F7X_TIMING_BUFF_MAX 200
@@ -108,6 +108,10 @@ static char GSE_OutLine[128];
   UINT32 m_F7XTiming_Start;
   UINT32 m_F7XTiming_End;
   UINT16 m_F7XTiming_Index;
+// m_F7XTiming_Start = TTMR_GetHSTickCount(); 
+// m_F7XTiming_End = TTMR_GetHSTickCount();
+// m_F7XTiming_Buff[m_F7XTiming_Index] = (m_F7XTiming_End - m_F7XTiming_Start);
+// m_F7XTiming_Index = (++m_F7XTiming_Index) % F7X_TIMING_BUFF_MAX; 
 #endif
 // Test Timing
 
@@ -1981,16 +1985,25 @@ void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
   F7X_DATA_FRAME_PTR pFrame; 
   UINT16 esn_raw[F7X_ESN_CHAR_RAW_MAX + 1]; 
   UINT16 *pWord0, *pWord1, *pWord2;
+  UINT16 esn_temp0, esn_temp1, esn_temp2;
  
- m_F7XTiming_Start = TTMR_GetHSTickCount(); 
-  
   pEsnStatus = (F7X_ESN_STATUS_PTR) &m_F7X_EsnStatus[ch]; 
   pFrame = (F7X_DATA_FRAME_PTR) &m_F7X_DataFrame[ch]; 
   
   // Get the raw ESN char from buffer.  
-  pWord2 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W2(optionCfg_ptr->esn_gpa)];
-  pWord1 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W1(optionCfg_ptr->esn_gpa)];
-  pWord0 = (UINT16 *) &pFrame->data[F7X_ESN_GPA_W0(optionCfg_ptr->esn_gpa)];
+  esn_temp2 = pFrame->data[F7X_ESN_GPA_W2(optionCfg_ptr->esn_gpa)];
+  esn_temp1 = pFrame->data[F7X_ESN_GPA_W1(optionCfg_ptr->esn_gpa)];
+  esn_temp0 = pFrame->data[F7X_ESN_GPA_W0(optionCfg_ptr->esn_gpa)];
+  
+  if ( F7X_ESN_GPA_REVERSE(optionCfg_ptr->esn_gpa) != 0) {
+    esn_temp2 = F7X_ESN_MSB(esn_temp2) | ( F7X_ESN_LSB(esn_temp2) << 8);
+    esn_temp1 = F7X_ESN_MSB(esn_temp1) | ( F7X_ESN_LSB(esn_temp1) << 8);
+    esn_temp0 = F7X_ESN_MSB(esn_temp0) | ( F7X_ESN_LSB(esn_temp0) << 8);
+  }
+  
+  pWord2 = (UINT16 *) &esn_temp2;
+  pWord1 = (UINT16 *) &esn_temp1;
+  pWord0 = (UINT16 *) &esn_temp0;
   
   // Ensure the format is "XX0000" else exit
   if ( (((F7X_ESN_MSB(*pWord2) >= 'A') && (F7X_ESN_MSB(*pWord2) <= 'Z')) ||
@@ -2032,12 +2045,8 @@ void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
   else 
   {
     pEsnStatus->nCntBad++; 
-  }
-  
-m_F7XTiming_End = TTMR_GetHSTickCount();
-m_F7XTiming_Buff[m_F7XTiming_Index] = (m_F7XTiming_End - m_F7XTiming_Start);
-m_F7XTiming_Index = (++m_F7XTiming_Index) % F7X_TIMING_BUFF_MAX; 
-  
+  }  
+
 }
 
 
@@ -2100,6 +2109,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Peter Lee    Date: 1/30/16    Time: 7:37p
+ * Updated in $/software/control processor/code/system
+ * SCR #1314 N-Param ESN Decode, Byte Reversing Option
  * 
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 11/30/15   Time: 6:56p

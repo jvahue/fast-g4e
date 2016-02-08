@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 10 $  $Date: 1/18/16 5:49p $
+      $Revision: 12 $  $Date: 2/02/16 9:43a $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -120,48 +120,6 @@ BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 
   APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Config(m1=%s,m2=%s,m3=%s)\r\n",msg1,msg2,msg3);
 
-  return (TRUE);
-}
-
-/******************************************************************************
- * Function:    APACMgr_IF_Select
- *
- * Description: Selects APAC Testing of 100% Nr Setting
- *
- * Parameters:  *msg1 - Not used
- *              *msg2 - Not used
- *              *msg3 - Not used
- *              *msg4 - Not used
- *              option - APAC_IF_NR100, APAC_IF_NR102
- *
- * Returns:     TRUE always
- *
- * Notes:
- *  SRS-5144 Upon the crew member pressing the Enter (·) pushbutton switch while
- *           in Screen M29, the APAC System shall identify APAC power level is
- *           "NORMAL" (100%Nr) for trend logic
- *  SRS-5147 Upon the crew member pressing the Enter (·) pushbutton switch while
- *           in Screen M30, the APAC System shall identify APAC power level is
- *           "CAT-A" (102%Nr) for trend logic
- *
- *****************************************************************************/
-BOOLEAN APACMgr_IF_Select ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
-                            APAC_IF_ENUM option )
-{
-/*  
-  ASSERT ( (option == APAC_IF_NR100) || (option == APAC_IF_NR102) );
-  // run_state is either APAC_RUN_STATE_IDLE for 1st time or successful prev test
-  //                     APAC_RUN_STATE_FAULT for failed prev test
-  ASSERT ( (m_APAC_Status.run_state == APAC_RUN_STATE_IDLE ) ||
-           (m_APAC_Status.run_state == APAC_RUN_STATE_FAULT )  );
-
-  m_APAC_Status.nr_sel = (option == APAC_IF_NR100) ? APAC_NR_SEL_100 : APAC_NR_SEL_102;
-
-  m_APAC_Status.run_state = APAC_RUN_STATE_IDLE;  // Set or clear run state back to _IDLE
-
-  APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Select(o=%d)-cat='%c'\r\n",
-                   option, APAC_CAT_STR[m_APAC_Status.nr_sel]);
-*/
   return (TRUE);
 }
 
@@ -569,6 +527,7 @@ BOOLEAN APACMgr_IF_ResultCommit ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4
 
   APACMgr_LogSummary ( (APAC_COMMIT_ENUM) (option - APAC_IF_RJCT) );
   m_APAC_Status.run_state = APAC_RUN_STATE_IDLE;
+  m_APAC_Status.state = APAC_STATE_IDLE;  
 
   APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _ResultCommit(o=%d)\r\n",option);
 
@@ -750,7 +709,7 @@ BOOLEAN APACMgr_IF_HistoryAdv ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 }
 
 
-  /******************************************************************************
+ /******************************************************************************
  * Function:    APACMgr_IF_HistoryDec
  *
  * Description: Moves the pointer to Prev entry in the Date Buffer.
@@ -833,6 +792,31 @@ BOOLEAN APACMgr_IF_HistoryDec ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 
 
 /******************************************************************************
+ * Function:    APACMgr_IF_HistoryReset
+ *
+ * Description: Reset Pointer to Most Recent Date and Day in history buffer
+ *
+ * Parameters:  *msg1 - Not used
+ *              *msg2 - Not used
+ *              *msg3 - Not used
+ *              *msg4 - Not used
+ *               option - Not used
+ *
+ * Returns:     TRUE always
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+BOOLEAN APACMgr_IF_HistoryReset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
+                                  APAC_IF_ENUM option )
+{
+  APACMgr_RestoreAppDataHistOrder();
+  
+  return (TRUE);
+}
+
+
+/******************************************************************************
  * Function:    APACMgr_IF_Reset
  *
  * Description: Resets the APAC Processing.  From start menu, abort "<<" and
@@ -864,7 +848,6 @@ BOOLEAN APACMgr_IF_Reset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                            APAC_IF_ENUM option )
 {
   APAC_COMMIT_ENUM commit;
-  BOOLEAN bResult;
   TREND_CMD_RESULT rslt;
 
   ASSERT ( (option == APAC_IF_DCLK) || (option == APAC_IF_TIMEOUT) );
@@ -889,7 +872,7 @@ BOOLEAN APACMgr_IF_Reset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
       APACMgr_LogAbortNCR ( commit );
     }
     if ((m_APAC_Status.eng_uut != APAC_ENG_MAX) && (m_APAC_Status.nr_sel != APAC_NR_SEL_MAX)){
-      bResult = TrendAppStartTrend(
+      TrendAppStartTrend(
                   m_APAC_Cfg.eng[m_APAC_Status.eng_uut].idxTrend[m_APAC_Status.nr_sel],
                   FALSE, &rslt);
     }
@@ -938,6 +921,19 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 2/02/16    Time: 9:43a
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #19 and #20.  Check in Cycle CBIT again.  ReOrder
+ * History back to most recent when RCL selected.  
+ * Add ifdef of Debug Code. 
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 2/01/16    Time: 2:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #16.  Additional updates.  Remove unused func
+ * APACMgr_IF_Select()
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 1/18/16    Time: 5:49p

@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 11 $  $Date: 1/19/16 5:12p $
+    $Revision: 13 $  $Date: 2/02/16 9:43a $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -31,33 +31,36 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-// #ifdef APAC_TEST_SIM
-#define APAC_DBG_CMD_HIST_DATE      0
-#define APAC_DBG_CMD_HIST_DAY       1
-#define APAC_DBG_CMD_HIST_DATE_ADV  2
-#define APAC_DBG_CMD_HIST_DATE_DEC  3
-#define APAC_DBG_CMD_HIST_DAY_ADV   4
-#define APAC_DBG_CMD_HIST_DAY_DEC   5
-#define APAC_DBG_CMD_CONFIG         6
-#define APAC_DBG_CMD_SELECT_100     7
-#define APAC_DBG_CMD_SELECT_102     8
-#define APAC_DBG_CMD_SETUP          9
-#define APAC_DBG_CMD_VLD_MANUAL     10
-#define APAC_DBG_CMD_RUN_PAC        11
-#define APAC_DBG_CMD_PAC_COMPLETED  12
-#define APAC_DBG_CMD_RESULT         13
-#define APAC_DBG_CMD_RESULT_COMMIT_VLD    14
-#define APAC_DBG_CMD_RESULT_COMMIT_INVLD  15
-#define APAC_DBG_CMD_RESULT_COMMIT_ACPT   16
-#define APAC_DBG_CMD_RESULT_COMMIT_RJCT   17
-#define APAC_DBG_CMD_RESET_DCLK           18
-#define APAC_DBG_CMD_RESET_TIMEOUT        19
-#define APAC_DBG_CMD_ERR_MSG              20
+#ifdef APAC_TEST_DBG
+  #define APAC_DBG_CMD_HIST_DATE      0
+  #define APAC_DBG_CMD_HIST_DAY       1
+  #define APAC_DBG_CMD_HIST_DATE_ADV  2
+  #define APAC_DBG_CMD_HIST_DATE_DEC  3
+  #define APAC_DBG_CMD_HIST_DAY_ADV   4
+  #define APAC_DBG_CMD_HIST_DAY_DEC   5
+  #define APAC_DBG_CMD_CONFIG         6
+  //#define APAC_DBG_CMD_SELECT_100   7
+  //#define APAC_DBG_CMD_SELECT_102   8
+  #define APAC_DBG_CMD_SETUP          9
+  #define APAC_DBG_CMD_VLD_MANUAL     10
+  #define APAC_DBG_CMD_RUN_PAC        11
+  #define APAC_DBG_CMD_PAC_COMPLETED  12
+  #define APAC_DBG_CMD_RESULT         13
+  #define APAC_DBG_CMD_RESULT_COMMIT_VLD    14
+  #define APAC_DBG_CMD_RESULT_COMMIT_INVLD  15
+  #define APAC_DBG_CMD_RESULT_COMMIT_ACPT   16
+  #define APAC_DBG_CMD_RESULT_COMMIT_RJCT   17
+  #define APAC_DBG_CMD_RESET_DCLK           18
+  #define APAC_DBG_CMD_RESET_TIMEOUT        19
+  #define APAC_DBG_CMD_ERR_MSG              20
+  #define APAC_DBG_CMD_HIST_DAY_RESET  21    
+#endif
 
+//#ifdef APAC_TEST_DBG
 #define AAPAC_DBG_CFG_BATCH_ON       0
 #define AAPAC_DBG_CFG_BATCH_STORE    1
 #define AAPAC_DBG_CFG_BATCH_CANCEL   2
-// #endif
+//#endif
 
 #define APAC_MAX_RECENT_DATE_TIME  20  // "HH:MM:SS MM/DD/YYYY"
 #define APAC_MAX_RECENT_ENTRY_LEN 128
@@ -103,19 +106,21 @@ static USER_HANDLER_RESULT APACMgr_DebugRestart(USER_DATA_TYPE DataType,
                                                 void **GetPtr);
 #endif
 
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 static USER_HANDLER_RESULT APACMgr_DebugCmdHist(USER_DATA_TYPE DataType,
                                                 USER_MSG_PARAM Param,
                                                 UINT32 Index,
                                                 const void *SetPtr,
                                                 void **GetPtr);
-// #endif
+#endif
 
+#ifdef APAC_TEST_DBG
 static USER_HANDLER_RESULT APACMgr_Debug(USER_DATA_TYPE DataType,
                                          USER_MSG_PARAM Param,
                                          UINT32 Index,
                                          const void *SetPtr,
                                          void **GetPtr);
+#endif
 
 static USER_HANDLER_RESULT APACMgr_RecentAllHistory(USER_DATA_TYPE DataType,
                                                     USER_MSG_PARAM Param,
@@ -128,7 +133,7 @@ static USER_HANDLER_RESULT APACMgr_HistoryClear(USER_DATA_TYPE DataType,
                                                 UINT32 Index,
                                                 const void *SetPtr,
                                                 void **GetPtr);
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 static USER_HANDLER_RESULT APACMgr_EngStatusDbg(USER_DATA_TYPE DataType,
                                                 USER_MSG_PARAM Param,
                                                 UINT32 Index,
@@ -140,13 +145,15 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
                                                    UINT32 Index,
                                                    const void *SetPtr,
                                                    void **GetPtr);
+#endif
 
+//#ifdef APAC_TEST_DBG
 static USER_HANDLER_RESULT APACMgr_DebugCfgBatch(USER_DATA_TYPE DataType,
-                                                 USER_MSG_PARAM Param,
-                                                 UINT32 Index,
-                                                 const void *SetPtr,
-                                                 void **GetPtr);
-// #endif
+    USER_MSG_PARAM Param,
+    UINT32 Index,
+    const void *SetPtr,
+    void **GetPtr);
+//#endif
 
 static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
@@ -164,13 +171,14 @@ static APAC_CFG cfgAPACTemp;
 static APAC_ENG_CFG cfgAPAC_EngTemp;
 static APAC_STATUS statusAPACTemp;
 static APAC_ENG_STATUS statusAPAC_EngTemp;
-static APAC_DEBUG debugAPACTemp;
 static CHAR cfgAPAC_TrendSnsrTemp[APAC_SNSR_NAME_CHAR_MAX];
+static APAC_DATA_ENG_NVM nvmAPAC_EngTemp;
 
+#ifdef APAC_TEST_DBG
+static APAC_DEBUG debugAPACTemp;
 static APAC_INLET_CFG_ENUM statusAPACDbg_Inlet;
 static APAC_NR_SEL_ENUM statusAPACDbg_NR_Sel;
-
-static APAC_DATA_ENG_NVM nvmAPAC_EngTemp;
+#endif
 
 
 /*****************************************************************************/
@@ -379,7 +387,7 @@ static USER_MSG_TBL apacMgr_EngDataNGTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 // APAC.DEBUG.CALC.  DATA,ITT,NG **************************************************************************************************************************************
 static USER_MSG_TBL apacMgr_EngDataDbgTbl[] =
 { /*Str              Next Tbl Ptr      Handler Func.           Data Type          Access    Parameter                                        IndexRange    DataLimit     EnumTbl*/
@@ -431,7 +439,7 @@ static USER_MSG_TBL apacMgr_EngStatusDbgTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 // APAC.DEBUG.CALC.  DATA,ITT,NG **************************************************************************************************************************************
-// #endif
+#endif
 
 static USER_MSG_TBL apacMgr_EngStatusTbl[] =
 { /*Str         Next Tbl Ptr            Handler Func.        Data Type          Access    Parameter                                   IndexRange          DataLimit            EnumTbl*/
@@ -474,6 +482,7 @@ static USER_MSG_TBL apacMgrStatusTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
+#ifdef APAC_TEST_DBG
 static USER_MSG_TBL apacMgrDebugCmdTbl[] =
 { /*Str            Next Tbl Ptr        Handler Func.         Data Type          Access                   Parameter                             IndexRange   DataLimit    EnumTbl*/
   {"DATE",         NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_HIST_DATE,      -1,-1,       NO_LIMIT,    NULL},
@@ -483,8 +492,8 @@ static USER_MSG_TBL apacMgrDebugCmdTbl[] =
   {"DAY_ADV",      NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_HIST_DAY_ADV,   -1,-1,       NO_LIMIT,    NULL},
   {"DAY_DEC",      NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_HIST_DAY_DEC,   -1,-1,       NO_LIMIT,    NULL},
   {"CONFIG",       NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_CONFIG,         -1,-1,       NO_LIMIT,    NULL},
-  {"SELECT_100",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_SELECT_100,     -1,-1,       NO_LIMIT,    NULL},
-  {"SELECT_102",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_SELECT_102,     -1,-1,       NO_LIMIT,    NULL},
+//{"SELECT_100",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_SELECT_100,     -1,-1,       NO_LIMIT,    NULL},
+//{"SELECT_102",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_SELECT_102,     -1,-1,       NO_LIMIT,    NULL},
   {"SETUP",        NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_SETUP,          -1,-1,       NO_LIMIT,    NULL},
   {"VLD_MANUAL",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_VLD_MANUAL,     -1,-1,       NO_LIMIT,    NULL},
   {"RUN_PAC",      NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_RUN_PAC,        -1,-1,       NO_LIMIT,    NULL},
@@ -497,10 +506,12 @@ static USER_MSG_TBL apacMgrDebugCmdTbl[] =
   {"RESET_DCLK",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_RESET_DCLK,      -1,-1,      NO_LIMIT,    NULL},
   {"RESET_TIMEOUT",NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_RESET_TIMEOUT,   -1,-1,      NO_LIMIT,    NULL},
   {"ERR_MSG",      NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_ERR_MSG,         -1,-1,      NO_LIMIT,    NULL},
+  {"DATE_RESET",   NO_NEXT_TABLE,      APACMgr_DebugCmdHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) APAC_DBG_CMD_HIST_DAY_RESET,  -1,-1,      NO_LIMIT,    NULL}, 
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
+#endif
 
-// #ifdef APAC_TEST_SIM
+//#ifdef APAC_TEST_DBG
 static USER_MSG_TBL apacMgrDebugCfgBatchTbl[] =
 { /*Str         Next Tbl Ptr        Handler Func.          Data Type          Access                   Parameter                             IndexRange   DataLimit    EnumTbl*/
   {"ON",        NO_NEXT_TABLE,      APACMgr_DebugCfgBatch, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) AAPAC_DBG_CFG_BATCH_ON,      -1,-1,       NO_LIMIT,    NULL},
@@ -508,15 +519,19 @@ static USER_MSG_TBL apacMgrDebugCfgBatchTbl[] =
   {"CANCEL",    NO_NEXT_TABLE,      APACMgr_DebugCfgBatch, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) AAPAC_DBG_CFG_BATCH_CANCEL,  -1,-1,       NO_LIMIT,    NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-// #endif
+//#endif
 
 static USER_MSG_TBL apacMgrDebugTbl[] =
 { /*Str            Next Tbl Ptr             Handler Func.             Data Type          Access                   Parameter                         IndexRange   DataLimit    EnumTbl*/
   {"HISTORY",      NO_NEXT_TABLE,           APACMgr_RecentAllHistory, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) NULL,                    -1,-1,       NO_LIMIT,    NULL},
   {"HISTORY_CLEAR",NO_NEXT_TABLE,           APACMgr_HistoryClear,     USER_TYPE_ACTION,  (USER_RO),               (void *) NULL,                    -1,-1,       NO_LIMIT,    NULL},
+#ifdef APAC_TEST_DBG  
   {"CALC",         apacMgr_EngStatusDbgTbl, NULL, NO_HANDLER_DATA},
   {"CMD",          apacMgrDebugCmdTbl,      NULL, NO_HANDLER_DATA},
+#endif  
+//#ifdef APAC_TEST_DBG  
   {"CFGBATCH",     apacMgrDebugCfgBatchTbl, NULL, NO_HANDLER_DATA},
+//#endif  
 #ifdef APAC_TEST_SIM
   {"SIM_TREND",    NO_NEXT_TABLE,           APACMgr_Debug,            USER_TYPE_BOOLEAN, USER_RW,                 (void *) &debugAPACTemp.simTrend, -1,-1,       NO_LIMIT,    NULL},
   {"SIM_RESTART",  NO_NEXT_TABLE,           APACMgr_DebugRestart,     USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) &statusAPACTemp.state,   -1,-1,       NO_LIMIT,    NULL},
@@ -885,7 +900,7 @@ static USER_HANDLER_RESULT APACMgr_DebugRestart(USER_DATA_TYPE DataType,
 }
 #endif
 
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_DebugCmdHist
  *
@@ -959,12 +974,6 @@ static USER_HANDLER_RESULT APACMgr_DebugCmdHist(USER_DATA_TYPE DataType,
     case APAC_DBG_CMD_CONFIG:
       ret = APACMgr_IF_Config ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_MAX);
       break;
-    case APAC_DBG_CMD_SELECT_100:
-      ret = APACMgr_IF_Select ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_NR100);
-      break;
-    case APAC_DBG_CMD_SELECT_102:
-      ret = APACMgr_IF_Select ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_NR102);
-      break;
     case APAC_DBG_CMD_SETUP:
       ret = APACMgr_IF_Setup ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_MAX);
       break;
@@ -1001,6 +1010,9 @@ static USER_HANDLER_RESULT APACMgr_DebugCmdHist(USER_DATA_TYPE DataType,
     case APAC_DBG_CMD_ERR_MSG:
       ret = APACMgr_IF_ErrMsg ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_MAX);
       break;
+    case APAC_DBG_CMD_HIST_DAY_RESET:
+      ret = APACMgr_IF_HistoryReset ( &msg1[0], &msg2[0], &msg3[0], &msg4[0], APAC_IF_MAX);
+      break;
     default:
       break;
   }
@@ -1017,8 +1029,9 @@ static USER_HANDLER_RESULT APACMgr_DebugCmdHist(USER_DATA_TYPE DataType,
 
   return (result);
 }
-// #endif
+#endif
 
+#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_Debug
  *
@@ -1069,8 +1082,9 @@ static USER_HANDLER_RESULT APACMgr_Debug(USER_DATA_TYPE DataType,
   return (result);
 
 }
+#endif
 
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_EngStatusDbg
  *
@@ -1124,9 +1138,9 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbg(USER_DATA_TYPE DataType,
 
   return result;
 }
-// #endif
+#endif
 
-// #ifdef APAC_TEST_SIM
+#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_EngStatusDbgExe
  *
@@ -1192,9 +1206,9 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
 
   return result;
 }
-// #endif
+#endif
 
-// #ifdef APAC_TEST_SIM
+//#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_DebugCfgBatch
  *
@@ -1250,7 +1264,7 @@ static USER_HANDLER_RESULT APACMgr_DebugCfgBatch(USER_DATA_TYPE DataType,
   }
   return (result);
 }
-// #endif
+//#endif
 
 /******************************************************************************
  * Function:    APACMgr_RecentAllHistory
@@ -1477,6 +1491,19 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Peter Lee    Date: 2/02/16    Time: 9:43a
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #19 and #20.  Check in Cycle CBIT again.  ReOrder
+ * History back to most recent when RCL selected.  
+ * Add ifdef of Debug Code. 
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 2/01/16    Time: 2:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #16.  Additional updates.  Remove unused func
+ * APACMgr_IF_Select()
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 1/19/16    Time: 5:12p

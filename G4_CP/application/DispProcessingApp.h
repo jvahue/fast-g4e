@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 7 $  $Date: 1/29/16 12:02p $     
+      $Revision: 8 $  $Date: 2/01/16 9:34a $     
 
 ******************************************************************************/
 
@@ -397,7 +397,7 @@ EXPORT USER_ENUM_TBL buttonIndexType[];
 
 EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
 EXPORT void                      DispProcessingApp_Handler(void *pParam);
-EXPORT void                      DispProcessingApp_FileInit(void);
+EXPORT BOOLEAN                   DispProcessingApp_FileInit(void);
 EXPORT UINT16                    DispProcessingApp_ReturnFileHdr(UINT8 *dest, 
                                                          const UINT16 max_size,
                                                          UINT16 ch);
@@ -410,6 +410,15 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 2/01/16    Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * Fix compiler warning from NVMgr "a value of type "void (*) (void)"
+ * cannot be used to initialize an entity of type "NV_INFO_INIT_FUNC". 
+ * 
+ * Update "void DispProcessingApp_FileInit(void)" to 
+ * "BOOLEAN DispProcessingApp_FileInit(void)"
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 1/29/16    Time: 12:02p

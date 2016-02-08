@@ -1,15 +1,16 @@
 #define ENGINERUN_BODY
 /******************************************************************************
-              Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
-                 All Rights Reserved. Proprietary and Confidential.
+            Copyright (C) 2012-2016 Pratt & Whitney Engine Services, Inc.
+               All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
 
     File:      EngineRun.c
 
     Description:
 
    VERSION
-      $Revision: 52 $  $Date: 11/05/15 6:45p $
+      $Revision: 53 $  $Date: 2/01/16 5:14p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -78,7 +79,7 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
 
 static void EngRunUpdateRunData  ( ENGRUN_DATA* pErData );
 static void EngRunWriteRunLog    ( ER_REASON reason, ENGRUN_DATA* pErData );
-static void EngRunCheckESN       ( void ); 
+static void EngRunCheckESN       ( void );
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -789,12 +790,11 @@ static void EngRunStartLog( ENGRUN_DATA* pErData )
   pErData->startingTime_ms = CM_GetTickCount();
 
   // Init the max value only if valid.
-  if ( SensorIsValid(pErData->maxMonSensorID) )
+  if ( SensorGetValueEx(pErData->maxMonSensorID, &valueMax) )
   {
-    valueMax = SensorGetValue(pErData->maxMonSensorID);
     if ( pErData->maxMonValue < valueMax)
     {
-      pErData->maxMonValue   = valueMax;
+      pErData->maxMonValue = valueMax;
     }
   }
   else
@@ -973,10 +973,8 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
   FLOAT32 valueMax;
 
   // Update the min during STOP and START
-  if ( SensorIsValid(pErData->minMonSensorID) )
+  if ( SensorGetValueEx(pErData->minMonSensorID, &valueMin) )
   {
-    valueMin  = SensorGetValue(pErData->minMonSensorID);
-
     if ( pErData->minMonValue > valueMin )
     {
       pErData->minMonValue = valueMin;
@@ -991,9 +989,8 @@ static void EngRunUpdateStartData( ENGRUN_DATA* pErData, BOOLEAN bUpdateDuration
   if (bUpdateDuration)
   {
     // update max
-    if ( SensorIsValid(pErData->maxMonSensorID) )
+    if (SensorGetValueEx(pErData->maxMonSensorID, &valueMax) )
     {
-      valueMax = SensorGetValue(pErData->maxMonSensorID);
       if ( pErData->maxMonValue < valueMax)
       {
         pErData->maxMonValue   = valueMax;
@@ -1056,6 +1053,11 @@ static void EngRunCheckESN( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:14p
+ * Updated in $/software/control processor/code/application
+ * SCR #1192 - Perf Enhancment improvements
  * 
  * *****************  Version 52  *****************
  * User: Peter Lee    Date: 11/05/15   Time: 6:45p

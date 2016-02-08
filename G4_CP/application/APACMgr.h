@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 9 $  $Date: 1/19/16 11:37a $
+      $Revision: 10 $  $Date: 2/02/16 9:43a $
 
 ******************************************************************************/
 
@@ -380,6 +380,20 @@ typedef struct { // Calc common data used for both ITT and NG Calc
   FLOAT32 tqCorr;    // Calculated TQ Corrected Value
 } APAC_ENG_CALC_COMMON, *APAC_ENG_CALC_COMMON_PTR;
 
+typedef enum {
+  APAC_ENG_CYC_CHK_IDLE, // Engine is off
+  APAC_ENG_CYC_CHK_MONITOR, // Check cycle is counting
+  APAC_ENG_CYC_CHK_FAULT, // If faulted, wait till Eng is Off
+  APAC_ENG_CYC_CHK_MAX
+} APAC_ENG_CYC_CHK_ENUM;
+#define APAC_ENG_CYC_CHK_FAIL_CNT  3  // # time cycle cnt not incr for failure. Actual=3sec
+
+typedef struct {
+  APAC_ENG_CYC_CHK_ENUM state;
+  UINT32 prev_cyc_cnt; // Prev cycle count
+  UINT16 fail_cnt;     // # time cycle cnt not incr
+} APAC_ENG_CYC_CHK, *APAC_ENG_CYC_CHK_PTR; 
+
 typedef struct {
   APAC_ENG_HRS_STATUS hrs;
   CHAR   esn[APAC_ESN_MAX_LEN];// Eng Serial Number.  "XX0000" indicate initial value
@@ -391,6 +405,7 @@ typedef struct {
 
   APAC_ENG_CALC_DATA itt;
   APAC_ENG_CALC_DATA ng;
+  APAC_ENG_CYC_CHK cyc_chk; 
 } APAC_ENG_STATUS, *APAC_ENG_STATUS_PTR;
 
 typedef struct {
@@ -630,7 +645,7 @@ typedef struct {
 #define APAC_HIST_NONE  "NONE "
 #define APAC_HIST_UTC   "UTC"
 
-
+#ifdef APAC_TEST_DBG
 typedef struct {
   APAC_ENG_CALC_COMMON common;
   APAC_ENG_CALC_DATA itt;
@@ -643,7 +658,7 @@ typedef struct {
   BOOLEAN simTrend;
 #endif
 } APAC_DEBUG, *APAC_DEBUG_PTR;
-
+#endif
 
 /******************************************************************************
                                  Package Exports
@@ -675,6 +690,12 @@ EXPORT BOOLEAN APACMgr_FileInitNVM( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 2/02/16    Time: 9:43a
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #19 and #20.  Check in Cycle CBIT again.  ReOrder
+ * History back to most recent when RCL selected.  
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 1/19/16    Time: 11:37a

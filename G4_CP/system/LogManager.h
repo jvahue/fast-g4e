@@ -1,16 +1,18 @@
 #ifndef LOGMNG_H
 #define LOGMNG_H
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    File:          LogManager.h
+    ECCN:        9D991
+
+    File:        LogManager.h
 
     Description:   This file contains helper functions for reading,
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 61 $  $Date: 1/12/15 1:40p $
+    $Revision: 62 $  $Date: 2/01/16 5:21p $
 
 ******************************************************************************/
 
@@ -275,6 +277,22 @@ typedef struct
    SYS_LOG_PAYLOAD  payload;
 } SYSTEM_LOG;
 
+// Performance improvement per SCR-1192
+typedef struct
+{
+  LOG_TYPE         logType;
+  SYS_APP_ID       source;
+  LOG_PRIORITY     priority;
+  LOG_REQ_STATUS   wrStatus;
+  RESULT           result;
+}SYSTEM_LOG_CTRL_HDR; // NOTE: MUST MATCH decl of SYSTEM_LOG w/o SYS_LOG_PAYLOAD substruct
+
+typedef struct
+{
+  SYSTEM_LOG_CTRL_HDR hdr;
+  SYS_LOG_PAYLOAD     payload;
+}SYSTEM_LOG_REDEF;
+
 typedef struct
 {
     LOG_MNG_STATE state;
@@ -423,6 +441,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 62  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements 
  * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 1/12/15    Time: 1:40p

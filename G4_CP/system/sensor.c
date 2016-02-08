@@ -1,7 +1,9 @@
 #define SENSOR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        sensor.c
 
@@ -25,7 +27,7 @@
     Notes:
 
     VERSION
-      $Revision: 104 $  $Date: 1/21/16 4:33p $
+      $Revision: 107 $  $Date: 2/02/16 5:19p $
 
 ******************************************************************************/
 
@@ -112,7 +114,6 @@ static SENSOR_STATUS SensorSignalTest    ( SENSOR_CONFIG *pConfig, SENSOR  *pSen
                                               FLOAT32       fVal );
 static SENSOR_STATUS SensorInterfaceTest ( SENSOR_CONFIG *pConfig, SENSOR  *pSensor,
                                               FLOAT32       fVal );
-static BOOLEAN       SensorNoTest        ( UINT16 nIndex );
 static BOOLEAN       SensorNoInterface   ( UINT16 nIndex );
 static void          SensorLogFailure    ( SENSOR_CONFIG *pConfig, SENSOR  *pSensor,
                                            FLOAT32       fVal,   SENSORFAILURE type );
@@ -306,6 +307,39 @@ BOOLEAN SensorIsUsed( SENSOR_INDEX Sensor)
 }
 
 /******************************************************************************
+ * Function:     SensorIsUsedEx
+ *
+ * Description:  This function combines the behavior of SensorIsUsed with
+ *               IsSensorValid into a single call for improved performance
+ *               over when those pair of functions are called sequentially.
+ *
+ * Parameters:   [in] sensorIdx - Index of sensor to check
+ *
+ *               [out] bIsUsed - TRUE  = used
+ *                               FALSE = not used
+ * Returns:      The current validity of the sensor if TRUE, or FASLE when unused.
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+BOOLEAN SensorIsUsedEx( SENSOR_INDEX sensorIdx, BOOLEAN* bIsUsed)
+{
+  BOOLEAN bValid;
+
+  if ((sensorIdx < MAX_SENSORS) && (m_SensorCfg[sensorIdx].type != UNUSED))
+  {
+    *bIsUsed = TRUE;
+     bValid  = Sensors[sensorIdx].bValueIsValid;
+  }
+  else
+  {
+    *bIsUsed = FALSE;
+    bValid   = FALSE;
+  }
+  return bValid;
+}
+
+/******************************************************************************
  * Function:     SensorGetValue
  *
  * Description:  This function provides a method to read the value of a sensor.
@@ -329,6 +363,35 @@ FLOAT32 SensorGetValue( SENSOR_INDEX Sensor)
   }
   // return the current value of the sensor
   return (fValue);
+}
+
+/******************************************************************************
+ * Function:     SensorGetValueEx ( SENSOR_INDEX sensorIdx, FLOAT32* fValue )
+ *
+ * Description:  This function combines the behavior of SensorIsValid and
+ *               SensorGetValue into a single call. Since these two functions
+ *               are often called in sequence, this provides significant
+ *               performance improvement(30%->40%) where the IsValid/GetValue
+ *               are called in a loop.
+ *
+ * Parameters:   [in]  sensorIdx - Index of sensor to get value
+ *               [out] fValue    - pointer to a FLOAT32 to return the sensor value.
+ *
+ * Returns:      [out] BOOLEAN - validity state of the sensor.
+ *
+ * Notes:        None
+ *
+ *****************************************************************************/
+BOOLEAN SensorGetValueEx( SENSOR_INDEX sensorIdx, FLOAT32* fValue)
+{
+  BOOLEAN bValid  = FALSE;
+  *fValue = 0.f;
+  if (sensorIdx < MAX_SENSORS)
+  {
+    bValid  = Sensors[sensorIdx].bValueIsValid;
+    *fValue = Sensors[sensorIdx].fValue;
+  }
+  return bValid;
 }
 
 /******************************************************************************
@@ -620,7 +683,7 @@ void SensorResetSummaryArray (SNSR_SUMMARY summary[], UINT16 nEntries)
  void SensorUpdateSummaries( SNSR_SUMMARY summaryArray[], UINT16 nEntries )
  {
   SNSR_SUMMARY* pSummary;
-  FLOAT32       newValue;
+  FLOAT32       newValue = 0.f;
   BOOLEAN       bInitialized;
   INT32         i = 0;
 
@@ -647,13 +710,12 @@ void SensorResetSummaryArray (SNSR_SUMMARY summary[], UINT16 nEntries)
     // If not, we stop updating the sensor summary for this sensor, calc it's average
     // and latch it until the this SNSR_SUMMARY is reset.
 
-    pSummary->bValid = SensorIsValid((SENSOR_INDEX)pSummary->SensorIndex );
+    // Get the validity and value of the sensor at 'pSummary'
+    pSummary->bValid = SensorGetValueEx((SENSOR_INDEX)pSummary->SensorIndex, &newValue );
 
     if ( pSummary->bValid )
     {
       ++pSummary->nSampleCount;
-
-      newValue = SensorGetValue(pSummary->SensorIndex);
 
       // Add value to total
 
@@ -1469,25 +1531,6 @@ static SENSOR_STATUS SensorInterfaceTest(SENSOR_CONFIG *pConfig,
 }
 
 /******************************************************************************
- * Function:     SensorNoTest
- *
- * Description:  This function is a generic function that always returns
- *               a passing result. This function is used for interfaces that
- *               do not have a specific test for the sensor.
- *
- * Parameters:   UINT16 nIndex - Sensor Index
- *
- * Returns:      TRUE
- *
- * Notes:        None
- *
- *****************************************************************************/
-static BOOLEAN SensorNoTest ( UINT16 nIndex )
-{
-   return (TRUE);
-}
-
-/******************************************************************************
  * Function:     SensorNoInterface
  *
  * Description:  This function is a generic function that always returns
@@ -1528,7 +1571,7 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    // Local Data
    SYS_APP_ID logID;
    SENSORLOG  faultLog;
-   CHAR       str[128];
+
 
    // Build the fault log
    faultLog.failureType        = type;
@@ -1544,10 +1587,8 @@ static void SensorLogFailure( SENSOR_CONFIG *pConfig, SENSOR *pSensor,
    faultLog.nDuration_ms       = 0;
 
    // Display a debug message about the failure
-   memset(str,0,sizeof(str));
-   snprintf(str, sizeof(str), "Sensor (%d) - %s",
-            pSensor->nSensorIndex, sensorFailureNames[type] );
-   GSE_DebugStr(NORMAL, TRUE, str);
+   GSE_DebugStr(NORMAL, TRUE, "Sensor (%d) - %s",
+                pSensor->nSensorIndex, sensorFailureNames[type]);
 
    // Determine the correct log ID to store
    switch (type)
@@ -2292,7 +2333,7 @@ static void SensorInitializeLiveData(void)
  *               TRUE  - the sensor inputs are valid
  *
  * Notes:        This test is used to determine if inputs continue to be
- *               valid/invalid during self-heal testing.      
+ *               valid/invalid during self-heal testing.
  *
  *****************************************************************************/
 static BOOLEAN SensorVirtualSensorTest (UINT16 nIndex)
@@ -2308,7 +2349,7 @@ static BOOLEAN SensorVirtualSensorTest (UINT16 nIndex)
   }
 
   // Add additional tests here..
-  
+
   return bResult;
 }
 
@@ -2404,6 +2445,21 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 107  *****************
+ * User: Contractor V&v Date: 2/02/16    Time: 5:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements removed SensorNoTest
+ * 
+ * *****************  Version 106  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 7:07p
+ * Updated in $/software/control processor/code/system
+ * Perf Enhancment improvements CR fixes and bug
+ * 
+ * *****************  Version 105  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements 
  * 
  * *****************  Version 104  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:33p
