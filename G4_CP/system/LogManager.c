@@ -1,7 +1,9 @@
 #define LOGMNG_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        LogManager.c
 
@@ -15,7 +17,7 @@
                        the end has been reached.
 
     VERSION
-    $Revision: 116 $  $Date: 1/12/15 1:37p $
+    $Revision: 119 $  $Date: 2/02/16 5:19p $
 
 ******************************************************************************/
 
@@ -74,6 +76,7 @@ static LOG_REQUEST            logEraseRequest;
 // this table is sized four bigger than the queue so it can't
 // be filled with pending writes
 static SYSTEM_LOG systemTable[SYSTEM_TABLE_MAX_SIZE];
+static UINT32                  m_nextSysTableIdx;
 
 // Log Erase Cleanup
 static DO_CLEANUP doCleanup;
@@ -456,6 +459,8 @@ void LogPreInit(void)
       systemTable[i].result   = SYS_OK;
       memset(&systemTable[i].payload, 0, sizeof(systemTable[i].payload));
    }
+   // set index of the first open slot
+   m_nextSysTableIdx = 0;
 
    // indicate the system is in the Pre-Init state
    logSystemInit = FALSE;
@@ -2681,98 +2686,124 @@ static
 UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
                         void *pData, UINT16 nSize, const TIMESTAMP *pTs, LOG_TYPE logType )
 {
-   // Local Data
-   SYSTEM_LOG sysLog;
-   LOG_SOURCE source;
-   TIMESTAMP  ts;
-   UINT32     i = 0;
-   INT32      intLevel;
-   BOOLEAN    bSlotFound;
+  // Local Data
+  SYSTEM_LOG sysLog;
+  LOG_SOURCE source;
+  TIMESTAMP  ts;
+  UINT32     i = 0;
+  INT32      intLevel;
+  BOOLEAN bSlotFound;
+  SYSTEM_LOG_REDEF* pSysLogRedef = NULL;
 
-   ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
+  ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
 
-   if ( SystemLogLimitCheck(logID) )
+  if ( SystemLogLimitCheck(logID) )
+  {
+   // Get current ts or use passed in ts
+   if ( pTs == NULL )
    {
-     // Get current ts or use passed in ts
-     if ( pTs == NULL )
+      // Get current ts if one is not provided.
+      CM_GetTimeAsTimestamp(&ts);
+   }
+   else
+   {
+      // Use passed in ts
+      ts = *pTs;
+   }
+
+   // Set sysLog record
+   sysLog.logType                = logType;
+   sysLog.source                 = logID;
+   sysLog.priority               = priority;
+
+   // Set the payload fields.
+   // Init nChecksum value so ChecksumBuffer() doesn't add
+   // un-initialized data to the total!
+   sysLog.payload.hdr.ts         = ts;
+   sysLog.payload.hdr.nID        = (UINT16)logID;
+   sysLog.payload.hdr.nSize      = nSize;
+   sysLog.payload.hdr.nChecksum  = 0;
+
+   if (nSize > 0)
+   {
+      memcpy (&sysLog.payload.data[0], pData, nSize);
+   }
+
+   sysLog.payload.hdr.nChecksum = ChecksumBuffer(&sysLog.payload,
+                                                 nSize + sizeof(sysLog.payload.hdr),
+                                                 0xFFFFFFFF);
+   bSlotFound = FALSE;
+
+   // Since the systemTable is larger than the log queue which deletes the oldest queue entry,
+   // we should always find the 'next' entry free
+   if( LOG_REQ_NULL == systemTable[m_nextSysTableIdx].wrStatus )
+   {
+     // Protect against trying to write multiple logs to the same entry
+     intLevel = __DIR();
+	   bSlotFound = TRUE;
+
+     // sysLog will go in the next systemTable entry
+     i = m_nextSysTableIdx;
+
+     // Increment index for next systemTable entry, with wrap-around.
+     m_nextSysTableIdx = (m_nextSysTableIdx < (SYSTEM_TABLE_MAX_SIZE - 1))
+                          ? ++m_nextSysTableIdx
+                          : 0;
+
+     // Get a pointer to the system table entry, cast it
+     // so copy may be done in two memcpy
+     pSysLogRedef =  (SYSTEM_LOG_REDEF*)&systemTable[i];
+
+     // copy header info
+     memcpy( pSysLogRedef, &sysLog, sizeof(pSysLogRedef->hdr) );
+
+     // copy payload.hdr + payload.data for the minimum size of the log
+     memcpy( &pSysLogRedef->payload,
+             &sysLog.payload,
+             ( sizeof(pSysLogRedef->payload.hdr) + nSize ) );
+
+     source.id = sysLog.source;
+     LogWrite(logType,
+              source,
+              pSysLogRedef->hdr.priority,
+              &pSysLogRedef->payload,
+              pSysLogRedef->payload.hdr.nSize +
+              sizeof(pSysLogRedef->payload.hdr),
+              (sysLog.payload.hdr.nChecksum +
+              ChecksumBuffer(&sysLog.payload.hdr.nChecksum,
+              sizeof(UINT32), LOG_CHKSUM_BLANK) ),
+              &(pSysLogRedef->hdr.wrStatus) );
+
+     // Enable the RMT Task
+     if ( logSystemInit )
      {
-        // Get current ts if one is not provided.
-        CM_GetTimeAsTimestamp(&ts);
+         TmTaskEnable ((TASK_INDEX)System_Log_Manage_Task, TRUE);
      }
-     else
+
+     __RIR( intLevel);
+   }
+
+   // there is no else statement because the table should
+   // never fill up because it is sized 4 bigger than the
+   // log queue. Since the log queue pops out the oldest when
+   // the queue fills we should always have room.
+
+   // Update Log ETM recording busy status
+   // Updates the flag if an ETM Log is requested to be written and the
+   // flag is not already set.
+   if((LOG_TYPE_ETM == sysLog.logType) && (TRUE == bSlotFound) && (FALSE == is_busy))
+   {
+     is_busy = bSlotFound;
+     if(m_event_func != NULL)
      {
-        // Use passed in ts
-        ts = *pTs;
-     }
-
-     memset(&sysLog,0,sizeof(sysLog));
-
-     sysLog.logType                = logType;
-     sysLog.source                 = logID;
-     sysLog.priority               = priority;
-     sysLog.payload.hdr.ts         = ts;
-     sysLog.payload.hdr.nID        = (UINT16)logID;
-     sysLog.payload.hdr.nSize      = nSize;
-
-     if (nSize > 0)
-     {
-        memcpy (&sysLog.payload.data[0], pData, nSize);
-     }
-
-     sysLog.payload.hdr.nChecksum  = ChecksumBuffer(&sysLog.payload,
-                                            nSize + sizeof(sysLog.payload.hdr),
-                                            0xFFFFFFFF);
-     bSlotFound = FALSE;
-
-     for (i = 0; (i < SYSTEM_TABLE_MAX_SIZE) && (bSlotFound == FALSE); i++)
-     {
-        // Protect against trying to write multiple logs to the same entry
-        intLevel = __DIR();
-        if (LOG_REQ_NULL == systemTable[i].wrStatus)
-        {
-           systemTable[i] = sysLog;
-
-           source.id = sysLog.source;
-           LogWrite(logType,
-                    source,
-                    systemTable[i].priority,
-                    &systemTable[i].payload,
-                    systemTable[i].payload.hdr.nSize +
-                      sizeof(systemTable[i].payload.hdr),
-                    (sysLog.payload.hdr.nChecksum +
-                     ChecksumBuffer(&sysLog.payload.hdr.nChecksum,
-                     sizeof(UINT32), LOG_CHKSUM_BLANK)),
-                    &systemTable[i].wrStatus);
-
-           // Enable the RMT Task
-           if ( logSystemInit )
-           {
-               TmTaskEnable ((TASK_INDEX)System_Log_Manage_Task, TRUE);
-           }
-           bSlotFound = TRUE;
-        }
-        __RIR( intLevel);
-        // there is no else statement because the table should
-        // never fill up because it is sized 4 bigger than the
-        // log queue. Since the log queue pops out the oldest when
-        // the queue fills we should always have room.
-
-        //Update Log ETM recording busy status
-        // Updates the flag if an ETM Log is requested to be written and the
-        // flag is not already set.
-        if((LOG_TYPE_ETM == sysLog.logType) && (TRUE == bSlotFound) && (FALSE == is_busy))
-        {
-           is_busy = bSlotFound;
-           if(m_event_func != NULL)
-           {
-              m_event_func(m_event_tag,is_busy);
-           }
-        }
+       m_event_func(m_event_tag,is_busy);
      }
    }
 
+  } // within log-limit check
+
    // Return the SystemTable index in case the caller needs to track the status.
-   return i;
+  return i;
 }
 
 /*****************************************************************************
@@ -2941,17 +2972,32 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
  *  MODIFICATIONS
  *    $History: LogManager.c $
  * 
+ * *****************  Version 119  *****************
+ * User: Contractor V&v Date: 2/02/16    Time: 5:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements memcpy move size fix
+ * 
+ * *****************  Version 118  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 7:08p
+ * Updated in $/software/control processor/code/system
+ * Perf Enhancment improvements CR fixes and bug
+ * 
+ * *****************  Version 117  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:20p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Ehancement Improvements - remove memset
+ * 
  * *****************  Version 116  *****************
  * User: John Omalley Date: 1/12/15    Time: 1:37p
  * Updated in $/software/control processor/code/system
  * SCR 1251 - Code Review Update
- * 
+ *
  * *****************  Version 115  *****************
  * User: John Omalley Date: 11/13/14   Time: 10:39a
  * Updated in $/software/control processor/code/system
  * SCR 1251 - Fixed Data Manager DL Write status location and increment
  * the discard count if the memory is full.
- * 
+ *
  * *****************  Version 114  *****************
  * User: Contractor2  Date: 11/11/14   Time: 4:41p
  * Updated in $/software/control processor/code/system

@@ -1,14 +1,16 @@
 #define SYSTEMLOG_BODY
 /******************************************************************************
-            Copyright (C) 2008-2012 Pratt & Whitney Engine Services, Inc. 
-                  All Rights Reserved. Proprietary and Confidential.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
+               All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        SystemLog.c 
     
     Description: 
 
    VERSION
-      $Revision: 10 $  $Date: 12-11-14 7:20p $    
+      $Revision: 12 $  $Date: 2/01/16 7:08p $    
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -31,10 +33,10 @@
 /*****************************************************************************/
 #undef  SYS_LOG_ID
 //Set the system code macro to stringify the enumerated list and include log count
-#define SYS_LOG_ID(label,value,count) {label,count,#label}, 
+#define SYS_LOG_ID(label,value,count) {label,count,#label},
 //define a constant for the number of elements in the SystemLogStrings array
 #define NUM_OF_LOG_IDS (sizeof(systemLogStrings)/sizeof(systemLogStrings[0]))
-
+#define SYS_LOG_ID_NOT_FOUND -1
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -55,6 +57,7 @@ static UINT16 logWriteCounts[NUM_OF_LOG_IDS];
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static INT32 SystemLogLookup(SYS_APP_ID LogID);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -67,44 +70,39 @@ static UINT16 logWriteCounts[NUM_OF_LOG_IDS];
  *              is to assist in reporting of LOG IDs to the user
  *
  * Parameters:  [in] LogID: Any SYS_APP_ID log ID
- *              
+ *
  * Returns:     CHAR* Stringification of the Log ID passed in the parameter.
  *                    If the ID does not exist in the SYS_APP_ID enum, a string
  *                    indicating the ID is undefined is returned.
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 const CHAR* SystemLogIDString(SYS_APP_ID LogID)
 {
   const CHAR* result = systemLogUndefindedID;
-  UINT32 i;
-
-  for(i = 0; i < NUM_OF_LOG_IDS; i++)
+  INT32 i;
+  i = SystemLogLookup(LogID);
+  if ( i != SYS_LOG_ID_NOT_FOUND )
   {
-    if(systemLogStrings[i].id == LogID)
-    {
-      //String found, return string pointer
-      result = systemLogStrings[i].str; 
-      break;
-    }
+    //String found, return string pointer
+    result = systemLogStrings[i].str;
   }
-  
   return result;
 }
 
- 
+
 /*****************************************************************************
  * Function:    SystemLogInitLimitCheck
  *
  * Description: Init system log write limit check counts
  *
  * Parameters:  None
- *              
+ *
  * Returns:     None
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 void SystemLogInitLimitCheck(void)
 {
@@ -117,27 +115,22 @@ void SystemLogInitLimitCheck(void)
  * Description: Resets write limit count of the specified log id
  *
  * Parameters:  [in] LogID: Any SYS_APP_ID log ID
- *              
+ *
  * Returns:     None
  *
- * Notes:       
- *              
+ * Notes:
+ *
  ****************************************************************************/
 void SystemLogResetLimitCheck(SYS_APP_ID LogID)
 {
-  BOOLEAN bFound = FALSE;
-  UINT32 i;
+  INT32 i;
 
-  const SYS_LOG_ID_STRS *pSysLogStr = &systemLogStrings[0];
+  i = SystemLogLookup(LogID);
 
-  for(i = 0; !bFound && (i < NUM_OF_LOG_IDS); ++i, ++pSysLogStr)
+  if ( i != SYS_LOG_ID_NOT_FOUND )
   {
-    if(pSysLogStr->id == LogID)
-    {
-      //ID found - resest count
-      bFound = TRUE;
-      logWriteCounts[i] = 0;
-    }
+    //ID found - reset count
+    logWriteCounts[i] = 0;
   }
 }
 
@@ -147,54 +140,102 @@ void SystemLogResetLimitCheck(SYS_APP_ID LogID)
  * Description: Checks if the specified log id has met its output limit
  *
  * Parameters:  [in] LogID: Any SYS_APP_ID log ID
- *              
+ *
  * Returns:     TRUE if limit not met
  *              FALSE if limit not met
  *
  * Notes:       Each call will increment the limit check count
- *              
+ *
  ****************************************************************************/
 BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID)
 {
   BOOLEAN result = FALSE;
-  BOOLEAN bFound = FALSE;
-  UINT32 i;
+  INT32 i;
+  const SYS_LOG_ID_STRS* pSysLogStr = NULL;
 
-  const SYS_LOG_ID_STRS *pSysLogStr = &systemLogStrings[0];
+  i = SystemLogLookup(LogID);
 
-  for(i = 0; !bFound && (i < NUM_OF_LOG_IDS); ++i, ++pSysLogStr)
+  if ( i != SYS_LOG_ID_NOT_FOUND )
   {
-    if(pSysLogStr->id == LogID)
+    pSysLogStr = (const SYS_LOG_ID_STRS*)&systemLogStrings[i];
+
+    //ID found - check count
+    if (pSysLogStr->cnt == 0)
     {
-      //ID found - check count
-      bFound = TRUE;
-      if (pSysLogStr->cnt == 0)
-      {
-        // count limit is 0 - always write
-        result = TRUE;
-      }
-      else      // check if write limit hit
-      if (logWriteCounts[i] < pSysLogStr->cnt)
-      {
-        result = TRUE;          // allow write
-        ++logWriteCounts[i];    // inc write count
-      }
+      // count limit is 0 - always write
+      result = TRUE;
+    }
+    else if (logWriteCounts[i] < pSysLogStr->cnt)  // check if write limit hit
+    {
+      result = TRUE;          // allow write
+      ++logWriteCounts[i];    // inc write count
     }
   }
-  
   return result;
 }
 
- 
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
 
+/*****************************************************************************
+ * Function:    SystemLogLookup
+ *
+ * Description: Performs a binary search against the systemLogStrings array
+ *              and returns the index of the entry.
+ *
+ * Parameters:  [in] LogID: Any SYS_APP_ID log ID
+ *
+ * Returns:     Index of the SYS_APP_ID if found, otherwise -1
+ *
+ * Notes:
+ *
+ ****************************************************************************/
+static INT32 SystemLogLookup(SYS_APP_ID LogID)
+{
+  INT32  min = 0;
+  INT32  max = NUM_OF_LOG_IDS;
+  INT32  mid;
+  INT32  foundIdx = SYS_LOG_ID_NOT_FOUND;
+
+  // continue searching while
+  while (min <= max && foundIdx == SYS_LOG_ID_NOT_FOUND)
+  {
+    mid = (min + ((max - min) / 2));
+
+    if (systemLogStrings[mid].id == LogID)
+    {
+      // the key value is always found at index 'mid'
+      foundIdx = mid;
+    }
+    else if (systemLogStrings[mid].id < LogID)
+    {
+      // search upper half
+      min = mid + 1;
+    }
+    else
+    {
+      // search lower half
+      max = mid - 1;
+    }
+  }
+  return foundIdx;
+}
 
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 7:08p
+ * Updated in $/software/control processor/code/system
+ * Perf Enhancment improvements CR fixes and bug
+ * 
+ * *****************  Version 11  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements 
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 12-11-14   Time: 7:20p

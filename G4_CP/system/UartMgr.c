@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 69 $  $Date: 1/29/16 8:54a $
+      $Revision: 70 $  $Date: 2/01/16 5:24p $
 
 ******************************************************************************/
 
@@ -60,7 +60,7 @@ static UARTMGR_TASK_PARAMS     uartMgrBlock[UART_NUM_OF_UARTS];
 static UARTMGR_BIT_TASK_PARAMS uartMgrBITBlock;
 static UINT8                   m_UartMgr_RawBuffer[UART_NUM_OF_UARTS][UARTMGR_RAW_BUF_SIZE];
 static UARTMGR_STORE_BUFF      m_UartMgr_StoreBuffer[UART_NUM_OF_UARTS];
-static CHAR                    sGSE_OutLine[128];
+
 static UARTMGR_DEBUG           m_UartMgr_Debug;
 
 static UARTMGR_DISP_DEBUG_TASK_PARMS uartMgrDispDebugBlock;
@@ -474,10 +474,9 @@ static void UartMgr_Task (void *pParam)
       //    to other I/F
       if ( pUartMgrStatus->bChanActive == FALSE )
       {
-        snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-                 "\r\nUartMgr Task: Valid Uart Data Present Detected (Ch=%d)\r\n",
-                 nChannel);
-        GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
+        GSE_DebugStr(NORMAL,TRUE,
+                     "\r\nUartMgr Task: Valid Uart Data Present Detected (Ch=%d)\r\n",
+                     nChannel);
 
         // On transition from timeout to NORMAL clear fault condition
         if ( (pUartMgrStatus->bChannelStartupTimeOut == TRUE) ||
@@ -839,7 +838,7 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
     pRunTimeData = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
 
     ASSERT( NULL != pUartMgrBlock->get_protocol_ready_hndl );
-    
+
     if (((CM_GetTickCount() - pRunTimeData->rxTime) > pWordInfo->dataloss_time) &&
         (pUartMgrBlock->get_protocol_ready_hndl(ch) == TRUE))
     {
@@ -848,11 +847,8 @@ BOOLEAN UartMgr_SensorTest (UINT16 nIndex)
       {
         pWordInfo->bFailed = TRUE;
 
-        snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-          "Uart_SensorTest: Word Timeout (ch = %d, S = %d)\r\n",
-                               ch, pWordInfo->nSensor);
-
-        GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
+        GSE_DebugStr(NORMAL,TRUE, "Uart_SensorTest: Word Timeout (ch = %d, S = %d)\r\n",
+                                   ch, pWordInfo->nSensor);
 
         wordTimeoutLog.result = SYS_UART_DATA_LOSS_TIMEOUT;
         snprintf( wordTimeoutLog.sFailMsg, sizeof(wordTimeoutLog.sFailMsg),
@@ -1634,16 +1630,12 @@ BOOLEAN UartMgr_DetermineChanLoss (UINT16 ch)
       if (pTimeOutFlag == &pUartMgrStatus->bChannelTimeOut)
       {
         UartMgr_CreateTimeOutSystemLog(SYS_UART_DATA_LOSS_TIMEOUT, ch);
-        snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-          "\r\nUartMgr: Uart Data Loss Timeout (Ch=%d) !\r\n", ch);
-        GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
+        GSE_DebugStr(NORMAL,TRUE, "\r\nUartMgr: Uart Data Loss Timeout (Ch=%d) !\r\n", ch);
       }
       else
       {
         UartMgr_CreateTimeOutSystemLog(SYS_UART_STARTUP_TIMEOUT, ch);
-        snprintf (sGSE_OutLine, sizeof(sGSE_OutLine),
-              "\r\nUartMgr: Uart StartUp Timeout (Ch=%d) !\r\n", ch);
-        GSE_DebugStr(NORMAL,TRUE,sGSE_OutLine);
+        GSE_DebugStr(NORMAL,TRUE,"\r\nUartMgr: Uart StartUp Timeout (Ch=%d) !\r\n", ch);
       }
 
       // Increment data loss counter !
@@ -2325,6 +2317,11 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 70  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements sort log list for bin srch
  * 
  * *****************  Version 69  *****************
  * User: John Omalley Date: 1/29/16    Time: 8:54a

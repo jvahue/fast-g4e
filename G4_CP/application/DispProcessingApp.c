@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 7 $  $Date: 1/29/16 12:02p $     
+      $Revision: 8 $  $Date: 2/01/16 9:34a $     
 
 ******************************************************************************/
 
@@ -186,7 +186,7 @@ static DISPLAY_CHAR_TABLE displayDiscreteTbl[DISCRETE_STATE_COUNT] =
 static void                  Init_SpecialCharacterStrings(void);
 static BOOLEAN               DispProcessingApp_GetNewDispData( void );
 static DISPLAY_STATE_PTR     DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-	                                                          UINT16 buttonInput);
+                                                            UINT16 buttonInput);
 static DISPLAY_SCREEN_ENUM   PerformAction(DISPLAY_SCREEN_ENUM nextAction);
 static void                  DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, 
                                                            BOOLEAN bNewData);
@@ -759,7 +759,7 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
 *****************************************************************************/
 static
 DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-	                                               UINT16 buttonInput)
+                                                 UINT16 buttonInput)
 {
   DISPLAY_SCREEN_STATUS_PTR pStatus;
 
@@ -784,7 +784,7 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
       pStatus->currentScreen  = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
       auto_Abort_Timer        = 0;
       pScreen = (DISPLAY_STATE_PTR)&(menuStateTbl[0]) +
-	             (UINT16)pStatus->currentScreen;
+               (UINT16)pStatus->currentScreen;
     }
   }
   else
@@ -879,21 +879,21 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
   else
   {
     pStatus->displayHealth = dispHealth;
-  	// Report error if the Max D_HLTH nonzero wait time is reached
-  	if (pStatus->dispHealthTimer >= no_HS_Timeout_Converted)
-  	{
+    // Report error if the Max D_HLTH nonzero wait time is reached
+    if (pStatus->dispHealthTimer >= no_HS_Timeout_Converted)
+    {
       DispProcessingApp_D_HLTHResult(dispHealth, pCfg->no_HS_Timeout_s);
 
       // Update the Debug Display when D_HLTH is nonzero too long.
       pStatus->bNewDebugData   = TRUE;
-  	  //Reset log timer
-  	  pStatus->dispHealthTimer = 0;
+      //Reset log timer
+      pStatus->dispHealthTimer = 0;
       pStatus->bD_HLTHReset    = FALSE;
-  	}
+    }
     else if (pStatus->bD_HLTHReset == TRUE)
-  	{
-  	  pStatus->dispHealthTimer++;
-  	}
+    {
+      pStatus->dispHealthTimer++;
+    }
     pStatus->bButtonEnable = FALSE;
     discreteDIOStatusFlag  = FALSE;
   }
@@ -2189,12 +2189,12 @@ void DispProcessingApp_RestoreAppData(void)
  *
  * Parameters:   None
  *
- * Returns:      None
+ * Returns:      Always return TRUE
  *
  * Notes:        None
  *
  *****************************************************************************/
-void DispProcessingApp_FileInit(void)
+BOOLEAN DispProcessingApp_FileInit(void)
 {
   // Init App Data
   m_DispProcApp_AppData.lastDCRate = DISPLAY_DEFAULT_DCRATE;
@@ -2203,6 +2203,7 @@ void DispProcessingApp_FileInit(void)
   NV_Write(NV_DISPPROC_CFG, 0, (void *) &m_DispProcApp_AppData,
            sizeof(DISPLAY_APP_DATA));
 
+  return TRUE;
 }
 
 /******************************************************************************
@@ -2257,6 +2258,15 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: Peter Lee    Date: 2/01/16    Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * Fix compiler warning from NVMgr "a value of type "void (*) (void)"
+ * cannot be used to initialize an entity of type "NV_INFO_INIT_FUNC". 
+ * 
+ * Update "void DispProcessingApp_FileInit(void)" to 
+ * "BOOLEAN DispProcessingApp_FileInit(void)"
  * 
  * *****************  Version 7  *****************
  * User: Peter Lee    Date: 1/29/16    Time: 12:02p

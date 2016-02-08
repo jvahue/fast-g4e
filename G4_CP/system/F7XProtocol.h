@@ -13,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 17 $  $Date: 11/30/15 6:56p $     
+      $Revision: 18 $  $Date: 1/30/16 7:37p $     
 
 ******************************************************************************/
 
@@ -313,6 +313,7 @@ typedef F7X_GENERAL_CFG F7X_GENERAL_CFGS[UART_NUM_OF_UARTS];
 //#define F7X_ESN_CHAR_2  2
 //#define F7X_ESN_CHAR_1  1
 //#define F7X_ESN_CHAR_0  0
+#define F7X_ESN_GPA_REVERSE(x) ( (x & 0x01000000) >> 24 )
 #define F7X_ESN_GPA_W2(x) ( (x & 0x00FF0000) >> 16 )
 #define F7X_ESN_GPA_W1(x) ( (x & 0x0000FF00) >>  8 )
 #define F7X_ESN_GPA_W0(x) ( (x & 0x000000FF) )
@@ -471,6 +472,11 @@ EXPORT BOOLEAN F7XProtocol_GetESN ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 1/30/16    Time: 7:37p
+ * Updated in $/software/control processor/code/system
+ * SCR #1314 N-Param ESN Decode, Byte Reversing Option
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 11/30/15   Time: 6:56p

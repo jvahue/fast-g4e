@@ -1,7 +1,9 @@
 #define CYCLE_BODY
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2012-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:         Cycle.c
 
@@ -22,7 +24,7 @@
 
 
   VERSION
-  $Revision: 36 $  $Date: 13-01-17 3:22p $
+  $Revision: 37 $  $Date: 2/01/16 5:19p $
 
 ******************************************************************************/
 
@@ -89,6 +91,9 @@ static CYCLE_COUNTS m_CountsRTC;    // buffer for counts written to RTC during t
                                     // RTC/EEPROM.
 
 static UINT32 m_CountsCurrent[MAX_CYCLES]; // Current totals reflecting persist when applicable
+
+static BOOLEAN m_cycleWriteToEE[MAX_CYCLES]; // Flags signal if EE write-back required
+                                             // on ER Finish
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -707,10 +712,7 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
 
       m_CountsEEProm.data[nCycle].count.n = m_CountsCurrent[nCycle];
 
-      #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-      NV_Write( NV_PCYCLE_CNTS_EE, N_OFFSET(nCycle), &m_CountsEEProm.data[nCycle].count.n,
-        sizeof(m_CountsEEProm.data[nCycle].count.n) );
-      #pragma ghs endnowarning
+      m_cycleWriteToEE[nCycle] = TRUE;
 
       #ifdef DEBUG_CYCLE
       /*vcast_dont_instrument_start*/
@@ -738,15 +740,26 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
 
       //lint -fallthrough
     case CYC_BKUP_RTC:
-      /* Update RTC_RAMRunTime memory ONLY IF the value is changing and is persistent type */
+      // Update RTC_RAM RunTime memory ONLY IF a persisted value is changing and we are not
+      // finishing an ER ( fallthru from CYC_BKUP_EE.
+
       if ( bDataChanged )
       {
         m_CountsRTC.data[nCycle].count.n = m_CountsCurrent[nCycle];
 
+        // If NOT updating EE during ER-Finish, go ahead and update the RTC,
+        // otherwise the caller, will check the m_cycleWriteToEE flags and
+        // perform complete EE and RTC, when all cycles have been updated
+        if (FALSE == m_cycleWriteToEE[nCycle])
+        {
 #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
-        NV_Write( NV_PCYCLE_CNTS_RTC, N_OFFSET(nCycle), &m_CountsRTC.data[nCycle].count.n,
-          sizeof(m_CountsRTC.data[nCycle].count.n) );
+          NV_Write( NV_PCYCLE_CNTS_RTC, N_OFFSET(nCycle), &m_CountsRTC.data[nCycle].count.n,
+                           sizeof(m_CountsRTC.data[nCycle].count.n) );
 #pragma ghs endnowarning
+
+        }
+
+
 
 #ifdef DEBUG_CYCLE
         /*vcast_dont_instrument_start*/
@@ -781,16 +794,61 @@ static void CycleUpdateCount( UINT16 nCycle,  CYC_BKUP_TYPE mode )
 void CycleFinishEngineRun( ENGRUN_INDEX erID )
 {
   UINT8 i;
+  BOOLEAN bWriteEE = FALSE;
+
   for (i = 0; i < MAX_CYCLES; i++)
   {
-    // If the cycle entry is configured, and belongs to the EngineRun,
+    // If the cycle entry is configured, AND 'belongs' to the EngineRun...
     // save the values and close it out.
 
     if ( m_Cfg[i].type != CYC_TYPE_NONE_CNT  && m_Cfg[i].nEngineRunId == erID)
     {
+      // Clr the write-needed flag. CycleUpdateCount will set it if write to EE is needed.
+      m_cycleWriteToEE[i] = FALSE;
+
       CycleUpdateCount( i, CYC_BKUP_EE );
+
+      //If the cycle has a change which requires persisting, latch a flag and handle at end
+      if (m_cycleWriteToEE[i])
+      {
+        bWriteEE = TRUE;
+      }
     }
   }
+
+  // If one of more cycles have indicated that the Persist file needs to be updated,
+  // perform a single write to NV_PCYCLE_CNTS_EE and NV_PCYCLE_CNTS_RTC
+
+  if (bWriteEE)
+  {
+     // Write all cycles to EE
+     NV_Write( NV_PCYCLE_CNTS_EE,  0, &m_CountsEEProm,  sizeof(m_CountsEEProm) );
+     // Write all cycles to RTC
+     NV_Write( NV_PCYCLE_CNTS_RTC, 0, &m_CountsRTC, sizeof(m_CountsRTC) );
+
+    #ifdef DEBUG_CYCLE
+    /*vcast_dont_instrument_start*/
+    if ( 0 != memcmp(&m_CountsEEProm, &m_CountsRTC, sizeof(CYCLE_COUNTS)) )
+    {
+      INT16 i;
+      for (i = 0; i < MAX_CYCLES; ++i )
+      {
+        if (m_CountsEEProm.data[nCycle].count.n !=  m_CountsRTC.data[nCycle].count.n &&
+          m_CountsEEProm.data[nCycle].checkID !=  m_CountsRTC.data[nCycle].checkID)
+        {
+          GSE_DebugStr(NORMAL,TRUE,"m_CountsEEProm[%d] = %d, %d  | m_CountsRTC[%d] = %d, %d",
+            i, m_CountsEEProm.data[i].count.n, m_CountsEEProm.data[i].checkID,
+            i, m_CountsRTC.data[i].count.n,    m_CountsRTC.data[i].checkID);
+        }
+      }
+    }
+    /*vcast_dont_instrument_end*/
+    #endif
+
+
+
+  }
+
 }
 
 /******************************************************************************
@@ -1022,6 +1080,11 @@ static void CycleSyncPersistFiles(BOOLEAN bNow)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Cycle.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:19p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Ehancement Improvements - remove memset
  * 
  * *****************  Version 36  *****************
  * User: John Omalley Date: 13-01-17   Time: 3:22p

@@ -16,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 127 $  $Date: 1/29/16 8:58a $
+      $Revision: 128 $  $Date: 2/01/16 5:24p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -37,214 +37,229 @@
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
+
+// !!!!!!!!!!!!!     IMPORTANT     !!!!!!!!!!!!!
+// The  following SYS_LOG_IDS table is accessed by a Binary Search routine.
+// The list must be maintained in ascending LogID 'value'
+// OTHERWISE LOOK-UPS MAY FAIL
+
 // A log write count of 0 specifies an unlimited number of log writes allowed.
 #undef  SYS_LOG_ID
 #define SYS_LOG_ID(label,value,count) label = value,
 
+// SYS_LOG_IDS in NUMERICAL ORDER
 #define SYS_LOG_IDS \
-SYS_LOG_ID(SYS_ID_NULL_LOG                          ,0      ,0)\
-SYS_LOG_ID(SYS_APP_ID_DONT_CARE                     ,0xFFFFFFFF ,0)\
-\
-SYS_LOG_ID(APP_ID_END_OF_FLIGHT                     ,0xA200 ,0)\
-SYS_LOG_ID(APP_ID_START_OF_RECORDING                ,0xA201 ,0)\
-SYS_LOG_ID(APP_ID_END_OF_RECORDING                  ,0xA202 ,0)\
-SYS_LOG_ID(APP_ID_FAST_WOWSTART                     ,0xA203 ,0)\
-SYS_LOG_ID(APP_ID_FAST_WOWEND                       ,0xA204 ,0)\
-SYS_LOG_ID(APP_ID_START_OF_DOWNLOAD                 ,0xA205 ,0)\
-SYS_LOG_ID(APP_ID_END_OF_DOWNLOAD                   ,0xA206 ,0)\
-SYS_LOG_ID(APP_ID_FSM_STATE_CHANGE                  ,0xA207 ,0)\
-SYS_LOG_ID(APP_ID_FSM_CRC_MISMATCH                  ,0xA208 ,0)\
-SYS_LOG_ID(APP_ID_EVENT_STARTED                     ,0xB000 ,0)\
-SYS_LOG_ID(APP_ID_EVENT_ENDED                       ,0xB001 ,0)\
-SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
-SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
-SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
-\
-SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
-SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
-\
-SYS_LOG_ID(APP_ID_CREEP_PBIT_CFG_CRC                ,0xB400 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_PBIT_EE_APP                 ,0xB401 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_PBIT_CRC_CHANGED            ,0xB402 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_SUMMARY                     ,0xB480 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_ER               ,0xB481 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_RESET            ,0xB482 ,0)\
-SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB483, 0)\
-\
-SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
-SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
-SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB503 ,0)\
-SYS_LOG_ID(APP_ID_TREND_NOT_DETECTED                ,0xB504 ,0)\
-SYS_LOG_ID(APP_ID_TREND_SUBSAMPLE_END               ,0xB505 ,0)/*Trend End-sample collection*/\
-\
-SYS_LOG_ID(APP_ID_APAC_SUMMARY                      ,0xB600 ,0)\
-SYS_LOG_ID(APP_ID_APAC_START                        ,0xB601 ,0)\
-SYS_LOG_ID(APP_ID_APAC_ABORT_NCR                    ,0xB602 ,0)\
-SYS_LOG_ID(APP_ID_APAC_FAILURE                      ,0xB603 ,0)\
-SYS_LOG_ID(APP_ID_APAC_VLD_MANUAL                   ,0xB604 ,0)\
-\
-SYS_LOG_ID(DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL        ,0x0500 ,0)\
-SYS_LOG_ID(DRV_ID_TTMR_PBIT_REG_INIT_FAIL           ,0x0700 ,0)\
-SYS_LOG_ID(DRV_ID_SPI_PBIT_REG_INIT_FAIL            ,0x0801 ,0)\
-SYS_LOG_ID(DRV_ID_RTC_PBIT_REG_INIT_FAIL            ,0x0902 ,0)\
-SYS_LOG_ID(DRV_ID_RTC_PBIT_TIME_NOT_VALID           ,0x0903 ,0)\
-SYS_LOG_ID(DRV_ID_RTC_PBIT_CLK_NOT_INC              ,0x0904 ,0)\
-SYS_LOG_ID(DRV_ID_DIO_PBIT_REG_INIT_FAIL            ,0x0A01 ,0)\
-SYS_LOG_ID(DRV_ID_EEPROM_PBIT_DEVICE_NOT_DETECTED   ,0x0B01 ,0)\
-SYS_LOG_ID(DRV_ID_DF_PBIT_CFI_BAD                   ,0x0D01 ,0)\
-SYS_LOG_ID(DRV_ID_DPRAM_PBIT_REG_INIT_FAIL          ,0x0F01 ,0)\
-SYS_LOG_ID(DRV_ID_DPRAM_PBIT_RAM_TEST_FAIL          ,0x0F02 ,0)\
-SYS_LOG_ID(DRV_ID_DPRAM_INTERRUPT_FAIL              ,0x0F13 ,0)\
-SYS_LOG_ID(DRV_ID_ADC_PBIT_RET_INIT_FAIL            ,0x1001 ,0)\
-SYS_LOG_ID(DRV_ID_A429_PBIT_FPGA_FAIL               ,0x1101 ,0)\
-SYS_LOG_ID(DRV_ID_A429_PBIT_TEST_FAIL               ,0x1102 ,0)\
-SYS_LOG_ID(DRV_ID_QAR_PBIT_LOOPBACK_FAIL            ,0x1201 ,0)\
-SYS_LOG_ID(DRV_ID_QAR_PBIT_DPRAM_FAIL               ,0x1202 ,0)\
-SYS_LOG_ID(DRV_ID_QAR_PBIT_FPGA_FAIL                ,0x1203 ,0)\
-SYS_LOG_ID(DRV_ID_PSC_PBIT_FAIL                     ,0x1700 ,0)\
-SYS_LOG_ID(DRV_ID_PSC_PBIT_REG_INIT_FAIL            ,0x1701 ,0)\
-SYS_LOG_ID(DRV_ID_PSC_INTERRUPT_FAIL                ,0x1712 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_PBIT_BAD_FPGA_VER            ,0x1801 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_PBIT_NOT_CONFIGURED          ,0x1802 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_PBIT_CONFIGURED_FAIL         ,0x1803 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_PBIT_INT_FAIL                ,0x1804 ,0) /* Limit in FPGA.c */\
-SYS_LOG_ID(DRV_ID_FPGA_MCF_SETUP_FAIL               ,0x1805 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_INTERRUPT_FAIL               ,0x1816 ,0)\
-SYS_LOG_ID(DRV_ID_FPGA_PBIT_WD_FAIL                 ,0x1807 ,0)\
-\
-SYS_LOG_ID(SYS_TASK_MAN_RMT_OVERRUN                 ,0x4620 ,0)\
-SYS_LOG_ID(SYS_TASK_MAN_DT_OVERRUN                  ,0x4621 ,0)\
-SYS_LOG_ID(SYS_CBIT_ASSERT_LOG                      ,0x4710 ,0)\
-SYS_LOG_ID(SYS_CBIT_RESET_LOG                       ,0x4711 ,0)\
-SYS_LOG_ID(SYS_CBIT_REG_CHECK_FAIL                  ,0x4714 ,0) /* Limit in CBITManager.c */\
-SYS_LOG_ID(SYS_CBIT_CRC_CHECK_FAIL                  ,0x4715 ,0) /* Limit in CBITManager.c */\
-SYS_LOG_ID(SYS_CBIT_RAM_CHECK_FAIL                  ,0x4716 ,0)\
-SYS_LOG_ID(SYS_CBIT_PWEH_SEU_COUNT_LOG              ,0x4720 ,0)\
-\
-SYS_LOG_ID(SYS_CFG_PBIT_OPEN_CFG_FAIL               ,0x4800 ,0)\
-SYS_LOG_ID(SYS_CFG_PBIT_REINIT_CFG_FAIL             ,0x4801 ,0)\
-SYS_LOG_ID(SYS_CFG_RESET_TO_DEFAULT                 ,0x48C0 ,0)\
-\
-SYS_LOG_ID(SYS_CM_PBIT_RTC_BAD                      ,0x4900 ,0)\
-SYS_LOG_ID(SYS_CM_CBIT_TIME_DRIFT_LIMIT_EXCEEDED    ,0x4910 ,0)\
-SYS_LOG_ID(SYS_CM_CBIT_TIME_INVALID_LOG             ,0x4912 ,0)\
-SYS_LOG_ID(SYS_CM_CBIT_SET_RTC_FAILED               ,0x4913 ,5)\
-SYS_LOG_ID(SYS_CM_CLK_UPDATE_RTC                    ,0x4920 ,0)\
-SYS_LOG_ID(SYS_CM_CLK_UPDATE_CPU                    ,0x4921 ,0)\
-SYS_LOG_ID(SYS_CM_MS_TIME_DRIFT_LIMIT_EXCEEDED      ,0x4922 ,0)\
-\
-SYS_LOG_ID(SYS_DIO_DISCRETE_WRAP_FAIL               ,0x4A10 ,0) /* Limit in DIO.c */\
-\
-SYS_LOG_ID(SYS_NVM_PRIMARY_FILE_BAD                 ,0x4B20 ,0)\
-SYS_LOG_ID(SYS_NVM_BACKUP_FILE_BAD                  ,0x4B21 ,0)\
-SYS_LOG_ID(SYS_NVM_PRIMARY_BACKUP_FILES_BAD         ,0x4B22 ,0)\
-SYS_LOG_ID(SYS_NVM_PRIMARY_NEQ_BACKUP_FILE          ,0x4B23 ,0)\
-\
-SYS_LOG_ID(SYS_LOG_MEM_CORRUPTED_ERASED             ,0x4C00 ,0)\
-SYS_LOG_ID(SYS_LOG_MEM_ERRORS                       ,0x4C01 ,0)\
-SYS_LOG_ID(SYS_LOG_MEM_READ_FAIL                    ,0x4C12 ,0)\
-SYS_LOG_ID(SYS_LOG_MEM_ERASE_FAIL                   ,0x4C14 ,0)\
-SYS_LOG_ID(SYS_LOG_85_PERCENT_FULL                  ,0x4C20 ,0)\
-\
-SYS_LOG_ID(SYS_ID_PM_POWER_ON_LOG                   ,0x5020 ,0)\
-SYS_LOG_ID(SYS_ID_PM_POWER_FAILURE_LOG              ,0x5021 ,0)\
-SYS_LOG_ID(SYS_ID_PM_POWER_FAILURE_NO_BATTERY_LOG   ,0x5022 ,0)\
-SYS_LOG_ID(SYS_ID_PM_POWER_INTERRUPT_LOG            ,0x5023 ,0)\
-SYS_LOG_ID(SYS_ID_PM_POWER_RECONNECT_LOG            ,0x5024 ,0)\
-SYS_LOG_ID(SYS_ID_PM_POWER_OFF_LOG                  ,0x5025 ,0)\
-SYS_LOG_ID(SYS_ID_PM_FORCED_SHUTDOWN_LOG            ,0x5026 ,0)\
-SYS_LOG_ID(SYS_ID_PM_RESTORE_DATA_FAILED            ,0x5027 ,0)\
-\
-SYS_LOG_ID(SYS_ID_A429_PBIT_DRV_FAIL                ,0x5101 ,0)\
-SYS_LOG_ID(SYS_ID_A429_CBIT_STARTUP_FAIL            ,0x5111 ,0)\
-SYS_LOG_ID(SYS_ID_A429_CBIT_DATA_LOSS_FAIL          ,0x5112 ,0)\
-SYS_LOG_ID(SYS_ID_A429_CBIT_SSM_FAIL                ,0x5113 ,0)\
-SYS_LOG_ID(SYS_ID_A429_BCD_DIGITS                   ,0x5114 ,0) /* Limit in Arinc429Mgr.c */\
-\
-SYS_LOG_ID(SYS_ID_QAR_PBIT_DRV_FAIL                 ,0x5204 ,0)\
-SYS_LOG_ID(SYS_ID_QAR_CBIT_STARTUP_FAIL             ,0x5211 ,0)\
-SYS_LOG_ID(SYS_ID_QAR_CBIT_DATA_LOSS_FAIL           ,0x5212 ,0)\
-SYS_LOG_ID(SYS_ID_QAR_CBIT_WORD_TIMEOUT_FAIL        ,0x5213 ,0)\
-SYS_LOG_ID(SYS_ID_QAR_DATA_PRESENT                  ,0x5220 ,10)\
-SYS_LOG_ID(SYS_ID_QAR_DATA_LOSS                     ,0x5221 ,10)\
-SYS_LOG_ID(SYS_ID_QAR_SYNC                          ,0x5222 ,0)\
-SYS_LOG_ID(SYS_ID_QAR_SYNC_LOSS                     ,0x5223 ,0)\
-\
-SYS_LOG_ID(SYS_ID_SENSOR_CBIT_FAIL                  ,0x5310 ,0)\
-SYS_LOG_ID(SYS_ID_SENSOR_RANGE_FAIL                 ,0x5311 ,0)\
-SYS_LOG_ID(SYS_ID_SENSOR_RATE_FAIL                  ,0x5312 ,0)\
-SYS_LOG_ID(SYS_ID_SENSOR_SIGNAL_FAIL                ,0x5313 ,0)\
-\
-SYS_LOG_ID(SYS_ID_UART_PBIT_FAIL                    ,0x5C00 ,0)\
-SYS_LOG_ID(SYS_ID_UART_CBIT_STARTUP_FAIL            ,0x5C11 ,0)\
-SYS_LOG_ID(SYS_ID_UART_CBIT_DATA_LOSS_FAIL          ,0x5C12 ,0)\
-SYS_LOG_ID(SYS_ID_UART_CBIT_WORD_TIMEOUT_FAIL       ,0x5C13 ,0)\
-SYS_LOG_ID(SYS_ID_UART_F7X_NEW_DL_FOUND             ,0x5C20 ,0)\
-SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
-SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
-SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
-/*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
-SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
-SYS_LOG_ID(SYS_ID_UART_PWCDISP_TXPACKET_FAIL        ,0x5C34 ,10)\
-SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
-\
-SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
-SYS_LOG_ID(SYS_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
-SYS_LOG_ID(SYS_ID_DIO_DISPLAY_FAIL                  ,0xB720 ,0)\
-\
-SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
-SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
-\
-SYS_LOG_ID(SYS_ID_MS_HEARTBEAT_FAIL                 ,0x4F10 ,0) /* Cfg Limit in MSStsCtl.c */\
-SYS_LOG_ID(SYS_ID_MS_RECONNECT                      ,0x4F20 ,0) /* Cfg Limit in MSStsCtl.c */\
-SYS_LOG_ID(SYS_ID_MS_VERSION_MISMATCH               ,0x4F21 ,0)\
-\
-SYS_LOG_ID(SYS_ID_FPGA_CBIT_CRC_FAIL                ,0x5811 ,0)\
-SYS_LOG_ID(SYS_ID_FPGA_CBIT_FORCE_RELOAD_RESULT     ,0x5812 ,0) /* Limit in FPGAManager.c */\
-SYS_LOG_ID(SYS_ID_FPGA_CBIT_REG_CHECK_FAIL          ,0x5813 ,0)\
-\
-SYS_LOG_ID(SYS_ID_BOX_POWER_ON_COUNT_RETRIEVE_FAIL  ,0x5901 ,0)\
-SYS_LOG_ID(SYS_ID_BOX_SYS_INFO_CRC_FAIL             ,0x5902 ,0)\
-SYS_LOG_ID(SYS_ID_BOX_INFO_SYS_STATUS_UPDATE        ,0x5903 ,0)\
-\
-SYS_LOG_ID(SYS_ID_SPIMGR_EEPROM_WRITE_FAIL          ,0x5A10 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_EEPROM_READ_FAIL           ,0x5A11 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_RTC_WRITE_FAIL             ,0x5A12 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_RTC_READ_FAIL              ,0x5A13 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_RTC_NVRAM_WRITE_FAIL       ,0x5A14 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_BUS_VOLT_READ_FAIL         ,0x5A15 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_BAT_VOLT_READ_FAIL         ,0x5A16 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_LITBAT_VOLT_READ_FAIL      ,0x5A17 ,0)\
-SYS_LOG_ID(SYS_ID_SPIMGR_BOARD_TEMP_READ_FAIL       ,0x5A18 ,0)\
-\
-SYS_LOG_ID(SYS_ID_GSE_PBIT_REG_INIT_FAIL            ,0x5B01 ,0)\
-\
-SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_FILES_INVALID      ,0x6020 ,0)/* Cycles */\
-SYS_LOG_ID(SYS_ID_CYCLES_CHECKID_CHANGED            ,0x6021 ,0)/* Cycles */\
-SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_COUNTS_DIFF        ,0x6022, 0)/* Cycles */\
-\
-SYS_LOG_ID(SYS_ID_ACTION_PERSIST_CLR                ,0x6120 ,0)\
-SYS_LOG_ID(SYS_ID_ACTION_PERSIST_RESET              ,0x6121 ,0)\
-\
-SYS_LOG_ID(APP_UI_USER_PARAM_CHANGE_LOG             ,0x8800 ,0)\
-SYS_LOG_ID(APP_UI_USER_ACTION_COMMAND_LOG           ,0x8801 ,0)\
-\
-SYS_LOG_ID(APP_AT_INFO_CFG_STATUS                   ,0xA020 ,0)\
-SYS_LOG_ID(APP_AT_INFO_AC_ID_MISMATCH               ,0xA023 ,0)\
-SYS_LOG_ID(APP_AT_INFO_AUTO_ERROR_DESC              ,0xA024 ,0)\
-\
-SYS_LOG_ID(APP_DM_SINGLE_BUFFER_OVERFLOW            ,0xA111 ,0)\
-SYS_LOG_ID(APP_DM_DOWNLOAD_STARTED                  ,0xA130 ,0)\
-SYS_LOG_ID(APP_DM_DOWNLOAD_STATISTICS               ,0xA120 ,0)\
-\
-SYS_LOG_ID(APP_UPM_INFO_VFY_TBL_ROWS                ,0xA322 ,0)\
-SYS_LOG_ID(APP_UPM_INFO_UPLOAD_START                ,0xA323 ,0)\
-SYS_LOG_ID(APP_UPM_INFO_UPLOAD_FILE_FAIL            ,0xA324 ,0)\
-SYS_LOG_ID(APP_UPM_GS_TRANSMIT_SUCCESS              ,0xA325 ,0)\
-SYS_LOG_ID(APP_UPM_GS_CRC_FAIL                      ,0xA326 ,0)\
-SYS_LOG_ID(APP_UPM_MS_CRC_FAIL                      ,0xA327 ,0)\
-\
-SYS_LOG_ID(APP_FM_INFO_USER_UPDATED_CLOCK           ,0xA226 ,0)
+  SYS_LOG_ID(SYS_ID_NULL_LOG                          ,0x0000 ,0)\
+  \
+  SYS_LOG_ID(DRV_ID_PRC_PBIT_BTO_REG_INIT_FAIL        ,0x0500 ,0)\
+  \
+  SYS_LOG_ID(DRV_ID_TTMR_PBIT_REG_INIT_FAIL           ,0x0700 ,0)\
+  \
+  SYS_LOG_ID(DRV_ID_SPI_PBIT_REG_INIT_FAIL            ,0x0801 ,0)\
+  \
+  SYS_LOG_ID(DRV_ID_RTC_PBIT_REG_INIT_FAIL            ,0x0902 ,0)\
+  SYS_LOG_ID(DRV_ID_RTC_PBIT_TIME_NOT_VALID           ,0x0903 ,0)\
+  SYS_LOG_ID(DRV_ID_RTC_PBIT_CLK_NOT_INC              ,0x0904 ,0)\
+  \
+  SYS_LOG_ID(DRV_ID_DIO_PBIT_REG_INIT_FAIL            ,0x0A01 ,0)\
+  SYS_LOG_ID(DRV_ID_EEPROM_PBIT_DEVICE_NOT_DETECTED   ,0x0B01 ,0)\
+  SYS_LOG_ID(DRV_ID_DF_PBIT_CFI_BAD                   ,0x0D01 ,0)\
+  SYS_LOG_ID(DRV_ID_DPRAM_PBIT_REG_INIT_FAIL          ,0x0F01 ,0)\
+  SYS_LOG_ID(DRV_ID_DPRAM_PBIT_RAM_TEST_FAIL          ,0x0F02 ,0)\
+  SYS_LOG_ID(DRV_ID_DPRAM_INTERRUPT_FAIL              ,0x0F13 ,0)\
+  SYS_LOG_ID(DRV_ID_ADC_PBIT_RET_INIT_FAIL            ,0x1001 ,0)\
+  SYS_LOG_ID(DRV_ID_A429_PBIT_FPGA_FAIL               ,0x1101 ,0)\
+  SYS_LOG_ID(DRV_ID_A429_PBIT_TEST_FAIL               ,0x1102 ,0)\
+  SYS_LOG_ID(DRV_ID_QAR_PBIT_LOOPBACK_FAIL            ,0x1201 ,0)\
+  SYS_LOG_ID(DRV_ID_QAR_PBIT_DPRAM_FAIL               ,0x1202 ,0)\
+  SYS_LOG_ID(DRV_ID_QAR_PBIT_FPGA_FAIL                ,0x1203 ,0)\
+  SYS_LOG_ID(DRV_ID_PSC_PBIT_FAIL                     ,0x1700 ,0)\
+  SYS_LOG_ID(DRV_ID_PSC_PBIT_REG_INIT_FAIL            ,0x1701 ,0)\
+  SYS_LOG_ID(DRV_ID_PSC_INTERRUPT_FAIL                ,0x1712 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_PBIT_BAD_FPGA_VER            ,0x1801 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_PBIT_NOT_CONFIGURED          ,0x1802 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_PBIT_CONFIGURED_FAIL         ,0x1803 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_PBIT_INT_FAIL                ,0x1804 ,0) /* Limit in FPGA.c */\
+  SYS_LOG_ID(DRV_ID_FPGA_MCF_SETUP_FAIL               ,0x1805 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_PBIT_WD_FAIL                 ,0x1807 ,0)\
+  SYS_LOG_ID(DRV_ID_FPGA_INTERRUPT_FAIL               ,0x1816 ,0)\
+  \
+  SYS_LOG_ID(SYS_TASK_MAN_RMT_OVERRUN                 ,0x4620 ,0)\
+  SYS_LOG_ID(SYS_TASK_MAN_DT_OVERRUN                  ,0x4621 ,0)\
+  SYS_LOG_ID(SYS_CBIT_ASSERT_LOG                      ,0x4710 ,0)\
+  SYS_LOG_ID(SYS_CBIT_RESET_LOG                       ,0x4711 ,0)\
+  SYS_LOG_ID(SYS_CBIT_REG_CHECK_FAIL                  ,0x4714 ,0) /* Limit in CBITManager.c */\
+  SYS_LOG_ID(SYS_CBIT_CRC_CHECK_FAIL                  ,0x4715 ,0) /* Limit in CBITManager.c */\
+  SYS_LOG_ID(SYS_CBIT_RAM_CHECK_FAIL                  ,0x4716 ,0)\
+  SYS_LOG_ID(SYS_CBIT_PWEH_SEU_COUNT_LOG              ,0x4720 ,0)\
+  \
+  SYS_LOG_ID(SYS_CFG_PBIT_OPEN_CFG_FAIL               ,0x4800 ,0)\
+  SYS_LOG_ID(SYS_CFG_PBIT_REINIT_CFG_FAIL             ,0x4801 ,0)\
+  SYS_LOG_ID(SYS_CFG_RESET_TO_DEFAULT                 ,0x48C0 ,0)\
+  \
+  SYS_LOG_ID(SYS_CM_PBIT_RTC_BAD                      ,0x4900 ,0)\
+  SYS_LOG_ID(SYS_CM_CBIT_TIME_DRIFT_LIMIT_EXCEEDED    ,0x4910 ,0)\
+  SYS_LOG_ID(SYS_CM_CBIT_TIME_INVALID_LOG             ,0x4912 ,0)\
+  SYS_LOG_ID(SYS_CM_CBIT_SET_RTC_FAILED               ,0x4913 ,5)\
+  SYS_LOG_ID(SYS_CM_CLK_UPDATE_RTC                    ,0x4920 ,0)\
+  SYS_LOG_ID(SYS_CM_CLK_UPDATE_CPU                    ,0x4921 ,0)\
+  SYS_LOG_ID(SYS_CM_MS_TIME_DRIFT_LIMIT_EXCEEDED      ,0x4922 ,0)\
+  \
+  SYS_LOG_ID(SYS_DIO_DISCRETE_WRAP_FAIL               ,0x4A10 ,0) /* Limit in DIO.c */\
+  \
+  SYS_LOG_ID(SYS_NVM_PRIMARY_FILE_BAD                 ,0x4B20 ,0)\
+  SYS_LOG_ID(SYS_NVM_BACKUP_FILE_BAD                  ,0x4B21 ,0)\
+  SYS_LOG_ID(SYS_NVM_PRIMARY_BACKUP_FILES_BAD         ,0x4B22 ,0)\
+  SYS_LOG_ID(SYS_NVM_PRIMARY_NEQ_BACKUP_FILE          ,0x4B23 ,0)\
+  \
+  SYS_LOG_ID(SYS_LOG_MEM_CORRUPTED_ERASED             ,0x4C00 ,0)\
+  SYS_LOG_ID(SYS_LOG_MEM_ERRORS                       ,0x4C01 ,0)\
+  SYS_LOG_ID(SYS_LOG_MEM_READ_FAIL                    ,0x4C12 ,0)\
+  SYS_LOG_ID(SYS_LOG_MEM_ERASE_FAIL                   ,0x4C14 ,0)\
+  SYS_LOG_ID(SYS_LOG_85_PERCENT_FULL                  ,0x4C20 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_MS_HEARTBEAT_FAIL                 ,0x4F10 ,0) /* Cfg Limit in MSStsCtl.c */\
+  SYS_LOG_ID(SYS_ID_MS_RECONNECT                      ,0x4F20 ,0) /* Cfg Limit in MSStsCtl.c */\
+  SYS_LOG_ID(SYS_ID_MS_VERSION_MISMATCH               ,0x4F21 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_PM_POWER_ON_LOG                   ,0x5020 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_POWER_FAILURE_LOG              ,0x5021 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_POWER_FAILURE_NO_BATTERY_LOG   ,0x5022 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_POWER_INTERRUPT_LOG            ,0x5023 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_POWER_RECONNECT_LOG            ,0x5024 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_POWER_OFF_LOG                  ,0x5025 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_FORCED_SHUTDOWN_LOG            ,0x5026 ,0)\
+  SYS_LOG_ID(SYS_ID_PM_RESTORE_DATA_FAILED            ,0x5027 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_A429_PBIT_DRV_FAIL                ,0x5101 ,0)\
+  SYS_LOG_ID(SYS_ID_A429_CBIT_STARTUP_FAIL            ,0x5111 ,0)\
+  SYS_LOG_ID(SYS_ID_A429_CBIT_DATA_LOSS_FAIL          ,0x5112 ,0)\
+  SYS_LOG_ID(SYS_ID_A429_CBIT_SSM_FAIL                ,0x5113 ,0)\
+  SYS_LOG_ID(SYS_ID_A429_BCD_DIGITS                   ,0x5114 ,0) /* Limit in Arinc429Mgr.c */\
+  \
+  SYS_LOG_ID(SYS_ID_QAR_PBIT_DRV_FAIL                 ,0x5204 ,0)\
+  SYS_LOG_ID(SYS_ID_QAR_CBIT_STARTUP_FAIL             ,0x5211 ,0)\
+  SYS_LOG_ID(SYS_ID_QAR_CBIT_DATA_LOSS_FAIL           ,0x5212 ,0)\
+  SYS_LOG_ID(SYS_ID_QAR_CBIT_WORD_TIMEOUT_FAIL        ,0x5213 ,0)\
+  SYS_LOG_ID(SYS_ID_QAR_DATA_PRESENT                  ,0x5220 ,10)\
+  SYS_LOG_ID(SYS_ID_QAR_DATA_LOSS                     ,0x5221 ,10)\
+  SYS_LOG_ID(SYS_ID_QAR_SYNC                          ,0x5222 ,0)\
+  SYS_LOG_ID(SYS_ID_QAR_SYNC_LOSS                     ,0x5223 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_SENSOR_CBIT_FAIL                  ,0x5310 ,0)\
+  SYS_LOG_ID(SYS_ID_SENSOR_RANGE_FAIL                 ,0x5311 ,0)\
+  SYS_LOG_ID(SYS_ID_SENSOR_RATE_FAIL                  ,0x5312 ,0)\
+  SYS_LOG_ID(SYS_ID_SENSOR_SIGNAL_FAIL                ,0x5313 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_INFO_TRIGGER_STARTED              ,0x5420 ,0)\
+  SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_FPGA_CBIT_CRC_FAIL                ,0x5811 ,0)\
+  SYS_LOG_ID(SYS_ID_FPGA_CBIT_FORCE_RELOAD_RESULT     ,0x5812 ,0) /* Limit in FPGAManager.c */\
+  SYS_LOG_ID(SYS_ID_FPGA_CBIT_REG_CHECK_FAIL          ,0x5813 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_BOX_POWER_ON_COUNT_RETRIEVE_FAIL  ,0x5901 ,0)\
+  SYS_LOG_ID(SYS_ID_BOX_SYS_INFO_CRC_FAIL             ,0x5902 ,0)\
+  SYS_LOG_ID(SYS_ID_BOX_INFO_SYS_STATUS_UPDATE        ,0x5903 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_SPIMGR_EEPROM_WRITE_FAIL          ,0x5A10 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_EEPROM_READ_FAIL           ,0x5A11 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_RTC_WRITE_FAIL             ,0x5A12 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_RTC_READ_FAIL              ,0x5A13 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_RTC_NVRAM_WRITE_FAIL       ,0x5A14 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_BUS_VOLT_READ_FAIL         ,0x5A15 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_BAT_VOLT_READ_FAIL         ,0x5A16 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_LITBAT_VOLT_READ_FAIL      ,0x5A17 ,0)\
+  SYS_LOG_ID(SYS_ID_SPIMGR_BOARD_TEMP_READ_FAIL       ,0x5A18 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_GSE_PBIT_REG_INIT_FAIL            ,0x5B01 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_UART_PBIT_FAIL                    ,0x5C00 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_CBIT_STARTUP_FAIL            ,0x5C11 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_CBIT_DATA_LOSS_FAIL          ,0x5C12 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_CBIT_WORD_TIMEOUT_FAIL       ,0x5C13 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_F7X_NEW_DL_FOUND             ,0x5C20 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_F7X_DL_NOT_RECOGNIZED        ,0x5C21 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
+  SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
+  /*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
+  SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
+  SYS_LOG_ID(SYS_ID_UART_PWCDISP_TXPACKET_FAIL        ,0x5C34 ,10)\
+  SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
+  \
+  SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_FILES_INVALID      ,0x6020 ,0)/* Cycles */\
+  SYS_LOG_ID(SYS_ID_CYCLES_CHECKID_CHANGED            ,0x6021 ,0)/* Cycles */\
+  SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_COUNTS_DIFF        ,0x6022, 0)/* Cycles */\
+  \
+  SYS_LOG_ID(SYS_ID_ACTION_PERSIST_CLR                ,0x6120 ,0)\
+  SYS_LOG_ID(SYS_ID_ACTION_PERSIST_RESET              ,0x6121 ,0)\
+  \
+  SYS_LOG_ID(APP_UI_USER_PARAM_CHANGE_LOG             ,0x8800 ,0)\
+  SYS_LOG_ID(APP_UI_USER_ACTION_COMMAND_LOG           ,0x8801 ,0)\
+  \
+  SYS_LOG_ID(APP_AT_INFO_CFG_STATUS                   ,0xA020 ,0)\
+  SYS_LOG_ID(APP_AT_INFO_AC_ID_MISMATCH               ,0xA023 ,0)\
+  SYS_LOG_ID(APP_AT_INFO_AUTO_ERROR_DESC              ,0xA024 ,0)\
+  \
+  SYS_LOG_ID(APP_DM_SINGLE_BUFFER_OVERFLOW            ,0xA111 ,0)\
+  SYS_LOG_ID(APP_DM_DOWNLOAD_STATISTICS               ,0xA120 ,0)\
+  SYS_LOG_ID(APP_DM_DOWNLOAD_STARTED                  ,0xA130 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_END_OF_FLIGHT                     ,0xA200 ,0)\
+  SYS_LOG_ID(APP_ID_START_OF_RECORDING                ,0xA201 ,0)\
+  SYS_LOG_ID(APP_ID_END_OF_RECORDING                  ,0xA202 ,0)\
+  SYS_LOG_ID(APP_ID_FAST_WOWSTART                     ,0xA203 ,0)\
+  SYS_LOG_ID(APP_ID_FAST_WOWEND                       ,0xA204 ,0)\
+  SYS_LOG_ID(APP_ID_START_OF_DOWNLOAD                 ,0xA205 ,0)\
+  SYS_LOG_ID(APP_ID_END_OF_DOWNLOAD                   ,0xA206 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_FSM_STATE_CHANGE                  ,0xA207 ,0)\
+  SYS_LOG_ID(APP_ID_FSM_CRC_MISMATCH                  ,0xA208 ,0)\
+  \
+  SYS_LOG_ID(APP_FM_INFO_USER_UPDATED_CLOCK           ,0xA226 ,0)\
+  \
+  SYS_LOG_ID(APP_UPM_INFO_VFY_TBL_ROWS                ,0xA322 ,0)\
+  SYS_LOG_ID(APP_UPM_INFO_UPLOAD_START                ,0xA323 ,0)\
+  SYS_LOG_ID(APP_UPM_INFO_UPLOAD_FILE_FAIL            ,0xA324 ,0)\
+  SYS_LOG_ID(APP_UPM_GS_TRANSMIT_SUCCESS              ,0xA325 ,0)\
+  SYS_LOG_ID(APP_UPM_GS_CRC_FAIL                      ,0xA326 ,0)\
+  SYS_LOG_ID(APP_UPM_MS_CRC_FAIL                      ,0xA327 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_EVENT_STARTED                     ,0xB000 ,0)\
+  SYS_LOG_ID(APP_ID_EVENT_ENDED                       ,0xB001 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_EVENT_TABLE_SUMMARY               ,0xB100 ,0)\
+  SYS_LOG_ID(APP_ID_EVENT_TABLE_TRANSITION            ,0xB101 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_TIMEHISTORY_ETM_LOG               ,0xB210 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_ENGINERUN_ENDED                   ,0xB301 ,0)\
+  SYS_LOG_ID(APP_ID_ENGINE_INFO_CRC_FAIL              ,0xB310 ,0)\
+  \
+  SYS_LOG_ID(APP_ID_CREEP_PBIT_CFG_CRC                ,0xB400 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_PBIT_EE_APP                 ,0xB401 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_PBIT_CRC_CHANGED            ,0xB402 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_SUMMARY                     ,0xB480 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_ER               ,0xB481 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_CBIT_FAULT_RESET            ,0xB482 ,0)\
+  SYS_LOG_ID(APP_ID_CREEP_SENSOR_FAILURE              ,0xB483, 0)\
+  \
+  SYS_LOG_ID(APP_ID_TREND_START                       ,0xB500 ,0)\
+  SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
+  SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB503 ,0)\
+  SYS_LOG_ID(APP_ID_TREND_NOT_DETECTED                ,0xB504 ,0)\
+  SYS_LOG_ID(APP_ID_TREND_SUBSAMPLE_END               ,0xB505 ,0)/*Trend End-sample collection*/\
+  \
+  SYS_LOG_ID(APP_ID_APAC_SUMMARY                      ,0xB600 ,0)\
+  SYS_LOG_ID(APP_ID_APAC_START                        ,0xB601 ,0)\
+  SYS_LOG_ID(APP_ID_APAC_ABORT_NCR                    ,0xB602 ,0)\
+  SYS_LOG_ID(APP_ID_APAC_FAILURE                      ,0xB603 ,0)\
+  SYS_LOG_ID(APP_ID_APAC_VLD_MANUAL                   ,0xB604 ,0)\
+  \
+  SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
+  SYS_LOG_ID(SYS_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
+  SYS_LOG_ID(SYS_ID_DIO_DISPLAY_FAIL                  ,0xB720 ,0)\
+  SYS_LOG_ID(SYS_APP_ID_DONT_CARE                     ,0xFFFFFFFF ,0)
 
 typedef enum {
   SYS_LOG_IDS
@@ -299,90 +314,95 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
  *  MODIFICATIONS
  *    $History: SystemLog.h $
  * 
+ * *****************  Version 128  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:24p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements sort log list for bin srch
+ *
  * *****************  Version 127  *****************
  * User: John Omalley Date: 1/29/16    Time: 8:58a
  * Updated in $/software/control processor/code/system
  * SCR 1302 - Display Protocol Updates
- * 
+ *
  * *****************  Version 126  *****************
  * User: John Omalley Date: 1/04/16    Time: 6:21p
  * Updated in $/software/control processor/code/system
  * SCR 1303 - Performance Software Updates
- * 
+ *
  * *****************  Version 125  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:26p
  * Updated in $/software/control processor/code/system
  * SCR 1303 - Updates for the Display Processing App
- * 
+ *
  * *****************  Version 124  *****************
  * User: Contractor V&v Date: 11/17/15   Time: 2:37p
  * Updated in $/software/control processor/code/system
  * SCR #1299 - Delete unused vSensor config log msg - use ASSERT now
- * 
+ *
  * *****************  Version 123  *****************
  * User: Contractor V&v Date: 11/02/15   Time: 5:49p
  * Updated in $/software/control processor/code/system
  * APAC updates to standarize log names
- * 
+ *
  * *****************  Version 122  *****************
  * User: Peter Lee    Date: 15-10-23   Time: 4:58p
  * Updated in $/software/control processor/code/system
  * SCR #1304 APAC Processing additional updates
- * 
+ *
  * *****************  Version 121  *****************
  * User: Peter Lee    Date: 15-10-19   Time: 10:00p
  * Updated in $/software/control processor/code/system
  * SCR #1304 APAC Processing remove DUP definition
- * 
+ *
  * *****************  Version 120  *****************
  * User: Contractor V&v Date: 10/19/15   Time: 6:25p
  * Updated in $/software/control processor/code/system
  * SCR #1300 - P100 Add log for end-summar
- * 
+ *
  * *****************  Version 119  *****************
  * User: Peter Lee    Date: 15-10-13   Time: 1:44p
  * Updated in $/software/control processor/code/system
  * SCR #1304 APAC Processing Initial Check In
- * 
+ *
  * *****************  Version 118  *****************
  * User: Jeremy Hester Date: 10/02/15   Time: 9:55a
  * Updated in $/software/control processor/code/system
  * SCR - 1302 Added PWC Display Protocol
- * 
+ *
  * *****************  Version 117  *****************
  * User: Contractor V&v Date: 9/23/15    Time: 1:22p
  * Updated in $/software/control processor/code/system
  * P100 Update for virtual sensor validation and error logging
- * 
+ *
  * *****************  Version 116  *****************
  * User: Peter Lee    Date: 15-02-06   Time: 7:18p
  * Updated in $/software/control processor/code/system
- * SCR #1255 GBS Protocol.  Additional Update Item #7. 
- * 
+ * SCR #1255 GBS Protocol.  Additional Update Item #7.
+ *
  * *****************  Version 115  *****************
  * User: Peter Lee    Date: 15-01-19   Time: 6:22p
  * Updated in $/software/control processor/code/system
  * SCR #1255 GBS Protocol Updates
  * 1) LSS output control
- * 
+ *
  * 2) KeepAlive Msg
- * 
+ *
  * 3) Dnload code loop thru
- * 
+ *
  * 4) Debug Dnload Code
- * 
- * 5) Buffer Multi Records before storing 
- * 
+ *
+ * 5) Buffer Multi Records before storing
+ *
  * *****************  Version 114  *****************
  * User: John Omalley Date: 1/19/15    Time: 1:59p
  * Updated in $/software/control processor/code/system
  * SCR 1263 - Code Review Update
- * 
+ *
  * *****************  Version 113  *****************
  * User: Peter Lee    Date: 15-01-11   Time: 10:20p
  * Updated in $/software/control processor/code/system
- * SCR #1255 GBS Protocol 
- * 
+ * SCR #1255 GBS Protocol
+ *
  * *****************  Version 112  *****************
  * User: Peter Lee    Date: 14-10-08   Time: 6:56p
  * Updated in $/software/control processor/code/system

@@ -10,12 +10,13 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 15 $  $Date: 1/29/16 12:02p $
+      $Revision: 16 $  $Date: 2/02/16 9:43a $
 
 ******************************************************************************/
 
 //#define APAC_TIMING_TEST 1
 //#define APAC_TEST_SIM 1
+//#define APAC_TEST_DBG 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -55,6 +56,7 @@ EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
 
 #define APAC_ESN_CHECK_TICK   1000 // Check every 1 second, if ESN has changed
 #define APAC_CYCLE_CHECK_TICK 1000 // Check every 1 second, if Cycle CBIT check
+#define APAC_CYCLE_INC_CHECK_TICK 1000 // Check every 1 second, if Cycle Inc CBIT check
 
 #define APAC_SNSR_NOT_FOUND_VAL -9999.0f  // Snsr Idx not found in Trend data
 
@@ -97,17 +99,19 @@ static APAC_DATA_AVG m_APAC_DataAvg[APAC_ENG_MAX];
 
 static UINT32 m_APAC_ESN_Check_tick;
 static UINT32 m_APAC_Cycle_Check_tick;
+static UINT32 m_APAC_Cycle_Inc_Check_tick; 
 
+#ifdef APAC_TEST_DBG
 static APAC_DEBUG m_APAC_Debug;
 static APAC_ENG_STATUS m_APAC_Eng_Debug;
 static APAC_INLET_CFG_ENUM m_APAC_Eng_Debug_Inlet;
 static APAC_NR_SEL_ENUM m_APAC_Eng_Debug_NR_Sel;
+#endif
 
 static APAC_VLD_LOG m_APAC_VLD_Log;
 
-//static CHAR gse_OutLine[128];
-
 // Test Timing
+// #define APAC_TIMING_TEST 1
 #ifdef APAC_TIMING_TEST
   #define APAC_TIMING_BUFF_MAX 200
   static UINT32 m_APACTiming_Buff[APAC_TIMING_BUFF_MAX];
@@ -166,6 +170,12 @@ static void APACMgr_InitDataAvgStructs ( void );
 
 static void APACMgr_CheckCfg ( void );
 static void APACMgr_InitDispNames ( void );
+
+static void APACMgr_CheckCycle ( APAC_ENG_ENUM i );
+static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i );
+
+static void APACMgr_RestoreAppDataHistOrder( void ); 
+
 
 // TEST
 #ifdef APAC_TEST_SIM
@@ -419,11 +429,13 @@ void APACMgr_Initialize ( void )
   memset ( (void *) &m_APAC_Hist, 0, sizeof(m_APAC_Hist) );
   memset ( (void *) &m_APAC_Hist_Status, 0, sizeof(m_APAC_Hist_Status) );
 
+#ifdef APAC_TEST_DBG
   memset ( (void *) &m_APAC_Eng_Debug, 0, sizeof(m_APAC_Eng_Debug) );
   m_APAC_Eng_Debug_Inlet = INLET_CFG_BASIC;
   m_APAC_Eng_Debug_NR_Sel = APAC_NR_SEL_100;
-  memset ( (void *) &m_APAC_VLD_Log, 0, sizeof(m_APAC_VLD_Log) );
   memset ( (void *) &m_APAC_Debug, 0, sizeof(m_APAC_Debug));
+#endif  
+  memset ( (void *) &m_APAC_VLD_Log, 0, sizeof(m_APAC_VLD_Log) );
 
   // Restore saved menu_delay_timeout_val as this might have been set by Menu App before hand
   m_APAC_Status.menu_invld_timeout_val_ptr_ms = ltemp;
@@ -498,6 +510,7 @@ void APACMgr_Initialize ( void )
 
   m_APAC_ESN_Check_tick =  tick + APAC_ESN_CHECK_TICK;
   m_APAC_Cycle_Check_tick = (tick + 50) + APAC_CYCLE_CHECK_TICK;  // Offset by 50 ms
+  m_APAC_Cycle_Inc_Check_tick = (tick + 100) + APAC_CYCLE_INC_CHECK_TICK;  // Offset by 100 ms
 
   APACMgr_InitDataAvgStructs();
   
@@ -660,6 +673,15 @@ static void APACMgr_Task (void *pParam)
       } // end if cfg for ESN decode from Port
     } // end loop thru all ENG to check ESN change
   } // end if timeout to check ESN change
+  
+  // Check if Cycle Inc CBIT 
+  if (tick >= m_APAC_Cycle_Inc_Check_tick) 
+  {
+    m_APAC_Cycle_Inc_Check_tick = tick + APAC_CYCLE_INC_CHECK_TICK;  // Set next timeout
+    for (i=APAC_ENG_1;i<APAC_ENG_MAX;i++) {
+      APACMgr_CheckCycle ( i ); 
+    }
+  }
 
   if ( m_APAC_Status.run_state != APAC_RUN_STATE_IDLE ){
     APACMgr_Running();
@@ -1385,9 +1407,6 @@ BOOLEAN APACMgr_RestoreAppDataHist( void )
 {
   RESULT result;
   BOOLEAN bOk;
-  UINT16 i;
-  APAC_HIST_ENTRY_PTR entry_ptr, begin_ptr;
-  UINT32 curr_mon_day, curr_yr;
 
 
   bOk = TRUE;
@@ -1407,45 +1426,75 @@ BOOLEAN APACMgr_RestoreAppDataHist( void )
     // Note: m_APAC_Hist_Status already cleared at this point
   }
   else // History Data retrieved
-  { // Assume data in order sequence from idx[0] to idx[99]. ->ts field will be
-    // "0" if not used / initialized
-    m_APAC_Hist_Status.num = 0;
-    entry_ptr = (APAC_HIST_ENTRY_PTR) m_APAC_Hist.entry;
-    for (i=0;i<APAC_HIST_ENTRY_MAX;i++) {
-      if ( ( entry_ptr->ts.Timestamp == APAC_HIST_BLANK ) &&
-           ( entry_ptr->ts.MSecond == APAC_HIST_BLANK ) )
-      {
-        break;  // Exit loop.  Blank entry found
-      } // end if ts == APAC_HIST_BLANK
-      m_APAC_Hist_Status.num++;
-      entry_ptr++;
-    } // end for loop i thru APAC_HIST_ENTRY_MAX
-    // Adj to point the last entry, not next empty
-    i = (m_APAC_Hist_Status.num == 0) ? 0 : (m_APAC_Hist_Status.num - 1);
-    m_APAC_Hist_Status.idxDate = i;
-    m_APAC_Hist_Status.idxDay = i;
-
-    // Setup idxDayEnd and idxDayBegin
-    m_APAC_Hist_Status.idxDayEnd = m_APAC_Hist_Status.idxDay;
-    entry_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[m_APAC_Hist_Status.idxDayEnd];
-    begin_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[0];
-    curr_mon_day = APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp);
-    curr_yr = APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp);
-    i = 0;
-    // Loop thru to find idxDayBegin
-    while (entry_ptr > begin_ptr) {
-      entry_ptr--;
-      if ((curr_mon_day != APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp)) ||
-          (curr_yr != APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp)) ) {
-        break;
-      }
-      i++;
-    }
-    m_APAC_Hist_Status.idxDayBegin = m_APAC_Hist_Status.idxDayEnd - i;
-
+  { 
+    APACMgr_RestoreAppDataHistOrder(); 
   } // end else History Data retrieved
 
   return (bOk);
+}
+
+
+/******************************************************************************
+ * Function:    APACMgr_RestoreAppDataHistOrder
+ *
+ * Description: Puts the restores the APAC App Hist Data from EEPROM into 
+ *              order (most recent date then most recent time)
+ *
+ * Parameters:  None
+ *
+ * Returns:     None
+ *
+ * Notes:       
+ *  - Loop thru and find # of entries in history.  After a period of time, this
+ *    list should be 100.
+ *  - Point to the last entry, which is the most recent Date
+ *  - Find the block (Begin and End) of the tests withing this Date
+ *    Worst case all 100 entries were performed on same day
+ * 
+ *****************************************************************************/
+static
+void APACMgr_RestoreAppDataHistOrder( void )
+{
+  UINT16 i;
+  APAC_HIST_ENTRY_PTR entry_ptr, begin_ptr;
+  UINT32 curr_mon_day, curr_yr;
+
+  // Assume data in order sequence from idx[0] to idx[99]. ->ts field will be
+  // "0" if not used / initialized
+  m_APAC_Hist_Status.num = 0;
+  entry_ptr = (APAC_HIST_ENTRY_PTR) m_APAC_Hist.entry;
+  for (i=0;i<APAC_HIST_ENTRY_MAX;i++) {
+    if ( ( entry_ptr->ts.Timestamp == APAC_HIST_BLANK ) &&
+         ( entry_ptr->ts.MSecond == APAC_HIST_BLANK ) )
+    {
+      break;  // Exit loop.  Blank entry found
+    } // end if ts == APAC_HIST_BLANK
+    m_APAC_Hist_Status.num++;
+    entry_ptr++;
+  } // end for loop i thru APAC_HIST_ENTRY_MAX
+  // Adj to point the last entry, not next empty
+  i = (m_APAC_Hist_Status.num == 0) ? 0 : (m_APAC_Hist_Status.num - 1);
+  m_APAC_Hist_Status.idxDate = i;
+  m_APAC_Hist_Status.idxDay = i;
+
+  // Setup idxDayEnd and idxDayBegin
+  m_APAC_Hist_Status.idxDayEnd = m_APAC_Hist_Status.idxDay;
+  entry_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[m_APAC_Hist_Status.idxDayEnd];
+  begin_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[0];
+  curr_mon_day = APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp);
+  curr_yr = APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp);
+  i = 0;
+  // Loop thru to find idxDayBegin
+  while (entry_ptr > begin_ptr) {
+    entry_ptr--;
+    if ((curr_mon_day != APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp)) ||
+        (curr_yr != APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp)) ) {
+      break;
+    }
+    i++;
+  }
+  m_APAC_Hist_Status.idxDayBegin = m_APAC_Hist_Status.idxDayEnd - i;
+  
 }
 
 
@@ -1882,6 +1931,100 @@ static void APACMgr_CheckCfg ( void )
 
 
 /******************************************************************************
+* Function:    APACMgr_CheckCycle
+*
+* Description: When APAC Test is Running, check to ensure the Engine Cycle is counting
+*              to ensure proper cycle configuration
+*
+* Parameters:  i - APAC_ENG_1 or APAC_ENG_2
+*
+* Returns:     None
+*
+* Notes:      
+*  - When APAC Test is Running (_STABILIZE, _SAMPLING, _COMPUTING) check
+*    Eng Flt Discrete against Eng Cycle
+*  - If Eng Flt Discrete and Eng Cycle do not agree after 2 seconds, declare
+*    APAC_VLD_REASON_CYCLE
+*****************************************************************************/
+static void APACMgr_CheckCycle ( APAC_ENG_ENUM i )
+{
+  APAC_ENG_STATUS_PTR eng_ptr;
+  APAC_ENG_CYC_CHK_PTR cyc_ptr; 
+  UINT32 cyc_cnt; 
+  
+  eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[i];
+  cyc_ptr = (APAC_ENG_CYC_CHK_PTR) &eng_ptr->cyc_chk; 
+  
+  if ( ( m_APAC_Status.run_state == APAC_RUN_STATE_STABILIZE) ||
+       ( m_APAC_Status.run_state == APAC_RUN_STATE_SAMPLING) ||
+       ( m_APAC_Status.run_state == APAC_RUN_STATE_COMPUTING) )
+  {
+    switch (cyc_ptr->state)
+    {
+      case APAC_ENG_CYC_CHK_IDLE:
+        cyc_ptr->state = APAC_ENG_CYC_CHK_MONITOR; 
+        cyc_ptr->prev_cyc_cnt = CycleGetCount(m_APAC_Cfg.eng[i].idxCycleHRS); 
+        break;
+       
+      case APAC_ENG_CYC_CHK_MONITOR:
+        if ( SensorIsValid(m_APAC_Cfg.eng[i].idxEngFlt ) &&
+            (SensorGetValue(m_APAC_Cfg.eng[i].idxEngFlt) == APAC_ENG_FLT_SET) )
+        {
+          cyc_cnt = CycleGetCount(m_APAC_Cfg.eng[i].idxCycleHRS); 
+          if (  cyc_cnt <= cyc_ptr->prev_cyc_cnt ) {
+            if ( cyc_ptr->fail_cnt >= APAC_ENG_CYC_CHK_FAIL_CNT ) {
+              snprintf ( m_APAC_VLD_Log.msg, sizeof(m_APAC_VLD_Log.msg), "E%d: curr=%d",
+                         i, cyc_cnt );
+              APACMgr_NVMUpdate ( i, APAC_VLD_REASON_CYCLE, &m_APAC_VLD_Log );
+              cyc_ptr->state = APAC_ENG_CYC_CHK_FAULT; 
+            }
+            cyc_ptr->fail_cnt++; 
+          }
+          else {
+            cyc_ptr->fail_cnt = 0;  // cyc_cnt incremented,clear fault cnt 
+          }
+          cyc_ptr->prev_cyc_cnt = cyc_cnt; // cyc cnt should inc once per sec when eng is ON
+        }
+        break;
+
+      default:
+      case APAC_ENG_CYC_CHK_FAULT:
+        // Do Nothing. Wait for m_APAC_Status.run_state to complete Testing In Progress
+        break;
+    }
+  }
+  else if (cyc_ptr->state != APAC_ENG_CYC_CHK_IDLE)
+  {
+    APACMgr_CheckCycleClear(i); 
+  }
+
+}
+
+/******************************************************************************
+* Function:    APACMgr_CheckCycleClear
+*
+* Description: Clear / Re-init Check Cycle Variables
+*
+* Parameters:  i - APAC_ENG_1 or APAC_ENG_2
+*
+* Returns:     None
+*
+* Notes:       None
+*
+*****************************************************************************/
+static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i )
+{
+  APAC_ENG_STATUS_PTR eng_ptr;
+  APAC_ENG_CYC_CHK_PTR cyc_ptr;
+  
+  eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[i];
+  cyc_ptr = (APAC_ENG_CYC_CHK_PTR) &eng_ptr->cyc_chk; 
+  
+  memset ( (void *) cyc_ptr, 0, sizeof(APAC_ENG_CYC_CHK) ); 
+}
+
+
+/******************************************************************************
  * Function:    APACMgr_GetStatus
  *
  * Description: Utility function to request current APACMgr Status
@@ -2228,6 +2371,12 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Peter Lee    Date: 2/02/16    Time: 9:43a
+ * Updated in $/software/control processor/code/application
+ * SCR #1308 Item #19 and #20.  Check in Cycle CBIT again.  ReOrder
+ * History back to most recent when RCL selected.  
  * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 1/29/16    Time: 12:02p

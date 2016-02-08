@@ -1,16 +1,18 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 /******************************************************************************
-            Copyright (C) 2009-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-   File: sensor.h
+    ECCN:        9D991
+
+   File:         sensor.h
 
 
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 52 $  $Date: 11/05/15 6:31p $
+      $Revision: 53 $  $Date: 2/01/16 5:22p $
 
 ******************************************************************************/
 
@@ -564,8 +566,10 @@ EXPORT USER_ENUM_TBL SensorIndexType[];
                              Package Exports Functions
 ******************************************************************************/
 EXPORT BOOLEAN SensorIsUsed            ( SENSOR_INDEX Sensor );
+EXPORT BOOLEAN SensorIsUsedEx          ( SENSOR_INDEX sensorIdx, BOOLEAN* bIsUsed);
 EXPORT BOOLEAN SensorIsValid           ( SENSOR_INDEX Sensor );
 EXPORT FLOAT32 SensorGetValue          ( SENSOR_INDEX Sensor );
+EXPORT BOOLEAN SensorGetValueEx        ( SENSOR_INDEX sensorIdx, FLOAT32* fValue);
 EXPORT FLOAT32 SensorGetPreviousValue  ( SENSOR_INDEX Sensor );
 EXPORT void    SensorsInitialize       ( void );
 EXPORT void    SensorDisableLiveStream ( void );
@@ -586,6 +590,11 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 2/01/16    Time: 5:22p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment improvements 
  * 
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 11/05/15   Time: 6:31p
