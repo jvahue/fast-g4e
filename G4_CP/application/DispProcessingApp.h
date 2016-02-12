@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 8 $  $Date: 2/01/16 9:34a $     
+      $Revision: 10 $  $Date: 2/10/16 5:36p $     
 
 ******************************************************************************/
 
@@ -35,10 +35,15 @@
 ******************************************************************************/
 #define DISPLAY_INVALID_BUTTON_TIME 1000//Default Invalid button time = 1  sec.
 #define DISPLAY_AUTO_ABORT_TIME     600 //Auto Abort Screen Time      = 10 min.
+#define DISPLAY_FAIL_MS_DEFAULT     150 //Default Display Failure TO  = 150 ms.
 #define PWCDISP_DISPLAY_HEALTH_WAIT_MAX 3   // The maximum number of 
                                             // consecutive D_HLTH packets 
                                             // containing nonzero values after
                                             // PBIT                   = 3  sec.
+#define VERSION_NUMBER_INIT        "1.0"//The initialized value of the version
+                                        // number status string.
+#define PART_NUMBER_INIT              1 //The initialized value of the part
+                                        // number status string.
 #define DISPLAY_DEFAULT_DCRATE        0 //Double Click Rate Default
 #define DBLCLICK_TIMEOUT             50 // default dbl click time in ticks. To
                                         // be combined with saved dblclk time.
@@ -84,10 +89,11 @@
 #define ACTION_ENUM_OFFSET          100 // The offset between actions and 
                                         // menu screen enumerator values
 
-#define DISPLAY_CFG_DEFAULT           \
-        DISPLAY_INVALID_BUTTON_TIME,  \
-        DISPLAY_AUTO_ABORT_TIME,      \
-        PWCDISP_DISPLAY_HEALTH_WAIT_MAX  
+#define DISPLAY_CFG_DEFAULT               \
+        DISPLAY_INVALID_BUTTON_TIME,      \
+        DISPLAY_AUTO_ABORT_TIME,          \
+        PWCDISP_DISPLAY_HEALTH_WAIT_MAX , \
+        DISPLAY_FAIL_MS_DEFAULT
 /******************************************************************************
                                  Package Typedefs
 ******************************************************************************/
@@ -214,8 +220,9 @@ typedef struct
 typedef struct
 {
   UINT32 invalidButtonTime_ms; // Amount of time spent on screen M28
-  UINT32 autoAbortTime_s; // auto abort time for display screens
-  UINT32 no_HS_Timeout_s; // max invalid D_HLTH wait in MIF ticks
+  UINT32 autoAbortTime_s;      // auto abort time for display screens
+  UINT32 no_HS_Timeout_s;      // max invalid D_HLTH wait in MIF ticks
+  UINT32 disc_Fail_ms;         // max data loss timeout for discreet validation
 }DISPLAY_SCREEN_CONFIG, *DISPLAY_SCREEN_CONFIG_PTR;
 
 /*********************
@@ -238,6 +245,7 @@ typedef struct
   UINT32      invalidButtonTime_ms;
   UINT32      autoAbortTime_s;
   UINT32      no_HS_Timeout_s;
+  UINT32      disc_Fail_ms;
 }DISPLAY_FILE_HDR, *DISPLAY_FILE_HDR_PTR;
 #pragma pack()
 
@@ -269,6 +277,7 @@ typedef struct
   UINT32    dispHealthTimer;// The Invalid Display Health Timer
   UINT8     partNumber;     // Display Part Number
   UINT8     versionNumber;  // Display Software version
+  CHAR      versionNumStr[MAX_SUBSTRING_SIZE];
   UINT32    lastFrameTime;
   TIMESTAMP lastFrameTS;
 }DISPLAY_SCREEN_STATUS, *DISPLAY_SCREEN_STATUS_PTR;
@@ -397,7 +406,7 @@ EXPORT USER_ENUM_TBL buttonIndexType[];
 
 EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
 EXPORT void                      DispProcessingApp_Handler(void *pParam);
-EXPORT BOOLEAN                   DispProcessingApp_FileInit(void);
+EXPORT void                      DispProcessingApp_FileInit(void);
 EXPORT UINT16                    DispProcessingApp_ReturnFileHdr(UINT8 *dest, 
                                                          const UINT16 max_size,
                                                          UINT16 ch);
@@ -410,6 +419,16 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 2/10/16    Time: 5:36p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 Removed GSE Commands
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:11a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 2/01/16    Time: 9:34a
@@ -434,6 +453,21 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
  * User: John Omalley Date: 1/21/16    Time: 4:40p
  * Updated in $/software/control processor/code/application
  * SCR 1312 - Updates from user feedback on navigation
+ *
+  * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from Performance Software
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:09a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from PSW Contractor
+ * 
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 15-12-02   Time: 6:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1303 Display App Updates from Jeremy.  
  *
  * *****************  Version 1  *****************
  * User: Jeremy Hester    Date: 9/22/2015    Time: 8:17a

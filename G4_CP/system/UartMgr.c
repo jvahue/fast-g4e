@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 70 $  $Date: 2/01/16 5:24p $
+      $Revision: 71 $  $Date: 2/10/16 9:18a $
 
 ******************************************************************************/
 
@@ -1408,30 +1408,31 @@ void UartMgr_ClearDownloadState ( UINT8 PortIndex )
 }
 
 /******************************************************************************
- * Function:    UartMgr_GetPort
+ * Function:    UartMgr_GetChannel
  *
  * Description: Utility function that returns a protocol UART port.
  *
- * Parameters:  chan         - The UART channel
+ * Parameters:  port         - The UART port
  *
- * Returns:     BYTE port    - The UART port
+ * Returns:     BYTE channel - The UART channel
  *
  * Notes:       None
  *
  *****************************************************************************/
 
-BYTE UartMgr_GetPort(UINT32 chan)
+BYTE UartMgr_GetChannel(UINT32 port)
 {
   UINT16 i;
-  BYTE port;
+  BYTE chan;
   for (i = 1; i < (UINT8)UART_NUM_OF_UARTS; i++)
   {
-      if (uartMgrBlock[i].protocol_ID == chan)
-      {
-	  port = i;
-      }
+    if (uartMgrBlock[i].protocol_ID == port)
+    {
+	  chan = i;
+      break;
+    }
   }
-  return(port);
+  return(chan);
 }
 
 /******************************************************************************
@@ -1441,7 +1442,7 @@ BYTE UartMgr_GetPort(UINT32 chan)
  *              simple fixed message formats with its application.
  *
  * Parameters:  *pDest       - The destination to Read the Data store into
- *              chan         - The UART channel
+ *              port         - The UART port
  *              Direction    - FALSE -> RX or TRUE -> TX
  *              nMaxByteSize - The total size in bytes being Read
  *
@@ -1450,13 +1451,13 @@ BYTE UartMgr_GetPort(UINT32 chan)
  * Notes:       None
  *
  *****************************************************************************/
-BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
+BOOLEAN UartMgr_Read(void *pDest, UINT32 port, UINT16 Direction,
                      UINT16 nMaxByteSize)
 {
-  BYTE port = UartMgr_GetPort(chan);
+  BYTE chan = UartMgr_GetChannel(port);
   BOOLEAN bStatus;
 
-  bStatus = uartMgrBlock[port].read_protocol(pDest, port, Direction,
+  bStatus = uartMgrBlock[chan].read_protocol(pDest, chan, Direction,
                                              nMaxByteSize);
   return (bStatus);
 }
@@ -1468,7 +1469,7 @@ BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
  *              simple fixed message formats with its application.
  *
  * Parameters:  *pDest       - The destination to Read the Data store into
- *              chan         - The UART channel
+ *              port         - The UART port
  *              Direction    - FALSE -> RX or TRUE -> TX
  *              nMaxByteSize - The total size in bytes being Read
  *
@@ -1477,11 +1478,11 @@ BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
  * Notes:       None
  *
  *****************************************************************************/
-void UartMgr_Write(void *pDest, UINT32 chan, UINT16 Direction, 
+void UartMgr_Write(void *pDest, UINT32 port, UINT16 Direction, 
                    UINT16 nMaxByteSize)
 {
-  BYTE port = UartMgr_GetPort(chan);
-  uartMgrBlock[port].write_protocol(pDest, port, Direction, nMaxByteSize);
+  BYTE chan = UartMgr_GetChannel(port);
+  uartMgrBlock[chan].write_protocol(pDest, chan, Direction, nMaxByteSize);
 }
 
 
@@ -2317,6 +2318,11 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 71  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:18a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 70  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:24p
