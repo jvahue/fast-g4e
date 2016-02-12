@@ -19,7 +19,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 58 $  $Date: 1/29/16 9:00a $
+   $Revision: 59 $  $Date: 2/10/16 9:20a $
 
 
 ******************************************************************************/
@@ -1235,29 +1235,31 @@ static void DIO_CheckWrapAround( void)
 *
 * Parameters:  const char* address - The address of local Display Discrete 
 *                                    storage.
-*              UINT16 discreteMax -  The maximum number of Display Discretes
+*              const CHAR* flagAddress – Address of the sensor validation flag.
+*              const CHAR* d_HLTHAddress – Address of the D_HLTH cod byte.
+*              const CHAR* dispStatus – The address of the Display Status Enum.
+*  
 *
 * Returns:     None
 *
 * Notes:       None
 ****************************************************************************/
-void DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax,
-                                const char* flagAddress, 
-                                const char* d_HLTHAddress,
-                                const char* dispStatus)
+void DIO_DispProtocolSetAddress(const CHAR* address,
+                                const CHAR* flagAddress, 
+                                const CHAR* d_HLTHAddress,
+                                const CHAR* dispStatus)
 {
-  UINT16 i = 0, j = 0;
+  UINT16 i = 0;
   for (i = 0; i < DIO_MAX_INPUTS; i++)
   {
-    if (dio_InputPins[i].peripheral == DIO_DISP &&
-        j < discreteMax)
+    if (dio_InputPins[i].peripheral == DIO_DISP)
     {
-      dio_InputPins[i].dataReg = (vuint8 *)(void*)(&address[0]);
+      dio_InputPins[i].dataReg = (volatile UINT8*)(void*)(&address[0]);
     }
   }
-  displayValidationFlag = (vuint8 *)(void*)(flagAddress);
-  displayHealth         = (vuint8 *)(void*)(d_HLTHAddress);
-  displayStatus         = (vuint8 *)(void*)(dispStatus);
+  displayValidationFlag = (volatile UINT8*)(void*)(flagAddress);
+  displayHealth         = (volatile UINT8*)(void*)(d_HLTHAddress);
+  displayStatus         = (volatile UINT8*)(void*)(dispStatus);
 }
 
 /*****************************************************************************
@@ -1318,6 +1320,11 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:20a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 58  *****************
  * User: John Omalley Date: 1/29/16    Time: 9:00a

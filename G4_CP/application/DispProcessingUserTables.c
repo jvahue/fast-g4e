@@ -3,7 +3,7 @@
             Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        DispProcessingUserTables.c
 
@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 4 $  $Date: 1/21/16 4:40p $
+    $Revision: 6 $  $Date: 2/10/16 5:36p $
 
 ******************************************************************************/
 #ifndef DISPLAY_PROCESSING_BODY
@@ -75,22 +75,15 @@ static DISPLAY_DEBUG         dispProcAppDebugTemp;
 
 static USER_MSG_TBL dispProcAppStatusTbl[] = 
 {
-  /*Str                Next Tbl Ptr   Handler Func.             Data Type          Access   Parameter                                       Index   DataLimit EnumTbl*/
-  {"CURRENT_SCREEN",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.currentScreen,  -1, -1, NO_LIMIT, screenIndexType},
-  {"PREVIOUS_SCREEN",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.previousScreen, -1, -1, NO_LIMIT, screenIndexType},
-  {"NEXT_SCREEN",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.nextScreen,     -1, -1, NO_LIMIT, screenIndexType},
-  {"D_HLTH_CODE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.displayHealth,  -1, -1, NO_LIMIT, NULL},
-  {"PBIT_COMPLETE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bPBITComplete,  -1, -1, NO_LIMIT, NULL},
-  {"BUTTON_ENABLE",    NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bButtonEnable,  -1, -1, NO_LIMIT, NULL},
-  {"APAC_PROCESSING",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bAPACProcessing,-1, -1, NO_LIMIT, NULL},
-  {"BUTTON_INPUT",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_ENUM,    USER_RO, (void *) &dispProcAppStatusTemp.buttonInput,    -1, -1, NO_LIMIT, buttonIndexType},
-  {"INVALID_BUTTON",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bInvalidButton, -1, -1, NO_LIMIT, NULL},
-  {"INVALID_D_HLTH",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.dispHealthTimer,-1, -1, NO_LIMIT, NULL},
-  {"LAST_FRAME_TIME",  NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.lastFrameTime,  -1, -1, NO_LIMIT, NULL},
-  {"DISP_PART_NUMBER", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.partNumber,     -1, -1, NO_LIMIT, NULL},
-  {"DISP_VERSION_NUM", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.versionNumber,  -1, -1, NO_LIMIT, NULL},
-  {"MSG_CONTENTS",     NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
-  {NULL,               NULL,          NULL,                     NO_HANDLER_DATA}
+  /*Str                  Next Tbl Ptr   Handler Func.             Data Type          Access   Parameter                                       Index   DataLimit EnumTbl*/
+  {"D_HLTH_CODE",        NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_HEX8,    USER_RO, (void *) &dispProcAppStatusTemp.displayHealth,  -1, -1, NO_LIMIT, NULL},
+  {"PBIT_COMPLETE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bPBITComplete,  -1, -1, NO_LIMIT, NULL},
+  {"BUTTON_ENABLE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bButtonEnable,  -1, -1, NO_LIMIT, NULL},
+  {"INVALID_D_HLTH_CNT", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.dispHealthTimer,-1, -1, NO_LIMIT, NULL},
+  {"DISP_PART_NUMBER",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT8,   USER_RO, (void *) &dispProcAppStatusTemp.partNumber,     -1, -1, NO_LIMIT, NULL},
+  {"DISP_VERSION_NUM",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.versionNumStr,  -1, -1, NO_LIMIT, NULL},
+  {"MSG_CONTENTS",       NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
+  {NULL,                 NULL,          NULL,                     NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL dispProcAppCfgTbl[] =
@@ -99,6 +92,7 @@ static USER_MSG_TBL dispProcAppCfgTbl[] =
   {"INVALID_BUTTON_TIME_MS", NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.invalidButtonTime_ms, -1, -1, NO_LIMIT, NULL},
   {"AUTO_ABORT_TIME_S",      NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.autoAbortTime_s,      -1, -1, NO_LIMIT, NULL},
   {"NO_HS_TIMEOUT_S",        NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.no_HS_Timeout_s,      -1, -1, NO_LIMIT, NULL},
+  {"DISC_FAIL_MS",           NO_NEXT_TABLE, DispProcessingApp_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &dispProcAppCfgTemp.disc_Fail_ms,         -1, -1, NO_LIMIT, NULL},
   {NULL,                     NULL,          NULL,                  NO_HANDLER_DATA}
 };
 
@@ -335,6 +329,11 @@ static USER_HANDLER_RESULT DispProcessingApp_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingUserTables.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 2/10/16    Time: 5:36p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 Removed GSE Commands
  * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:40p

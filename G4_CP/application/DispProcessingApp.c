@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 8 $  $Date: 2/01/16 9:34a $     
+      $Revision: 10 $  $Date: 2/10/16 5:36p $     
 
 ******************************************************************************/
 
@@ -36,7 +36,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define PWCDISP_RX_FREQUENCY_TEST 15  //MAX time between RX messages
+
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -101,7 +101,7 @@ static DISPLAY_VARIABLE_TABLE m_VariableTable[MAX_SCREEN_VARIABLE_COUNT] =
 /*12 PAC_VALUES */ { "",       12, 12 },
 /*13 DCRATE     */ { "",       21,  3 },
 /*14 CHANGED    */ { "",       23,  1 },
-/*15 POWER      */ { "",       12,  3 }
+/*15 NR_SPD     */ { "",       12,  3 }
 };
 
 static UARTMGR_PROTOCOL_DATA  m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT];
@@ -117,9 +117,9 @@ static UINT16                 newDataTimer          = 0;
 static BOOLEAN                dblClickFlag          = FALSE;
 static BOOLEAN                bValidatePAC          = FALSE;
 static BOOLEAN                bPACDecision          = FALSE;
-static BOOLEAN                bLogLimiter           = FALSE;
 static BOOLEAN                discreteDIOStatusFlag = FALSE;
 
+static UINT8* dataLossFlag = NULL;
 static DISPLAY_DEBUG_TASK_PARAMS dispProcAppDisplayDebugBlock;
 static DISPLAY_APP_TASK_PARAMS   dispProcAppBlock;
 static INT8 scaledDCRATE = 0; // The scaled value of DCRATE for M21
@@ -183,11 +183,11 @@ static DISPLAY_CHAR_TABLE displayDiscreteTbl[DISCRETE_STATE_COUNT] =
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
-static void                  Init_SpecialCharacterStrings(void);
+static void                  DispProcessingApp_InitStrings(void);
 static BOOLEAN               DispProcessingApp_GetNewDispData( void );
 static DISPLAY_STATE_PTR     DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-                                                            UINT16 buttonInput);
-static DISPLAY_SCREEN_ENUM   PerformAction(DISPLAY_SCREEN_ENUM nextAction);
+	                                                          UINT16 buttonInput);
+static DISPLAY_SCREEN_ENUM   DispProcessingApp_PerformAction(DISPLAY_SCREEN_ENUM nextAction);
 static void                  DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, 
                                                            BOOLEAN bNewData);
 static void                  DispProcessingApp_D_HLTHResult(UINT8 dispHealth, 
@@ -215,13 +215,13 @@ static BOOLEAN               AquirePACData();
 static BOOLEAN               PACDecision();
 static BOOLEAN               PACAcceptOrValidate();
 static BOOLEAN               PACRejectORInvalidate();
-static void                  DispProcApp_SendNewMonitorData( char characterString[] );
-static DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData);
-static void                  FormatCharacterString(DISPLAY_STATE_PTR pScreen);
-static DISPLAY_SCREEN_ENUM   GetNextState(DISPLAY_BUTTON_STATES button, 
-                                          BOOLEAN thisScreen,
-                                          DISPLAY_STATE_PTR pParamScreen);
-static void                  NoButtonData(void);
+static void                  DispProcessingApp_SendNewMonData(CHAR characterString[] );
+static DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData);
+static void                  DispProcessingApp_FormatString(DISPLAY_STATE_PTR pScreen);
+static DISPLAY_SCREEN_ENUM   DispProcessingApp_GetNextState(DISPLAY_BUTTON_STATES button, 
+                                                            BOOLEAN thisScreen,
+                                                            DISPLAY_STATE_PTR pParamScreen);
+static void                  DispProcessingApp_NoButtonData(void);
 static void                  DispProcessingApp_CreateTransLog(DISPLAY_LOG_RESULT_ENUM result,
                                                               DISPLAY_SCREEN_ENUM previousScreen,
                                                               DISPLAY_SCREEN_ENUM currentScreen,
@@ -237,7 +237,7 @@ static DISPLAY_STATE menuStateTbl[DISPLAY_SCREEN_COUNT] =
 /*M2 */{"TO BE INITIALIZED       ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, M01,  M03,  M06,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M3 */{"TO BE INITIALIZED       ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, M02,  M04,  A02,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M4 */{"TO BE INITIALIZED       ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, M03,  M01,  A08,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
-/*M5 */{"TO BE INITIALIZED       ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A15,  A00,  M07,  NO_ACTION, A01,        0, 15,  1, -1, -1, -1},
+/*M5 */{"TO BE INITIALIZED       ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, M06,  A00,  M07,  NO_ACTION, A01,        0, 15,  1, -1, -1, -1},
 /*M6 */{"HTR/COND SOVOFF CONFIRM?", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, M02,  A00,  A01,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1}, 
 /*M7 */{"SEL ENGINE  START PAC?  ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A14,  A00,  A16,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M8 */{"RUNNING PAC 111111111111", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A00,  A00,  A00,  NO_ACTION, A18,        2, -1, -1, -1, -1, -1},
@@ -268,16 +268,16 @@ static DISPLAY_STATE menuStateTbl[DISPLAY_SCREEN_COUNT] =
 static DISPLAY_ACTION_TABLE m_ActionTable[MAX_ACTIONS_COUNT] =
 {
 //A#    Function,              Return True, Return False
-/*A0 */{InvalidButtonInput,    NO_ACTION,   M28},
-/*A1 */{GetConfig,             M05,         M05},
-/*A2 */{RecallDate,            M19,         M19},
-/*A3 */{RecallNextDate,        A02,         A02},
-/*A4 */{RecallPreviousDate,    A02,         A02},
-/*A5 */{RecallPAC,             M20,         M20},
-/*A6 */{RecallNextPAC,         A05,         A05},
-/*A7 */{RecallPreviousPAC,     A05,         A05},
-/*A8 */{SavedDoubleClick,      M21,         M21},
-/*A9 */{IncDoubleClick,        A08,         A08},
+/*A00*/{InvalidButtonInput,    NO_ACTION,   M28},
+/*A01*/{GetConfig,             M05,         M05},
+/*A02*/{RecallDate,            M19,         M19},
+/*A03*/{RecallNextDate,        A02,         A02},
+/*A04*/{RecallPreviousDate,    A02,         A02},
+/*A05*/{RecallPAC,             M20,         M20},
+/*A06*/{RecallNextPAC,         A05,         A05},
+/*A07*/{RecallPreviousPAC,     A05,         A05},
+/*A08*/{SavedDoubleClick,      M21,         M21},
+/*A09*/{IncDoubleClick,        A08,         A08},
 /*A10*/{DecDoubleClick,        A08,         A08},
 /*A11*/{SaveDoubleClick,       A08,         A08},
 /*A12*/{ResetPAC,              M02,         M02},
@@ -312,7 +312,8 @@ static DISPLAY_ACTION_TABLE m_ActionTable[MAX_ACTIONS_COUNT] =
  *
  * Description: Initializes the Display Processing Application functionality 
  *
- * Parameters:  bEnable - Enable Disp Processing Tasks if APAC enabled
+ * Parameters:  BOOLEAN bEnable - Only initializes the task if the APAC manager
+ *                                is active.
  *
  * Returns:     None
  *
@@ -329,14 +330,17 @@ void DispProcessingApp_Initialize(BOOLEAN bEnable)
   
   // Sets both Current and previous screen to M1 and 
   // both bNewData and bPBITComplete to FALSE
-  memset(&m_DispProcApp_Status, 0, sizeof(m_DispProcApp_Status));
-  memset(&m_DispProcRX_Info,    0, sizeof(m_DispProcRX_Info)   );
-  memset(&m_DispProcApp_Cfg,    0, sizeof(m_DispProcApp_Cfg)   );
+  memset(&m_DispProcApp_Status, 0,      sizeof(m_DispProcApp_Status));
+  memset(&m_DispProcRX_Info,    0,      sizeof(m_DispProcRX_Info)   );
+  memset(&m_DispProcApp_Cfg,    0,      sizeof(m_DispProcApp_Cfg)   );
   m_DispProcApp_Status.buttonInput    = NO_PUSH_BUTTON_DATA;
   m_DispProcApp_Status.currentScreen  = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
   m_DispProcApp_Status.previousScreen = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
   m_DispProcApp_Status.nextScreen     = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
   m_DispProcApp_Status.displayHealth  = D_HLTH_PBIT_ACTIVE;
+  m_DispProcApp_Status.partNumber     = PART_NUMBER_INIT;
+  snprintf((char*)m_DispProcApp_Status.versionNumStr, 
+           DISP_PRINT_PARAM(VERSION_NUMBER_INIT));
 
   User_AddRootCmd(&dispProcAppRootTblPtr);
 
@@ -344,10 +348,10 @@ void DispProcessingApp_Initialize(BOOLEAN bEnable)
       sizeof(m_DispProcApp_Cfg));
   // Set the DIO address and Sensor validation flag for the Display Discretes.
   DIO_DispProtocolSetAddress((const char*)&m_DispProcRX_Info.discreteState[0],
-                             DISCRETE_STATE_COUNT,
                              (const char*)&discreteDIOStatusFlag,
                              (const char*)&m_DispProcApp_Status.displayHealth,
                              (const char*)&dio_Validity_Status);
+  dataLossFlag = PWCDispProtocol_DataLossFlag();
   // Restore App Data
   DispProcessingApp_RestoreAppData();
   savedDCRATE = m_DispProcApp_AppData.lastDCRate;
@@ -365,7 +369,7 @@ void DispProcessingApp_Initialize(BOOLEAN bEnable)
   m_DispProcApp_Debug.bNewFrame  = FALSE;
   
   // Initialize Character Strings that require specific formatting.
-  Init_SpecialCharacterStrings();
+  DispProcessingApp_InitStrings();
 
   m_DispProcRX_Info.displayHealth = D_HLTH_PBIT_ACTIVE;
   m_DispProcRX_Info.partNumber    = DEFAULT_PART_NUMBER;
@@ -379,8 +383,7 @@ void DispProcessingApp_Initialize(BOOLEAN bEnable)
   pStatus->lastFrameTime = CM_GetTickCount();
 
   // Create Display Processing App Task
-  if (bEnable)
-  {
+  if (bEnable){
     // Create Display Processing App Task
     memset(&dispTaskInfo, 0, sizeof(dispTaskInfo));
     strncpy_safe(dispTaskInfo.Name, sizeof(dispTaskInfo.Name),
@@ -440,62 +443,58 @@ void DispProcessingApp_Handler(void *pParam)
   DISPLAY_DEBUG_PTR          pDebug;
   UINT16                     i;
   
-  pStatus  = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
-  bNewData = (BOOLEAN*)&pStatus->bNewData;
-  pScreen  = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) + 
-             (UINT16)pStatus->currentScreen);
-  frameScreen     = pStatus->currentScreen;
-  pDebug   = (DISPLAY_DEBUG_PTR)&m_DispProcApp_Debug;
+  pStatus     = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
+  bNewData    = (BOOLEAN*)&pStatus->bNewData;
+  pScreen     = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) + 
+                (UINT16)pStatus->currentScreen);
+  frameScreen = pStatus->currentScreen;
+  pDebug      = (DISPLAY_DEBUG_PTR)&m_DispProcApp_Debug;
 
   // Look for new RX data
   *bNewData = DispProcessingApp_GetNewDispData();
   
   // Get available button input
-  pStatus->buttonInput = DispProcApp_GetDisplayButtonInput(*bNewData);
+  pStatus->buttonInput = DispProcessingApp_GetBtnInput(*bNewData);
 
   // Handle the Auto Abort timer and the Manual return to M1.
   pScreen = DispProcessingApp_AutoAbortValid(pScreen, 
                                              (UINT16)pStatus->buttonInput);
   //Process MenuScreen based on button input received by the protocol
-  pStatus->nextScreen = GetNextState(pStatus->buttonInput,TRUE, NULL);
+  pStatus->nextScreen = DispProcessingApp_GetNextState(pStatus->buttonInput, 
+    TRUE, NULL);
 
-  if (pStatus->nextScreen != NO_ACTION)
-  { // Update Previous screen
+  if (pStatus->nextScreen != NO_ACTION){ 
+    // Update Previous screen
     pStatus->previousScreen = pStatus->currentScreen;
 
-    while((UINT16)pStatus->nextScreen >= ACTION_ENUM_OFFSET)
-    { // If the next screen requires an action process the action.
-      pStatus->nextScreen = PerformAction(pStatus->nextScreen);
+    while((UINT16)pStatus->nextScreen >= ACTION_ENUM_OFFSET){ 
+      // If the next screen requires an action process the action.
+      pStatus->nextScreen = 
+        DispProcessingApp_PerformAction(pStatus->nextScreen);
     }
     // Update status and format the new screen.
     pStatus->currentScreen = pStatus->nextScreen;
     pScreen = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) + 
               (UINT16)pStatus->currentScreen);
-    FormatCharacterString(pScreen);
+    DispProcessingApp_FormatString(pScreen);
     pScreen = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) +
         (UINT16)pStatus->currentScreen);
   }
-  bLogLimiter = (pStatus->buttonInput != NO_PUSH_BUTTON_DATA ||
-                 frameScreen != pStatus->currentScreen) 
-                ? FALSE : bLogLimiter;
-  if (bLogLimiter == FALSE)
-  {
+
+  if (pStatus->buttonInput != NO_PUSH_BUTTON_DATA ||
+      frameScreen != pStatus->currentScreen){
     pStatus->bNewDebugData = TRUE;
-    bLogLimiter            = TRUE;
     DispProcessingApp_CreateTransLog(DISPLAY_LOG_TRANSITION, 
       pStatus->previousScreen, pStatus->currentScreen, FALSE);
   }
 
   // Update Debug menu based on if the menu string has changed.
-  for (i = 0; i < MAX_SCREEN_SIZE; i++)
-  {
-    if (pStatus->bNewDebugData != TRUE && pDebug->bDebug == TRUE)
-    {
+  for (i = 0; i < MAX_SCREEN_SIZE; i++){
+    if (pStatus->bNewDebugData != TRUE && pDebug->bDebug == TRUE){
       pStatus->bNewDebugData = (pStatus->charString[i]==pScreen->menuString[i])
                                 ? pStatus->bNewDebugData : TRUE;
     }
-    else
-    {
+    else{
       break;
     }
   }
@@ -504,15 +503,14 @@ void DispProcessingApp_Handler(void *pParam)
   memcpy((void *)pStatus->charString, (const void*)pScreen->menuString, 
          MAX_SCREEN_SIZE);
   // Update the Debug display if there is any new significant RX data.
-  if (pDebug->bNewFrame != TRUE)
-  {
+  if (pDebug->bNewFrame != TRUE){
     pDebug->bNewFrame = pStatus->bNewDebugData;
     pDebug->buttonInput = pStatus->buttonInput;
   }
   pStatus->bNewDebugData = FALSE;
   
   // Update the Protocol with new character string and DCRATE
-  DispProcApp_SendNewMonitorData(pScreen->menuString);
+  DispProcessingApp_SendNewMonData(pScreen->menuString);
 
   // Update Status
   CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->lastFrameTS);
@@ -524,7 +522,7 @@ void DispProcessingApp_Handler(void *pParam)
 
 
 /******************************************************************************
- * Function:    Init_SpecialCharacterStrings
+ * Function:    DispProcessingApp_InitStrings
  *
  * Description: Function initially formats all character strings containing 
  *              special symbols.
@@ -537,7 +535,7 @@ void DispProcessingApp_Handler(void *pParam)
  *
  *****************************************************************************/
 static
-void Init_SpecialCharacterStrings()
+void DispProcessingApp_InitStrings()
 {
   DISPLAY_STATE_PTR        pScreen;
   DISPLAY_BUTTON_TABLE_PTR pButtons;
@@ -566,10 +564,8 @@ void Init_SpecialCharacterStrings()
            MAX_SCREEN_SIZE + 1, "E12 ITT 344CNVL NG 5666%c",   0x25);
 
   // Format stings for Invalid Push Button Screen
-  for (i = 0; i < DISPLAY_VALID_BUTTONS; i++)
-  {
-    switch (pButtons->id)
-    {
+  for (i = 0; i < DISPLAY_VALID_BUTTONS; i++){
+    switch (pButtons->id){
       case RIGHT_BUTTON:
         snprintf((char *)pButtons->name, pButtons->size + 1, "%c", 0x02);
         break;
@@ -642,44 +638,38 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
   UARTMGR_PROTOCOL_DATA_PTR  pData;
   DISPLAY_RX_INFORMATION_PTR pDest;
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
+  DISPLAY_SCREEN_CONFIG_PTR  pCfg;
 
   pData    = (UARTMGR_PROTOCOL_DATA_PTR)&m_PWCDisp_RXData[0];
   pDest    = (DISPLAY_RX_INFORMATION_PTR)&m_DispProcRX_Info;
   pStatus  = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
+  pCfg     = (DISPLAY_SCREEN_CONFIG_PTR)&m_DispProcApp_Cfg;
   bNewData = PWCDispProtocol_Read_Handler(pData, 
                                          (UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY,
                                          (UINT16)RX_PROTOCOL, 
                                          (UINT16)PWCDISP_RX_ELEMENT_COUNT);
   bButtonReset = TRUE;
   
-  if(bNewData == TRUE)
-  {
+  if(bNewData == TRUE){
     // Check to see if all new button presses are FALSE and update bButtonReset
-    for(i = 1; i <= DISPLAY_VALID_BUTTONS; i++)
-    {
-      if((BOOLEAN)(pData + i)->data.value != FALSE)
-      {
+    for(i = 1; i <= DISPLAY_VALID_BUTTONS; i++){
+      if((BOOLEAN)(pData + i)->data.value != FALSE){
         bButtonReset = FALSE;
       }
     }
     
     // If all previous button states were FALSE then accept new presses
-    if(pStatus->bButtonReset == TRUE && bButtonReset == FALSE)
-    {
-      for (i = 0; i < BUTTON_STATE_COUNT; i++)
-      {
-        if( i >= UNUSED1_BUTTON)
-        {
-          if(i == EVENT_BUTTON)
-          {
+    if(pStatus->bButtonReset == TRUE && bButtonReset == FALSE){
+      for (i = 0; i < BUTTON_STATE_COUNT; i++){
+        if( i >= UNUSED1_BUTTON){
+          if(i == EVENT_BUTTON){
             pDest->buttonState[i]   = 
               (BOOLEAN)(pData + (UINT16)BUTTONSTATE_EVENT)->data.value;
             pDest->dblClickState[i] = 
               (BOOLEAN)(pData + (UINT16)DOUBLECLICK_EVENT)->data.value;
           }
         }
-        else
-        {
+        else{
           pDest->buttonState[i]   = 
             (BOOLEAN)(pData + (UINT16)BUTTONSTATE_RIGHT + i)->data.value;
           pDest->dblClickState[i] = 
@@ -687,18 +677,15 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
         }
       }
     }
-    else
-    {                                                                          
+    else{                                                                          
       // There were button states set to true for the last set of data received
       // Ignore all button presses.                                            
-      NoButtonData();                                                      
+        DispProcessingApp_NoButtonData();
     }                                                                          
                                                                                
-    for(i = 0; i < (UINT16)DISCRETE_STATE_COUNT; i++)                               
-    {
+    for(i = 0; i < (UINT16)DISCRETE_STATE_COUNT; i++){
       if (pDest->discreteState[i] != 
-          (BOOLEAN)(pData + (UINT16)DISCRETE_ZERO + i)->data.value)
-      {
+          (BOOLEAN)(pData + (UINT16)DISCRETE_ZERO + i)->data.value){
         // Update Debug Display if there are discrete changes
         pStatus->bNewDebugData = TRUE;
       }
@@ -721,16 +708,17 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
     
     pDest->versionNumber[VERSION_MINOR_NUMBER] = (UINT8)tempChar >> 4;
     pStatus->versionNumber = (UINT8)(pData+(UINT16)VERSION_NUMBER)->data.value;
+    snprintf((char*)pStatus->versionNumStr, MAX_SUBSTRING_SIZE, "%d.%d", 
+             pDest->versionNumber[VERSION_MAJOR_NUMBER], 
+             pDest->versionNumber[VERSION_MINOR_NUMBER]);
     newDataTimer = 0;
   }
-  else
-  {
+  else{
     //set the discrete DIO Status Flag to FALSE if no RX messages are received
     //within 150 ms.
-    if(++newDataTimer >= PWCDISP_RX_FREQUENCY_TEST)
-    {
+    if(++newDataTimer >= (pCfg->disc_Fail_ms/10)){
       discreteDIOStatusFlag = FALSE; 
-      dio_Validity_Status   = (UINT8)DIO_DISPLAY_NO_DATA_FAIL;
+      dio_Validity_Status   = *dataLossFlag;
     }
   }
   // As soon as D_HLTH is received as 0x00 for the first time, Display Pbit is
@@ -752,29 +740,26 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
 * Parameters:  pScreen - Pointer to the screen to be updated if necessary.
 *              buttonInput - Value of the current input.
 *
-* Returns:     None
+* Returns:     DISPLAY_STATE_PTR pScreen - The current screen reset or unreset
 *
 * Notes:       None
 *
 *****************************************************************************/
 static
 DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-                                                 UINT16 buttonInput)
+	                                               UINT16 buttonInput)
 {
   DISPLAY_SCREEN_STATUS_PTR pStatus;
 
   pStatus = (DISPLAY_SCREEN_STATUS_PTR) &m_DispProcApp_Status;
 
-  if (buttonInput == (UINT16)NO_PUSH_BUTTON_DATA)
-  {
+  if (buttonInput == (UINT16)NO_PUSH_BUTTON_DATA){
     // Increment Auto Abort Timer
     auto_Abort_Timer++;
     
-    if (auto_Abort_Timer == autoAbortTime_Converted)
-    {
+    if (auto_Abort_Timer == autoAbortTime_Converted){
       // Update Transition Log, Reset APAC.
-      if(pStatus->currentScreen != (DISPLAY_SCREEN_ENUM)HOME_SCREEN)
-      {
+      if(pStatus->currentScreen != (DISPLAY_SCREEN_ENUM)HOME_SCREEN){
         DispProcessingApp_CreateTransLog(DISPLAY_LOG_TIMEOUT, 
           pStatus->currentScreen, (DISPLAY_SCREEN_ENUM)HOME_SCREEN, TRUE);
         APACMgr_IF_Reset(NULL, NULL, NULL, NULL, APAC_IF_TIMEOUT);
@@ -784,11 +769,10 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
       pStatus->currentScreen  = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
       auto_Abort_Timer        = 0;
       pScreen = (DISPLAY_STATE_PTR)&(menuStateTbl[0]) +
-               (UINT16)pStatus->currentScreen;
+	             (UINT16)pStatus->currentScreen;
     }
   }
-  else
-  {
+  else{
     // reset the auto abort timer
     auto_Abort_Timer = 0;
   }
@@ -796,7 +780,7 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
 }
 
 /******************************************************************************
-* Function:    PerformAction
+* Function:    DispProcessingApp_PerformAction
 *
 * Description: Perform the required action for this screen.
 *
@@ -808,7 +792,8 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
 *
 *****************************************************************************/
 static
-DISPLAY_SCREEN_ENUM PerformAction(DISPLAY_SCREEN_ENUM nextAction)
+DISPLAY_SCREEN_ENUM 
+  DispProcessingApp_PerformAction(DISPLAY_SCREEN_ENUM nextAction)
 {
   DISPLAY_ACTION_TABLE_PTR pAction;
 
@@ -840,20 +825,16 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pCfg    = (DISPLAY_SCREEN_CONFIG_PTR)&m_DispProcApp_Cfg;
 
-  if(dispHealth == D_HLTH_ACTIVE) 
-  {
+  if(dispHealth == D_HLTH_ACTIVE) {
     pStatus->dispHealthTimer = 0;
-    if (bNewData == TRUE)
-    { 
+    if (bNewData == TRUE){ 
       // Ensure that these elements are not set at startup to TRUE
       pStatus->bPBITComplete   = TRUE;
       pStatus->bButtonEnable   = TRUE;
-      pStatus->bD_HLTHReset    = TRUE;
       discreteDIOStatusFlag    = TRUE;
       dio_Validity_Status      = (UINT8)DIO_DISPLAY_VALID;
     }
-    if (pStatus->displayHealth != dispHealth)
-    { 
+    if (pStatus->displayHealth != dispHealth){ 
       pStatus->displayHealth = dispHealth;
       pStatus->bNewDebugData = TRUE;
     }
@@ -862,10 +843,8 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
   else if (dispHealth == D_HLTH_COM_RX_FAULT      || 
            dispHealth == D_HLTH_INOP_SIGNAL_FAULT ||
            dispHealth == D_HLTH_MON_INOP_FAULT    || 
-           dispHealth == D_HLTH_DISPLAY_FAULT)
-  {
-    if(pStatus->displayHealth != dispHealth) //Fresh critical D_HLTH code.
-    {
+           dispHealth == D_HLTH_DISPLAY_FAULT){
+    if(pStatus->displayHealth != dispHealth){ //Fresh critical D_HLTH code.
       // Update the Debug Display, Status, and Log
       pStatus->displayHealth = dispHealth;
       pStatus->bNewDebugData = TRUE;
@@ -873,27 +852,20 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
     }
     pStatus->bButtonEnable = FALSE;
     discreteDIOStatusFlag  = FALSE;
+  	pStatus->dispHealthTimer++;
     dio_Validity_Status    = (UINT8)DIO_DISPLAY_HEALTH_CODE_FAIL;
   }
   // Set timer for PBIT and diagnostic D_HLTH codes
-  else
-  {
+  else{
     pStatus->displayHealth = dispHealth;
-    // Report error if the Max D_HLTH nonzero wait time is reached
-    if (pStatus->dispHealthTimer >= no_HS_Timeout_Converted)
-    {
+  	// Report error if the Max D_HLTH nonzero wait time is reached
+  	if (pStatus->dispHealthTimer == no_HS_Timeout_Converted){
       DispProcessingApp_D_HLTHResult(dispHealth, pCfg->no_HS_Timeout_s);
 
       // Update the Debug Display when D_HLTH is nonzero too long.
       pStatus->bNewDebugData   = TRUE;
-      //Reset log timer
-      pStatus->dispHealthTimer = 0;
-      pStatus->bD_HLTHReset    = FALSE;
-    }
-    else if (pStatus->bD_HLTHReset == TRUE)
-    {
-      pStatus->dispHealthTimer++;
-    }
+  	}
+    pStatus->dispHealthTimer++;  	
     pStatus->bButtonEnable = FALSE;
     discreteDIOStatusFlag  = FALSE;
   }
@@ -908,7 +880,7 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
 * Parameters:  dispHealth      - the D_HLTH byte from the encoded rx packet.
 *              no_HS_Timeout_s - The max nonzero D_HLTH time before timeout.
 *
-* Returns:     RESULT - returns D_HLTH log result.
+* Returns:     None
 *
 * Notes:       None
 *
@@ -918,8 +890,7 @@ void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
 {
   DISPLAY_LOG_RESULT_ENUM result;
   DISPLAY_DHLTH_LOG       displayHealthTOLog;
-  switch (dispHealth)
-  {
+  switch (dispHealth){
     case D_HLTH_PBIT_ACTIVE:
       result = DISPLAY_LOG_PBIT_ACTIVE;
       break;
@@ -957,12 +928,12 @@ void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
 }
 
 /******************************************************************************
- * Function:    DispProcApp_SendNewMonitorData
+ * Function:    DispProcessingApp_SendNewMonData
  *
  * Description: Utility function that sends out updated data to be encoded by
  *              the PWC Display Protocol.
  *
- * Parameters:  UINT8*  characterString - contains the unencoded character 
+ * Parameters:  CHAR characterString - contains the unencoded character 
  *                                        string for the current display  
  *                                        screen                                          
  *
@@ -972,7 +943,7 @@ void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
  *
  *****************************************************************************/
 static
-void DispProcApp_SendNewMonitorData( char characterString[] )
+void DispProcessingApp_SendNewMonData(CHAR characterString[])
 {
   UARTMGR_PROTOCOL_DATA_PTR pProtData, pCharData;
   DISPLAY_APP_DATA_PTR      pData;
@@ -985,8 +956,7 @@ void DispProcApp_SendNewMonitorData( char characterString[] )
   pCharData     = pProtData + (UINT16)CHARACTER_0;
   
   // Copy character string into the outgoing TX packet
-  for(i = 0; i < MAX_SCREEN_SIZE; i++)
-  {
+  for(i = 0; i < MAX_SCREEN_SIZE; i++){
     pCharData->data.value = *pString;
     pCharData++; pString++;
   }
@@ -1031,18 +1001,16 @@ static BOOLEAN InvalidButtonInput()
   size            = MAX_SCREEN_SIZE / 2;
   charCount       = 0;
 
-  if (invalid_Button_Timer >= invalidButtonTime_Converted)
-  {
+  if (invalid_Button_Timer >= invalidButtonTime_Converted){
     // timer expired. return to the previous screen. Update previous screen
     pAction->retTrue        = invalidButtonScreen;
     pStatus->previousScreen = pStatus->currentScreen;
     invalid_Button_Timer    = 0;
     pStatus->bInvalidButton = FALSE;
   }
-  else
-  {
+  else{
     invalidButtonScreen = (pStatus->previousScreen != pAction->retFalse) 
-                        ? pStatus->previousScreen : invalidButtonScreen;
+                        ?  pStatus->previousScreen :  invalidButtonScreen;
     // return to M28 regardless of button press
     pAction->retTrue        = pAction->retFalse;
     pStatus->bInvalidButton = TRUE;
@@ -1053,20 +1021,16 @@ static BOOLEAN InvalidButtonInput()
   pInvalidScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] +
       (UINT16)invalidButtonScreen;
   // Perform check to see what buttons are valid and add them to display.
-  for (i = 0; i < DISPLAY_VALID_BUTTONS; i++)
-  {
-    checkState = GetNextState((DISPLAY_BUTTON_STATES)pButtons->id, FALSE,
-        pInvalidScreen);
-    if (checkState != pStatus->nextScreen && checkState != NO_ACTION)
-    {
-      if (charCount == 0)
-      {
+  for (i = 0; i < DISPLAY_VALID_BUTTONS; i++){
+    checkState = DispProcessingApp_GetNextState(
+      (DISPLAY_BUTTON_STATES)pButtons->id, FALSE, pInvalidScreen);
+    if (checkState != pStatus->nextScreen && checkState != NO_ACTION){
+      if (charCount == 0){
         // Add symbol minus the comma
         strcat(strInsert, (const char *)pButtons->name);
         charCount += pButtons->size;
       }
-      else if ((charCount + pButtons->size + 1) <= size)
-      {
+      else if ((charCount + pButtons->size + 1) <= size){
         // Add symbol plus the comma
         strcat(strInsert, (const char *)(","));
         strcat(strInsert, (const char *)pButtons->name);
@@ -1079,14 +1043,11 @@ static BOOLEAN InvalidButtonInput()
   // Update Max
   max = size + (charCount - 1);
 
-  for (i = size; i < MAX_SCREEN_SIZE; i++)
-  {
-    if (i <= max)
-    {
+  for (i = size; i < MAX_SCREEN_SIZE; i++){
+    if (i <= max){
       pScreen->menuString[i] = strInsert[i - size];
     }
-    else
-    {
+    else{
       pScreen->menuString[i] = ' ';
     }
   }
@@ -1143,6 +1104,7 @@ static BOOLEAN RecallDate()
   DISPLAY_VARIABLE_TABLE_PTR pVar, date, time;
   DISPLAY_STATE_PTR pScreen;
   DISPLAY_ACTION_TABLE_PTR pAction;
+  BOOLEAN bResult;
   
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pVar    = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
@@ -1151,9 +1113,15 @@ static BOOLEAN RecallDate()
   pScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] + (UINT16)pAction->retTrue;
   date    = pVar + pScreen->var1;
   time    = pVar + pScreen->var2;
-  
-  return(APACMgr_IF_HistoryData(date->strInsert, time->strInsert, NULL, NULL,
-                                APAC_IF_DATE));
+
+  if (pStatus->currentScreen != pAction->retTrue){
+    bResult = APACMgr_IF_HistoryReset(NULL, NULL, NULL, NULL, APAC_IF_MAX);
+  }
+
+  bResult = APACMgr_IF_HistoryData(date->strInsert, time->strInsert, NULL, NULL,
+      APAC_IF_DATE);
+
+  return(bResult);
 }
 
 /******************************************************************************
@@ -1285,28 +1253,22 @@ static BOOLEAN SavedDoubleClick()
   dcRate  = pVar + pScreen->var1;
   changed = pVar + pScreen->var2;
   
-  if (pStatus->previousScreen != pAction->retTrue)
-  {
+  if (pStatus->previousScreen != pAction->retTrue){
     scaledDCRATE = savedDCRATE;
   }
-  if(scaledDCRATE > 0)
-  {
+  if(scaledDCRATE > 0){
     sprintf(dcRate->strInsert, "+%d", scaledDCRATE);
   }
-  else if (scaledDCRATE == 0)
-  {
+  else if (scaledDCRATE == 0){
     sprintf(dcRate->strInsert, " %d", scaledDCRATE);
   }
-  else
-  {
+  else{
     sprintf(dcRate->strInsert, "%d", scaledDCRATE);
   }
-  if (pData->lastDCRate == scaledDCRATE)
-  {
+  if (pData->lastDCRate == scaledDCRATE){
       changed->strInsert[0] = ' '; 
   }
-  else
-  {
+  else{
     snprintf((char *)(changed)->strInsert,
              sizeof((changed)->strInsert), "%c", CHANGED_CHARACTER);
   }
@@ -1327,8 +1289,7 @@ static BOOLEAN SavedDoubleClick()
  *****************************************************************************/
 static BOOLEAN IncDoubleClick()
 {
-  if(scaledDCRATE < DISPLAY_DCRATE_MAX)
-  {
+  if(scaledDCRATE < DISPLAY_DCRATE_MAX){
     scaledDCRATE++;
     m_DispProcApp_Status.previousScreen = m_DispProcApp_Status.currentScreen;
   }
@@ -1350,8 +1311,7 @@ static BOOLEAN IncDoubleClick()
  *****************************************************************************/
 static BOOLEAN DecDoubleClick()
 {
-  if(scaledDCRATE > (DISPLAY_DCRATE_MAX * -1))
-  {
+  if(scaledDCRATE > (DISPLAY_DCRATE_MAX * -1)){
     scaledDCRATE--;
     m_DispProcApp_Status.previousScreen = m_DispProcApp_Status.currentScreen;
   }
@@ -1370,8 +1330,7 @@ static BOOLEAN DecDoubleClick()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN SaveDoubleClick()
-{
+static BOOLEAN SaveDoubleClick(){
   DISPLAY_APP_DATA_PTR pData;
   
   pData             = (DISPLAY_APP_DATA_PTR)&m_DispProcApp_AppData;
@@ -1576,8 +1535,7 @@ static BOOLEAN AquirePACData()
   APACMgr_IF_Result(cat->strInsert, ng_Margin->strInsert,
                     itt_Margin->strInsert, eng_Num->strInsert, APAC_IF_MAX);
   
-  if(cat->strInsert[0] != 'A')
-  {
+  if(cat->strInsert[0] != 'A'){
     cat->strInsert[0] = ' ';
   }
   return(TRUE);
@@ -1600,12 +1558,10 @@ static BOOLEAN PACDecision()
 {
   APAC_IF_ENUM decision;
 
-  if (bValidatePAC == FALSE)
-  {
+  if (bValidatePAC == FALSE){
     decision = (bPACDecision == TRUE) ? APAC_IF_ACPT : APAC_IF_RJCT;
   }
-  else
-  {
+  else{
     decision = (bPACDecision == TRUE) ? APAC_IF_VLD : APAC_IF_INVLD;
   }
   return(APACMgr_IF_ResultCommit(NULL, NULL, NULL, NULL, decision));
@@ -1684,7 +1640,7 @@ DISPLAY_DEBUG_PTR DispProcessingApp_GetDebug(void)
 }
 
 /******************************************************************************
- * Function:    DispProcApp_GetDisplayButtonInput
+ * Function:    DispProcessingApp_GetBtnInput
  *
  * Description: Returns the button pressed by the user. 
  *
@@ -1696,7 +1652,7 @@ DISPLAY_DEBUG_PTR DispProcessingApp_GetDebug(void)
  *
  *****************************************************************************/
 static 
-DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
+DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
 {
   DISPLAY_RX_INFORMATION_PTR pRX_Info;
   DISPLAY_APP_DATA_PTR       pData;
@@ -1717,55 +1673,44 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
                                   DBLCLICK_TIMEOUT + (UINT16)lastDCRate;
   pStatus    = (DISPLAY_SCREEN_STATUS_PTR) &m_DispProcApp_Status;
 
-  if(bNewData == TRUE)
-  {
-    for(i = 0; i < (UINT16)BUTTON_STATE_COUNT; i++)
-    {
-      if(pRX_Info->buttonState[i] == TRUE)
-      {
+  if(bNewData == TRUE){
+    for(i = 0; i < (UINT16)BUTTON_STATE_COUNT; i++){
+      if(pRX_Info->buttonState[i] == TRUE){
         buttonState = (DISPLAY_BUTTON_STATES)i;
         btnTrueCnt++;
       }
-      if(pRX_Info->dblClickState[i] == TRUE)
-      {
+      if(pRX_Info->dblClickState[i] == TRUE){
         dblButtonState = (DISPLAY_BUTTON_STATES)(i + BUTTON_STATE_COUNT);
         dblTrueCnt++;
       }
     }
   }
-  if (btnTrueCnt == 0)
-  {
+  if (btnTrueCnt == 0){
     buttonState = NO_PUSH_BUTTON_DATA;
   }
-  if (dblTrueCnt == 0)
-  {
+  if (dblTrueCnt == 0){
     dblButtonState = NO_PUSH_BUTTON_DATA;
   }
   if (btnTrueCnt > 1 || dblTrueCnt > 1 || pStatus->bButtonEnable == FALSE
-      || dblTrueCnt > btnTrueCnt)
-  {
+      || dblTrueCnt > btnTrueCnt){
     // Ignore button data if more than one button is pressed
     buttonState   = NO_PUSH_BUTTON_DATA; 
     dblClickFlag  = FALSE;
     dblClickTimer = 0;
   }
-  else
-  {
-    if(dblClickFlag == TRUE)
-    { // If the dblclick timer has expired use previous button
-      if (dblClickTimer >= dblTimeout && buttonState == NO_PUSH_BUTTON_DATA)
-      {
+  else{
+    if(dblClickFlag == TRUE){ 
+      // If the dblclick timer has expired use previous button
+      if (dblClickTimer >= dblTimeout && buttonState == NO_PUSH_BUTTON_DATA){
         buttonState            = prevButtonState;
         dblClickFlag           = FALSE;
         dblClickTimer          = 0;
       }
-      else
-      {
+      else{
         dblClickTimer++;
         // If button and double click match return the dbl click.
         if (buttonState == prevButtonState && 
-            dblButtonState == (buttonState + BUTTON_STATE_COUNT))
-        {
+            dblButtonState == (buttonState + BUTTON_STATE_COUNT)){
           buttonState            = dblButtonState;
           dblClickFlag           = FALSE;
           dblClickTimer          = 0;
@@ -1773,8 +1718,7 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
         // If a different button was pressed execute first press and queue 
         // the second for dbl click testing
         else if (buttonState != NO_PUSH_BUTTON_DATA &&
-                 dblButtonState == NO_PUSH_BUTTON_DATA)
-        {
+                 dblButtonState == NO_PUSH_BUTTON_DATA){
           tempState              = buttonState;
           buttonState            = prevButtonState;
           prevButtonState        = tempState;
@@ -1785,19 +1729,16 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
                 (dblButtonState != 
                 (buttonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT) || 
                 dblButtonState != 
-                (prevButtonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT)))
-        {
+                (prevButtonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT))){
           buttonState            = NO_PUSH_BUTTON_DATA;
           dblClickFlag           = FALSE;
           dblClickTimer          = 0;
         }
       }
     }
-    else
-    {
+    else{
       if(buttonState != NO_PUSH_BUTTON_DATA &&
-         dblButtonState == NO_PUSH_BUTTON_DATA)
-      {
+         dblButtonState == NO_PUSH_BUTTON_DATA){
         dblClickFlag        = TRUE;
         prevButtonState     = buttonState;
       }
@@ -1810,12 +1751,11 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
 }
 
 /******************************************************************************
- * Function:    FormatCharacterString
+ * Function:    DispProcessingApp_FormatString
  *
  * Description: Updates a Display Character String with proper formatting. 
  *
- * Parameters:  pFormat - pointer to a string format table
- *              pScreen - pointer to Screen Table
+ * Parameters:  pScreen - pointer to Screen Table
  *
  * Returns:     None 
  *              
@@ -1824,7 +1764,7 @@ DISPLAY_BUTTON_STATES DispProcApp_GetDisplayButtonInput(BOOLEAN bNewData)
  *****************************************************************************/
 
 static
-void FormatCharacterString(DISPLAY_STATE_PTR pScreen)
+void DispProcessingApp_FormatString(DISPLAY_STATE_PTR pScreen)
 {
   DISPLAY_VARIABLE_TABLE_PTR   pVar;
   UINT8                        i, j; 
@@ -1834,12 +1774,9 @@ void FormatCharacterString(DISPLAY_STATE_PTR pScreen)
   varIndex[2] = pScreen->var3; varIndex[5] = pScreen->var6;
   pVar = (DISPLAY_VARIABLE_TABLE_PTR)&m_VariableTable[0];
 
-  for (i = 0; i < MAX_VARIABLES_PER_SCREEN; i++)
-  {
-    if (varIndex[i] != -1)
-    {
-      for(j = 0; j < (pVar + varIndex[i])->variableLength; j++)
-      {
+  for (i = 0; i < MAX_VARIABLES_PER_SCREEN; i++){
+    if (varIndex[i] != -1){
+      for(j = 0; j < (pVar + varIndex[i])->variableLength; j++){
         pScreen->menuString[(pVar + varIndex[i])->variablePosition + j] = 
           ((pVar + varIndex[i])->strInsert[j] != NULL) ?
           (pVar + varIndex[i])->strInsert[j] : ' ';
@@ -1849,7 +1786,7 @@ void FormatCharacterString(DISPLAY_STATE_PTR pScreen)
 }
 
 /******************************************************************************
- * Function:    GetNextState
+ * Function:    DispProcessingApp_GetNextState
  *
  * Description: Returns the next state listed in the  MenuStateTbl according
  *              to the button state.
@@ -1858,14 +1795,16 @@ void FormatCharacterString(DISPLAY_STATE_PTR pScreen)
  *              thisScreen - TRUE: use current screen. FALSE: Manual Screen
  *              pParamScreen - Manual Screen (not used if thisScreen = TRUE)
  *
- * Returns:     None 
+ * Returns:     DISPLAY_SCREEN_ENUM nextScreen - the next screen based on the 
+ *                                               button input 
  *              
  * Notes:       None
  *
  *****************************************************************************/
 
 static 
-DISPLAY_SCREEN_ENUM GetNextState(DISPLAY_BUTTON_STATES button, 
+DISPLAY_SCREEN_ENUM DispProcessingApp_GetNextState(
+                                 DISPLAY_BUTTON_STATES button,
                                  BOOLEAN thisScreen, 
                                  DISPLAY_STATE_PTR pParamScreen)
 {
@@ -1875,18 +1814,15 @@ DISPLAY_SCREEN_ENUM GetNextState(DISPLAY_BUTTON_STATES button,
   
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
 
-  if (thisScreen == TRUE)
-  {
+  if (thisScreen == TRUE){
     pScreen = (DISPLAY_STATE_PTR)&menuStateTbl[0] +
               (UINT16)pStatus->currentScreen;
   }
-  else
-  {
+  else{
     pScreen = pParamScreen;
   }
   
-  switch(button)
-  {
+  switch(button){
   case UP_DBLCLICK:
     nextScreen = pScreen->dblUpScreen;
     break;
@@ -1941,13 +1877,12 @@ DISPLAY_SCREEN_ENUM GetNextState(DISPLAY_BUTTON_STATES button,
 
 
 /******************************************************************************
- * Function:    NoButtonData
+ * Function:    DispProcessingApp_NoButtonData
  *
  * Description: Utility function that sets button state data to FALSE. Only to 
  *              be used during APAC Processing when no button data is required.
  *
- * Parameters:  pFormat - pointer to a string format table
- *              pScreen - pointer to Screen Table
+ * Parameters:  None
  *
  * Returns:     None 
  *              
@@ -1955,15 +1890,14 @@ DISPLAY_SCREEN_ENUM GetNextState(DISPLAY_BUTTON_STATES button,
  *
  *****************************************************************************/
 static
-void NoButtonData(void)
+void DispProcessingApp_NoButtonData(void)
 {
   DISPLAY_RX_INFORMATION_PTR pbutton;
   UINT16 i;
 
   pbutton = (DISPLAY_RX_INFORMATION_PTR)&m_DispProcRX_Info;
   
-  for(i = 0; i < BUTTON_STATE_COUNT; i++)
-  {
+  for(i = 0; i < BUTTON_STATE_COUNT; i++){
     pbutton->buttonState[i]   = FALSE;
     pbutton->dblClickState[i] = FALSE;
   }
@@ -1987,10 +1921,8 @@ void DispProcAppDebug_Task(void *param)
   
   pDebug = (DISPLAY_DEBUG_PTR)&m_DispProcApp_Debug;
 
-  if (pDebug->bDebug == TRUE)
-  {
-    if(pDebug->bNewFrame == TRUE)
-    {
+  if (pDebug->bDebug == TRUE){
+    if(pDebug->bNewFrame == TRUE){
       DISPLAY_SCREEN_STATUS_PTR  pStatus;
       DISPLAY_CHAR_TABLE_PTR     pMenuID, pButtonID, pDiscreteID;
       DISPLAY_STATE_PTR          pScreen;
@@ -2073,12 +2005,12 @@ void DispProcAppDebug_Task(void *param)
       
       // Display The Version Number Major.Minor
       snprintf((char*)m_Str, DISP_PRINT_PARAM("VersionNumber   = %d.%d\r\n"),
-               pRXInfo->versionNumber[0], pRXInfo->versionNumber[1]);
+               pRXInfo->versionNumber[VERSION_MAJOR_NUMBER], 
+               pRXInfo->versionNumber[VERSION_MINOR_NUMBER]);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n");
       
-      for (i = 0; i < (UINT16)DISCRETE_STATE_COUNT; i++)
-      {
+      for (i = 0; i < (UINT16)DISCRETE_STATE_COUNT; i++){
         // Display the active discretes
         snprintf((char *)m_Str, sizeof(m_Str), 
                  (const char*)(pDiscreteID + i)->name);
@@ -2095,7 +2027,7 @@ void DispProcAppDebug_Task(void *param)
       snprintf((char *)m_Str, (UINT16)(MAX_LINE_LENGTH + 1), 
                (const char *)&(pScreen + 
                (UINT16)pStatus->currentScreen)->menuString[0]);
-      TranslateArrows((char *)m_Str, (UINT16)MAX_LINE_LENGTH);
+      PWCDispProtocol_TranslateArrows((CHAR *)m_Str, (UINT16)MAX_LINE_LENGTH);
       GSE_PutLine((const char *) m_Str);
       GSE_PutLine("\r\n");
       m_Str[0] = NULL;
@@ -2104,7 +2036,7 @@ void DispProcAppDebug_Task(void *param)
       memcpy((void*)m_Str, (const void*)&(pScreen + 
              (UINT16)pStatus->currentScreen)->menuString[MAX_LINE_LENGTH], 
              MAX_LINE_LENGTH);
-      TranslateArrows((char *)m_Str, MAX_LINE_LENGTH);
+      PWCDispProtocol_TranslateArrows((CHAR *)m_Str, MAX_LINE_LENGTH);
       GSE_PutLine((const char *)m_Str);
       GSE_PutLine("\r\n\n");
       
@@ -2169,15 +2101,13 @@ void DispProcessingApp_RestoreAppData(void)
   RESULT result;
   
   result = NV_Open(NV_DISPPROC_CFG);
-  if(result == SYS_OK)
-  {
+  if(result == SYS_OK){
     NV_Read(NV_DISPPROC_CFG, 0, (void *) &m_DispProcApp_AppData,
             sizeof(DISPLAY_APP_DATA));
   }
   
   //If open failed re-init app data
-  if (result != SYS_OK)
-  {
+  if (result != SYS_OK){
     DispProcessingApp_FileInit();
   }
 }
@@ -2189,12 +2119,12 @@ void DispProcessingApp_RestoreAppData(void)
  *
  * Parameters:   None
  *
- * Returns:      Always return TRUE
+ * Returns:      None
  *
  * Notes:        None
  *
  *****************************************************************************/
-BOOLEAN DispProcessingApp_FileInit(void)
+void DispProcessingApp_FileInit(void)
 {
   // Init App Data
   m_DispProcApp_AppData.lastDCRate = DISPLAY_DEFAULT_DCRATE;
@@ -2203,7 +2133,6 @@ BOOLEAN DispProcessingApp_FileInit(void)
   NV_Write(NV_DISPPROC_CFG, 0, (void *) &m_DispProcApp_AppData,
            sizeof(DISPLAY_APP_DATA));
 
-  return TRUE;
 }
 
 /******************************************************************************
@@ -2232,6 +2161,7 @@ UINT16 DispProcessingApp_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
   pFileHdr->invalidButtonTime_ms = pCfg->invalidButtonTime_ms;
   pFileHdr->autoAbortTime_s      = pCfg->autoAbortTime_s;
   pFileHdr->no_HS_Timeout_s      = pCfg->no_HS_Timeout_s;
+  pFileHdr->disc_Fail_ms         = pCfg->disc_Fail_ms;
   pFileHdr->size                 = sizeof(DISPLAY_FILE_HDR);
   
   return(pFileHdr->size);
@@ -2259,6 +2189,16 @@ void DispProcApp_DisableLiveStream(void)
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
  * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 2/10/16    Time: 5:36p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 Removed GSE Commands
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:09a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
+ * 
  * *****************  Version 8  *****************
  * User: Peter Lee    Date: 2/01/16    Time: 9:34a
  * Updated in $/software/control processor/code/application
@@ -2282,6 +2222,21 @@ void DispProcApp_DisableLiveStream(void)
  * User: John Omalley Date: 1/21/16    Time: 4:40p
  * Updated in $/software/control processor/code/application
  * SCR 1312 - Updates from user feedback on navigation
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from Performance Software
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 12/18/15   Time: 11:09a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from PSW Contractor
+ * 
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 15-12-02   Time: 6:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1303 Display App Updates from Jeremy.  
  * 
  * *****************  Version 1  *****************
  * User: Jeremy Hester Date: 10/5/15    Time:4:10p

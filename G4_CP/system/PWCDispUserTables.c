@@ -1,9 +1,9 @@
 #define PWCDISP_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        90991
+    ECCN:        9D991
 
     File:        PWCDispUserTables.c
 
@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 4 $  $Date: 1/21/16 4:33p $
+    $Revision: 5 $  $Date: 2/10/16 9:16a $
 
 ******************************************************************************/
 #ifndef PWCDISP_PROTOCOL_BODY
@@ -167,6 +167,7 @@ static USER_MSG_TBL pwcDispCfgTbl[] =
 {
   /*Str                    Next Tbl Ptr   Handler Func.   Data Type         Access   Parameter                                IndexRange DataLimit EnumTbl*/
   {"PACKET_ERROR_MAX",     NO_NEXT_TABLE, PWCDispMsg_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &pwcDispCfgTemp.packetErrorMax, -1, -1,    NO_LIMIT, NULL},
+  {"NO_DATA_TO_MS",        NO_NEXT_TABLE, PWCDispMsg_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &pwcDispCfgTemp.noDataTO_ms,    -1, -1,    NO_LIMIT, NULL},
   {NULL,                   NULL,          NULL,           NO_HANDLER_DATA}
 };
 
@@ -455,10 +456,20 @@ static USER_HANDLER_RESULT PWCDispmsg_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: PWCDispUserTables.c $
  * 
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:16a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
+ * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:33p
  * Updated in $/software/control processor/code/system
  * SCR 1302 - Added discrete processing and code review updates
+ * 
+ * *****************  Version 3  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 2  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:31p

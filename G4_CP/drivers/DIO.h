@@ -13,7 +13,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 47 $  $Date: 1/29/16 9:01a $
+      $Revision: 48 $  $Date: 2/10/16 9:20a $
 ******************************************************************************/
 
 
@@ -201,7 +201,9 @@ typedef enum
 {
   DIO_DISPLAY_VALID,            // Display Sensor Data valid
   DIO_DISPLAY_HEALTH_CODE_FAIL, // Display Health code failure
-  DIO_DISPLAY_NO_DATA_FAIL      // Display not receiving new data
+  DIO_DISPLAY_DATA_LOSS_FAIL,   // Display not receiving new data
+  DIO_DISPLAY_SYNC_LOSS_FAIL    // Display sync loss timeout
+
 }DIO_DISPLAY_LOG_RESULT_ENUM;
 
 //Defines the configuration a single discrete input/output
@@ -287,10 +289,10 @@ EXPORT  FLOAT32 DIO_GetValue ( UINT16 Pin, UINT32 *null );
 EXPORT  void    DIO_GetOutputPin(DIO_OUTPUT Pin, BOOLEAN *PinState );
 
 EXPORT  void    DIO_UpdateDiscreteInputs ( void );
-EXPORT  void    DIO_DispProtocolSetAddress(const char* address, UINT16 discreteMax,
-                                           const char* flagAddress,
-                                           const char* d_HLTHAddress,
-                                           const char* dispStatus);
+EXPORT  void    DIO_DispProtocolSetAddress(const CHAR* address,
+                                           const CHAR* flagAddress,
+                                           const CHAR* d_HLTHAddress,
+                                           const CHAR* dispStatus);
 EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
 
 #endif // DIO_H
@@ -299,6 +301,11 @@ EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 48  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:20a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 47  *****************
  * User: John Omalley Date: 1/29/16    Time: 9:01a

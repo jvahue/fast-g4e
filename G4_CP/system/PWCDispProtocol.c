@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 6 $  $Date: 1/29/16 8:56a $     
+      $Revision: 7 $  $Date: 2/10/16 9:15a $     
 
 ******************************************************************************/
 
@@ -35,20 +35,6 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define PWCDISP_MAX_RAW_RX_BUF     512  //MAX raw Buffer size for RX Packets
-#define PWCDISP_MAX_RAW_TX_BUF      31  //MAX raw Buffer size for TX Packets
-#define PWCDISP_TX_FREQUENCY        10  //MAX time between TX messages
-#define PWCDISP_HEADER_SIZE          4  //Header size of tx/rx messages
-#define PWCDISP_UNUSED_BIT1          5  //Unused bit 1 from RX message.
-#define PWCDISP_EVENT_OFFSET         2  //Event button offset from unused bits 
-#define PWCDISP_MAX_LINE_LENGTH     12  //Max display line length.
-#define PWCDISP_PARAM_NAMES_LENGTH  15  //Max char length for 
-                                        //PWCDISP_PARAM_NAMES
-#define UP_ARROW                  0x01  //Designated Hex value for up arrow
-#define RIGHT_ARROW               0x02  //Designated Hex value for right arrow
-#define DOWN_ARROW                0x03  //Designated Hex value for down arrow
-#define LEFT_ARROW                0x04  //Designated Hex value for left arrow
-#define ENTER_DOT                 0x05  //Designated Hex value for enter dot
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -197,6 +183,8 @@ static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT] =
 };
 
 static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
+static UINT8 dataLossFlag  = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
+static UINT32 newDataTimer = 0;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -378,6 +366,8 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   PWCDISP_RAW_RX_BUFFER_PTR   rx_buff_ptr;
   PWCDISP_RAW_TX_BUFFER_PTR   tx_buff_ptr;
   PWCDISP_TX_PARAM_LIST_PTR   tx_param_ptr;
+  PWCDISP_CFG_PTR             pCfg;
+  PWCDISP_DATA_LOSS_FAIL_LOG  noDataLog;
   UINT8     *dest_ptr;
   UINT8     *end_ptr;
   BOOLEAN   bNewData, bBadTXPacket, bTXFrame;
@@ -391,6 +381,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   tx_buff_ptr     = (PWCDISP_RAW_TX_BUFFER_PTR) &m_PWCDisp_TXBuff;
   rx_buff_ptr     = (PWCDISP_RAW_RX_BUFFER_PTR) &m_PWCDisp_RXBuff;
   tx_param_ptr    = (PWCDISP_TX_PARAM_LIST_PTR) &m_PWCDisp_TXParamList;
+  pCfg            = (PWCDISP_CFG_PTR) &m_PWCDisp_Cfg;
   dest_ptr        = rx_buff_ptr-> pWr;
   end_ptr         = (UINT8 *) &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF]; 
   
@@ -423,6 +414,19 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     
     // Attempt to synchronize and decode RX raw buffer
     bNewData = PWCDispProtocol_FrameSearch(rx_buff_ptr);
+    newDataTimer = 0;
+  }
+  else
+  {
+    dataLossFlag = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
+    if(++newDataTimer >= (pCfg->noDataTO_ms/10))
+    {
+      noDataLog.lastFrameTime = CM_GetTickCount();
+      noDataLog.noDataTO_ms = pCfg->noDataTO_ms;
+      LogWriteSystem(SYS_ID_UART_PWCDISP_NO_DATA_FAIL, LOG_PRIORITY_LOW,
+        &noDataLog, sizeof(PWCDISP_DATA_LOSS_FAIL_LOG),
+        NULL);
+    }
   }
   
   //Begin Processing TX message packets every 10 MIF Frames
@@ -438,15 +442,15 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     {
       m_PWCDisp_Debug.bNewTXFrame = bTXFrame;
     }
-    if(bBadTXPacket != TRUE)
+    if(!bBadTXPacket)
     {
-      UART_Transmit(UartMgr_GetPort((UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY), 
+      UART_Transmit(UartMgr_GetChannel((UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY), 
                    (const INT8*) &tx_buff_ptr->data[0], 
                    PWCDISP_MAX_RAW_TX_BUF, &sent_cnt);
     }
     //Reset txTimer. If there is a bad packet the timer will reset to 10 in 
     //order to refresh the tx data ASAP
-    tx_status_ptr->txTimer = (bBadTXPacket != TRUE) ? 1 : PWCDISP_TX_FREQUENCY;
+    tx_status_ptr->txTimer = (!bBadTXPacket) ? 1 : PWCDISP_TX_FREQUENCY;
   }
   else
   {
@@ -454,7 +458,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   }
 
   // If there is new, recognized data then Update the UART Manager
-  if(bNewData == TRUE)
+  if(bNewData)
   {
     PWCDispProtocol_UpdateUartMgr();
   }
@@ -733,6 +737,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
               pStatus->sync               = FALSE;
               bBadPacket                  = TRUE;
               m_PWCDisp_Debug.bNewRXFrame = TRUE;
+              dataLossFlag = (UINT8)DIO_DISPLAY_SYNC_LOSS_FAIL;
             }
             src_ptr++; i++;
           }
@@ -829,6 +834,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
             bBadPacket                  = TRUE;
             m_PWCDisp_Debug.bNewRXFrame = TRUE;
           }
+          dataLossFlag = (UINT8)DIO_DISPLAY_SYNC_LOSS_FAIL;
         }
         break;
       case PWCDISP_PARAMSRCH_UPDATE_BUFFER:
@@ -1150,7 +1156,7 @@ void PWCDispDebug_Task(void *pParam)
 
 
 /******************************************************************************
-* Function:    TranslateArrows
+* Function:    PWCDispProtocol_TranslateArrows
 *
 * Description: Utility Function to replace Hex directional characters with 
 *              "v,^,<,>,@"
@@ -1163,7 +1169,7 @@ void PWCDispDebug_Task(void *pParam)
 * Notes:       none
 *
 *****************************************************************************/
-void TranslateArrows(char charString[], UINT16 length)
+void PWCDispProtocol_TranslateArrows(CHAR charString[], UINT16 length)
 {
   UINT16 i;
   for (i = 0; i < length; i++)
@@ -1346,7 +1352,7 @@ static void PWCDispDebug_TX(void *pParam)
   snprintf((char *)m_Str, PWCDISP_MAX_LINE_LENGTH + 1, "%s", 
            (const char *)&(pStatus->packetContents
            [(UINT16)PWCDISP_TX_PARAM_CHARDATA]));
-  TranslateArrows((char *)m_Str, PWCDISP_MAX_LINE_LENGTH);
+  PWCDispProtocol_TranslateArrows((CHAR *)m_Str, PWCDISP_MAX_LINE_LENGTH);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
   m_Str[0] = NULL;
@@ -1355,7 +1361,7 @@ static void PWCDispDebug_TX(void *pParam)
   snprintf((char *)m_Str, PWCDISP_MAX_LINE_LENGTH + 1, "%s",
            (const char *)&(pStatus->packetContents
            [(UINT16)PWCDISP_TX_PARAM_CHARDATA + PWCDISP_MAX_LINE_LENGTH]));
-  TranslateArrows((char *)m_Str, PWCDISP_MAX_LINE_LENGTH);
+  PWCDispProtocol_TranslateArrows((CHAR *)m_Str, PWCDISP_MAX_LINE_LENGTH);
   GSE_PutLine((const char*)m_Str);
   GSE_PutLine("\r\n\n");
 
@@ -1519,7 +1525,7 @@ void PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan, UINT16 Direction,
  *              max_size - max size of dest buffer 
  *              ch - uart channel requested 
  *
- * Returns:     cnt - byte count of data returned 
+ * Returns:     size of PWCDISP_FILE_HDR 
  *
  * Notes:       none 
  *
@@ -1534,9 +1540,27 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
   pFileHdr = (PWCDISP_FILE_HDR_PTR)dest;
   
   pFileHdr->packetErrorMax = pCfg->packetErrorMax;
+  pFileHdr->noDataTO_ms    = pCfg->noDataTO_ms;
   pFileHdr->size = sizeof(PWCDISP_FILE_HDR);
   
   return(pFileHdr->size);
+}
+
+/******************************************************************************
+* Function:    PWCDispProtocol_DataLossFlag()
+*
+* Description: Function to return the Data Loss Status(i.e. synced/no data)
+*
+* Parameters:  None
+*
+* Returns:     UINT8* &dataLossFlag - Address of the data loss flag
+*
+* Notes:       none
+*
+*****************************************************************************/
+UINT8* PWCDispProtocol_DataLossFlag(void)
+{
+    return(&dataLossFlag);
 }
 
 /*****************************************************************************/
@@ -1547,6 +1571,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
  * 
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:15a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
+ * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 1/29/16    Time: 8:56a
  * Updated in $/software/control processor/code/system
@@ -1556,6 +1585,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
  * User: John Omalley Date: 1/21/16    Time: 4:33p
  * Updated in $/software/control processor/code/system
  * SCR 1302 - Added discrete processing and code review updates
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:10a

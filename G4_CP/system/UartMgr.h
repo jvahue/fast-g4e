@@ -1,7 +1,7 @@
 #ifndef UARTMGR_H
 #define UARTMGR_H
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -11,7 +11,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 25 $  $Date: 15-10-19 10:29p $
+      $Revision: 26 $  $Date: 2/10/16 9:18a $
 
 ******************************************************************************/
 
@@ -455,11 +455,11 @@ EXPORT UINT8*  UartMgr_DownloadRecord     ( UINT8 PortIndex, DL_STATUS *pStatus,
                                             DL_WRITE_STATUS **pDL_WrStatus );
 EXPORT void    UartMgr_DownloadStop       ( UINT8 PortIndex );
 EXPORT void    UartMgr_DownloadClr        ( BOOLEAN Run, INT32 param ); 
-EXPORT BOOLEAN UartMgr_Read(void *pDest, UINT32 chan, UINT16 Direction,
+EXPORT BYTE    UartMgr_GetChannel(UINT32 port);
+EXPORT BOOLEAN UartMgr_Read(void *pDest, UINT32 port, UINT16 Direction,
                             UINT16 nMaxByteSize);
-EXPORT void UartMgr_Write(void *pDest, UINT32 chan, UINT16 Direction,
-                          UINT16 nMaxByteSize);
-EXPORT BYTE UartMgr_GetPort(UINT32 chan);
+EXPORT void    UartMgr_Write(void *pDest, UINT32 port, UINT16 Direction,
+                             UINT16 nMaxByteSize);
 
 #endif // UARTMGR_H
 
@@ -467,6 +467,11 @@ EXPORT BYTE UartMgr_GetPort(UINT32 chan);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 26  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:18a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 15-10-19   Time: 10:29p

@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 6 $  $Date: 1/29/16 8:57a $     
+      $Revision: 7 $  $Date: 2/10/16 9:15a $     
 
 ******************************************************************************/
 
@@ -33,32 +33,50 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#define PWCDISP_PACKET_ERROR_MAX        100 // The maximum number of RX
-                                            // desyncronizations before 
-                                            // recording a log.
-#define PWCDISP_MAX_PARAMS              256 // The max number of parameters
-                                            // able to be stored between
-                                            // the protocol and the display
-                                            // app
-#define PWCDISP_MAX_CHAR_PARAMS          24 // Max number of disp characters
-#define PWCDISP_MAX_RX_LIST_SIZE          7 // RX Payload Packet size
-#define PWCDISP_MAX_TX_LIST_SIZE         26 // TX Payload Packet size with ID
-#define PWCDISP_RX_MAX_MSG_SIZE          12 // Full RX Packet size
-#define PWCDISP_TX_MSG_SIZE              31 // Full TX Packet size
-#define MAX_DEBUG_STRING_SIZE            40 // The maximum debug string size
-#define MAX_STORAGE_ITEMS                 4 // The max amount of storage items
-                                            // between the display and the app
-#define TX_TIMER_OFFSET                   2 // Arbitrary 2 in order to ensure 
-                                            // that rx and tx handling are on
-                                            // different frames.
-#define PWCDISP_SYNC_BYTE1             0x55
-#define PWCDISP_SYNC_BYTE2             0xAA
-#define PWCDISP_RX_PACKET_ID           0x11
-#define PWCDISP_TX_PACKET_ID           0x01
-#define RX_PROTOCOL                       0 //For use in Debug
-#define TX_PROTOCOL                       1 //For use in Debug
+#define PWCDISP_PACKET_ERROR_MAX   100 // The maximum number of RX
+                                       // desyncronizations before 
+                                       // recording a log.
+#define PWCDISP_NO_DATA_TIMEOUT_MS 150 // The maximum amount of time the 
+                                       // protocol can receive no data before
+                                       // recording a log.
+#define PWCDISP_MAX_PARAMS         256 // The max number of parameters
+                                       // able to be stored between
+                                       // the protocol and the display
+                                       // app
+#define PWCDISP_MAX_CHAR_PARAMS     24 // Max number of disp characters
+#define PWCDISP_MAX_RX_LIST_SIZE     7 // RX Payload Packet size
+#define PWCDISP_MAX_TX_LIST_SIZE    26 // TX Payload Packet size with ID
+#define PWCDISP_RX_MAX_MSG_SIZE     12 // Full RX Packet size
+#define PWCDISP_TX_MSG_SIZE         31 // Full TX Packet size
+#define MAX_DEBUG_STRING_SIZE       40 // The maximum debug string size
+#define MAX_STORAGE_ITEMS            4 // The max amount of storage items
+                                       // between the display and the app
+#define TX_TIMER_OFFSET              2 // Arbitrary 2 in order to ensure 
+                                       // that rx and tx handling are on
+                                       // different frames.
+#define PWCDISP_SYNC_BYTE1        0x55
+#define PWCDISP_SYNC_BYTE2        0xAA
+#define PWCDISP_RX_PACKET_ID      0x11
+#define PWCDISP_TX_PACKET_ID      0x01
+#define PWCDISP_MAX_RAW_RX_BUF     512 //MAX raw Buffer size for RX Packets
+#define PWCDISP_MAX_RAW_TX_BUF      31 //MAX raw Buffer size for TX Packets
+#define PWCDISP_TX_FREQUENCY        10 //MAX time between TX messages
+#define PWCDISP_HEADER_SIZE          4 //Header size of tx/rx messages
+#define PWCDISP_UNUSED_BIT1          5 //Unused bit 1 from RX message.
+#define PWCDISP_EVENT_OFFSET         2 //Event button offset from unused bits 
+#define PWCDISP_MAX_LINE_LENGTH     12 //Max display line length.
+#define PWCDISP_PARAM_NAMES_LENGTH  15 //Max char length for 
+//PWCDISP_PARAM_NAMES
+#define UP_ARROW                  0x01 //Designated Hex value for up arrow
+#define RIGHT_ARROW               0x02 //Designated Hex value for right arrow
+#define DOWN_ARROW                0x03 //Designated Hex value for down arrow
+#define LEFT_ARROW                0x04 //Designated Hex value for left arrow
+#define ENTER_DOT                 0x05 //Designated Hex value for enter dot
+#define RX_PROTOCOL                  0 //For use in Debug
+#define TX_PROTOCOL                  1 //For use in Debug
 #define PWCDISP_CFG_DEFAULT             \
-     PWCDISP_PACKET_ERROR_MAX
+     PWCDISP_PACKET_ERROR_MAX,          \
+     PWCDISP_NO_DATA_TIMEOUT_MS
 
 #define DISP_PRINT_PARAM(a) sizeof(a), (const char*)a
 #define DISP_PRINT_PARAMF(a,b) sizeof(a), (const char*)a, b
@@ -186,6 +204,7 @@ typedef struct
 typedef struct
 {
   UINT32      packetErrorMax;
+  UINT32      noDataTO_ms;
 }PWCDISP_CFG, *PWCDISP_CFG_PTR;
 
 /*********************
@@ -207,6 +226,7 @@ typedef struct
 {
   UINT16      size;
   UINT32      packetErrorMax;
+  UINT32      noDataTO_ms;
 }PWCDISP_FILE_HDR, *PWCDISP_FILE_HDR_PTR;
 #pragma pack()
 /*********************
@@ -219,6 +239,14 @@ typedef struct
   UINT32 validSyncCnt;
   UINT32 invalidSyncCnt;
 }PWCDISP_INVALID_PACKET_LOG;
+#pragma pack()
+
+#pragma pack(1)
+typedef struct
+{
+  UINT32 lastFrameTime;
+  UINT32 noDataTO_ms;
+}PWCDISP_DATA_LOSS_FAIL_LOG;
 #pragma pack()
 
 #pragma pack(1)
@@ -272,7 +300,8 @@ EXPORT PWCDISP_CFG_PTR       PWCDispProtocol_GetCfg(void);
 EXPORT void    PWCDispDebug_Task(void *pParam);
 EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
 EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
-EXPORT void    TranslateArrows(char charString[], UINT16 length);
+EXPORT void    PWCDispProtocol_TranslateArrows(CHAR charString[], 
+                                               UINT16 length);
 EXPORT void    PWCDispProtocol_SetRXDebug(void);
 EXPORT void    PWCDispProtocol_SetTXDebug(void);
 EXPORT BOOLEAN PWCDispProtocol_Read_Handler(void *pDest, UINT32 chan, 
@@ -283,12 +312,17 @@ EXPORT void    PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan,
                                              UINT16 nMaxByteSize);
 EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest, 
                                              const UINT16 max_size, UINT16 ch);
-
+EXPORT UINT8*  PWCDispProtocol_DataLossFlag(void);
 #endif // PWCDISP_PROTOCOL_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:15a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 1/29/16    Time: 8:57a
@@ -299,6 +333,11 @@ EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest,
  * User: John Omalley Date: 1/21/16    Time: 4:33p
  * Updated in $/software/control processor/code/system
  * SCR 1302 - Added discrete processing and code review updates
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:22p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Performance Software Updates
  * 
  * *****************  Version 3  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:10a
