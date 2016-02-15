@@ -515,7 +515,7 @@ BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHi
 /*vcast_dont_instrument_start*/
       GSE_DebugStr(NORMAL, TRUE, "Trend[%d]: Sensor[%d] stable history %d/%d.",
                               idx, pSnsrStableHist->sensorID[i],
-                              pData->absoluteStability[i].stableDurMs,
+                              pData->curStability.stableDurMs[i],
                               pData->cmdStabilityDurMs);
 /*vcast_dont_instrument_end*/
 #endif
@@ -1850,8 +1850,8 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
   UINT16*  pOutLierCnt;
 
   // Get a pointer to the Stability Criteria for this stability sensor
-  STABILITY_CRITERIA* pStabCrit   = &pCfg->stability[tblIndex];
-  ABS_STABILITY* pAbsVar = &pData->absoluteStability[tblIndex];
+  STABILITY_CRITERIA* pStabCrit = &pCfg->stability[tblIndex];
+  ABS_STABILITY*      pAbsVar   = &pData->absoluteStability[tblIndex];
 
   pLowerRefLimit = &pAbsVar->lowerValue;
   pUpperRefLimit = &pAbsVar->upperValue;
@@ -1871,8 +1871,13 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
 #ifdef TREND_DEBUG
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE,
-    "Trend[%d]: Sensor[%d]: Init Abs Var values. Range %8.4f <-|%8.4f|-> %8.4f.\r\n",
-     pData->trendIndex, pStabCrit->sensorIndex,*pLowerRefLimit,fVal,*pUpperRefLimit);
+      "Trend[%d]: Sensor[%d]: Initialized values Rng: %8.4f<-|%8.4f|->%8.4f Outlier max: %d\r\n",
+                                pData->trendIndex,
+                                pStabCrit->sensorIndex,
+                                *pLowerRefLimit,
+                                fVal,
+                                *pUpperRefLimit,
+                                pAbsVar->outLierMax);
 /*vcast_dont_instrument_end*/
 #endif
   }
@@ -1892,16 +1897,17 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
       // Check if the stability of the sensor value is exceeding the ref-point variance.
       if ((fVal > *pUpperRefLimit || fVal < *pLowerRefLimit))
       {
-        if (++*pOutLierCnt <= pAbsVar->outLierMax)
+        if ( *pOutLierCnt < pAbsVar->outLierMax )
         {
-#ifdef TREND_DEBUG
+          *pOutLierCnt = *pOutLierCnt + 1;
+          #ifdef TREND_DEBUG
           /*vcast_dont_instrument_start*/
           GSE_DebugStr(NORMAL, TRUE,
-              "Trend[%d]: Sensor[%d]  value %8.4f exceeds var. Outlier: %d Max: %d\r\n",
+              "Trend[%d]: Sensor[%d] value %8.4f exceeds var. Outlier: %d-of-%d \r\n",
                          pData->trendIndex, pStabCrit->sensorIndex, fVal, *pOutLierCnt,
                          pAbsVar->outLierMax);
             /*vcast_dont_instrument_end*/
-#endif
+            #endif
         }
         else
         {
@@ -1917,20 +1923,37 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
           *pLowerRefLimit = fVal - pStabCrit->criteria.variance;
           *pUpperRefLimit = fVal + pStabCrit->criteria.variance;
           *pOutLierCnt = 0;
-#ifdef TREND_DEBUG
-/*vcast_dont_instrument_start*/
+          #ifdef TREND_DEBUG
+          /*vcast_dont_instrument_start*/
           GSE_DebugStr(NORMAL, TRUE,
-          "Trend[%d]: Snsr %d %6.4f exceeds abs var and outlier cnt. New range %8.4f->%8.4f",
-            pData->trendIndex, pStabCrit->sensorIndex, fVal, *pLowerRefLimit, *pUpperRefLimit);
-/*vcast_dont_instrument_end*/
-#endif
+          "Trend[%d]: Sensor[%d] %6.4f exceeds var and outlier max(%d). New Var: %8.4f->%8.4f",
+                                   pData->trendIndex,
+                                   pStabCrit->sensorIndex,
+                                   fVal,
+                                   pAbsVar->outLierMax,
+                                   *pLowerRefLimit,
+                                   *pUpperRefLimit);
+          /*vcast_dont_instrument_end*/
+          #endif
         }
       }
       else // Value within variance, clear spike count
       {
+        #ifdef TREND_DEBUG
+        /*vcast_dont_instrument_start*/
+        if(*pOutLierCnt > 0)
+        {
+          GSE_DebugStr(NORMAL, TRUE,
+            "Trend[%d]: Sensor[%d] value %8.4f back in var. Outliner cnt reset from %d \r\n",
+            pData->trendIndex, pStabCrit->sensorIndex, fVal, *pOutLierCnt);
+        }
+        /*vcast_dont_instrument_end*/
+        #endif
+
         *pOutLierCnt = 0;
       }
-    }
+    } // bDoVarCheck
+
   }
   else // Sensor has failed the upper/lower max checks.
   {
@@ -1985,33 +2008,32 @@ static void TrendSetDelayStabilityStartTime(TREND_CFG* pCfg, TREND_DATA* pData)
 static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 {
   pData->cmdStabilityDurMs = 0;
-  memset(&pData->absoluteStability[0], 0, sizeof(pData->absoluteStability) );
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- * 
+ *
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:16p
  * Updated in $/software/control processor/code/application
- * SCR #1192 - Perf Enhancment improvements 
- * 
+ * SCR #1192 - Perf Enhancment improvements
+ *
  * *****************  Version 45  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p
  * Updated in $/software/control processor/code/application
  * SCR #1300 Trend.debug section and stablie duration changed to all
- * 
+ *
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 12/10/15   Time: 3:49p
  * Updated in $/software/control processor/code/application
  * SCR # 1300 CR Compliance changes.
- * 
+ *
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 6:06p
  * Updated in $/software/control processor/code/application
  * SCR #1300 CR review fixes for recently enabled debug functions
- * 
+ *
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 3:10p
  * Updated in $/software/control processor/code/application
