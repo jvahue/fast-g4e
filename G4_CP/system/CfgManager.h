@@ -9,7 +9,7 @@
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 61 $  $Date: 12/16/15 1:54p $
+ $Revision: 62 $  $Date: 2/17/16 10:13a $
 
 ******************************************************************************/
 
@@ -156,8 +156,6 @@ typedef struct
     GBS_CTL_CFG             GBSCtlConfig;
     // GBS Param Protocol Configuration
     GBS_CFGS                GBSConfigs;
-    // PWC Disp Param Protocol Configuration
-    PWCDISP_CFG             PWCDispConfig;
     // Display Processing App Configuration
     DISPLAY_SCREEN_CONFIG   DispProcAppConfig;
     // APAC Configuration
@@ -220,6 +218,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 62  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:13a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Removed the configuration as not necessary
  * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 12/16/15   Time: 1:54p

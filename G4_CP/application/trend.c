@@ -13,7 +13,7 @@
    Note:
 
  VERSION
- $Revision: 46 $  $Date: 2/01/16 5:16p $
+ $Revision: 47 $  $Date: 2/16/16 1:22p $
 
 ******************************************************************************/
 
@@ -1871,7 +1871,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
 #ifdef TREND_DEBUG
 /*vcast_dont_instrument_start*/
     GSE_DebugStr(NORMAL,TRUE,
-      "Trend[%d]: Sensor[%d]: Initialized values Rng: %8.4f<-|%8.4f|->%8.4f Outlier max: %d\r\n",
+   "Trend[%d]: Sensor[%d]: Initialized values Rng: %8.4f<-|%8.4f|->%8.4f Outlier max: %d\r\n",
                                 pData->trendIndex,
                                 pStabCrit->sensorIndex,
                                 *pLowerRefLimit,
@@ -1926,7 +1926,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
           #ifdef TREND_DEBUG
           /*vcast_dont_instrument_start*/
           GSE_DebugStr(NORMAL, TRUE,
-          "Trend[%d]: Sensor[%d] %6.4f exceeds var and outlier max(%d). New Var: %8.4f->%8.4f",
+         "Trend[%d]: Sensor[%d] %6.4f exceeds var and outlier max(%d). New Var: %8.4f->%8.4f",
                                    pData->trendIndex,
                                    pStabCrit->sensorIndex,
                                    fVal,
@@ -2013,27 +2013,32 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
- *
+ * 
+ * *****************  Version 47  *****************
+ * User: Contractor V&v Date: 2/16/16    Time: 1:22p
+ * Updated in $/software/control processor/code/application
+ * SCR #1299 - Fix bug on TrendReset was resetting max outliner allowed.
+ * 
  * *****************  Version 46  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:16p
  * Updated in $/software/control processor/code/application
- * SCR #1192 - Perf Enhancment improvements
- *
+ * SCR #1192 - Perf Enhancment improvements 
+ * 
  * *****************  Version 45  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p
  * Updated in $/software/control processor/code/application
  * SCR #1300 Trend.debug section and stablie duration changed to all
- *
+ * 
  * *****************  Version 44  *****************
  * User: Contractor V&v Date: 12/10/15   Time: 3:49p
  * Updated in $/software/control processor/code/application
  * SCR # 1300 CR Compliance changes.
- *
+ * 
  * *****************  Version 43  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 6:06p
  * Updated in $/software/control processor/code/application
  * SCR #1300 CR review fixes for recently enabled debug functions
- *
+ * 
  * *****************  Version 42  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 3:10p
  * Updated in $/software/control processor/code/application

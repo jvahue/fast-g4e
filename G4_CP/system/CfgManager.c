@@ -11,7 +11,7 @@
 
 
     VERSION
-    $Revision: 82 $  $Date: 11/19/15 4:12p $
+    $Revision: 83 $  $Date: 2/17/16 10:13a $
 
 ******************************************************************************/
 
@@ -117,8 +117,6 @@ static const CFGMGR_NVRAM DefaultNVCfg =  {
                                           {GBS_MULTI_CFG_DEFAULT},
                                           // GBS Configs
                                           {GBS_CFGS_DEFAULT},
-                                          // PWC Disp Config
-                                          {PWCDISP_CFG_DEFAULT},
                                           // Disp Processing App Config
                                           {DISPLAY_CFG_DEFAULT},
                                           // APAC Config
@@ -746,6 +744,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 83  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:13a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Removed the configuration as not necessary
  * 
  * *****************  Version 82  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:12p

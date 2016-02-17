@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 12 $  $Date: 2/02/16 9:43a $
+      $Revision: 13 $  $Date: 2/16/16 6:56p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -366,7 +366,7 @@ BOOLEAN APACMgr_IF_ValidateManual ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *ms
 BOOLEAN APACMgr_IF_RunningPAC ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                                 APAC_IF_ENUM option )
 {
-  BOOLEAN ok;
+  BOOLEAN ok, bResult, bResult1; 
   APAC_RUN_STATE_ENUM run_state;
 
   static APAC_RUN_STATE_ENUM prev_run_state = APAC_RUN_STATE_MAX;
@@ -381,10 +381,18 @@ BOOLEAN APACMgr_IF_RunningPAC ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
     m_APAC_Status.run_state = APAC_RUN_STATE_INCREASE_TQ;
     m_APAC_Status.timeout_ms  = CM_GetTickCount() +
                                 CM_DELAY_IN_SECS(m_APAC_Cfg.timeout.hIGELow_sec);
+    APACMgr_CheckHIGE_LOW( &bResult, &bResult1 ); 
+    // Need to indicate to display that TQ and GNDSP Ok immediately. 
+    run_state = (bResult && bResult1) ? APAC_RUN_STATE_STABILIZE : m_APAC_Status.run_state; 
+    run_state = (bResult && !bResult1) ? APAC_RUN_STATE_DECR_GND_SPD :  run_state;     
   }
+  else 
+  {
+    // Return current state for display
+    run_state = m_APAC_Status.run_state;
+  }
+    
 
-  // Return current state for display
-  run_state = m_APAC_Status.run_state;
   memcpy ( (UINT8 *) msg1, (UINT8 *) &APAC_STATE_RUN_STR_BUFF_CONST[run_state],
            APAC_MENU_DISPLAY_CHAR_MAX );
 
@@ -542,7 +550,7 @@ BOOLEAN APACMgr_IF_ResultCommit ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4
  *              APACMgr_IF_HistoryAdv() moves the pointer.
  *
  * Parameters:  *msg1 - Date "APR/08/2015" format OR Time   "12:31 ACP E1"
- *              *msg2 - Time "HH:MM UTC"          OR Result "A +2.6% +15C"
+ *              *msg2 - Time "HH:MM UTC"          OR Result "A +15C +2.6%"
  *              *msg3 - Not used
  *              *msg4 - Not used
  *              option - APAC_IF_DATE, APAC_IF_DAY
@@ -612,10 +620,10 @@ BOOLEAN APACMgr_IF_HistoryData ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
       snprintf(msg1, APAC_MENU_DISPLAY_CHAR_MAX, "%s %s %s", msg1,
                APAC_HIST_ACT_STR_CONST[act],
                APAC_HIST_ENG_STR_CONST[eng]);
-      snprintf(msg2, APAC_MENU_DISPLAY_CHAR_MAX, "%s %+1.1f%% %+03dC",
+      snprintf(msg2, APAC_MENU_DISPLAY_CHAR_MAX, "%s %+03dC %+1.1f%%",
                APAC_HIST_CAT_STR_CONST[nr_sel],
-               m_APAC_Hist.entry[idx].ngMargin,
-               (INT32) m_APAC_Hist.entry[idx].ittMargin);
+               (INT32) m_APAC_Hist.entry[idx].ittMargin,
+               m_APAC_Hist.entry[idx].ngMargin);
     } // end else APAC_IF_DAY
     else {
       snprintf(msg1, APAC_MENU_DISPLAY_CHAR_MAX, "%s       ", msg1);
@@ -921,6 +929,12 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Peter Lee    Date: 2/16/16    Time: 6:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #2 and #3.  1 frame _INCR_TQ when not necessary and
+ * reverse order for ITT and NG for PAC RCL menu
  * 
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 2/02/16    Time: 9:43a

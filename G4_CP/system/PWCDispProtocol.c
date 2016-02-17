@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 7 $  $Date: 2/10/16 9:15a $     
+      $Revision: 8 $  $Date: 2/17/16 10:14a $     
 
 ******************************************************************************/
 
@@ -137,7 +137,6 @@ static PWCDISP_RAW_TX_BUFFER             m_PWCDisp_TXBuff;
 
 static PWCDISP_TX_PARAM_LIST             m_PWCDisp_TXParamList;
                                          
-static PWCDISP_CFG                       m_PWCDisp_Cfg;
 static PWCDISP_DEBUG                     m_PWCDisp_Debug;
                                          
 static PWCDISP_DISPLAY_DEBUG_TASK_PARAMS pwcDisplayDebugBlock;
@@ -184,7 +183,6 @@ static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT] =
 
 static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
 static UINT8 dataLossFlag  = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
-static UINT32 newDataTimer = 0;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -284,7 +282,6 @@ void PWCDispProtocol_Initialize ( void )
   memset (&m_PWCDisp_TXBuff,      0, sizeof(m_PWCDisp_TXBuff     ));
   memset (&m_PWCDisp_RXDataFrame, 0, sizeof(m_PWCDisp_RXDataFrame));
   memset (&m_PWCDisp_TXParamList, 0, sizeof(m_PWCDisp_TXParamList));
-  memset (&m_PWCDisp_Cfg,         0, sizeof(m_PWCDisp_Cfg        ));
   memset (&m_PWCDisp_DataStore,   0, sizeof(m_PWCDisp_DataStore  ));
 
   // Initialize the Write and Read index into the Raw RX Buffer
@@ -297,14 +294,10 @@ void PWCDispProtocol_Initialize ( void )
 
   // Add an entry in the user message handler table for PWCDisp Cfg Items
   User_AddRootCmd(&pwcDispProtocolRootTblPtr);
-  
-  // Restore User Cfg
-  memcpy(&m_PWCDisp_Cfg, &CfgMgr_RuntimeConfigPtr()->PWCDispConfig, 
-         sizeof(m_PWCDisp_Cfg));
 
   // Update Start up Debug
   m_PWCDisp_Debug.bDebug       = FALSE;
-  m_PWCDisp_Debug.bProtocol    = RX_PROTOCOL; 
+  m_PWCDisp_Debug.protocol     = RX_PROTOCOL;
   m_PWCDisp_Debug.bNewRXFrame  = FALSE;
   m_PWCDisp_Debug.bNewTXFrame  = FALSE;
   
@@ -366,8 +359,6 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   PWCDISP_RAW_RX_BUFFER_PTR   rx_buff_ptr;
   PWCDISP_RAW_TX_BUFFER_PTR   tx_buff_ptr;
   PWCDISP_TX_PARAM_LIST_PTR   tx_param_ptr;
-  PWCDISP_CFG_PTR             pCfg;
-  PWCDISP_DATA_LOSS_FAIL_LOG  noDataLog;
   UINT8     *dest_ptr;
   UINT8     *end_ptr;
   BOOLEAN   bNewData, bBadTXPacket, bTXFrame;
@@ -381,7 +372,6 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   tx_buff_ptr     = (PWCDISP_RAW_TX_BUFFER_PTR) &m_PWCDisp_TXBuff;
   rx_buff_ptr     = (PWCDISP_RAW_RX_BUFFER_PTR) &m_PWCDisp_RXBuff;
   tx_param_ptr    = (PWCDISP_TX_PARAM_LIST_PTR) &m_PWCDisp_TXParamList;
-  pCfg            = (PWCDISP_CFG_PTR) &m_PWCDisp_Cfg;
   dest_ptr        = rx_buff_ptr-> pWr;
   end_ptr         = (UINT8 *) &rx_buff_ptr->data[PWCDISP_MAX_RAW_RX_BUF]; 
   
@@ -414,19 +404,10 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     
     // Attempt to synchronize and decode RX raw buffer
     bNewData = PWCDispProtocol_FrameSearch(rx_buff_ptr);
-    newDataTimer = 0;
   }
   else
   {
     dataLossFlag = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
-    if(++newDataTimer >= (pCfg->noDataTO_ms/10))
-    {
-      noDataLog.lastFrameTime = CM_GetTickCount();
-      noDataLog.noDataTO_ms = pCfg->noDataTO_ms;
-      LogWriteSystem(SYS_ID_UART_PWCDISP_NO_DATA_FAIL, LOG_PRIORITY_LOW,
-        &noDataLog, sizeof(PWCDISP_DATA_LOSS_FAIL_LOG),
-        NULL);
-    }
   }
   
   //Begin Processing TX message packets every 10 MIF Frames
@@ -525,24 +506,6 @@ PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus (void)
 PWCDISP_DEBUG_PTR PWCDispProtocol_GetDebug (void)
 {
   return((PWCDISP_DEBUG_PTR) &m_PWCDisp_Debug);
-}
-
-/******************************************************************************
- * Function:    PWCDispProtocol_GetCfg
- *
- * Description: Utility function to request current PWC Display Protocol config 
- *              state 
- *
- * Parameters:  None
- *
- * Returns:     Ptr to PWCDisp Debug Data
- *
- * Notes:       None 
- *
- *****************************************************************************/
-PWCDISP_CFG_PTR PWCDispProtocol_GetCfg(void)
-{
-  return ((PWCDISP_CFG_PTR) &m_PWCDisp_Cfg);
 }
 
 /******************************************************************************
@@ -816,8 +779,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
           pStatus->payloadSize = frame_ptr->size;
           pStatus->chksum = frame_ptr->chksum;
 	  
-          // Message is good, reset bad packet counter
-          pStatus->rx_SyncLossCnt     = 0;
+          // Message is good
           m_PWCDisp_Debug.bNewRXFrame = TRUE;
           i += (PWCDISP_RX_MAX_MSG_SIZE - 3);
           stateSearch = PWCDISP_PARAMSRCH_UPDATE_BUFFER;
@@ -899,25 +861,18 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
 {
   PWCDISP_INVALID_PACKET_LOG invalidPktLog;
   PWCDISP_RX_STATUS_PTR pStatus;
-  PWCDISP_CFG_PTR pCfg;
   
   pStatus         = (PWCDISP_RX_STATUS_PTR)&m_PWCDisp_RXStatus;
-  pCfg            = &m_PWCDisp_Cfg;
   
   // Message was deemed invalid. Update status and record any necessary logs.
   if(bBadPacket == TRUE)
   {
-    pStatus->rx_SyncLossCnt++;
     pStatus->invalidSyncCnt++;
-    if (pStatus->rx_SyncLossCnt > pCfg->packetErrorMax)
-    {
-      invalidPktLog.validSyncCnt  = pStatus->syncCnt;
-      invalidPktLog.invalidSyncCnt = pStatus->invalidSyncCnt;
-      invalidPktLog.lastFrameTime = pStatus->lastFrameTime;
-      LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
-                     &invalidPktLog, sizeof(PWCDISP_INVALID_PACKET_LOG), NULL);
-      pStatus->rx_SyncLossCnt = 0;
-    }
+    invalidPktLog.validSyncCnt   = pStatus->syncCnt;
+    invalidPktLog.invalidSyncCnt = pStatus->invalidSyncCnt;
+    invalidPktLog.lastFrameTime  = pStatus->lastFrameTime;
+    LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
+                   &invalidPktLog, sizeof(PWCDISP_INVALID_PACKET_LOG), NULL);
   }
 }
 
@@ -1143,11 +1098,11 @@ void PWCDispDebug_Task(void *pParam)
   
   if(pDebug->bDebug == TRUE)
   {
-    if(pDebug->bProtocol == RX_PROTOCOL && pDebug->bNewRXFrame == TRUE)
+    if(pDebug->protocol == RX_PROTOCOL && pDebug->bNewRXFrame == TRUE)
     {
       PWCDispDebug_RX(pParam);
     }
-    else if (pDebug->bProtocol == TX_PROTOCOL && pDebug->bNewTXFrame == TRUE)
+    else if (pDebug->protocol == TX_PROTOCOL && pDebug->bNewTXFrame == TRUE)
     {
       PWCDispDebug_TX(pParam);
     }
@@ -1394,45 +1349,6 @@ void PWCDispProtocol_DisableLiveStrm(void)
 }
 
 /******************************************************************************
- * Function:     PWCDispProtocol_SetRXDebug
- *
- * Description:  Enables the RX Protocol Debug Display
- *
- * Parameters:   None
- *
- * Returns:      None. 
- *
- * Notes:        
- *  1) Used for debugging only 
- *
- *
- *****************************************************************************/
-void PWCDispProtocol_SetRXDebug(void)
-{
-  m_PWCDisp_Debug.bProtocol = RX_PROTOCOL;
-}
-
-/******************************************************************************
- * Function:     PWCDispProtocol_SetTXDebug
- *
- * Description:  Enables the TX Protocol Debug Display
- *
- * Parameters:   None
- *
- * Returns:      None. 
- *
- * Notes:        
- *  1) Used for debugging only 
- *
- *
- *****************************************************************************/
-void PWCDispProtocol_SetTXDebug(void)
-{
-  m_PWCDisp_Debug.bProtocol = TX_PROTOCOL;
-}
-
-
-/******************************************************************************
 * Function:    PWCDispProtocol_Read_Handler
 *
 * Description: Utility function that allows a protocol to communicate in
@@ -1517,36 +1433,6 @@ void PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan, UINT16 Direction,
 }
 
 /******************************************************************************
- * Function:    PWCDispProtocol_ReturnFileHdr()
- *
- * Description: Function to return the F7X file hdr structure
- *
- * Parameters:  dest - pointer to destination buffer
- *              max_size - max size of dest buffer 
- *              ch - uart channel requested 
- *
- * Returns:     size of PWCDISP_FILE_HDR 
- *
- * Notes:       none 
- *
- *****************************************************************************/
-UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
-                                     UINT16 ch)
-{
-  PWCDISP_CFG_PTR       pCfg;
-  PWCDISP_FILE_HDR_PTR  pFileHdr;
-  
-  pCfg     = &m_PWCDisp_Cfg;
-  pFileHdr = (PWCDISP_FILE_HDR_PTR)dest;
-  
-  pFileHdr->packetErrorMax = pCfg->packetErrorMax;
-  pFileHdr->noDataTO_ms    = pCfg->noDataTO_ms;
-  pFileHdr->size = sizeof(PWCDISP_FILE_HDR);
-  
-  return(pFileHdr->size);
-}
-
-/******************************************************************************
 * Function:    PWCDispProtocol_DataLossFlag()
 *
 * Description: Function to return the Data Loss Status(i.e. synced/no data)
@@ -1563,6 +1449,26 @@ UINT8* PWCDispProtocol_DataLossFlag(void)
     return(&dataLossFlag);
 }
 
+/******************************************************************************
+* Function:    PWCDispProtocol_ReturnFileHdr()
+*
+* Description: PWC Display has no cfg items so returns 0.
+*
+* Parameters:  dest - pointer to destination buffer
+*              max_size - max size of dest buffer
+*              ch - uart channel requested
+*
+* Returns:     0
+*
+* Notes:       none
+*
+*****************************************************************************/
+UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
+    UINT16 ch)
+{
+  return(0);
+}
+
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
@@ -1570,6 +1476,11 @@ UINT8* PWCDispProtocol_DataLossFlag(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 8  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:14a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Removed configuration items
  * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:15a

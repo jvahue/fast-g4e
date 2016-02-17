@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 16 $  $Date: 2/02/16 9:43a $
+      $Revision: 17 $  $Date: 2/16/16 6:55p $
 
 ******************************************************************************/
 
@@ -175,6 +175,8 @@ static void APACMgr_CheckCycle ( APAC_ENG_ENUM i );
 static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i );
 
 static void APACMgr_RestoreAppDataHistOrder( void ); 
+
+static void APACMgr_CheckHIGE_LOW( BOOLEAN *bResult, BOOLEAN *bResult1 ); 
 
 
 // TEST
@@ -712,7 +714,6 @@ static void APACMgr_Running (void)
 {
   BOOLEAN bResult, bResult1, bResult2, bResult3, bResult4, bResult5, bResult6;
   BOOLEAN bResult7;
-  BOOLEAN validity;
   UINT32 tick, temp;
   APAC_TBL_PTR tbl_ptr;
   APAC_ENG_ENUM eng_uut;
@@ -741,16 +742,8 @@ static void APACMgr_Running (void)
     case APAC_RUN_STATE_DECR_GND_SPD:
       
       // Execute HIGE_LOW criteria to determine if cond met ?
-      bResult =  (BOOLEAN) EvalExeExpression ( EVAL_CALLER_TYPE_APAC,
-                                      (INT32) m_APAC_Status.eng_uut,
-                                      &m_APAC_Cfg.eng[m_APAC_Status.eng_uut].sc_TqCrit,
-                                      (BOOLEAN *) &validity );
-      bResult = bResult && validity;
-      bResult1 = (BOOLEAN) EvalExeExpression  ( EVAL_CALLER_TYPE_APAC,
-                                      (INT32) m_APAC_Status.eng_uut,
-                                      &m_APAC_Cfg.eng[m_APAC_Status.eng_uut].sc_GndCrit,
-                                      (BOOLEAN *) &validity );
-      bResult1 = bResult1 && validity;
+      APACMgr_CheckHIGE_LOW ( &bResult, &bResult1 ); 
+      
       // .run_state used for status display on menu for "INCREASE TQ." or "DECR GND SPD"
       m_APAC_Status.run_state = (bResult == FALSE) ? APAC_RUN_STATE_INCREASE_TQ : 
                                                      APAC_RUN_STATE_DECR_GND_SPD ; 
@@ -1286,6 +1279,7 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit )
 static void APACMgr_ClearStatus (void)
 {
   UINT16 i;
+  APAC_SNSR_STATUS_PTR snsr_status_ptr;
 
   m_APAC_Status.run_state = APAC_RUN_STATE_IDLE;
   m_APAC_Status.state = APAC_STATE_IDLE;
@@ -1298,6 +1292,11 @@ static void APACMgr_ClearStatus (void)
     memset ( (void *) &m_APAC_Status.eng[i].common, 0, sizeof(APAC_ENG_CALC_COMMON) );
     memset ( (void *) &m_APAC_Status.eng[i].itt, 0, sizeof(APAC_ENG_CALC_DATA) );
     memset ( (void *) &m_APAC_Status.eng[i].ng,  0, sizeof(APAC_ENG_CALC_DATA) );
+  }
+  snsr_status_ptr = (APAC_SNSR_STATUS_PTR) &m_APAC_Snsr_Status[0];
+  for (i=0;i<APAC_SNSR_MAX;i++) {
+    snsr_status_ptr->bNotOk = FALSE; 
+    snsr_status_ptr++; 
   }
 }
 
@@ -2236,6 +2235,38 @@ BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_
 }
 
 
+/******************************************************************************
+* Function:    APACMgr_CheckHIGE_LOW
+*
+* Description: When APAC Test is Running, check to Tq and Gnd Speed are within
+*              acceptable range
+*
+* Parameters:  *bResult - Ptr to return Tq Criteria Met (TRUE)
+*              *bResult1 - Ptr to return GndSpd Criteria Met (TRUE)
+*
+* Returns:     None
+*
+* Notes:       None
+*
+*****************************************************************************/
+static void APACMgr_CheckHIGE_LOW ( BOOLEAN *bResult, BOOLEAN *bResult1 )
+{
+  BOOLEAN validity;
+  
+  // Execute HIGE_LOW criteria to determine if cond met ?
+  *bResult =  (BOOLEAN) EvalExeExpression ( EVAL_CALLER_TYPE_APAC,
+              (INT32) m_APAC_Status.eng_uut,
+              &m_APAC_Cfg.eng[m_APAC_Status.eng_uut].sc_TqCrit,
+              (BOOLEAN *) &validity );
+  *bResult = *bResult && validity;
+  *bResult1 = (BOOLEAN) EvalExeExpression  ( EVAL_CALLER_TYPE_APAC,
+              (INT32) m_APAC_Status.eng_uut,
+              &m_APAC_Cfg.eng[m_APAC_Status.eng_uut].sc_GndCrit,
+              (BOOLEAN *) &validity );
+  *bResult1 = *bResult1 && validity;
+}
+
+
 /*****************************************************************************/
 /* TEST Functions                                                            */
 /*****************************************************************************/
@@ -2371,6 +2402,12 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 2/16/16    Time: 6:55p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #1 and #2.  GNDSP CRIT bad display and 1 frame _INCR_TQ
+ * when not necessary.
  * 
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 2/02/16    Time: 9:43a

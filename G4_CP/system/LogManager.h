@@ -12,7 +12,7 @@
                    writing and erasing logs to the data flash memory.
 
   VERSION
-    $Revision: 62 $  $Date: 2/01/16 5:21p $
+    $Revision: 63 $  $Date: 2/16/16 1:23p $
 
 ******************************************************************************/
 
@@ -267,17 +267,9 @@ typedef struct
    UINT32  savedSize;
 } LOG_EEPROM_CONFIG;
 
-typedef struct
-{
-   LOG_TYPE         logType;
-   SYS_APP_ID       source;
-   LOG_PRIORITY     priority;
-   LOG_REQ_STATUS   wrStatus;
-   RESULT           result;
-   SYS_LOG_PAYLOAD  payload;
-} SYSTEM_LOG;
-
 // Performance improvement per SCR-1192
+// The data flash header is now formally declared so that
+// memcpy can be performed for minimum sizes of header and payload.
 typedef struct
 {
   LOG_TYPE         logType;
@@ -285,13 +277,13 @@ typedef struct
   LOG_PRIORITY     priority;
   LOG_REQ_STATUS   wrStatus;
   RESULT           result;
-}SYSTEM_LOG_CTRL_HDR; // NOTE: MUST MATCH decl of SYSTEM_LOG w/o SYS_LOG_PAYLOAD substruct
+}DATA_FLASH_HDR;
 
 typedef struct
 {
-  SYSTEM_LOG_CTRL_HDR hdr;
-  SYS_LOG_PAYLOAD     payload;
-}SYSTEM_LOG_REDEF;
+   DATA_FLASH_HDR   hdr;
+   SYS_LOG_PAYLOAD  payload;
+} SYSTEM_LOG;
 
 typedef struct
 {
@@ -441,6 +433,11 @@ EXPORT void              LogETM_SetRecStateChangeEvt(INT32 tag,void (*func)(INT3
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.h $
+ * 
+ * *****************  Version 63  *****************
+ * User: Contractor V&v Date: 2/16/16    Time: 1:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment declare a DATA_FLASH header
  * 
  * *****************  Version 62  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:21p

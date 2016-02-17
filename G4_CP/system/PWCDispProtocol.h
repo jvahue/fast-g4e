@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 7 $  $Date: 2/10/16 9:15a $     
+      $Revision: 8 $  $Date: 2/17/16 10:14a $     
 
 ******************************************************************************/
 
@@ -33,12 +33,6 @@
 /******************************************************************************
                                  Package Defines
 ******************************************************************************/
-#define PWCDISP_PACKET_ERROR_MAX   100 // The maximum number of RX
-                                       // desyncronizations before 
-                                       // recording a log.
-#define PWCDISP_NO_DATA_TIMEOUT_MS 150 // The maximum amount of time the 
-                                       // protocol can receive no data before
-                                       // recording a log.
 #define PWCDISP_MAX_PARAMS         256 // The max number of parameters
                                        // able to be stored between
                                        // the protocol and the display
@@ -72,11 +66,6 @@
 #define DOWN_ARROW                0x03 //Designated Hex value for down arrow
 #define LEFT_ARROW                0x04 //Designated Hex value for left arrow
 #define ENTER_DOT                 0x05 //Designated Hex value for enter dot
-#define RX_PROTOCOL                  0 //For use in Debug
-#define TX_PROTOCOL                  1 //For use in Debug
-#define PWCDISP_CFG_DEFAULT             \
-     PWCDISP_PACKET_ERROR_MAX,          \
-     PWCDISP_NO_DATA_TIMEOUT_MS
 
 #define DISP_PRINT_PARAM(a) sizeof(a), (const char*)a
 #define DISP_PRINT_PARAMF(a,b) sizeof(a), (const char*)a, b
@@ -86,6 +75,12 @@
 /********************/
 /*   Enumerators    */
 /********************/
+typedef enum
+{
+  RX_PROTOCOL,
+  TX_PROTOCOL
+}PWCDISP_DIRECTION_ENUM;
+
 typedef enum
 {
   RXPACKETID,
@@ -182,7 +177,6 @@ typedef struct
   UINT32      syncCnt;
   UINT32      invalidSyncCnt;
   UINT32      lastFrameTime; 
-  UINT32      rx_SyncLossCnt;  
   TIMESTAMP   lastFrameTS; //RX time in TS format for snap shot recording
   }PWCDISP_RX_STATUS, *PWCDISP_RX_STATUS_PTR;
 
@@ -199,23 +193,14 @@ typedef struct
 }PWCDISP_TX_STATUS, *PWCDISP_TX_STATUS_PTR;
 
 /*********************
-*       Config       *
-*********************/
-typedef struct
-{
-  UINT32      packetErrorMax;
-  UINT32      noDataTO_ms;
-}PWCDISP_CFG, *PWCDISP_CFG_PTR;
-
-/*********************
 *       Debug        *
 *********************/
 typedef struct
 {
-  BOOLEAN     bDebug;      //Enable debug frame display
-  BOOLEAN     bProtocol;   //Protocol to debug. (TX/RX)
-  BOOLEAN     bNewRXFrame; //New frame = RX sync has occurred 
-  BOOLEAN     bNewTXFrame; //New frame = TX data checked 
+  BOOLEAN                bDebug;      //Enable debug frame display
+  PWCDISP_DIRECTION_ENUM protocol;    //Protocol to debug. (TX/RX)
+  BOOLEAN                bNewRXFrame; //New frame = RX sync has occurred 
+  BOOLEAN                bNewTXFrame; //New frame = TX data checked 
 }PWCDISP_DEBUG, *PWCDISP_DEBUG_PTR;
 
 /**********************************
@@ -239,14 +224,6 @@ typedef struct
   UINT32 validSyncCnt;
   UINT32 invalidSyncCnt;
 }PWCDISP_INVALID_PACKET_LOG;
-#pragma pack()
-
-#pragma pack(1)
-typedef struct
-{
-  UINT32 lastFrameTime;
-  UINT32 noDataTO_ms;
-}PWCDISP_DATA_LOSS_FAIL_LOG;
 #pragma pack()
 
 #pragma pack(1)
@@ -278,7 +255,18 @@ typedef struct
    #define EXPORT extern
 #endif
 
-
+#if defined (PWCDISP_PROTOCOL_BODY)
+// Directional index enumeration for modules which ref the PWC Display Protocol
+USER_ENUM_TBL protocolIndexType[] =
+{ 
+  { "RX", RX_PROTOCOL },
+  { "TX", TX_PROTOCOL },
+  { NULL, 0 }
+};
+#else
+// Export the protocolIndexType enum table
+EXPORT USER_ENUM_TBL protocolIndexType[];
+#endif
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
@@ -295,29 +283,30 @@ EXPORT PWCDISP_RX_STATUS_PTR PWCDispProtocol_GetRXStatus (void);
 EXPORT PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus (void);
 
 EXPORT PWCDISP_DEBUG_PTR     PWCDispProtocol_GetDebug (void);
-EXPORT PWCDISP_CFG_PTR       PWCDispProtocol_GetCfg(void);
 
 EXPORT void    PWCDispDebug_Task(void *pParam);
 EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
-EXPORT void    PWCDispProtocol_DisableLiveStrm(void);
 EXPORT void    PWCDispProtocol_TranslateArrows(CHAR charString[], 
                                                UINT16 length);
-EXPORT void    PWCDispProtocol_SetRXDebug(void);
-EXPORT void    PWCDispProtocol_SetTXDebug(void);
 EXPORT BOOLEAN PWCDispProtocol_Read_Handler(void *pDest, UINT32 chan, 
                                             UINT16 Direction, 
                                             UINT16 nMaxByteSize);
 EXPORT void    PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan, 
                                              UINT16 Direction, 
                                              UINT16 nMaxByteSize);
-EXPORT UINT16  PWCDispProtocol_ReturnFileHdr(UINT8 *dest, 
-                                             const UINT16 max_size, UINT16 ch);
 EXPORT UINT8*  PWCDispProtocol_DataLossFlag(void);
+EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
+                                     UINT16 ch);
 #endif // PWCDISP_PROTOCOL_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 8  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:14a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Removed configuration items
  * 
  * *****************  Version 7  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:15a

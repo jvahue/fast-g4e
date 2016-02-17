@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 5 $  $Date: 2/10/16 9:16a $
+    $Revision: 6 $  $Date: 2/17/16 10:14a $
 
 ******************************************************************************/
 #ifndef PWCDISP_PROTOCOL_BODY
@@ -48,18 +48,6 @@ static USER_HANDLER_RESULT PWCDispTXMsg_Status(USER_DATA_TYPE DataType,
                                               UINT32 Index,
                                               const void *SetPtr,
                                               void **GetPtr);
-
-static USER_HANDLER_RESULT PWCDispMsg_Cfg(USER_DATA_TYPE DataType,
-                                          USER_MSG_PARAM Param,
-                                          UINT32 Index,
-                                          const void *SetPtr,
-                                          void **GetPtr);
-
-static USER_HANDLER_RESULT PWCDispmsg_ShowConfig(USER_DATA_TYPE DataType,
-                                                 USER_MSG_PARAM Param,
-                                                 UINT32 Index,
-                                                 const void *SetPtr,
-                                                 void **GetPtr);
                                           
 static USER_HANDLER_RESULT PWCDispMsg_Debug(USER_DATA_TYPE DataType,
                                             USER_MSG_PARAM Param,
@@ -73,7 +61,6 @@ static USER_HANDLER_RESULT PWCDispMsg_Debug(USER_DATA_TYPE DataType,
 
 static PWCDISP_RX_STATUS   pwcDispRXStatusTemp;
 static PWCDISP_TX_STATUS   pwcDispTXStatusTemp;
-static PWCDISP_CFG         pwcDispCfgTemp;
 static PWCDISP_DEBUG       pwcDispDebugTemp;
 
 
@@ -101,17 +88,15 @@ static USER_MSG_TBL pwcDispRXParamTbl[] =
 
 static USER_MSG_TBL pwcDispRXStatusTbl[] =
 {
-  /*Str                Next Tbl Ptr   Handler Func.        Data Type          Access   Parameter                                     IndexRange DataLimit EnumTbl*/
-  {"SYNC",             NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &pwcDispRXStatusTemp.sync,           -1, -1,    NO_LIMIT, NULL},
-  {"CHECKSUM",         NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_HEX16,   USER_RO, (void *) &pwcDispRXStatusTemp.chksum,         -1, -1,    NO_LIMIT, NULL},
-  {"PAYLOAD_SIZE",     NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT8,   USER_RO, (void *) &pwcDispRXStatusTemp.payloadSize,    -1, -1,    NO_LIMIT, NULL},
-  {"LAST_SYNC_PERIOD", NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastSyncPeriod, -1, -1,    NO_LIMIT, NULL},
-  {"LAST_SYNC",        NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastSyncTime,   -1, -1,    NO_LIMIT, NULL},
-  {"SYNC_CNT",         NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.syncCnt,        -1, -1,    NO_LIMIT, NULL},
-  {"INVALID_SYNC_CNT", NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.invalidSyncCnt, -1, -1,    NO_LIMIT, NULL},
-  {"LAST_FRAME_TIME",  NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastFrameTime,  -1, -1,    NO_LIMIT, NULL},
-  {"MSG_CONTENTS",     pwcDispRXParamTbl, NULL,            NO_HANDLER_DATA},
-  {NULL,               NULL,          NULL,                NO_HANDLER_DATA}
+  /*Str                   Next Tbl Ptr   Handler Func.        Data Type          Access   Parameter                                     IndexRange DataLimit EnumTbl*/
+  {"SYNC",                NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &pwcDispRXStatusTemp.sync,           -1, -1,    NO_LIMIT, NULL},
+  {"LAST_SYNC_PERIOD_MS", NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastSyncPeriod, -1, -1,    NO_LIMIT, NULL},
+  {"LAST_SYNC_MS",        NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastSyncTime,   -1, -1,    NO_LIMIT, NULL},
+  {"PACKET_CNT",          NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.syncCnt,        -1, -1,    NO_LIMIT, NULL},
+  {"SYNC_LOSS_CNT",       NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.invalidSyncCnt, -1, -1,    NO_LIMIT, NULL},
+  {"LAST_FRAME_TIME_MS",  NO_NEXT_TABLE, PWCDispRXMsg_Status, USER_TYPE_UINT32,  USER_RO, (void *) &pwcDispRXStatusTemp.lastFrameTime,  -1, -1,    NO_LIMIT, NULL},
+  {"MSG_CONTENTS",        pwcDispRXParamTbl, NULL,            NO_HANDLER_DATA},
+  {NULL,                  NULL,          NULL,                NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL  pwcDispTXParamTbl[] =
@@ -154,36 +139,28 @@ static USER_MSG_TBL  pwcDispTXParamTbl[] =
 static USER_MSG_TBL pwcDispTXStatusTbl[] =
 {
   /*Str                  Next Tbl Ptr   Handler Func.        Data Type         Access   Parameter                                       IndexRange DataLimit EnumTbl*/
-  {"LAST_PACKET_PERIOD", NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastPacketPeriod, -1, -1,    NO_LIMIT, NULL},
-  {"LAST_PACKET_TIME",   NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastPacketTime,   -1, -1,    NO_LIMIT, NULL},
-  {"VALID_PACKET_CNT",   NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.validPacketCnt,   -1, -1,    NO_LIMIT, NULL},
-  {"INVALID_PACKET_CNT", NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.invalidPacketCnt, -1, -1,    NO_LIMIT, NULL},
-  {"LAST_FRAME_TIME",    NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastFrameTime,    -1, -1,    NO_LIMIT, NULL},
-  {"MSG_CONTENTS",       pwcDispTXParamTbl, NULL,            NO_HANDLER_DATA},
-  {NULL,                 NULL,          NULL,                NO_HANDLER_DATA}
-};
-
-static USER_MSG_TBL pwcDispCfgTbl[] =
-{
-  /*Str                    Next Tbl Ptr   Handler Func.   Data Type         Access   Parameter                                IndexRange DataLimit EnumTbl*/
-  {"PACKET_ERROR_MAX",     NO_NEXT_TABLE, PWCDispMsg_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &pwcDispCfgTemp.packetErrorMax, -1, -1,    NO_LIMIT, NULL},
-  {"NO_DATA_TO_MS",        NO_NEXT_TABLE, PWCDispMsg_Cfg, USER_TYPE_UINT32, USER_RW, (void *) &pwcDispCfgTemp.noDataTO_ms,    -1, -1,    NO_LIMIT, NULL},
-  {NULL,                   NULL,          NULL,           NO_HANDLER_DATA}
+  {"LAST_PACKET_PERIOD_MS", NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastPacketPeriod, -1, -1,    NO_LIMIT, NULL},
+  {"LAST_PACKET_TIME_MS",   NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastPacketTime,   -1, -1,    NO_LIMIT, NULL},
+  {"VALID_PACKET_CNT",      NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.validPacketCnt,   -1, -1,    NO_LIMIT, NULL},
+  {"INVALID_PACKET_CNT",    NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.invalidPacketCnt, -1, -1,    NO_LIMIT, NULL},
+  {"LAST_FRAME_TIME_MS",    NO_NEXT_TABLE, PWCDispTXMsg_Status, USER_TYPE_UINT32, USER_RO, (void *) &pwcDispTXStatusTemp.lastFrameTime,    -1, -1,    NO_LIMIT, NULL},
+  {"MSG_CONTENTS",          pwcDispTXParamTbl, NULL,            NO_HANDLER_DATA},
+  {NULL,                    NULL,          NULL,                NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL pwcDispDebugTbl[] =
 {
   /*Str         Next Tbl Ptr   Handler Func.     Data Type          Access              Parameter                              IndexRange DataLimit EnumTbl*/
   {"ENABLE",    NO_NEXT_TABLE, PWCDispMsg_Debug, USER_TYPE_BOOLEAN, (USER_RW|USER_GSE), (void *) &pwcDispDebugTemp.bDebug,     -1, -1,    NO_LIMIT, NULL},
-  {"PROTOCOL",  NO_NEXT_TABLE, PWCDispMsg_Debug, USER_TYPE_BOOLEAN, (USER_RW|USER_GSE), (void *) &pwcDispDebugTemp.bProtocol,  -1, -1,    NO_LIMIT, NULL},
+  {"DIRECTION", NO_NEXT_TABLE, PWCDispMsg_Debug, USER_TYPE_ENUM,    (USER_RW|USER_GSE), (void *) &pwcDispDebugTemp.protocol,   -1, -1,    NO_LIMIT, protocolIndexType},
   {NULL,        NULL,          NULL,             NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL pwcDispStatusTbl[] =
 {
-  {"RXSTATUS", pwcDispRXStatusTbl, NULL,         NO_HANDLER_DATA},
-  {"TXSTATUS", pwcDispTXStatusTbl, NULL,         NO_HANDLER_DATA},
-  {NULL,       NULL,               NULL,         NO_HANDLER_DATA}
+  {"RX", pwcDispRXStatusTbl, NULL,         NO_HANDLER_DATA},
+  {"TX", pwcDispTXStatusTbl, NULL,         NO_HANDLER_DATA},
+  {NULL, NULL,               NULL,         NO_HANDLER_DATA}
 };
 
 static USER_MSG_TBL pwcDispProtocolRoot[] =
@@ -191,8 +168,6 @@ static USER_MSG_TBL pwcDispProtocolRoot[] =
   /*Str        Next Tbl Ptr        Handler Func. Data Type*/
   {"STATUS",   pwcDispStatusTbl,   NULL,         NO_HANDLER_DATA},
   {"DEBUG",    pwcDispDebugTbl,    NULL,         NO_HANDLER_DATA},
-  {"CFG",      pwcDispCfgTbl,      NULL,         NO_HANDLER_DATA},
-  {DISPLAY_CFG,NO_NEXT_TABLE,      PWCDispmsg_ShowConfig, USER_TYPE_ACTION, (USER_RO|USER_NO_LOG|USER_GSE), NULL,     -1,-1,     NO_LIMIT, NULL},
   {NULL,       NULL,               NULL,         NO_HANDLER_DATA}
 };
 
@@ -299,61 +274,6 @@ USER_HANDLER_RESULT PWCDispTXMsg_Status(USER_DATA_TYPE DataType,
 }
 
 /******************************************************************************
- * Function:    PWCDispMsg_Cfg
- *
- * Description: Called by the User.c module from the reference to this function
- *              in the user message tables above.
- *              Retrieves and set the latest PWC Display Cfg Data
- *
- * Parameters:   [in] DataType:  C type of the data to be read or changed, used
- *                               for casting the data pointers
- *               [in/out] Param: Pointer to the configuration item to be read
- *                               or changed
- *               [in] Index:     Index parameter is used to reference the
- *                               specific sensor to change.  Range is validated
- *                               by the user manager
- *               [in] SetPtr:    For write commands, a pointer to the data to
- *                               write to the configuration.
- *               [out] GetPtr:   For read commands, UserCfg function will set
- *                               this to the location of the data requested.
- *
- * Returns:     USER_RESULT_OK:    Processed successfully
- *              USER_RESULT_ERROR: Could not be processed, value at GetPtr not
- *                                 set.
- *
- * Notes:       none
- *
-*****************************************************************************/
-static
-USER_HANDLER_RESULT PWCDispMsg_Cfg(USER_DATA_TYPE DataType,
-                                   USER_MSG_PARAM Param,
-                                   UINT32 Index,
-                                   const void *SetPtr,
-                                   void **GetPtr)
-{
-  USER_HANDLER_RESULT result;
-  
-  result = USER_RESULT_OK;
-  
-  // Determine which array element
-  memcpy(&pwcDispCfgTemp, &CfgMgr_ConfigPtr()->PWCDispConfig,
-         sizeof(pwcDispCfgTemp));
-         
-  result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
-  
-  if(SetPtr != NULL && USER_RESULT_OK == result)
-  {
-    memcpy(&CfgMgr_ConfigPtr()->PWCDispConfig, &pwcDispCfgTemp,
-           sizeof(PWCDISP_CFG));
-           
-    CfgMgr_StoreConfigItem(CfgMgr_ConfigPtr(), 
-                           &CfgMgr_ConfigPtr()->PWCDispConfig,
-                           sizeof(PWCDISP_CFG));
-  }
-  return(result);
-}
-
-/******************************************************************************
  * Function:    PWCDispMsg_Debug
  *
  * Description: Called by the User.c module from the reference to this function
@@ -387,74 +307,27 @@ USER_HANDLER_RESULT PWCDispMsg_Debug(USER_DATA_TYPE DataType,
                                      void **GetPtr)
 {
   USER_HANDLER_RESULT result;
-  
+
   result = USER_RESULT_OK;
-  
+
   pwcDispDebugTemp = *PWCDispProtocol_GetDebug();
-  
+
   result = User_GenericAccessor(DataType, Param, Index, SetPtr, GetPtr);
-  
-  *PWCDispProtocol_GetDebug() = pwcDispDebugTemp;
-  
-  return result;
-}
-
-/******************************************************************************
-* Function:    PWCDispmsg_ShowConfig
-*
-* Description:  Handles User Manager requests to retrieve the configuration
-*               settings.
-*
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used
-*                               for casting the data pointers
-*               [in/out] Param: Pointer to the configuration item to be read
-*                               or changed
-*               [in] Index:     Index parameter is used to reference the
-*                               specific sensor to change.  Range is validated
-*                               by the user manager
-*               [in] SetPtr:    For write commands, a pointer to the data to
-*                               write to the configuration.
-*               [out] GetPtr:   For read commands, UserCfg function will set
-*                               this to the location of the data requested.
-*
-*
-* Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.
-*
-* Notes:
-*****************************************************************************/
-static USER_HANDLER_RESULT PWCDispmsg_ShowConfig(USER_DATA_TYPE DataType,
-                                                 USER_MSG_PARAM Param,
-                                                 UINT32 Index,
-                                                 const void *SetPtr,
-                                                 void **GetPtr)
-{
-  USER_HANDLER_RESULT result;
-  CHAR label[USER_MAX_MSG_STR_LEN * 3];
-
-  // Top level name is a single indented space
-  CHAR branchName[USER_MAX_MSG_STR_LEN] = " ";
-
-  USER_MSG_TBL *pCfgTable;
-
-  snprintf(label, sizeof(label), "\r\n\r\nPWC_DISPLAY.CFG");
-  
-  // Assume the worst possible result
-  result = USER_RESULT_ERROR;
-  
-  if(User_OutputMsgString(label, FALSE))
+  if(SetPtr != NULL && USER_RESULT_OK == result)
   {
-    pCfgTable = pwcDispCfgTbl;
-
-    result = User_DisplayConfigTree(branchName, pCfgTable, 0, 0, NULL);
+    *PWCDispProtocol_GetDebug() = pwcDispDebugTemp;
   }
-
   return result;
 }
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispUserTables.c $
+ * 
+ * *****************  Version 6  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:14a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Removed configuration items
  * 
  * *****************  Version 5  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:16a

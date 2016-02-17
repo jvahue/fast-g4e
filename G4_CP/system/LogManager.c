@@ -17,7 +17,7 @@
                        the end has been reached.
 
     VERSION
-    $Revision: 119 $  $Date: 2/02/16 5:19p $
+    $Revision: 120 $  $Date: 2/16/16 1:23p $
 
 ******************************************************************************/
 
@@ -452,11 +452,11 @@ void LogPreInit(void)
    //Setup for log system write queue
    for (i=0; i<SYSTEM_TABLE_MAX_SIZE; i++)
    {
-      systemTable[i].logType  = LOG_TYPE_DONT_CARE;
-      systemTable[i].source   = SYS_ID_NULL_LOG;
-      systemTable[i].priority = LOG_PRIORITY_DONT_CARE;
-      systemTable[i].wrStatus = LOG_REQ_NULL;
-      systemTable[i].result   = SYS_OK;
+      systemTable[i].hdr.logType  = LOG_TYPE_DONT_CARE;
+      systemTable[i].hdr.source   = SYS_ID_NULL_LOG;
+      systemTable[i].hdr.priority = LOG_PRIORITY_DONT_CARE;
+      systemTable[i].hdr.wrStatus = LOG_REQ_NULL;
+      systemTable[i].hdr.result   = SYS_OK;
       memset(&systemTable[i].payload, 0, sizeof(systemTable[i].payload));
    }
    // set index of the first open slot
@@ -2081,23 +2081,23 @@ void LogSystemLogManageTask ( void *pParam )
    // Loop through the entire table
    for ( i = 0; i < SYSTEM_TABLE_MAX_SIZE; i++)
    {
-      if (LOG_REQ_COMPLETE == systemTable[i].wrStatus)
+      if (LOG_REQ_COMPLETE == systemTable[i].hdr.wrStatus)
       {
-         systemTable[i].wrStatus = LOG_REQ_NULL;
+         systemTable[i].hdr.wrStatus = LOG_REQ_NULL;
       }
-      else if ((LOG_REQ_PENDING == systemTable[i].wrStatus) ||
-               (LOG_REQ_INPROG  == systemTable[i].wrStatus))
+      else if ((LOG_REQ_PENDING == systemTable[i].hdr.wrStatus) ||
+               (LOG_REQ_INPROG  == systemTable[i].hdr.wrStatus))
       {
          bAllDone = FALSE;
          // Check if this is an ETM Log in progress
-         if ( systemTable[i].logType == LOG_TYPE_ETM )
+         if ( systemTable[i].hdr.logType == LOG_TYPE_ETM )
          {
             bETM_InProgress = TRUE;
          }
       }
-      else if (LOG_REQ_FAILED == systemTable[i].wrStatus)
+      else if (LOG_REQ_FAILED == systemTable[i].hdr.wrStatus)
       {
-         systemTable[i].wrStatus = LOG_REQ_NULL;
+         systemTable[i].hdr.wrStatus = LOG_REQ_NULL;
          GSE_DebugStr(NORMAL,TRUE, "SystemLogMngTask: Write Failed");
       }
 
@@ -2693,7 +2693,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
   UINT32     i = 0;
   INT32      intLevel;
   BOOLEAN bSlotFound;
-  SYSTEM_LOG_REDEF* pSysLogRedef = NULL;
+  SYSTEM_LOG* pSysTblLog = NULL;
 
   ASSERT(nSize <= LOG_SYSTEM_ETM_MAX_SIZE);
 
@@ -2712,9 +2712,9 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
    }
 
    // Set sysLog record
-   sysLog.logType                = logType;
-   sysLog.source                 = logID;
-   sysLog.priority               = priority;
+   sysLog.hdr.logType                = logType;
+   sysLog.hdr.source                 = logID;
+   sysLog.hdr.priority               = priority;
 
    // Set the payload fields.
    // Init nChecksum value so ChecksumBuffer() doesn't add
@@ -2736,7 +2736,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
 
    // Since the systemTable is larger than the log queue which deletes the oldest queue entry,
    // we should always find the 'next' entry free
-   if( LOG_REQ_NULL == systemTable[m_nextSysTableIdx].wrStatus )
+   if( LOG_REQ_NULL == systemTable[m_nextSysTableIdx].hdr.wrStatus )
    {
      // Protect against trying to write multiple logs to the same entry
      intLevel = __DIR();
@@ -2745,34 +2745,35 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
      // sysLog will go in the next systemTable entry
      i = m_nextSysTableIdx;
 
-     // Increment index for next systemTable entry, with wrap-around.
+     // Increment index for the next systemTable entry
+     // if current m_nextSysTableIdx is at the last entry, wrap-around.
      m_nextSysTableIdx = (m_nextSysTableIdx < (SYSTEM_TABLE_MAX_SIZE - 1))
-                          ? ++m_nextSysTableIdx
+                          ? (m_nextSysTableIdx + 1)
                           : 0;
 
      // Get a pointer to the system table entry, cast it
      // so copy may be done in two memcpy
-     pSysLogRedef =  (SYSTEM_LOG_REDEF*)&systemTable[i];
+     pSysTblLog =  &systemTable[i];
 
      // copy header info
-     memcpy( pSysLogRedef, &sysLog, sizeof(pSysLogRedef->hdr) );
+     memcpy( pSysTblLog, &sysLog, sizeof(pSysTblLog->hdr) );
 
      // copy payload.hdr + payload.data for the minimum size of the log
-     memcpy( &pSysLogRedef->payload,
+     memcpy( &pSysTblLog->payload,
              &sysLog.payload,
-             ( sizeof(pSysLogRedef->payload.hdr) + nSize ) );
+             ( sizeof(pSysTblLog->payload.hdr) + nSize ) );
 
-     source.id = sysLog.source;
+     source.id = sysLog.hdr.source;
      LogWrite(logType,
               source,
-              pSysLogRedef->hdr.priority,
-              &pSysLogRedef->payload,
-              pSysLogRedef->payload.hdr.nSize +
-              sizeof(pSysLogRedef->payload.hdr),
+              pSysTblLog->hdr.priority,
+              &pSysTblLog->payload,
+              pSysTblLog->payload.hdr.nSize +
+              sizeof(pSysTblLog->payload.hdr),
               (sysLog.payload.hdr.nChecksum +
               ChecksumBuffer(&sysLog.payload.hdr.nChecksum,
               sizeof(UINT32), LOG_CHKSUM_BLANK) ),
-              &(pSysLogRedef->hdr.wrStatus) );
+              &(pSysTblLog->hdr.wrStatus) );
 
      // Enable the RMT Task
      if ( logSystemInit )
@@ -2791,7 +2792,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
    // Update Log ETM recording busy status
    // Updates the flag if an ETM Log is requested to be written and the
    // flag is not already set.
-   if((LOG_TYPE_ETM == sysLog.logType) && (TRUE == bSlotFound) && (FALSE == is_busy))
+   if((LOG_TYPE_ETM == sysLog.hdr.logType) && (TRUE == bSlotFound) && (FALSE == is_busy))
    {
      is_busy = bSlotFound;
      if(m_event_func != NULL)
@@ -2863,8 +2864,8 @@ void LogUpdateWritePendingStatuses( void )
   {
     if (LOG_INDEX_NOT_SET != logMngBlock.logWritePending[i] )
     {
-      if ( LOG_REQ_PENDING == systemTable[ logMngBlock.logWritePending[i] ].wrStatus ||
-       LOG_REQ_INPROG  == systemTable[ logMngBlock.logWritePending[i] ].wrStatus )
+      if ( LOG_REQ_PENDING == systemTable[ logMngBlock.logWritePending[i] ].hdr.wrStatus ||
+       LOG_REQ_INPROG  == systemTable[ logMngBlock.logWritePending[i] ].hdr.wrStatus )
       {
        // Still busy... do nothing.
       }
@@ -2971,6 +2972,11 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 120  *****************
+ * User: Contractor V&v Date: 2/16/16    Time: 1:23p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - Perf Enhancment declare a DATA_FLASH header
  * 
  * *****************  Version 119  *****************
  * User: Contractor V&v Date: 2/02/16    Time: 5:19p

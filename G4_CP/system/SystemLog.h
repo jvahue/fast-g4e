@@ -16,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 129 $  $Date: 2/10/16 9:13a $
+      $Revision: 130 $  $Date: 2/17/16 10:15a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -185,7 +185,6 @@
   /*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
   SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
   SYS_LOG_ID(SYS_ID_UART_PWCDISP_TXPACKET_FAIL        ,0x5C34 ,10)\
-  SYS_LOG_ID(SYS_ID_UART_PWCDISP_NO_DATA_FAIL         ,0x5C35 ,10)\
   SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
   \
   SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_FILES_INVALID      ,0x6020 ,0)/* Cycles */\
@@ -314,6 +313,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 130  *****************
+ * User: John Omalley Date: 2/17/16    Time: 10:15a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Remove log
  * 
  * *****************  Version 129  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:13a
