@@ -1,17 +1,18 @@
 #define CMUTIL_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:     9D991
 
     File:     CfgManager.c
 
-
-    Description:
-
+    Description: Defines the configuration section and controls for storing 
+	             and retrieving the configuration from the EEPROM for the FAST 
+	             system.
 
     VERSION
-    $Revision: 83 $  $Date: 2/17/16 10:13a $
+    $Revision: 84 $  $Date: 2/22/16 9:33a $
 
 ******************************************************************************/
 
@@ -744,6 +745,11 @@ void CfgMgr_GenerateDebugLogs(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.c $
+ * 
+ * *****************  Version 84  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:33a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 83  *****************
  * User: John Omalley Date: 2/17/16    Time: 10:13a

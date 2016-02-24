@@ -1,9 +1,10 @@
 #ifndef TREND_H
 #define TREND_H
 /******************************************************************************
-                Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+             Copyright (C) 2012-2016 Pratt & Whitney Engine Services, Inc.
                     All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
 
     File:        trend.h
 
@@ -11,7 +12,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 27 $  $Date: 12/11/15 5:29p $
+  $Revision: 28 $  $Date: 2/22/16 11:39a $
 
 *******************************************************************************/
 
@@ -457,6 +458,11 @@ EXPORT void    TrendGetSampleData      ( TREND_INDEX idx, TREND_SAMPLE_DATA* pSt
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 2/22/16    Time: 11:39a
+ * Updated in $/software/control processor/code/application
+ * SCR 1300 - Code Review Update
  * 
  * *****************  Version 27  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p

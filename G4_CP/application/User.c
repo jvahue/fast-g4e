@@ -1,7 +1,9 @@
 #define USER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:       9D991
 
     File:       User.c
 
@@ -43,7 +45,7 @@
 
 
    VERSION
-   $Revision: 123 $  $Date: 11/19/15 4:10p $
+   $Revision: 124 $  $Date: 2/23/16 11:51a $
 
 ******************************************************************************/
 
@@ -1272,7 +1274,7 @@ BOOLEAN User_CvtSetStr(USER_DATA_TYPE Type,INT8* SetStr,void **SetPtr,
     case USER_TYPE_UINT16:
     case USER_TYPE_HEX32:
     case USER_TYPE_UINT32:
-    case USER_TYPE_INT8:
+    //case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     //case USER_TYPE_INT32:
     if ( strncmp("0X",SetStr,2) == 0)
@@ -1648,9 +1650,9 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
     //  sprintf(GetStr,"%d",*(UINT16*)GetPtr);
     //  break;
 
-    case USER_TYPE_INT8:
-      snprintf(GetStr,(INT32)Len, "%d",*(UINT8*)GetPtr);
-      break;
+    //case USER_TYPE_INT8:
+    //  snprintf(GetStr,(INT32)Len, "%d",*(UINT8*)GetPtr);
+    //  break;
 
     case USER_TYPE_HEX8:
       snprintf(GetStr, (INT32)Len, "0x%02X",*(UINT8*)GetPtr);
@@ -1797,10 +1799,10 @@ void User_SetMinMax(USER_RANGE *Min,USER_RANGE *Max,USER_DATA_TYPE Type)
       Max->Uint = noLimit ? UINT32_MAX : MIN(UINT32_MAX,Max->Uint);
       break;
 
-    case USER_TYPE_INT8:
-      Min->Sint = noLimit ? INT8_MIN   : MAX(INT8_MIN,Min->Sint);
-      Max->Sint = noLimit ? INT8_MAX   : MIN(INT8_MAX,Max->Sint);
-      break;
+    //case USER_TYPE_INT8:
+    //  Min->Sint = noLimit ? INT8_MIN   : MAX(INT8_MIN,Min->Sint);
+    //  Max->Sint = noLimit ? INT8_MAX   : MIN(INT8_MAX,Max->Sint);
+    //  break;
 
     //case USER_TYPE_INT16:
     //  Min->Sint = NoLimit ? INT16_MIN  : MAX(INT16_MIN,Min->Sint);
@@ -1902,7 +1904,7 @@ void User_ConversionErrorResponse(INT8* RspStr,USER_RANGE Min,USER_RANGE Max,
                Min.Uint,Max.Uint, USER_MSG_VFY_FORMAT);
       break;
 
-    case USER_TYPE_INT8:
+    //case USER_TYPE_INT8:
     //case USER_TYPE_INT16:
     case USER_TYPE_INT32:
       snprintf(RspStr,destLength,USER_MSG_CMD_CONVERSION_ERR"valid range is %d to %d.%s",
@@ -2409,10 +2411,8 @@ USER_HANDLER_RESULT User_GenericAccessor(USER_DATA_TYPE DataType,
         *(BOOLEAN *) Param.Ptr = *(BOOLEAN*)SetPtr;
         break;
 
-     
-      case USER_TYPE_INT8:
-      
      /*
+      case USER_TYPE_INT8:
       case USER_TYPE_INT16:
       case USER_TYPE_ENUM8:
       case USER_TYPE_ENUM16:
@@ -3121,6 +3121,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 124  *****************
+ * User: John Omalley Date: 2/23/16    Time: 11:51a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 123  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:10p

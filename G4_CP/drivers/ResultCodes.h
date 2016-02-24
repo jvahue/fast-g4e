@@ -1,8 +1,10 @@
 #ifndef RESULTCODES_H
 #define RESULTCODES_H
 /******************************************************************************
- *         Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+ *         Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
  *              All Rights Reserved. Proprietary and Confidential.
+ *
+ * ECCN:          9D991
  *
  * File:          ResultCodes.h
  *
@@ -19,7 +21,7 @@
  *                different types of error reporting from different drivers
  *
  *  VERSION
- *    $Revision: 61 $  $Date: 12/18/15 11:09a $
+ *    $Revision: 62 $  $Date: 2/22/16 9:27a $
  *
  *
 ******************************************************************************/
@@ -222,6 +224,11 @@ EXPORT const CHAR* RcGetResultCodeString(RESULT Result, CHAR* outstr);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ResultCodes.h $
+ * 
+ * *****************  Version 62  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:27a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Code Review Update
  * 
  * *****************  Version 61  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:09a

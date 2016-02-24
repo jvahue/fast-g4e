@@ -1,14 +1,17 @@
 #define ENGINERUN_USERTABLES_BODY
 /******************************************************************************
-Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
-All Rights Reserved. Proprietary and Confidential.
+        Copyright (C) 2012-2016 Pratt & Whitney Engine Services, Inc.
+            All Rights Reserved. Proprietary and Confidential.
+
+ECCN:          9D991
 
 File:          EngineRunUserTables.c
 
-Description:
+Description:   User tables for configuration and status for the enginerun 
+               object.
 
 VERSION
-$Revision: 27 $  $Date: 11/05/15 6:46p $
+$Revision: 28 $  $Date: 2/23/16 9:59a $
 
 ******************************************************************************/
 #ifndef ENGINERUN_BODY
@@ -263,7 +266,7 @@ static USER_MSG_TBL engSerialNoCfgCmd [] =
 static USER_MSG_TBL engSerialNoSatusCmd [] =
 {
   /*Str             Next Tbl Ptr     Handler Func         Data Type            Access       Parameter                    IndexRange          DataLimit             EnumTbl*/
-  {"ESN",           NO_NEXT_TABLE,   EngSerialNoStatus,   USER_TYPE_STR,       USER_RO,     &m_EngSerialStatusTemp.esn,  0, MAX_ENGINES-1,   0, ENG_ESN_MAX_LEN,   engSNPortIndexStrs },
+  {"ESN",           NO_NEXT_TABLE,   EngSerialNoStatus,   USER_TYPE_STR,       USER_RO,     m_EngSerialStatusTemp.esn,  0, MAX_ENGINES-1,   0, ENG_ESN_MAX_LEN,   engSNPortIndexStrs },
   { NULL,           NULL,            NULL,                NO_HANDLER_DATA}
 };
 
@@ -633,6 +636,11 @@ static USER_HANDLER_RESULT EngRunShowConfig(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: EngineRunUserTables.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 2/23/16    Time: 9:59a
+ * Updated in $/software/control processor/code/application
+ * SCR 1304 - Code Review Updates
  * 
  * *****************  Version 27  *****************
  * User: Peter Lee    Date: 11/05/15   Time: 6:46p
