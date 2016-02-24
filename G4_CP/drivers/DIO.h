@@ -5,7 +5,7 @@
                All Rights Reserved. Proprietary and Confidential.
 
   ECCN:        9D991
-	       
+
   File:        DIO.h
 
   Description: This header file includes the variables and funtions necessary
@@ -13,7 +13,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 48 $  $Date: 2/10/16 9:20a $
+      $Revision: 49 $  $Date: 2/24/16 3:57p $
 ******************************************************************************/
 
 
@@ -35,8 +35,6 @@
 ******************************************************************************/
 #define PIN_LABEL_LEN 24
 #define DEBOUNCE_PERIOD_MS 50
-#define DISP_DISCRETE_BASE 0x3179ff34 
-#define DISP_GPIO_0 (volatile UINT8 *)(DISP_DISCRETE_BASE + 0x00)
 #ifndef WIN32
     #define DIO_R(a) *(a)
     #define DIO_W(a,m,o) (*(a) = ((o) == DIO_SetHigh) ? (*(a) | (m)) : (*(a) & ~(m)))
@@ -181,14 +179,14 @@ typedef enum{        //For defining a pin's direction
 
 typedef enum{        //Output operation, for calls to "SetOutput"
   DIO_SetLow,
-  DIO_SetHigh,
+  DIO_SetHigh
 } DIO_OUT_OP;
 
 typedef enum{
   DIO_GPIO,
   DIO_TMR2,
   DIO_FPGA,
-  DIO_DISP,
+  DIO_DISP
 }DIO_PERIPHERAL;
 
 typedef enum{         // How should discrete values be accessed.
@@ -301,6 +299,11 @@ EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 49  *****************
+ * User: John Omalley Date: 2/24/16    Time: 3:57p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 48  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:20a

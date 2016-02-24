@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 35 $  $Date: 12/15/15 5:06p $
+    $Revision: 36 $  $Date: 2/23/16 4:07p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -90,6 +90,12 @@ static USER_HANDLER_RESULT Trend_DsplySampleData( USER_DATA_TYPE DataType,
                                                    UINT32 Index,
                                                    const void *SetPtr,
                                                    void **GetPtr );
+
+static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
+                                                     USER_MSG_PARAM Param,
+                                                     UINT32 Index,
+                                                     const void *SetPtr,
+                                                     void **GetPtr);
 
 /*****************************************************************************/
 /* Public Functions                                                          */
@@ -266,6 +272,7 @@ static USER_MSG_TBL trendDebugTbl [] =
   { "STOP",        NO_NEXT_TABLE,     Trend_Stop,               USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG|USER_GSE),   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
   { "GET_HIST",    NO_NEXT_TABLE,     Trend_DsplyStabilityHist, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG|USER_GSE),   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
   { "GET_SAMPLE",  NO_NEXT_TABLE,     Trend_DsplySampleData,    USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG|USER_GSE),   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
+  {"GET_STABILITY",NO_NEXT_TABLE,     Trend_DsplyStabilityState,USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG|USER_GSE),   NULL,     0,(MAX_TRENDS-1),  NO_LIMIT,  NULL},
   { NULL,          NULL,              NULL,                     NO_HANDLER_DATA}
 };
 
@@ -584,9 +591,48 @@ static USER_HANDLER_RESULT Trend_DsplySampleData(USER_DATA_TYPE DataType,USER_MS
   return USER_RESULT_OK;
 }
 
+/******************************************************************************
+ * Function:     Trend_DsplyStabilityState()
+ *
+ * Description:  Test function to simulate APAC call to TrendGetStabilityState
+ *
+ * Parameters:   USER_DATA_TYPE DataType
+ *               USER_MSG_PARAM Param
+ *               UINT32         Index
+ *               const void     *SetPtr
+ *               void           **GetPtr
+ *
+ * Returns:      None
+ *
+ * Notes:
+ *
+ *****************************************************************************/
+static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
+		                                     USER_MSG_PARAM Param, UINT32 Index,
+										                  	 const void *SetPtr,  void **GetPtr)
+{
+  STABILITY_STATE stabState;
+  UINT32          durMs;
+  SAMPLE_RESULT   sampleResult;  
+
+  TrendGetStabilityState( (TREND_INDEX)Index, &stabState, &durMs, &sampleResult );
+
+  GSE_DebugStr( NORMAL, FALSE, "StableState: %s\r\nDuration: %d\r\nLastResult: %s"NL,
+                              trendStabStateEnum[stabState].Str,
+                              durMs,
+                              trendSampleResultEnum[sampleResult].Str );
+  return USER_RESULT_OK;
+}
+
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: Contractor V&v Date: 2/23/16    Time: 4:07p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Add a GSE debug to retrieve stability state, dur and last
+ * result
  * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 12/15/15   Time: 5:06p

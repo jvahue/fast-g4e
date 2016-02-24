@@ -1,7 +1,9 @@
 #define INITIALIZATION_MANAGER_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:        9D991
 
   File:        InitializationManager.c
 
@@ -10,7 +12,7 @@
                System and Application.
 
  VERSION
-     $Revision: 125 $  $Date: 1/29/16 1:45p $
+     $Revision: 126 $  $Date: 2/22/16 9:55a $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -774,6 +776,11 @@ void Im_StartupTickHandler(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: InitializationManager.c $
+ * 
+ * *****************  Version 126  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:55a
+ * Updated in $/software/control processor/code/system
+ * SCR 1308 - Code Review Update
  * 
  * *****************  Version 125  *****************
  * User: Peter Lee    Date: 1/29/16    Time: 1:45p

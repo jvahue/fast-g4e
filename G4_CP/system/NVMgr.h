@@ -1,8 +1,10 @@
 #ifndef SYS_NVMGR_H
 #define SYS_NVMGR_H
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+  ECCN:          9D991
 
   File:          NVMgr.h
 
@@ -12,7 +14,7 @@
                  to this module.
 
    VERSION
-    $Revision: 73 $  $Date: 11/19/15 4:32p $
+    $Revision: 74 $  $Date: 2/22/16 9:58a $
 
 ******************************************************************************/
 
@@ -401,6 +403,11 @@ EXPORT INT32        NV_GetFileCRC(NV_FILE_ID fileNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.h $
+ * 
+ * *****************  Version 74  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:58a
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 73  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:32p

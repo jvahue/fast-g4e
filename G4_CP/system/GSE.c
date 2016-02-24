@@ -1,8 +1,10 @@
 #define GSE_BODY
 
 /******************************************************************************
-            Copyright (C) 2008 - 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008 - 2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+ ECCN:        9D991
 
  File:        GSE.c
 
@@ -12,7 +14,7 @@
               provided.
 
  VERSION
-     $Revision: 37 $  $Date: 1/21/16 4:31p $
+     $Revision: 38 $  $Date: 2/22/16 9:48a $
 
 ******************************************************************************/
 
@@ -681,6 +683,11 @@ static void GSE_WriteDebugToDest(const CHAR* str, UINT32 size )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: GSE.c $
+ * 
+ * *****************  Version 38  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:48a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 37  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:31p

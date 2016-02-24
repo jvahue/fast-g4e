@@ -2,8 +2,10 @@
 #define USER_H
 
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         User.h
 
@@ -17,7 +19,7 @@
                   defines for user data access (ie. USER_RO)
 
     VERSION
-    $Revision: 51 $  $Date: 11/19/15 4:10p $
+    $Revision: 53 $  $Date: 2/23/16 11:51a $
 
 ******************************************************************************/
 
@@ -108,7 +110,7 @@ typedef enum{
   USER_TYPE_UINT8,
   USER_TYPE_UINT16,
   USER_TYPE_UINT32,
-  USER_TYPE_INT8,
+  //USER_TYPE_INT8,
   //USER_TYPE_INT16,
   USER_TYPE_INT32,
   USER_TYPE_HEX8,
@@ -280,6 +282,16 @@ EXPORT BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.h $
+ * 
+ * *****************  Version 53  *****************
+ * User: John Omalley Date: 2/23/16    Time: 11:51a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
+ * 
+ * *****************  Version 52  *****************
+ * User: John Omalley Date: 2/22/16    Time: 11:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Update
  * 
  * *****************  Version 51  *****************
  * User: John Omalley Date: 11/19/15   Time: 4:10p

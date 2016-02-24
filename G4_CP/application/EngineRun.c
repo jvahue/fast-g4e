@@ -10,7 +10,7 @@
     Description:
 
    VERSION
-      $Revision: 53 $  $Date: 2/01/16 5:14p $
+      $Revision: 54 $  $Date: 2/23/16 9:16a $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -1033,11 +1033,12 @@ static void EngRunCheckESN( void )
     {
       if (m_engineSerialNoCfg[i].portType != ENG_SN_PORT_NONE)
       { // NOTE: Currently only UART port has ESN decode logic
-        if (m_esn_hndl[i](m_engineSerialNoCfg[i].portIndex, &esn[0], ENG_ESN_MAX_LEN) == TRUE)
+        if (m_esn_hndl[i]((UINT16)m_engineSerialNoCfg[i].portIndex, &esn[0],
+						                                 ENG_ESN_MAX_LEN) == TRUE)
         { // Have ESN to process
           if (strncmp ( m_engineSerialNoStatus[i].esn, esn, ENG_ESN_MAX_LEN) != 0)
-          { // ESN has changed.
-            memcpy ( m_engineSerialNoStatus[i].esn, esn, ENG_ESN_MAX_LEN); // quicker with memcpy
+          { // ESN has changed. quicker with memcpy
+            memcpy ( m_engineSerialNoStatus[i].esn, esn, ENG_ESN_MAX_LEN);  
             m_engineSerialNoStatus[i].nCntChanged++;
           } // end if esn has changed
         } // end if ESN exists
@@ -1053,6 +1054,11 @@ static void EngRunCheckESN( void )
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.c $
+ * 
+ * *****************  Version 54  *****************
+ * User: John Omalley Date: 2/23/16    Time: 9:16a
+ * Updated in $/software/control processor/code/application
+ * SCR 1304 - Code Review Update
  * 
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:14p

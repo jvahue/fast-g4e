@@ -1,9 +1,10 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 /******************************************************************************
-              Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+          Copyright (C) 2012 - 2016 Pratt & Whitney Engine Services, Inc.
                  All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
 
     File:        evaluator.h
 
@@ -11,7 +12,7 @@
     Description: Function prototypes and defines for the generic evaluator engine.
 
   VERSION
-  $Revision: 20 $  $Date: 15-10-13 1:43p $
+  $Revision: 21 $  $Date: 2/22/16 9:20a $
 
 ******************************************************************************/
 
@@ -159,6 +160,11 @@ EXPORT const CHAR* EvalGetMsgFromErrCode(INT32 errNum);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Evaluator.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:20a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1304 - Code Review Updates
  * 
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 15-10-13   Time: 1:43p

@@ -695,6 +695,14 @@
 					RelativePath="..\G4_CP\application\DispProcessingUserTables.c"
 					>
 					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="Release|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -2427,6 +2435,14 @@
 					RelativePath="..\G4_CP\test\c_cover_ioPWES.c"
 					>
 					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="Release|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -2438,6 +2454,14 @@
 				<File
 					RelativePath="..\G4_CP\test\TestPoints.c"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\G4_CP\test\TestPoints.h"

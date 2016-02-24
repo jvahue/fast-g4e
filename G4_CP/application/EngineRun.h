@@ -2,8 +2,10 @@
 #define ENGINERUN_H
 
 /******************************************************************************
-            Copyright (C) 2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2012-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        EngineRun.h
 
@@ -11,7 +13,7 @@
                  data from the various interfaces.
 
     VERSION
-      $Revision: 31 $  $Date: 11/11/15 11:49a $
+      $Revision: 32 $  $Date: 2/23/16 9:35a $
 
 ******************************************************************************/
 
@@ -183,8 +185,7 @@ typedef enum
   ENG_SN_PORT_NONE,
   ENG_SN_PORT_ARINC429,  // Reserved for future. Not used today
   ENG_SN_PORT_PORT_QAR,  // Reserved for future. Not used today
-  ENG_SN_PORT_UART,
-  ENG_SN_PORT_MAX
+  ENG_SN_PORT_UART
 } ENG_SN_PORT_TYPE;
 
 typedef enum
@@ -202,7 +203,7 @@ typedef struct
 {
   ENG_SN_PORT_TYPE portType; 
   ENG_SN_PORT_INDEX portIndex; 
-} ENG_SN_CFG, *ENG_SN_CFG_PTR; 
+} ENG_SN_CFG; 
 
 typedef struct
 {
@@ -210,7 +211,7 @@ typedef struct
   
   UINT32 check_tick;    // Check / decode ESN at a slower periodic rate
   UINT32 nCntChanged;   // Count ESN changed    
-} ENG_SN_STATUS, *ENG_SN_STATUS_PTR;
+} ENG_SN_STATUS;
 
 typedef ENG_SN_CFG ENG_SN_CFGS[MAX_ENGINES];
 
@@ -260,6 +261,11 @@ EXPORT BOOLEAN          EngRunGetSN                ( UINT8 engId, CHAR *esn_ptr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: EngineRun.h $
+ * 
+ * *****************  Version 32  *****************
+ * User: John Omalley Date: 2/23/16    Time: 9:35a
+ * Updated in $/software/control processor/code/application
+ * SCR 1304 - Code Review Updates
  * 
  * *****************  Version 31  *****************
  * User: Peter Lee    Date: 11/11/15   Time: 11:49a

@@ -1,15 +1,17 @@
 #ifndef CMUTIL_H
 #define CMUTIL_H
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+ ECCN: 9D991
 
  File: CfgManager.h
 
  Description: Definitions for the non-volatile configuration data.
 
  VERSION
- $Revision: 62 $  $Date: 2/17/16 10:13a $
+ $Revision: 63 $  $Date: 2/22/16 9:41a $
 
 ******************************************************************************/
 
@@ -218,6 +220,11 @@ EXPORT UINT16 CfgMgr_GetETMBinaryHdr(INT8 *pDest, UINT16 nMaxByteSize );
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: CfgManager.h $
+ * 
+ * *****************  Version 63  *****************
+ * User: John Omalley Date: 2/22/16    Time: 9:41a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Update
  * 
  * *****************  Version 62  *****************
  * User: John Omalley Date: 2/17/16    Time: 10:13a

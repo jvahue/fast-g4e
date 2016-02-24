@@ -7,13 +7,37 @@
 
    File:        trend.c
 
-   Description:
+   Description: Trend Processing is a mechanism for capturing system behavior 
+                during the EngineRun-Active state or by API command. Up to 6 
+                trends may be configured in the system.
 
+                Trends are configured to collect sensor summary data according 
+                to the following configurable settings:
+                    - Trend Type (Standard, Commanded) 
+                    - Stability criteria
+                    - Sample period per collection.
+                    - Sample rate during a collection.
+                    - Delay interval between collections.
+                    - The maximum number of collection.
+                    - End-Period sub-sampling.
+                
+                Trends will be configured to collect sensor summary data on up to 
+                32 sensors.
 
-   Note:
+                A trend can transition between the following states:
+                    - IDLE - The trend is inactive, waiting for conditions to enter READY
+                    - READY - The trend is searching for stability conditions or waiting 
+                              for a direct directive to enter SAMPLE
+                    - SAMPLE - The trend is actively sampling and collecting sensor input. 
+                               After a configured time the trend will transition to IDLE 
+                               or READY.
+
+                Trend processing will support two types: STANDARD Trend and  COMMANDED Trend.
+
+   Note: None
 
  VERSION
- $Revision: 47 $  $Date: 2/16/16 1:22p $
+ $Revision: 48 $  $Date: 2/23/16 10:41a $
 
 ******************************************************************************/
 
@@ -178,10 +202,10 @@ void TrendInitialize( void )
     // NOTE: The 'nTotalSensors' count is not affected since we are counting
     // ALL configured sample sensors during the end.
 
-      SensorInitSummaryArray ( pData->endSummary,
-                               MAX_TREND_SENSORS,
-                               pCfg->sensorMap,
-                               sizeof(pCfg->sensorMap) );
+    SensorInitSummaryArray ( pData->endSummary,
+                             MAX_TREND_SENSORS,
+                             pCfg->sensorMap,
+                             sizeof(pCfg->sensorMap) );
 
     // Assign the function to use for sensor-stability determination.
     pData->pStabilityFunc = STB_STRGY_INCRMNTL == pCfg->stableStrategy
@@ -2013,6 +2037,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 48  *****************
+ * User: John Omalley Date: 2/23/16    Time: 10:41a
+ * Updated in $/software/control processor/code/application
+ * SCR 1299 - Code Review Updates
  * 
  * *****************  Version 47  *****************
  * User: Contractor V&v Date: 2/16/16    Time: 1:22p

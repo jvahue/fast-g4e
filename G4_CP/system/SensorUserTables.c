@@ -1,14 +1,16 @@
 #define SENSOR_USERTABLES_BODY
 /******************************************************************************
-        Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+        Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
             All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        SensorUserTables.c
 
     Description: User Interface for Sensor Runtime Processing
 
     VERSION
-       $Revision: 39 $  $Date: 12/03/15 5:59p $
+       $Revision: 40 $  $Date: 2/22/16 11:23a $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -596,6 +598,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 40  *****************
+ * User: John Omalley Date: 2/22/16    Time: 11:23a
+ * Updated in $/software/control processor/code/system
+ * SCR 1299 - Code Review Update
  * 
  * *****************  Version 39  *****************
  * User: Contractor V&v Date: 12/03/15   Time: 5:59p
