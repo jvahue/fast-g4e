@@ -19,7 +19,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 55 $  $Date: 1/29/15 4:43p $
+     $Revision: 56 $  $Date: 2/24/16 7:45p $
 
 ******************************************************************************/
 
@@ -71,6 +71,9 @@
 #define IS_LEAP_YEAR(Yr) ( ((Yr & 0x3) != 0) ? FALSE:\
                            ((Yr % 100) != 0) ? TRUE : \
                            ((Yr % 400) != 0) ? FALSE: TRUE )
+
+#define CM_MONTH_FEB   2   // Month maintained as 1..12
+#define CM_DAYS_FEB_LEAR_YR_INDEX  0  // Index to DaysPerMonth [] = {29, //Feb leap year
 
 #define CM_DAYS_IN_YEAR_NO_LEAP    365          // Ignoring leap year
 #define CM_DAYS_IN_YEAR_WITH_LEAP  365.242199f  // Including leap year
@@ -793,9 +796,14 @@ UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
 
   // Determine # months for current year in sec
   itemp = 0;
-  for (i=1;i<=time_struct.Month;i++)
+  for (i=1;i<time_struct.Month;i++)
   {
-    itemp += DaysPerMonth[i];
+    if ((i == CM_MONTH_FEB) && IS_LEAP_YEAR(time_struct.Year)) {
+      itemp += DaysPerMonth[CM_DAYS_FEB_LEAR_YR_INDEX];
+    }
+    else {
+      itemp += DaysPerMonth[i];
+    }
   }
   sec += (itemp * CM_SEC_IN_DAY);
 
@@ -1178,6 +1186,11 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: Peter Lee    Date: 2/24/16    Time: 7:45p
+ * Updated in $/software/control processor/code/system
+ * SCR #1305 Time Rollover @ MidNight
  * 
  * *****************  Version 55  *****************
  * User: John Omalley Date: 1/29/15    Time: 4:43p

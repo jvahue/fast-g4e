@@ -16,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 130 $  $Date: 2/17/16 10:15a $
+      $Revision: 131 $  $Date: 2/25/16 4:58p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -256,9 +256,10 @@
   SYS_LOG_ID(APP_ID_APAC_FAILURE                      ,0xB603 ,0)\
   SYS_LOG_ID(APP_ID_APAC_VLD_MANUAL                   ,0xB604 ,0)\
   \
-  SYS_LOG_ID(SYS_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
-  SYS_LOG_ID(SYS_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
-  SYS_LOG_ID(SYS_ID_DIO_DISPLAY_FAIL                  ,0xB720 ,0)\
+  SYS_LOG_ID(APP_ID_DISPLAY_APP_DHLTH_TO              ,0xB700 ,0)\
+  SYS_LOG_ID(APP_ID_DISPLAY_APP_TRANSITION            ,0xB710 ,0)\
+  SYS_LOG_ID(APP_ID_DIO_DISPLAY_FAIL                  ,0xB720 ,0)\
+  SYS_LOG_ID(APP_ID_DISPLAY_INVALID_BUTTON            ,0xB730 ,0)\
   SYS_LOG_ID(SYS_APP_ID_DONT_CARE                     ,0xFFFFFFFF ,0)
 
 typedef enum {
@@ -313,6 +314,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 131  *****************
+ * User: John Omalley Date: 2/25/16    Time: 4:58p
+ * Updated in $/software/control processor/code/system
+ * SCR 1303 - Design Review Update
  * 
  * *****************  Version 130  *****************
  * User: John Omalley Date: 2/17/16    Time: 10:15a

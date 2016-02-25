@@ -10,7 +10,7 @@
     Description: Definitions for using time units.
     
     VERSION
-    $Revision: 5 $  $Date: 8/28/12 1:06p $
+    $Revision: 6 $  $Date: 2/24/16 7:44p $
     
 ******************************************************************************/
 
@@ -63,8 +63,8 @@ typedef struct
 typedef struct
 {
     UINT16          Year;              // 1997..2082
-    UINT16          Month;             // 0..11
-    UINT16          Day;               // 0..31   Day of Month
+    UINT16          Month;             // 1..12
+    UINT16          Day;               // 1..31   Day of Month
     UINT16          Hour;              // 0..23
     UINT16          Minute;            // 0..59
     UINT16          Second;            // 0..59
@@ -95,6 +95,11 @@ typedef struct
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: alt_Time.h $
+ * 
+ * *****************  Version 6  *****************
+ * User: Peter Lee    Date: 2/24/16    Time: 7:44p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1305 Time Rollover @ MidNight
  * 
  * *****************  Version 5  *****************
  * User: Jeff Vahue   Date: 8/28/12    Time: 1:06p

@@ -19,7 +19,7 @@
                this facilitates the DIO CBIT function of the system level.
 
    VERSION
-   $Revision: 59 $  $Date: 2/10/16 9:20a $
+   $Revision: 60 $  $Date: 2/25/16 4:29p $
 
 
 ******************************************************************************/
@@ -460,8 +460,9 @@ BOOLEAN DIO_ReadPin( DIO_INPUT Pin)
       }
       else if(dio_InputPins[Pin].peripheral == DIO_DISP)
       {
-        value = DIO_R(dio_InputPins[Pin].dataReg + 
-                      dio_InputPins[Pin].pinMask);
+        value = (dio_InputPins[Pin].dataReg != NULL) ? 
+          DIO_R(dio_InputPins[Pin].dataReg + dio_InputPins[Pin].pinMask)
+          : FALSE;
         bState = (value) ? ON : OFF;
       }
       else
@@ -1250,7 +1251,7 @@ void DIO_DispProtocolSetAddress(const CHAR* address,
                                 const CHAR* dispStatus)
 {
   UINT16 i = 0;
-  for (i = 0; i < DIO_MAX_INPUTS; i++)
+  for (i = 0; i < (UINT32)DIO_MAX_INPUTS; i++)
   {
     if (dio_InputPins[i].peripheral == DIO_DISP)
     {
@@ -1292,7 +1293,7 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
               [nIndex - (UINT16)DispDisc0];
 
       // Return status flag or NULL if status flag has not been initialized
-      bValid = DIO_R(displayValidationFlag);
+      bValid = (BOOLEAN)(DIO_R(displayValidationFlag));
       ++(pDisp->testCnt);
 
       if (!bValid && pDisp->bValid)
@@ -1303,7 +1304,7 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
         displayLog.totalTests    = pDisp->testCnt;
         displayLog.failReason    = 
           (DIO_DISPLAY_LOG_RESULT_ENUM)(DIO_R(displayStatus));
-        LogWriteSystem(SYS_ID_DIO_DISPLAY_FAIL, LOG_PRIORITY_LOW,
+        LogWriteSystem(APP_ID_DIO_DISPLAY_FAIL, LOG_PRIORITY_LOW,
                        &displayLog, sizeof(DIO_DISPLAY_FAIL_LOG), NULL);
       }
       pDisp->bValid = bValid;
@@ -1320,6 +1321,12 @@ BOOLEAN DIO_SensorTest(UINT16 nIndex)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.c $
+ * 
+ * *****************  Version 60  *****************
+ * User: John Omalley Date: 2/25/16    Time: 4:29p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1303 - Code Review - When compiled for the G4E there wasn't
+ * protection against NULL which caused the software to crash.
  * 
  * *****************  Version 59  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:20a

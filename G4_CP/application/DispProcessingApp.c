@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 10 $  $Date: 2/10/16 5:36p $     
+      $Revision: 11 $  $Date: 2/25/16 5:03p $     
 
 ******************************************************************************/
 
@@ -58,31 +58,31 @@ typedef struct
 
 static UARTMGR_PROTOCOL_DATA m_PWCDisp_TXData[PWCDISP_TX_ELEMENT_CNT_COMPLETE]=
 {
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 },
-  { NULL, -1, -1 }
+  { NULL },// CHARACTER_0
+  { NULL },// CHARACTER_1
+  { NULL },// CHARACTER_2
+  { NULL },// CHARACTER_3
+  { NULL },// CHARACTER_4
+  { NULL },// CHARACTER_5
+  { NULL },// CHARACTER_6
+  { NULL },// CHARACTER_7
+  { NULL },// CHARACTER_8
+  { NULL },// CHARACTER_9
+  { NULL },// CHARACTER_10
+  { NULL },// CHARACTER_11
+  { NULL },// CHARACTER_12
+  { NULL },// CHARACTER_13
+  { NULL },// CHARACTER_14
+  { NULL },// CHARACTER_15
+  { NULL },// CHARACTER_16
+  { NULL },// CHARACTER_17
+  { NULL },// CHARACTER_18
+  { NULL },// CHARACTER_19
+  { NULL },// CHARACTER_20
+  { NULL },// CHARACTER_21
+  { NULL },// CHARACTER_22
+  { NULL },// CHARACTER_23
+  { NULL } // DC_RATE
 };
 static DISPLAY_VARIABLE_TABLE m_VariableTable[MAX_SCREEN_VARIABLE_COUNT] =
 {//                  strInsert Pos Len
@@ -224,8 +224,7 @@ static DISPLAY_SCREEN_ENUM   DispProcessingApp_GetNextState(DISPLAY_BUTTON_STATE
 static void                  DispProcessingApp_NoButtonData(void);
 static void                  DispProcessingApp_CreateTransLog(DISPLAY_LOG_RESULT_ENUM result,
                                                               DISPLAY_SCREEN_ENUM previousScreen,
-                                                              DISPLAY_SCREEN_ENUM currentScreen,
-                                                              BOOLEAN reset);
+                                                              DISPLAY_SCREEN_ENUM currentScreen);
 static void                  DispProcessingApp_RestoreAppData(void);
 #include "DispProcessingUserTables.c"
 
@@ -239,7 +238,7 @@ static DISPLAY_STATE menuStateTbl[DISPLAY_SCREEN_COUNT] =
 /*M4 */{"TO BE INITIALIZED       ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, M03,  M01,  A08,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M5 */{"TO BE INITIALIZED       ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, M06,  A00,  M07,  NO_ACTION, A01,        0, 15,  1, -1, -1, -1},
 /*M6 */{"HTR/COND SOVOFF CONFIRM?", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, M02,  A00,  A01,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1}, 
-/*M7 */{"SEL ENGINE  START PAC?  ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A14,  A00,  A16,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
+/*M7 */{"SEL ENGINE  START PAC?  ", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A01,  A00,  A16,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M8 */{"RUNNING PAC 111111111111", A00,     A00,       A13,       A00,        A00,        NO_ACTION,  A00, A00, A00,  A00,  A00,  NO_ACTION, A18,        2, -1, -1, -1, -1, -1},
 /*M9 */{"UNUSED                  ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, A00,  A00,  A00,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
 /*M10*/{"UNUSED                  ", A00,     A00,       A00,       A00,        A00,        NO_ACTION,  A00, A00, A00,  A00,  A00,  NO_ACTION, NO_ACTION, -1, -1, -1, -1, -1, -1},
@@ -485,7 +484,7 @@ void DispProcessingApp_Handler(void *pParam)
       frameScreen != pStatus->currentScreen){
     pStatus->bNewDebugData = TRUE;
     DispProcessingApp_CreateTransLog(DISPLAY_LOG_TRANSITION, 
-      pStatus->previousScreen, pStatus->currentScreen, FALSE);
+      pStatus->previousScreen, pStatus->currentScreen);
   }
 
   // Update Debug menu based on if the menu string has changed.
@@ -658,23 +657,13 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
       }
     }
     
-    // If all previous button states were FALSE then accept new presses
+    //If all previous button states were FALSE then accept new presses
     if(pStatus->bButtonReset == TRUE && bButtonReset == FALSE){
       for (i = 0; i < BUTTON_STATE_COUNT; i++){
-        if( i >= UNUSED1_BUTTON){
-          if(i == EVENT_BUTTON){
-            pDest->buttonState[i]   = 
-              (BOOLEAN)(pData + (UINT16)BUTTONSTATE_EVENT)->data.value;
-            pDest->dblClickState[i] = 
-              (BOOLEAN)(pData + (UINT16)DOUBLECLICK_EVENT)->data.value;
-          }
-        }
-        else{
-          pDest->buttonState[i]   = 
-            (BOOLEAN)(pData + (UINT16)BUTTONSTATE_RIGHT + i)->data.value;
-          pDest->dblClickState[i] = 
-            (BOOLEAN)(pData + (UINT16)DOUBLECLICK_RIGHT + i)->data.value;
-        }
+        pDest->buttonState[i]   = 
+          (BOOLEAN)(pData + (UINT16)BUTTONSTATE_RIGHT + i)->data.value;
+        pDest->dblClickState[i] = 
+          (BOOLEAN)(pData + (UINT16)DOUBLECLICK_RIGHT + i)->data.value;
       }
     }
     else{                                                                          
@@ -761,7 +750,7 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
       // Update Transition Log, Reset APAC.
       if(pStatus->currentScreen != (DISPLAY_SCREEN_ENUM)HOME_SCREEN){
         DispProcessingApp_CreateTransLog(DISPLAY_LOG_TIMEOUT, 
-          pStatus->currentScreen, (DISPLAY_SCREEN_ENUM)HOME_SCREEN, TRUE);
+          pStatus->currentScreen, (DISPLAY_SCREEN_ENUM)HOME_SCREEN);
         APACMgr_IF_Reset(NULL, NULL, NULL, NULL, APAC_IF_TIMEOUT);
         pStatus->previousScreen = pStatus->currentScreen;
       }
@@ -848,6 +837,7 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
       // Update the Debug Display, Status, and Log
       pStatus->displayHealth = dispHealth;
       pStatus->bNewDebugData = TRUE;
+      CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->dispHealthTOStart);
       DispProcessingApp_D_HLTHResult(dispHealth, 0);
     }
     pStatus->bButtonEnable = FALSE;
@@ -858,6 +848,9 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
   // Set timer for PBIT and diagnostic D_HLTH codes
   else{
     pStatus->displayHealth = dispHealth;
+    if (pStatus->dispHealthTimer == 0){
+      CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->dispHealthTOStart);
+    }
   	// Report error if the Max D_HLTH nonzero wait time is reached
   	if (pStatus->dispHealthTimer == no_HS_Timeout_Converted){
       DispProcessingApp_D_HLTHResult(dispHealth, pCfg->no_HS_Timeout_s);
@@ -888,43 +881,14 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
 static
 void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
 {
-  DISPLAY_LOG_RESULT_ENUM result;
-  DISPLAY_DHLTH_LOG       displayHealthTOLog;
-  switch (dispHealth){
-    case D_HLTH_PBIT_ACTIVE:
-      result = DISPLAY_LOG_PBIT_ACTIVE;
-      break;
-    case D_HLTH_PBIT_PASS:
-      result = DISPLAY_LOG_PBIT_PASS;
-      break;
-    case D_HLTH_MON_INOP_FAULT:
-      result = DISPLAY_LOG_INOP_MON_FAULT;
-      break;
-    case D_HLTH_INOP_SIGNAL_FAULT:
-      result = DISPLAY_LOG_INOP_SIGNAL_FAULT;
-      break;
-    case D_HLTH_COM_RX_FAULT:
-      result = DISPLAY_LOG_RX_COM_FAULT;
-      break;
-    case D_HLTH_DISPLAY_FAULT:
-      result = DISPLAY_LOG_DISPLAY_FAULT;
-      break;
-    case D_HLTH_DIAGNOSTIC:
-      result = DISPLAY_LOG_DIAGNOSTIC_MODE;
-      break;
-    default:
-      result = DISPLAY_LOG_D_HLTH_UNKNOWN;
-      break;
-  }
+  DISPLAY_APP_DHLTH_TO_LOG displayHealthTOLog;
    
   // Process Log
-  displayHealthTOLog.result          = result;
-  displayHealthTOLog.d_HLTHcode      = dispHealth;
-  displayHealthTOLog.no_HS_Timeout_s = no_HS_Timeout_s;
-  CM_GetTimeAsTimestamp((TIMESTAMP *)&displayHealthTOLog.lastFrameTime);
+  displayHealthTOLog.d_HLTHcode       = dispHealth;
+  displayHealthTOLog.start_of_Timeout = m_DispProcApp_Status.dispHealthTOStart;
 
-  LogWriteETM(SYS_ID_DISPLAY_APP_DHLTH_TO, LOG_PRIORITY_LOW,
-      &displayHealthTOLog, sizeof(displayHealthTOLog), NULL);
+  LogWriteETM(APP_ID_DISPLAY_APP_DHLTH_TO, LOG_PRIORITY_LOW,
+      &displayHealthTOLog, sizeof(DISPLAY_APP_DHLTH_TO_LOG), NULL);
 }
 
 /******************************************************************************
@@ -1640,6 +1604,32 @@ DISPLAY_DEBUG_PTR DispProcessingApp_GetDebug(void)
 }
 
 /******************************************************************************
+* Function:    DispProcessingApp_ButtonLog
+*
+* Description: Assembles and records an invalid button log.
+*
+* Parameters:  buttonState[] - array of button inputs
+*              dblClkState[] - array of dblClk inputs
+*
+* Returns:     None
+*
+* Notes:       None
+*
+*****************************************************************************/
+DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[])
+{
+  DISPLAY_INVALID_BTN_LOG invalidBtnLog;
+  UINT16 i;
+
+  for (i = 0; i < BUTTON_STATE_COUNT; i++){
+    invalidBtnLog.buttonState[i] = buttonState[i];
+    invalidBtnLog.dblClkState[i] = dblClkState[i];
+  }
+  LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
+    &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
+}
+
+/******************************************************************************
  * Function:    DispProcessingApp_GetBtnInput
  *
  * Description: Returns the button pressed by the user. 
@@ -1692,11 +1682,18 @@ DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
     dblButtonState = NO_PUSH_BUTTON_DATA;
   }
   if (btnTrueCnt > 1 || dblTrueCnt > 1 || pStatus->bButtonEnable == FALSE
-      || dblTrueCnt > btnTrueCnt){
-    // Ignore button data if more than one button is pressed
+      || dblTrueCnt > btnTrueCnt || 
+      pRX_Info->buttonState[UNUSED1_BUTTON]   ||
+      pRX_Info->buttonState[UNUSED2_BUTTON]   ||
+      pRX_Info->dblClickState[UNUSED1_BUTTON] ||
+      pRX_Info->dblClickState[UNUSED2_BUTTON]){
+    // Ignore button data if more than one button is pressed or if Unused bits
+    // are active
     buttonState   = NO_PUSH_BUTTON_DATA; 
     dblClickFlag  = FALSE;
     dblClickTimer = 0;
+    DispProcessingApp_ButtonLog(pRX_Info->buttonState, 
+                                pRX_Info->dblClickState);
   }
   else{
     if(dblClickFlag == TRUE){ 
@@ -1732,7 +1729,9 @@ DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
                 (prevButtonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT))){
           buttonState            = NO_PUSH_BUTTON_DATA;
           dblClickFlag           = FALSE;
-          dblClickTimer          = 0;
+          dblClickTimer = 0;
+          DispProcessingApp_ButtonLog(pRX_Info->buttonState, 
+                                      pRX_Info->dblClickState);
         }
       }
     }
@@ -2065,21 +2064,19 @@ void DispProcAppDebug_Task(void *param)
 static
 void DispProcessingApp_CreateTransLog(DISPLAY_LOG_RESULT_ENUM result,
                                       DISPLAY_SCREEN_ENUM previousScreen,
-                                      DISPLAY_SCREEN_ENUM currentScreen,
-                                      BOOLEAN reset)
+                                      DISPLAY_SCREEN_ENUM currentScreen)
 {
-  DISPLAY_SCREEN_STATUS_PTR pStatus;
-  DISPLAY_TRANSITION_LOG    log;
+  DISPLAY_SCREEN_STATUS_PTR  pStatus;
+  DISPLAY_APP_TRANSITION_LOG log;
 
   pStatus            = (DISPLAY_SCREEN_STATUS_PTR) &m_DispProcApp_Status;
   log.result         = result;
-  log.bReset         = reset; // Is this a reset? (auto abort or dblclk left)
   log.buttonPressed  = pStatus->buttonInput;
   log.previousScreen = (UINT16)previousScreen;
   log.currentScreen  = (UINT16)currentScreen;
 
-  LogWriteSystem(SYS_ID_DISPLAY_APP_TRANSITION, LOG_PRIORITY_LOW, &log,
-                 sizeof(DISPLAY_TRANSITION_LOG), NULL);
+  LogWriteSystem(APP_ID_DISPLAY_APP_TRANSITION, LOG_PRIORITY_LOW, &log,
+                 sizeof(DISPLAY_APP_TRANSITION_LOG), NULL);
 }
 
 /******************************************************************************
@@ -2188,6 +2185,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 2/25/16    Time: 5:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Design Review Updates
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 2/10/16    Time: 5:36p
