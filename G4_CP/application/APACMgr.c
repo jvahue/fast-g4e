@@ -10,13 +10,14 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 17 $  $Date: 2/16/16 6:55p $
+      $Revision: 18 $  $Date: 2/24/16 6:13p $
 
 ******************************************************************************/
 
 //#define APAC_TIMING_TEST 1
 //#define APAC_TEST_SIM 1
 //#define APAC_TEST_DBG 1
+//#define APACMGR_CYCLE_CBIT_INCR 1
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
@@ -35,7 +36,8 @@
 #include "GSE.h"
 #include "Assert.h"
 
-EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
+EXPORT void DispProcessingApp_Initialize(BOOLEAN bEnable);
+
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
@@ -99,7 +101,9 @@ static APAC_DATA_AVG m_APAC_DataAvg[APAC_ENG_MAX];
 
 static UINT32 m_APAC_ESN_Check_tick;
 static UINT32 m_APAC_Cycle_Check_tick;
-static UINT32 m_APAC_Cycle_Inc_Check_tick; 
+#ifdef APACMGR_CYCLE_CBIT_INCR
+  static UINT32 m_APAC_Cycle_Inc_Check_tick; 
+#endif
 
 #ifdef APAC_TEST_DBG
 static APAC_DEBUG m_APAC_Debug;
@@ -171,8 +175,10 @@ static void APACMgr_InitDataAvgStructs ( void );
 static void APACMgr_CheckCfg ( void );
 static void APACMgr_InitDispNames ( void );
 
-static void APACMgr_CheckCycle ( APAC_ENG_ENUM i );
-static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i );
+#ifdef APACMGR_CYCLE_CBIT_INCR
+  static void APACMgr_CheckCycle ( APAC_ENG_ENUM i );
+  static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i );
+#endif
 
 static void APACMgr_RestoreAppDataHistOrder( void ); 
 
@@ -432,10 +438,12 @@ void APACMgr_Initialize ( void )
   memset ( (void *) &m_APAC_Hist_Status, 0, sizeof(m_APAC_Hist_Status) );
 
 #ifdef APAC_TEST_DBG
+  /*vcast_dont_instrument_start*/  
   memset ( (void *) &m_APAC_Eng_Debug, 0, sizeof(m_APAC_Eng_Debug) );
   m_APAC_Eng_Debug_Inlet = INLET_CFG_BASIC;
   m_APAC_Eng_Debug_NR_Sel = APAC_NR_SEL_100;
   memset ( (void *) &m_APAC_Debug, 0, sizeof(m_APAC_Debug));
+  /*vcast_dont_instrument_end*/
 #endif  
   memset ( (void *) &m_APAC_VLD_Log, 0, sizeof(m_APAC_VLD_Log) );
 
@@ -445,8 +453,10 @@ void APACMgr_Initialize ( void )
 
 // Test
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/ 
   m_APAC_Status.menu_invld_timeout_val_ptr_ms = &test_menu_invld_timeout_val;  // TEST
   test_menu_invld_timeout_val = 1500; // TEST
+  /*vcast_dont_instrument_end*/
 #endif
 // Test
 
@@ -512,7 +522,11 @@ void APACMgr_Initialize ( void )
 
   m_APAC_ESN_Check_tick =  tick + APAC_ESN_CHECK_TICK;
   m_APAC_Cycle_Check_tick = (tick + 50) + APAC_CYCLE_CHECK_TICK;  // Offset by 50 ms
+#ifdef APACMGR_CYCLE_CBIT_INCR  
+  /*vcast_dont_instrument_start*/
   m_APAC_Cycle_Inc_Check_tick = (tick + 100) + APAC_CYCLE_INC_CHECK_TICK;  // Offset by 100 ms
+  /*vcast_dont_instrument_end*/
+#endif  
 
   APACMgr_InitDataAvgStructs();
   
@@ -677,6 +691,8 @@ static void APACMgr_Task (void *pParam)
   } // end if timeout to check ESN change
   
   // Check if Cycle Inc CBIT 
+#ifdef APACMGR_CYCLE_CBIT_INCR
+  /*vcast_dont_instrument_start*/
   if (tick >= m_APAC_Cycle_Inc_Check_tick) 
   {
     m_APAC_Cycle_Inc_Check_tick = tick + APAC_CYCLE_INC_CHECK_TICK;  // Set next timeout
@@ -684,6 +700,8 @@ static void APACMgr_Task (void *pParam)
       APACMgr_CheckCycle ( i ); 
     }
   }
+  /*vcast_dont_instrument_end*/
+#endif  
 
   if ( m_APAC_Status.run_state != APAC_RUN_STATE_IDLE ){
     APACMgr_Running();
@@ -691,7 +709,9 @@ static void APACMgr_Task (void *pParam)
 
 // Test
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/  
   APACMgr_Simulate();
+  /*vcast_dont_instrument_end*/  
 #endif
 // Test
 
@@ -751,8 +771,10 @@ static void APACMgr_Running (void)
       {
         // Kick off trend object
 #ifdef APAC_TEST_SIM
+        /*vcast_dont_instrument_start*/  
         bResult = APACMgr_Test_TrendAppStartTrend(
                     m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel], TRUE, &rslt);
+        /*vcast_dont_instrument_end*/        
 #else
         bResult = TrendAppStartTrend(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
                                      TRUE, &rslt);
@@ -785,9 +807,11 @@ static void APACMgr_Running (void)
       // If Trend stabilizeS
       // if (APACMgr_Test_TrendStatus() == TRUE)
 #ifdef APAC_TEST_SIM
+      /*vcast_dont_instrument_start*/  
       APACMgr_Test_TrendGetStabilityState(
           m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel], &state_stability, &temp,
           &state_sample);
+      /*vcast_dont_instrument_end*/      
 #else
       TrendGetStabilityState(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
                              &state_stability, &temp, &state_sample);
@@ -817,9 +841,11 @@ static void APACMgr_Running (void)
 
     case APAC_RUN_STATE_SAMPLING:
 #ifdef APAC_TEST_SIM
+      /*vcast_dont_instrument_start*/  
       APACMgr_Test_TrendGetStabilityState(
            m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel], &state_stability, &temp,
            &state_sample);
+      /*vcast_dont_instrument_end*/      
 #else
       TrendGetStabilityState(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
                              &state_stability, &temp, &state_sample);
@@ -1331,6 +1357,7 @@ static void APACMgr_GetDataValues (void)
 #endif
 
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/ 
   if (m_APAC_Debug.simTrend == TRUE)
   {
     eng_uut = m_APAC_Status.eng_uut;
@@ -1350,6 +1377,7 @@ static void APACMgr_GetDataValues (void)
   }
   else
   {
+  /*vcast_dont_instrument_end*/  
 #endif
     TrendGetSampleData(m_APAC_Cfg.eng[m_APAC_Status.eng_uut].idxTrend[m_APAC_Status.nr_sel],
                        &data);
@@ -1383,7 +1411,9 @@ static void APACMgr_GetDataValues (void)
       pDataEntry++; // Move to next element in APAC_DATA_AVG_ENUM
     } // outer loop thru APAC_DATA_AVG_ENUM
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/ 
   }
+  /*vcast_dont_instrument_end*/
 #endif
 
 }
@@ -1929,6 +1959,8 @@ static void APACMgr_CheckCfg ( void )
 }
 
 
+#ifdef APACMGR_CYCLE_CBIT_INCR
+/*vcast_dont_instrument_start*/ 
 /******************************************************************************
 * Function:    APACMgr_CheckCycle
 *
@@ -1998,7 +2030,12 @@ static void APACMgr_CheckCycle ( APAC_ENG_ENUM i )
   }
 
 }
+/*vcast_dont_instrument_end*/
+#endif
 
+
+#ifdef APACMGR_CYCLE_CBIT_INCR
+/*vcast_dont_instrument_start*/ 
 /******************************************************************************
 * Function:    APACMgr_CheckCycleClear
 *
@@ -2021,6 +2058,8 @@ static void APACMgr_CheckCycleClear ( APAC_ENG_ENUM i )
   
   memset ( (void *) cyc_ptr, 0, sizeof(APAC_ENG_CYC_CHK) ); 
 }
+/*vcast_dont_instrument_end*/
+#endif
 
 
 /******************************************************************************
@@ -2271,6 +2310,7 @@ static void APACMgr_CheckHIGE_LOW ( BOOLEAN *bResult, BOOLEAN *bResult1 )
 /* TEST Functions                                                            */
 /*****************************************************************************/
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/ 
   static BOOLEAN APACMgr_Test_TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart,
                                                   TREND_CMD_RESULT* rslt)
   {
@@ -2298,11 +2338,13 @@ static void APACMgr_CheckHIGE_LOW ( BOOLEAN *bResult, BOOLEAN *bResult1 )
       TrendGetStabilityState( idx, pStabState, pDurMs, pSampleResult );
     }
   }
+  /*vcast_dont_instrument_end*/
 #endif
 
 
 
 #ifdef APAC_TEST_SIM
+/*vcast_dont_instrument_start*/
 static void APACMgr_Simulate ( void )
 {
   UINT32 tick;
@@ -2397,11 +2439,18 @@ static void APACMgr_Simulate ( void )
   }
 
 }
+/*vcast_dont_instrument_end*/
 #endif // APAC_TEST_SIM
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 2/24/16    Time: 6:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #4 Comment out APAC Mgr Cycle CBIT Increment test.
+ * Added a few vcast for commented out code. 
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 2/16/16    Time: 6:55p

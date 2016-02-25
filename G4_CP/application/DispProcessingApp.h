@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 10 $  $Date: 2/10/16 5:36p $     
+      $Revision: 11 $  $Date: 2/25/16 5:03p $     
 
 ******************************************************************************/
 
@@ -40,9 +40,9 @@
                                             // consecutive D_HLTH packets 
                                             // containing nonzero values after
                                             // PBIT                   = 3  sec.
-#define VERSION_NUMBER_INIT        "1.0"//The initialized value of the version
+#define VERSION_NUMBER_INIT        "?.?"//The initialized value of the version
                                         // number status string.
-#define PART_NUMBER_INIT              1 //The initialized value of the part
+#define PART_NUMBER_INIT              0 //The initialized value of the part
                                         // number status string.
 #define DISPLAY_DEFAULT_DCRATE        0 //Double Click Rate Default
 #define DBLCLICK_TIMEOUT             50 // default dbl click time in ticks. To
@@ -147,15 +147,7 @@ typedef enum
 typedef enum
 {
   DISPLAY_LOG_TIMEOUT,
-  DISPLAY_LOG_TRANSITION,
-  DISPLAY_LOG_PBIT_ACTIVE,
-  DISPLAY_LOG_PBIT_PASS,
-  DISPLAY_LOG_INOP_MON_FAULT,
-  DISPLAY_LOG_INOP_SIGNAL_FAULT,
-  DISPLAY_LOG_RX_COM_FAULT,
-  DISPLAY_LOG_DISPLAY_FAULT,
-  DISPLAY_LOG_DIAGNOSTIC_MODE,
-  DISPLAY_LOG_D_HLTH_UNKNOWN
+  DISPLAY_LOG_TRANSITION
 }DISPLAY_LOG_RESULT_ENUM;
 
 /********************************/
@@ -275,6 +267,7 @@ typedef struct
                             // of button presses.
   BOOLEAN   bNewDebugData;
   UINT32    dispHealthTimer;// The Invalid Display Health Timer
+  TIMESTAMP dispHealthTOStart; // The start of the D_HLTH Timeout
   UINT8     partNumber;     // Display Part Number
   UINT8     versionNumber;  // Display Software version
   CHAR      versionNumStr[MAX_SUBSTRING_SIZE];
@@ -300,28 +293,31 @@ typedef struct
   UINT16                   previousScreen;
   UINT16                   currentScreen;
   DISPLAY_BUTTON_STATES    buttonPressed;
-  BOOLEAN                  bReset;
-}DISPLAY_TRANSITION_LOG;
+}DISPLAY_APP_TRANSITION_LOG;
 
 typedef struct
 {
-  DISPLAY_LOG_RESULT_ENUM    result;
-  UINT32                     no_HS_Timeout_s;
-  UINT8                      d_HLTHcode;    //The D_HLTH Hex code
-  TIMESTAMP                  lastFrameTime;
-}DISPLAY_DHLTH_LOG;
+  UINT8                      d_HLTHcode; //The D_HLTH Hex code
+  TIMESTAMP                  start_of_Timeout;
+}DISPLAY_APP_DHLTH_TO_LOG;
+
+typedef struct
+{
+  BOOLEAN buttonState[BUTTON_STATE_COUNT];
+  BOOLEAN dblClkState[BUTTON_STATE_COUNT];
+}DISPLAY_INVALID_BTN_LOG;
 #pragma pack()
 /*********************
 *   Miscellaneous    *
 *********************/
 typedef struct
 {
-  TASK_INDEX      MgrTaskID;
+  TASK_INDEX      mgrTaskID;
 } DISPLAY_DEBUG_TASK_PARAMS;
 
 typedef struct
 {
-    TASK_INDEX    MgrTaskID;
+    TASK_INDEX    mgrTaskID;
 } DISPLAY_APP_TASK_PARAMS;
 
 /******************************************************************************
@@ -419,6 +415,11 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 2/25/16    Time: 5:03p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Design Review Updates
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 2/10/16    Time: 5:36p

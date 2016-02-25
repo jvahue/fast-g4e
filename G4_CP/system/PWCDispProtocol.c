@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 8 $  $Date: 2/17/16 10:14a $     
+      $Revision: 9 $  $Date: 2/25/16 4:50p $     
 
 ******************************************************************************/
 
@@ -93,21 +93,21 @@ typedef enum
 /********************/
 typedef struct
 {
-  UINT8     data[PWCDISP_MAX_RAW_RX_BUF];
-  UINT8    *pWr;
-  UINT8    *pRd;
-  UINT16    cnt;
-  UINT8    *pStart;  // For debugging
-  UINT8    *pEnd;    // For debugging
+  UINT8   data[PWCDISP_MAX_RAW_RX_BUF];
+  UINT8  *pWr;
+  UINT8  *pRd;
+  UINT16  cnt;
+  UINT8  *pStart;  // For debugging
+  UINT8  *pEnd;    // For debugging
 }PWCDISP_RAW_RX_BUFFER, *PWCDISP_RAW_RX_BUFFER_PTR;
 
 typedef struct
 {
-  BOOLEAN             bNewFrame;
-  UINT16              sync_word;
-  UINT8               size;
-  UINT16              chksum;
-  UINT8  data[PWCDISP_MAX_RX_LIST_SIZE];
+  BOOLEAN bNewFrame;
+  UINT16  sync_word;
+  UINT8   size;
+  UINT16  chksum;
+  UINT8   data[PWCDISP_MAX_RX_LIST_SIZE];
 }PWCDISP_RX_DATA_FRAME, *PWCDISP_RX_DATA_FRAME_PTR;
 
 /********************/
@@ -154,39 +154,46 @@ static UARTMGR_PROTOCOL_DATA    m_PWCDisp_TXData[PWCDISP_TX_ELEMENT_CNT_COMPLETE
 // RX Temporary Data Store
 static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT] = 
 {
- //Data  Index Range
-  {NULL, 1,    1},     //RXPACKETID
-  {NULL, 1,    1},     //BUTTONSTATE_RIGHT
-  {NULL, 1,    1},     //BUTTONSTATE_LEFT
-  {NULL, 1,    1},     //BUTTONSTATE_ENTER
-  {NULL, 1,    1},     //BUTTONSTATE_UP
-  {NULL, 1,    1},     //BUTTONSTATE_DOWN
-  {NULL, 1,    1},     //BUTTONSTATE_EVENT
-  {NULL, 1,    1},     //DOUBLECLICK_RIGHT
-  {NULL, 1,    1},     //DOUBLECLICK_LEFT
-  {NULL, 1,    1},     //DOUBLECLICK_ENTER
-  {NULL, 1,    1},     //DOUBLECLICK_UP
-  {NULL, 1,    1},     //DOUBLECLICK_DOWN
-  {NULL, 1,    1},     //DOUBLECLICK_EVENT
-  {NULL, 1,    1},     //DISCRETE_ZERO
-  {NULL, 1,    1},     //DISCRETE_ONE
-  {NULL, 1,    1},     //DISCRETE_TWO
-  {NULL, 1,    1},     //DISCRETE_THREE
-  {NULL, 1,    1},     //DISCRETE_FOUR
-  {NULL, 1,    1},     //DISCRETE_FIVE
-  {NULL, 1,    1},     //DISCRETE_SIX
-  {NULL, 1,    1},     //DISCRETE_SEVEN
-  {NULL, 1,    1},     //DISPLAY_HEALTH
-  {NULL, 1,    1},     //PART_NUMBER
-  {NULL, 1,    1}      //VERSION_NUMBER
+ //Data 
+  {NULL}, //RXPACKETID
+  {NULL}, //BUTTONSTATE_RIGHT
+  {NULL}, //BUTTONSTATE_LEFT
+  {NULL}, //BUTTONSTATE_ENTER
+  {NULL}, //BUTTONSTATE_UP
+  {NULL}, //BUTTONSTATE_DOWN
+  {NULL}, //UNUSED1_BUTTON
+  {NULL}, //UNUSED2_BUTTON
+  {NULL}, //BUTTONSTATE_EVENT
+  {NULL}, //DOUBLECLICK_RIGHT
+  {NULL}, //DOUBLECLICK_LEFT
+  {NULL}, //DOUBLECLICK_ENTER
+  {NULL}, //DOUBLECLICK_UP
+  {NULL}, //DOUBLECLICK_DOWN
+  {NULL}, //UNUSED1_DBLCLK
+  {NULL}, //UNUSED2_DBLCLK
+  {NULL}, //DOUBLECLICK_EVENT
+  {NULL}, //DISCRETE_ZERO
+  {NULL}, //DISCRETE_ONE
+  {NULL}, //DISCRETE_TWO
+  {NULL}, //DISCRETE_THREE
+  {NULL}, //DISCRETE_FOUR
+  {NULL}, //DISCRETE_FIVE
+  {NULL}, //DISCRETE_SIX
+  {NULL}, //DISCRETE_SEVEN
+  {NULL}, //DISPLAY_HEALTH
+  {NULL}, //PART_NUMBER
+  {NULL}  //VERSION_NUMBER
 };
 
-static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
-static UINT8 dataLossFlag  = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
+static UINT8  m_Str[MAX_DEBUG_STRING_SIZE];
+static UINT8  dataLossFlag = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 
+static PWCDISP_RX_STATUS_PTR PWCDispProtocol_GetRXStatus(void);
+static PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus(void); 
+static PWCDISP_DEBUG_PTR PWCDispProtocol_GetDebug(void);
 static void    PWCDispProtocol_UpdateUartMgr(void);
 static void    PWCDispProtocol_Resync(void);
 static BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr);
@@ -197,6 +204,7 @@ static void    PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket);
 static BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr);
 static BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
                                                 PWCDISP_RAW_TX_BUFFER_PTR tx_buff_ptr);
+static void    PWCDispDebug_Task(void *pParam);
 static void    PWCDispDebug_RX(void *pParam);
 static void    PWCDispDebug_TX(void *pParam);
 #include "PWCDispUserTables.c"
@@ -266,7 +274,7 @@ const PWCDISP_PARAM_NAMES pwcDisp_TX_Param_Names[PWCDISP_TX_ELEMENT_CNT_COMPLETE
  * Notes:       None
  *
  *****************************************************************************/
-void PWCDispProtocol_Initialize ( void ) 
+void PWCDispProtocol_Initialize(void)
 {  
   PWCDISP_RX_STATUS_PTR pRXStatus; 
   PWCDISP_TX_STATUS_PTR pTXStatus; 
@@ -282,7 +290,8 @@ void PWCDispProtocol_Initialize ( void )
   memset (&m_PWCDisp_TXBuff,      0, sizeof(m_PWCDisp_TXBuff     ));
   memset (&m_PWCDisp_RXDataFrame, 0, sizeof(m_PWCDisp_RXDataFrame));
   memset (&m_PWCDisp_TXParamList, 0, sizeof(m_PWCDisp_TXParamList));
-  memset (&m_PWCDisp_DataStore,   0, sizeof(m_PWCDisp_DataStore  ));
+  memset (m_PWCDisp_DataStore,    0, sizeof(m_PWCDisp_DataStore  ));
+  m_PWCDisp_RXStatus.port = (UINT8)UART_NUM_OF_UARTS;
 
   // Initialize the Write and Read index into the Raw RX Buffer
   PWCDispProtocol_Resync();
@@ -361,7 +370,9 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   PWCDISP_TX_PARAM_LIST_PTR   tx_param_ptr;
   UINT8     *dest_ptr;
   UINT8     *end_ptr;
-  BOOLEAN   bNewData, bBadTXPacket, bTXFrame;
+  BOOLEAN   bNewData;
+  BOOLEAN   bBadTXPacket;
+  BOOLEAN   bTXFrame;
   UINT16    i, sent_cnt;
   
   bNewData        = FALSE;
@@ -417,7 +428,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     bTXFrame = PWCDispProtocol_ReadTXData(tx_param_ptr);
     //Verify that all characters are approved and encode packet contents
     bBadTXPacket =
-	PWCDispProtocol_TXCharacterCheck(tx_param_ptr, tx_buff_ptr);
+    PWCDispProtocol_TXCharacterCheck(tx_param_ptr, tx_buff_ptr);
     //Update TX Debug Frame if there is new data.
     if (m_PWCDisp_Debug.bNewTXFrame != TRUE)
     {
@@ -467,6 +478,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
  * Notes:       None 
  *
  *****************************************************************************/
+static
 PWCDISP_RX_STATUS_PTR PWCDispProtocol_GetRXStatus (void)
 {
   return ((PWCDISP_RX_STATUS_PTR) &m_PWCDisp_RXStatus);
@@ -485,6 +497,7 @@ PWCDISP_RX_STATUS_PTR PWCDispProtocol_GetRXStatus (void)
  * Notes:       None 
  *
  *****************************************************************************/
+static
 PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus (void)
 {
   return ((PWCDISP_TX_STATUS_PTR) &m_PWCDisp_TXStatus);
@@ -503,6 +516,7 @@ PWCDISP_TX_STATUS_PTR PWCDispProtocol_GetTXStatus (void)
  * Notes:       None 
  *
  *****************************************************************************/
+static
 PWCDISP_DEBUG_PTR PWCDispProtocol_GetDebug (void)
 {
   return((PWCDISP_DEBUG_PTR) &m_PWCDisp_Debug);
@@ -524,8 +538,11 @@ static
 void PWCDispProtocol_UpdateUartMgr(void)
 {
   PWCDISP_RX_DATA_FRAME_PTR frame_ptr;
-  UARTMGR_PROTOCOL_DATA_PTR pData, pCurrentData;
-  UINT16 i, size, cnt;
+  UARTMGR_PROTOCOL_DATA_PTR pData;
+  UARTMGR_PROTOCOL_DATA_PTR pCurrentData;
+  UINT16 i;
+  UINT16 size;
+  UINT16 cnt;
 
   frame_ptr = &m_PWCDisp_RXDataFrame;
   pData = &m_PWCDisp_RXData[0];
@@ -542,18 +559,8 @@ void PWCDispProtocol_UpdateUartMgr(void)
   // Parse Button States and save to table
   for (i = 0; i < size; i++)
   {
-    // Account for default 0 bits
-    if (i == PWCDISP_UNUSED_BIT1)
-    {
-      (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> 
-          (i + PWCDISP_EVENT_OFFSET)) & (0x01));
-    }
-    else
-    {
-      (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> i) & (0x01));
-    }
+    (pCurrentData + i)->data.value =
+      (BOOLEAN)((frame_ptr->data[cnt] >> i) & (0x01));
   }
   cnt++;
 
@@ -562,17 +569,8 @@ void PWCDispProtocol_UpdateUartMgr(void)
   // Parse double click states and save to table
   for (i = 0; i < size; i++)
   {
-    // Account for default 0 bits
-    if (i == PWCDISP_UNUSED_BIT1)
-    {
-      (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> (i + PWCDISP_EVENT_OFFSET)) & (0x01));
-    }
-    else
-    {
-      (pCurrentData + i)->data.value =
-        (BOOLEAN)((frame_ptr->data[cnt] >> i) & (0x01));
-    }
+    (pCurrentData + i)->data.value =
+      (BOOLEAN)((frame_ptr->data[cnt] >> i) & (0x01));
   }
   cnt++;
   
@@ -601,8 +599,8 @@ void PWCDispProtocol_UpdateUartMgr(void)
   pCurrentData->data.value = frame_ptr->data[cnt];
   
   // Write the contents of the table to the UART manager
-  UartMgr_Write(pData, (UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY, RX_PROTOCOL,
-               (UINT16)PWCDISP_RX_ELEMENT_COUNT);
+  UartMgr_Write(pData, (UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY, 
+               (UINT16)RX_PROTOCOL, (UINT16)PWCDISP_RX_ELEMENT_COUNT);
 }
 /******************************************************************************
  * Function:    PWCDispProtocol_Resync()
@@ -650,9 +648,18 @@ void PWCDispProtocol_Resync(void)
 static
 BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
 {
-  BOOLEAN bNewData, bContinueSearch, bLookingForMsg, bBadPacket;
-  UINT8 *src_ptr, *end_ptr, *data, buff[PWCDISP_MAX_RAW_RX_BUF];
-  UINT16 i, j, k, checksum;
+  BOOLEAN bNewData;
+  BOOLEAN bContinueSearch;
+  BOOLEAN bLookingForMsg;
+  BOOLEAN bBadPacket;
+  UINT8 *src_ptr;
+  UINT8 *end_ptr;
+  UINT8 *data;
+  UINT8 buff[PWCDISP_MAX_RAW_RX_BUF];
+  UINT16 i;
+  UINT16 j;
+  UINT16 k;
+  UINT16 checksum;
   PWCDISP_PARAM_SEARCH_ENUM stateSearch;
   PWCDISP_RX_STATUS_PTR pStatus;
   PWCDISP_RX_DATA_FRAME_PTR frame_ptr;
@@ -684,10 +691,13 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         // Begin scanning for header while there is space for a message header
         while (src_ptr < end_ptr && bLookingForMsg == TRUE)
         { 
-          if (*src_ptr       == PWCDISP_SYNC_BYTE1       &&
-              *(src_ptr + 1) == PWCDISP_SYNC_BYTE2       &&
-              *(src_ptr + 2) == PWCDISP_MAX_RX_LIST_SIZE &&
-              *(src_ptr + 3) == PWCDISP_RX_PACKET_ID)
+          if (*src_ptr == PWCDISP_SYNC_BYTE1             &&
+              *(src_ptr + (UINT16)PWCDISP_RX_PARAM_SYNC2) 
+                 == PWCDISP_SYNC_BYTE2                   &&
+              *(src_ptr + (UINT16)PWCDISP_RX_PARAM_SIZE)  
+                 == PWCDISP_MAX_RX_LIST_SIZE             &&
+              *(src_ptr + (UINT16)PWCDISP_RX_PARAM_PACKETID) 
+                 == PWCDISP_RX_PACKET_ID)
           {
             // Discontinue searching for message header
             bLookingForMsg = FALSE;
@@ -698,6 +708,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
             {
               // Lost sync. Increment invalid packet
               pStatus->sync               = FALSE;
+              pStatus->lastSyncLossReason = SYNC_LOSS_RSN_HEADER_INVALID;
               bBadPacket                  = TRUE;
               m_PWCDisp_Debug.bNewRXFrame = TRUE;
               dataLossFlag = (UINT8)DIO_DISPLAY_SYNC_LOSS_FAIL;
@@ -706,32 +717,27 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
           }
         }
         // Header found. Begin Data extraction.
+        // Is there enough data for a full message??
         if(bLookingForMsg == FALSE &&
-          ((src_ptr + (UINT16)(PWCDISP_RX_PARAM_COUNT - 1)) < 
+          ((src_ptr + ((UINT16)PWCDISP_RX_PARAM_COUNT - 1)) < 
            (end_ptr + (PWCDISP_HEADER_SIZE-1)))) 
         {
           stateSearch = PWCDISP_PARAMSRCH_EXTRACT_DATA;
         }
-        else if (bLookingForMsg == FALSE && 
-                ((src_ptr + (UINT16)(PWCDISP_RX_PARAM_COUNT - 1)) >= 
-                 (end_ptr + (PWCDISP_HEADER_SIZE-1))))
+        else // at least four bytes left in flat buffer
         {
-          stateSearch =PWCDISP_PARAMSRCH_UPDATE_BUFFER;
-        }
-        else // four bytes left in flat buffer
-        {
-          // Not enough data. Try again later
+          // Not enough data. Try again when there is more data
           stateSearch = PWCDISP_PARAMSRCH_UPDATE_BUFFER;
         }
         break;
 
       case PWCDISP_PARAMSRCH_EXTRACT_DATA:
         // Save sync_word, size, and checksum to Frame Buffer
-        frame_ptr->sync_word = (*src_ptr << 8) | 
+        frame_ptr->sync_word = (*src_ptr << BYTE_LENGTH) | 
                                (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_SYNC2));
         frame_ptr->size      = *(src_ptr + (UINT16)PWCDISP_RX_PARAM_SIZE);
         frame_ptr->chksum    = 
-          (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_CHKSUM_HIGH) << 8) |
+          (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_CHKSUM_HIGH) << BYTE_LENGTH) |
           (*(src_ptr + (UINT16)PWCDISP_RX_PARAM_CHKSUM_LOW));
         
         // Adjust buffer position to Packet ID
@@ -748,11 +754,11 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         stateSearch = PWCDISP_PARAMSRCH_CHECKSUM;
         break;
 
-	  case PWCDISP_PARAMSRCH_CHECKSUM:
+      case PWCDISP_PARAMSRCH_CHECKSUM:
         // Calculate packet Checksum
         checksum = 0;
-        checksum += (UINT8)(frame_ptr->sync_word >> 8);
-	    checksum += (UINT8)(frame_ptr->sync_word);
+        checksum += (UINT8)(frame_ptr->sync_word >> BYTE_LENGTH);
+        checksum += (UINT8)(frame_ptr->sync_word);
         checksum += (UINT16) frame_ptr->size;
         for(k = 0; k < frame_ptr->size; k++)
         {
@@ -766,22 +772,26 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
           // and update status
           pStatus->sync = TRUE;
           pStatus->syncCnt++;
+          CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->lastSyncTS);
           pStatus->lastSyncPeriod = (CM_GetTickCount() -
-		                            pStatus->lastSyncTime);
+                                    pStatus->lastSyncTime);
           pStatus->lastSyncTime   = CM_GetTickCount();
           bNewData = TRUE;
 
-          // New RX frame. Update RX Packet Contents.
-          memcpy(pStatus->packetContents, src_ptr - (PWCDISP_RX_MAX_MSG_SIZE - 2),
+          // New Msg. Update Packet Contents minus the two checkum bytes.
+          memcpy(pStatus->packetContents, src_ptr-(PWCDISP_RX_MAX_MSG_SIZE-2),
                  PWCDISP_RX_MAX_MSG_SIZE);
 
           //Update Status and Ready Packet Size Verification
           pStatus->payloadSize = frame_ptr->size;
           pStatus->chksum = frame_ptr->chksum;
-	  
+
           // Message is good
           m_PWCDisp_Debug.bNewRXFrame = TRUE;
-          i += (PWCDISP_RX_MAX_MSG_SIZE - 3);
+          // Update the new read position to the end of the message
+          // (excluding the three bytes that have been scanned thus far 
+          //  in the header)
+          i += (PWCDISP_RX_MAX_MSG_SIZE - (PWCDISP_HEADER_SIZE - 1));
           stateSearch = PWCDISP_PARAMSRCH_UPDATE_BUFFER;
         }
         else
@@ -794,6 +804,7 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
             // Lost sync. Increment invalid packet
             pStatus->sync               = FALSE;
             bBadPacket                  = TRUE;
+            pStatus->lastSyncLossReason = SYNC_LOSS_CHECKSUM_INVALID;
             m_PWCDisp_Debug.bNewRXFrame = TRUE;
           }
           dataLossFlag = (UINT8)DIO_DISPLAY_SYNC_LOSS_FAIL;
@@ -859,7 +870,7 @@ void PWCDispProtocol_UpdateRdPtr(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr,
 static 
 void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
 {
-  PWCDISP_INVALID_PACKET_LOG invalidPktLog;
+  PWCDISP_SYNC_LOSS_LOG invalidPktLog;
   PWCDISP_RX_STATUS_PTR pStatus;
   
   pStatus         = (PWCDISP_RX_STATUS_PTR)&m_PWCDisp_RXStatus;
@@ -868,11 +879,11 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
   if(bBadPacket == TRUE)
   {
     pStatus->invalidSyncCnt++;
-    invalidPktLog.validSyncCnt   = pStatus->syncCnt;
-    invalidPktLog.invalidSyncCnt = pStatus->invalidSyncCnt;
-    invalidPktLog.lastFrameTime  = pStatus->lastFrameTime;
+    invalidPktLog.reason          = pStatus->lastSyncLossReason;
+    invalidPktLog.validSyncCnt    = pStatus->syncCnt;
+    invalidPktLog.lastKnownSyncTS = pStatus->lastSyncTS;
     LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
-                   &invalidPktLog, sizeof(PWCDISP_INVALID_PACKET_LOG), NULL);
+                   &invalidPktLog, sizeof(PWCDISP_SYNC_LOSS_LOG), NULL);
   }
 }
 
@@ -892,7 +903,7 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
 static
 void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
 {
-  PWCDISP_DISPLAY_PACKET_ERROR_LOG invalidPktLog;
+  PWCDISP_TXPACKET_FAIL_LOG invalidPktLog;
   PWCDISP_TX_STATUS_PTR pStatus;
   
   pStatus = (PWCDISP_TX_STATUS_PTR)&m_PWCDisp_TXStatus;
@@ -902,11 +913,9 @@ void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
   {
     snprintf((char *)invalidPktLog.packetContents, PWCDISP_TX_MSG_SIZE + 1, 
              "%s", (const char *)pStatus->packetContents);
-    invalidPktLog.lastFrameTime = pStatus->lastFrameTime;
     invalidPktLog.validPacketCnt = pStatus->validPacketCnt;
-    invalidPktLog.invalidPacketCnt = pStatus->invalidPacketCnt;
     LogWriteSystem(SYS_ID_UART_PWCDISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
-                   &invalidPktLog, sizeof(PWCDISP_DISPLAY_PACKET_ERROR_LOG), 
+                   &invalidPktLog, sizeof(PWCDISP_TXPACKET_FAIL_LOG), 
                    NULL);    
   }
 }
@@ -928,14 +937,17 @@ static
 BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr)
 {
   // Acquire character Parameters from the Display Processing Application
-  UARTMGR_PROTOCOL_DATA_PTR pData, pCurrentData;
+  UARTMGR_PROTOCOL_DATA_PTR pData;
+  UARTMGR_PROTOCOL_DATA_PTR pCurrentData;
   BOOLEAN bNewData;
-  UINT16 i, size;
+  UINT16 i;
+  UINT16 size;
   UINT8 *pDest;
 
   pData = (UARTMGR_PROTOCOL_DATA_PTR)&m_PWCDisp_TXData[0];
   bNewData = UartMgr_Read(pData, (UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY, 
-                         TX_PROTOCOL, (UINT16)PWCDISP_TX_ELEMENT_CNT_COMPLETE);
+                         (UINT16)TX_PROTOCOL,
+                         (UINT16)PWCDISP_TX_ELEMENT_CNT_COMPLETE);
 
   // Aquire new data if available
   if (bNewData == TRUE)
@@ -950,7 +962,7 @@ BOOLEAN PWCDispProtocol_ReadTXData(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr)
     {
       if(*pDest != (UINT8)(pCurrentData->data.value))
       {
-	    bNewData = TRUE;
+        bNewData = TRUE;
       }
       *pDest = (UINT8)pCurrentData->data.value;
       pDest++; pCurrentData++;
@@ -996,9 +1008,12 @@ static
 BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
                                          PWCDISP_RAW_TX_BUFFER_PTR tx_buff_ptr)
 {
-  UINT8 *buff, *data;
-  UINT16 i, checksum;
-  BOOLEAN bBadTXPacket, bContinueCheck;
+  UINT8 *buff;
+  UINT8 *data;
+  UINT16 i;
+  UINT16 checksum;
+  BOOLEAN bBadTXPacket;
+  BOOLEAN bContinueCheck;
   PWCDISP_TX_STATUS_PTR pStatus;
   
   buff           = (UINT8 *) &tx_buff_ptr->data[0];
@@ -1037,9 +1052,9 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
           *buff++ = *data++;
         }
         
-		*buff = (UINT8)tx_param_ptr->doubleClickRate;
+        *buff = (UINT8)tx_param_ptr->doubleClickRate;
         
-		// Ready Checksum Calculation and Encoding
+        // Ready Checksum Calculation and Encoding
         stateCheck = PWCDISP_PARAM_ENCODE_CHECKSUM;
         break;
       
@@ -1090,6 +1105,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
 * Notes:       None
 *
 *****************************************************************************/
+static 
 void PWCDispDebug_Task(void *pParam)
 {
   PWCDISP_DEBUG_PTR pDebug;
@@ -1148,7 +1164,7 @@ void PWCDispProtocol_TranslateArrows(CHAR charString[], UINT16 length)
         break;
       default:
         break;
-    };
+    }
   }
 }
 
@@ -1171,7 +1187,7 @@ static void PWCDispDebug_RX(void *pParam)
   PWCDISP_RX_STATUS_PTR pStatus;
   PWCDISP_PARAM_NAMES_PTR pName;
   UINT16 i;
-  UINT8 subString[15];
+  UINT8 subString[PWCDISP_SUBSTRING_MAX];
   
   pDebug    = &m_PWCDisp_Debug;
   pStatus   = (PWCDISP_RX_STATUS_PTR)&m_PWCDisp_RXStatus;
@@ -1198,17 +1214,17 @@ static void PWCDispDebug_RX(void *pParam)
   // Display Raw Buffer
   // Display Sync Byte 1
   snprintf((char *)m_Str, DISP_PRINT_PARAMF("SYNC1          =0x%02x\r\n",
-	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC1]));
+    pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC1]));
   GSE_PutLine( (const char *) m_Str );
     
   // Display Sync Byte 2
   snprintf((char *)m_Str, DISP_PRINT_PARAMF("SYNC2          =0x%02x\r\n",
-	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC2]));
+    pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SYNC2]));
   GSE_PutLine( (const char *) m_Str );
   
   // Display Size Byte
   snprintf((char *)m_Str, DISP_PRINT_PARAMF("SIZE_BYTE      =0x%02x\r\n",
-	pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SIZE]));
+    pStatus->packetContents[(UINT16)PWCDISP_RX_PARAM_SIZE]));
   GSE_PutLine( (const char *) m_Str );
 
   m_Str[0] = NULL;
@@ -1225,7 +1241,7 @@ static void PWCDispDebug_RX(void *pParam)
   }
 
   // Display RX last packet period
-  snprintf((char *)m_Str, 33, "LAST_PACKET_PERIOD =%10d\r\n",
+  snprintf((char *)m_Str, MAX_DEBUG_STRING_SIZE,"LAST_PACKET_PERIOD =%10d\r\n",
            pStatus->lastSyncPeriod);
   GSE_PutLine( (const char *) m_Str );
   GSE_PutLine("\r\n");
@@ -1252,7 +1268,7 @@ static void PWCDispDebug_TX(void *pParam)
   PWCDISP_PARAM_NAMES_PTR pName;
   PWCDISP_TX_STATUS_PTR pStatus;
   UINT16 i;
-  UINT8 subString[15];
+  UINT8 subString[PWCDISP_SUBSTRING_MAX];
   
   pDebug = &m_PWCDisp_Debug;
   pName = (PWCDISP_PARAM_NAMES_PTR)&pwcDisp_TX_Param_Names[0];
@@ -1263,17 +1279,17 @@ static void PWCDispDebug_TX(void *pParam)
   // Display Raw Buffer
   // Display Sync byte 1
   snprintf((char *) m_Str, DISP_PRINT_PARAMF("\r\nSYNC1          =0x%02x\r\n",
-	  pStatus->packetContents[0]));
+      pStatus->packetContents[PWCDISP_TX_PARAM_SYNC1]));
   GSE_PutLine((const char *)m_Str);
     
   // Display Sync byte 2
   snprintf((char *) m_Str, DISP_PRINT_PARAMF("SYNC2          =0x%02x\r\n",
-	  pStatus->packetContents[1]));
+      pStatus->packetContents[PWCDISP_TX_PARAM_SYNC2]));
   GSE_PutLine((const char *) m_Str);
     
   // Display Size
   snprintf((char *) m_Str, DISP_PRINT_PARAMF("SIZE           =0x%02x\r\n",
-	  pStatus->packetContents[2]));
+      pStatus->packetContents[PWCDISP_TX_PARAM_SIZE]));
   GSE_PutLine((const char *) m_Str);
     
   m_Str[0] = NULL;
@@ -1281,23 +1297,20 @@ static void PWCDispDebug_TX(void *pParam)
   // Display Packet ID and Character list
   for(i = 0; i < (UINT16)PWCDISP_TX_ELEMENT_CNT_COMPLETE - 1; i++)
   {
-    //snprintf((char *)subString, 15, "%s", (const char *)(pName + i)->name);
     snprintf((char *)m_Str, DISP_PRINT_PARAM((pName + i)->name));
     snprintf((char *)subString, DISP_PRINT_PARAMF(" =0x%02x\r\n",
-	    pStatus->packetContents[i+(UINT16)PWCDISP_TX_PARAM_CHARDATA]));
+        pStatus->packetContents[i+(UINT16)PWCDISP_TX_PARAM_CHARDATA]));
     strcat((char *)m_Str, (const char *)subString);
     GSE_PutLine((const char *) m_Str);
     m_Str[0] = NULL;
   }
   GSE_PutLine("\r\n");
     
-  // Display DCRATE
-  //snprintf((char *)subString, 15, "%s", 
-  //         (const char *)(pName + (UINT16)DC_RATE)->name);
   snprintf((char *)m_Str, DISP_PRINT_PARAM((pName + (UINT16)DC_RATE)->name));
   snprintf((char *) subString, DISP_PRINT_PARAMF(" =%03d ms\r\n",
            (INT8)(pStatus->packetContents
-           [(UINT16)PWCDISP_TX_PARAM_CHARDATA + (UINT16)DC_RATE]) * 2));//TODO Add conversion here
+           [(UINT16)PWCDISP_TX_PARAM_CHARDATA + (UINT16)DC_RATE]) * 
+           DCRATE_INT8_TO_MS_CONVERSION));
   strcat((char *)m_Str, (const char*)subString);
   GSE_PutLine((const char*) m_Str);
   GSE_PutLine("\r\n");
@@ -1370,9 +1383,11 @@ BOOLEAN PWCDispProtocol_Read_Handler(void *pDest, UINT32 chan,
                                      UINT16 Direction, UINT16 nMaxByteSize)
 {
     //Already in code. Needs to be adapted to this framework.
-    BOOLEAN *bNewData, bStatus;
+    BOOLEAN *bNewData;
+    BOOLEAN bStatus;
     UINT16 i;
-    UARTMGR_PROTOCOL_DATA_PTR pSource, pDestination;
+    UARTMGR_PROTOCOL_DATA_PTR pSource;
+    UARTMGR_PROTOCOL_DATA_PTR pDestination;
 
     bNewData = &m_PWCDisp_DataStore[Direction].bNewData;
     pSource = 
@@ -1416,11 +1431,12 @@ void PWCDispProtocol_Write_Handler(void *pDest, UINT32 chan, UINT16 Direction,
     //Already in code. Needs to be adapted to this framework.
     BOOLEAN *bNewData;
     UINT16 i;
-    UARTMGR_PROTOCOL_DATA_PTR pSource, pDestination;
+    UARTMGR_PROTOCOL_DATA_PTR pSource;
+    UARTMGR_PROTOCOL_DATA_PTR pDestination;
 
     bNewData = &m_PWCDisp_DataStore[Direction].bNewData;
     pDestination =
-	(UARTMGR_PROTOCOL_DATA_PTR)&m_PWCDisp_DataStore[Direction].param[0];
+    (UARTMGR_PROTOCOL_DATA_PTR)&m_PWCDisp_DataStore[Direction].param[0];
     pSource = (UARTMGR_PROTOCOL_DATA_PTR)pDest;
 
     // Data is saved to temporary storage in the UartMgr
@@ -1450,6 +1466,27 @@ UINT8* PWCDispProtocol_DataLossFlag(void)
 }
 
 /******************************************************************************
+* Function:    PWCDispProtocol_SetBaseUARTCh()
+*
+* Description: An Assert function to ensure that the PWC Display Protocol is 
+*              only assigned to one UART channel
+*
+* Parameters:  UINT16 ch -- The UART Channel being Configured
+*
+* Returns:     None
+*
+* Notes:       none
+*
+*****************************************************************************/
+void PWCDispProtocol_SetBaseUARTCh(UINT16 ch)
+{
+  // Only one instance of PWC Display Protocol can be initialized
+  ASSERT(m_PWCDisp_RXStatus.port == (UINT8)UART_NUM_OF_UARTS );
+
+  m_PWCDisp_RXStatus.port = (UINT8)ch;
+}
+
+/******************************************************************************
 * Function:    PWCDispProtocol_ReturnFileHdr()
 *
 * Description: PWC Display has no cfg items so returns 0.
@@ -1476,6 +1513,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 9  *****************
+ * User: John Omalley Date: 2/25/16    Time: 4:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 8  *****************
  * User: John Omalley Date: 2/17/16    Time: 10:14a

@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 36 $  $Date: 2/23/16 4:07p $
+    $Revision: 37 $  $Date: 2/25/16 12:04p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -466,8 +466,8 @@ static USER_HANDLER_RESULT Trend_Start(USER_DATA_TYPE DataType, USER_MSG_PARAM P
 {
    TREND_CMD_RESULT cmdResult;
    TrendAppStartTrend( (TREND_INDEX)Index, TRUE, &cmdResult);
-   GSE_DebugStr(NORMAL, TRUE, "Trend[%d] Start API call returned: %s"NL,
-                               Index, trendCmdString[cmdResult]);
+   GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] Start API call returned: %s"NL,
+                Index, trendCmdString[cmdResult]);
    return USER_RESULT_OK;
 }
 
@@ -492,7 +492,7 @@ static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType, USER_MSG_PARAM Pa
 {
   TREND_CMD_RESULT cmdResult;
   TrendAppStartTrend( (TREND_INDEX)Index, FALSE, &cmdResult);
-  GSE_DebugStr(NORMAL, TRUE, "Trend[%d] Stop API call returned: %s"NL,
+  GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] Stop API call returned: %s"NL,
                               Index, trendCmdString[cmdResult]);
   return USER_RESULT_OK;
 }
@@ -521,7 +521,12 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityHist(USER_DATA_TYPE DataType,
 {
   UINT16 i;
   STABLE_HISTORY stbHist;
-  if ( TrendGetStabilityHistory( (TREND_INDEX)Index, &stbHist ) )
+
+  if (FALSE == m_TrendCfg[Index].bCommanded)
+  {
+     GSE_DebugStr(DBGOFF, TRUE, "Trend not configured as 'commanded'. Ignored"NL, Index);
+  }
+  else if ( TrendGetStabilityHistory( (TREND_INDEX)Index, &stbHist ) )
   {
     for( i = 0; i < MAX_STAB_SENSORS; ++i)
     {
@@ -530,13 +535,13 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityHist(USER_DATA_TYPE DataType,
         break;
       }
 
-      GSE_DebugStr(NORMAL, TRUE, "Entry[%d]: Snsr: %d Stable: %s", i, stbHist.sensorID[i],
+      GSE_DebugStr(DBGOFF, TRUE, "Entry[%d]: Snsr: %d Stable: %s", i, stbHist.sensorID[i],
         TRUE == stbHist.bStable[i] ? "TRUE" : "FALSE");
     }
   }
   else
   {
-    GSE_DebugStr(NORMAL, TRUE, "Trend[%d] No stats available."NL, Index);
+    GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] No stats available."NL, Index);
   }
   return USER_RESULT_OK;
 }
@@ -563,31 +568,39 @@ static USER_HANDLER_RESULT Trend_DsplySampleData(USER_DATA_TYPE DataType,USER_MS
   UINT16 i;
   TREND_SAMPLE_DATA sampleData;
 
-  TrendGetSampleData( (TREND_INDEX)Index, &sampleData );
-
-  for( i = 0; i < MAX_TREND_SENSORS; ++i)
+  if (FALSE == m_TrendCfg[Index].bCommanded)
   {
-    if (SENSOR_UNUSED == sampleData.snsrSummary[i].SensorIndex)
-    {
-      break;
-    }
-    GSE_DebugStr(NORMAL, FALSE,
-    "Entry[%d]:\r\n Snsr: %d\r\n SmplCnt: %d\r\n Vld: %s\r\n tmin: %d %d\r\n"
-    "minVal: %8.2f\r\ntmax: %d %d\r\n  maxVal: %8.2f\r\n  avgVal: %8.2f\r\n  totVal: %8.2f"NL,
-          i,
-          sampleData.snsrSummary[i].SensorIndex,
-          sampleData.snsrSummary[i].nSampleCount,
-          (sampleData.snsrSummary[i].bValid == 1) ? "TRUE":"FALSE",
-          sampleData.snsrSummary[i].timeMinValue.Timestamp,
-          sampleData.snsrSummary[i].timeMinValue.MSecond,
-          sampleData.snsrSummary[i].fMinValue,
-          sampleData.snsrSummary[i].timeMaxValue.Timestamp,
-          sampleData.snsrSummary[i].timeMaxValue.MSecond,
-          sampleData.snsrSummary[i].fMaxValue,
-          sampleData.snsrSummary[i].fAvgValue,
-          sampleData.snsrSummary[i].fTotal);
-
+    GSE_DebugStr(DBGOFF, TRUE, "Trend not configured as 'commanded'. Ignored"NL, Index);
   }
+  else
+  {
+    TrendGetSampleData( (TREND_INDEX)Index, &sampleData );
+
+    for( i = 0; i < MAX_TREND_SENSORS; ++i)
+    {
+      if (SENSOR_UNUSED == sampleData.snsrSummary[i].SensorIndex)
+      {
+        break;
+      }
+
+      GSE_DebugStr(DBGOFF, FALSE,
+     "Entry[%d]:\r\n Snsr: %d\r\n SmplCnt: %d\r\n Vld: %s\r\n tmin: %d %d\r\n"
+     "minVal: %8.2f\r\ntmax: %d %d\r\n  maxVal: %8.2f\r\n  avgVal: %8.2f\r\n  totVal: %8.2f"NL,
+        i,
+        sampleData.snsrSummary[i].SensorIndex,
+        sampleData.snsrSummary[i].nSampleCount,
+        (sampleData.snsrSummary[i].bValid == 1) ? "TRUE":"FALSE",
+        sampleData.snsrSummary[i].timeMinValue.Timestamp,
+        sampleData.snsrSummary[i].timeMinValue.MSecond,
+        sampleData.snsrSummary[i].fMinValue,
+        sampleData.snsrSummary[i].timeMaxValue.Timestamp,
+        sampleData.snsrSummary[i].timeMaxValue.MSecond,
+        sampleData.snsrSummary[i].fMaxValue,
+        sampleData.snsrSummary[i].fAvgValue,
+        sampleData.snsrSummary[i].fTotal);
+    }
+  }
+
   return USER_RESULT_OK;
 }
 
@@ -613,11 +626,11 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
 {
   STABILITY_STATE stabState;
   UINT32          durMs;
-  SAMPLE_RESULT   sampleResult;  
+  SAMPLE_RESULT   sampleResult;
 
   TrendGetStabilityState( (TREND_INDEX)Index, &stabState, &durMs, &sampleResult );
 
-  GSE_DebugStr( NORMAL, FALSE, "StableState: %s\r\nDuration: %d\r\nLastResult: %s"NL,
+  GSE_DebugStr( DBGOFF, FALSE, "StableState: %s\r\nDuration: %d\r\nLastResult: %s"NL,
                               trendStabStateEnum[stabState].Str,
                               durMs,
                               trendSampleResultEnum[sampleResult].Str );
@@ -627,6 +640,11 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: Contractor V&v Date: 2/25/16    Time: 12:04p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Remove ASSERT check in TrendGetStabilityHistory
  * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 2/23/16    Time: 4:07p

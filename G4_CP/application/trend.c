@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 48 $  $Date: 2/23/16 10:41a $
+ $Revision: 49 $  $Date: 2/25/16 12:03p $
 
 ******************************************************************************/
 
@@ -519,7 +519,6 @@ BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHi
   pData = &m_TrendData[idx];
   pCfg  = &m_TrendCfg[idx];
 
-  ASSERT( TRUE == pCfg->bCommanded );
 
   // Populate a status history struct of which sensors in the stability criteria array were
   // stable during the last trend.
@@ -2037,6 +2036,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 49  *****************
+ * User: Contractor V&v Date: 2/25/16    Time: 12:03p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - trend.debug commands don’t require NORMAL verbosity
  * 
  * *****************  Version 48  *****************
  * User: John Omalley Date: 2/23/16    Time: 10:41a

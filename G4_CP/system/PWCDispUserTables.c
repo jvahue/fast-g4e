@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 6 $  $Date: 2/17/16 10:14a $
+    $Revision: 7 $  $Date: 2/25/16 4:56p $
 
 ******************************************************************************/
 #ifndef PWCDISP_PROTOCOL_BODY
@@ -62,6 +62,14 @@ static USER_HANDLER_RESULT PWCDispMsg_Debug(USER_DATA_TYPE DataType,
 static PWCDISP_RX_STATUS   pwcDispRXStatusTemp;
 static PWCDISP_TX_STATUS   pwcDispTXStatusTemp;
 static PWCDISP_DEBUG       pwcDispDebugTemp;
+
+// Directional index enumeration for modules which ref the PWC Display Protocol
+static USER_ENUM_TBL protocolIndexType[] =
+{
+  { "RX", (UINT32)RX_PROTOCOL },
+  { "TX", (UINT32)TX_PROTOCOL },
+  { NULL, 0 }
+};
 
 
 /*****************************************/
@@ -323,6 +331,11 @@ USER_HANDLER_RESULT PWCDispMsg_Debug(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispUserTables.c $
+ * 
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 2/25/16    Time: 4:56p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Update per PWCDispProtocol.c Code Review
  * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 2/17/16    Time: 10:14a
