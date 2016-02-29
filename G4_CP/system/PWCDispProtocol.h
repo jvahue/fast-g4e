@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 9 $  $Date: 2/25/16 4:54p $     
+      $Revision: 10 $  $Date: 2/29/16 5:33p $     
 
 ******************************************************************************/
 
@@ -185,6 +185,7 @@ typedef struct
   UINT32      lastSyncPeriod;
   UINT32      lastSyncTime;
   UINT32      syncCnt;
+  UINT32      recentSyncCnt;
   UINT32      invalidSyncCnt;
   UINT32      lastFrameTime; 
   TIMESTAMP   lastFrameTS; //RX time in TS format for snap shot recording
@@ -232,7 +233,7 @@ typedef struct
 #pragma pack(1)
 typedef struct
 {
-  TIMESTAMP                  lastKnownSyncTS;
+  TIMESTAMP                  lastSyncTime;
   UINT32                     validSyncCnt;
   PWCDISP_SYNC_LOSS_RSN_ENUM reason;
 }PWCDISP_SYNC_LOSS_LOG;
@@ -294,6 +295,11 @@ EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 2/29/16    Time: 5:33p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Logic Updates from V&V findings
  * 
  * *****************  Version 9  *****************
  * User: John Omalley Date: 2/25/16    Time: 4:54p

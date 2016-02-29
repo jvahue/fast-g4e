@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 72 $  $Date: 2/25/16 5:01p $
+      $Revision: 74 $  $Date: 2/29/16 9:34a $
 
 ******************************************************************************/
 
@@ -246,37 +246,32 @@ void UartMgr_Initialize (void)
       // Init UartMgrBlock[] struct
       uartMgrBlock[i].nChannel = i;
       uartMgrBlock[i].download_protocol_clr_hndl = UartMgr_Download_Clr_NoneHndl;
+      uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
+      uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
+      uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
       switch ( pUartMgrCfg->protocol )
       {
         case UARTMGR_PROTOCOL_F7X_N_PARAM:
           uartMgrBlock[i].exec_protocol = F7XProtocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = F7XProtocol_ReturnFileHdr;
-          uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
-          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
           uartMgrBlock[i].get_protocol_esn = F7XProtocol_GetESN;
           break;
         case UARTMGR_PROTOCOL_EMU150:
           uartMgrBlock[i].exec_protocol = EMU150Protocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = EMU150Protocol_ReturnFileHdr;
           uartMgrBlock[i].download_protocol_hndl = EMU150Protocol_DownloadHndl;
-          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
           EMU150Protocol_SetBaseUartCfg(i, uartCfg);
           break;
         case UARTMGR_PROTOCOL_ID_PARAM:
           uartMgrBlock[i].exec_protocol = IDParamProtocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = IDParamProtocol_ReturnFileHdr;
-          uartMgrBlock[i].download_protocol_hndl = UartMgr_Download_NoneHndl;
           uartMgrBlock[i].get_protocol_ready_hndl = IDParamProtocol_Ready;
-          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
           IDParamProtocol_InitUartMgrData ( i, (void *) m_UartMgr_Data[i] );
           break;
         case UARTMGR_PROTOCOL_GBS:
           uartMgrBlock[i].exec_protocol = GBSProtocol_Handler;
           uartMgrBlock[i].get_protocol_fileHdr = GBSProtocol_ReturnFileHdr;
-          uartMgrBlock[i].download_protocol_hndl = GBSProtocol_DownloadHndl;
-          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-          uartMgrBlock[i].get_protocol_esn = UartMgr_Get_ESN_NoneHndl;
+          uartMgrBlock[i].download_protocol_hndl = GBSProtocol_DownloadHndl;          
           uartMgrBlock[i].download_protocol_clr_hndl = GBSProtocol_DownloadClrHndl;
           break;          
         case UARTMGR_PROTOCOL_PWC_DISPLAY:
@@ -284,9 +279,7 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].read_protocol           = PWCDispProtocol_Read_Handler;
           uartMgrBlock[i].write_protocol          = PWCDispProtocol_Write_Handler;
           uartMgrBlock[i].get_protocol_fileHdr    = PWCDispProtocol_ReturnFileHdr;
-          uartMgrBlock[i].download_protocol_hndl  = UartMgr_Download_NoneHndl;
-          uartMgrBlock[i].get_protocol_ready_hndl = UartMgr_Protocol_ReadyOk_Hndl;
-	      uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
+	        uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
           PWCDispProtocol_SetBaseUARTCh(i);
           break;
         case UARTMGR_PROTOCOL_NONE:
@@ -2319,6 +2312,17 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 74  *****************
+ * User: Peter Lee    Date: 2/29/16    Time: 9:34a
+ * Updated in $/software/control processor/code/system
+ * SCR #1317 Item #5 Add back in uartMgrBlock[i].download_protocol_hndl =
+ * GBSProtocol_DownloadHndl;
+ * 
+ * *****************  Version 73  *****************
+ * User: Peter Lee    Date: 2/25/16    Time: 8:38p
+ * Updated in $/software/control processor/code/system
+ * SCR #1317 Item #5 ESN decode pointing to wrong port causes crash
  * 
  * *****************  Version 72  *****************
  * User: John Omalley Date: 2/25/16    Time: 5:01p
