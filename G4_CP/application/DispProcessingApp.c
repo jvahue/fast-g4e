@@ -1621,12 +1621,12 @@ DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[])
   DISPLAY_INVALID_BTN_LOG invalidBtnLog;
   UINT16 i;
 
-  for (i = 0; i < BUTTON_STATE_COUNT; i++){
-    invalidBtnLog.buttonState[i] = buttonState[i];
-    invalidBtnLog.dblClkState[i] = dblClkState[i];
-  }
-  LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
-    &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
+  //for (i = 0; i < BUTTON_STATE_COUNT; i++){
+  //  invalidBtnLog.buttonState[i] = buttonState[i];
+  //  invalidBtnLog.dblClkState[i] = dblClkState[i];
+  //}
+  //LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
+  //  &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
 }
 
 /******************************************************************************
