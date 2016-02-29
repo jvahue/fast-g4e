@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 9 $  $Date: 2/25/16 4:50p $     
+      $Revision: 10 $  $Date: 2/29/16 5:33p $     
 
 ******************************************************************************/
 
@@ -770,13 +770,19 @@ BOOLEAN PWCDispProtocol_FrameSearch(PWCDISP_RAW_RX_BUFFER_PTR rx_buff_ptr)
         { 
           // Set bNewData to TRUE to indicate a new recognized message
           // and update status
+          bNewData = TRUE;
+          if (!(pStatus->sync)){
+            CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->lastSyncTS);
+            pStatus->recentSyncCnt = 1;
+          }
+          else{
+            pStatus->recentSyncCnt++;
+          }
           pStatus->sync = TRUE;
           pStatus->syncCnt++;
-          CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->lastSyncTS);
           pStatus->lastSyncPeriod = (CM_GetTickCount() -
                                     pStatus->lastSyncTime);
           pStatus->lastSyncTime   = CM_GetTickCount();
-          bNewData = TRUE;
 
           // New Msg. Update Packet Contents minus the two checkum bytes.
           memcpy(pStatus->packetContents, src_ptr-(PWCDISP_RX_MAX_MSG_SIZE-2),
@@ -880,8 +886,8 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
   {
     pStatus->invalidSyncCnt++;
     invalidPktLog.reason          = pStatus->lastSyncLossReason;
-    invalidPktLog.validSyncCnt    = pStatus->syncCnt;
-    invalidPktLog.lastKnownSyncTS = pStatus->lastSyncTS;
+    invalidPktLog.validSyncCnt    = pStatus->recentSyncCnt;
+    invalidPktLog.lastSyncTime    = pStatus->lastSyncTS;
     LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_SYNC_LOSS_LOG), NULL);
   }
@@ -905,14 +911,20 @@ void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
 {
   PWCDISP_TXPACKET_FAIL_LOG invalidPktLog;
   PWCDISP_TX_STATUS_PTR pStatus;
+  CHAR charString[PWCDISP_MAX_CHAR_PARAMS];
+  UINT16 i;
   
   pStatus = (PWCDISP_TX_STATUS_PTR)&m_PWCDisp_TXStatus;
 
   // Display Packet was deemed invalid. Record logs.
   if(bBadPacket == TRUE)
   {
-    snprintf((char *)invalidPktLog.packetContents, PWCDISP_TX_MSG_SIZE + 1, 
-             "%s", (const char *)pStatus->packetContents);
+    for (i = 0; i < PWCDISP_MAX_CHAR_PARAMS; i++)
+    {
+      charString[i] = pStatus->packetContents[i + (PWCDISP_HEADER_SIZE)];
+    }
+    snprintf((char *)invalidPktLog.packetContents, PWCDISP_MAX_CHAR_PARAMS + 1,
+             "%s", (const char *)charString);
     invalidPktLog.validPacketCnt = pStatus->validPacketCnt;
     LogWriteSystem(SYS_ID_UART_PWCDISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_TXPACKET_FAIL_LOG), 
@@ -1513,6 +1525,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 10  *****************
+ * User: John Omalley Date: 2/29/16    Time: 5:33p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Logic Updates from V&V findings
  * 
  * *****************  Version 9  *****************
  * User: John Omalley Date: 2/25/16    Time: 4:50p

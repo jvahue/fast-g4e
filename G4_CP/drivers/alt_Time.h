@@ -2,7 +2,7 @@
 #define ALT_TIME_H
 
 /******************************************************************************
-            Copyright (C) 2009-2012 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
 
     File:        alt_Time.h        
@@ -10,7 +10,7 @@
     Description: Definitions for using time units.
     
     VERSION
-    $Revision: 6 $  $Date: 2/24/16 7:44p $
+    $Revision: 7 $  $Date: 2/26/16 1:55p $
     
 ******************************************************************************/
 
@@ -95,6 +95,11 @@ typedef struct
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: alt_Time.h $
+ * 
+ * *****************  Version 7  *****************
+ * User: Peter Lee    Date: 2/26/16    Time: 1:55p
+ * Updated in $/software/control processor/code/drivers
+ * SCR #1305 Code Review Update - Copy Right date.
  * 
  * *****************  Version 6  *****************
  * User: Peter Lee    Date: 2/24/16    Time: 7:44p

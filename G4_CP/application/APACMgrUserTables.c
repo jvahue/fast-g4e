@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 13 $  $Date: 2/02/16 9:43a $
+    $Revision: 14 $  $Date: 2/26/16 10:20a $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -56,15 +56,17 @@
   #define APAC_DBG_CMD_HIST_DAY_RESET  21    
 #endif
 
-//#ifdef APAC_TEST_DBG
+#ifdef APAC_TEST_DBG
 #define AAPAC_DBG_CFG_BATCH_ON       0
 #define AAPAC_DBG_CFG_BATCH_STORE    1
 #define AAPAC_DBG_CFG_BATCH_CANCEL   2
-//#endif
+#endif
 
 #define APAC_MAX_RECENT_DATE_TIME  20  // "HH:MM:SS MM/DD/YYYY"
 #define APAC_MAX_RECENT_ENTRY_LEN 128
 
+#define APAC_MAX_VALUE_CHAR_ARRAY 32
+#define APAC_MAX_LABEL_CHAR_ARRAY 128
 
 /*****************************************************************************/
 /* Local Typedefs                                                            */
@@ -147,13 +149,13 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
                                                    void **GetPtr);
 #endif
 
-//#ifdef APAC_TEST_DBG
+#ifdef APAC_TEST_DBG
 static USER_HANDLER_RESULT APACMgr_DebugCfgBatch(USER_DATA_TYPE DataType,
     USER_MSG_PARAM Param,
     UINT32 Index,
     const void *SetPtr,
     void **GetPtr);
-//#endif
+#endif
 
 static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
                                               USER_MSG_PARAM Param,
@@ -163,6 +165,8 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
 
 static CHAR *APACMgr_RecentAllHistoryEntry ( UINT8 index_obj );
 
+static USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_max,
+                                                     USER_MSG_TBL* pCfgTable);
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -457,16 +461,20 @@ static USER_MSG_TBL apacMgr_EngStatusTbl[] =
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
+// Level 1
+#define APAC_ENG_STRING          "ENG"
+#define APAC_TREND_NAMES_STRING  "TREND_NAMES"
 static USER_MSG_TBL apacMgrCfgTbl[] =
 { /*Str          Next Tbl Ptr               Handler Func.  Data Type          Access    Parameter                           IndexRange   DataLimit    EnumTbl*/
-  {"ENABLED",    NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_BOOLEAN, USER_RW,  (void *) &cfgAPACTemp.enabled,      -1,-1,       NO_LIMIT,    NULL},
   {"ENG",        apacMgr_EngTbl,            NULL,          NO_HANDLER_DATA },
+  {"TREND_NAMES",apacMgr_SnsrTrendNamesTbl, NULL,          NO_HANDLER_DATA },
+  // NOTE:  Arrays should be above for apac.showcfg to work properly
   {"SNSR",       apacMgr_SnsrTbl,           NULL,          NO_HANDLER_DATA },
   {"TIMEOUT",    apacMgr_TimeOutTbl,        NULL,          NO_HANDLER_DATA },
-  {"INLET",      NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.inletCfg,     -1,-1,       NO_LIMIT,    apacInletStrs},
   {"SNSR_NAMES", apacMgr_SnsrNamesTbl,      NULL,          NO_HANDLER_DATA },
-  {"TREND_NAMES",apacMgr_SnsrTrendNamesTbl, NULL,          NO_HANDLER_DATA },
   {"ADJUST",     apacMgr_AdjustTbl,         NULL,          NO_HANDLER_DATA },
+  {"INLET",      NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.inletCfg,     -1,-1,       NO_LIMIT,    apacInletStrs},
+  {"ENABLED",    NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_BOOLEAN, USER_RW,  (void *) &cfgAPACTemp.enabled,      -1,-1,       NO_LIMIT,    NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -511,7 +519,7 @@ static USER_MSG_TBL apacMgrDebugCmdTbl[] =
 };
 #endif
 
-//#ifdef APAC_TEST_DBG
+#ifdef APAC_TEST_DBG
 static USER_MSG_TBL apacMgrDebugCfgBatchTbl[] =
 { /*Str         Next Tbl Ptr        Handler Func.          Data Type          Access                   Parameter                             IndexRange   DataLimit    EnumTbl*/
   {"ON",        NO_NEXT_TABLE,      APACMgr_DebugCfgBatch, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) AAPAC_DBG_CFG_BATCH_ON,      -1,-1,       NO_LIMIT,    NULL},
@@ -519,7 +527,7 @@ static USER_MSG_TBL apacMgrDebugCfgBatchTbl[] =
   {"CANCEL",    NO_NEXT_TABLE,      APACMgr_DebugCfgBatch, USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) AAPAC_DBG_CFG_BATCH_CANCEL,  -1,-1,       NO_LIMIT,    NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
-//#endif
+#endif
 
 static USER_MSG_TBL apacMgrDebugTbl[] =
 { /*Str            Next Tbl Ptr             Handler Func.             Data Type          Access                   Parameter                         IndexRange   DataLimit    EnumTbl*/
@@ -529,9 +537,9 @@ static USER_MSG_TBL apacMgrDebugTbl[] =
   {"CALC",         apacMgr_EngStatusDbgTbl, NULL, NO_HANDLER_DATA},
   {"CMD",          apacMgrDebugCmdTbl,      NULL, NO_HANDLER_DATA},
 #endif  
-//#ifdef APAC_TEST_DBG  
+#ifdef APAC_TEST_DBG  
   {"CFGBATCH",     apacMgrDebugCfgBatchTbl, NULL, NO_HANDLER_DATA},
-//#endif  
+#endif  
 #ifdef APAC_TEST_SIM
   {"SIM_TREND",    NO_NEXT_TABLE,           APACMgr_Debug,            USER_TYPE_BOOLEAN, USER_RW,                 (void *) &debugAPACTemp.simTrend, -1,-1,       NO_LIMIT,    NULL},
   {"SIM_RESTART",  NO_NEXT_TABLE,           APACMgr_DebugRestart,     USER_TYPE_ACTION,  (USER_RO|USER_NO_LOG),   (void *) &statusAPACTemp.state,   -1,-1,       NO_LIMIT,    NULL},
@@ -1208,7 +1216,7 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
 }
 #endif
 
-//#ifdef APAC_TEST_DBG
+#ifdef APAC_TEST_DBG
 /******************************************************************************
  * Function:    APACMgr_DebugCfgBatch
  *
@@ -1264,7 +1272,7 @@ static USER_HANDLER_RESULT APACMgr_DebugCfgBatch(USER_DATA_TYPE DataType,
   }
   return (result);
 }
-//#endif
+#endif
 
 /******************************************************************************
  * Function:    APACMgr_RecentAllHistory
@@ -1480,17 +1488,93 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
                                                  const void *SetPtr,
                                                  void **GetPtr)
 {
+  // Local Data
   USER_HANDLER_RESULT result;
+  CHAR                labelStem[APAC_MAX_LABEL_CHAR_ARRAY] = "\r\n\r\nAPAC.CFG";
+  USER_MSG_TBL*       pCfgTable;
+  CHAR                branchName[USER_MAX_MSG_STR_LEN] = " ";
 
-  result = USER_RESULT_OK;
+  
+  // Local Initialization
+  pCfgTable = apacMgrCfgTbl;     // Re-set the pointer to beginning of CFG table
+  result    = USER_RESULT_OK;
+
+  User_OutputMsgString (labelStem, FALSE);
+
+  while ( pCfgTable->MsgStr  != NULL             &&
+          pCfgTable->MsgType != USER_TYPE_ACTION &&
+          result             == USER_RESULT_OK )
+  {
+    if (0 == strncmp(pCfgTable->MsgStr, APAC_ENG_STRING, sizeof(pCfgTable->MsgStr)))
+    {
+      result = APACMgr_ShowConfigSubItem ( apacMgr_EngTbl, APAC_ENG_MAX, pCfgTable );
+    }
+    else if (0 == strncmp(pCfgTable->MsgStr, APAC_TREND_NAMES_STRING, sizeof(pCfgTable->MsgStr))) {
+      result = APACMgr_ShowConfigSubItem ( apacMgr_SnsrTrendNamesTbl, MAX_STAB_SENSORS, pCfgTable );
+    }
+    else
+    {
+      result = User_DisplayConfigTree(branchName, pCfgTable, 0, 0, NULL);
+      break;
+    }
+    pCfgTable++;
+  }
 
   return result;
+}
+
+
+/******************************************************************************
+* Function:    APACMgr_ShowConfigSubItem
+*
+* Description: 
+*
+* Parameters:   
+*
+* Returns:     USER_HANDLER_RESULT
+*
+* Notes:
+*
+*****************************************************************************/
+static 
+USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_max,
+                                              USER_MSG_TBL* pCfgTable)
+{
+  INT16 i; 
+  USER_HANDLER_RESULT result = USER_RESULT_OK;
+  CHAR  labelStem[APAC_MAX_LABEL_CHAR_ARRAY];
+  CHAR  label[USER_MAX_MSG_STR_LEN * 3];
+  CHAR  branchName[USER_MAX_MSG_STR_LEN] = " ";
+  CHAR  nextBranchName[USER_MAX_MSG_STR_LEN] = "  ";  
+  
+  for ( i = 0; i < tbl_max && result == USER_RESULT_OK; i++ )
+  {
+    // Substruct name was the first entry to terminate the while-loop above
+    strncpy_safe(labelStem, sizeof(labelStem), pCfgTable->MsgStr, _TRUNCATE);
+    // Display element info above each set of data.
+    snprintf(label, sizeof(label), "\r\n\r\n%s%s[%d]",branchName, labelStem, i);
+    // Assume the worse, to terminate this for-loop
+    result = USER_RESULT_ERROR;
+    if ( User_OutputMsgString( label, FALSE ) )
+    {
+      result = User_DisplayConfigTree(nextBranchName, MsgTbl, i, 0, NULL);
+    }
+  }
+  
+  return (result);
+  
 }
 
 
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 2/26/16    Time: 10:20a
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #6 Update "apac.showcfg".  Also ifdef out some debug
+ * code. 
  * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 2/02/16    Time: 9:43a

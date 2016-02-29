@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 11 $  $Date: 2/25/16 5:03p $     
+      $Revision: 12 $  $Date: 2/29/16 5:34p $     
 
 ******************************************************************************/
 
@@ -216,6 +216,7 @@ static BOOLEAN               PACDecision();
 static BOOLEAN               PACAcceptOrValidate();
 static BOOLEAN               PACRejectORInvalidate();
 static void                  DispProcessingApp_SendNewMonData(CHAR characterString[] );
+static void                  DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[]);
 static DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData);
 static void                  DispProcessingApp_FormatString(DISPLAY_STATE_PTR pScreen);
 static DISPLAY_SCREEN_ENUM   DispProcessingApp_GetNextState(DISPLAY_BUTTON_STATES button, 
@@ -479,13 +480,14 @@ void DispProcessingApp_Handler(void *pParam)
     pScreen = (DISPLAY_STATE_PTR)(&(menuStateTbl[0]) +
         (UINT16)pStatus->currentScreen);
   }
-
-  if (pStatus->buttonInput != NO_PUSH_BUTTON_DATA ||
-      frameScreen != pStatus->currentScreen){
-    pStatus->bNewDebugData = TRUE;
+  // Record transition log only if the current screen has been updated
+  if (frameScreen != pStatus->currentScreen){
     DispProcessingApp_CreateTransLog(DISPLAY_LOG_TRANSITION, 
       pStatus->previousScreen, pStatus->currentScreen);
   }
+
+  pStatus->bNewDebugData = (pStatus->buttonInput != NO_PUSH_BUTTON_DATA ||
+      frameScreen != pStatus->currentScreen) ? TRUE : pStatus->bNewDebugData;
 
   // Update Debug menu based on if the menu string has changed.
   for (i = 0; i < MAX_SCREEN_SIZE; i++){
@@ -887,7 +889,7 @@ void DispProcessingApp_D_HLTHResult(UINT8 dispHealth, UINT32 no_HS_Timeout_s)
   displayHealthTOLog.d_HLTHcode       = dispHealth;
   displayHealthTOLog.start_of_Timeout = m_DispProcApp_Status.dispHealthTOStart;
 
-  LogWriteETM(APP_ID_DISPLAY_APP_DHLTH_TO, LOG_PRIORITY_LOW,
+  LogWriteSystem(APP_ID_DISPLAY_APP_DHLTH_TO, LOG_PRIORITY_LOW,
       &displayHealthTOLog, sizeof(DISPLAY_APP_DHLTH_TO_LOG), NULL);
 }
 
@@ -1616,17 +1618,18 @@ DISPLAY_DEBUG_PTR DispProcessingApp_GetDebug(void)
 * Notes:       None
 *
 *****************************************************************************/
-DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[])
+static 
+void DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[])
 {
   DISPLAY_INVALID_BTN_LOG invalidBtnLog;
   UINT16 i;
 
-  //for (i = 0; i < BUTTON_STATE_COUNT; i++){
-  //  invalidBtnLog.buttonState[i] = buttonState[i];
-  //  invalidBtnLog.dblClkState[i] = dblClkState[i];
-  //}
-  //LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
-  //  &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
+  for (i = 0; i < BUTTON_STATE_COUNT; i++){
+    invalidBtnLog.buttonState[i] = buttonState[i];
+    invalidBtnLog.dblClkState[i] = dblClkState[i];
+  }
+  LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
+    &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
 }
 
 /******************************************************************************
@@ -1675,13 +1678,13 @@ DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
       }
     }
   }
-  if (btnTrueCnt == 0){
+  if (btnTrueCnt == 0 || pStatus->bButtonEnable == FALSE){
     buttonState = NO_PUSH_BUTTON_DATA;
   }
-  if (dblTrueCnt == 0){
+  if (dblTrueCnt == 0 || pStatus->bButtonEnable == FALSE){
     dblButtonState = NO_PUSH_BUTTON_DATA;
   }
-  if (btnTrueCnt > 1 || dblTrueCnt > 1 || pStatus->bButtonEnable == FALSE
+  if (btnTrueCnt > 1 || dblTrueCnt > 1
       || dblTrueCnt > btnTrueCnt || 
       pRX_Info->buttonState[UNUSED1_BUTTON]   ||
       pRX_Info->buttonState[UNUSED2_BUTTON]   ||
@@ -1724,7 +1727,7 @@ DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
         // Extraneous case where button and dbl do not match.
         else if (dblButtonState != NO_PUSH_BUTTON_DATA &&
                 (dblButtonState != 
-                (buttonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT) || 
+                (dblButtonState - (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT) || 
                 dblButtonState != 
                 (prevButtonState + (DISPLAY_BUTTON_STATES)BUTTON_STATE_COUNT))){
           buttonState            = NO_PUSH_BUTTON_DATA;
@@ -2185,6 +2188,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 2/29/16    Time: 5:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Logic Update
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 2/25/16    Time: 5:03p
