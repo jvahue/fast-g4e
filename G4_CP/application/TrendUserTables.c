@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 37 $  $Date: 2/25/16 12:04p $
+    $Revision: 38 $  $Date: 3/07/16 8:08p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -276,7 +276,6 @@ static USER_MSG_TBL trendDebugTbl [] =
   { NULL,          NULL,              NULL,                     NO_HANDLER_DATA}
 };
 
-
 static USER_MSG_TBL trendRoot [] =
 { /* Str            Next Tbl Ptr       Handler Func.             Data Type          Access                       Parameter       IndexRange     DataLimit  EnumTbl*/
    { "CFG",         trendCmd     ,     NULL,                     NO_HANDLER_DATA},
@@ -327,7 +326,7 @@ static USER_HANDLER_RESULT Trend_UserCfg ( USER_DATA_TYPE DataType,
 
    result = USER_RESULT_OK;
 
-   //Load Event structure into the temporary location based on index param
+   //Load trend structure into the temporary location based on index param
    //Param.Ptr points to the struct member to be read/written
    //in the temporary location
    memcpy(&m_ConfigTrendTemp,
@@ -465,9 +464,14 @@ static USER_HANDLER_RESULT Trend_Start(USER_DATA_TYPE DataType, USER_MSG_PARAM P
                                 UINT32 Index, const void *SetPtr, void **GetPtr)
 {
    TREND_CMD_RESULT cmdResult;
+   static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
+
    TrendAppStartTrend( (TREND_INDEX)Index, TRUE, &cmdResult);
-   GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] Start API call returned: %s"NL,
-                Index, trendCmdString[cmdResult]);
+
+   snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Start API call returned: %s\r\n",
+                   Index, trendCmdString[cmdResult] );    
+
+   User_OutputMsgString(outputBuffer, FALSE);
    return USER_RESULT_OK;
 }
 
@@ -491,9 +495,13 @@ static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType, USER_MSG_PARAM Pa
                                 UINT32 Index, const void *SetPtr, void **GetPtr)
 {
   TREND_CMD_RESULT cmdResult;
+  static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
+
   TrendAppStartTrend( (TREND_INDEX)Index, FALSE, &cmdResult);
-  GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] Stop API call returned: %s"NL,
-                              Index, trendCmdString[cmdResult]);
+
+  snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Stop API call returned: %s\r\n",
+                   Index, trendCmdString[cmdResult] );
+  User_OutputMsgString(outputBuffer, FALSE);
   return USER_RESULT_OK;
 }
 
@@ -515,34 +523,62 @@ static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType, USER_MSG_PARAM Pa
  *****************************************************************************/
 static USER_HANDLER_RESULT Trend_DsplyStabilityHist(USER_DATA_TYPE DataType,
 		                                     USER_MSG_PARAM Param,
-                                             UINT32 Index,
-											 const void *SetPtr,
-											 void **GetPtr)
+                                         UINT32 Index,
+											                   const void *SetPtr,
+											                   void **GetPtr)
 {
   UINT16 i;
   STABLE_HISTORY stbHist;
+  CHAR         tempStr[USER_MAX_MSG_STR_LEN * 4];
+  static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
+  UINT32 len;
+  UINT32 nOffset = 0;
+  BOOLEAN bWriteOutputMsg = FALSE;
 
-  if (FALSE == m_TrendCfg[Index].bCommanded)
+  memcpy(&m_ConfigTrendTemp,
+          &CfgMgr_ConfigPtr()->TrendConfigs[Index],
+          sizeof(m_ConfigTrendTemp));
+
+  if (FALSE == CfgMgr_ConfigPtr()->TrendConfigs[Index].bCommanded)
   {
-     GSE_DebugStr(DBGOFF, TRUE, "Trend not configured as 'commanded'. Ignored"NL, Index);
+    snprintf(outputBuffer, sizeof( outputBuffer),
+             "Trend not configured as 'commanded'. Ignored\r\n");
+    User_OutputMsgString(outputBuffer, FALSE);    
   }
   else if ( TrendGetStabilityHistory( (TREND_INDEX)Index, &stbHist ) )
   {
+    bWriteOutputMsg = TRUE;
+    // Build up the lines of stability history entries.
     for( i = 0; i < MAX_STAB_SENSORS; ++i)
     {
       if (SENSOR_UNUSED == stbHist.sensorID[i])
       {
+        snprintf ( tempStr, sizeof(tempStr), "\r\n");
+        len = strlen ( tempStr );        
+        memcpy ( (void *) &outputBuffer[nOffset], tempStr, len );
+        nOffset += len;
         break;
       }
-
-      GSE_DebugStr(DBGOFF, TRUE, "Entry[%d]: Snsr: %d Stable: %s", i, stbHist.sensorID[i],
-        TRUE == stbHist.bStable[i] ? "TRUE" : "FALSE");
+      snprintf(tempStr, sizeof( tempStr),
+               "\r\nEntry[%d]: Snsr: %d Stable: %s", i, stbHist.sensorID[i],
+                TRUE == stbHist.bStable[i] ? "TRUE" : "FALSE");
+      len = strlen ( tempStr );
+      memcpy ( (void *) &outputBuffer[nOffset], tempStr, len );
+      nOffset += len;
     }
   }
   else
   {
-    GSE_DebugStr(DBGOFF, TRUE, "Trend[%d] No stats available."NL, Index);
+    snprintf(outputBuffer, sizeof( outputBuffer),
+             "Trend[%d] No stats available.\r\n", Index);
+    User_OutputMsgString(outputBuffer, FALSE);    
   }
+
+  if(bWriteOutputMsg)
+  {
+    User_OutputMsgString(outputBuffer, FALSE);
+  }
+
   return USER_RESULT_OK;
 }
 
@@ -567,38 +603,61 @@ static USER_HANDLER_RESULT Trend_DsplySampleData(USER_DATA_TYPE DataType,USER_MS
 {
   UINT16 i;
   TREND_SAMPLE_DATA sampleData;
+  CHAR         tempStr[(USER_MAX_MSG_STR_LEN*2) * 12];
+  static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
+  UINT32 len;
+  UINT32 nOffset = 0;
+  BOOLEAN bWriteOutputMsg = FALSE;  
 
-  if (FALSE == m_TrendCfg[Index].bCommanded)
+  if (FALSE == CfgMgr_ConfigPtr()->TrendConfigs[Index].bCommanded)
   {
-    GSE_DebugStr(DBGOFF, TRUE, "Trend not configured as 'commanded'. Ignored"NL, Index);
+    snprintf(outputBuffer, sizeof( outputBuffer),
+             "Trend not configured as 'commanded'. Ignored\r\n");
+    User_OutputMsgString(outputBuffer, FALSE);    
   }
   else
-  {
+  {    
+    bWriteOutputMsg = TRUE;
     TrendGetSampleData( (TREND_INDEX)Index, &sampleData );
 
     for( i = 0; i < MAX_TREND_SENSORS; ++i)
     {
       if (SENSOR_UNUSED == sampleData.snsrSummary[i].SensorIndex)
       {
+        // All buffered, break out and print the msg on return.
+        snprintf ( tempStr, sizeof(tempStr), "\r\n");
+        len = strlen ( tempStr );
+        memcpy ( (void *) &outputBuffer[nOffset], tempStr, len );
+        nOffset += len;
         break;
       }
 
-      GSE_DebugStr(DBGOFF, FALSE,
-     "Entry[%d]:\r\n Snsr: %d\r\n SmplCnt: %d\r\n Vld: %s\r\n tmin: %d %d\r\n"
-     "minVal: %8.2f\r\ntmax: %d %d\r\n  maxVal: %8.2f\r\n  avgVal: %8.2f\r\n  totVal: %8.2f"NL,
-        i,
-        sampleData.snsrSummary[i].SensorIndex,
-        sampleData.snsrSummary[i].nSampleCount,
-        (sampleData.snsrSummary[i].bValid == 1) ? "TRUE":"FALSE",
-        sampleData.snsrSummary[i].timeMinValue.Timestamp,
-        sampleData.snsrSummary[i].timeMinValue.MSecond,
-        sampleData.snsrSummary[i].fMinValue,
-        sampleData.snsrSummary[i].timeMaxValue.Timestamp,
-        sampleData.snsrSummary[i].timeMaxValue.MSecond,
-        sampleData.snsrSummary[i].fMaxValue,
-        sampleData.snsrSummary[i].fAvgValue,
-        sampleData.snsrSummary[i].fTotal);
+      snprintf(tempStr, sizeof( tempStr),
+      "\r\nEntry[%d]:\r\n Snsr: %d\r\n SmplCnt: %d\r\n Vld: %s\r\n tmin: %d %d\r\n"
+      " minVal: %8.2f\r\n tmax: %d %d\r\n maxVal: %8.2f\r\n avgVal: %8.2f\r\n"
+      " totVal: %8.2f",
+          i,
+          sampleData.snsrSummary[i].SensorIndex,
+          sampleData.snsrSummary[i].nSampleCount,
+          (sampleData.snsrSummary[i].bValid == 1) ? "TRUE":"FALSE",
+          sampleData.snsrSummary[i].timeMinValue.Timestamp,
+          sampleData.snsrSummary[i].timeMinValue.MSecond,
+          sampleData.snsrSummary[i].fMinValue,
+          sampleData.snsrSummary[i].timeMaxValue.Timestamp,
+          sampleData.snsrSummary[i].timeMaxValue.MSecond,
+          sampleData.snsrSummary[i].fMaxValue,
+          sampleData.snsrSummary[i].fAvgValue,
+          sampleData.snsrSummary[i].fTotal);
+
+      len = strlen ( tempStr );      
+      memcpy ( (void *) &outputBuffer[nOffset], tempStr, len );
+      nOffset += len;
     }
+  }
+
+  if(bWriteOutputMsg)
+  {
+    User_OutputMsgString(outputBuffer, FALSE);
   }
 
   return USER_RESULT_OK;
@@ -625,21 +684,29 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
 										                  	 const void *SetPtr,  void **GetPtr)
 {
   STABILITY_STATE stabState;
+  static CHAR     outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
   UINT32          durMs;
   SAMPLE_RESULT   sampleResult;
 
   TrendGetStabilityState( (TREND_INDEX)Index, &stabState, &durMs, &sampleResult );
 
-  GSE_DebugStr( DBGOFF, FALSE, "StableState: %s\r\nDuration: %d\r\nLastResult: %s"NL,
+  snprintf(outputBuffer, sizeof( outputBuffer),
+             "StableState: %s\r\nDuration: %d\r\nLastResult: %s\r\n",
                               trendStabStateEnum[stabState].Str,
                               durMs,
                               trendSampleResultEnum[sampleResult].Str );
+  User_OutputMsgString(outputBuffer, FALSE);  
   return USER_RESULT_OK;
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
+ * 
+ * *****************  Version 38  *****************
+ * User: Contractor V&v Date: 3/07/16    Time: 8:08p
+ * Updated in $/software/control processor/code/application
+ * Updated Trend.debug cmds to output checksum
  * 
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 2/25/16    Time: 12:04p

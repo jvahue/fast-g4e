@@ -2,7 +2,7 @@
 #define F7X_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -13,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 18 $  $Date: 1/30/16 7:37p $     
+      $Revision: 19 $  $Date: 3/02/16 8:26a $     
 
 ******************************************************************************/
 
@@ -472,6 +472,11 @@ EXPORT BOOLEAN F7XProtocol_GetESN ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 3/02/16    Time: 8:26a
+ * Updated in $/software/control processor/code/system
+ * SCR 1314 - Code Review Update
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 1/30/16    Time: 7:37p

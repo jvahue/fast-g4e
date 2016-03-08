@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for F7X Protocol CSC
 
     VERSION
-    $Revision: 21 $  $Date: 11/30/15 6:56p $
+    $Revision: 22 $  $Date: 3/07/16 8:39p $
 
 ******************************************************************************/
 #ifndef F7X_PROTOCOL_BODY
@@ -113,12 +113,12 @@ static F7X_DEBUG f7XDebugTemp;
 /* User Table Defintions                 */
 /*****************************************/
 static USER_MSG_TBL f7XOptionESNTbl[] =
-{ /*Str               Next Tbl Ptr    Handler Func.     Data Type          Access   Parameter                               IndexRange             DataLimit    EnumTbl*/
-  {"VAL",             NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_STR,     USER_RO, (void *) &f7XOptionESNTemp.esn,         1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
-  {"CNT_SYNC",        NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntSync,    1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
-  {"CNT_CHANGED",     NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntChanged, 1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
-  {"CNT_NEW",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntNew,     1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
-  {"CNT_BAD",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntBad,     1,UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+{ /*Str               Next Tbl Ptr    Handler Func.     Data Type          Access   Parameter                               IndexRange                       DataLimit    EnumTbl*/
+  {"VAL",             NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_STR,     USER_RO, (void *) &f7XOptionESNTemp.esn,         1, (UINT32) UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_SYNC",        NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntSync,    1, (UINT32) UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_CHANGED",     NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntChanged, 1, (UINT32) UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_NEW",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntNew,     1, (UINT32) UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
+  {"CNT_BAD",         NO_NEXT_TABLE,  F7XMsg_OptionESN, USER_TYPE_UINT32,  USER_RO, (void *) &f7XOptionESNTemp.nCntBad,     1, (UINT32) UART_NUM_OF_UARTS-1, NO_LIMIT,    NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -312,9 +312,9 @@ static USER_MSG_TBL f7XParamCfgTbl[] =
 };
 
 static USER_MSG_TBL f7XOptionCfgTbl[] =
-{ /*Str        Next Tbl Ptr       Handler Func.       Data Type          Access    Parameter                                       IndexRange               DataLimit    EnumTbl*/
-  {"ESN_ENB",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_BOOLEAN, USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_enb,  1,UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
-  {"ESN_GPA",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_HEX32,   USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_gpa,  1,UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
+{ /*Str        Next Tbl Ptr       Handler Func.       Data Type          Access    Parameter                                    IndexRange                       DataLimit    EnumTbl*/
+  {"ESN_ENB",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_BOOLEAN, USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_enb,  1,(UINT32) UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
+  {"ESN_GPA",  NO_NEXT_TABLE,     F7XMsg_GeneralCfg,  USER_TYPE_HEX32,   USER_RW,  (void *) &f7XGeneralCfgTemp.option.esn_gpa,  1,(UINT32) UART_NUM_OF_UARTS-1,   NO_LIMIT,    NULL},  
   {NULL,       NULL,              NULL, NO_HANDLER_DATA}
 };
 
@@ -692,11 +692,11 @@ USER_HANDLER_RESULT F7XMsg_GeneralCfg(USER_DATA_TYPE DataType,
 
 
 /******************************************************************************
- * Function:    F7XMsg_Status
+ * Function:    F7XMsg_OptionESN
  *
  * Description: Called by the User.c module from the reference to this fucntion
  *              in the user message tables above.
- *              Retrieves the latest F7X Status Data
+ *              Retrieves the latest F7X Options Configuration
  *
  * Parameters:   [in] DataType:  C type of the data to be read or changed, used
  *                               for casting the data pointers
@@ -944,6 +944,11 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 3/07/16    Time: 8:39p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates.
  * 
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 11/30/15   Time: 6:56p

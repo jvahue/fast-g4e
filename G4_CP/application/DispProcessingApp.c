@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 12 $  $Date: 2/29/16 5:34p $     
+      $Revision: 13 $  $Date: 3/08/16 8:21a $     
 
 ******************************************************************************/
 
@@ -118,6 +118,7 @@ static BOOLEAN                dblClickFlag          = FALSE;
 static BOOLEAN                bValidatePAC          = FALSE;
 static BOOLEAN                bPACDecision          = FALSE;
 static BOOLEAN                discreteDIOStatusFlag = FALSE;
+static BOOLEAN                autoAbortFlag         = FALSE;
 
 static UINT8* dataLossFlag = NULL;
 static DISPLAY_DEBUG_TASK_PARAMS dispProcAppDisplayDebugBlock;
@@ -437,6 +438,7 @@ void DispProcessingApp_Initialize(BOOLEAN bEnable)
 void DispProcessingApp_Handler(void *pParam)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
+  DISPLAY_LOG_RESULT_ENUM    transLogResult;
   BOOLEAN                   *bNewData;
   DISPLAY_STATE_PTR          pScreen;
   DISPLAY_SCREEN_ENUM        frameScreen;
@@ -482,7 +484,10 @@ void DispProcessingApp_Handler(void *pParam)
   }
   // Record transition log only if the current screen has been updated
   if (frameScreen != pStatus->currentScreen){
-    DispProcessingApp_CreateTransLog(DISPLAY_LOG_TRANSITION, 
+    transLogResult = (autoAbortFlag) ? 
+      DISPLAY_LOG_TIMEOUT : DISPLAY_LOG_TRANSITION;
+    autoAbortFlag = FALSE;
+    DispProcessingApp_CreateTransLog(transLogResult, 
       pStatus->previousScreen, pStatus->currentScreen);
   }
 
@@ -748,11 +753,10 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
     // Increment Auto Abort Timer
     auto_Abort_Timer++;
     
-    if (auto_Abort_Timer == autoAbortTime_Converted){
+    if (auto_Abort_Timer >= autoAbortTime_Converted){
       // Update Transition Log, Reset APAC.
       if(pStatus->currentScreen != (DISPLAY_SCREEN_ENUM)HOME_SCREEN){
-        DispProcessingApp_CreateTransLog(DISPLAY_LOG_TIMEOUT, 
-          pStatus->currentScreen, (DISPLAY_SCREEN_ENUM)HOME_SCREEN);
+        autoAbortFlag = TRUE;
         APACMgr_IF_Reset(NULL, NULL, NULL, NULL, APAC_IF_TIMEOUT);
         pStatus->previousScreen = pStatus->currentScreen;
       }
@@ -2188,6 +2192,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 3/08/16    Time: 8:21a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Logic Update for double transition log on timeout
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 2/29/16    Time: 5:34p
