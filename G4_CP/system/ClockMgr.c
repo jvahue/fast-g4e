@@ -19,7 +19,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 57 $  $Date: 2/26/16 1:49p $
+     $Revision: 58 $  $Date: 3/02/16 3:45p $
 
 ******************************************************************************/
 
@@ -786,8 +786,8 @@ UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
   itemp = 0;
   if ( time_struct.Year >= 2000 )
   {
-    // Determine # leap days, from last leap year of 1996.
-    itemp = ((time_struct.Year - 1996) / 4);
+    // Determine # leap days, from last leap year of 1997.
+    itemp = ((time_struct.Year - 1997) / 4);
   }
   // else date between 1997 and 2000, no leap yr calc required
   itemp = (CM_DAYS_IN_YEAR_NO_LEAP * (time_struct.Year - BASE_YEAR)) + itemp;
@@ -1186,6 +1186,14 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 58  *****************
+ * User: Peter Lee    Date: 3/02/16    Time: 3:45p
+ * Updated in $/software/control processor/code/system
+ * SCR #1305.  Base year is 1997 not 1996.  Func will still work for "how"
+ * it's used (as a comparison between two times), but will not accurately
+ * return "seconds since base year" without this update if this is
+ * required in a future update. 
  * 
  * *****************  Version 57  *****************
  * User: Peter Lee    Date: 2/26/16    Time: 1:49p

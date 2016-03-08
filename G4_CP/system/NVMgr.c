@@ -1,7 +1,9 @@
 #define SYS_NVMGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+ ECCN:       9D991
 
  File:       NVMgr.c
 
@@ -27,7 +29,7 @@
            RTC
 
    VERSION
-    $Revision: 80 $  $Date: 1/18/16 5:36p $
+    $Revision: 81 $  $Date: 3/03/16 3:04p $
 
 
 ******************************************************************************/
@@ -1768,6 +1770,11 @@ void NV_CopyPrimaryToBackupShadow(NV_RUNTIME_INFO* File)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: NVMgr.c $
+ * 
+ * *****************  Version 81  *****************
+ * User: John Omalley Date: 3/03/16    Time: 3:04p
+ * Updated in $/software/control processor/code/system
+ * SCR 1309 - Code Review Update
  * 
  * *****************  Version 80  *****************
  * User: Peter Lee    Date: 1/18/16    Time: 5:36p

@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 10 $  $Date: 2/29/16 5:33p $     
+      $Revision: 11 $  $Date: 3/08/16 8:23a $     
 
 ******************************************************************************/
 
@@ -885,9 +885,9 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
   if(bBadPacket == TRUE)
   {
     pStatus->invalidSyncCnt++;
-    invalidPktLog.reason          = pStatus->lastSyncLossReason;
-    invalidPktLog.validSyncCnt    = pStatus->recentSyncCnt;
-    invalidPktLog.lastSyncTime    = pStatus->lastSyncTS;
+    invalidPktLog.reason           = pStatus->lastSyncLossReason;
+    invalidPktLog.validSyncCnt     = pStatus->recentSyncCnt;
+    invalidPktLog.achievedSyncTime = pStatus->lastSyncTS;
     LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_SYNC_LOSS_LOG), NULL);
   }
@@ -1525,6 +1525,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 3/08/16    Time: 8:23a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Logic Updates
  * 
  * *****************  Version 10  *****************
  * User: John Omalley Date: 2/29/16    Time: 5:33p
