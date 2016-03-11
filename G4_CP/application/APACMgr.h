@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 12 $  $Date: 3/11/16 1:59p $
+      $Revision: 11 $  $Date: 3/10/16 6:56p $
 
 ******************************************************************************/
 
@@ -361,7 +361,7 @@ typedef struct {
 typedef struct {
   FLOAT32 avgVal;  // Average (over sample period) ITT or Ng used for calculation
   FLOAT32 margin;  // Calculated Margin ITT or Ng
-  FLOAT32 max;     // Calculated Max ITT or Ng
+  FLOAT64 max;     // Calculated Max ITT or Ng
   FLOAT64 c0;      // Calc c0
   FLOAT64 c1;      // Calc c1
   FLOAT64 c2;      // Calc c2
@@ -693,12 +693,6 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
- * 
- * *****************  Version 12  *****************
- * User: Peter Lee    Date: 3/11/16    Time: 1:59p
- * Updated in $/software/control processor/code/application
- * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
- * Status
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 6:56p
