@@ -10,7 +10,7 @@
     Description:
 
     VERSION
-    $Revision: 9 $  $Date: 15-03-02 6:55p $
+    $Revision: 10 $  $Date: 3/10/16 6:56p $
 
 ******************************************************************************/
 
@@ -74,7 +74,8 @@ FSM_TC_ITEM(ACFG, FALSE,         AC_FSMGetState)\
 FSM_TC_ITEM(RFON, FALSE,         FAST_FSMRfGetState)\
 FSM_TC_ITEM(ENDF, FALSE,         FSM_GetStateFALSE)\
 FSM_TC_ITEM(DOUT, TRUE,          DIOMgr_FSMGetStateDIO)\
-FSM_TC_ITEM(LACH, FALSE,         PmFSMAppBusyGetState)
+FSM_TC_ITEM(LACH, FALSE,         PmFSMAppBusyGetState)\
+FSM_TC_ITEM(APAC, FALSE,         APACMgr_FSMGetState)
 
 #define FSM_TASK_LIST\
 /*            Name  IsNumerated  Max Num Control Function         GetState Function*/\
@@ -119,6 +120,11 @@ FSM_TASK_ITEM(UCLR, FALSE,       0,      UartMgr_DownloadClr,     FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 10  *****************
+ * User: Peter Lee    Date: 3/10/16    Time: 6:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Items #1,#2,#4 APAC Processing Updates
  * 
  * *****************  Version 9  *****************
  * User: Peter Lee    Date: 15-03-02   Time: 6:55p

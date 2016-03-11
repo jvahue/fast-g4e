@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 18 $  $Date: 2/24/16 6:13p $
+      $Revision: 20 $  $Date: 3/11/16 1:59p $
 
 ******************************************************************************/
 
@@ -532,6 +532,14 @@ void APACMgr_Initialize ( void )
   
   // Call Display Processing App and Info that APAC is enb or dsb
   DispProcessingApp_Initialize(m_APAC_Cfg.enabled);
+  
+  // Update engineRunIndex of each engine
+  for (i=(UINT32) APAC_ENG_1;i< (UINT32) APAC_ENG_MAX;i++) {
+    if (m_APAC_Cfg.eng[i].idxCycleHRS != CYCLE_UNUSED) {
+      m_APAC_Status.eng[i].engineRunIndex = 
+        CfgMgr_RuntimeConfigPtr()->CycleConfigs[m_APAC_Cfg.eng[i].idxCycleHRS].nEngineRunId; 
+    }
+  }
 
 // Test
 #ifdef APAC_TEST_SIM
@@ -605,6 +613,27 @@ BOOLEAN APACMgr_FileInitNVM(void)
   
   return TRUE;
 }
+
+
+/******************************************************************************
+ * Function:     APACMgr_FSMGetState   | IMPLEMENTS GetState() INTERFACE to
+ *                                     | FSM
+ *
+ * Description:  Returns the APAC inprogress status.  
+ *               This function has the call signature required by the
+ *               Fast State Manager's Task interface.
+ *
+ * Parameters:   [in] Param: Not used, for matching call sig. only.
+ *
+ * Returns:
+ *
+ *****************************************************************************/
+BOOLEAN APACMgr_FSMGetState( INT32 param )
+{
+  return ( !(m_APAC_Status.run_state == APAC_RUN_STATE_IDLE) || 
+            (m_APAC_Status.run_state == APAC_RUN_STATE_FAULT) );
+}
+
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -875,7 +904,9 @@ static void APACMgr_Running (void)
         // This s/b be very quick computation.
         eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[eng_uut];
         itt_ptr = (APAC_ENG_CALC_DATA_PTR) &eng_ptr->itt;
+        itt_ptr->cfgOffset = m_APAC_Cfg.adjust.itt;
         ng_ptr = (APAC_ENG_CALC_DATA_PTR) &eng_ptr->ng;
+        ng_ptr->cfgOffset = m_APAC_Cfg.adjust.ng; 
         common_ptr = (APAC_ENG_CALC_COMMON_PTR) &eng_ptr->common;
         bResult1 = bResult2 = bResult3 = bResult4 = bResult5 = TRUE;  // Init all to TRUE
         bResult1 = APACMgr_CalcTqCorr ( common_ptr->valBaroCorr, common_ptr->avgBaroPres,
@@ -1170,6 +1201,7 @@ static void APACMgr_LogSummary ( APAC_COMMIT_ENUM commit )
   tbl_ptr = (APAC_TBL_PTR) &m_APAC_Tbl[APAC_ITT][tblIdx];  
 
   alog.eng_uut = m_APAC_Status.eng_uut;
+  alog.engineRunIndex = m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex;
   memcpy ( (void *) alog.esn, (void *) eng_ptr->esn, APAC_ESN_MAX_LEN);
   alog.nr_sel = m_APAC_Status.nr_sel;
   alog.inletCfg = m_APAC_Cfg.inletCfg;
@@ -1223,12 +1255,10 @@ static void APACMgr_LogEngStart ( void )
   eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[m_APAC_Status.eng_uut];
 
   alog.eng_uut = m_APAC_Status.eng_uut;
+  alog.engineRunIndex = m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex;
   memcpy ( (void *) alog.esn, (void *) eng_ptr->esn, APAC_ESN_MAX_LEN);
   alog.nr_sel = m_APAC_Status.nr_sel;
   alog.inletCfg = m_APAC_Cfg.inletCfg;
-  alog.manual = eng_ptr->vld.set;
-  alog.reason = eng_ptr->vld.reason;
-  alog.reason_summary = eng_ptr->vld.reason_summary;
   alog.engHrs_prev_s = eng_ptr->hrs.prev_s;
   alog.engHrs_curr_s = eng_ptr->hrs.curr_s;
 
@@ -1254,6 +1284,9 @@ static void APACMgr_LogFailure ( void )
 
   memcpy ( (void *) &alog.data, (void *) &m_APAC_ErrMsg, sizeof(alog.data) );
   alog.eng_uut = m_APAC_Status.eng_uut;
+  alog.engineRunIndex = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ? 
+                         m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex : 
+                         ENGRUN_UNUSED; 
 
   LogWriteETM (APP_ID_APAC_FAILURE, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
@@ -1277,6 +1310,9 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit )
 
   alog.commit = commit;
   alog.eng_uut = m_APAC_Status.eng_uut; 
+  alog.engineRunIndex = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ? 
+                         m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex : 
+                         ENGRUN_UNUSED; 
   
   alog.reason = (m_APAC_Status.eng_uut == APAC_ENG_MAX) ?
                  m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason :
@@ -2445,6 +2481,17 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
+ * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 3/10/16    Time: 6:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Items #1,#2,#4 APAC Processing Updates
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 2/24/16    Time: 6:13p

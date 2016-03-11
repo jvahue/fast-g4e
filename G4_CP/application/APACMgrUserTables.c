@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 14 $  $Date: 2/26/16 10:20a $
+    $Revision: 15 $  $Date: 3/11/16 1:59p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -375,6 +375,7 @@ static USER_MSG_TBL apacMgr_EngDataITTTbl[] =
   {"C2",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c2,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C3",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c3,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C4",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c4,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"OFFSET",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.cfgOffset,0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -388,6 +389,7 @@ static USER_MSG_TBL apacMgr_EngDataNGTbl[] =
   {"C2",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c2,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C3",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c3,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C4",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c4,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"OFFSET",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.cfgOffset,0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},  
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -1569,6 +1571,12 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 2/26/16    Time: 10:20a
