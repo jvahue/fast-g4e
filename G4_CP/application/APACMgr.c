@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 20 $  $Date: 3/11/16 1:59p $
+      $Revision: 19 $  $Date: 3/10/16 6:56p $
 
 ******************************************************************************/
 
@@ -141,7 +141,7 @@ static BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32
 
 static BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val,
                                    APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT32 *margin_ptr,
-                                   FLOAT32 *max_ptr, APAC_ENG_CALC_DATA_PTR c_ptr);
+                                   FLOAT64 *max_ptr, APAC_ENG_CALC_DATA_PTR c_ptr);
 
 static void APACMgr_Task ( void *pParam ) ;
 static void APACMgr_Running ( void );
@@ -2199,7 +2199,7 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
 *****************************************************************************/
 static
 BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_PTR tbl_ptr,
-                            FLOAT32 adj, FLOAT32 *margin_ptr, FLOAT32 *max_ptr,
+                            FLOAT32 adj, FLOAT32 *margin_ptr, FLOAT64 *max_ptr,
                             APAC_ENG_CALC_DATA_PTR c_ptr)
 {
   APAC_TBL_ENTRY_PTR entry1_ptr, entry2_ptr;
@@ -2295,7 +2295,7 @@ BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_
   } // end for i loop
 
   *margin_ptr = (FLOAT32) margin;
-  *max_ptr = (FLOAT32) res;
+  *max_ptr = res;
 
   GSE_DebugStr (NORMAL,TRUE,"APACMgr: APACMgr_CalcMargin() o=%1.2f,t=%1.2f,v=%1.2f,mrg=%1.2f(%1.2f),max=%1.2f,ok=%d\r\n",
                     oat, tqDelta, val, *margin_ptr, adj, *max_ptr, ok);
@@ -2481,12 +2481,6 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
- * 
- * *****************  Version 20  *****************
- * User: Peter Lee    Date: 3/11/16    Time: 1:59p
- * Updated in $/software/control processor/code/application
- * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
- * Status
  * 
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 6:56p
