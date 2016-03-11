@@ -1,7 +1,7 @@
 #define F7X_PROTOCOL_BODY
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 26 $  $Date: 1/30/16 7:37p $     
+      $Revision: 28 $  $Date: 3/10/16 12:11p $     
 
 ******************************************************************************/
 
@@ -575,7 +575,7 @@ void F7XProtocol_Initialize ( void )
   memcpy(m_F7X_DumplistCfg, CfgMgr_RuntimeConfigPtr()->F7XConfig, sizeof(m_F7X_DumplistCfg));
   memcpy(&m_F7X_ParamListCfg, &(CfgMgr_RuntimeConfigPtr()->F7XParamConfig), 
          sizeof(m_F7X_ParamListCfg)); 
-  memcpy(m_F7X_GeneralCfg, CfgMgr_RuntimeConfigPtr()->F7XGeneralCfg, sizeof(m_F7X_GeneralCfg) ); 
+  memcpy(m_F7X_GeneralCfg, CfgMgr_RuntimeConfigPtr()->F7XGeneralCfg, sizeof(m_F7X_GeneralCfg)); 
   
   // Update runtime var of Param Translation Table 
   // Clear all entries to default 
@@ -1965,7 +1965,7 @@ void F7XProtocol_RestoreAppData( void )
  * Description: Utility function to decode the ESN from the N-Param Dumplist
  *
  * Parameters:  ch - UART chan 
- *              option - F7X_OPTION_CFG with GPA for decode info
+ *              optionCfg_ptr - F7X_OPTION_CFG with GPA for decode info
  *
  * Returns:     none
  *
@@ -2021,7 +2021,7 @@ void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
     esn_raw[1] = *pWord1;
     esn_raw[2] = *pWord0;
     esn_raw[F7X_ESN_CHAR_RAW_MAX] = '\0'; // Append NULL termination
-    if (strncmp((const CHAR * ) &esn_raw, pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX) == 0)
+    if (strncmp((const CHAR * ) esn_raw, pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX) == 0)
     {
       if (pEsnStatus->nCntSync < F7X_ESN_SYNC_THRES)
       {
@@ -2037,7 +2037,7 @@ void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
     else 
     { // esn has changed since last one or init case
       pEsnStatus->nCntSync = 0; // Clear to '0'
-      strncpy_safe ( pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX, (const CHAR *) &esn_raw, 
+      strncpy_safe ( pEsnStatus->esn_sync, F7X_ESN_CHAR_MAX, (const CHAR *) esn_raw, 
                      _TRUNCATE ); 
       pEsnStatus->nCntChanged++; 
     } // end else esn changed since last one
@@ -2071,7 +2071,7 @@ BOOLEAN F7XProtocol_FileInit(void)
 
   // Init App data
   // Note: NV_Mgr will record log if data is corrupt
-  for (i = 0; i < UART_NUM_OF_UARTS; i++)
+  for (i = 0; i < (UINT16) UART_NUM_OF_UARTS; i++)
   {
     m_F7X_AppData[i].lastRecognizedDL = F7X_DUMPLIST_NOT_RECOGNIZED_INDEX;
   }
@@ -2109,6 +2109,16 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Peter Lee    Date: 3/10/16    Time: 12:11p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates
+ * 
+ * *****************  Version 27  *****************
+ * User: Peter Lee    Date: 3/10/16    Time: 11:40a
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates.
  * 
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 1/30/16    Time: 7:37p

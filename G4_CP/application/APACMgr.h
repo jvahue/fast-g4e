@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 10 $  $Date: 2/02/16 9:43a $
+      $Revision: 12 $  $Date: 3/11/16 1:59p $
 
 ******************************************************************************/
 
@@ -367,6 +367,7 @@ typedef struct {
   FLOAT64 c2;      // Calc c2
   FLOAT64 c3;      // Calc c3
   FLOAT64 c4;      // Calc c4
+  FLOAT32 cfgOffset;  // Offset from cfg file
 } APAC_ENG_CALC_DATA, *APAC_ENG_CALC_DATA_PTR;
 
 typedef struct { // Calc common data used for both ITT and NG Calc
@@ -406,6 +407,7 @@ typedef struct {
   APAC_ENG_CALC_DATA itt;
   APAC_ENG_CALC_DATA ng;
   APAC_ENG_CYC_CHK cyc_chk; 
+  ENGRUN_INDEX engineRunIndex; 
 } APAC_ENG_STATUS, *APAC_ENG_STATUS_PTR;
 
 typedef struct {
@@ -532,6 +534,7 @@ typedef struct {
 #pragma pack(1)
 typedef struct {
   APAC_ENG_ENUM eng_uut;      // Eng 1 or Eng 2
+  ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]  
   CHAR esn[APAC_ESN_MAX_LEN]; // ESN from data bus
   APAC_NR_SEL_ENUM nr_sel;    // 100% or 102% nr sel
   APAC_INLET_CFG_ENUM inletCfg; // Inlet selection from cfg
@@ -556,13 +559,10 @@ typedef struct {
 
 typedef struct {
   APAC_ENG_ENUM eng_uut;      // Eng 1 or Eng 2
+  ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]    
   CHAR esn[APAC_ESN_MAX_LEN]; // ESN from data bus
   APAC_NR_SEL_ENUM nr_sel;    // 100% or 102% nr sel
   APAC_INLET_CFG_ENUM inletCfg;  // Inlet selection from cfg
-  BOOLEAN manual;             // Manual Verification
-  APAC_VLD_REASON_ENUM reason;// Manual Verification Reason
-  UINT16 reason_summary;      // All Manual Validate Reasons since last Man Validate. 
-                              //      Ref APAC_VLD_BIT_ENCODE_CONST[]
   UINT32 engHrs_curr_s;       // Current Eng Hrs Cycle time
   UINT32 engHrs_prev_s;       // Previous (last manual validation) Eng Hrs Cycle Time
 } APAC_ENG_START_LOG, *APAC_ENG_START_LOG_PTR;
@@ -570,6 +570,7 @@ typedef struct {
 typedef struct {
   APAC_COMMIT_ENUM commit;     // ABORT,NCR only
   APAC_ENG_ENUM eng_uut;       // Engine Under Test.  If APAC_ENG_MAX then Eng not selected
+  ENGRUN_INDEX engineRunIndex; // Engine Run Cfg Index [0..3,255]  
   APAC_VLD_REASON_ENUM reason; // Pending Manual Validate Reason (if any and if eng selected)
   UINT16 reason_summary;       // All Manual Validate Reasons since last Man Validate. 
                                //      Ref APAC_VLD_BIT_ENCODE_CONST[]
@@ -577,6 +578,7 @@ typedef struct {
 
 typedef struct {
   APAC_ENG_ENUM eng_uut;      // Eng 1 or Eng 2  or Eng_Max (if unknown)
+  ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]    
   APAC_ERRMSG_DISPLAY data;
 } APAC_FAILURE_LOG, *APAC_FAILURE_LOG_PTR;
 
@@ -683,6 +685,7 @@ typedef struct {
 EXPORT void APACMgr_Initialize ( void );
 EXPORT BOOLEAN APACMgr_FileInitHist( void );
 EXPORT BOOLEAN APACMgr_FileInitNVM( void );
+EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param ); 
 
 #endif // APAC_MGR_H
 
@@ -690,6 +693,17 @@ EXPORT BOOLEAN APACMgr_FileInitNVM( void );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 3/10/16    Time: 6:56p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Items #1,#2,#4 APAC Processing Updates
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 2/02/16    Time: 9:43a
