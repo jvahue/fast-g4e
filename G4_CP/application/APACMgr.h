@@ -2,7 +2,7 @@
 #define APAC_MGR_H
 
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        APACMgr.h
@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 11 $  $Date: 3/10/16 6:56p $
+      $Revision: 13 $  $Date: 3/11/16 7:15p $
 
 ******************************************************************************/
 
@@ -360,7 +360,7 @@ typedef struct {
 
 typedef struct {
   FLOAT32 avgVal;  // Average (over sample period) ITT or Ng used for calculation
-  FLOAT32 margin;  // Calculated Margin ITT or Ng
+  FLOAT64 margin;  // Calculated Margin ITT or Ng
   FLOAT64 max;     // Calculated Max ITT or Ng
   FLOAT64 c0;      // Calc c0
   FLOAT64 c1;      // Calc c1
@@ -543,11 +543,11 @@ typedef struct {
   APAC_COMMIT_ENUM commit;    // RJCT,ACPT,INVLD,VLD,ABORT,NCR
   UINT32 engHrs_curr_s;       // Current Eng Hrs Cycle time
   UINT32 engHrs_prev_s;       // Previous (last manual validation) Eng Hrs Cycle Time
-  FLOAT32 ittMargin;
-  FLOAT32 ittMax;
+  FLOAT64 ittMargin;
+  FLOAT64 ittMax;
   FLOAT32 ittAvg;
-  FLOAT32 ngMargin;
-  FLOAT32 ngMax;
+  FLOAT64 ngMargin;
+  FLOAT64 ngMax;
   FLOAT32 ngAvg;
   APAC_ENG_CALC_COMMON common;
   APAC_ENG_CALC_DATA itt;
@@ -693,6 +693,18 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 7:15p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update APAC ITT/Ng Margin and Max value from
+ * FLOAT32 to FLOAT64.
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 6:56p

@@ -1,6 +1,6 @@
 #define APAC_MGR_BODY
 /******************************************************************************
-            Copyright (C) 2016 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 19 $  $Date: 3/10/16 6:56p $
+      $Revision: 21 $  $Date: 3/11/16 7:15p $
 
 ******************************************************************************/
 
@@ -140,7 +140,7 @@ static BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32
                                    APAC_ENG_CALC_COMMON_PTR common_ptr );
 
 static BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val,
-                                   APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT32 *margin_ptr,
+                                   APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT64 *margin_ptr,
                                    FLOAT64 *max_ptr, APAC_ENG_CALC_DATA_PTR c_ptr);
 
 static void APACMgr_Task ( void *pParam ) ;
@@ -1666,8 +1666,8 @@ void APACMgr_NVMAppendHistData( void )
   eng_ptr = (APAC_ENG_STATUS_PTR) &m_APAC_Status.eng[m_APAC_Status.eng_uut];
   entry_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[idxLast];
   CM_GetTimeAsTimestamp(&entry_ptr->ts);
-  entry_ptr->ittMargin = eng_ptr->itt.margin;
-  entry_ptr->ngMargin = eng_ptr->ng.margin;
+  entry_ptr->ittMargin = (FLOAT32) eng_ptr->itt.margin;
+  entry_ptr->ngMargin = (FLOAT32) eng_ptr->ng.margin;
   entry_ptr->flags = (UINT8) APAC_HIST_ENCODE((UINT8) m_APAC_Status.eng_uut,
                              (UINT8) eng_ptr->commit, (UINT8) m_APAC_Status.nr_sel);
   // Update NVM App Data
@@ -2199,7 +2199,7 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
 *****************************************************************************/
 static
 BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_PTR tbl_ptr,
-                            FLOAT32 adj, FLOAT32 *margin_ptr, FLOAT64 *max_ptr,
+                            FLOAT32 adj, FLOAT64 *margin_ptr, FLOAT64 *max_ptr,
                             APAC_ENG_CALC_DATA_PTR c_ptr)
 {
   APAC_TBL_ENTRY_PTR entry1_ptr, entry2_ptr;
@@ -2294,7 +2294,7 @@ BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_
     }
   } // end for i loop
 
-  *margin_ptr = (FLOAT32) margin;
+  *margin_ptr = margin;
   *max_ptr = res;
 
   GSE_DebugStr (NORMAL,TRUE,"APACMgr: APACMgr_CalcMargin() o=%1.2f,t=%1.2f,v=%1.2f,mrg=%1.2f(%1.2f),max=%1.2f,ok=%d\r\n",
@@ -2481,6 +2481,18 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 7:15p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update APAC ITT/Ng Margin and Max value from
+ * FLOAT32 to FLOAT64.
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
  * 
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 6:56p
