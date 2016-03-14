@@ -1,6 +1,6 @@
 #define APAC_MGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9E991
@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 14 $  $Date: 2/26/16 10:20a $
+    $Revision: 16 $  $Date: 3/11/16 7:15p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -368,7 +368,7 @@ static USER_MSG_TBL apacMgr_EngDataTbl[] =
 static USER_MSG_TBL apacMgr_EngDataITTTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.        Data Type           Access    Parameter                                 IndexRange          DataLimit     EnumTbl*/
   {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.max,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c0,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C1",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c1,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
@@ -382,7 +382,7 @@ static USER_MSG_TBL apacMgr_EngDataITTTbl[] =
 static USER_MSG_TBL apacMgr_EngDataNGTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.        Data Type           Access    Parameter                                 IndexRange          DataLimit     EnumTbl*/
   {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.max,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c0,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C1",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c1,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
@@ -1572,6 +1572,18 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
  * 
+ * *****************  Version 16  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 7:15p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update APAC ITT/Ng Margin and Max value from
+ * FLOAT32 to FLOAT64.
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 3/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1320 Item #5 Add IT/Ng Cfg Offset Adj to Summary log and GSE
+ * Status
+ *
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 2/26/16    Time: 10:20a
  * Updated in $/software/control processor/code/application

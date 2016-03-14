@@ -10,7 +10,7 @@
   Description: User command structures and functions for the trend processing
 
   VERSION
-    $Revision: 38 $  $Date: 3/07/16 8:08p $
+    $Revision: 39 $  $Date: 3/14/16 3:13p $
 ******************************************************************************/
 #ifndef TREND_BODY
 #error TrendUserTables.c should only be included by Trend.c
@@ -473,7 +473,6 @@ static USER_HANDLER_RESULT Trend_Start(USER_DATA_TYPE DataType, USER_MSG_PARAM P
    snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Start API call returned: %s\r\n",
             Index, trendCmdString[cmdResult] );
 
-   outputBuffer[strlen(outputBuffer)] = NULL;
    User_OutputMsgString(outputBuffer, FALSE);
    return USER_RESULT_OK;
 }
@@ -504,7 +503,6 @@ static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType, USER_MSG_PARAM Pa
 
   snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Stop API call returned: %s\r\n",
                    Index, trendCmdString[cmdResult] );
-  outputBuffer[strlen(outputBuffer)] = NULL;
   User_OutputMsgString(outputBuffer, FALSE);
   return USER_RESULT_OK;
 }
@@ -686,54 +684,57 @@ static USER_HANDLER_RESULT Trend_DsplyStabilityState(USER_DATA_TYPE DataType,
   SAMPLE_RESULT   sampleResult;
   static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
-  memset(outputBuffer, 0, sizeof(outputBuffer));
-
   TrendGetStabilityState( (TREND_INDEX)Index, &stabState, &durMs, &sampleResult );
 
   snprintf(outputBuffer, sizeof( outputBuffer),
-             "StableState: %s\r\nDuration: %d\r\nLastResult: %s\r\n\0",
+             "StableState: %s\r\nDuration: %d\r\nLastResult: %s\r\n",
                               trendStabStateEnum[stabState].Str,
                               durMs,
                               trendSampleResultEnum[sampleResult].Str );
-  User_OutputMsgString(outputBuffer, FALSE);
+  User_OutputMsgString(outputBuffer, FALSE);  
   return USER_RESULT_OK;
 }
 
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TrendUserTables.c $
- *
+ * 
+ * *****************  Version 39  *****************
+ * User: Contractor V&v Date: 3/14/16    Time: 3:13p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Fix buffer overrun on Get_Sample command
+ * 
  * *****************  Version 38  *****************
  * User: Contractor V&v Date: 3/07/16    Time: 8:08p
  * Updated in $/software/control processor/code/application
  * Updated Trend.debug cmds to output checksum
- *
+ * 
  * *****************  Version 37  *****************
  * User: Contractor V&v Date: 2/25/16    Time: 12:04p
  * Updated in $/software/control processor/code/application
  * SCR #1300 - Remove ASSERT check in TrendGetStabilityHistory
- *
+ * 
  * *****************  Version 36  *****************
  * User: Contractor V&v Date: 2/23/16    Time: 4:07p
  * Updated in $/software/control processor/code/application
  * SCR #1300 - Add a GSE debug to retrieve stability state, dur and last
  * result
- *
+ * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 12/15/15   Time: 5:06p
  * Updated in $/software/control processor/code/application
  * SCR #1300 updated/deleted GSE trend.cfg as identified in review.
- *
+ * 
  * *****************  Version 34  *****************
  * User: Contractor V&v Date: 12/11/15   Time: 5:29p
  * Updated in $/software/control processor/code/application
  * SCR #1300 Trend.debug section and stablie duration changed to all
- *
+ * 
  * *****************  Version 33  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 6:06p
  * Updated in $/software/control processor/code/application
  * SCR #1300 CR review fixes for recently enabled debug functions
- *
+ * 
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 12/07/15   Time: 3:10p
  * Updated in $/software/control processor/code/application

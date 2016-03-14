@@ -5,17 +5,17 @@
 
     ECCN:        9D991
 
-    File:        SystemLog.c 
-    
-    Description: 
+    File:        SystemLog.c
+
+    Description:
 
    VERSION
-      $Revision: 12 $  $Date: 2/01/16 7:08p $    
+      $Revision: 13 $  $Date: 3/14/16 6:07p $
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
-/*****************************************************************************/    
+/*****************************************************************************/
 #include <string.h>
 
 /*****************************************************************************/
@@ -142,7 +142,7 @@ void SystemLogResetLimitCheck(SYS_APP_ID LogID)
  * Parameters:  [in] LogID: Any SYS_APP_ID log ID
  *
  * Returns:     TRUE if limit not met
- *              FALSE if limit not met
+ *              FALSE if limit met or if LogID is not found.
  *
  * Notes:       Each call will increment the limit check count
  *
@@ -194,7 +194,7 @@ BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID)
 static INT32 SystemLogLookup(SYS_APP_ID LogID)
 {
   INT32  min = 0;
-  INT32  max = NUM_OF_LOG_IDS;
+  INT32  max = NUM_OF_LOG_IDS - 1;
   INT32  mid;
   INT32  foundIdx = SYS_LOG_ID_NOT_FOUND;
 
@@ -226,6 +226,11 @@ static INT32 SystemLogLookup(SYS_APP_ID LogID)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: Contractor V&v Date: 3/14/16    Time: 6:07p
+ * Updated in $/software/control processor/code/system
+ * SCR #1192 - CR finding fix on array size and documentation comment
  * 
  * *****************  Version 12  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 7:08p
