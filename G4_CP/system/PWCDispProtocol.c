@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 11 $  $Date: 3/08/16 8:23a $     
+      $Revision: 12 $  $Date: 3/15/16 10:56a $     
 
 ******************************************************************************/
 
@@ -911,7 +911,7 @@ void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
 {
   PWCDISP_TXPACKET_FAIL_LOG invalidPktLog;
   PWCDISP_TX_STATUS_PTR pStatus;
-  CHAR charString[PWCDISP_MAX_CHAR_PARAMS];
+  UINT8 charString[PWCDISP_MAX_CHAR_PARAMS];
   UINT16 i;
   
   pStatus = (PWCDISP_TX_STATUS_PTR)&m_PWCDisp_TXStatus;
@@ -1525,6 +1525,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 3/15/16    Time: 10:56a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Update
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 3/08/16    Time: 8:23a
