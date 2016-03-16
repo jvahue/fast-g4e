@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 11 $  $Date: 3/08/16 8:23a $     
+      $Revision: 12 $  $Date: 3/15/16 5:21p $     
 
 ******************************************************************************/
 
@@ -56,8 +56,6 @@
 #define PWCDISP_MAX_RAW_TX_BUF      31 //MAX raw Buffer size for TX Packets
 #define PWCDISP_TX_FREQUENCY        10 //MAX time between TX messages
 #define PWCDISP_HEADER_SIZE          4 //Header size of tx/rx messages
-#define PWCDISP_UNUSED_BIT1          5 //Unused bit 1 from RX message.
-#define PWCDISP_EVENT_OFFSET         2 //Event button offset from unused bits 
 #define PWCDISP_MAX_LINE_LENGTH     12 //Max display line length.
 #define PWCDISP_PARAM_NAMES_LENGTH  15 //Max char length for 
 #define PWCDISP_SUBSTRING_MAX       15 //Max length for debug substring
@@ -215,18 +213,6 @@ typedef struct
   BOOLEAN                bNewRXFrame; //New frame = RX sync has occurred 
   BOOLEAN                bNewTXFrame; //New frame = TX data checked 
 }PWCDISP_DEBUG, *PWCDISP_DEBUG_PTR;
-
-/**********************************
-  PWC Display Protocol File Header
-**********************************/
-#pragma pack(1)
-typedef struct
-{
-  UINT16      size;
-  UINT32      packetErrorMax;
-  UINT32      noDataTO_ms;
-}PWCDISP_FILE_HDR, *PWCDISP_FILE_HDR_PTR;
-#pragma pack()
 /*********************
 *       Logs         *
 *********************/
@@ -295,6 +281,11 @@ EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 3/15/16    Time: 5:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 3/08/16    Time: 8:23a

@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 74 $  $Date: 2/29/16 9:34a $
+      $Revision: 75 $  $Date: 3/16/16 11:19a $
 
 ******************************************************************************/
 
@@ -83,6 +83,7 @@ static INT8 str[UARTMGR_DEBUG_BUFFER_SIZE * 6]; // convert byte to "0xXX" with C
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
+static void              UartMgr_InitData               ( void );
 static void              UartMgr_Task                   ( void *pParam );
 static void              UartMgr_BITTask                ( void *pParam );
 static BOOLEAN           UartMgr_DetermineChanLoss      ( UINT16 ch );
@@ -90,7 +91,7 @@ static void              UartMgr_CreateTimeOutSystemLog ( RESULT resultType, UIN
 static void              UartMgr_DetermineParamDataLoss ( UINT16 ch );
 static UINT16            UartMgr_CopyRollBuff           ( UINT8  *dest_ptr, UINT8 *src_ptr,
                                                           UINT16 size,      UINT32 *wr_cnt,
-                                              UINT32 *rd_cnt,   UINT16 wrap_size );
+                                                          UINT32 *rd_cnt,   UINT16 wrap_size );
 static FLOAT32           UartMgr_ConvertToEngUnits (UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr);
 static void              UartMgrDispDebug_Task          ( void *pParam );
 static void              UartMgr_Download_NoneHndl      ( UINT8 port,
@@ -161,17 +162,14 @@ static UART_CONFIG uartDrvDefaultCfg =
 void UartMgr_Initialize (void)
 {
   TCB    tcbTaskInfo;
-  UINT16  i,k;
+  UINT16  i;
   RESULT result;
   UARTMGR_CFG_PTR pUartMgrCfg;
   UARTMGR_PORT_CFG_PTR pUartMgrPortCfg;
   UARTMGR_STATUS_PTR pUartMgrStatus;
   UART_CONFIG uartCfg;
-  UARTMGR_WORD_INFO_PTR pWordInfo;
   UART_SYS_PBIT_STARTUP_LOG startupLog;
   BOOLEAN bAtLeastOneEnabled;
-  UARTMGR_PARAM_DATA_PTR   pUartData;
-  UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;
 
   // Initialize all local variables
   memset (m_UartMgrStatus, 0, sizeof(UARTMGR_STATUS) * (UINT8)UART_NUM_OF_UARTS);
@@ -181,39 +179,8 @@ void UartMgr_Initialize (void)
   memset (m_UartMgr_StoreBuffer, 0, sizeof(UARTMGR_STORE_BUFF) * (UINT8)UART_NUM_OF_UARTS);
   memset (m_UartMgr_Download, 0, sizeof(UARTMGR_DOWNLOAD) * (UINT8)UART_NUM_OF_UARTS);
   memset ( (void *) &m_UartMgr_Download_GBS_SIM, 0, sizeof(m_UartMgr_Download_GBS_SIM) );
-  // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
-  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
-  {
-    for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
-    {
-      pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[k][i];
-      runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
-      runtime_data_ptr->id = UARTMGR_WORD_ID_NOT_INIT;
-      // Also set flag to ReInit to TRUE to call DataReductionInit() later on
-      runtime_data_ptr->bReInit = TRUE;
-    }
-  }
-  // UartMgr_WordInfo.nIndex to UARTMGR_WORD_INDEX_NOT_FOUND
-  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
-  {
-    pWordInfo = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[k][0];
-    for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
-    {
-      pWordInfo->nIndex = UARTMGR_WORD_INDEX_NOT_FOUND;
-      pWordInfo->id = UARTMGR_WORD_ID_NOT_USED;  // Initialize to Not Used.  Init when
-                                                 //   _SensorSetup() called.
-      pWordInfo++;
-    }
-    m_UartMgr_WordSensorCount[k] = 0;
-  }
-  // Initialize all protocol handlers after UargMgrConfig restored
-  F7XProtocol_Initialize();
-  EMU150Protocol_Initialize();
-  IDParamProtocol_Initialize();
-  GBSProtocol_Initialize(); 
-  PWCDispProtocol_Initialize();
-  
-
+  // Initialize Data and WordInfo
+  UartMgr_InitData();
   //Add an entry in the user message handler table
   User_AddRootCmd(&uartMgrRootTblPtr);
   // Restore User Default
@@ -279,13 +246,12 @@ void UartMgr_Initialize (void)
           uartMgrBlock[i].read_protocol           = PWCDispProtocol_Read_Handler;
           uartMgrBlock[i].write_protocol          = PWCDispProtocol_Write_Handler;
           uartMgrBlock[i].get_protocol_fileHdr    = PWCDispProtocol_ReturnFileHdr;
-	        uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
+          uartMgrBlock[i].protocol_ID             = UARTMGR_PROTOCOL_PWC_DISPLAY;
           PWCDispProtocol_SetBaseUARTCh(i);
           break;
         case UARTMGR_PROTOCOL_NONE:
         case UARTMGR_PROTOCOL_MAX:
           // Nothing to do here - Fall Through
-          //break;
         default:
           FATAL ("Unexpected UARTMGR_PROTOCOL = %d, UART Channel = %d",
                     pUartMgrCfg->protocol, i);
@@ -298,7 +264,6 @@ void UartMgr_Initialize (void)
       {
         // If cfg and port ok, Initialize Uart Task
         memset(&tcbTaskInfo, 0, sizeof(tcbTaskInfo));
-        // strncpy_safe(TaskInfo.Name, sizeof(TaskInfo.Name),"Uart Mgr",_TRUNCATE);
         snprintf(tcbTaskInfo.Name, sizeof(tcbTaskInfo.Name),"Uart Mgr %d", i);
         tcbTaskInfo.TaskID      = (TASK_INDEX)((UINT8)UART_Mgr0 + i);
         tcbTaskInfo.Function    = UartMgr_Task;
@@ -341,7 +306,6 @@ void UartMgr_Initialize (void)
   
   // Update internal variables  
   UartMgr_ClearDownloadState(GBS_SIM_PORT_INDEX); 
-
   // Enable UartMgr BIT Task if any Uart is enabled
   if ( bAtLeastOneEnabled == TRUE )
   {
@@ -357,7 +321,6 @@ void UartMgr_Initialize (void)
     tcbTaskInfo.Rmt.MifRate    = taskInfo[Uart_BIT].MIFrate;
     tcbTaskInfo.Enabled     = TRUE;
     tcbTaskInfo.Locked      = FALSE;
-
     tcbTaskInfo.pParamBlock = (void *) &uartMgrBITBlock;
     TmTaskCreate ( &tcbTaskInfo );
     // Enable UartMgr Display Task
@@ -373,12 +336,10 @@ void UartMgr_Initialize (void)
     tcbTaskInfo.Rmt.MifRate    = taskInfo[Uart_Disp_Debug].MIFrate;
     tcbTaskInfo.Enabled     = TRUE;
     tcbTaskInfo.Locked      = FALSE;
-
     tcbTaskInfo.pParamBlock = (void *) &uartMgrDispDebugBlock;
     TmTaskCreate ( &tcbTaskInfo );
   }
   // For UART[0] force to GSE default conditions
-
   // Initialize Uart Mgr Debug
   memset ( &m_UartMgr_Debug, 0x00, sizeof(UARTMGR_DEBUG) );
   m_UartMgr_Debug.bDebug = FALSE;
@@ -397,7 +358,6 @@ void UartMgr_Initialize (void)
   /*vcast_dont_instrument_end*/
 #endif
 }
-
 
 /******************************************************************************
  * Function:    UartMgr_Task
@@ -1416,13 +1376,13 @@ void UartMgr_ClearDownloadState ( UINT8 PortIndex )
 
 BYTE UartMgr_GetChannel(UINT32 port)
 {
-  UINT16 i;
-  BYTE chan;
+  BYTE i;
+  BYTE chan = 0;
   for (i = 1; i < (UINT8)UART_NUM_OF_UARTS; i++)
   {
-    if (uartMgrBlock[i].protocol_ID == port)
+    if (uartMgrBlock[i].protocol_ID == (UARTMGR_PROTOCOLS)port)
     {
-	  chan = i;
+      chan = i;
       break;
     }
   }
@@ -1534,6 +1494,60 @@ void UartMgrDispDebug_Task ( void *pParam )
 /*****************************************************************************/
 /* Local Functions                                                           */
 /*****************************************************************************/
+/******************************************************************************
+ * Function:    UartMgr_InitData
+ *
+ * Description: Initializes the UartMgr Data, WordInfo Data and Protocol 
+ *              handlers.
+ *
+ * Parameters:  None
+ *
+ * Returns:     None
+ *
+ * Notes:
+ *  
+ *****************************************************************************/
+static void UartMgr_InitData(void)
+{
+  UINT16 i;
+  UINT16 k;
+  UARTMGR_WORD_INFO_PTR    pWordInfo;
+  UARTMGR_PARAM_DATA_PTR   pUartData;
+  UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr;  
+  
+  // UartMgr_Data.runtime_data need to be inititalized to UARTMGR_WORD_ID_NOT_INIT
+  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
+  {
+    for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
+    {
+      pUartData = (UARTMGR_PARAM_DATA_PTR) &m_UartMgr_Data[k][i];
+      runtime_data_ptr = (UARTMGR_RUNTIME_DATA_PTR) &pUartData->runtime_data;
+      runtime_data_ptr->id = UARTMGR_WORD_ID_NOT_INIT;
+      // Also set flag to ReInit to TRUE to call DataReductionInit() later on
+      runtime_data_ptr->bReInit = TRUE;
+    }
+  }
+  // UartMgr_WordInfo.nIndex to UARTMGR_WORD_INDEX_NOT_FOUND
+  for (k = 0; k < (UINT8)UART_NUM_OF_UARTS; k++)
+  {
+    pWordInfo = (UARTMGR_WORD_INFO_PTR) &m_UartMgr_WordInfo[k][0];
+    for (i = 0; i < UARTMGR_MAX_PARAM_WORD; i++)
+    {
+      pWordInfo->nIndex = UARTMGR_WORD_INDEX_NOT_FOUND;
+      pWordInfo->id = UARTMGR_WORD_ID_NOT_USED;  // Initialize to Not Used.  Init when
+      //   _SensorSetup() called.
+      pWordInfo++;
+    }
+    m_UartMgr_WordSensorCount[k] = 0;
+  }	
+  
+  // Initialize all protocol handlers after UargMgrConfig restored
+  F7XProtocol_Initialize();
+  EMU150Protocol_Initialize();
+  IDParamProtocol_Initialize();
+  GBSProtocol_Initialize(); 
+  PWCDispProtocol_Initialize();
+}
 
 /******************************************************************************
  * Function:    UartMgr_GetStatus
@@ -2312,6 +2326,11 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 75  *****************
+ * User: John Omalley Date: 3/16/16    Time: 11:19a
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 74  *****************
  * User: Peter Lee    Date: 2/29/16    Time: 9:34a
