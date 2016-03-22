@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 16 $  $Date: 3/11/16 7:15p $
+    $Revision: 17 $  $Date: 3/22/16 6:17p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -358,10 +358,10 @@ static USER_MSG_TBL apacMgr_EngDataTbl[] =
   {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.avgTQ,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"TQCORR",         NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.tqCorr,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"TQCORR",         NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.tqCorr,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -403,10 +403,10 @@ static USER_MSG_TBL apacMgr_EngDataDbgTbl[] =
   {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, -1,-1,        NO_LIMIT,     NULL},
   {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.avgTQ,       -1,-1,        NO_LIMIT,     NULL},
   {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, -1,-1,        NO_LIMIT,     NULL},
-  {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,-1,-1,        NO_LIMIT,     NULL},
-  {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    -1,-1,        NO_LIMIT,     NULL},
-  {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   -1,-1,        NO_LIMIT,     NULL},
-  {"TQCORR",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.tqCorr,      -1,-1,        NO_LIMIT,     NULL},
+  {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,-1,-1,        NO_LIMIT,     NULL},
+  {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    -1,-1,        NO_LIMIT,     NULL},
+  {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   -1,-1,        NO_LIMIT,     NULL},
+  {"TQCORR",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.tqCorr,      -1,-1,        NO_LIMIT,     NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -1571,6 +1571,11 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 3/22/16    Time: 6:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update FLOAT to FLOAT64.
  * 
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 3/11/16    Time: 7:15p

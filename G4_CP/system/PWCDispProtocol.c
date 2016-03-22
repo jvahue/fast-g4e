@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 12 $  $Date: 3/15/16 10:56a $     
+      $Revision: 13 $  $Date: 3/17/16 1:30p $     
 
 ******************************************************************************/
 
@@ -888,7 +888,7 @@ void PWCDispProtocol_ValidRXPacket(BOOLEAN bBadPacket)
     invalidPktLog.reason           = pStatus->lastSyncLossReason;
     invalidPktLog.validSyncCnt     = pStatus->recentSyncCnt;
     invalidPktLog.achievedSyncTime = pStatus->lastSyncTS;
-    LogWriteSystem(SYS_ID_UART_PWCDISP_SYNC_LOSS, LOG_PRIORITY_LOW,
+    LogWriteSystem(SYS_ID_UART_DISP_SYNC_LOSS, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_SYNC_LOSS_LOG), NULL);
   }
 }
@@ -926,7 +926,7 @@ void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
     snprintf((char *)invalidPktLog.packetContents, PWCDISP_MAX_CHAR_PARAMS + 1,
              "%s", (const char *)charString);
     invalidPktLog.validPacketCnt = pStatus->validPacketCnt;
-    LogWriteSystem(SYS_ID_UART_PWCDISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
+    LogWriteSystem(SYS_ID_UART_DISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_TXPACKET_FAIL_LOG), 
                    NULL);    
   }
@@ -1525,6 +1525,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 3/17/16    Time: 1:30p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code eview Updates
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 3/15/16    Time: 10:56a

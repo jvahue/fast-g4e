@@ -16,7 +16,7 @@
                  can be made for a particular ID.
 
    VERSION
-      $Revision: 131 $  $Date: 2/25/16 4:58p $
+      $Revision: 132 $  $Date: 3/17/16 1:32p $
 ******************************************************************************/
 
 /*****************************************************************************/
@@ -88,8 +88,8 @@
   SYS_LOG_ID(SYS_TASK_MAN_DT_OVERRUN                  ,0x4621 ,0)\
   SYS_LOG_ID(SYS_CBIT_ASSERT_LOG                      ,0x4710 ,0)\
   SYS_LOG_ID(SYS_CBIT_RESET_LOG                       ,0x4711 ,0)\
-  SYS_LOG_ID(SYS_CBIT_REG_CHECK_FAIL                  ,0x4714 ,0) /* Limit in CBITManager.c */\
-  SYS_LOG_ID(SYS_CBIT_CRC_CHECK_FAIL                  ,0x4715 ,0) /* Limit in CBITManager.c */\
+  SYS_LOG_ID(SYS_CBIT_REG_CHECK_FAIL                  ,0x4714 ,0) /*Limit in CBITManager.c*/\
+  SYS_LOG_ID(SYS_CBIT_CRC_CHECK_FAIL                  ,0x4715 ,0) /*Limit in CBITManager.c*/\
   SYS_LOG_ID(SYS_CBIT_RAM_CHECK_FAIL                  ,0x4716 ,0)\
   SYS_LOG_ID(SYS_CBIT_PWEH_SEU_COUNT_LOG              ,0x4720 ,0)\
   \
@@ -118,8 +118,8 @@
   SYS_LOG_ID(SYS_LOG_MEM_ERASE_FAIL                   ,0x4C14 ,0)\
   SYS_LOG_ID(SYS_LOG_85_PERCENT_FULL                  ,0x4C20 ,0)\
   \
-  SYS_LOG_ID(SYS_ID_MS_HEARTBEAT_FAIL                 ,0x4F10 ,0) /* Cfg Limit in MSStsCtl.c */\
-  SYS_LOG_ID(SYS_ID_MS_RECONNECT                      ,0x4F20 ,0) /* Cfg Limit in MSStsCtl.c */\
+  SYS_LOG_ID(SYS_ID_MS_HEARTBEAT_FAIL                 ,0x4F10 ,0) /*Cfg Limit in MSStsCtl.c*/\
+  SYS_LOG_ID(SYS_ID_MS_RECONNECT                      ,0x4F20 ,0) /*Cfg Limit in MSStsCtl.c*/\
   SYS_LOG_ID(SYS_ID_MS_VERSION_MISMATCH               ,0x4F21 ,0)\
   \
   SYS_LOG_ID(SYS_ID_PM_POWER_ON_LOG                   ,0x5020 ,0)\
@@ -135,7 +135,7 @@
   SYS_LOG_ID(SYS_ID_A429_CBIT_STARTUP_FAIL            ,0x5111 ,0)\
   SYS_LOG_ID(SYS_ID_A429_CBIT_DATA_LOSS_FAIL          ,0x5112 ,0)\
   SYS_LOG_ID(SYS_ID_A429_CBIT_SSM_FAIL                ,0x5113 ,0)\
-  SYS_LOG_ID(SYS_ID_A429_BCD_DIGITS                   ,0x5114 ,0) /* Limit in Arinc429Mgr.c */\
+  SYS_LOG_ID(SYS_ID_A429_BCD_DIGITS                   ,0x5114 ,0) /*Limit in Arinc429Mgr.c*/\
   \
   SYS_LOG_ID(SYS_ID_QAR_PBIT_DRV_FAIL                 ,0x5204 ,0)\
   SYS_LOG_ID(SYS_ID_QAR_CBIT_STARTUP_FAIL             ,0x5211 ,0)\
@@ -155,7 +155,7 @@
   SYS_LOG_ID(SYS_ID_INFO_TRIGGER_ENDED                ,0x5421 ,0)\
   \
   SYS_LOG_ID(SYS_ID_FPGA_CBIT_CRC_FAIL                ,0x5811 ,0)\
-  SYS_LOG_ID(SYS_ID_FPGA_CBIT_FORCE_RELOAD_RESULT     ,0x5812 ,0) /* Limit in FPGAManager.c */\
+  SYS_LOG_ID(SYS_ID_FPGA_CBIT_FORCE_RELOAD_RESULT     ,0x5812 ,0) /*Limit in FPGAManager.c*/\
   SYS_LOG_ID(SYS_ID_FPGA_CBIT_REG_CHECK_FAIL          ,0x5813 ,0)\
   \
   SYS_LOG_ID(SYS_ID_BOX_POWER_ON_COUNT_RETRIEVE_FAIL  ,0x5901 ,0)\
@@ -183,8 +183,8 @@
   SYS_LOG_ID(SYS_ID_UART_EMU150_STATUS                ,0x5C30 ,0)\
   SYS_LOG_ID(SYS_ID_UART_GBS_STATUS                   ,0x5C31 ,0)\
   /*SYS_LOG_ID(SYS_ID_UART_GBS_BLK_STATUS             ,0x5C32 ,0)\ Future Support*/\
-  SYS_LOG_ID(SYS_ID_UART_PWCDISP_SYNC_LOSS            ,0x5C33 ,10)\
-  SYS_LOG_ID(SYS_ID_UART_PWCDISP_TXPACKET_FAIL        ,0x5C34 ,10)\
+  SYS_LOG_ID(SYS_ID_UART_DISP_SYNC_LOSS               ,0x5C33 ,10)\
+  SYS_LOG_ID(SYS_ID_UART_DISP_TXPACKET_FAIL           ,0x5C34 ,10)\
   SYS_LOG_ID(SYS_ID_UART_ID_PARAM_SYNC_LOSS           ,0x5C40 ,10)\
   \
   SYS_LOG_ID(SYS_ID_CYCLES_PERSIST_FILES_INVALID      ,0x6020 ,0)/* Cycles */\
@@ -248,7 +248,7 @@
   SYS_LOG_ID(APP_ID_TREND_END                         ,0xB502 ,0)\
   SYS_LOG_ID(APP_ID_TREND_FAILED                      ,0xB503 ,0)\
   SYS_LOG_ID(APP_ID_TREND_NOT_DETECTED                ,0xB504 ,0)\
-  SYS_LOG_ID(APP_ID_TREND_SUBSAMPLE_END               ,0xB505 ,0)/*Trend End-sample collection*/\
+  SYS_LOG_ID(APP_ID_TREND_SUBSAMPLE_END               ,0xB505 ,0)/*Trend End-sample collect*/\
   \
   SYS_LOG_ID(APP_ID_APAC_SUMMARY                      ,0xB600 ,0)\
   SYS_LOG_ID(APP_ID_APAC_START                        ,0xB601 ,0)\
@@ -314,6 +314,11 @@ EXPORT BOOLEAN SystemLogLimitCheck(SYS_APP_ID LogID);
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: SystemLog.h $
+ * 
+ * *****************  Version 132  *****************
+ * User: John Omalley Date: 3/17/16    Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code eview Updates
  * 
  * *****************  Version 131  *****************
  * User: John Omalley Date: 2/25/16    Time: 4:58p

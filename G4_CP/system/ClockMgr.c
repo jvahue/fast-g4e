@@ -19,7 +19,7 @@
                 it is driven from the real-time clock on the SPI bus.
 
  VERSION
-     $Revision: 58 $  $Date: 3/02/16 3:45p $
+     $Revision: 59 $  $Date: 3/22/16 12:12p $
 
 ******************************************************************************/
 
@@ -782,11 +782,13 @@ UINT32 CM_GetSecSinceBaseYr ( TIMESTAMP *ts, TIMESTRUCT *time_s )
   // Determine years since 1997 in sec
   // Note: Year will be > 1997 as year in ts format is years since Base Year !
   // Note: Leap yr calc not compliant to /4 and /100 is not a leap yr unless also
-  //       /400.  Leap yr calc would fail for 2100.
+  //       /400.  Leap yr calc would fail for 2100, because this code will calc that 
+  //       2100 is a leap year when it is not.  If this code is to be used to include 2100
+  //       this code must be updated. 
   itemp = 0;
   if ( time_struct.Year >= 2000 )
   {
-    // Determine # leap days, from last leap year of 1997.
+    // Determine # leap days, from base year of 1997.
     itemp = ((time_struct.Year - 1997) / 4);
   }
   // else date between 1997 and 2000, no leap yr calc required
@@ -1186,6 +1188,11 @@ void CM_UpdateRecordingState(BOOLEAN bRec)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: ClockMgr.c $
+ * 
+ * *****************  Version 59  *****************
+ * User: Peter Lee    Date: 3/22/16    Time: 12:12p
+ * Updated in $/software/control processor/code/system
+ * Code review updates.  
  * 
  * *****************  Version 58  *****************
  * User: Peter Lee    Date: 3/02/16    Time: 3:45p
