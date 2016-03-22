@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 13 $  $Date: 3/11/16 7:15p $
+      $Revision: 14 $  $Date: 3/22/16 6:17p $
 
 ******************************************************************************/
 
@@ -375,10 +375,10 @@ typedef struct { // Calc common data used for both ITT and NG Calc
   FLOAT32 avgBaroPres;  // Average (over sample period) Baro Press from Bus
   FLOAT32 avgTQ;    // Average (over sample period) TQ from bus
   FLOAT32 valBaroCorr;  // Value of Baro Correction Factor from Bus
-  FLOAT32 convBaroCorr; // Converted Baro Correction from mBar to Ft
-  FLOAT32 calcPALT; // Calculated Pressure Altitude
-  FLOAT32 coeffPALT; // Calculated Pressure Altitude Coefficient
-  FLOAT32 tqCorr;    // Calculated TQ Corrected Value
+  FLOAT64 convBaroCorr; // Converted Baro Correction from mBar to Ft
+  FLOAT64 calcPALT;  // Calculated Pressure Altitude
+  FLOAT64 coeffPALT; // Calculated Pressure Altitude Coefficient
+  FLOAT64 tqCorr;    // Calculated TQ Corrected Value
 } APAC_ENG_CALC_COMMON, *APAC_ENG_CALC_COMMON_PTR;
 
 typedef enum {
@@ -693,6 +693,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 3/22/16    Time: 6:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update FLOAT to FLOAT64.
  * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 3/11/16    Time: 7:15p

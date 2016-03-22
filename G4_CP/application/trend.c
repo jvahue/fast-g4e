@@ -7,29 +7,29 @@
 
    File:        trend.c
 
-   Description: Trend Processing is a mechanism for capturing system behavior 
-                during the EngineRun-Active state or by API command. Up to 6 
+   Description: Trend Processing is a mechanism for capturing system behavior
+                during the EngineRun-Active state or by API command. Up to 6
                 trends may be configured in the system.
 
-                Trends are configured to collect sensor summary data according 
+                Trends are configured to collect sensor summary data according
                 to the following configurable settings:
-                    - Trend Type (Standard, Commanded) 
+                    - Trend Type (Standard, Commanded)
                     - Stability criteria
                     - Sample period per collection.
                     - Sample rate during a collection.
                     - Delay interval between collections.
                     - The maximum number of collection.
                     - End-Period sub-sampling.
-                
-                Trends will be configured to collect sensor summary data on up to 
+
+                Trends will be configured to collect sensor summary data on up to
                 32 sensors.
 
                 A trend can transition between the following states:
                     - IDLE - The trend is inactive, waiting for conditions to enter READY
-                    - READY - The trend is searching for stability conditions or waiting 
+                    - READY - The trend is searching for stability conditions or waiting
                               for a direct directive to enter SAMPLE
-                    - SAMPLE - The trend is actively sampling and collecting sensor input. 
-                               After a configured time the trend will transition to IDLE 
+                    - SAMPLE - The trend is actively sampling and collecting sensor input.
+                               After a configured time the trend will transition to IDLE
                                or READY.
 
                 Trend processing will support two types: STANDARD Trend and  COMMANDED Trend.
@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 49 $  $Date: 2/25/16 12:03p $
+ $Revision: 50 $  $Date: 3/18/16 5:43p $
 
 ******************************************************************************/
 
@@ -500,8 +500,7 @@ void TrendGetStabilityState(TREND_INDEX idx, STABILITY_STATE* pStabState,
 
  *               [out] pSnsrStableHist - Pointer to STABLE_HISTORY structure.
  *
- * Returns:      TRUE   if the status word was processed
- *               FALSE  data is not available or return pointer not initialized.
+ * Returns:      Always returns true.
  *
  * Notes:        FUNCTION MUST BE CALLED PRIOR TO RE-ENTERING THE 'READY' state
  *
@@ -518,7 +517,6 @@ BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHi
 
   pData = &m_TrendData[idx];
   pCfg  = &m_TrendCfg[idx];
-
 
   // Populate a status history struct of which sensors in the stability criteria array were
   // stable during the last trend.
@@ -2036,6 +2034,12 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 50  *****************
+ * User: Contractor V&v Date: 3/18/16    Time: 5:43p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Comment changed to indicate TrendGetStability always 
+ * returns true
  * 
  * *****************  Version 49  *****************
  * User: Contractor V&v Date: 2/25/16    Time: 12:03p

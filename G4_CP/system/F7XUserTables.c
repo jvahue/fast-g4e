@@ -1,6 +1,6 @@
 #define F7X_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for F7X Protocol CSC
 
     VERSION
-    $Revision: 22 $  $Date: 3/07/16 8:39p $
+    $Revision: 23 $  $Date: 3/17/16 10:56a $
 
 ******************************************************************************/
 #ifndef F7X_PROTOCOL_BODY
@@ -944,6 +944,11 @@ USER_HANDLER_RESULT F7XMsg_ParamListShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: John Omalley Date: 3/17/16    Time: 10:56a
+ * Updated in $/software/control processor/code/system
+ * SCR 1304 - Code Review Update
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 3/07/16    Time: 8:39p

@@ -17,7 +17,7 @@
                        the end has been reached.
 
     VERSION
-    $Revision: 120 $  $Date: 2/16/16 1:23p $
+    $Revision: 121 $  $Date: 3/18/16 5:44p $
 
 ******************************************************************************/
 
@@ -2740,7 +2740,7 @@ UINT32 LogManageWrite ( SYS_APP_ID logID, LOG_PRIORITY priority,
    {
      // Protect against trying to write multiple logs to the same entry
      intLevel = __DIR();
-	   bSlotFound = TRUE;
+     bSlotFound = TRUE;
 
      // sysLog will go in the next systemTable entry
      i = m_nextSysTableIdx;
@@ -2972,6 +2972,11 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 121  *****************
+ * User: Contractor V&v Date: 3/18/16    Time: 5:44p
+ * Updated in $/software/control processor/code/system
+ * SCR #1300 - CR review changes
  * 
  * *****************  Version 120  *****************
  * User: Contractor V&v Date: 2/16/16    Time: 1:23p

@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 21 $  $Date: 3/11/16 7:15p $
+      $Revision: 22 $  $Date: 3/22/16 6:17p $
 
 ******************************************************************************/
 
@@ -139,7 +139,7 @@ static APAC_STATUS_PTR APACMgr_GetStatus (void);
 static BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
                                    APAC_ENG_CALC_COMMON_PTR common_ptr );
 
-static BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val,
+static BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT64 tqDelta, FLOAT32 val,
                                    APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT64 *margin_ptr,
                                    FLOAT64 *max_ptr, APAC_ENG_CALC_DATA_PTR c_ptr);
 
@@ -2156,15 +2156,15 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
       ax2 = (entry_ptr + 1)->val;
       ay1 = entry_ptr->coeff;
       ay2 = (entry_ptr + 1)->coeff;
-      common_ptr->coeffPALT = (FLOAT32) APAC_CALC_INTERPOLATE(palt_corr,ax1,ax2,ay1,ay2);
+      common_ptr->coeffPALT = APAC_CALC_INTERPOLATE(palt_corr,ax1,ax2,ay1,ay2);
       common_ptr->tqCorr = common_ptr->coeffPALT * tq;
       break;
     }
     entry_ptr++;
   }
 
-  common_ptr->convBaroCorr = (FLOAT32) baro_conv;
-  common_ptr->calcPALT = (FLOAT32) palt_corr;
+  common_ptr->convBaroCorr = baro_conv;
+  common_ptr->calcPALT = palt_corr;
 
   GSE_DebugStr (NORMAL,TRUE,
      "APACMgr: APACMgr_CalcTqCorr() bi=%1.1f,pi=%1.1f,ti=%1.1f,bc=%1.1f,pc=%1.1f,co=%1.4f,t=%1.1f,ok=%d\r\n",
@@ -2198,7 +2198,7 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
 *
 *****************************************************************************/
 static
-BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT32 tqDelta, FLOAT32 val, APAC_TBL_PTR tbl_ptr,
+BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT64 tqDelta, FLOAT32 val, APAC_TBL_PTR tbl_ptr,
                             FLOAT32 adj, FLOAT64 *margin_ptr, FLOAT64 *max_ptr,
                             APAC_ENG_CALC_DATA_PTR c_ptr)
 {
@@ -2481,6 +2481,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 3/22/16    Time: 6:17p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update FLOAT to FLOAT64.
  * 
  * *****************  Version 21  *****************
  * User: Peter Lee    Date: 3/11/16    Time: 7:15p
