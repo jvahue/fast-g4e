@@ -359,7 +359,7 @@ typedef struct {
 } APAC_ENG_VLD_STATUS;
 
 typedef struct {
-  FLOAT32 avgVal;  // Average (over sample period) ITT or Ng used for calculation
+  FLOAT64 avgVal;  // Average (over sample period) ITT or Ng used for calculation
   FLOAT64 margin;  // Calculated Margin ITT or Ng
   FLOAT64 max;     // Calculated Max ITT or Ng
   FLOAT64 c0;      // Calc c0
@@ -545,10 +545,10 @@ typedef struct {
   UINT32 engHrs_prev_s;       // Previous (last manual validation) Eng Hrs Cycle Time
   FLOAT64 ittMargin;
   FLOAT64 ittMax;
-  FLOAT32 ittAvg;
+  FLOAT64 ittAvg;
   FLOAT64 ngMargin;
   FLOAT64 ngMax;
-  FLOAT32 ngAvg;
+  FLOAT64 ngAvg;
   APAC_ENG_CALC_COMMON common;
   APAC_ENG_CALC_DATA itt;
   APAC_ENG_CALC_DATA ng;
