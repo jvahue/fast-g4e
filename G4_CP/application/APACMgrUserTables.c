@@ -354,10 +354,10 @@ static USER_MSG_TBL apacMgr_SnsrTrendNamesTbl[] =
 
 static USER_MSG_TBL apacMgr_EngDataTbl[] =
 { /*Str              Next Tbl Ptr      Handler Func.        Data Type          Access    Parameter                                        IndexRange          DataLimit     EnumTbl*/
-  {"AVG_OAT",        NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.avgOAT,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.avgTQ,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
-  {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,   USER_RO,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"AVG_OAT",        NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.avgOAT,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.avgTQ,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, 0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
@@ -399,10 +399,10 @@ static USER_MSG_TBL apacMgr_EngDataDbgTbl[] =
 { /*Str              Next Tbl Ptr      Handler Func.           Data Type          Access    Parameter                                        IndexRange    DataLimit     EnumTbl*/
   {"INLET",          NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_ENUM,    USER_RW,  (void *) &statusAPACDbg_Inlet,                   -1,-1,        NO_LIMIT,     apacInletStrs},
   {"NR_SEL",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_ENUM,    USER_RW,  (void *) &statusAPACDbg_NR_Sel,                  -1,-1,        NO_LIMIT,     apacNrSelStrs},
-  {"AVG_OAT",        NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.avgOAT,      -1,-1,        NO_LIMIT,     NULL},
-  {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, -1,-1,        NO_LIMIT,     NULL},
-  {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.avgTQ,       -1,-1,        NO_LIMIT,     NULL},
-  {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,   USER_RW,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, -1,-1,        NO_LIMIT,     NULL},
+  {"AVG_OAT",        NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RW,  (void *) &statusAPAC_EngTemp.common.avgOAT,      -1,-1,        NO_LIMIT,     NULL},
+  {"AVG_BAROPRES",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RW,  (void *) &statusAPAC_EngTemp.common.avgBaroPres, -1,-1,        NO_LIMIT,     NULL},
+  {"AVG_TQ",         NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RW,  (void *) &statusAPAC_EngTemp.common.avgTQ,       -1,-1,        NO_LIMIT,     NULL},
+  {"VAL_BAROCORR",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RW,  (void *) &statusAPAC_EngTemp.common.valBaroCorr, -1,-1,        NO_LIMIT,     NULL},
   {"CONV_BAROCORR",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.convBaroCorr,-1,-1,        NO_LIMIT,     NULL},
   {"CALC_PALT",      NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.calcPALT,    -1,-1,        NO_LIMIT,     NULL},
   {"COEFF_PALT",     NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64, USER_RO,  (void *) &statusAPAC_EngTemp.common.coeffPALT,   -1,-1,        NO_LIMIT,     NULL},
