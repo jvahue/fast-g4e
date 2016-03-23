@@ -16,7 +16,7 @@
 
 //#define APAC_TIMING_TEST 1
 //#define APAC_TEST_SIM 1
-//#define APAC_TEST_DBG 1
+#define APAC_TEST_DBG 1
 //#define APACMGR_CYCLE_CBIT_INCR 1
 
 /*****************************************************************************/
@@ -77,7 +77,7 @@ typedef enum {
 
 typedef struct {
   SENSOR_INDEX idx;
-  FLOAT32 *dest_ptr;
+  FLOAT64 *dest_ptr;
 } APAC_DATA_AVG_ENTRY, *APAC_DATA_AVG_ENTRY_PTR;
 
 typedef struct {
@@ -136,10 +136,10 @@ static APAC_VLD_LOG m_APAC_VLD_Log;
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
 static APAC_STATUS_PTR APACMgr_GetStatus (void);
-static BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
+static BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
                                    APAC_ENG_CALC_COMMON_PTR common_ptr );
 
-static BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT64 tqDelta, FLOAT32 val,
+static BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val,
                                    APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT64 *margin_ptr,
                                    FLOAT64 *max_ptr, APAC_ENG_CALC_DATA_PTR c_ptr);
 
@@ -1426,7 +1426,7 @@ static void APACMgr_GetDataValues (void)
       {
         if (snsr_ptr->SensorIndex == pDataEntry->idx)
         {
-          *pDataEntry->dest_ptr = snsr_ptr->fAvgValue;
+          *pDataEntry->dest_ptr = (FLOAT64) snsr_ptr->fAvgValue;
           break; // exit inner loop, and go to next APAC_DATA_AVG_ENUM
         } // end if (snsr_ptr->SensorIndex == pDataAvg->avg.idx)
         snsr_ptr++;
@@ -1438,10 +1438,10 @@ static void APACMgr_GetDataValues (void)
           GSE_DebugStr(NORMAL,TRUE,
                 "APACMgr: APACMgr_GetDataValues() Snsr Idx Not Found Eng=%d,Idx=%d\r\n",
                 m_APAC_Status.eng_uut, pDataEntry->idx);
-          *pDataEntry->dest_ptr = APAC_SNSR_NOT_FOUND_VAL;
+          *pDataEntry->dest_ptr = (FLOAT64) APAC_SNSR_NOT_FOUND_VAL;
         } // end if ( i != APAC_DATA_VAL_BARO)
         else { // Get APAC_DATA_VAL_BARO val directly
-          *pDataEntry->dest_ptr = SensorGetValue(pDataEntry->idx);
+          *pDataEntry->dest_ptr = (FLOAT64) SensorGetValue(pDataEntry->idx);
         }
       }
       pDataEntry++; // Move to next element in APAC_DATA_AVG_ENUM
@@ -2133,7 +2133,7 @@ APAC_STATUS_PTR APACMgr_GetStatus (void)
  *
  *****************************************************************************/
 static
-BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
+BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
                             APAC_ENG_CALC_COMMON_PTR common_ptr)
 {
   FLOAT64 baro_conv, palt_corr;
@@ -2198,7 +2198,7 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT32 baro_corr, FLOAT32 baro_pres, FLOAT32 tq,
 *
 *****************************************************************************/
 static
-BOOLEAN APACMgr_CalcMargin (FLOAT32 oat, FLOAT64 tqDelta, FLOAT32 val, APAC_TBL_PTR tbl_ptr,
+BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val, APAC_TBL_PTR tbl_ptr,
                             FLOAT32 adj, FLOAT64 *margin_ptr, FLOAT64 *max_ptr,
                             APAC_ENG_CALC_DATA_PTR c_ptr)
 {

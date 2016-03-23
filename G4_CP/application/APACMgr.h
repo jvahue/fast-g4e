@@ -371,10 +371,10 @@ typedef struct {
 } APAC_ENG_CALC_DATA, *APAC_ENG_CALC_DATA_PTR;
 
 typedef struct { // Calc common data used for both ITT and NG Calc
-  FLOAT32 avgOAT;   // Average (over sample period) OAT value
-  FLOAT32 avgBaroPres;  // Average (over sample period) Baro Press from Bus
-  FLOAT32 avgTQ;    // Average (over sample period) TQ from bus
-  FLOAT32 valBaroCorr;  // Value of Baro Correction Factor from Bus
+  FLOAT64 avgOAT;   // Average (over sample period) OAT value
+  FLOAT64 avgBaroPres;  // Average (over sample period) Baro Press from Bus
+  FLOAT64 avgTQ;    // Average (over sample period) TQ from bus
+  FLOAT64 valBaroCorr;  // Value of Baro Correction Factor from Bus
   FLOAT64 convBaroCorr; // Converted Baro Correction from mBar to Ft
   FLOAT64 calcPALT;  // Calculated Pressure Altitude
   FLOAT64 coeffPALT; // Calculated Pressure Altitude Coefficient
