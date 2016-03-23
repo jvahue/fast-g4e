@@ -1196,6 +1196,10 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
   common_ptr = (APAC_ENG_CALC_COMMON_PTR) &m_APAC_Eng_Debug.common;
   itt_ptr = (APAC_ENG_CALC_DATA_PTR) &m_APAC_Eng_Debug.itt;
   ng_ptr = (APAC_ENG_CALC_DATA_PTR) &m_APAC_Eng_Debug.ng;
+  
+// Test
+// common_ptr->valBaroCorr = (FLOAT32) 977.149963f; 
+// Test  
 
   // Call APACMgr_CalcTqDelta()
   bOk =  APACMgr_CalcTqCorr( common_ptr->valBaroCorr, common_ptr->avgBaroPres,

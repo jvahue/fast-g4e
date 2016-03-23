@@ -1682,7 +1682,7 @@ BOOLEAN User_CvtGetStr(USER_DATA_TYPE Type, INT8* GetStr, UINT32 Len,
       break;
 
     case USER_TYPE_FLOAT64:
-      snprintf(GetStr, (INT32)Len, "%lf",*(FLOAT64*)GetPtr);
+      snprintf(GetStr, (INT32)Len, "%.15f",*(FLOAT64*)GetPtr);
       break;
 
     case USER_TYPE_BOOLEAN:
