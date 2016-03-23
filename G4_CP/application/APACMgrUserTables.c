@@ -367,7 +367,7 @@ static USER_MSG_TBL apacMgr_EngDataTbl[] =
 
 static USER_MSG_TBL apacMgr_EngDataITTTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.        Data Type           Access    Parameter                                 IndexRange          DataLimit     EnumTbl*/
-  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.max,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c0,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
@@ -381,7 +381,7 @@ static USER_MSG_TBL apacMgr_EngDataITTTbl[] =
 
 static USER_MSG_TBL apacMgr_EngDataNGTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.        Data Type           Access    Parameter                                 IndexRange          DataLimit     EnumTbl*/
-  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
+  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.avgVal,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.margin,   0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.max,      0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatus,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c0,       0,APAC_ENG_MAX-1,   NO_LIMIT,     NULL},
@@ -412,7 +412,7 @@ static USER_MSG_TBL apacMgr_EngDataDbgTbl[] =
 
 static USER_MSG_TBL apacMgr_EngDataDbgITTTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.           Data Type           Access    Parameter                                 IndexRange     DataLimit     EnumTbl*/
-  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RW,  (void *) &statusAPAC_EngTemp.itt.avgVal,   -1,-1,        NO_LIMIT,     NULL},
+  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64,  USER_RW,  (void *) &statusAPAC_EngTemp.itt.avgVal,   -1,-1,        NO_LIMIT,     NULL},
   {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.margin,   -1,-1,        NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.itt.max,      -1,-1,        NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.itt.c0,       -1,-1,        NO_LIMIT,     NULL},
@@ -425,7 +425,7 @@ static USER_MSG_TBL apacMgr_EngDataDbgITTTbl[] =
 
 static USER_MSG_TBL apacMgr_EngDataDbgNGTbl[] =
 { /*Str        Next Tbl Ptr      Handler Func.           Data Type           Access    Parameter                                 IndexRange     DataLimit     EnumTbl*/
-  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RW,  (void *) &statusAPAC_EngTemp.ng.avgVal,   -1,-1,          NO_LIMIT,     NULL},
+  {"AVG_VAL",  NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64,  USER_RW,  (void *) &statusAPAC_EngTemp.ng.avgVal,   -1,-1,          NO_LIMIT,     NULL},
   {"MARGIN",   NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.margin,   -1,-1,          NO_LIMIT,     NULL},
   {"MAX",      NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT,    USER_RO,  (void *) &statusAPAC_EngTemp.ng.max,      -1,-1,          NO_LIMIT,     NULL},
   {"C0",       NO_NEXT_TABLE,    APACMgr_EngStatusDbg,   USER_TYPE_FLOAT64,  USER_RO,  (void *) &statusAPAC_EngTemp.ng.c0,       -1,-1,          NO_LIMIT,     NULL},
