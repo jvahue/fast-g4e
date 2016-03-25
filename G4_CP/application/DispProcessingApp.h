@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 11 $  $Date: 2/25/16 5:03p $     
+      $Revision: 12 $  $Date: 3/23/16 8:50a $     
 
 ******************************************************************************/
 
@@ -50,6 +50,8 @@
 #define MAX_SCREEN_SIZE              24 // Total sum of characters on lines 
                                         // one and two.
 #define MAX_LINE_LENGTH              12 // Total sum of characters on one line.
+#define MAX_CHAR_LENGTH              24 // Maximum string length of structure 
+                                        // related strings
 #define MAX_ACTIONS_COUNT            29 // Maximum number of actions
 #define MAX_SCREEN_VARIABLE_COUNT    16 // Maximum number of screen variables
 #define MAX_VARIABLES_PER_SCREEN      6 // Max number of variables per screen
@@ -67,13 +69,11 @@
 #define DISCRETE_STATE_COUNT          8 // Total number of possible discretes
 #define DISPLAY_DCRATE_MAX            5 // The maximum value (from 1 to 5) of
                                         // DCRATE on screen M21.
-#define DISPLAY_VALID_BUTTONS        12 // The current total number of valid
+#define DISPLAY_VALID_BUTTONS        16 // The current total number of valid
                                         // push buttons.
 #define D_HLTH_ACTIVE              0x00 // Display is transmitting packets with 
                                         // valid data.
-#define D_HLTH_DIAGNOSTIC          0x40 // Unit is displaying diagnostic info
 #define D_HLTH_PBIT_ACTIVE         0x80 // Unit is performing the lamp test
-#define D_HLTH_PBIT_PASS           0x88 // Unit has passed PBIT
 #define D_HLTH_INOP_SIGNAL_FAULT   0xC3 // Unit not receiving discrete monitor
                                         // indication but is receiving packets
 #define D_HLTH_COM_RX_FAULT        0xCC // Unit receiving discrete monitor 
@@ -157,7 +157,7 @@ typedef enum
 typedef struct
 {
   DISPLAY_BUTTON_STATES   id;
-  CHAR                    name[24];
+  CHAR                    name[MAX_CHAR_LENGTH];
   UINT16                  size;
 }DISPLAY_BUTTON_TABLE, *DISPLAY_BUTTON_TABLE_PTR;
 
@@ -171,7 +171,7 @@ typedef struct
 /********************************/
 typedef struct
 {
-  CHAR  strInsert[24];
+  CHAR  strInsert[MAX_CHAR_LENGTH];
   UINT8 variablePosition;
   UINT8 variableLength;
 }DISPLAY_VARIABLE_TABLE, *DISPLAY_VARIABLE_TABLE_PTR;
@@ -185,7 +185,7 @@ typedef struct
 
 typedef struct
 {
-  CHAR                      menuString[24];
+  CHAR                      menuString[MAX_CHAR_LENGTH];
   DISPLAY_SCREEN_ENUM       dblUpScreen;
   DISPLAY_SCREEN_ENUM       dblDownScreen;
   DISPLAY_SCREEN_ENUM       dblLeftScreen;
@@ -261,7 +261,6 @@ typedef struct
                             // take place without the use of a button click
   DISPLAY_BUTTON_STATES buttonInput;// The interpreted command from the display
   BOOLEAN   bButtonReset;   // Is true when all button states are false.
-  BOOLEAN   bD_HLTHReset;   // Is true when D_HLTH byte is 0x00.
   BOOLEAN   bInvalidButton; // If an invalid key is pressed this boolean will 
                             // allow the Screen to update despite the lack
                             // of button presses.
@@ -324,74 +323,13 @@ typedef struct
                                  Package Exports
 ******************************************************************************/
 #undef EXPORT
+
 #if defined ( DISPLAY_PROCESSING_BODY )
-
-#define EXPORT
+   #define EXPORT
 #else
-#define EXPORT extern
-
+   #define EXPORT extern
 #endif
 
-#if defined (DISPLAY_PROCESSING_BODY)
-// Screen index enumeration for modules which ref Display Processing App
-USER_ENUM_TBL screenIndexType[] =
-{ { "M00",M00 }, {"M01", M01 }, {"M02", M02 }, 
-  { "M03",M03 }, {"M04", M04 }, {"M05", M05 }, 
-  { "M06",M06 }, {"M07", M07 }, {"M08", M08 }, 
-  { "M09",M09 }, {"M10", M10 }, {"M11", M11 }, 
-  { "M12",M12 }, {"M13", M13 }, {"M14", M14 }, 
-  { "M15",M15 }, {"M16", M16 }, {"M17", M17 }, 
-  { "M18",M18 }, {"M19", M19 }, {"M20", M20 }, 
-  { "M21",M21 }, {"M22", M22 }, {"M23", M23 }, 
-  { "M24",M24 }, {"M25", M25 }, {"M26", M26 }, 
-  { "M27",M27 }, {"M28", M28 }, {"M29", M29 }, 
-  { "M30",M30 },
-  { "UNUSED", DISPLAY_SCREEN_COUNT }, 
-  { "A00",A00 }, {"A01", A01 }, {"A02", A02 },
-  { "A03",A03 }, {"A04", A04 }, {"A05", A05 },
-  { "A06",A06 }, {"A07", A07 }, {"A08", A08 },
-  { "A09",A09 }, {"A10", A10 }, {"A11", A11 },
-  { "A12",A12 }, {"A13", A13 }, {"A14", A14 },
-  { "A15",A15 }, {"A16", A16 }, {"A17", A17 },
-  { "A18",A18 }, {"A19", A19 }, {"A20", A20 },
-  { "A21",A21 }, {"A22", A22 }, {"A23", A23 },
-  { "A24",A24 }, {"A25", A25 }, {"A26", A26 },
-  { "A27", A27}, {"A28", A28 },
-  { "NO_ACTION", NO_ACTION },   { NULL, 0 }
-};
-#else
-// Export the triggerIndex enum table
-EXPORT USER_ENUM_TBL screenIndexType[];
-#endif
-
-#if defined (DISPLAY_PROCESSING_BODY)
-// Screen index enumeration for modules which ref Display Processing App
-USER_ENUM_TBL buttonIndexType[] =
-{ 
-  { "RIGHT_BUTTON"       , RIGHT_BUTTON          },
-  { "LEFT_BUTTON"        , LEFT_BUTTON           },
-  { "ENTER_BUTTON"       , ENTER_BUTTON          }, 
-  { "UP_BUTTON"          , UP_BUTTON             },
-  { "DOWN_BUTTON"        , DOWN_BUTTON           },
-  { "UNUSED1_BUTTON"     , UNUSED1_BUTTON        },
-  { "UNUSED2_BUTTON"     , UNUSED2_BUTTON        }, 
-  { "EVENT_BUTTON"       , EVENT_BUTTON          },
-  { "RIGHT_DBLCLICK"     , RIGHT_DBLCLICK        },
-  { "LEFT_DBLCLICK"      , LEFT_DBLCLICK         }, 
-  { "ENTER_DBLCLICK"     , ENTER_DBLCLICK        }, 
-  { "UP_DBLCLICK"        , UP_DBLCLICK           },
-  { "DOWN_DBLCLICK"      , DOWN_DBLCLICK         }, 
-  { "UNUSED1_DBLCLICK"   , UNUSED1_DBLCLICK      }, 
-  { "UNUSED2_DBLCLICK"   , UNUSED2_DBLCLICK      }, 
-  { "EVENT_DBLCLICK"     , EVENT_DBLCLICK        }, 
-  { "UNUSED"             , DISPLAY_BUTTONS_COUNT }, 
-  { "NO_PUSH_BUTTON_DATA", NO_PUSH_BUTTON_DATA   },
-  { NULL, 0 }
-};
-#else
-// Export the triggerIndex enum table
-EXPORT USER_ENUM_TBL buttonIndexType[];
-#endif
 /******************************************************************************
                              Package Exports Variables
 ******************************************************************************/
@@ -415,6 +353,11 @@ EXPORT void                      DispProcApp_DisableLiveStream(void);
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 3/23/16    Time: 8:50a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: John Omalley Date: 2/25/16    Time: 5:03p

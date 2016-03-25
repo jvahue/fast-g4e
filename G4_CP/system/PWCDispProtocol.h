@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 12 $  $Date: 3/15/16 5:21p $     
+      $Revision: 13 $  $Date: 3/24/16 12:57p $     
 
 ******************************************************************************/
 
@@ -59,6 +59,8 @@
 #define PWCDISP_MAX_LINE_LENGTH     12 //Max display line length.
 #define PWCDISP_PARAM_NAMES_LENGTH  15 //Max char length for 
 #define PWCDISP_SUBSTRING_MAX       15 //Max length for debug substring
+#define PWCDISP_DATALOSSWAIT         6 //Max wait time before setting the data
+                                       //loss flag
 #define DCRATE_INT8_TO_MS_CONVERSION 2 //value used to convert the byte DCRATE
                                        //to its value in ms.
 #define BYTE_LENGTH                  8 //Total bits in a byte
@@ -281,6 +283,11 @@ EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 3/24/16    Time: 12:57p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - V&V Findings Updates
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 3/15/16    Time: 5:21p

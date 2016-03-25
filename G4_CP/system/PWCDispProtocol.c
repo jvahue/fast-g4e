@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 13 $  $Date: 3/17/16 1:30p $     
+      $Revision: 14 $  $Date: 3/24/16 12:57p $     
 
 ******************************************************************************/
 
@@ -187,6 +187,7 @@ static UARTMGR_PROTOCOL_DATA    m_PWCDisp_RXData[PWCDISP_RX_ELEMENT_COUNT] =
 
 static UINT8  m_Str[MAX_DEBUG_STRING_SIZE];
 static UINT8  dataLossFlag = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
+static UINT32 dataLossCounter = 0;
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
 /*****************************************************************************/
@@ -415,8 +416,9 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     
     // Attempt to synchronize and decode RX raw buffer
     bNewData = PWCDispProtocol_FrameSearch(rx_buff_ptr);
+    dataLossCounter = 0;
   }
-  else
+  else if (++dataLossCounter == PWCDISP_DATALOSSWAIT)
   {
     dataLossFlag = (UINT8)DIO_DISPLAY_DATA_LOSS_FAIL;
   }
@@ -1096,8 +1098,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
     }
   }
   // Update status, reset stateCheck switch, and return bBadTXPacket
-  snprintf((char *)pStatus->packetContents, PWCDISP_TX_MSG_SIZE + 1, "%s", 
-           (const char *)tx_buff_ptr->data);
+  memcpy(pStatus->packetContents, tx_buff_ptr->data, PWCDISP_TX_MSG_SIZE);
   stateCheck = PWCDISP_PARAM_ENCODE_CHARACTERS;
   // Record a System Log if the Packet is bad.
   PWCDispProtocol_ValidTXPacket(bBadTXPacket);
@@ -1525,6 +1526,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 3/24/16    Time: 12:57p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - V&V Findings Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 3/17/16    Time: 1:30p

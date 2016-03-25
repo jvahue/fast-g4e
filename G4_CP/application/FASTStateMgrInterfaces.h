@@ -2,15 +2,17 @@
 #define FASTSTATEMGRINTERFACES_H
 
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         FASTStateMgrInterfaces.h
 
-    Description:
+    Description:  Interface definitions for the FAST State Machine.
 
     VERSION
-    $Revision: 10 $  $Date: 3/10/16 6:56p $
+    $Revision: 11 $  $Date: 3/23/16 8:57a $
 
 ******************************************************************************/
 
@@ -120,6 +122,11 @@ FSM_TASK_ITEM(UCLR, FALSE,       0,      UartMgr_DownloadClr,     FSM_GetStateFA
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTStateMgrInterfaces.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: John Omalley Date: 3/23/16    Time: 8:57a
+ * Updated in $/software/control processor/code/application
+ * SCR 1320 Code Review Updates
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 6:56p
