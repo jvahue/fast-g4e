@@ -1,6 +1,6 @@
 #define DISPLAY_PROC_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:        9D991
@@ -11,7 +11,7 @@
                  CSC
 
     VERSION
-    $Revision: 6 $  $Date: 2/10/16 5:36p $
+    $Revision: 7 $  $Date: 3/23/16 8:50a $
 
 ******************************************************************************/
 #ifndef DISPLAY_PROCESSING_BODY
@@ -81,8 +81,8 @@ static USER_MSG_TBL dispProcAppStatusTbl[] =
   {"BUTTON_ENABLE",      NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_BOOLEAN, USER_RO, (void *) &dispProcAppStatusTemp.bButtonEnable,  -1, -1, NO_LIMIT, NULL},
   {"INVALID_D_HLTH_CNT", NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT32,  USER_RO, (void *) &dispProcAppStatusTemp.dispHealthTimer,-1, -1, NO_LIMIT, NULL},
   {"DISP_PART_NUMBER",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_UINT8,   USER_RO, (void *) &dispProcAppStatusTemp.partNumber,     -1, -1, NO_LIMIT, NULL},
-  {"DISP_VERSION_NUM",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.versionNumStr,  -1, -1, NO_LIMIT, NULL},
-  {"MSG_CONTENTS",       NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *) &dispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
+  {"DISP_VERSION_NUM",   NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *)  dispProcAppStatusTemp.versionNumStr,  -1, -1, NO_LIMIT, NULL},
+  {"MSG_CONTENTS",       NO_NEXT_TABLE, DispProcessingApp_Status, USER_TYPE_STR,     USER_RO, (void *)  dispProcAppStatusTemp.charString,     -1, -1, NO_LIMIT, NULL},
   {NULL,                 NULL,          NULL,                     NO_HANDLER_DATA}
 };
 
@@ -330,15 +330,35 @@ static USER_HANDLER_RESULT DispProcessingApp_ShowConfig(USER_DATA_TYPE DataType,
  *  MODIFICATIONS
  *    $History: DispProcessingUserTables.c $
  * 
+ * *****************  Version 7  *****************
+ * User: John Omalley Date: 3/23/16    Time: 8:50a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
+ * 
  * *****************  Version 6  *****************
  * User: John Omalley Date: 2/10/16    Time: 5:36p
  * Updated in $/software/control processor/code/application
  * SCR 1303 Removed GSE Commands
  * 
+ * *****************  Version 5  *****************
+ * User: John Omalley Date: 2/10/16    Time: 9:11a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
+ * 
  * *****************  Version 4  *****************
  * User: John Omalley Date: 1/21/16    Time: 4:40p
  * Updated in $/software/control processor/code/application
  * SCR 1312 - Updates from user feedback on navigation
+ * 
+  * *****************  Version 3  *****************
+ * User: John Omalley Date: 1/04/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Updates from Performance Software
+ * 
+ * *****************  Version 2  *****************
+ * User: Peter Lee    Date: 15-12-02   Time: 6:38p
+ * Updated in $/software/control processor/code/application
+ * SCR #1303 Display App Updates from Jeremy.  
  * 
  * *****************  Version 1  *****************
  * User: Jeremy Hester Date: 10/5/15    Time: 11:20p

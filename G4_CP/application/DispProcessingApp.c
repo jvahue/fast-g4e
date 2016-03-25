@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 13 $  $Date: 3/08/16 8:21a $     
+      $Revision: 14 $  $Date: 3/24/16 12:54p $     
 
 ******************************************************************************/
 
@@ -134,18 +134,22 @@ static DISPLAY_SCREEN_ENUM invalidButtonScreen;
 
 static DISPLAY_BUTTON_TABLE validButtonTable[DISPLAY_VALID_BUTTONS] =
 {
-  {DOWN_BUTTON,   "", 1},
-  {UP_BUTTON,     "", 1},
-  {ENTER_BUTTON,  "", 1},
-  {LEFT_BUTTON,   "", 1},
-  {RIGHT_BUTTON,  "", 1},
-  {EVENT_BUTTON,  "", 2},
-  {DOWN_DBLCLICK, "", 2},
-  {UP_DBLCLICK,   "", 2},
-  {ENTER_DBLCLICK,"", 2},
-  {LEFT_DBLCLICK, "", 2},
-  {RIGHT_DBLCLICK,"", 2},
-  {EVENT_DBLCLICK,"", 2}
+  {DOWN_BUTTON,      "", 1},
+  {UP_BUTTON,        "", 1},
+  {ENTER_BUTTON,     "", 1},
+  {LEFT_BUTTON,      "", 1},
+  {RIGHT_BUTTON,     "", 1},
+  {UNUSED1_BUTTON,   "", 0},
+  {UNUSED2_BUTTON,   "", 0},
+  {EVENT_BUTTON,     "", 2},
+  {DOWN_DBLCLICK,    "", 2},
+  {UP_DBLCLICK,      "", 2},
+  {ENTER_DBLCLICK,   "", 2},
+  {LEFT_DBLCLICK,    "", 2},
+  {RIGHT_DBLCLICK,   "", 2},
+  {UNUSED1_DBLCLICK, "", 0},
+  {UNUSED2_DBLCLICK, "", 0},
+  {EVENT_DBLCLICK,   "", 2}
 };
 
 static UINT8 m_Str[MAX_DEBUG_STRING_SIZE];
@@ -187,7 +191,7 @@ static DISPLAY_CHAR_TABLE displayDiscreteTbl[DISCRETE_STATE_COUNT] =
 static void                  DispProcessingApp_InitStrings(void);
 static BOOLEAN               DispProcessingApp_GetNewDispData( void );
 static DISPLAY_STATE_PTR     DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-	                                                          UINT16 buttonInput);
+                                                              UINT16 buttonInput);
 static DISPLAY_SCREEN_ENUM   DispProcessingApp_PerformAction(DISPLAY_SCREEN_ENUM nextAction);
 static void                  DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, 
                                                            BOOLEAN bNewData);
@@ -504,7 +508,6 @@ void DispProcessingApp_Handler(void *pParam)
       break;
     }
   }
-
   // Copy the menu string into the status string.
   memcpy((void *)pStatus->charString, (const void*)pScreen->menuString, 
          MAX_SCREEN_SIZE);
@@ -743,7 +746,7 @@ BOOLEAN DispProcessingApp_GetNewDispData( void )
 *****************************************************************************/
 static
 DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
-	                                               UINT16 buttonInput)
+                                                   UINT16 buttonInput)
 {
   DISPLAY_SCREEN_STATUS_PTR pStatus;
 
@@ -764,7 +767,7 @@ DISPLAY_STATE_PTR DispProcessingApp_AutoAbortValid(DISPLAY_STATE_PTR pScreen,
       pStatus->currentScreen  = (DISPLAY_SCREEN_ENUM)HOME_SCREEN;
       auto_Abort_Timer        = 0;
       pScreen = (DISPLAY_STATE_PTR)&(menuStateTbl[0]) +
-	             (UINT16)pStatus->currentScreen;
+                 (UINT16)pStatus->currentScreen;
     }
   }
   else{
@@ -815,7 +818,7 @@ static
 void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
 {
   DISPLAY_SCREEN_STATUS_PTR pStatus;
-  DISPLAY_SCREEN_CONFIG_PTR pCfg;
+  DISPLAY_SCREEN_CONFIG_PTR pCfg; 
   
   pStatus = (DISPLAY_SCREEN_STATUS_PTR)&m_DispProcApp_Status;
   pCfg    = (DISPLAY_SCREEN_CONFIG_PTR)&m_DispProcApp_Cfg;
@@ -848,7 +851,7 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
     }
     pStatus->bButtonEnable = FALSE;
     discreteDIOStatusFlag  = FALSE;
-  	pStatus->dispHealthTimer++;
+    pStatus->dispHealthTimer++;
     dio_Validity_Status    = (UINT8)DIO_DISPLAY_HEALTH_CODE_FAIL;
   }
   // Set timer for PBIT and diagnostic D_HLTH codes
@@ -857,14 +860,14 @@ void DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, BOOLEAN bNewData)
     if (pStatus->dispHealthTimer == 0){
       CM_GetTimeAsTimestamp((TIMESTAMP *)&pStatus->dispHealthTOStart);
     }
-  	// Report error if the Max D_HLTH nonzero wait time is reached
-  	if (pStatus->dispHealthTimer == no_HS_Timeout_Converted){
+    // Report error if the Max D_HLTH nonzero wait time is reached
+    if (pStatus->dispHealthTimer == no_HS_Timeout_Converted){
       DispProcessingApp_D_HLTHResult(dispHealth, pCfg->no_HS_Timeout_s);
 
       // Update the Debug Display when D_HLTH is nonzero too long.
       pStatus->bNewDebugData   = TRUE;
-  	}
-    pStatus->dispHealthTimer++;  	
+    }
+    pStatus->dispHealthTimer++;  
     pStatus->bButtonEnable = FALSE;
     discreteDIOStatusFlag  = FALSE;
   }
@@ -1633,7 +1636,7 @@ void DispProcessingApp_ButtonLog(BOOLEAN buttonState[], BOOLEAN dblClkState[])
     invalidBtnLog.dblClkState[i] = dblClkState[i];
   }
   LogWriteSystem(APP_ID_DISPLAY_INVALID_BUTTON, LOG_PRIORITY_LOW,
-    &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
+      &invalidBtnLog, sizeof(DISPLAY_INVALID_BTN_LOG), NULL);
 }
 
 /******************************************************************************
@@ -1699,8 +1702,10 @@ DISPLAY_BUTTON_STATES DispProcessingApp_GetBtnInput(BOOLEAN bNewData)
     buttonState   = NO_PUSH_BUTTON_DATA; 
     dblClickFlag  = FALSE;
     dblClickTimer = 0;
-    DispProcessingApp_ButtonLog(pRX_Info->buttonState, 
-                                pRX_Info->dblClickState);
+    if (bNewData == TRUE){
+      DispProcessingApp_ButtonLog(pRX_Info->buttonState, 
+                                  pRX_Info->dblClickState);
+    }
   }
   else{
     if(dblClickFlag == TRUE){ 
@@ -2192,6 +2197,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 3/24/16    Time: 12:54p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Logic Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 3/08/16    Time: 8:21a
