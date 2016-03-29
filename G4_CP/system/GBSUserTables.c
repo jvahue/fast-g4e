@@ -1,6 +1,6 @@
 #define GBS_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        GBSUserTables.c
@@ -8,7 +8,7 @@
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 10 $  $Date: 15-03-24 5:31p $
+    $Revision: 11 $  $Date: 3/26/16 11:40p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -85,13 +85,13 @@ static USER_HANDLER_RESULT GBSMsg_CtlDebugClear ( USER_DATA_TYPE DataType,
                                                   UINT32 Index,
                                                   const void *SetPtr,
                                                   void **GetPtr );
-#ifdef DTU_GBS_SIM                                                    
+                                               
 static USER_HANDLER_RESULT GBSMsg_CtlDebug   ( USER_DATA_TYPE DataType,
                                                USER_MSG_PARAM Param,
                                                UINT32 Index,
                                                const void *SetPtr,
                                                void **GetPtr );
-#endif
+
 
 /*
 static USER_HANDLER_RESULT GBSMsg_ShowConfig ( USER_DATA_TYPE DataType,
@@ -211,8 +211,13 @@ static USER_MSG_TBL gbsCtlCfgTbl[] =
   {"KEEP_BAD_REC",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bKeepBadRec,     -1,-1,  NO_LIMIT,NULL}, 
   {"BUFF_RECS",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bBuffRecStore,   -1,-1,  NO_LIMIT,NULL}, 
   {"BUFF_RECS_SIZE",   NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.cntBuffRecSize,  -1,-1,  1,65536,NULL},   
-  {"CONFIRM_RECS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bConfirm,        -1,-1,  NO_LIMIT,NULL},   
-   
+  {"CONFIRM_RECS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_BOOLEAN, USER_RW, (void *) &gbsCtlTemp.bConfirm,        -1,-1,  NO_LIMIT,NULL},
+
+  {"BLK_REQ_TIMEOUT_MS", NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.blk_req_timeout_ms,     -1,-1,  NO_LIMIT, NULL},
+  {"BLK_REQ_RETRIES",    NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT16,  USER_RW, (void *) &gbsCtlTemp.blk_req_retries_cnt,    -1,-1,  NO_LIMIT, NULL},
+  {"REC_TIMEOUT_MS",     NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT32,  USER_RW, (void *) &gbsCtlTemp.rec_retries_timeout_ms, -1,-1,  NO_LIMIT, NULL},
+  {"REC_RETRIES",        NO_NEXT_TABLE, GBSMsg_CtlCfg,  USER_TYPE_UINT16,  USER_RW, (void *) &gbsCtlTemp.rec_retries_cnt,        -1,-1,  NO_LIMIT, NULL},
+  
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -233,6 +238,7 @@ static USER_MSG_TBL gbsCtlStatusTbl[] =
 static USER_MSG_TBL gbsCtlDebugTbl[] =
 { /*Str               Next Tbl Ptr   Handler Func.         Data Type          Access                  Parameter                        IndexRange DataLimit EnumTbl*/
   {"CLEAR_NVM",       NO_NEXT_TABLE, GBSMsg_CtlDebugClear, USER_TYPE_ACTION,  USER_RO,                NULL,                            -1,-1,  NO_LIMIT,NULL},
+  {"VERBOSITY",       NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_BOOLEAN, USER_RW,                &gbsDebugTemp.dbg_verbosity,     -1,-1,  NO_LIMIT,NULL},
   //{"DNLOAD_CODE",   NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_UINT8,   USER_RW,                &gbsDebugTemp.dnloadCode,        -1,-1,  NO_LIMIT,NULL},
 #ifdef DTU_GBS_SIM  
   {"DTU_GBS_SIM_LOG", NO_NEXT_TABLE, GBSMsg_CtlDebug,      USER_TYPE_BOOLEAN, USER_RW,                &gbsDebugTemp.DTU_GBS_SIM_SimLog,-1,-1,  NO_LIMIT,NULL},
@@ -650,8 +656,6 @@ USER_HANDLER_RESULT GBSMsg_CtlDebugClear(USER_DATA_TYPE DataType,
  * Notes:
  *
 *****************************************************************************/
-#ifdef DTU_GBS_SIM  
-/*vcast_dont_instrument_start*/
 static
 USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
                                     USER_MSG_PARAM Param,
@@ -671,8 +675,7 @@ USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
 
   return result;
 }
-/*vcast_dont_instrument_end*/
-#endif  
+
 
 /******************************************************************************
 * Function:    GBSMsg_ShowConfig
@@ -715,6 +718,12 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 3/26/16    Time: 11:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1324.  Add additional GBS Protocol Configuration Items.  Fix minor
+ * bug with ">" vs ">=". 
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:31p

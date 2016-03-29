@@ -1,6 +1,6 @@
 #define VERSION_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc. 
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc. 
                All Rights Reserved. Proprietary and Confidential.
   
   ECCN:        9D991
@@ -10,7 +10,7 @@
   Description: Product Name and Build Version and Date strings.
  
     VERSION
-      $Revision: 45 $  $Date: 1/21/15 1:48p $
+      $Revision: 46 $  $Date: 3/29/16 8:33a $
     
 ******************************************************************************/
 
@@ -46,7 +46,7 @@ typedef struct
 /* Local Variables                                                           */
 /*****************************************************************************/
 const CHAR *PRODUCT_COPYRIGHT = "Pratt & Whitney Engine Services\r\n"
-                                "Copyright (c) 2007-2015 \r\n";
+                                "Copyright (c) 2007-2016 \r\n";
 
 const CHAR *PRODUCT_NAME      = "FAST II Software";
 
@@ -139,6 +139,11 @@ BOOLEAN Ver_CheckVerAndDateMatch(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.c $
+ * 
+ * *****************  Version 46  *****************
+ * User: John Omalley Date: 3/29/16    Time: 8:33a
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1325 - Update the copyright date
  * 
  * *****************  Version 45  *****************
  * User: John Omalley Date: 1/21/15    Time: 1:48p

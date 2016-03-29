@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 14 $  $Date: 3/22/16 6:17p $
+      $Revision: 16 $  $Date: 3/29/16 8:17a $
 
 ******************************************************************************/
 
@@ -578,7 +578,9 @@ typedef struct {
 
 typedef struct {
   APAC_ENG_ENUM eng_uut;      // Eng 1 or Eng 2  or Eng_Max (if unknown)
-  ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]    
+  ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]  
+  APAC_NR_SEL_ENUM nr_sel;    // 100% or 102% nr sel
+  APAC_INLET_CFG_ENUM inletCfg; // Inlet selection from cfg  
   APAC_ERRMSG_DISPLAY data;
 } APAC_FAILURE_LOG, *APAC_FAILURE_LOG_PTR;
 
@@ -693,6 +695,16 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 16  *****************
+ * User: John Omalley Date: 3/29/16    Time: 8:17a
+ * Updated in $/software/control processor/code/application
+ * SCR 1320 Item #10
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 3/26/16    Time: 11:43p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update FLOAT to FLOAT64.
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 3/22/16    Time: 6:17p

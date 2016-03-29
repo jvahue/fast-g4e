@@ -1,6 +1,6 @@
 #define GBS_PROTOCOL_BODY
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        GBSProtocol.c
@@ -11,7 +11,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 24 $  $Date: 15-04-01 1:44p $
+      $Revision: 25 $  $Date: 3/26/16 11:40p $
 
 ******************************************************************************/
 
@@ -162,7 +162,8 @@ typedef struct {
                                 //   With Sim Log, blk size excludes CRC and Status.
                                 //   Have to acct for difference
 #endif        
-  UINT16 pad;                         
+  UINT16 pad;  
+  BOOLEAN dbg_verbosity;        // Enb GBS_Dbg_TxData() and GBS_Dbg_RxData()
 } GBS_DEBUG_CTL, *GBS_DEBUG_CTL_PTR ; // Run Time Only
 
 typedef struct {
@@ -175,9 +176,7 @@ typedef struct {
 /*****************************************************************************/
 static GBS_CFG        m_GBS_Cfg[GBS_MAX_CH];
 static GBS_CTL_CFG    m_GBS_Ctl_Cfg;
-#ifdef DTU_GBS_SIM
-  static GBS_DEBUG_CTL  m_GBS_Debug; 
-#endif          
+static GBS_DEBUG_CTL  m_GBS_Debug; 
 static GBS_DEBUG_DNLOAD m_GBS_DebugDnload[GBS_MAX_CH]; 
 
 static GBS_STATUS     m_GBS_Status[GBS_MAX_CH];
@@ -206,6 +205,11 @@ static GBS_CMD_RSP cmdRsp_Record[GBS_MAX_CH][GBS_CMD_RSP_MAX];  // Retrieve Rec
 static GBS_CMD_REQ_BLK m_CmdReqBlk[GBS_MAX_CH];
 
 static GBS_CMD_RSP cmdRsp_Confirm[GBS_CMD_RSP_MAX];  // Rec Retreived OK.  Confirm EDU
+
+#define GBS_TX_RX_BUFF_MAX 60  // "0x00 ..." or 5 char per bin byte for 10 b max w 10 b OH. 
+#define GBS_TX_RX_CHAR_MAX 10  // 10 bytes where each byte -> 6 ASCII char (5 char + 1 space)
+static CHAR m_gbs_tx_buff[GBS_TX_RX_BUFF_MAX];
+static CHAR m_gbs_rx_buff[GBS_TX_RX_BUFF_MAX];
 
 // Test Timing
 #ifdef GBS_TIMING_TEST
@@ -255,6 +259,8 @@ static void GBS_CreateKeepAlive ( GBS_CMD_RSP_PTR cmdRsp_ptr );
 
 static void GBS_ChkMultiInstall ( GBS_STATUS_PTR pStatus ); 
 
+static void GBS_Dbg_TxData (GBS_STATUS_PTR pStatus, UINT16 ch);
+static void GBS_Dbg_RxData (GBS_STATUS_PTR pStatus, UINT8 *data, UINT16 cnt);
 
 #include "GBSUserTables.c"
 
@@ -487,6 +493,15 @@ void GBSProtocol_Initialize ( void )
         m_GBS_Ctl_Cfg.cmd_delay_ms;  // Get Setting from Cfg 
     m_GBS_Status[j].ptrACK_NAK = (UINT8 *) 
         &cmdRsp_Record[j][GBS_STATE_RECORD_ACK_NAK_INDEX].cmd[0]; 
+
+    cmdRsp_Record[j][GBS_STATE_RECORD_ACK_NAK_INDEX].nRetries =
+        m_GBS_Ctl_Cfg.rec_retries_cnt;  // Get Setting from Cfg 
+    cmdRsp_Record[j][GBS_STATE_RECORD_ACK_NAK_INDEX].nRetryTimeOut =
+        m_GBS_Ctl_Cfg.rec_retries_timeout_ms;  // Get Setting from Cfg 
+    cmdRsp_Record[j][GBS_STATE_RECORD_CODE_INDEX].nRetries =
+        m_GBS_Ctl_Cfg.blk_req_retries_cnt;  // Get Setting from Cfg 
+    cmdRsp_Record[j][GBS_STATE_RECORD_CODE_INDEX].nRetryTimeOut =
+      m_GBS_Ctl_Cfg.blk_req_timeout_ms;  // Get Setting from Cfg 
   }
 
   for (i=0;i<GBS_MAX_CH;i++)  // Initialize each ch cmd-rsp set to _SET_EDU
@@ -499,12 +514,13 @@ void GBSProtocol_Initialize ( void )
        &cmdRsp_Record[m_GBS_Ctl_Cfg.nPort][GBS_STATE_RECORD_ACK_NAK_INDEX].cmd[0]; 
        
   m_GBS_Multi_Ctl.nReqNum = ACTION_NO_REQ; 
-
+  
+  m_GBS_Debug.dbg_verbosity = FALSE; 
 #ifdef DTU_GBS_SIM
   /*vcast_dont_instrument_start*/
   m_GBS_Debug.DTU_GBS_SIM_SimLog = FALSE; 
   /*vcast_dont_instrument_end*/
-#endif  
+#endif
     
 #ifdef GBS_TIMING_TEST
   /*vcast_dont_instrument_start*/
@@ -641,6 +657,9 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   }
   else 
   {
+    if (( m_GBS_Debug.dbg_verbosity == TRUE ) && ( pStatus->state != GBS_STATE_IDLE )) {
+      GBS_Dbg_RxData( pStatus, data, cnt ); 
+    }
     GBS_ProcessRxData( pStatus, pDownloadData, data, cnt);
   }
 
@@ -649,13 +668,11 @@ BOOLEAN GBSProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   {
     result = UART_Transmit ( (UINT8) ch, (const INT8*) &m_GBS_TxBuff[ch].buff[0], 
                              (UINT16) m_GBS_TxBuff[ch].cnt, &sent_cnt);
-// Debug
-/*  
-    GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Byte0=%d)\r\n", 
-               ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), m_GBS_TxBuff[ch].cnt,
-               m_GBS_TxBuff[ch].buff[0]);  
-*/               
-// Debug
+    
+    if ( m_GBS_Debug.dbg_verbosity == TRUE ) {
+      GBS_Dbg_TxData(pStatus, ch); 
+    }
+    
     if (result == DRV_OK)
     {
       m_GBS_TxBuff[ch].cnt = 0;
@@ -1370,7 +1387,7 @@ static GBS_STATE_ENUM GBS_ProcessStateRecords ( GBS_STATUS_PTR pStatus, UINT8 *p
           //   before allowing ACK/NAK (needed for retries where prev ACK/NAK not
           //   seen by EDU).
           if ( (pStatus->dataBlkState.state != GBS_BLK_STATE_SAVING) && 
-               ((tick_ms - pStatus->lastRxTime_ms) > cmdRsp_ptr->nRetryTimeOut) && 
+               ((tick_ms - pStatus->lastRxTime_ms) >= cmdRsp_ptr->nRetryTimeOut) && 
                ((tick_ms - pStatus->lastRxTime_ms) > m_GBS_Ctl_Cfg.timeIdleOut) &&
                (pStatus->dataBlkState.bFailed != TRUE) )
           {
@@ -1601,11 +1618,11 @@ static BOOLEAN GBS_ProcessBlkSize ( UINT8 *pData, UINT16 cnt, UINT32 status_ptr 
   pStatus = (GBS_STATUS_PTR) status_ptr; 
   ch = pStatus->ch; 
 
-
   if (pStatus->cntBlkSizeBad < (m_GBS_Ctl_Cfg.retriesSingle + 1))
   {
     pCnt = (UINT32 *) &m_GBS_RxBuff[ch].cnt;
     pDest = (UINT8 *) &m_GBS_RxBuff[ch].buff[*pCnt];
+
     if ( (cnt > 0) && (*pCnt < GBS_RAW_BUFF_MAX) )  // copy any new data bytes received
     {
       memcpy ( (UINT8 *) pDest, (UINT8 *) pData, cnt );
@@ -2316,9 +2333,75 @@ static GBS_MULTI_CTL_PTR GBS_GetCtlStatus (void)
 }
 
 
+/******************************************************************************
+ * Function:    GBS_Dbg_RxData
+ *
+ * Description: Utility function to output Raw Rx Data to GSE for debugging
+ *
+ * Parameters:  pStatus - ptr to GBS_STATUS data for specific chan
+ *              *data - ptr to Rx Raw Data
+ *              cnt - number of bytes in Rx Raw Data
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static void GBS_Dbg_RxData (GBS_STATUS_PTR pStatus, UINT8 *data, UINT16 cnt)
+{
+  UINT16 i;   
+  
+  if ((cnt > 0) && (pStatus->dataBlkState.cntBlkCurr == 0))
+  {
+    for (i=0;(i<cnt) && (i<GBS_TX_RX_CHAR_MAX);i++)
+    {
+      sprintf( (char *) &m_gbs_rx_buff[i * 3], "%02x ", *(data + i) );
+    }
+    m_gbs_rx_buff[i * 3] = '\0'; // NULL
+    GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Rx (Ch=%d,Cnt=%d,Data=%s)\r\n", 
+                 ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), cnt,
+                 m_gbs_rx_buff);
+  }
+}
+
+
+/******************************************************************************
+ * Function:    GBS_Dbg_TxData
+ *
+ * Description: Utility function to output Raw Tx Data to GSE for debugging
+ *
+ * Parameters:  pStatus - ptr to GBS_STATUS data for specific chan
+ *              ch - uart channel 
+ *
+ * Returns:     None
+ *
+ * Notes:       None
+ *
+ *****************************************************************************/
+static void GBS_Dbg_TxData (GBS_STATUS_PTR pStatus, UINT16 ch)
+{
+  UINT16 i; 
+  
+  for (i=0;(i<m_GBS_TxBuff[ch].cnt) && (i<GBS_TX_RX_CHAR_MAX);i++)
+  {
+    sprintf( (char *) &m_gbs_tx_buff[i * 3], "%02x ", m_GBS_TxBuff[ch].buff[i] );
+  }
+  m_gbs_tx_buff[i * 3] = '\0'; // NULL
+  GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Data=%s)\r\n", 
+               ((pStatus->multi_ch) ? GBS_SIM_PORT_INDEX : pStatus->ch), m_GBS_TxBuff[ch].cnt,
+               m_gbs_tx_buff);
+}
+
+
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Peter Lee    Date: 3/26/16    Time: 11:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1324.  Add additional GBS Protocol Configuration Items.  Fix minor
+ * bug with ">" vs ">=". 
  * 
  * *****************  Version 24  *****************
  * User: Peter Lee    Date: 15-04-01   Time: 1:44p

@@ -2,7 +2,7 @@
 #define GBS_PROTOCOL_H
 
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     File:        GBSProtocol.h
@@ -13,7 +13,7 @@
     Export:      ECCN 9D991
 
     VERSION
-      $Revision: 10 $  $Date: 15-03-24 5:31p $
+      $Revision: 11 $  $Date: 3/26/16 11:40p $
 
 ******************************************************************************/
 
@@ -51,6 +51,10 @@
 #define GBS_MULTIPLE_RETRIES  12 // Max of 12
 #define GBS_RESTART_DELAY_MS  CM_DELAY_IN_MSEC(10000)
 #define GBS_CMD_DELAY_MS      CM_DELAY_IN_MSEC(0)
+#define GBS_BLK_REQ_RETRIES         20 
+#define GBS_BLK_REQ_RETRIES_TO_MS   CM_DELAY_IN_MSEC(1000)
+#define GBS_REC_RETRIES             20 
+#define GBS_REC_RETRIES_TO_MS       CM_DELAY_IN_MSEC(1000)
 
                               /*0,  1,  2,  3,  4*/ /* dnloadTypes */
 #define GBS_CFG_DEFAULT        0x5,GBS_DNLOAD_CODE_NOTUSED,GBS_DNLOAD_CODE_NOTUSED,\
@@ -66,6 +70,10 @@
                                GBS_RESTART_SETEDU_MODE,  /* restarts */\
                                GBS_RESTART_DELAY_MS,     /* restart_delay_ms */\
                                GBS_CMD_DELAY_MS,         /* cmd_delay_ms */\
+                               GBS_BLK_REQ_RETRIES,         /* blk_req_retries_cnt */\
+                               GBS_BLK_REQ_RETRIES_TO_MS,   /* blk_req_timeout_ms */\
+                               GBS_REC_RETRIES,             /* rec_retries_cnt */\
+                               GBS_REC_RETRIES_TO_MS,       /* rec_retries_timeout_ms */\
                                TRUE,                     /* bKeepBadRec */\
                                FALSE,                    /* bBuffRecStore */\
                                1000,                     /* cntBuffRecSize */\
@@ -96,6 +104,12 @@ typedef struct {
   UINT32 restarts;      // Max restart before declaring dnload failed
   UINT32 restart_delay_ms;  // Delay between restarts
   UINT32 cmd_delay_ms;  // Cmd to Cmd Delay 
+  
+  UINT16 blk_req_retries_cnt;    // Block Request Retries (def = 20)
+  UINT32 blk_req_timeout_ms;     // Block Request Timeout before Retries (def= 1 sec)
+  UINT16 rec_retries_cnt;        // Record Retries (def = 20)
+  UINT32 rec_retries_timeout_ms; // Record Retires Timeout before retries (def = 1 sec)
+  
   BOOLEAN bKeepBadRec;  // TRUE keep bad CRC record
   BOOLEAN bBuffRecStore; // Enb the buffering of small records for storage
   UINT32 cntBuffRecSize; // When buffering of rec enb, the size to flush
@@ -381,6 +395,12 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 11  *****************
+ * User: Peter Lee    Date: 3/26/16    Time: 11:40p
+ * Updated in $/software/control processor/code/system
+ * SCR #1324.  Add additional GBS Protocol Configuration Items.  Fix minor
+ * bug with ">" vs ">=". 
  * 
  * *****************  Version 10  *****************
  * User: Peter Lee    Date: 15-03-24   Time: 5:31p

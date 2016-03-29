@@ -10,13 +10,13 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 22 $  $Date: 3/22/16 6:17p $
+      $Revision: 24 $  $Date: 3/29/16 8:17a $
 
 ******************************************************************************/
 
 //#define APAC_TIMING_TEST 1
 //#define APAC_TEST_SIM 1
-#define APAC_TEST_DBG 1
+//#define APAC_TEST_DBG 1
 //#define APACMGR_CYCLE_CBIT_INCR 1
 
 /*****************************************************************************/
@@ -1283,10 +1283,12 @@ static void APACMgr_LogFailure ( void )
   APAC_FAILURE_LOG alog;
 
   memcpy ( (void *) &alog.data, (void *) &m_APAC_ErrMsg, sizeof(alog.data) );
-  alog.eng_uut = m_APAC_Status.eng_uut;
+  alog.eng_uut        = m_APAC_Status.eng_uut;
   alog.engineRunIndex = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ? 
                          m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex : 
                          ENGRUN_UNUSED; 
+  alog.nr_sel         = m_APAC_Status.nr_sel;
+  alog.inletCfg       = m_APAC_Cfg.inletCfg;
 
   LogWriteETM (APP_ID_APAC_FAILURE, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
@@ -2481,6 +2483,16 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: John Omalley Date: 3/29/16    Time: 8:17a
+ * Updated in $/software/control processor/code/application
+ * SCR 1320 Item #10
+ * 
+ * *****************  Version 23  *****************
+ * User: Peter Lee    Date: 3/26/16    Time: 11:43p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7.  Update FLOAT to FLOAT64.
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 3/22/16    Time: 6:17p
