@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 50 $  $Date: 3/18/16 5:43p $
+ $Revision: 51 $  $Date: 3/30/16 6:18p $
 
 ******************************************************************************/
 
@@ -527,14 +527,13 @@ BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHi
     {
       pSnsrStableHist->sensorID[i] = pCfg->stability[i].sensorIndex;
 
-      pSnsrStableHist->bStable[i] =
-        (pData->curStability.stableDurMs[i] == 0) ||
-        (pData->curStability.stableDurMs[i]  < pData->cmdStabilityDurMs)
+      pSnsrStableHist->bStable[i] = 
+      (pData->curStability.stableDurMs[i]) < (MILLISECONDS_PER_SECOND*pCfg->stabilityPeriod_s)
          ? FALSE : TRUE;
 
 #ifdef TREND_DEBUG
 /*vcast_dont_instrument_start*/
-      GSE_DebugStr(NORMAL, TRUE, "Trend[%d]: Sensor[%d] stable history %d/%d.",
+      GSE_DebugStr(DBGOFF, TRUE, "Trend[%d]: Sensor[%d] stable history %d/%d.",
                               idx, pSnsrStableHist->sensorID[i],
                               pData->curStability.stableDurMs[i],
                               pData->cmdStabilityDurMs);
@@ -1355,7 +1354,7 @@ static void TrendCheckAutoTrendStability( TREND_CFG* pCfg, TREND_DATA* pData )
                            &pData->timeSinceLastTrendMs);
     #ifdef TREND_DEBUG
     /*vcast_dont_instrument_start*/
-    GSE_DebugStr(NORMAL, TRUE,"Trend[%d]: Trend Interval: %d of %d\r\n",
+    GSE_DebugStr(DBGOFF, TRUE,"Trend[%d]: Trend Interval: %d of %d\r\n",
                  pData->trendIndex,
                  pData->timeSinceLastTrendMs,
                  pCfg->trendInterval_s * ONE_SEC_IN_MILLSECS);
@@ -1506,7 +1505,7 @@ static void TrendStartAutoTrend(TREND_CFG* pCfg, TREND_DATA* pData)
                                          ACTION_ON, FALSE, FALSE);
   #ifdef TREND_DEBUG
   /*vcast_dont_instrument_start*/
-  GSE_DebugStr( NORMAL, TRUE,
+  GSE_DebugStr( DBGOFF, TRUE,
   "Trend[%d]: Auto-Trend started TimeStable: %dms, TimeSinceLastMs: %dms \r\n",
                            pData->trendIndex,
                            pData->nTimeStableMs,
@@ -1663,7 +1662,7 @@ static void TrendCheckCmdedTrendStability( TREND_CFG* pCfg, TREND_DATA* pData )
       /*vcast_dont_instrument_start*/
       if (STB_STATE_READY == pData->stableState)
       {
-        GSE_DebugStr(NORMAL, TRUE,
+        GSE_DebugStr(DBGOFF, TRUE,
           "Trend[%d]: CMD Trend stable: %d of %d mSec during READY\r\n",
           pData->trendIndex,
           pData->nTimeStableMs,
@@ -1671,7 +1670,7 @@ static void TrendCheckCmdedTrendStability( TREND_CFG* pCfg, TREND_DATA* pData )
       }
       else
       {
-        GSE_DebugStr(NORMAL, TRUE,
+        GSE_DebugStr(DBGOFF, TRUE,
           "Trend[%d]: CMD Trend stable: %d of %d mSec during SAMPLE\r\n",
           pData->trendIndex,
           pData->nTimeStableMs - (pCfg->stabilityPeriod_s * ONE_SEC_IN_MILLSECS),
@@ -1891,7 +1890,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
     *pOutLierCnt    = 0;
 #ifdef TREND_DEBUG
 /*vcast_dont_instrument_start*/
-    GSE_DebugStr(NORMAL,TRUE,
+    GSE_DebugStr(DBGOFF,TRUE,
    "Trend[%d]: Sensor[%d]: Initialized values Rng: %8.4f<-|%8.4f|->%8.4f Outlier max: %d\r\n",
                                 pData->trendIndex,
                                 pStabCrit->sensorIndex,
@@ -1923,7 +1922,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
           *pOutLierCnt = *pOutLierCnt + 1;
           #ifdef TREND_DEBUG
           /*vcast_dont_instrument_start*/
-          GSE_DebugStr(NORMAL, TRUE,
+          GSE_DebugStr(DBGOFF, TRUE,
               "Trend[%d]: Sensor[%d] value %8.4f exceeds var. Outlier: %d-of-%d \r\n",
                          pData->trendIndex, pStabCrit->sensorIndex, fVal, *pOutLierCnt,
                          pAbsVar->outLierMax);
@@ -1946,7 +1945,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
           *pOutLierCnt = 0;
           #ifdef TREND_DEBUG
           /*vcast_dont_instrument_start*/
-          GSE_DebugStr(NORMAL, TRUE,
+          GSE_DebugStr(DBGOFF, TRUE,
          "Trend[%d]: Sensor[%d] %6.4f exceeds var and outlier max(%d). New Var: %8.4f->%8.4f",
                                    pData->trendIndex,
                                    pStabCrit->sensorIndex,
@@ -1964,7 +1963,7 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
         /*vcast_dont_instrument_start*/
         if(*pOutLierCnt > 0)
         {
-          GSE_DebugStr(NORMAL, TRUE,
+          GSE_DebugStr(DBGOFF, TRUE,
             "Trend[%d]: Sensor[%d] value %8.4f back in var. Outliner cnt reset from %d \r\n",
             pData->trendIndex, pStabCrit->sensorIndex, fVal, *pOutLierCnt);
         }
@@ -2034,6 +2033,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 51  *****************
+ * User: Contractor V&v Date: 3/30/16    Time: 6:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Fixed bug in calculating sensor stability duration
  * 
  * *****************  Version 50  *****************
  * User: Contractor V&v Date: 3/18/16    Time: 5:43p

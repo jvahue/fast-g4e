@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 13 $  $Date: 3/24/16 12:57p $     
+      $Revision: 14 $  $Date: 3/31/16 1:33p $     
 
 ******************************************************************************/
 
@@ -53,7 +53,6 @@
 #define PWCDISP_RX_PACKET_ID      0x11
 #define PWCDISP_TX_PACKET_ID      0x01
 #define PWCDISP_MAX_RAW_RX_BUF     512 //MAX raw Buffer size for RX Packets
-#define PWCDISP_MAX_RAW_TX_BUF      31 //MAX raw Buffer size for TX Packets
 #define PWCDISP_TX_FREQUENCY        10 //MAX time between TX messages
 #define PWCDISP_HEADER_SIZE          4 //Header size of tx/rx messages
 #define PWCDISP_MAX_LINE_LENGTH     12 //Max display line length.
@@ -283,6 +282,11 @@ EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 3/31/16    Time: 1:33p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 3/24/16    Time: 12:57p

@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 12 $  $Date: 3/23/16 8:50a $     
+      $Revision: 13 $  $Date: 3/30/16 11:13a $     
 
 ******************************************************************************/
 
@@ -163,7 +163,7 @@ typedef struct
 
 typedef struct
 {
-  UINT8* name;
+  CHAR* name;
 }DISPLAY_CHAR_TABLE, *DISPLAY_CHAR_TABLE_PTR;
 
 /********************************/
@@ -222,8 +222,8 @@ typedef struct
 *********************/
 typedef struct
 {
-  BOOLEAN     bDebug;      //Enable debug frame display
-  BOOLEAN     bNewFrame; //New frame = TX data checked 
+  BOOLEAN               bDebug;      //Enable debug frame display
+  BOOLEAN               bNewFrame;   //New frame = TX data checked 
   DISPLAY_BUTTON_STATES buttonInput; //Saved button state for debug
 }DISPLAY_DEBUG, *DISPLAY_DEBUG_PTR;
 
@@ -323,7 +323,6 @@ typedef struct
                                  Package Exports
 ******************************************************************************/
 #undef EXPORT
-
 #if defined ( DISPLAY_PROCESSING_BODY )
    #define EXPORT
 #else
@@ -339,20 +338,18 @@ typedef struct
 ******************************************************************************/
 
 EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
-EXPORT void                      DispProcessingApp_Handler(void *pParam);
 EXPORT void                      DispProcessingApp_FileInit(void);
-EXPORT UINT16                    DispProcessingApp_ReturnFileHdr(UINT8 *dest, 
-                                                         const UINT16 max_size,
-                                                         UINT16 ch);
-EXPORT void                      DispProcAppDebug_Task(void *param);
-EXPORT DISPLAY_SCREEN_STATUS_PTR DispProcessingApp_GetStatus(void);
-EXPORT DISPLAY_DEBUG_PTR         DispProcessingApp_GetDebug(void);
 EXPORT void                      DispProcApp_DisableLiveStream(void);
 #endif // DISPLAY_PROCESSING_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 3/30/16    Time: 11:13a
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Updates
  * 
  * *****************  Version 12  *****************
  * User: John Omalley Date: 3/23/16    Time: 8:50a

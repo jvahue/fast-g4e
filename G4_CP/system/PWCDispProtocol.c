@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 14 $  $Date: 3/24/16 12:57p $     
+      $Revision: 15 $  $Date: 3/31/16 1:32p $     
 
 ******************************************************************************/
 
@@ -115,7 +115,7 @@ typedef struct
 /********************/
 typedef struct
 {
-    UINT8     data[PWCDISP_MAX_RAW_TX_BUF];
+    UINT8     data[PWCDISP_TX_MSG_SIZE];
 }PWCDISP_RAW_TX_BUFFER, *PWCDISP_RAW_TX_BUFFER_PTR;
 
 typedef struct
@@ -440,7 +440,7 @@ BOOLEAN  PWCDispProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
     {
       UART_Transmit(UartMgr_GetChannel((UINT32)UARTMGR_PROTOCOL_PWC_DISPLAY), 
                    (const INT8*) &tx_buff_ptr->data[0], 
-                   PWCDISP_MAX_RAW_TX_BUF, &sent_cnt);
+                   PWCDISP_TX_MSG_SIZE, &sent_cnt);
     }
     //Reset txTimer. If there is a bad packet the timer will reset to 10 in 
     //order to refresh the tx data ASAP
@@ -1080,7 +1080,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
         pStatus->validPacketCnt++;
         buff = (UINT8 *) &tx_buff_ptr->data[0];
         // Calculate Checksum
-        for (i = 0; i < PWCDISP_MAX_RAW_TX_BUF - 2; i++)
+        for (i = 0; i < PWCDISP_TX_MSG_SIZE - 2; i++)
         {
           checksum += *buff++;
         }
@@ -1098,7 +1098,9 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
     }
   }
   // Update status, reset stateCheck switch, and return bBadTXPacket
-  memcpy(pStatus->packetContents, tx_buff_ptr->data, PWCDISP_TX_MSG_SIZE);
+  for (i = 0; i < PWCDISP_TX_MSG_SIZE; i++){
+    pStatus->packetContents[i] = tx_buff_ptr->data[i];
+  }
   stateCheck = PWCDISP_PARAM_ENCODE_CHARACTERS;
   // Record a System Log if the Packet is bad.
   PWCDispProtocol_ValidTXPacket(bBadTXPacket);
@@ -1526,6 +1528,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 3/31/16    Time: 1:32p
+ * Updated in $/software/control processor/code/system
+ * SCR 1302 - Code Review Updates
  * 
  * *****************  Version 14  *****************
  * User: John Omalley Date: 3/24/16    Time: 12:57p

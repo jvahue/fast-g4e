@@ -5,15 +5,15 @@
             Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
+
     File:        GBSProtocol.h
 
     Description: Contains data structures related to the GBS Serial Protocol
                  Handler
 
-    Export:      ECCN 9D991
-
     VERSION
-      $Revision: 11 $  $Date: 3/26/16 11:40p $
+      $Revision: 12 $  $Date: 3/30/16 11:30a $
 
 ******************************************************************************/
 
@@ -395,6 +395,11 @@ EXPORT void GBSProtocol_DownloadClrHndl ( BOOLEAN Run, INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.h $
+ * 
+ * *****************  Version 12  *****************
+ * User: John Omalley Date: 3/30/16    Time: 11:30a
+ * Updated in $/software/control processor/code/system
+ * SCR 1324 - Code Review Update
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 3/26/16    Time: 11:40p
