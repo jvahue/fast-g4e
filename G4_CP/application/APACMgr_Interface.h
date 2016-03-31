@@ -1,15 +1,17 @@
 #ifndef APAC_MGR_INTERFACE_H
 #define APAC_MGR_INTERFACE_H
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        APACMgr_Interface.h
 
     Description: Contains data structures related to the APACMgr Interface function
 
     VERSION
-      $Revision: 3 $  $Date: 2/02/16 9:43a $
+      $Revision: 4 $  $Date: 3/30/16 11:20a $
 
 ******************************************************************************/
 
@@ -100,6 +102,11 @@ EXPORT void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.h $
+ * 
+ * *****************  Version 4  *****************
+ * User: John Omalley Date: 3/30/16    Time: 11:20a
+ * Updated in $/software/control processor/code/application
+ * SCR 1308 - Code Review Updates
  * 
  * *****************  Version 3  *****************
  * User: Peter Lee    Date: 2/02/16    Time: 9:43a

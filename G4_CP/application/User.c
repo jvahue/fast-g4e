@@ -45,7 +45,7 @@
 
 
    VERSION
-   $Revision: 124 $  $Date: 2/23/16 11:51a $
+   $Revision: 125 $  $Date: 3/29/16 11:14p $
 
 ******************************************************************************/
 
@@ -3121,6 +3121,11 @@ BOOLEAN User_BitSetIsValid(USER_DATA_TYPE type, UINT32* destPtr,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: User.c $
+ * 
+ * *****************  Version 125  *****************
+ * User: Peter Lee    Date: 3/29/16    Time: 11:14p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #7
  * 
  * *****************  Version 124  *****************
  * User: John Omalley Date: 2/23/16    Time: 11:51a
