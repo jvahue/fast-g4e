@@ -464,8 +464,8 @@ typedef struct {
 } APAC_TBL, *APAC_TBL_PTR;
 
 typedef struct {
-  FLOAT32 val;
-  FLOAT32 coeff;
+  FLOAT64 val;
+  FLOAT64 coeff;
 } APAC_PALT_COEFF_ENTRY, *APAC_PALT_COEFF_ENTRY_PTR;
 
 #define APAC_PALT_COEFF_ENTRY_MAX 20
