@@ -10,7 +10,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 16 $  $Date: 3/29/16 8:17a $
+      $Revision: 17 $  $Date: 4/07/16 2:18p $
 
 ******************************************************************************/
 
@@ -695,6 +695,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 4/07/16    Time: 2:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #10.  Additional FLOAT32 -> FLOAT64 Updates
  * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 3/29/16    Time: 8:17a

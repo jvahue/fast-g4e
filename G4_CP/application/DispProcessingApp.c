@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 16 $  $Date: 3/31/16 1:35p $     
+      $Revision: 17 $  $Date: 4/04/16 4:35p $     
 
 ******************************************************************************/
 
@@ -1013,7 +1013,8 @@ static BOOLEAN DispAction_InvalidButtonInput()
   for (i = 0; i < DISPLAY_VALID_BUTTONS; i++){
     checkState = DispProcessingApp_GetNextState(
       (DISPLAY_BUTTON_STATES)pButtons->id, FALSE, pInvalidScreen);
-    if (checkState != pStatus->nextScreen && checkState != NO_ACTION){
+    if (checkState != pStatus->nextScreen && checkState != NO_ACTION &&
+        checkState != pInvalidScreen->noButtonInput){
       if (charCount == 0){
         // Add symbol minus the comma
         strcat(strInsert, (const char *)pButtons->name);
@@ -1905,6 +1906,16 @@ DISPLAY_SCREEN_ENUM DispProcessingApp_GetNextState(
   case NO_PUSH_BUTTON_DATA:
     nextScreen = pScreen->noButtonInput;
     break;
+  case UNUSED1_BUTTON:
+    // lint - fallthrough
+  case UNUSED2_BUTTON:
+    // lint - fallthrough
+  case UNUSED1_DBLCLICK:
+    // lint - fallthrough
+  case UNUSED2_DBLCLICK:
+    // lint - fallthrough
+  case DISPLAY_BUTTONS_COUNT:
+    // lint - fallthrough
   default:
     nextScreen = pScreen->noButtonInput;
     break;
@@ -2193,6 +2204,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 4/04/16    Time: 4:35p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 - Code Review Update
  * 
  * *****************  Version 16  *****************
  * User: John Omalley Date: 3/31/16    Time: 1:35p

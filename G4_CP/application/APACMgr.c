@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 24 $  $Date: 3/29/16 8:17a $
+      $Revision: 25 $  $Date: 4/01/16 5:15p $
 
 ******************************************************************************/
 
@@ -1205,8 +1205,7 @@ static void APACMgr_LogSummary ( APAC_COMMIT_ENUM commit )
   memcpy ( (void *) alog.esn, (void *) eng_ptr->esn, APAC_ESN_MAX_LEN);
   alog.nr_sel = m_APAC_Status.nr_sel;
   alog.inletCfg = m_APAC_Cfg.inletCfg;
-  alog.chart_rev_str[APAC_INLET_CHART_REV_1ST_CHAR] = 
-                    tbl_ptr->chart_rev_str[APAC_INLET_CHART_REV_1ST_CHAR];
+  memcpy ((void *) alog.chart_rev_str, tbl_ptr->chart_rev_str, APAC_INLET_CHART_REV_LEN);
   alog.manual = eng_ptr->vld.set;
   alog.reason = eng_ptr->vld.reason;
   alog.reason_summary = eng_ptr->vld.reason_summary; 
@@ -2483,6 +2482,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 25  *****************
+ * User: Peter Lee    Date: 4/01/16    Time: 5:15p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #9.   BAD Chart Value in APAC SUMMARY LOG 
  * 
  * *****************  Version 24  *****************
  * User: John Omalley Date: 3/29/16    Time: 8:17a
