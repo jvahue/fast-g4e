@@ -2,8 +2,10 @@
 #define APAC_MGR_TABLES_H
 
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        APACMgr_Tables.h
 
@@ -11,14 +13,13 @@
                  margins
 
     VERSION
-      $Revision: 4 $  $Date: 3/16/16 9:16a $
+      $Revision: 5 $  $Date: 4/11/16 7:37p $
 
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-#include <float.h>
 
 
 /*****************************************************************************/
@@ -32,16 +33,6 @@
 ******************************************************************************/
 
 #define APAC_TBL_MAX_ENTRIES   20
-
-#define APAC_INLET_CHART_BASIC_STR    "BASIC"
-#define APAC_INLET_ISSUE_BASIC_100_STR    "F"
-#define APAC_INLET_ISSUE_BASIC_102_STR    "B"
-#define APAC_INLET_CHART_EAPS_STR     "EAPS "
-#define APAC_INLET_ISSUE_EAPS_100_STR     "B"
-#define APAC_INLET_ISSUE_EAPS_102_STR     "B"
-#define APAC_INLET_CHART_IBF_STR      "IBF "
-#define APAC_INLET_ISSUE_IBF_100_STR      "C"
-#define APAC_INLET_ISSUE_IBF_100_STR      "C"
 
 
 #define APAC_TBL_ITT_NORMAL_100PCNT_DEF      \
@@ -272,7 +263,7 @@
        96.49,   -0.40143793821,  0.00638558436, -0.00003400916,  0.00000007075,   20,   -FLT_MAX, +FLT_MAX,  \
        87.20,   -0.03276233003,  0.00160218251, -0.00000658514,  0.00000001218,   30,   -FLT_MAX, +FLT_MAX,  \
        43.40,    1.63464963436, -0.02141195536,  0.00013391124, -0.00000030780,   40,   -FLT_MAX, +FLT_MAX,  \
-       97.60,   -0.29785624100,  0.00484739900, -0.00002335665,  0.00000004223,   50,   -FLT_MAX, +FLT_MAX,  \
+       97.60,   -0.29785624146,  0.00484739942, -0.00002335665,  0.00000004223,   50,   -FLT_MAX, +FLT_MAX,  \
            0,                0,              0,              0,              0,    0,   -FLT_MAX, +FLT_MAX,  \
            0,                0,              0,              0,              0,    0,   -FLT_MAX, +FLT_MAX,  \
            0,                0,              0,              0,              0,    0,   -FLT_MAX, +FLT_MAX,  \
@@ -367,8 +358,8 @@
             0,               0,              0,              0,              0,   0,  -FLT_MAX, +FLT_MAX,  \
             0,               0,              0,              0,              0,   0,  -FLT_MAX, +FLT_MAX,  \
             0,               0,              0,              0,              0,   0,  -FLT_MAX, +FLT_MAX,  \
-        81.4f,   /*  param_min   */ \
-       105.5f,   /*  param_max   */ \
+        82.0f,   /*  param_min   */ \
+       105.0f,   /*  param_max   */ \
          TRUE,   /*  minEq ">=" for Tq Low */ \
            17,   /*  number of entries in table */ \
       "EAPS ",   /*  inlet chart string "BASIC", "EAPS ", "IBF  " */ \
@@ -427,7 +418,7 @@
              0,      0,  /* 18 Not Used */\
              0,      0,  /* 19 Not Used */\
              0,      0,  /* 20 Not Used */\
-            17           /* 17 Used Entries */
+            16           /* 16 Used Entries */
 
 
 /******************************************************************************
@@ -435,10 +426,16 @@
 ******************************************************************************/
 
 
-
 /******************************************************************************
                                  Package Exports
 ******************************************************************************/
+#undef EXPORT
+
+#if defined ( APAC_MGR_BODY )
+#define EXPORT
+#else
+#define EXPORT extern
+#endif
 
 
 /******************************************************************************
@@ -457,6 +454,11 @@
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Tables.h $
+ * 
+ * *****************  Version 5  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 7:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
  * 
  * *****************  Version 4  *****************
  * User: Peter Lee    Date: 3/16/16    Time: 9:16a

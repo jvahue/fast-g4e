@@ -3,12 +3,14 @@
             Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    Export:      ECCN 9D991
+
     File:        GBSUserTables.c
 
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 11 $  $Date: 3/26/16 11:40p $
+    $Revision: 12 $  $Date: 4/11/16 1:59p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -718,6 +720,11 @@ USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 12  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/system
+ * Minor Code Review Updates
  * 
  * *****************  Version 11  *****************
  * User: Peter Lee    Date: 3/26/16    Time: 11:40p

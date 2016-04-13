@@ -1,9 +1,9 @@
 #define APAC_MGR_INTERFACE_BODY
 /******************************************************************************
-            Copyright (C) 2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        9E991
+    ECCN:        9D991
 
     File:        APACMgr_Interface.c
 
@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 13 $  $Date: 2/16/16 6:56p $
+      $Revision: 14 $  $Date: 4/11/16 6:53p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -90,7 +90,7 @@ static CHAR gse_OutLine1[128];
  *  SRS-5065 Default value of Chart Part / version letter for EAPS aircraft configuration
  *           is 139G1580A001 / ISSUE B and shall be displayed as 'ISSUE B'
  *  SRS-5066 Default value of Chart Part / version letter for IBF aircraft configuration
- *           is 139G1580A021 / ISSUE A and shall be displayed as 'ISSUE A'
+ *           is 139G1580A021 / ISSUE C and shall be displayed as 'ISSUE C'
  *
  *****************************************************************************/
 BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
@@ -112,9 +112,9 @@ BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
   tblIdx = m_APAC_Tbl_Mapping[m_APAC_Status.nr_sel][m_APAC_Cfg.inletCfg];
   tbl_ptr = (APAC_TBL_PTR) &m_APAC_Tbl[APAC_ITT][tblIdx];  
  
-  memcpy ( (void *) msg1, tbl_ptr->inlet_str, APAC_MENU_DISPLAY_CHAR_MAX);
-  memcpy ( (void *) msg2, tbl_ptr->chart_rev_str, APAC_MENU_DISPLAY_CHAR_MAX);
-  memcpy ( (void *) msg3, tbl_ptr->chart_nr_str, APAC_MENU_DISPLAY_CHAR_MAX);
+  memcpy ( (void *) msg1, tbl_ptr->inlet_str, sizeof(tbl_ptr->inlet_str) );
+  memcpy ( (void *) msg2, tbl_ptr->chart_rev_str, sizeof(tbl_ptr->chart_rev_str));
+  memcpy ( (void *) msg3, tbl_ptr->chart_nr_str, sizeof(tbl_ptr->chart_nr_str));
 
   m_APAC_Status.state = APAC_STATE_TEST_INPROGRESS;
 
@@ -301,7 +301,7 @@ BOOLEAN APACMgr_IF_ErrMsg ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
  *              *msg4 - Not used
  *              option - Not used
  *
- * Returns:     TRUE if Manual PAC Validation is required (>50 hrs since last)
+ * Returns:     TRUE if Manual PAC Validation is required (>=50 hrs since last)
  *              FALSE if Manual PAC Validation is not required (<50 hrs since last)
  *
  * Notes:
@@ -351,7 +351,8 @@ BOOLEAN APACMgr_IF_ValidateManual ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *ms
  *
  * Description: Returns Current Status of the APAC test in progress
  *
- * Parameters:  *msg1 - "NOT LOW", "STABILIZING", "SAMPLING", "COMPUTING"
+ * Parameters:  *msg1 - "INCREASE TQ.", ""DECR GND SPD", STABILIZING.", 
+ *                      "SAMPLING....", "COMPUTING..."
  *              *msg2 - Not used
  *              *msg3 - Not used
  *              *msg4 - Not used
@@ -366,7 +367,9 @@ BOOLEAN APACMgr_IF_ValidateManual ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *ms
 BOOLEAN APACMgr_IF_RunningPAC ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                                 APAC_IF_ENUM option )
 {
-  BOOLEAN ok, bResult, bResult1; 
+  BOOLEAN ok;
+  BOOLEAN bResult; 
+  BOOLEAN bResult1; 
   APAC_RUN_STATE_ENUM run_state;
 
   static APAC_RUN_STATE_ENUM prev_run_state = APAC_RUN_STATE_MAX;
@@ -660,7 +663,8 @@ BOOLEAN APACMgr_IF_HistoryAdv ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                                 APAC_IF_ENUM option )
 {
   APAC_HIST_STATUS_PTR status_ptr;
-  UINT16 idx, idxLast;
+  UINT16 idx;
+  UINT16 idxLast;
   APAC_HIST_ENTRY_PTR entry_ptr;
   UINT32 curr_mon_day, curr_yr;
 
@@ -740,9 +744,11 @@ BOOLEAN APACMgr_IF_HistoryDec ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                                 APAC_IF_ENUM option )
 {
   APAC_HIST_STATUS_PTR status_ptr;
-  UINT16 idx, idxLast;
+  UINT16 idx;
+  UINT16 idxLast;
   APAC_HIST_ENTRY_PTR entry_ptr;
-  UINT32 curr_mon_day, curr_yr;
+  UINT32 curr_mon_day; 
+  UINT32 curr_yr;
   UINT16 cnt;
 
   ASSERT ( (option == APAC_IF_DATE) || (option == APAC_IF_DAY) );
@@ -929,6 +935,11 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 14  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 6:53p
+ * Updated in $/software/control processor/code/application
+ * Minor Code Review Updates.
  * 
  * *****************  Version 13  *****************
  * User: Peter Lee    Date: 2/16/16    Time: 6:56p

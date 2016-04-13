@@ -3,14 +3,14 @@
             Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    ECCN:        9E991
+    ECCN:        9D991
 
     File:        APACMgrUserTables.c
 
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 18 $  $Date: 3/26/16 11:43p $
+    $Revision: 20 $  $Date: 4/11/16 7:42p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -65,7 +65,7 @@
 #define APAC_MAX_RECENT_DATE_TIME  20  // "HH:MM:SS MM/DD/YYYY"
 #define APAC_MAX_RECENT_ENTRY_LEN 128
 
-#define APAC_MAX_VALUE_CHAR_ARRAY 32
+//#define APAC_MAX_VALUE_CHAR_ARRAY 32
 #define APAC_MAX_LABEL_CHAR_ARRAY 128
 
 /*****************************************************************************/
@@ -1509,10 +1509,12 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
   {
     if (0 == strncmp(pCfgTable->MsgStr, APAC_ENG_STRING, sizeof(pCfgTable->MsgStr)))
     {
-      result = APACMgr_ShowConfigSubItem ( apacMgr_EngTbl, APAC_ENG_MAX, pCfgTable );
+      result = APACMgr_ShowConfigSubItem ( apacMgr_EngTbl, (INT16) APAC_ENG_MAX, pCfgTable );
     }
-    else if (0 == strncmp(pCfgTable->MsgStr, APAC_TREND_NAMES_STRING, sizeof(pCfgTable->MsgStr))) {
-      result = APACMgr_ShowConfigSubItem ( apacMgr_SnsrTrendNamesTbl, MAX_STAB_SENSORS, pCfgTable );
+    else if (0 == strncmp(pCfgTable->MsgStr, APAC_TREND_NAMES_STRING, 
+	                      sizeof(pCfgTable->MsgStr))) {
+      result = APACMgr_ShowConfigSubItem ( apacMgr_SnsrTrendNamesTbl, MAX_STAB_SENSORS, 
+										   pCfgTable );
     }
     else
     {
@@ -1529,9 +1531,12 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
 /******************************************************************************
 * Function:    APACMgr_ShowConfigSubItem
 *
-* Description: 
+* Description: Handles User Manager requests to retrieve the configuration
+*              settings.
 *
-* Parameters:   
+* Parameters:  [in] *MsgTbl:  Pointer to MsgTbl to transverse
+*              [in] tbl_max:  Max entries in MsgTbl
+*              [in] *pCfgTable:  Pointer to top level APAC Cfg Table
 *
 * Returns:     USER_HANDLER_RESULT
 *
@@ -1571,6 +1576,16 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 7:42p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
+ * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 6:53p
+ * Updated in $/software/control processor/code/application
+ * Minor Code Review Updates.
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 3/26/16    Time: 11:43p
