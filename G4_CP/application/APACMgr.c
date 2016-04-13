@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 25 $  $Date: 4/01/16 5:15p $
+      $Revision: 26 $  $Date: 4/11/16 7:37p $
 
 ******************************************************************************/
 
@@ -24,6 +24,7 @@
 /*****************************************************************************/
 #include <math.h>
 #include <stdio.h>
+#include <float.h>
 
 
 /*****************************************************************************/
@@ -2482,6 +2483,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 7:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
  * 
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 4/01/16    Time: 5:15p

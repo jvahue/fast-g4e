@@ -5,19 +5,20 @@
             Copyright (C) 2015-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    ECCN:        9D991
+
     File:        APACMgr.h
 
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 17 $  $Date: 4/07/16 2:18p $
+      $Revision: 18 $  $Date: 4/11/16 7:37p $
 
 ******************************************************************************/
 
 /*****************************************************************************/
 /* Compiler Specific Includes                                                */
 /*****************************************************************************/
-#include <float.h>
 
 
 /*****************************************************************************/
@@ -695,6 +696,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 7:37p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 4/07/16    Time: 2:18p

@@ -3,15 +3,15 @@
             Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
+    Export:      ECCN 9D991
+
     File:        GBSProtocol.c
 
     Description: Contains all functions and data related to the GBS Protocol
                  Handler
 
-    Export:      ECCN 9D991
-
     VERSION
-      $Revision: 25 $  $Date: 3/26/16 11:40p $
+      $Revision: 27 $  $Date: 4/11/16 2:13p $
 
 ******************************************************************************/
 
@@ -2355,7 +2355,7 @@ static void GBS_Dbg_RxData (GBS_STATUS_PTR pStatus, UINT8 *data, UINT16 cnt)
   {
     for (i=0;(i<cnt) && (i<GBS_TX_RX_CHAR_MAX);i++)
     {
-      sprintf( (char *) &m_gbs_rx_buff[i * 3], "%02x ", *(data + i) );
+      snprintf( (char *) &m_gbs_rx_buff[i * 3], GBS_TX_RX_BUFF_MAX, "%02x ", *(data + i) );
     }
     m_gbs_rx_buff[i * 3] = '\0'; // NULL
     GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Rx (Ch=%d,Cnt=%d,Data=%s)\r\n", 
@@ -2384,7 +2384,8 @@ static void GBS_Dbg_TxData (GBS_STATUS_PTR pStatus, UINT16 ch)
   
   for (i=0;(i<m_GBS_TxBuff[ch].cnt) && (i<GBS_TX_RX_CHAR_MAX);i++)
   {
-    sprintf( (char *) &m_gbs_tx_buff[i * 3], "%02x ", m_GBS_TxBuff[ch].buff[i] );
+    snprintf( (char *) &m_gbs_tx_buff[i * 3], GBS_TX_RX_BUFF_MAX, "%02x ", 
+              m_GBS_TxBuff[ch].buff[i] );
   }
   m_gbs_tx_buff[i * 3] = '\0'; // NULL
   GSE_DebugStr(NORMAL,TRUE,"GBS Protocol: Tx (Ch=%d,Cnt=%d,Data=%s)\r\n", 
@@ -2396,6 +2397,16 @@ static void GBS_Dbg_TxData (GBS_STATUS_PTR pStatus, UINT16 ch)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 2:13p
+ * Updated in $/software/control processor/code/system
+ * Minor Code Review Updates.
+ * 
+ * *****************  Version 26  *****************
+ * User: Peter Lee    Date: 4/11/16    Time: 1:59p
+ * Updated in $/software/control processor/code/system
+ * Minor Code Review Updates
  * 
  * *****************  Version 25  *****************
  * User: Peter Lee    Date: 3/26/16    Time: 11:40p
