@@ -1592,7 +1592,7 @@ static void MonitorSetTaskEnable (CHAR* Token[])
 static void MonitorDumpMem(CHAR* Token[] )
 {
   void*  pAddress;
-  UINT16  size;
+  SINT32 size;
   BOOLEAN bWellKnownLocation = FALSE;
 
   // Handle well-known memory areas
