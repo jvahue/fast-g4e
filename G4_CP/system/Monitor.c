@@ -561,14 +561,16 @@ static void MonitorSysCmds( CHAR* Cmd)
     {
       MonitorSysPerf(Token);
     }
-    /*
+
 #ifdef ENABLE_SYS_DUMP_MEM_CMD
+    /*vcast_dont_instrument_start*/
     else if (strcmp (Token[1], "dumpmem") == 0)
     {
         MonitorDumpMem(Token);
     }
+    /*vcast_dont_instrument_end*/
 #endif
-    */
+
     // UNKNOWN MONITOR COMMAND -------------------------------------------
     else
     {
