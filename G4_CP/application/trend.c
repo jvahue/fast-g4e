@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 51 $  $Date: 3/30/16 6:18p $
+ $Revision: 52 $  $Date: 4/14/16 3:03p $
 
 ******************************************************************************/
 
@@ -888,8 +888,8 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
 
       pLog->nSamples = pSummary->nSampleCount; //pData->masterSampleCnt;
 
-      // Loop through all the sensors for this collection
-      for ( i = 0; i < MAX_TREND_SENSORS; i++ )
+      // Loop through the configured summary sensors
+      for ( i = 0; i < pData->nTotalSensors; i++ )
       {
         // Set a pointer the summary item(sensor)
         pSummaryItem = &(pSummary[i]);
@@ -2033,6 +2033,12 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 52  *****************
+ * User: Contractor V&v Date: 4/14/16    Time: 3:03p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300 - Fixed bug in iterating thru number of active-configured
+ * summary sensors.
  * 
  * *****************  Version 51  *****************
  * User: Contractor V&v Date: 3/30/16    Time: 6:18p
