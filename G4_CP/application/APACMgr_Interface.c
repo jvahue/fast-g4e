@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 15 $  $Date: 4/15/16 6:10p $
+      $Revision: 16 $  $Date: 4/15/16 6:59p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -880,10 +880,9 @@ BOOLEAN APACMgr_IF_Reset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
     // DCLK or TimeOut from M5,M6,M29,M30,M7 -> ABORT or NCR
     // DCLK or TimeOut from M18, (M22,M17,M16,M15) Dont' care as Failure Log already recorded
 
-    // DCLK or TimeOut from m8 is when LogAbortNCR s/b recored..
-    if ( m_APAC_Status.run_state != APAC_RUN_STATE_IDLE ) {
-      APACMgr_LogAbortNCR ( commit );
-    }
+    // DCLK or TimeOut from m8 or m23 is when LogAbortNCR s/b recored..
+    APACMgr_LogAbortNCR ( commit );
+    
     if ((m_APAC_Status.eng_uut != APAC_ENG_MAX) && (m_APAC_Status.nr_sel != APAC_NR_SEL_MAX)){
       TrendAppStartTrend(
                   m_APAC_Cfg.eng[m_APAC_Status.eng_uut].idxTrend[m_APAC_Status.nr_sel],
@@ -934,6 +933,12 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Peter Lee    Date: 4/15/16    Time: 6:59p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #12.  ABT/NCR log not created on M26 or from "Manual Vld
+ * Menu".
  * 
  * *****************  Version 15  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:10p
