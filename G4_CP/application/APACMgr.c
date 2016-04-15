@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 27 $  $Date: 4/15/16 6:09p $
+      $Revision: 28 $  $Date: 4/15/16 6:19p $
 
 ******************************************************************************/
 
@@ -1341,6 +1341,7 @@ static void APACMgr_LogFailure ( void )
     disc = (vld == TRUE) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_VLD])  :
                            (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_VLD]) ;
   }
+  alog.discState = disc; 
   LogWriteETM (APP_ID_APAC_FAILURE, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
 
@@ -2534,6 +2535,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Peter Lee    Date: 4/15/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #13 add disc state to FAILURE log. 
  * 
  * *****************  Version 27  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:09p

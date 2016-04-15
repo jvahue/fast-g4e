@@ -12,7 +12,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 18 $  $Date: 4/11/16 7:37p $
+      $Revision: 19 $  $Date: 4/15/16 6:19p $
 
 ******************************************************************************/
 
@@ -582,6 +582,7 @@ typedef struct {
   ENGRUN_INDEX engineRunIndex;// Engine Run Cfg Index [0..3,255]  
   APAC_NR_SEL_ENUM nr_sel;    // 100% or 102% nr sel
   APAC_INLET_CFG_ENUM inletCfg; // Inlet selection from cfg  
+  UINT16 discState;           // State and Validity of Flight,Idle,EAPS/IBF discretes
   APAC_ERRMSG_DISPLAY data;
 } APAC_FAILURE_LOG, *APAC_FAILURE_LOG_PTR;
 
@@ -696,6 +697,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 4/15/16    Time: 6:19p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #13 add disc state to FAILURE log. 
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 7:37p
