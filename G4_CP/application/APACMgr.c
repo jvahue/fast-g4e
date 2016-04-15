@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 26 $  $Date: 4/11/16 7:37p $
+      $Revision: 27 $  $Date: 4/15/16 6:09p $
 
 ******************************************************************************/
 
@@ -85,6 +85,15 @@ typedef struct {
   APAC_DATA_AVG_ENTRY avg[APAC_DATA_AVG_MAX];
 } APAC_DATA_AVG, *APAC_DATA_AVG_PTR;
 
+typedef enum {
+  ENG_INLET_STATE = 0, 
+  ENG_INLET_VLD, 
+  ENG_FLIGHT_STATE, 
+  ENG_FLIGHT_VLD, 
+  ENG_IDLE_STATE, 
+  ENG_IDLE_VLD, 
+  ENG_DISC_STATE_MAX
+} APAC_ENG_DISC_STATE_ENUM; 
 
 /*****************************************************************************/
 /* Local Variables                                                           */
@@ -400,6 +409,23 @@ static const UINT16 APAC_VLD_BIT_ENCODE_CONST[] =
   0x0004,              // APAC_VLD_REASON_CFG
   0x0008,              // APAC_VLD_REASON_CYCLE
   0x0010               // APAC_VLD_REASON_NVM
+}; 
+
+static const UINT16 APAC_ENG_DISC_STATE_POS[APAC_ENG_MAX][ENG_DISC_STATE_MAX] = 
+{
+  { 0x0001,              // E1 INLET DISC STATE
+    0x0002,              // E1 INLET DISC VALIDITY
+    0x0004,              // E1 FLIGHT DISC STATE
+    0x0008,              // E1 FLIGHT DISC VALIDITY
+    0x0010,              // E1 IDLE DISC STATE
+    0x0020 },            // E1 IDLE DISC VALIDITY
+  
+  { 0x0100,              // E2 INLET DISC STATE
+    0x0200,              // E2 INLET DISC VALIDITY
+    0x0400,              // E2 FLIGHT DISC STATE
+    0x0800,              // E2 FLIGHT DISC VALIDITY
+    0x1000,              // E2 IDLE DISC STATE
+    0x2000 }             // E2 IDLE DISC VALIDITY
 }; 
 
 #include "APACMgr_Interface.c"
@@ -1281,6 +1307,11 @@ static void APACMgr_LogEngStart ( void )
 static void APACMgr_LogFailure ( void )
 {
   APAC_FAILURE_LOG alog;
+  APAC_ENG_ENUM i; 
+  UINT16 disc; 
+  FLOAT32 fval;
+  BOOLEAN vld; 
+  APAC_ENG_CFG_PTR eng_ptr;         
 
   memcpy ( (void *) &alog.data, (void *) &m_APAC_ErrMsg, sizeof(alog.data) );
   alog.eng_uut        = m_APAC_Status.eng_uut;
@@ -1289,7 +1320,27 @@ static void APACMgr_LogFailure ( void )
                          ENGRUN_UNUSED; 
   alog.nr_sel         = m_APAC_Status.nr_sel;
   alog.inletCfg       = m_APAC_Cfg.inletCfg;
-
+  
+  disc = 0; 
+  for ( i = APAC_ENG_1; i < APAC_ENG_MAX ; i++ )
+  {
+    eng_ptr = (APAC_ENG_CFG_PTR) &m_APAC_Cfg.eng[i]; 
+    vld = SensorGetValueEx( eng_ptr->idxEAPS_IBF_sw, (FLOAT32 *) &fval);
+    disc = (fval == 1.0) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_INLET_STATE])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_INLET_STATE]) ;
+    disc = (vld == TRUE) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_INLET_VLD])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_INLET_VLD]) ;
+    vld = SensorGetValueEx( eng_ptr->idxEngFlt, (FLOAT32 *) &fval);
+    disc = (fval == 1.0) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_FLIGHT_STATE])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_FLIGHT_STATE]) ;
+    disc = (vld == TRUE) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_FLIGHT_VLD])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_FLIGHT_VLD]) ;
+    vld = SensorGetValueEx( eng_ptr->idxEngIdle, (FLOAT32 *) &fval);
+    disc = (fval == 1.0) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_STATE])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_STATE]) ;
+    disc = (vld == TRUE) ? (disc | APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_VLD])  :
+                           (disc & ~APAC_ENG_DISC_STATE_POS[i][ENG_IDLE_VLD]) ;
+  }
   LogWriteETM (APP_ID_APAC_FAILURE, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
 
@@ -1316,11 +1367,11 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit )
                          m_APAC_Status.eng[m_APAC_Status.eng_uut].engineRunIndex : 
                          ENGRUN_UNUSED; 
   
-  alog.reason = (m_APAC_Status.eng_uut == APAC_ENG_MAX) ?
+  alog.reason = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ?
                  m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason :
                  APAC_VLD_REASON_NONE ;
    
-  alog.reason_summary = (m_APAC_Status.eng_uut == APAC_ENG_MAX) ?
+  alog.reason_summary = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ?
                  m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason_summary :
                  APAC_VLD_REASON_NONE ;
    
@@ -2483,6 +2534,12 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Peter Lee    Date: 4/15/16    Time: 6:09p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #11 ABT/NCR Log has incorrect VLD Manual Reason.
+ * Item #13 add disc state to FAILURE log. 
  * 
  * *****************  Version 26  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 7:37p
