@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 14 $  $Date: 4/11/16 6:53p $
+      $Revision: 15 $  $Date: 4/15/16 6:10p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -116,8 +116,6 @@ BOOLEAN APACMgr_IF_Config ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
   memcpy ( (void *) msg2, tbl_ptr->chart_rev_str, sizeof(tbl_ptr->chart_rev_str));
   memcpy ( (void *) msg3, tbl_ptr->chart_nr_str, sizeof(tbl_ptr->chart_nr_str));
 
-  m_APAC_Status.state = APAC_STATE_TEST_INPROGRESS;
-
   APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Config(m1=%s,m2=%s,m3=%s)\r\n",msg1,msg2,msg3);
 
   return (TRUE);
@@ -158,7 +156,6 @@ BOOLEAN APACMgr_IF_Setup ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
 {
   BOOLEAN ok, eng1, eng2, eaps_ibf_1, eaps_ibf_2;
 
-  ASSERT ( m_APAC_Status.state == APAC_STATE_TEST_INPROGRESS );
   ASSERT ( m_APAC_Status.run_state == APAC_RUN_STATE_IDLE );
 
   // Check that each eng sensor is valid
@@ -215,6 +212,8 @@ BOOLEAN APACMgr_IF_Setup ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
     APACMgr_IF_DebugStr(NORMAL,TRUE,"APACMgr: _Setup( )-eng=%c\r\n",
                      APAC_ENG_POS_STR[m_APAC_Status.eng_uut]);
   }
+  
+  m_APAC_Status.state = APAC_STATE_TEST_INPROGRESS;
 
   return (ok);
 }
@@ -935,6 +934,12 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 15  *****************
+ * User: Peter Lee    Date: 4/15/16    Time: 6:10p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #12.  ABT/NCR log not created on M26 or from "Manual Vld
+ * Menu". 
  * 
  * *****************  Version 14  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 6:53p
