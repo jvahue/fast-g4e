@@ -3,14 +3,14 @@
             Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    Export:      ECCN 9D991
+    ECCN:        9D991
 
     File:        GBSUserTables.c
 
     Description: Routines to support the user commands for GBS Protocol CSC
 
     VERSION
-    $Revision: 12 $  $Date: 4/11/16 1:59p $
+    $Revision: 13 $  $Date: 4/14/16 4:00p $
 
 ******************************************************************************/
 #ifndef GBS_PROTOCOL_BODY
@@ -679,47 +679,14 @@ USER_HANDLER_RESULT GBSMsg_CtlDebug(USER_DATA_TYPE DataType,
 }
 
 
-/******************************************************************************
-* Function:    GBSMsg_ShowConfig
-*
-* Description:  Handles User Manager requests to retrieve the configuration
-*               settings.
-*
-* Parameters:   [in] DataType:  C type of the data to be read or changed, used
-*                               for casting the data pointers
-*               [in/out] Param: Pointer to the configuration item to be read
-*                               or changed
-*               [in] Index:     Index parameter is used to reference the
-*                               specific sensor to change.  Range is validated
-*                               by the user manager
-*               [in] SetPtr:    For write commands, a pointer to the data to
-*                               write to the configuration.
-*               [out] GetPtr:   For read commands, UserCfg function will set
-*                               this to the location of the data requested.
-*
-*
-* Returns:     USER_RESULT_OK:    Processed successfully
-*              USER_RESULT_ERROR: Error processing command.
-*
-* Notes:
-*****************************************************************************/
-/*
-static
-USER_HANDLER_RESULT GBSMsg_ShowConfig(USER_DATA_TYPE DataType,
-                                      USER_MSG_PARAM Param,
-                                      UINT32 Index,
-                                      const void *SetPtr,
-                                      void **GetPtr)
-{
-  USER_HANDLER_RESULT result ;
-
-  return result;
-}
-*/
-
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSUserTables.c $
+ * 
+ * *****************  Version 13  *****************
+ * User: John Omalley Date: 4/14/16    Time: 4:00p
+ * Updated in $/software/control processor/code/system
+ * Code Review Update
  * 
  * *****************  Version 12  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 1:59p

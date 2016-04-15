@@ -8,7 +8,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 35 $  $Date: 10/22/14 6:26p $
+   $Revision: 36 $  $Date: 4/15/16 11:24a $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -442,9 +442,11 @@ static USER_HANDLER_RESULT FAST_InstallIdCmd(USER_DATA_TYPE DataType,
   {
     // If "set", copy the string at SetPtr to the Installation id string in
     // config mgr structure.
-    memcpy(CfgMgr_ConfigPtr()->Id,
-           SetPtr,
-           sizeof(CfgMgr_ConfigPtr()->Id) );
+    // memcpy(CfgMgr_ConfigPtr()->Id,
+    //       SetPtr,
+    //       sizeof(CfgMgr_ConfigPtr()->Id) );
+    strncpy_safe(CfgMgr_ConfigPtr()->Id, sizeof(CfgMgr_ConfigPtr()->Id),
+                 SetPtr,_TRUNCATE);  
 
     //Store the modified temporary structure in the EEPROM.
     user_result = USER_RESULT_ERROR;
@@ -505,6 +507,11 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: John Omalley Date: 4/15/16    Time: 11:24a
+ * Updated in $/software/control processor/code/application
+ * SCR 1327 - Change memcpy of string for install-id to strcpy
  * 
  * *****************  Version 35  *****************
  * User: Contractor V&v Date: 10/22/14   Time: 6:26p

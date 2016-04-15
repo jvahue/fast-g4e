@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 20 $  $Date: 4/11/16 7:42p $
+    $Revision: 21 $  $Date: 4/14/16 3:34p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -1512,9 +1512,9 @@ static USER_HANDLER_RESULT APACMgr_ShowConfig(USER_DATA_TYPE DataType,
       result = APACMgr_ShowConfigSubItem ( apacMgr_EngTbl, (INT16) APAC_ENG_MAX, pCfgTable );
     }
     else if (0 == strncmp(pCfgTable->MsgStr, APAC_TREND_NAMES_STRING, 
-	                      sizeof(pCfgTable->MsgStr))) {
+                          sizeof(pCfgTable->MsgStr))) {
       result = APACMgr_ShowConfigSubItem ( apacMgr_SnsrTrendNamesTbl, MAX_STAB_SENSORS, 
-										   pCfgTable );
+                                           pCfgTable );
     }
     else
     {
@@ -1576,6 +1576,11 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 21  *****************
+ * User: John Omalley Date: 4/14/16    Time: 3:34p
+ * Updated in $/software/control processor/code/application
+ * Code Review Update
  * 
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 7:42p

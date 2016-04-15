@@ -104,8 +104,6 @@ extern UINT32  __CRC_START;  // declared in CBITManager.c
 extern UINT32  __CRC_END;    // declared in CBITManager.c
 #endif
 
-#define ENABLE_SYS_DUMP_MEM_CMD
-
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -561,16 +559,14 @@ static void MonitorSysCmds( CHAR* Cmd)
     {
       MonitorSysPerf(Token);
     }
-
+    /*
 #ifdef ENABLE_SYS_DUMP_MEM_CMD
-    /*vcast_dont_instrument_start*/
     else if (strcmp (Token[1], "dumpmem") == 0)
     {
         MonitorDumpMem(Token);
     }
-    /*vcast_dont_instrument_end*/
 #endif
-
+    */
     // UNKNOWN MONITOR COMMAND -------------------------------------------
     else
     {
@@ -1594,7 +1590,7 @@ static void MonitorSetTaskEnable (CHAR* Token[])
 static void MonitorDumpMem(CHAR* Token[] )
 {
   void*  pAddress;
-  SINT32 size;
+  UINT16  size;
   BOOLEAN bWellKnownLocation = FALSE;
 
   // Handle well-known memory areas
@@ -1915,7 +1911,7 @@ static void MonitorSysPerfReset(CHAR* token3)
   TCB*   pTask;
   UINT32 intSave;
   INT32  taskId;
-  CHAR*  pEnd;
+  CHAR*  pEnd;  
 
   taskId = strtol(token3, &pEnd,  10);
 
@@ -1928,7 +1924,7 @@ static void MonitorSysPerfReset(CHAR* token3)
       // Don't clear counts for whomever may have been logging.
       Tm.perfTask = taskId;
       Tm.nPerfCount = 0;
-    }
+    }    
     else
     {
       // Reset the active count for the associated task and the perfdata area
@@ -2012,12 +2008,12 @@ static void MonitorSysPerfStats(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Monitor.c $
- *
+ * 
  * *****************  Version 89  *****************
  * User: John Omalley Date: 2/05/15    Time: 10:26a
  * Updated in $/software/control processor/code/system
  * SCR 1192 - Code Review Updates
- *
+ * 
  * *****************  Version 88  *****************
  * User: Contractor V&v Date: 2/03/15    Time: 7:15p
  * Updated in $/software/control processor/code/system

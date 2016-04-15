@@ -3,7 +3,7 @@
             Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
-    Export:      ECCN 9D991
+    ECCN:        9D991
 
     File:        GBSProtocol.c
 
@@ -11,7 +11,7 @@
                  Handler
 
     VERSION
-      $Revision: 27 $  $Date: 4/11/16 2:13p $
+      $Revision: 28 $  $Date: 4/14/16 3:40p $
 
 ******************************************************************************/
 
@@ -2397,6 +2397,11 @@ static void GBS_Dbg_TxData (GBS_STATUS_PTR pStatus, UINT16 ch)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: GBSProtocol.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: John Omalley Date: 4/14/16    Time: 3:40p
+ * Updated in $/software/control processor/code/system
+ * Code Review Update
  * 
  * *****************  Version 27  *****************
  * User: Peter Lee    Date: 4/11/16    Time: 2:13p
