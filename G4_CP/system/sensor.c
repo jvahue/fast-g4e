@@ -27,7 +27,7 @@
     Notes:
 
     VERSION
-      $Revision: 107 $  $Date: 2/02/16 5:19p $
+      $Revision: 108 $  $Date: 4/19/16 4:32p $
 
 ******************************************************************************/
 
@@ -181,7 +181,7 @@ void SensorsInitialize( void)
 {
   // Local Data
   TCB tcbTaskInfo;
-
+  
   // Add user commands for the sensors to the user command tables
   User_AddRootCmd(&RootSensorMsg);
   User_AddRootCmd(&LiveDataMsg);
@@ -246,7 +246,7 @@ void SensorsInitialize( void)
 
   liveDataBlock.startTime   = 0;
   TmTaskCreate (&tcbTaskInfo);
-
+  
 }
 
 /******************************************************************************
@@ -880,6 +880,13 @@ static void SensorsConfigure (void)
 	       (SENSOR_INDEX)UNPACK_VIRTUAL_SNRB( pSensorCfg->generalPurposeA);
             Sensors[i].vOpType =
 	       (VIRTUALTYPE) UNPACK_VIRTUAL_TYPE( pSensorCfg->generalPurposeA);
+            Sensors[i].vRawCombineAsize = 
+         (UINT16) UNPACK_VIRTUAL_RAW_A_SIZE(pSensorCfg->generalPurposeA);
+            Sensors[i].vRawCombineBsize = 
+         (UINT16) UNPACK_VIRTUAL_RAW_B_SIZE(pSensorCfg->generalPurposeA);
+            Sensors[i].vRawCombineNeg = 
+         (BOOLEAN) UNPACK_VIRTUAL_RAW_NEGATIVE(pSensorCfg->generalPurposeA);
+              
 
             //Validate the config of the Virtual sensor
             ASSERT_MESSAGE( (TRUE == SensorIsUsed(Sensors[i].vSnsrA)),
@@ -2375,6 +2382,10 @@ static FLOAT32 SensorVirtualGetValue ( UINT16 nIndex, UINT32 *null )
   SENSOR* pData    = &Sensors[nIndex];
   SENSOR* pSensorA = &Sensors[pData->vSnsrA];
   SENSOR* pSensorB = &Sensors[pData->vSnsrB];
+  UINT32 rawA;
+  UINT32 rawB;
+  UINT32 rawCombined; 
+  SINT32 *signedPtr; 
 
   switch( pData->vOpType )
   {
@@ -2403,6 +2414,26 @@ static FLOAT32 SensorVirtualGetValue ( UINT16 nIndex, UINT32 *null )
       }
       break;
 
+    case VIRTUAL_RAW_COMBINE:
+      // Combine A and B, where A is MSW and B is LSW.  Handle sign if configured
+      rawA = (UINT32) pSensorA->fValue; 
+      rawB = (UINT32) pSensorB->fValue; 
+      rawCombined = 0; 
+      rawCombined = (rawA << (32 - pData->vRawCombineAsize));
+      rawCombined = rawCombined | (rawB << (32 - (pData->vRawCombineBsize +
+                                                  pData->vRawCombineAsize)));
+      // Shift it back into place, also include sign if configured as signed value
+      if (pData->vRawCombineNeg == TRUE) {
+        signedPtr = (SINT32 *) &rawCombined; 
+        fVal = (FLOAT32) (*signedPtr / pow(2,(32 - (pData->vRawCombineBsize + 
+                                                    pData->vRawCombineAsize))));
+      }
+      else {
+        fVal = (FLOAT32) (rawCombined / pow(2,(32 - (pData->vRawCombineBsize + 
+                                                     pData->vRawCombineAsize))));
+      }
+      break; 
+      
     case VIRTUAL_MAX:
 	case VIRTUAL_UNUSED:
     default:
@@ -2445,6 +2476,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 108  *****************
+ * User: Contractor V&v Date: 4/19/16    Time: 4:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1328 Add support for vSensor Raw Combine
  * 
  * *****************  Version 107  *****************
  * User: Contractor V&v Date: 2/02/16    Time: 5:19p

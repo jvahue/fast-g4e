@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 52 $  $Date: 4/14/16 3:03p $
+ $Revision: 53 $  $Date: 4/19/16 4:18p $
 
 ******************************************************************************/
 
@@ -919,7 +919,7 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
           pLog->sensor[i].fMaxValue   = pSummaryItem->fMaxValue;
           pLog->sensor[i].fAvgValue   = pSummaryItem->fAvgValue;
         }
-        else // Sensor Not Used
+        else // Sensor declared in trend sensorMap, but sensor not declared/used
         {
           pLog->sensor[i].sensorIndex = SENSOR_UNUSED;
           pLog->sensor[i].bValid      = FALSE;
@@ -927,6 +927,15 @@ static void TrendFinish( TREND_CFG* pCfg, TREND_DATA* pData )
           pLog->sensor[i].fAvgValue   = 0.0;
         }
       }
+      // Initialize/clear the unused summary entries in the log
+      for ( i = pData->nTotalSensors; i < MAX_TREND_SENSORS; i++ )
+      {
+        pLog->sensor[i].sensorIndex = SENSOR_UNUSED;
+        pLog->sensor[i].bValid      = FALSE;
+        pLog->sensor[i].fMaxValue   = 0.0;
+        pLog->sensor[i].fAvgValue   = 0.0;
+      }
+
 
   #pragma ghs nowarning 1545 //Suppress packed structure alignment warning
 
@@ -2033,6 +2042,12 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 53  *****************
+ * User: Contractor V&v Date: 4/19/16    Time: 4:18p
+ * Updated in $/software/control processor/code/application
+ * SCR #1300, bug  fix to clear unused summary sensors fields in log
+ * write.
  * 
  * *****************  Version 52  *****************
  * User: Contractor V&v Date: 4/14/16    Time: 3:03p
