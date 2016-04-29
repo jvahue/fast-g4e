@@ -10,7 +10,7 @@
     Description: User Interface for Sensor Runtime Processing
 
     VERSION
-       $Revision: 40 $  $Date: 2/22/16 11:23a $
+       $Revision: 41 $  $Date: 4/19/16 4:32p $
 
 ******************************************************************************/
 #ifndef SENSOR_BODY
@@ -165,6 +165,7 @@ USER_ENUM_TBL virtualType[]     =  { { "UNUSED"     , VIRTUAL_UNUSED},
                                      { "DIFF"       , VIRTUAL_DIFF  },
                                      { "MULT"       , VIRTUAL_MULT  },
                                      { "DIV"        , VIRTUAL_DIV   },
+                                     { "RAW_COMBINE", VIRTUAL_RAW_COMBINE }, 
                                      { NULL         , 0             }
                                    };
 
@@ -598,6 +599,11 @@ USER_HANDLER_RESULT Sensor_LiveDataList(USER_DATA_TYPE DataType,
 /*****************************************************************************
 *  MODIFICATIONS
 *    $History: SensorUserTables.c $
+ * 
+ * *****************  Version 41  *****************
+ * User: Contractor V&v Date: 4/19/16    Time: 4:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1328 Add support for vSensor Raw Combine
  * 
  * *****************  Version 40  *****************
  * User: John Omalley Date: 2/22/16    Time: 11:23a

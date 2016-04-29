@@ -12,7 +12,7 @@
    Description: Definitions for sensor types
 
    VERSION
-      $Revision: 53 $  $Date: 2/01/16 5:22p $
+      $Revision: 54 $  $Date: 4/19/16 4:32p $
 
 ******************************************************************************/
 
@@ -221,6 +221,9 @@
 #define UNPACK_VIRTUAL_SNRA(word)((word & 0x0000FF00) >> 8)
 #define UNPACK_VIRTUAL_SNRB(word)((word & 0x000000FF))
 #define UNPACK_VIRTUAL_TYPE(word)((word & 0x00070000) >> 16)
+#define UNPACK_VIRTUAL_RAW_A_SIZE(word) ((word & 0x3E000000) >> 25)
+#define UNPACK_VIRTUAL_RAW_B_SIZE(word) ((word & 0x01F00000) >> 20)
+#define UNPACK_VIRTUAL_RAW_NEGATIVE(word) ((word & 0x40000000) >> 30)
 
 /******************************************************************************
                                  Package Typedefs
@@ -360,6 +363,7 @@ typedef enum
   VIRTUAL_DIFF,
   VIRTUAL_MULT,
   VIRTUAL_DIV,
+  VIRTUAL_RAW_COMBINE, 
   VIRTUAL_MAX
 }VIRTUALTYPE;
 
@@ -512,6 +516,12 @@ typedef struct
     VIRTUALTYPE       vOpType;                      /* The op to perform on input A and B*/
     SENSOR_INDEX      vSnsrA;                       /* The index of input sensor A       */
     SENSOR_INDEX      vSnsrB;                       /* The index of input sensor B       */
+    UINT16            vRawCombineAsize;             /* For VIRTUAL "COMBINE", the # bits to 
+                                                       parse from SensorA */
+    UINT16            vRawCombineBsize;             /* For VIRTUAL "COMBINE", the # bits to 
+                                                       parse from SensorB */
+    BOOLEAN           vRawCombineNeg;               /* For VIRTUAL "COMBINE", combine A + B
+                                                         is a signed value  */
 } SENSOR;
 
 // Storage container definition for Sensor failure log
@@ -590,6 +600,11 @@ EXPORT void    SensorCalculateSummaryAvgs( SNSR_SUMMARY summaryArray[], UINT16 n
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.h $
+ * 
+ * *****************  Version 54  *****************
+ * User: Contractor V&v Date: 4/19/16    Time: 4:32p
+ * Updated in $/software/control processor/code/system
+ * SCR #1328 Add support for vSensor Raw Combine
  * 
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 2/01/16    Time: 5:22p
