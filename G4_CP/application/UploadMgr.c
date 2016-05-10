@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 187 $  $Date: 1/21/15 1:10p $
+   $Revision: 188 $  $Date: 5/09/16 2:22p $
 
 ******************************************************************************/
 
@@ -1354,6 +1354,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       if(!pTask->Disable)
       {
         memset(&pTask->FileHeader,0,sizeof(pTask->FileHeader));
+        pTask->logUploadCnt = 0;
         readOffset = pTask->FlightDataStart;
         pTask->State = LOG_COLLECTION_LOG_HEADER_FIND;
         m_MSCrcResult = MS_CRC_RESULT_NONE;
@@ -1525,8 +1526,8 @@ void UploadMgr_FileCollectionTask(void *pParam)
       else
       {
         //DTU Serial Number
-        INT8   BoxStr[BOX_INFO_STR_LEN];
-        Box_GetSerno(BoxStr);
+        INT8   boxStr[BOX_INFO_STR_LEN];
+        Box_GetSerno(boxStr);
 
         CM_GetTimeAsTimestamp(&timestamp);
 
@@ -1535,18 +1536,18 @@ void UploadMgr_FileCollectionTask(void *pParam)
         if(LOG_TYPE_SYSTEM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
           snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
-                  "SYS", BoxStr, timestamp.Timestamp);
+                  "SYS", boxStr, timestamp.Timestamp);
         }
         else if (LOG_TYPE_ETM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
-                    "ETM", BoxStr, timestamp.Timestamp);
+                    "ETM", boxStr, timestamp.Timestamp);
         }
         else
         {
           snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
             DataMgrGetACSDataSet(UploadOrderTbl[pTask->UploadOrderIdx].ACS.acs).sID,
-            BoxStr, timestamp.Timestamp);
+            boxStr, timestamp.Timestamp);
         }
         //Start a File Verification Entry in the Verification Table. Once the
         //entry is created, start the upload process.
@@ -1951,6 +1952,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
        FAST_SignalUploadComplete();
        /**** DELIBERATE FALL THROUGH TO LOG_AUTO_CHECK_FINISHED 
             THIS REMOVES THE DEBUG OUTPUT EVERY TIME AUTOUPLOAD DOESNT FIND A RECORD ****/
+       //lint -fallthrough
     case LOG_COLLECTION_AUTO_CHECK_FINISH:
       
       pTask->InProgress = FALSE;
@@ -3553,6 +3555,12 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 188  *****************
+ * User: John Omalley Date: 5/09/16    Time: 2:22p
+ * Updated in $/software/control processor/code/application
+ * SCR 1329 - Corrected the error path where the Upload Count wasn't being
+ * reset.
  * 
  * *****************  Version 187  *****************
  * User: John Omalley Date: 1/21/15    Time: 1:10p

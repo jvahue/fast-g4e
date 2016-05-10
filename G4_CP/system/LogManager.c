@@ -17,7 +17,7 @@
                        the end has been reached.
 
     VERSION
-    $Revision: 121 $  $Date: 3/18/16 5:44p $
+    $Revision: 122 $  $Date: 5/09/16 2:21p $
 
 ******************************************************************************/
 
@@ -1795,12 +1795,12 @@ void LogMarkTask( void *pParam )
             TmTaskEnable ((TASK_INDEX)Log_Mark_State_Task, FALSE);
             break;
          }
-
-         if (pTCB->nRdOffset > pTCB->nEndOffset)
-         {
-            *(pTCB->pStatus) = LOG_MARK_COMPLETE;
-            TmTaskEnable ((TASK_INDEX)Log_Mark_State_Task, FALSE);
-         }
+      }
+     
+      if (pTCB->nRdOffset > pTCB->nEndOffset)
+      {
+          *(pTCB->pStatus) = LOG_MARK_COMPLETE;
+          TmTaskEnable ((TASK_INDEX)Log_Mark_State_Task, FALSE);
       }
    }
    else // Pause Writes for 1 second
@@ -2972,6 +2972,13 @@ LOG_QUEUE_STATUS LogQueuePut(LOG_REQUEST Entry)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: LogManager.c $
+ * 
+ * *****************  Version 122  *****************
+ * User: John Omalley Date: 5/09/16    Time: 2:21p
+ * Updated in $/software/control processor/code/system
+ * SCR 1329 - Updated the LogMarkStateTask to complete and kill task in
+ * the unexpected case where the Read Address is larger than the End
+ * address. 
  * 
  * *****************  Version 121  *****************
  * User: Contractor V&v Date: 3/18/16    Time: 5:44p
