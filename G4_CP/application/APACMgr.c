@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 29 $  $Date: 5/11/16 7:08p $
+      $Revision: 30 $  $Date: 5/11/16 7:18p $
 
 ******************************************************************************/
 
@@ -2538,10 +2538,15 @@ static void APACMgr_Simulate ( void )
  *  MODIFICATIONS
  *    $History: APACMgr.c $
  * 
+ * *****************  Version 30  *****************
+ * User: Jeff Vahue   Date: 5/11/16    Time: 7:18p
+ * Updated in $/software/control processor/code/application
+ * SCR-1331 Fix my commit comment
+ * 
  * *****************  Version 29  *****************
  * User: Jeff Vahue   Date: 5/11/16    Time: 7:08p
  * Updated in $/software/control processor/code/application
- * SCR-1331 Add  missing /*vcast_dont_instrument_start&end*/  
+ * SCR-1331 Add  missing -vcast_dont_instrument_start&end-  
  * 
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:19p
