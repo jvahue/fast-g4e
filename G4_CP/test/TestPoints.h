@@ -11,7 +11,7 @@
                 certification.
 
   VERSION
-  $Revision: 46 $  $Date: 11/11/14 4:33p $
+  $Revision: 47 $  $Date: 5/11/16 7:25p $
 
 ******************************************************************************/
 
@@ -210,6 +210,11 @@ EXPORT  UINT32 StartupTpUintInit( UINT32 actual, TEST_POINTS tpId, UINT32 iValue
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.h $
+ * 
+ * *****************  Version 47  *****************
+ * User: Jeff Vahue   Date: 5/11/16    Time: 7:25p
+ * Updated in $/software/control processor/code/test
+ * SCR1331 Add TP enum 
  * 
  * *****************  Version 46  *****************
  * User: Contractor2  Date: 11/11/14   Time: 4:33p
