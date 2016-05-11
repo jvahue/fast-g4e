@@ -32,6 +32,8 @@
 #include "GSE.h"
 #include "NVMgr.h"
 
+#include "TestPoints.h"
+
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
@@ -1057,7 +1059,7 @@ BOOLEAN PWCDispProtocol_TXCharacterCheck(PWCDISP_TX_PARAM_LIST_PTR tx_param_ptr,
         for(i = 0; i < PWCDISP_MAX_CHAR_PARAMS; i++)
         {
           // If the character is not approved abort loop and report bad packet
-          if(*data > 0x7F && bBadTXPacket != TRUE)
+          if(*data > TPU(0x7F, eTpPwcDispChr) && bBadTXPacket != TRUE)
           {
             bBadTXPacket = TRUE;
             pStatus->invalidPacketCnt++;
