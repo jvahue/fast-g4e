@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 28 $  $Date: 4/15/16 6:19p $
+      $Revision: 29 $  $Date: 5/11/16 7:08p $
 
 ******************************************************************************/
 
@@ -570,9 +570,11 @@ void APACMgr_Initialize ( void )
 
 // Test
 #ifdef APAC_TEST_SIM
+  /*vcast_dont_instrument_start*/  
   //simState = APAC_SIM_IDLE;
   simState = APAC_SIM_MAX;
   simNextTick = CM_GetTickCount() + simStateDelay[simState];
+  /*vcast_dont_instrument_end*/  
 #endif
 // Test
   
@@ -2535,6 +2537,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 5/11/16    Time: 7:08p
+ * Updated in $/software/control processor/code/application
+ * SCR-1331 Add  missing /*vcast_dont_instrument_start&end*/  
  * 
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:19p
