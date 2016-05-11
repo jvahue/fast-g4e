@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 15 $  $Date: 3/31/16 1:32p $     
+      $Revision: 16 $  $Date: 5/11/16 7:02p $     
 
 ******************************************************************************/
 
@@ -1530,6 +1530,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 16  *****************
+ * User: Jeff Vahue   Date: 5/11/16    Time: 7:02p
+ * Updated in $/software/control processor/code/system
+ * SCR-1331 Add Test Point for H5308, 5310
  * 
  * *****************  Version 15  *****************
  * User: John Omalley Date: 3/31/16    Time: 1:32p
