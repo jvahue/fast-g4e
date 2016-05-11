@@ -143,6 +143,7 @@ typedef enum {
     eTpUldScr1245, // UploadMgr SCR 1245 - END_LOG timeout
     eTpLogFull,    // Control Log Flash Full flow
     eTpLogQFull,   // Control Log Queue Full flow
+    eTpPwcDispChr, // Fail characters going to the display
 
 
 //>>>>>>>>>>>>>>>> Do not change the lines below <<<<<<<<<<<<<<<<<
