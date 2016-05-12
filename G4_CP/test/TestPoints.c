@@ -607,7 +607,7 @@ USER_HANDLER_RESULT NoOverruns(USER_DATA_TYPE DataType,
 	// setup the controls to disable MIF overrun reporting
 	tpData[eTpNoDtOverrun].wait = 0;
 	tpData[eTpNoDtOverrun].repeat = 0;
-	tpData[eTpNoDtOverrun].rVal = 120;
+	tpData[eTpNoDtOverrun].rVal.uVal = 120;
 	tpData[eTpNoDtOverrun].type = TP_VALUE;
 
 #else
