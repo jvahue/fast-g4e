@@ -13,7 +13,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 14 $  $Date: 3/31/16 1:33p $     
+      $Revision: 15 $  $Date: 5/12/16 4:48p $     
 
 ******************************************************************************/
 
@@ -229,7 +229,7 @@ typedef struct
 #pragma pack(1)
 typedef struct
 {
-  UINT8  packetContents[PWCDISP_TX_MSG_SIZE];
+  UINT8  packetContents[PWCDISP_MAX_CHAR_PARAMS];
   UINT32 validPacketCnt;
 }PWCDISP_TXPACKET_FAIL_LOG;
 #pragma pack()
@@ -282,6 +282,11 @@ EXPORT UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.h $
+ * 
+ * *****************  Version 15  *****************
+ * User: John Omalley Date: 5/12/16    Time: 4:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1317 AI #14 - Fixed the number of characters in the TX Fail log
  * 
  * *****************  Version 14  *****************
  * User: John Omalley Date: 3/31/16    Time: 1:33p

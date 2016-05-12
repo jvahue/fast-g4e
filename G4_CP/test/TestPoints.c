@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 25 $  $Date: 1/26/13 3:14p $  
+    $Revision: 26 $  $Date: 5/12/16 4:52p $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -88,6 +88,12 @@ USER_HANDLER_RESULT DumpCoverage(USER_DATA_TYPE DataType,
                                  const void *SetPtr,
                                  void **GetPtr);
 
+USER_HANDLER_RESULT NoOverruns(USER_DATA_TYPE DataType,
+                               USER_MSG_PARAM Param,
+                               UINT32 Index,
+                               const void *SetPtr,
+                               void **GetPtr);
+
 static USER_MSG_TBL TestPointRoot[] =
 {
     TP_USER("TYPE",   USER_TYPE_ENUM,   &tpEdit.type,        TpTypeNames),
@@ -99,9 +105,10 @@ static USER_MSG_TBL TestPointRoot[] =
     TP_USER("TGLMAX", USER_TYPE_UINT32, &tpEdit.toggleMax,   NULL),
     TP_USER("TGLLIM", USER_TYPE_UINT32, &tpEdit.toggleLim,   NULL),
     TP_USER("TGLCUR", USER_TYPE_UINT32, &tpEdit.toggleCur,   NULL),
-    { "INIT",    NO_NEXT_TABLE, TpInitTable,          USER_TYPE_ACTION, USER_RW|USER_NO_LOG, NULL, -1, -1, NO_LIMIT, NULL},
+    { "INIT",    NO_NEXT_TABLE, TpInitTable,          USER_TYPE_ACTION, USER_RW|USER_NO_LOG, NULL,          -1, -1, NO_LIMIT, NULL},
     { "SD_DUMP", NO_NEXT_TABLE, User_GenericAccessor, USER_TYPE_YESNO,  USER_RW|USER_NO_LOG, &enableSdDump, -1, -1, NO_LIMIT, NULL},
     { "DUMPCOV", NO_NEXT_TABLE, DumpCoverage,         USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL,          -1, -1, NO_LIMIT, NULL},
+    { "NO_OVR",  NO_NEXT_TABLE, NoOverruns,           USER_TYPE_ACTION, USER_RO|USER_NO_LOG, NULL,          -1, -1, NO_LIMIT, NULL},
     { NULL,NULL,NULL,NO_HANDLER_DATA}
 };
 
@@ -577,6 +584,40 @@ USER_HANDLER_RESULT DumpCoverage(USER_DATA_TYPE DataType,
 }
 
 /******************************************************************************
+* Function:    NoOverruns
+*
+* Description: Set the count of successive overruns to 120 before we assert.
+*              
+*
+* Parameters:  [in] DataType : Actual Value or variable value
+*              [in] Param: test point identifier
+*              
+* Returns:     UINT32: The test point value          
+*
+* Notes:       
+*              
+*****************************************************************************/
+USER_HANDLER_RESULT NoOverruns(USER_DATA_TYPE DataType,
+                               USER_MSG_PARAM Param,
+                               UINT32 Index,
+                               const void *SetPtr,
+                               void **GetPtr)
+{
+#ifndef WIN32
+	// setup the controls to disable MIF overrun reporting
+	tpData[eTpNoDtOverrun].wait = 0;
+	tpData[eTpNoDtOverrun].repeat = 0;
+	tpData[eTpNoDtOverrun].rVal = 120;
+	tpData[eTpNoDtOverrun].type = TP_VALUE;
+
+#else
+    GSE_DebugStr(OFF, FALSE, "Coverage Done");
+#endif
+
+    return USER_RESULT_OK;
+}
+
+/******************************************************************************
 * Function:    TpInitTable
 *
 * Description: This functions clears out all TP Data.
@@ -604,6 +645,11 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 26  *****************
+ * User: Jeff Vahue   Date: 5/12/16    Time: 4:52p
+ * Updated in $/software/control processor/code/test
+ * Add new command to disable MIF ovverun assert
  * 
  * *****************  Version 25  *****************
  * User: Jeff Vahue   Date: 1/26/13    Time: 3:14p

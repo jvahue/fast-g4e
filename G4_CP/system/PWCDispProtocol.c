@@ -12,7 +12,7 @@
                  Protocol Handler 
     
     VERSION
-      $Revision: 16 $  $Date: 5/11/16 7:02p $     
+      $Revision: 17 $  $Date: 5/12/16 4:48p $     
 
 ******************************************************************************/
 
@@ -927,8 +927,7 @@ void PWCDispProtocol_ValidTXPacket(BOOLEAN bBadPacket)
     {
       charString[i] = pStatus->packetContents[i + (PWCDISP_HEADER_SIZE)];
     }
-    snprintf((char *)invalidPktLog.packetContents, PWCDISP_MAX_CHAR_PARAMS + 1,
-             "%s", (const char *)charString);
+    memcpy(invalidPktLog.packetContents, charString, sizeof(charString));
     invalidPktLog.validPacketCnt = pStatus->validPacketCnt;
     LogWriteSystem(SYS_ID_UART_DISP_TXPACKET_FAIL, LOG_PRIORITY_LOW,
                    &invalidPktLog, sizeof(PWCDISP_TXPACKET_FAIL_LOG), 
@@ -1530,6 +1529,11 @@ UINT16 PWCDispProtocol_ReturnFileHdr(UINT8 *dest, const UINT16 max_size,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: PWCDispProtocol.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: John Omalley Date: 5/12/16    Time: 4:48p
+ * Updated in $/software/control processor/code/system
+ * SCR 1317 AI #14 - Fixed the number of characters in the TX Fail log
  * 
  * *****************  Version 16  *****************
  * User: Jeff Vahue   Date: 5/11/16    Time: 7:02p
