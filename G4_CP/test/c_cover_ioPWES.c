@@ -2054,7 +2054,7 @@ void SendPacket(void)
     do {
         // clear the input buffer
         rsp = GSE_getc();
-        while rsp != -1: rsp = GSE_getc();
+        while (rsp != -1): rsp = GSE_getc();
 
         // send all the data
         UART_Transmit( GSE_UART_PORT, (INT8*)(&covData), size, &bytesSent);
@@ -2089,7 +2089,6 @@ void SendPacket(void)
             else
             {
                 rsp = -1;
-                canCount = 0;
             }
         }
     } while (rsp == NAK && canCount < 2);
