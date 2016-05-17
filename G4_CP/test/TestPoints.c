@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 26 $  $Date: 5/12/16 4:52p $  
+    $Revision: 27 $  $Date: 5/12/16 5:27p $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -645,6 +645,10 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 27  *****************
+ * User: Jeff Vahue   Date: 5/12/16    Time: 5:27p
+ * Updated in $/software/control processor/code/test
  * 
  * *****************  Version 26  *****************
  * User: Jeff Vahue   Date: 5/12/16    Time: 4:52p
