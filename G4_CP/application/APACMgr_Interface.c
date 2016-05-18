@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 16 $  $Date: 4/15/16 6:59p $
+      $Revision: 17 $  $Date: 5/16/16 4:33p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -326,11 +326,11 @@ BOOLEAN APACMgr_IF_ValidateManual ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *ms
   eng_hrs = (m_APAC_Status.run_state == APAC_RUN_STATE_COMMIT) ? eng_ptr->hrs.start_s :
                                                                  eng_ptr->hrs.curr_s;
   if ((m_APAC_Status.run_state != APAC_RUN_STATE_COMMIT) &&
-      ((eng_hrs - eng_ptr->hrs.prev_s) >= APAC_ENG_HRS_VALIDATE_SEC))
+      ((eng_hrs - eng_ptr->hrs.prev_s) >= m_APAC_Status.engHrsCfg_s))
   { // Set Manual APAC Validate Flag only on start of APAC Run test
     snprintf ( m_APAC_VLD_Log.msg, sizeof(m_APAC_VLD_Log.msg), "E%d: curr=%d,prev=%d",
                m_APAC_Status.eng_uut, eng_hrs, eng_ptr->hrs.prev_s );
-    APACMgr_NVMUpdate ( m_APAC_Status.eng_uut, APAC_VLD_REASON_50HRS, &m_APAC_VLD_Log );
+    APACMgr_NVMUpdate ( m_APAC_Status.eng_uut, APAC_VLD_REASON_HRS, &m_APAC_VLD_Log );
   }
 
   ok = eng_ptr->vld.set;  // NOTE: validate could have been flagged previously
@@ -933,6 +933,11 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 17  *****************
+ * User: Peter Lee    Date: 5/16/16    Time: 4:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1330 Engine Hours Manual Validate Configurable
  * 
  * *****************  Version 16  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:59p

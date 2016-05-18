@@ -12,7 +12,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 19 $  $Date: 4/15/16 6:19p $
+      $Revision: 20 $  $Date: 5/16/16 4:33p $
 
 ******************************************************************************/
 
@@ -44,7 +44,9 @@
 #define APAC_TIMEOUT_HIGELOW_SEC  15
 #define APAC_TIMEOUT_STABLE_SEC   20
 
-#define APAC_ENG_HRS_VALIDATE_SEC  (50 * 3600) // 50 Hrs in seconds
+#define APAC_ENG_HRS_VALIDATE_HRS  50            // 50 Hrs in seconds
+#define APAC_ENG_SEC_PER_HR        3600          // 3600 sec per hour
+//#define APAC_ENG_HRS_VALIDATE_SEC  (50 * 3600) // 50 Hrs in seconds
 
 #define APAC_MENU_DISPLAY_CHAR_MAX  13  // 12 + '\0'
 
@@ -113,6 +115,7 @@
                             APAC_ADJUST_CFG_DEFAULT,      /* adjust */\
                             APAC_SNSR_NAME_CFG_DEFAULT,   /* names */\
                             APAC_SNSR_TREND_NAME_CFG_DEFAULT, /* namesTrend */\
+							APAC_ENG_HRS_VALIDATE_HRS,    /* engHrs_hr */\
                             FALSE                         /* enabled */
 
 
@@ -176,7 +179,7 @@
 #define APAC_CFG_CHECK_MSG_SIZE  32
 
 #define APAC_VLD_STR_NONE    "VLD_NONE"
-#define APAC_VLD_STR_50HRS   "VLD_50HRS"
+#define APAC_VLD_STR_HRS     "VLD_HRS"
 #define APAC_VLD_STR_ESN     "VLD_ESN"
 #define APAC_VLD_STR_CFG     "VLD_CFG"
 #define APAC_VLD_STR_CYCLE   "VLD_CYCLE"
@@ -293,6 +296,7 @@ typedef struct {
   APAC_ADJUST_CFG adjust;      // adjustments to Margin Calc
   APAC_SNSR_NAMES_CFG names;   // 5 char name for internal calc params
   APAC_SNSR_TREND_NAMES_CFG namesTrend;  // 5 char name for trend sensors
+  UINT16 engHrs_hr;            // Engine Hours before Manual Validate Required
   BOOLEAN enabled;             // APAC processing enabled
 } APAC_CFG, *APAC_CFG_PTR;
 
@@ -328,7 +332,7 @@ typedef enum {
 
 typedef enum {
   APAC_VLD_REASON_NONE,
-  APAC_VLD_REASON_50HRS, // > 50 Hrs since last manual validation
+  APAC_VLD_REASON_HRS,   // > Cfg Hrs (50 hrs def) since last manual validation
   APAC_VLD_REASON_ESN,   // ESN has changed
   APAC_VLD_REASON_CFG,   // Cfg has changed
   APAC_VLD_REASON_CYCLE, // Cycle indicate cycle count has changed
@@ -428,6 +432,7 @@ typedef struct {
   UINT32 *menu_invld_timeout_val_ptr_ms;   // Ptr to Menu "Invalid" delay timeout value
   TIMESTAMP ts_start;   // TimeStamp of Start of Test (link to APAC START LOG and
                         //    APAC SUMMARY LOG
+  UINT32 engHrsCfg_s;   // Engine Hours Cfg in seconds 
   APAC_CFG_STATE_ENUM cfg_state;
   CHAR cfg_err[APAC_CFG_CHECK_MSG_SIZE];
 } APAC_STATUS, *APAC_STATUS_PTR;
@@ -621,7 +626,7 @@ typedef struct{
 typedef struct {
   CHAR esn[APAC_ESN_MAX_LEN];
   UINT32 hrs_s;  // Prev Eng Cyc Hrs since last Manual PAC Validation
-                 //   50 hrs exceed = Curr Eng Hrs - Prev Eng Hrs
+                 //   Eng hrs exceed = Curr Eng Hrs - Prev Eng Hrs
   BOOLEAN vld;                     // Manual Validate is flagged
   APAC_VLD_REASON_ENUM vld_reason; // Manual Validate Reason
   UINT16 vld_reason_summary;       // All Manual Validate Reasons since last Man Validate. 
@@ -697,6 +702,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 5/16/16    Time: 4:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1330 Engine Hours Manual Validate Configurable
  * 
  * *****************  Version 19  *****************
  * User: Peter Lee    Date: 4/15/16    Time: 6:19p
