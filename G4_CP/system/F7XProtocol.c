@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 28 $  $Date: 3/10/16 12:11p $     
+      $Revision: 29 $  $Date: 5/17/16 9:06a $     
 
 ******************************************************************************/
 
@@ -130,6 +130,7 @@ static void F7XProtocol_UpdateUartMgrData( UINT16 ch, UARTMGR_PARAM_DATA_PTR dat
 static void F7XProtocol_RestoreAppData( void ); 
 static F7X_PARAM_PTR F7XProtocol_GetParamEntryList (UINT16 entry);
 static void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr );
+static F7X_OPTION_CFG F7XProtocol_ESN_Init( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr );
 
 #include "F7XUserTables.c"
 
@@ -680,9 +681,8 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
   UINT8 *end_ptr; 
   BOOLEAN bNewData; 
   UINT16 i; 
-  F7X_OPTION_CFG_PTR optionCfg_ptr; 
+
   
- 
   bNewData = FALSE; 
 
   data_ptr = (UARTMGR_PARAM_DATA_PTR) runtime_data_ptr; 
@@ -743,16 +743,17 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       {
          F7XProtocol_InitUartMgrData( ch, data_ptr, word_info_ptr); 
          status_ptr->bInitUartMgrDataDone = TRUE; 
+		 status_ptr->optionRunTime = F7XProtocol_ESN_Init( ch, 
+							            (F7X_OPTION_CFG_PTR) &m_F7X_GeneralCfg[ch].option);
       }
       
       // Update Uart Mgr Data 
       F7XProtocol_UpdateUartMgrData( ch, data_ptr, word_info_ptr); 
  
       // Currently only one option. In future if more options, decode in init and set flags. 
-      optionCfg_ptr = (F7X_OPTION_CFG_PTR) &m_F7X_GeneralCfg[ch].option;
-      if (optionCfg_ptr->esn_enb == TRUE) {
-        F7XProtocol_ESN_Decode( ch, optionCfg_ptr );
-      }
+	  if ( status_ptr->optionRunTime.esn_enb == TRUE ) {
+         F7XProtocol_ESN_Decode( ch, (F7X_OPTION_CFG_PTR) &status_ptr->optionRunTime );
+	  }
     }
     
     // If no new frame update individual data loss calculation and update Uart Mgr 
@@ -1795,7 +1796,7 @@ void F7XProtocol_InitUartMgrData( UINT16 ch, UARTMGR_PARAM_DATA_PTR data_ptr,
    UINT16 i,k; 
    UINT16 size; 
    UINT16 *pid; 
-
+   
 
    // From Dump List assign Uart Mgr Data entries, using translation table
    pStatus = (F7X_STATUS_PTR) &m_F7X_Status[ch]; 
@@ -1831,7 +1832,7 @@ void F7XProtocol_InitUartMgrData( UINT16 ch, UARTMGR_PARAM_DATA_PTR data_ptr,
      
      // Update tol 
      data_red_ptr->Tol = pParam->tol; 
-     
+	 
      // Move to the next entry 
      data_ptr++; 
    }
@@ -2050,6 +2051,79 @@ void F7XProtocol_ESN_Decode( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
 }
 
 
+/******************************************************************************
+ * Function:    F7XProtocol_ESN_Init
+ *
+ * Description: Utility function to initialize the word location of the 
+ *              esn parameters, when a dumplist is recognized
+ *
+ * Parameters:  ch - UART chan 
+ *              optionCfg_ptr - F7X_OPTION_CFG with GPA for decode info
+ *
+ * Returns:     F7X_OPTION_CFG, where .esn_gpa updated to reflect word location
+ *
+ * Notes:
+ * 1) Finds the Word Locations from the Recognized Dumplist RAW data frame
+ *    that corresponds to the Params Defined as the ESN Char 1,2 and 3 from
+ *    the configuration
+ *
+ *****************************************************************************/
+static 
+F7X_OPTION_CFG F7XProtocol_ESN_Init( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr )
+{
+  UINT16 esn_word_loc0, esn_word_loc1, esn_word_loc2;
+  UINT16 esn_param_id0, esn_param_id1, esn_param_id2;
+  #define F7X_ESN_NOT_DEFINED 0xFFFF
+						
+  F7X_DUMPLIST_CFG_PTR pCfg; 
+  F7X_STATUS_PTR pStatus; 
+
+  UINT16 i; 
+  UINT16 size; 
+  BOOLEAN bAllFound; 
+  F7X_OPTION_CFG optionRunTime; 
+
+  // From Dump List assign Uart Mgr Data entries, using translation table
+  pStatus = (F7X_STATUS_PTR) &m_F7X_Status[ch]; 
+  pCfg = (F7X_DUMPLIST_CFG_PTR) &m_F7X_DumplistCfg[pStatus->nIndexCfg]; 
+  
+  // Get the Param Id defined for the ESN Chars
+  esn_param_id2 = F7X_ESN_GPA_W2(optionCfg_ptr->esn_gpa);
+  esn_param_id1 = F7X_ESN_GPA_W1(optionCfg_ptr->esn_gpa);
+  esn_param_id0 = F7X_ESN_GPA_W0(optionCfg_ptr->esn_gpa);
+  esn_word_loc2 = esn_word_loc1 = esn_word_loc0 = F7X_ESN_NOT_DEFINED; 
+  bAllFound = FALSE;
+  optionRunTime.esn_enb = FALSE;
+  optionRunTime.esn_gpa = 0x00; 
+
+  // determine number of param words, minus delimiter and addr chksum fields 
+  size = ((pStatus->DumpListSize - 5) / 2) ; 
+
+  for (i=0;i<size;i++) 
+  {	
+    esn_word_loc2 = (esn_param_id2 == pCfg->ParamId[i]) ? i : esn_word_loc2;
+	esn_word_loc1 = (esn_param_id1 == pCfg->ParamId[i]) ? i : esn_word_loc1;
+	esn_word_loc0 = (esn_param_id0 == pCfg->ParamId[i]) ? i : esn_word_loc0;
+	
+	if ( (esn_word_loc2 != F7X_ESN_NOT_DEFINED) && (esn_word_loc1 != F7X_ESN_NOT_DEFINED) &&
+	     (esn_word_loc0 != F7X_ESN_NOT_DEFINED) ) {
+      bAllFound = TRUE; 
+      break;  // Exit early if all esn word locations found
+    } 
+  } // end for i loop thru all word location in dump list
+ 
+  optionRunTime.esn_enb = optionCfg_ptr->esn_enb; 
+  // Remap Param Id to Word Location for reading directly from Raw Data Frame
+  optionRunTime.esn_gpa = optionCfg_ptr->esn_gpa & ~F7X_ESN_GPA_WORD_BITS; 
+  optionRunTime.esn_gpa |= (bAllFound == TRUE) ?
+	                       ( F7X_ESN_GPA_W2_REMAP(esn_word_loc2) | 
+						     F7X_ESN_GPA_W1_REMAP(esn_word_loc1) |
+						     F7X_ESN_GPA_W0_REMAP(esn_word_loc0) ) : 0; 
+  
+  return (optionRunTime); 
+}
+
+
 
 /******************************************************************************
  * Function:     F7XProtocol_FileInit
@@ -2109,6 +2183,12 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 29  *****************
+ * User: Peter Lee    Date: 5/17/16    Time: 9:06a
+ * Updated in $/software/control processor/code/system
+ * SCR #1317 Item M-1. ESN decode to be independent of raw dumplist data
+ * frame word location.   
  * 
  * *****************  Version 28  *****************
  * User: Peter Lee    Date: 3/10/16    Time: 12:11p

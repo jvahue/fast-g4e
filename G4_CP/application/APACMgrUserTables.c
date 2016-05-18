@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 21 $  $Date: 4/14/16 3:34p $
+    $Revision: 22 $  $Date: 5/16/16 4:33p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -254,7 +254,7 @@ static
 USER_ENUM_TBL vldReasonStrs[] =
 {
   {APAC_VLD_STR_NONE,  APAC_VLD_REASON_NONE},
-  {APAC_VLD_STR_50HRS, APAC_VLD_REASON_50HRS},
+  {APAC_VLD_STR_HRS,   APAC_VLD_REASON_HRS},
   {APAC_VLD_STR_ESN,   APAC_VLD_REASON_ESN},
   {APAC_VLD_STR_CFG,   APAC_VLD_REASON_CFG},
   {APAC_VLD_STR_CYCLE, APAC_VLD_REASON_CYCLE},
@@ -476,6 +476,7 @@ static USER_MSG_TBL apacMgrCfgTbl[] =
   {"SNSR_NAMES", apacMgr_SnsrNamesTbl,      NULL,          NO_HANDLER_DATA },
   {"ADJUST",     apacMgr_AdjustTbl,         NULL,          NO_HANDLER_DATA },
   {"INLET",      NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_ENUM,    USER_RW,  (void *) &cfgAPACTemp.inletCfg,     -1,-1,       NO_LIMIT,    apacInletStrs},
+  {"ENG_HOURS",  NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_UINT16,  USER_RW,  (void *) &cfgAPACTemp.engHrs_hr,    -1,-1,       0,  400,     NULL},
   {"ENABLED",    NO_NEXT_TABLE,             APACMgr_Cfg,   USER_TYPE_BOOLEAN, USER_RW,  (void *) &cfgAPACTemp.enabled,      -1,-1,       NO_LIMIT,    NULL},
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -1576,6 +1577,11 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 22  *****************
+ * User: Peter Lee    Date: 5/16/16    Time: 4:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1330 Engine Hours Manual Validate Configurable
  * 
  * *****************  Version 21  *****************
  * User: John Omalley Date: 4/14/16    Time: 3:34p

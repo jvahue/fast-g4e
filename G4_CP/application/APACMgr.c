@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 30 $  $Date: 5/11/16 7:18p $
+      $Revision: 32 $  $Date: 5/16/16 4:33p $
 
 ******************************************************************************/
 
@@ -101,7 +101,7 @@ typedef enum {
 static APAC_CFG m_APAC_Cfg;
 static APAC_STATUS m_APAC_Status;
 static APAC_TBL m_APAC_Tbl[APAC_PARAM_MARGIN_MAX][APAC_INSTALL_MAX];
-static APAC_PALT_COEFF_TBL m_APAC_PALT_Coeff;
+static APAC_PALT_COEFF_TBL m_APAC_PALT_Coeff[INLET_CFG_MAX];
 static APAC_ERRMSG_DISPLAY m_APAC_ErrMsg;
 static APAC_SNSR_STATUS m_APAC_Snsr_Status[APAC_SNSR_MAX];
 static APAC_HIST m_APAC_Hist;    // Approx 1500 bytes
@@ -147,7 +147,8 @@ static APAC_VLD_LOG m_APAC_VLD_Log;
 /*****************************************************************************/
 static APAC_STATUS_PTR APACMgr_GetStatus (void);
 static BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
-                                   APAC_ENG_CALC_COMMON_PTR common_ptr );
+                                   APAC_ENG_CALC_COMMON_PTR common_ptr,
+								   APAC_PALT_COEFF_TBL_PTR palt_coeff_ptr);
 
 static BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val,
                                    APAC_TBL_PTR tbl_ptr, FLOAT32 adj, FLOAT64 *margin_ptr,
@@ -266,9 +267,11 @@ static const APAC_TBL APAC_NG_CONST_TBL[APAC_INSTALL_MAX] =
   { APAC_TBL_NG_IBF_102PCNT_DEF    }
 };
 
-static const APAC_PALT_COEFF_TBL APAC_PALT_COEFF_CONST_TBL =
+static const APAC_PALT_COEFF_TBL APAC_PALT_COEFF_CONST_TBL[INLET_CFG_MAX] =
 {
-  APAC_TBL_COEFF_DEF
+  APAC_TBL_COEFF_DEF_BASIC,
+  APAC_TBL_COEFF_DEF_EAPS,
+  APAC_TBL_COEFF_DEF_IBF
 };
 
 // The ordering below must match APAC_RUN_STATE_ENUM
@@ -393,7 +396,7 @@ static const APAC_CFG_CHECK APAC_CFG_CHECK_TBL[] =
 static const CHAR *APAC_VLD_STR_CONST[] =
 {
   APAC_VLD_STR_NONE,   // APAC_VLD_REASON_NONE
-  APAC_VLD_STR_50HRS,  // APAC_VLD_REASON_50HRS
+  APAC_VLD_STR_HRS,    // APAC_VLD_REASON_HRS
   APAC_VLD_STR_ESN,    // APAC_VLD_REASON_ESN
   APAC_VLD_STR_CFG,    // APAC_VLD_REASON_CFG
   APAC_VLD_STR_CYCLE,  // APAC_VLD_REASON_CYCLE
@@ -493,6 +496,8 @@ void APACMgr_Initialize ( void )
   // Copy data from CfgMgr, to be used as the run time copy
   memcpy( (void *) &m_APAC_Cfg, (const void *) &CfgMgr_RuntimeConfigPtr()->APACConfig,
           sizeof(m_APAC_Cfg));
+  
+  m_APAC_Status.engHrsCfg_s = m_APAC_Cfg.engHrs_hr * APAC_ENG_SEC_PER_HR; 
 
 #ifdef APAC_TIMING_TEST
   /*vcast_dont_instrument_start*/
@@ -533,7 +538,9 @@ void APACMgr_Initialize ( void )
     m_APAC_Tbl[APAC_ITT][i] = APAC_ITT_CONST_TBL[i];
     m_APAC_Tbl[APAC_NG][i] = APAC_NG_CONST_TBL[i];
   }
-  m_APAC_PALT_Coeff = APAC_PALT_COEFF_CONST_TBL;
+  for (i=0;i<(UINT16) INLET_CFG_MAX; i++) {
+    m_APAC_PALT_Coeff[i] = APAC_PALT_COEFF_CONST_TBL[i]; 
+  }
 
   APACMgr_ClearStatus();
   strncpy_safe ( m_APAC_Status.eng[APAC_ENG_1].esn, APAC_ESN_MAX_LEN, APAC_ESN_DEFAULT,
@@ -939,7 +946,8 @@ static void APACMgr_Running (void)
         common_ptr = (APAC_ENG_CALC_COMMON_PTR) &eng_ptr->common;
         bResult1 = bResult2 = bResult3 = bResult4 = bResult5 = TRUE;  // Init all to TRUE
         bResult1 = APACMgr_CalcTqCorr ( common_ptr->valBaroCorr, common_ptr->avgBaroPres,
-                                        common_ptr->avgTQ, common_ptr);
+                                        common_ptr->avgTQ, common_ptr,
+                                        &m_APAC_PALT_Coeff[m_APAC_Cfg.inletCfg] );
         // If _CalcTqDelta() fails then don't check TqDelta Range, as PAMB calc had failed
         //    in _CalcTqDelta() call.
         bResult4 = (bResult1 == FALSE) ? TRUE :
@@ -2190,7 +2198,8 @@ APAC_STATUS_PTR APACMgr_GetStatus (void)
  *****************************************************************************/
 static
 BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
-                            APAC_ENG_CALC_COMMON_PTR common_ptr)
+                            APAC_ENG_CALC_COMMON_PTR common_ptr, 
+							APAC_PALT_COEFF_TBL_PTR palt_coeff_ptr)
 {
   FLOAT64 baro_conv, palt_corr;
   FLOAT64 ax1,ax2,ay1,ay2;
@@ -2203,8 +2212,8 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
   palt_corr = APAC_CALC_PALT_CORR( baro_pres, baro_conv );
   common_ptr->tqCorr = 0.0f;
 
-  entry_ptr = (APAC_PALT_COEFF_ENTRY_PTR) m_APAC_PALT_Coeff.p;
-  j = m_APAC_PALT_Coeff.numEntries;
+  entry_ptr = (APAC_PALT_COEFF_ENTRY_PTR) palt_coeff_ptr->p;
+  j = palt_coeff_ptr->numEntries;
   for (i=0;i<(j-1);i++) {
     if ( (palt_corr >= entry_ptr->val) && (palt_corr <= (entry_ptr + 1)->val) ) {
       ok = TRUE;
@@ -2538,6 +2547,16 @@ static void APACMgr_Simulate ( void )
  *  MODIFICATIONS
  *    $History: APACMgr.c $
  * 
+ * *****************  Version 32  *****************
+ * User: Peter Lee    Date: 5/16/16    Time: 4:33p
+ * Updated in $/software/control processor/code/application
+ * SCR #1330 Engine Hours Manual Validate Configurable
+ * 
+ * *****************  Version 31  *****************
+ * User: Peter Lee    Date: 5/16/16    Time: 2:50p
+ * Updated in $/software/control processor/code/application
+ * SCR #1326 IBF 10k Max Altitude Table Support
+ *  
  * *****************  Version 30  *****************
  * User: Jeff Vahue   Date: 5/11/16    Time: 7:18p
  * Updated in $/software/control processor/code/application

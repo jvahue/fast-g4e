@@ -13,7 +13,7 @@
                  Handler 
     
     VERSION
-      $Revision: 19 $  $Date: 3/02/16 8:26a $     
+      $Revision: 20 $  $Date: 5/17/16 9:06a $     
 
 ******************************************************************************/
 
@@ -322,6 +322,12 @@ typedef F7X_GENERAL_CFG F7X_GENERAL_CFGS[UART_NUM_OF_UARTS];
 #define F7X_ESN_SYNC_THRES  20  // The same ESN val must be decoded at least 20 times
                                 //  before considered "real'. At 20 Hz, this normally is 
                                 //  1 sec. 
+#define F7X_ESN_GPA_W2_REMAP(x) ( x << 16 )
+#define F7X_ESN_GPA_W1_REMAP(x) ( x << 8 )
+#define F7X_ESN_GPA_W0_REMAP(x) ( x ) 
+#define F7X_ESN_GPA_WORD_BITS   0x00FFFFFF   // GPA Word Bit Locations
+
+
 typedef struct 
 {
   BOOLEAN bDecoded;  // ESN has been decoded once from the bus for this curr pwr up
@@ -347,10 +353,9 @@ typedef struct
   UINT32  nResyncs;
   UINT32  lastFrameTime; 
   TIMESTAMP lastFrameTS;  // Rx time in TS format for snap shot recording
-  
-  BOOLEAN bResync;   // Currrently hunting for sync after lost of sync ! 
-  
+  BOOLEAN bResync;        // Currrently hunting for sync after lost of sync ! 
   BOOLEAN bInitUartMgrDataDone; 
+  F7X_OPTION_CFG optionRunTime; // Run Time Option Data - ESN only today
 } F7X_STATUS, *F7X_STATUS_PTR; 
 
 typedef struct
@@ -472,6 +477,12 @@ EXPORT BOOLEAN F7XProtocol_GetESN ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.h $
+ * 
+ * *****************  Version 20  *****************
+ * User: Peter Lee    Date: 5/17/16    Time: 9:06a
+ * Updated in $/software/control processor/code/system
+ * SCR #1317 Item M-1. ESN decode to be independent of raw dumplist data
+ * frame word location.   
  * 
  * *****************  Version 19  *****************
  * User: John Omalley Date: 3/02/16    Time: 8:26a

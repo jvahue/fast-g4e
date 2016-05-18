@@ -50,7 +50,13 @@ const CHAR *PRODUCT_COPYRIGHT = "Pratt & Whitney Engine Services\r\n"
 
 const CHAR *PRODUCT_NAME      = "FAST II Software";
 
-const CHAR *PRODUCT_VERSION   = VER_FUNC"."VER_MAJOR"."VER_MINOR DEV_BUILD;  
+#ifndef STE_TP
+#define _INST ""
+#else
+#define _INST "-i"
+#endif
+
+const CHAR *PRODUCT_VERSION   = VER_FUNC"."VER_MAJOR"."VER_MINOR DEV_BUILD _INST;  
 
 // Build Date and Time Stamp.
 // DATE and TIME are inserted at compile time, but will not affect the Checksum or CRC.
