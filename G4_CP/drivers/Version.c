@@ -10,7 +10,7 @@
   Description: Product Name and Build Version and Date strings.
  
     VERSION
-      $Revision: 46 $  $Date: 3/29/16 8:33a $
+      $Revision: 47 $  $Date: 5/18/16 12:13p $
     
 ******************************************************************************/
 
@@ -145,6 +145,11 @@ BOOLEAN Ver_CheckVerAndDateMatch(void)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.c $
+ * 
+ * *****************  Version 47  *****************
+ * User: Jeff Vahue   Date: 5/18/16    Time: 12:13p
+ * Updated in $/software/control processor/code/drivers
+ * SCR-1331 Add indication when code is instrumented to the version str
  * 
  * *****************  Version 46  *****************
  * User: John Omalley Date: 3/29/16    Time: 8:33a

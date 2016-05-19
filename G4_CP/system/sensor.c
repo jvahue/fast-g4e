@@ -27,7 +27,7 @@
     Notes:
 
     VERSION
-      $Revision: 108 $  $Date: 4/19/16 4:32p $
+      $Revision: 109 $  $Date: 5/19/16 1:03p $
 
 ******************************************************************************/
 
@@ -872,20 +872,20 @@ static void SensorsConfigure (void)
             break;
 
          case SAMPLE_VIRTUAL:
-            // GPA word contains the packed sensor indexes(A and B) and
-	    // the type(operation)
+         // GPA word contains the packed sensor indexes(A and B) and
+         // the type(operation)
             Sensors[i].vSnsrA  =
-	       (SENSOR_INDEX)UNPACK_VIRTUAL_SNRA( pSensorCfg->generalPurposeA);
+           (SENSOR_INDEX)UNPACK_VIRTUAL_SNRA( pSensorCfg->generalPurposeA);
             Sensors[i].vSnsrB  =
-	       (SENSOR_INDEX)UNPACK_VIRTUAL_SNRB( pSensorCfg->generalPurposeA);
+           (SENSOR_INDEX)UNPACK_VIRTUAL_SNRB( pSensorCfg->generalPurposeA);
             Sensors[i].vOpType =
-	       (VIRTUALTYPE) UNPACK_VIRTUAL_TYPE( pSensorCfg->generalPurposeA);
+           (VIRTUALTYPE) UNPACK_VIRTUAL_TYPE( pSensorCfg->generalPurposeA);
             Sensors[i].vRawCombineAsize = 
-         (UINT16) UNPACK_VIRTUAL_RAW_A_SIZE(pSensorCfg->generalPurposeA);
+           (UINT16) UNPACK_VIRTUAL_RAW_A_SIZE(pSensorCfg->generalPurposeA);
             Sensors[i].vRawCombineBsize = 
-         (UINT16) UNPACK_VIRTUAL_RAW_B_SIZE(pSensorCfg->generalPurposeA);
+           (UINT16) UNPACK_VIRTUAL_RAW_B_SIZE(pSensorCfg->generalPurposeA);
             Sensors[i].vRawCombineNeg = 
-         (BOOLEAN) UNPACK_VIRTUAL_RAW_NEGATIVE(pSensorCfg->generalPurposeA);
+           (BOOLEAN) UNPACK_VIRTUAL_RAW_NEGATIVE(pSensorCfg->generalPurposeA);
               
 
             //Validate the config of the Virtual sensor
@@ -2425,17 +2425,17 @@ static FLOAT32 SensorVirtualGetValue ( UINT16 nIndex, UINT32 *null )
       // Shift it back into place, also include sign if configured as signed value
       if (pData->vRawCombineNeg == TRUE) {
         signedPtr = (SINT32 *) &rawCombined; 
-        fVal = (FLOAT32) (*signedPtr / pow(2,(32 - (pData->vRawCombineBsize + 
-                                                    pData->vRawCombineAsize))));
+        fVal = ((FLOAT32)(*signedPtr)) / (1U << (32 - (pData->vRawCombineBsize + 
+                                                       pData->vRawCombineAsize)));
       }
       else {
-        fVal = (FLOAT32) (rawCombined / pow(2,(32 - (pData->vRawCombineBsize + 
-                                                     pData->vRawCombineAsize))));
+        fVal = (FLOAT32)rawCombined / (1U << (32 - (pData->vRawCombineBsize + 
+                                                    pData->vRawCombineAsize)));
       }
       break; 
       
     case VIRTUAL_MAX:
-	case VIRTUAL_UNUSED:
+    case VIRTUAL_UNUSED:
     default:
       FATAL("Unsupported VIRTUALTYPE = %d", pData->vOpType );
       break;
@@ -2476,6 +2476,11 @@ static BOOLEAN SensorVirtualInterfaceValid(UINT16 nIndex)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: sensor.c $
+ * 
+ * *****************  Version 109  *****************
+ * User: John Omalley Date: 5/19/16    Time: 1:03p
+ * Updated in $/software/control processor/code/system
+ * SCR 1328 - Code Review Findings
  * 
  * *****************  Version 108  *****************
  * User: Contractor V&v Date: 4/19/16    Time: 4:32p

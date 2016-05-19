@@ -1,14 +1,16 @@
 #define FASTMGR_USERTABLES_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:        9D991
 
     File:        FastMgrUserTables.c
 
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 36 $  $Date: 4/15/16 11:24a $
+   $Revision: 37 $  $Date: 5/19/16 1:58p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -507,6 +509,11 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 37  *****************
+ * User: John Omalley Date: 5/19/16    Time: 1:58p
+ * Updated in $/software/control processor/code/application
+ * SCR 1327 - Code Review Updates
  * 
  * *****************  Version 36  *****************
  * User: John Omalley Date: 4/15/16    Time: 11:24a
