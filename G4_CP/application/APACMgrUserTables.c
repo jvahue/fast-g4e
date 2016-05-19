@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 22 $  $Date: 5/16/16 4:33p $
+    $Revision: 23 $  $Date: 5/19/16 5:51p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -868,6 +868,7 @@ static USER_HANDLER_RESULT APACMgr_CfgExprStrCmd(USER_DATA_TYPE DataType,
 }
 
 #ifdef APAC_TEST_SIM
+/*vcast_dont_instrument_start*/ 
 /******************************************************************************
  * Function:    APACMgr_DebugRestart
  *
@@ -909,9 +910,11 @@ static USER_HANDLER_RESULT APACMgr_DebugRestart(USER_DATA_TYPE DataType,
 
   return (result);
 }
+/*vcast_dont_instrument_end*/ 
 #endif
 
 #ifdef APAC_TEST_DBG
+/*vcast_dont_instrument_start*/ 
 /******************************************************************************
  * Function:    APACMgr_DebugCmdHist
  *
@@ -1040,9 +1043,8 @@ static USER_HANDLER_RESULT APACMgr_DebugCmdHist(USER_DATA_TYPE DataType,
 
   return (result);
 }
-#endif
 
-#ifdef APAC_TEST_DBG
+
 /******************************************************************************
  * Function:    APACMgr_Debug
  *
@@ -1093,9 +1095,8 @@ static USER_HANDLER_RESULT APACMgr_Debug(USER_DATA_TYPE DataType,
   return (result);
 
 }
-#endif
 
-#ifdef APAC_TEST_DBG
+
 /******************************************************************************
  * Function:    APACMgr_EngStatusDbg
  *
@@ -1149,9 +1150,8 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbg(USER_DATA_TYPE DataType,
 
   return result;
 }
-#endif
 
-#ifdef APAC_TEST_DBG
+
 /******************************************************************************
  * Function:    APACMgr_EngStatusDbgExe
  *
@@ -1217,9 +1217,8 @@ static USER_HANDLER_RESULT APACMgr_EngStatusDbgExe(USER_DATA_TYPE DataType,
 
   return result;
 }
-#endif
 
-#ifdef APAC_TEST_DBG
+
 /******************************************************************************
  * Function:    APACMgr_DebugCfgBatch
  *
@@ -1275,6 +1274,7 @@ static USER_HANDLER_RESULT APACMgr_DebugCfgBatch(USER_DATA_TYPE DataType,
   }
   return (result);
 }
+/*vcast_dont_instrument_end*/ 
 #endif
 
 /******************************************************************************
@@ -1577,6 +1577,11 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 23  *****************
+ * User: Jeff Vahue   Date: 5/19/16    Time: 5:51p
+ * Updated in $/software/control processor/code/application
+ * SCR-1331 Add Vectorcast enable/disable coverage cmds
  * 
  * *****************  Version 22  *****************
  * User: Peter Lee    Date: 5/16/16    Time: 4:33p

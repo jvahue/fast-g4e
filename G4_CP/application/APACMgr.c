@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 32 $  $Date: 5/16/16 4:33p $
+      $Revision: 33 $  $Date: 5/19/16 6:30p $
 
 ******************************************************************************/
 
@@ -1496,17 +1496,10 @@ static void APACMgr_GetDataValues (void)
         snsr_ptr++;
       } // inner loop thru MAX_TREND_SENSORS
       if (j == MAX_TREND_SENSORS)
-      { // Sensor Index not found, just move onto next APAC_DATA_AVG_ENUM
-        // and set an out of range value, as calc will fail.
-        if ( i != APAC_DATA_VAL_BAROCORR) {
-          GSE_DebugStr(NORMAL,TRUE,
-                "APACMgr: APACMgr_GetDataValues() Snsr Idx Not Found Eng=%d,Idx=%d\r\n",
-                m_APAC_Status.eng_uut, pDataEntry->idx);
-          *pDataEntry->dest_ptr = (FLOAT64) APAC_SNSR_NOT_FOUND_VAL;
-        } // end if ( i != APAC_DATA_VAL_BARO)
-        else { // Get APAC_DATA_VAL_BARO val directly
-          *pDataEntry->dest_ptr = (FLOAT64) SensorGetValue(pDataEntry->idx);
-        }
+      { // Sensor Index not found (that is not BAROCORR), Cfg Error.  ASSERT()
+		ASSERT ( i == APAC_DATA_VAL_BAROCORR );
+        // Get APAC_DATA_VAL_BARO val directly
+        *pDataEntry->dest_ptr = (FLOAT64) SensorGetValue(pDataEntry->idx);
       }
       pDataEntry++; // Move to next element in APAC_DATA_AVG_ENUM
     } // outer loop thru APAC_DATA_AVG_ENUM
@@ -2546,6 +2539,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 33  *****************
+ * User: Peter Lee    Date: 5/19/16    Time: 6:30p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #15 Code Coverage Request Updates
  * 
  * *****************  Version 32  *****************
  * User: Peter Lee    Date: 5/16/16    Time: 4:33p

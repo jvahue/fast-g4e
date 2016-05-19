@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 17 $  $Date: 5/16/16 4:33p $
+      $Revision: 18 $  $Date: 5/19/16 6:30p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -685,29 +685,25 @@ BOOLEAN APACMgr_IF_HistoryAdv ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
       // If idxDate is last entry in Hist List, wrap to beginning '0'
       idx = (status_ptr->idxDate != idxLast) ? (status_ptr->idxDate + 1) : 0;
       // If new idx is last entry in Hist List, then just one entry in next Date Blk
-      if ( idx >= idxLast ) {
-        status_ptr->idxDayBegin = idx;
-      }
-      else // have another Date Blk to find
-      {
-        entry_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[idx];
-        curr_mon_day = APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp);
-        curr_yr = APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp);
-        while (idx <= idxLast)
-        {
-          entry_ptr++;
-          // Compare to next entry, current entry
-          if ( (curr_mon_day != APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp)) ||
-               (curr_yr != APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp)) ||
-               (idx == idxLast) )
-          {
-            status_ptr->idxDayBegin = ((status_ptr->idxDate + 1) > idxLast) ?
-                                      0 : (status_ptr->idxDate + 1);
-            break;
-          }
-          idx++; // point to next entry as this one has same Date
-        } //loop until Date Changes
-      } // else find next Date Blk
+	  status_ptr->idxDayBegin = idx;
+      if ( idx < idxLast ) {
+   	    entry_ptr = (APAC_HIST_ENTRY_PTR) &m_APAC_Hist.entry[idx];
+	    curr_mon_day = APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp);
+	    curr_yr = APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp);
+	    while (idx <= idxLast) {
+		  entry_ptr++;
+		  // Compare to next entry, current entry
+		  if ( (curr_mon_day != APAC_HIST_PARSE_MON_DAY(entry_ptr->ts.Timestamp)) ||
+				  (curr_yr != APAC_HIST_PARSE_YR(entry_ptr->ts.Timestamp)) ||
+				  (idx == idxLast) )
+		  {
+			  status_ptr->idxDayBegin = ((status_ptr->idxDate + 1) > idxLast) ?
+										0 : (status_ptr->idxDate + 1);
+			  break;
+		  }
+		  idx++; // point to next entry as this one has same Date
+	    } //loop until Date Changes
+	  } //end if ( idx < idxLast )
       status_ptr->idxDate = idx;
       status_ptr->idxDayEnd = idx;
       status_ptr->idxDay = idx;
@@ -933,6 +929,11 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: Peter Lee    Date: 5/19/16    Time: 6:30p
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #15 Code Coverage Request Updates
  * 
  * *****************  Version 17  *****************
  * User: Peter Lee    Date: 5/16/16    Time: 4:33p
