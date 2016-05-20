@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 53 $  $Date: 4/19/16 4:18p $
+ $Revision: 54 $  $Date: 5/20/16 1:22p $
 
 ******************************************************************************/
 
@@ -1078,7 +1078,7 @@ static void TrendReset( TREND_CFG* pCfg, TREND_DATA* pData, BOOLEAN bRunTime )
     pAbsVar->upperValue = 0.f;
     pAbsVar->outLierCnt = 0;
     pAbsVar->outLierMax =
-       (UINT16) (pCfg->rate * pCfg->stability[i].absOutlier_ms) / ONE_SEC_IN_MILLSECS;
+       (UINT16) ( (pCfg->rate * pCfg->stability[i].absOutlier_ms) / ONE_SEC_IN_MILLSECS);
   }
 
   pData->delayedStbStartMs = 0;
@@ -2042,6 +2042,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 54  *****************
+ * User: Jeff Vahue   Date: 5/20/16    Time: 1:22p
+ * Updated in $/software/control processor/code/application
+ * SCR-1333 Fix cast of trend outlier duration
  * 
  * *****************  Version 53  *****************
  * User: Contractor V&v Date: 4/19/16    Time: 4:18p
