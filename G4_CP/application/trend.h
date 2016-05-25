@@ -12,7 +12,7 @@
     Description: Function prototypes and defines for the trend processing.
 
   VERSION
-  $Revision: 28 $  $Date: 2/22/16 11:39a $
+  $Revision: 29 $  $Date: 5/25/16 6:47p $
 
 *******************************************************************************/
 
@@ -451,6 +451,11 @@ EXPORT void    TrendGetSampleData      ( TREND_INDEX idx, TREND_SAMPLE_DATA* pSt
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.h $
+ * 
+ * *****************  Version 29  *****************
+ * User: Jeff Vahue   Date: 5/25/16    Time: 6:47p
+ * Updated in $/software/control processor/code/application
+ * SCR-1331 Updates due to code coverage review
  * 
  * *****************  Version 28  *****************
  * User: John Omalley Date: 2/22/16    Time: 11:39a
