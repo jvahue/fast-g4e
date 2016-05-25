@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 54 $  $Date: 5/20/16 1:22p $
+ $Revision: 55 $  $Date: 5/25/16 6:47p $
 
 ******************************************************************************/
 
@@ -2025,6 +2025,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 55  *****************
+ * User: Jeff Vahue   Date: 5/25/16    Time: 6:47p
+ * Updated in $/software/control processor/code/application
+ * SCR-1331 Updates due to code coverage review
  * 
  * *****************  Version 54  *****************
  * User: Jeff Vahue   Date: 5/20/16    Time: 1:22p
