@@ -13,7 +13,7 @@
                  Application 
     
     VERSION
-      $Revision: 13 $  $Date: 3/30/16 11:13a $     
+      $Revision: 14 $  $Date: 5/23/16 3:34p $     
 
 ******************************************************************************/
 
@@ -338,13 +338,18 @@ typedef struct
 ******************************************************************************/
 
 EXPORT void                      DispProcessingApp_Initialize(BOOLEAN bEnable);
-EXPORT void                      DispProcessingApp_FileInit(void);
+EXPORT BOOLEAN                   DispProcessingApp_FileInit(void);
 EXPORT void                      DispProcApp_DisableLiveStream(void);
 #endif // DISPLAY_PROCESSING_H
 
 /******************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.h $
+ * 
+ * *****************  Version 14  *****************
+ * User: John Omalley Date: 5/23/16    Time: 3:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1335 - Fixed compiler warning
  * 
  * *****************  Version 13  *****************
  * User: John Omalley Date: 3/30/16    Time: 11:13a

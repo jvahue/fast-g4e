@@ -11,7 +11,7 @@
                  Interface Function and the Menu Processing
 
     VERSION
-      $Revision: 18 $  $Date: 5/19/16 6:30p $
+      $Revision: 19 $  $Date: 5/25/16 6:28p $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -857,7 +857,6 @@ BOOLEAN APACMgr_IF_Reset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
                            APAC_IF_ENUM option )
 {
   APAC_COMMIT_ENUM commit;
-  TREND_CMD_RESULT rslt;
 
   ASSERT ( (option == APAC_IF_DCLK) || (option == APAC_IF_TIMEOUT) );
 
@@ -882,7 +881,7 @@ BOOLEAN APACMgr_IF_Reset ( CHAR *msg1, CHAR *msg2, CHAR *msg3, CHAR *msg4,
     if ((m_APAC_Status.eng_uut != APAC_ENG_MAX) && (m_APAC_Status.nr_sel != APAC_NR_SEL_MAX)){
       TrendAppStartTrend(
                   m_APAC_Cfg.eng[m_APAC_Status.eng_uut].idxTrend[m_APAC_Status.nr_sel],
-                  FALSE, &rslt);
+                  FALSE );
     }
   } // end else if (== APAC_STATE_TEST_INPROGRESS) &&
     // m_APAC_Status.run_state != APAC_RUN_STATE_FAULT)
@@ -929,6 +928,12 @@ void APACMgr_IF_InvldDelayTimeOutVal ( UINT32 *timeoutVal_ptr )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr_Interface.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: Peter Lee    Date: 5/25/16    Time: 6:28p
+ * Updated in $/software/control processor/code/application
+ * SCR #1331 Code Coverage Updates - TrendAppStartTrend() func param
+ * changed.
  * 
  * *****************  Version 18  *****************
  * User: Peter Lee    Date: 5/19/16    Time: 6:30p

@@ -175,13 +175,6 @@ typedef enum
   MAX_STB_STRGY
 }STB_STRATEGY;
 
-typedef enum
-{
-  TREND_CMD_OK,             // The command has been accepted
-  TREND_NOT_CONFIGURED,     // The Trend is not configured
-  TREND_NOT_COMMANDABLE     // The Trend is not configured to be commanded.
-} TREND_CMD_RESULT;
-
 #pragma pack(1)
 
 //***************************************
@@ -448,8 +441,8 @@ EXPORT void   TrendInitialize   ( void );
 EXPORT UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize );
 
 // APAC interface functions
-EXPORT BOOLEAN TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart, TREND_CMD_RESULT* rslt);
-EXPORT void    TrendGetStabilityState( TREND_INDEX idx, STABILITY_STATE* pStabState,
+EXPORT void TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart);
+EXPORT void TrendGetStabilityState( TREND_INDEX idx, STABILITY_STATE* pStabState,
                                        UINT32* pDurMs,  SAMPLE_RESULT* pSampleResult);
 EXPORT BOOLEAN TrendGetStabilityHistory( TREND_INDEX idx, STABLE_HISTORY* pSnsrStableHist);
 EXPORT void    TrendGetSampleData      ( TREND_INDEX idx, TREND_SAMPLE_DATA* pStabilityData);

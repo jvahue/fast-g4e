@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 33 $  $Date: 5/19/16 6:30p $
+      $Revision: 34 $  $Date: 5/25/16 6:28p $
 
 ******************************************************************************/
 
@@ -806,7 +806,6 @@ static void APACMgr_Running (void)
   APAC_INSTALL_ENUM tblIdx;
   APAC_ENG_CALC_COMMON_PTR common_ptr;
   APAC_ENG_CALC_DATA_PTR itt_ptr, ng_ptr;
-  TREND_CMD_RESULT rslt;
   STABILITY_STATE state_stability;
   SAMPLE_RESULT state_sample;
 
@@ -838,21 +837,12 @@ static void APACMgr_Running (void)
 #ifdef APAC_TEST_SIM
         /*vcast_dont_instrument_start*/  
         bResult = APACMgr_Test_TrendAppStartTrend(
-                    m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel], TRUE, &rslt);
+                    m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel], TRUE);
         /*vcast_dont_instrument_end*/        
 #else
-        bResult = TrendAppStartTrend(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
-                                     TRUE, &rslt);
+        TrendAppStartTrend(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
+                           TRUE);
 #endif
-        // If TREND_NOT_COMMANDABLE rslt, output GSE Debug
-        if ( rslt == TREND_NOT_COMMANDABLE ) {
-          GSE_DebugStr(NORMAL,TRUE,
-                       "APACMgr: APACMgr_Running() ENG[%d] Trend Not Commandable\r\n",eng_uut);
-        }
-        if ( rslt == TREND_NOT_CONFIGURED ) {
-          GSE_DebugStr(NORMAL,TRUE,
-                       "APACMgr: APACMgr_Running() ENG[%d] Trend Not Cfg\r\n",eng_uut);
-        }
         // Always move to stablize state.  If Trend Not Cfg, will timeout in stablize state
         m_APAC_Status.timeout_ms = tick + CM_DELAY_IN_SECS(m_APAC_Cfg.timeout.stable_sec);
         m_APAC_Status.run_state = APAC_RUN_STATE_STABILIZE;
@@ -890,8 +880,8 @@ static void APACMgr_Running (void)
       {
         // Command Trend to Off. Note: Will call TrendAppStartTrend(FALSE) until Trend
         //   trans to STB_STATE_IDLE.  This should not be a problem
-        bResult = TrendAppStartTrend(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
-                                     FALSE, &rslt);
+        TrendAppStartTrend(m_APAC_Cfg.eng[eng_uut].idxTrend[m_APAC_Status.nr_sel],
+                           FALSE);
         // Note: Trend will take another MIF frame before TrendGetStabilityHistory() is
         //       available. Wait for state_stability -> STB_STATE_IDLE.
         if (state_stability == STB_STATE_IDLE)
@@ -2018,12 +2008,11 @@ static void APACMgr_CheckCfg ( void )
   UINT8  *byte_ptr;
   UINT32 *long_ptr;
   BOOLEAN apacCfgOk;
-  CHAR *msg_ptr;
 
+  
   pCfg = (APAC_CFG_CHECK_PTR) &APAC_CFG_CHECK_TBL[0];
   apacCfgOk = TRUE;
   m_APAC_Status.cfg_state = APAC_CFG_STATE_OK;  // Def to Cfg is Ok.
-  msg_ptr = NULL;
 
   while ( ( pCfg->ptr != NULL ) && (apacCfgOk) )
   {
@@ -2033,21 +2022,22 @@ static void APACMgr_CheckCfg ( void )
     if ( ((pCfg->size == APAC_CFG_CHECK_U8) && (*byte_ptr == (UINT8) pCfg->check_val)) ||
          ((pCfg->size == APAC_CFG_CHECK_U32) && (*long_ptr == (UINT32) pCfg->check_val)) )
     {
+#ifndef APAC_TEST_DBG  
+      FATAL("APACMgr: APACMgr_CheckCfg() Cfg Err '%s'\r\n", pCfg->msg); 
+#else	
+      /*vcast_dont_instrument_start*/ 	  
       apacCfgOk = FALSE;
-      msg_ptr = (CHAR *) pCfg->msg;
+	  m_APAC_Status.cfg_state = APAC_CFG_STATE_FAULT;
+	  strncpy_safe ( m_APAC_Status.cfg_err, APAC_CFG_CHECK_MSG_SIZE, 
+					 (CHAR *) pCfg->msg, _TRUNCATE );
+	  GSE_DebugStr(NORMAL,TRUE,"APACMgr: APACMgr_CheckCfg() Cfg Err (%s)\r\n",
+				   m_APAC_Status.cfg_err);
       break;
+      /*vcast_dont_instrument_end*/	  
+#endif
     }
     pCfg++;
   } // end while ( pCfg->ptr != NULL )
-
-  if (!apacCfgOk) // If err, update cfg_state and cfg_err[] msg
-  {
-    m_APAC_Status.cfg_state = APAC_CFG_STATE_FAULT;
-    strncpy_safe ( m_APAC_Status.cfg_err, APAC_CFG_CHECK_MSG_SIZE, msg_ptr, _TRUNCATE );
-    GSE_DebugStr(NORMAL,TRUE,"APACMgr: APACMgr_CheckCfg() Cfg Err (%s)\r\n",msg_ptr);
-  }
-
-  ASSERT ( apacCfgOk != FALSE );
 
 }
 
@@ -2539,6 +2529,12 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 34  *****************
+ * User: Peter Lee    Date: 5/25/16    Time: 6:28p
+ * Updated in $/software/control processor/code/application
+ * SCR #1331 Code Coverage Updates - TrendAppStartTrend() func param
+ * changed.
  * 
  * *****************  Version 33  *****************
  * User: Peter Lee    Date: 5/19/16    Time: 6:30p

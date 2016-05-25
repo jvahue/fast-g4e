@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 17 $  $Date: 4/04/16 4:35p $     
+      $Revision: 18 $  $Date: 5/23/16 3:34p $     
 
 ******************************************************************************/
 
@@ -2171,7 +2171,7 @@ void DispProcessingApp_RestoreAppData(void)
  * Notes:        None
  *
  *****************************************************************************/
-void DispProcessingApp_FileInit(void)
+BOOLEAN DispProcessingApp_FileInit(void)
 {
   // Init App Data
   m_DispProcApp_AppData.lastDCRate = DISPLAY_DEFAULT_DCRATE;
@@ -2179,7 +2179,8 @@ void DispProcessingApp_FileInit(void)
   // Update App Data
   NV_Write(NV_DISPPROC_CFG, 0, (void *) &m_DispProcApp_AppData,
            sizeof(DISPLAY_APP_DATA));
-
+  
+  return TRUE;
 }
 
 /******************************************************************************
@@ -2204,6 +2205,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 18  *****************
+ * User: John Omalley Date: 5/23/16    Time: 3:34p
+ * Updated in $/software/control processor/code/application
+ * SCR 1335 - Fixed compiler warning
  * 
  * *****************  Version 17  *****************
  * User: John Omalley Date: 4/04/16    Time: 4:35p
