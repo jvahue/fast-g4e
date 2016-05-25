@@ -40,12 +40,6 @@
 /* Local Variables                                                           */
 /*****************************************************************************/
 // See Local Variables below Function Prototypes Section
-static const CHAR* trendCmdString[] =
-{
-  "TREND_CMD_OK",             // The command has been accepted
-  "TREND_NOT_CONFIGURED",     // The Trend is not configured
-  "TREND_NOT_COMMANDABLE",    // The Trend is not configured to be commanded.
-};
 
 /*****************************************************************************/
 /* Local Function Prototypes                                                 */
@@ -465,13 +459,19 @@ static USER_HANDLER_RESULT Trend_ShowConfig ( USER_DATA_TYPE DataType,
 static USER_HANDLER_RESULT Trend_Start(USER_DATA_TYPE DataType, USER_MSG_PARAM Param,
                                        UINT32 Index, const void *SetPtr, void **GetPtr)
 {
-   TREND_CMD_RESULT cmdResult;
    static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
-   TrendAppStartTrend( (TREND_INDEX)Index, TRUE, &cmdResult);
-
-   snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Start API call returned: %s\r\n",
-            Index, trendCmdString[cmdResult] );
+   if (TRUE != m_TrendCfg[Index].bCommanded)
+   {
+       snprintf(outputBuffer, sizeof(outputBuffer), 
+                "Trend[%d] is not command type\r\n", Index);
+   }
+   else
+   {
+       TrendAppStartTrend( (TREND_INDEX)Index, TRUE);
+       snprintf(outputBuffer, sizeof(outputBuffer), 
+                "Trend[%d] Started\r\n", Index);
+   }
 
    User_OutputMsgString(outputBuffer, FALSE);
    return USER_RESULT_OK;
@@ -499,13 +499,20 @@ static USER_HANDLER_RESULT Trend_Stop(USER_DATA_TYPE DataType,
                                       const void *SetPtr,
                                       void **GetPtr)
 {
-  TREND_CMD_RESULT cmdResult;
   static CHAR  outputBuffer[USER_SINGLE_MSG_MAX_SIZE];
 
-  TrendAppStartTrend( (TREND_INDEX)Index, FALSE, &cmdResult);
-
-  snprintf(outputBuffer, sizeof(outputBuffer), "Trend[%d] Stop API call returned: %s\r\n",
-                   Index, trendCmdString[cmdResult] );
+  if (TRUE != m_TrendCfg[Index].bCommanded)
+  {
+    snprintf(outputBuffer, sizeof(outputBuffer), 
+             "Trend[%d] is not command type\r\n", Index);
+  }
+  else
+  {
+    TrendAppStartTrend( (TREND_INDEX)Index, FALSE);
+    snprintf(outputBuffer, sizeof(outputBuffer), 
+             "Trend[%d] Stopped\r\n", Index);
+  }
+  
   User_OutputMsgString(outputBuffer, FALSE);
   return USER_RESULT_OK;
 }

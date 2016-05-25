@@ -13,7 +13,7 @@
                   events.
 
     VERSION
-    $Revision: 32 $  $Date: 11/03/14 5:24p $
+    $Revision: 33 $  $Date: 5/24/16 9:34a $
 
 ******************************************************************************/
 
@@ -39,6 +39,7 @@
 #define FAST_TXTEST_VPNSTA_FAIL_STR "Fail: VPN connect timeout"
 
 #define SW_VERSION_LEN      32
+#define SYS_ETM_NAME_LEN    32
 
 /******************************************************************************
                                  Package Typedefs                             *
@@ -53,9 +54,11 @@ typedef struct
   UINT32 tx_test_SIM_rdy_to;
   UINT32 tx_test_GSM_rdy_to;
   UINT32 tx_test_VPN_rdy_to;
+  CHAR sysFilename[SYS_ETM_NAME_LEN];
+  CHAR etmFilename[SYS_ETM_NAME_LEN];  
 }FASTMGR_CONFIG;
 
-#define FASTMGR_CONFIG_DEFAULT {0,0,0,0},{0,0,0,0},300,TIME_SOURCE_LOCAL,120,180,300,300
+#define FASTMGR_CONFIG_DEFAULT {0,0,0,0},{0,0,0,0},300,TIME_SOURCE_LOCAL,120,180,300,300,"SYS","ETM"
 
 /******************************************************************************
                                  Package Exports                              *
@@ -86,11 +89,18 @@ EXPORT BOOLEAN              FAST_FSMRfGetState       (INT32 param);
 EXPORT void                 FAST_FSMRfRun            (BOOLEAN Run,INT32 param);
 EXPORT void                 FAST_FSMEndOfFlightRun   (BOOLEAN Run, INT32 Param);
 EXPORT BOOLEAN              FAST_FSMRecordGetState   (INT32 param);
+EXPORT void                 FAST_GetSYSName          (INT8* nameStr);
+EXPORT void                 FAST_GetETMName          (INT8* nameStr);
 
 #endif // FASTMGR_H
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
+ * 
+ * *****************  Version 33  *****************
+ * User: John Omalley Date: 5/24/16    Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Added configurable ETM and SYS filenames
  * 
  * *****************  Version 32  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:24p

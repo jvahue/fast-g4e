@@ -13,7 +13,7 @@
                See the c module for a detailed description.
 
   VERSION
-      $Revision: 49 $  $Date: 2/24/16 3:57p $
+      $Revision: 50 $  $Date: 5/23/16 3:33p $
 ******************************************************************************/
 
 
@@ -99,7 +99,7 @@ DIO_PIN(WLAN_WOW_Enb,    DIO_In,  OFF,  DIO_GPIO, DIO_FILTERED,   &MCF_GPIO_PODR
 DIO_PIN(SW_PFEN_Sta,     DIO_In,  OFF,  DIO_GPIO, DIO_RAW,        &MCF_GPIO_PODR_FECI2C,0x08)\
 /*FPGA GPIO input.  Typecast 16-bit GPIO_1 reg to fit in 8-bit ptr type. Should think about\
   adding reg width column in the future if more 16-but registers are needed*/\
-DIO_PIN(FFD_Enb,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        FPGA_GPIO_1, FPGA_GPIO_1_FFDI)\
+DIO_PIN(FFD_Enb,         DIO_In,  ON,   DIO_FPGA, DIO_RAW,        (void*)FPGA_GPIO_1, FPGA_GPIO_1_FFDI)\
 DIO_PIN(DispDisc0,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x00)\
 DIO_PIN(DispDisc1,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x01)\
 DIO_PIN(DispDisc2,       DIO_In,  OFF,  DIO_DISP, DIO_RAW,        NULL,                 0x02)\
@@ -299,6 +299,11 @@ EXPORT  BOOLEAN DIO_SensorTest(UINT16 nIndex);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: DIO.h $
+ * 
+ * *****************  Version 50  *****************
+ * User: John Omalley Date: 5/23/16    Time: 3:33p
+ * Updated in $/software/control processor/code/drivers
+ * SCR 1335 - Cast FPGA register to fix compiler warning.
  * 
  * *****************  Version 49  *****************
  * User: John Omalley Date: 2/24/16    Time: 3:57p

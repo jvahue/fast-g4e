@@ -11,7 +11,7 @@
                   events.
 
    VERSION
-   $Revision: 128 $  $Date: 11/03/14 5:24p $
+   $Revision: 129 $  $Date: 5/24/16 9:34a $
 
 
 ******************************************************************************/
@@ -526,6 +526,43 @@ void FAST_FSMEndOfFlightRun(BOOLEAN Run, INT32 Param)
   }
 }
 
+/******************************************************************************
+ * Function:    FAST_GetSYSName  
+ *  
+ * Description: Get the System Name from the FAST configuration
+ *
+ * Parameters:  [out] nameStr: Buffer to receive the string
+ *
+ * Returns:     none
+ *
+ * Notes:       Receiving buffer must be at least SYS_ETM_NAME_LEN long
+ *
+ *****************************************************************************/
+void FAST_GetSYSName(INT8* nameStr)
+{
+  strncpy_safe( nameStr, SYS_ETM_NAME_LEN,
+                CfgMgr_RuntimeConfigPtr()->FASTCfg.sysFilename,
+                _TRUNCATE);
+}
+
+/******************************************************************************
+ * Function:    FAST_GetETMName  
+ *  
+ * Description: Get the ETM Name from the FAST configuration
+ *
+ * Parameters:  [out] nameStr: Buffer to receive the string
+ *
+ * Returns:     none
+ *
+ * Notes:       Receiving buffer must be at least SYS_ETM_NAME_LEN long
+ *
+ *****************************************************************************/
+void FAST_GetETMName(INT8* nameStr)
+{
+  strncpy_safe( nameStr, SYS_ETM_NAME_LEN,
+                CfgMgr_RuntimeConfigPtr()->FASTCfg.etmFilename,
+                _TRUNCATE);
+}
 
 /*****************************************************************************/
 /* Local Functions                                                           */
@@ -1581,6 +1618,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 129  *****************
+ * User: John Omalley Date: 5/24/16    Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Added configurable ETM and SYS filenames
  * 
  * *****************  Version 128  *****************
  * User: Contractor V&v Date: 11/03/14   Time: 5:24p

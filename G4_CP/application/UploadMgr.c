@@ -12,7 +12,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 188 $  $Date: 5/09/16 2:22p $
+   $Revision: 189 $  $Date: 5/24/16 9:34a $
 
 ******************************************************************************/
 
@@ -1527,6 +1527,7 @@ void UploadMgr_FileCollectionTask(void *pParam)
       {
         //DTU Serial Number
         INT8   boxStr[BOX_INFO_STR_LEN];
+        CHAR   fileName[SYS_ETM_NAME_LEN];
         Box_GetSerno(boxStr);
 
         CM_GetTimeAsTimestamp(&timestamp);
@@ -1535,13 +1536,15 @@ void UploadMgr_FileCollectionTask(void *pParam)
         //or create a file name based on the ACS.ID
         if(LOG_TYPE_SYSTEM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
-          snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
-                  "SYS", boxStr, timestamp.Timestamp);
+            FAST_GetSYSName(fileName);
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
+                     fileName, boxStr, timestamp.Timestamp);
         }
         else if (LOG_TYPE_ETM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
-           snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
-                    "ETM", boxStr, timestamp.Timestamp);
+            FAST_GetETMName(fileName);
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
+                     fileName, boxStr, timestamp.Timestamp);
         }
         else
         {
@@ -3555,6 +3558,11 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 189  *****************
+ * User: John Omalley Date: 5/24/16    Time: 9:34a
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Added configurable ETM and SYS filenames
  * 
  * *****************  Version 188  *****************
  * User: John Omalley Date: 5/09/16    Time: 2:22p

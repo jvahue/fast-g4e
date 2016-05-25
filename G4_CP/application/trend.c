@@ -392,22 +392,17 @@ UINT16 TrendGetBinaryHdr ( void *pDest, UINT16 nMaxByteSize )
  *               BOOLEAN bStart  - TRUE if trend is to be started.
  *                                 FALSE if trend is to be stopped.
  *
- *               TREND_CMD_RESULT* rslt - optional pointer to return reason
- *                                 the call failed.
- *
- * Returns:      BOOLEAN - TRUE if call successful, otherwise FALSE
+ * Returns:      None
  *
  * Notes:        The indicated Trend is checked for:
  *               1. idx represents a configured trend id and
  *               2. trend[idx].cfg.commanded = TRUE and
  *
- *              if either of the above fail FALSE is returned and the reason is
- *              returned in the caller provided pointer 'rslt'.
+ *               if either of the above fail it is FATAL (i.e., cfg error).
  *
  *****************************************************************************/
-BOOLEAN TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart, TREND_CMD_RESULT* rslt)
+void TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart)
 {
-  TREND_CMD_RESULT result = TREND_CMD_OK;  // Default to OK, set error as needed.
   TREND_CFG*  pCfg  = NULL;
   TREND_DATA* pData = NULL;
 
@@ -418,27 +413,15 @@ BOOLEAN TrendAppStartTrend( TREND_INDEX idx, BOOLEAN bStart, TREND_CMD_RESULT* r
 
   if (TREND_UNUSED == pData->trendIndex)
   {
-    result = TREND_NOT_CONFIGURED;
+    FATAL("Trend[%d] is not configured", idx);
   }
   else if (TRUE != pCfg->bCommanded)
   {
-    result = TREND_NOT_COMMANDABLE;
+    FATAL("Trend[%d] is not commandable", idx);
   }
 
-  //If no config error detected in this call, signal the trend for the next time task executes.
-  if ( TREND_CMD_OK == result )
-  {
-    //TrendSetStabilityState(pData, bStart ? STB_STATE_READY : STB_STATE_IDLE );
-    pData->apacCmd = bStart ? APAC_CMD_START : APAC_CMD_STOP;
-  }
-
-  // Check if caller wants result details.
-  if (NULL != rslt)
-  {
-    *rslt = result;
-  }
-
-  return (TREND_CMD_OK == result);
+  //TrendSetStabilityState(pData, bStart ? STB_STATE_READY : STB_STATE_IDLE );
+  pData->apacCmd = bStart ? APAC_CMD_START : APAC_CMD_STOP;
 }
 
 /******************************************************************************
