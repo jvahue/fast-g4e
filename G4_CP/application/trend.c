@@ -37,7 +37,7 @@
    Note: None
 
  VERSION
- $Revision: 55 $  $Date: 5/25/16 6:47p $
+ $Revision: 56 $  $Date: 5/26/16 1:59p $
 
 ******************************************************************************/
 
@@ -1856,7 +1856,6 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
 {
   FLOAT32 fVal;
   FLOAT32 delta;
-  FLOAT32 fRefValue;
   FLOAT32* pLowerRefLimit;
   FLOAT32* pUpperRefLimit;
   UINT16*  pOutLierCnt;
@@ -1924,14 +1923,19 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
         else
         {
           // Exceeded the variance limits of ref-point. Make this point the ref point.
-          // Compute the variance delta for updating the stability table
-          fRefValue = (*pUpperRefLimit - *pLowerRefLimit)/2.f;
-          delta = ( fRefValue > fVal) ? fRefValue - fVal :  fVal - fRefValue;
-          delta *= (FLOAT32)pCfg->rate;
+          // Compute the variance delta for updating the stability table.
+          // Ensure positive difference; delta is based on whether above the Upper limit,
+          // or below the Lower limit
 
+          delta = (fVal > *pUpperRefLimit) ? fVal - *pUpperRefLimit
+                                           : *pLowerRefLimit - fVal;
+
+          // Adjust for processing rate
+          delta *= (FLOAT32)pCfg->rate;
           pData->curStability.status[tblIndex]  = STAB_SNSR_VARIANCE_ERROR;
           pData->curStability.snsrVar[tblIndex] = delta;
 
+          // Set new limits based on new value, and clear outlier counts.
           *pLowerRefLimit = fVal - pStabCrit->criteria.variance;
           *pUpperRefLimit = fVal + pStabCrit->criteria.variance;
           *pOutLierCnt = 0;
@@ -1969,6 +1973,21 @@ static BOOLEAN TrendMonStabilityAbsolute( TREND_CFG* pCfg, TREND_DATA* pData,
   }
   else // Sensor has failed the upper/lower max checks.
   {
+    #ifdef TREND_DEBUG
+    /*vcast_dont_instrument_start*/
+    if(bDoVarCheck)
+    {
+      // This sensor was expected to be checked for tol, report going STAB_SNSR_RANGE_ERROR
+      GSE_DebugStr(DBGOFF, TRUE,
+    "Trend[%d]: Sensor[%d] Detected STAB_SNSR_RANGE_ERROR - fVal: %8.4f Min: %8.4f Max: %8.4f",
+        pData->trendIndex,
+        pStabCrit->sensorIndex,
+        fVal,
+        pStabCrit->criteria.lower,
+        pStabCrit->criteria.upper);
+    }
+    /*vcast_dont_instrument_end*/
+    #endif
     pData->curStability.status[tblIndex] = STAB_SNSR_RANGE_ERROR;
   }
 
@@ -2025,6 +2044,11 @@ static void TrendClearSensorStabilityHistory(TREND_DATA* pData)
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: trend.c $
+ * 
+ * *****************  Version 56  *****************
+ * User: Contractor V&v Date: 5/26/16    Time: 1:59p
+ * Updated in $/software/control processor/code/application
+ * SCR  #1332 Trend Fail Log Sensor Variance Reported Wrong
  * 
  * *****************  Version 55  *****************
  * User: Jeff Vahue   Date: 5/25/16    Time: 6:47p
