@@ -14,7 +14,7 @@ Description:  This file implements the test point capability used during
 
 
  VERSION
-    $Revision: 27 $  $Date: 5/12/16 5:27p $  
+    $Revision: 28 $  $Date: 5/27/16 11:17a $  
 
 ******************************************************************************/
 #ifdef STE_TP
@@ -607,7 +607,7 @@ USER_HANDLER_RESULT NoOverruns(USER_DATA_TYPE DataType,
 	// setup the controls to disable MIF overrun reporting
 	tpData[eTpNoDtOverrun].wait = 0;
 	tpData[eTpNoDtOverrun].repeat = 0;
-	tpData[eTpNoDtOverrun].rVal.uVal = 120;
+	tpData[eTpNoDtOverrun].rVal.uVal = 0x7fffFFFF;
 	tpData[eTpNoDtOverrun].type = TP_VALUE;
 
 #else
@@ -645,6 +645,11 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: TestPoints.c $
+ * 
+ * *****************  Version 28  *****************
+ * User: Jeff Vahue   Date: 5/27/16    Time: 11:17a
+ * Updated in $/software/control processor/code/test
+ * Ensure there is no chance that an overrun reset will occur.
  * 
  * *****************  Version 27  *****************
  * User: Jeff Vahue   Date: 5/12/16    Time: 5:27p
@@ -763,4 +768,3 @@ USER_HANDLER_RESULT TpInitTable(USER_DATA_TYPE DataType,
  * SCR# 472 - Fix file/function header
  * 
  *************************************************************************/
-
