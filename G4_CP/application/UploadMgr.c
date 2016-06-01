@@ -1,7 +1,9 @@
 #define UPLOADMGR_BODY
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         UploadMgr.c
 
@@ -12,7 +14,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 189 $  $Date: 5/24/16 9:34a $
+   $Revision: 191 $  $Date: 5/31/16 2:39p $
 
 ******************************************************************************/
 
@@ -1537,13 +1539,13 @@ void UploadMgr_FileCollectionTask(void *pParam)
         if(LOG_TYPE_SYSTEM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
             FAST_GetSYSName(fileName);
-            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-SYS-%s-%s-%d.dtu",
                      fileName, boxStr, timestamp.Timestamp);
         }
         else if (LOG_TYPE_ETM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
             FAST_GetETMName(fileName);
-            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-%s-%s-%d.dtu",
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-ETM-%s-%s-%d.dtu",
                      fileName, boxStr, timestamp.Timestamp);
         }
         else
@@ -3558,6 +3560,16 @@ void UploadMgr_PrintInstallationInfo()
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
+ * 
+ * *****************  Version 191  *****************
+ * User: John Omalley Date: 5/31/16    Time: 2:39p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Code Review Update
+ * 
+ * *****************  Version 190  *****************
+ * User: John Omalley Date: 5/31/16    Time: 9:15a
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Modified to hardcoded "-SYS" and "-ETM-"
  * 
  * *****************  Version 189  *****************
  * User: John Omalley Date: 5/24/16    Time: 9:34a

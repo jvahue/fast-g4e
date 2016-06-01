@@ -1,7 +1,9 @@
 #define FASTMGR_BODY
 /******************************************************************************
-            Copyright (C) 2007-2014 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         FASTMgr.c
 
@@ -11,7 +13,7 @@
                   events.
 
    VERSION
-   $Revision: 129 $  $Date: 5/24/16 9:34a $
+   $Revision: 130 $  $Date: 5/31/16 2:24p $
 
 
 ******************************************************************************/
@@ -1618,6 +1620,11 @@ void FAST_DoTxTestTask(BOOLEAN Condition, UINT32 timeout, UINT32 StartTime_s,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.c $
+ * 
+ * *****************  Version 130  *****************
+ * User: John Omalley Date: 5/31/16    Time: 2:24p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Code Review Updates
  * 
  * *****************  Version 129  *****************
  * User: John Omalley Date: 5/24/16    Time: 9:34a

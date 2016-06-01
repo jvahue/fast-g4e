@@ -10,7 +10,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 67 $  $Date: 4/14/15 2:34p $
+      $Revision: 68 $  $Date: 5/31/16 9:36a $
 
 ******************************************************************************/
 
@@ -644,7 +644,9 @@ void MSSC_SendHeartbeatCmd(void)
   if(SYS_OK == MSI_PutCommandEx(CMD_ID_HEARTBEAT,
                              &cmd,
                              sizeof(cmd),
-                             1000,
+                             // Set response timeout for the heartbeat to 1/4 of cfg timeout
+                             // Causes Heartbeat to retry up to 4 times before failing                             
+                             m_HeartbeatTimer/4,   
                              MSSC_MSRspCallback,TRUE))
   {
     m_SendHeartbeat = FALSE;
@@ -1020,6 +1022,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 68  *****************
+ * User: John Omalley Date: 5/31/16    Time: 9:36a
+ * Updated in $/software/control processor/code/system
+ * SCR 1329 - Set the HB response timeout to 1/4 of the configured timeout
  * 
  * *****************  Version 67  *****************
  * User: John Omalley Date: 4/14/15    Time: 2:34p

@@ -10,7 +10,7 @@
     Description: Tables and functions for FastMgr User Commands
 
    VERSION
-   $Revision: 38 $  $Date: 5/24/16 9:34a $
+   $Revision: 39 $  $Date: 5/31/16 2:35p $
 
 ******************************************************************************/
 #ifndef FASTMGR_BODY
@@ -128,8 +128,8 @@ static USER_MSG_TBL cfg_flags_cmd [] =
   { "TXTST_SIM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_SIM_rdy_to,-1,-1,       NO_LIMIT,           NULL },
   { "TXTST_GSM_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_GSM_rdy_to,-1,-1,       NO_LIMIT,           NULL },
   { "TXTST_VPN_TO_S",  NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_UINT32,   USER_RW,    &fast_cfg_temp.tx_test_VPN_rdy_to,-1,-1,       NO_LIMIT,           NULL },
-  { "SYSFILENAME",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_STR,      USER_RW,    &fast_cfg_temp.sysFilename,       -1,-1,       0,SYS_ETM_NAME_LEN, NULL },
-  { "ETMFILENAME",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_STR,      USER_RW,    &fast_cfg_temp.etmFilename,       -1,-1,       0,SYS_ETM_NAME_LEN, NULL },
+  { "SYSFILENAME",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_STR,      USER_RW,    fast_cfg_temp.sysFilename,        -1,-1,       0,SYS_ETM_NAME_LEN, NULL },
+  { "ETMFILENAME",     NO_NEXT_TABLE, FAST_UserCfg,       USER_TYPE_STR,      USER_RW,    fast_cfg_temp.etmFilename,        -1,-1,       0,SYS_ETM_NAME_LEN, NULL },
   { NULL,              NULL,          NULL,               NO_HANDLER_DATA }
 };
 
@@ -511,6 +511,11 @@ static USER_HANDLER_RESULT FAST_StartTxTest(USER_DATA_TYPE DataType,
 /*************************************************************************
 *  MODIFICATIONS
 *    $History: FASTMgrUserTables.c $
+ * 
+ * *****************  Version 39  *****************
+ * User: John Omalley Date: 5/31/16    Time: 2:35p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Code Review Update
  * 
  * *****************  Version 38  *****************
  * User: John Omalley Date: 5/24/16    Time: 9:34a

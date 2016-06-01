@@ -2,8 +2,10 @@
 #define FASTMGR_H
 
 /******************************************************************************
-            Copyright (C) 2007-2012 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
+
+    ECCN:         9D991
 
     File:         FASTMgr.h
 
@@ -13,7 +15,7 @@
                   events.
 
     VERSION
-    $Revision: 33 $  $Date: 5/24/16 9:34a $
+    $Revision: 35 $  $Date: 5/31/16 2:28p $
 
 ******************************************************************************/
 
@@ -39,7 +41,7 @@
 #define FAST_TXTEST_VPNSTA_FAIL_STR "Fail: VPN connect timeout"
 
 #define SW_VERSION_LEN      32
-#define SYS_ETM_NAME_LEN    32
+#define SYS_ETM_NAME_LEN    28
 
 /******************************************************************************
                                  Package Typedefs                             *
@@ -58,7 +60,7 @@ typedef struct
   CHAR etmFilename[SYS_ETM_NAME_LEN];  
 }FASTMGR_CONFIG;
 
-#define FASTMGR_CONFIG_DEFAULT {0,0,0,0},{0,0,0,0},300,TIME_SOURCE_LOCAL,120,180,300,300,"SYS","ETM"
+#define FASTMGR_CONFIG_DEFAULT {0,0,0,0},{0,0,0,0},300,TIME_SOURCE_LOCAL,120,180,300,300,"",""
 
 /******************************************************************************
                                  Package Exports                              *
@@ -96,6 +98,16 @@ EXPORT void                 FAST_GetETMName          (INT8* nameStr);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
+ * 
+ * *****************  Version 35  *****************
+ * User: John Omalley Date: 5/31/16    Time: 2:28p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Code Review Updates
+ * 
+ * *****************  Version 34  *****************
+ * User: John Omalley Date: 5/31/16    Time: 9:15a
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Modified to hardcoded "-SYS" and "-ETM-"
  * 
  * *****************  Version 33  *****************
  * User: John Omalley Date: 5/24/16    Time: 9:34a
