@@ -11,7 +11,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 64 $  $Date: 2/17/15 3:55p $
+     $Revision: 65 $  $Date: 6/01/16 2:02p $
 
 ******************************************************************************/
 
@@ -2444,10 +2444,10 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                // Data Loss Time Out Exceeded
                bSave = Arinc429MgrInvalidateParameter ( pSdiData, pWordInfo, pDataRecord );
 
+#ifdef ARINC429_DEBUG_COMPILE
+               /*vcast_dont_instrument_start*/
                if ( FALSE == pProtocol->bFailedOnce )
                {
-#ifdef ARINC429_DEBUG_COMPILE
-                 /*vcast_dont_instrument_start*/
                   ARINC429_SYS_CBIT_SSM_FAIL_LOG SSMFailLog;
                   CHAR                           TempStr[32];
 
@@ -2465,9 +2465,9 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                            SSMFailLog.FailMsg);
                   GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                   /*vcast_dont_instrument_end*/
-#endif
                   pProtocol->bFailedOnce = TRUE;
                }
+#endif
             }
          }
       }
@@ -2620,11 +2620,11 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                }
             }
 
+#ifdef ARINC429_DEBUG_COMPILE
+            /*vcast_dont_instrument_start*/
             // If this failure hasn't been reported yet - do it now
             if ( FALSE == pProtocol->bFailedOnce )
             {
-#ifdef ARINC429_DEBUG_COMPILE
-              /*vcast_dont_instrument_start*/
                ARINC429_SYS_CBIT_SSM_FAIL_LOG SSMFailLog;
                CHAR                           TempStr[32];
 
@@ -2641,9 +2641,9 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                          "Arinc429_ParamTest: %s", SSMFailLog.FailMsg);
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
                /*vcast_dont_instrument_end*/
-#endif
                pProtocol->bFailedOnce = TRUE;
             }
+#endif
          }
       }
    }
@@ -3716,6 +3716,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 65  *****************
+ * User: Jeff Vahue   Date: 6/01/16    Time: 2:02p
+ * Updated in $/software/control processor/code/system
+ * SCR-1331 #ifdef out unused test code
  * 
  * *****************  Version 64  *****************
  * User: John Omalley Date: 2/17/15    Time: 3:55p

@@ -12,7 +12,7 @@
                  Processing Application 
     
     VERSION
-      $Revision: 18 $  $Date: 5/23/16 3:34p $     
+      $Revision: 19 $  $Date: 5/31/16 2:13p $     
 
 ******************************************************************************/
 
@@ -200,29 +200,29 @@ static DISPLAY_SCREEN_ENUM   DispProcessingApp_PerformAction(
 static void                  DispProcessingApp_D_HLTHcheck(UINT8 dispHealth, 
                                                            BOOLEAN bNewData);
 static void                  DispProcessingApp_D_HLTHResult(UINT8 dispHealth);
-static BOOLEAN               DispAction_InvalidButtonInput();
-static BOOLEAN               DispAction_GetConfig();
-static BOOLEAN               DispAction_RecallDate();
-static BOOLEAN               DispAction_RecallNextDate();
-static BOOLEAN               DispAction_RecallPreviousDate();
-static BOOLEAN               DispAction_RecallPAC();
-static BOOLEAN               DispAction_RecallNextPAC();
-static BOOLEAN               DispAction_RecallPreviousPAC();
-static BOOLEAN               DispAction_SavedDoubleClick();
-static BOOLEAN               DispAction_IncDoubleClick();
-static BOOLEAN               DispAction_DecDoubleClick();
-static BOOLEAN               DispAction_SaveDoubleClick();
-static BOOLEAN               DispAction_ResetPAC();
-static BOOLEAN               DispAction_CorrectSetup();
-static BOOLEAN               DispAction_ValidateMenu();
-static BOOLEAN               DispAction_RunningPAC();
-static BOOLEAN               DispAction_PACResult();
-static BOOLEAN               DispAction_PACManual();
-static BOOLEAN               DispAction_ErrorMessage();
-static BOOLEAN               DispAction_AquirePACData();
-static BOOLEAN               DispAction_PACDecision();
-static BOOLEAN               DispAction_PACAcceptOrValidate();
-static BOOLEAN               DispAction_PACRejectORInvalidate();
+static BOOLEAN               DispAction_InvalidButtonInput(void);
+static BOOLEAN               DispAction_GetConfig(void);
+static BOOLEAN               DispAction_RecallDate(void);
+static BOOLEAN               DispAction_RecallNextDate(void);
+static BOOLEAN               DispAction_RecallPreviousDate(void);
+static BOOLEAN               DispAction_RecallPAC(void);
+static BOOLEAN               DispAction_RecallNextPAC(void);
+static BOOLEAN               DispAction_RecallPreviousPAC(void);
+static BOOLEAN               DispAction_SavedDoubleClick(void);
+static BOOLEAN               DispAction_IncDoubleClick(void);
+static BOOLEAN               DispAction_DecDoubleClick(void);
+static BOOLEAN               DispAction_SaveDoubleClick(void);
+static BOOLEAN               DispAction_ResetPAC(void);
+static BOOLEAN               DispAction_CorrectSetup(void);
+static BOOLEAN               DispAction_ValidateMenu(void);
+static BOOLEAN               DispAction_RunningPAC(void);
+static BOOLEAN               DispAction_PACResult(void);
+static BOOLEAN               DispAction_PACManual(void);
+static BOOLEAN               DispAction_ErrorMessage(void);
+static BOOLEAN               DispAction_AquirePACData(void);
+static BOOLEAN               DispAction_PACDecision(void);
+static BOOLEAN               DispAction_PACAcceptOrValidate(void);
+static BOOLEAN               DispAction_PACRejectORInvalidate(void);
 static DISPLAY_SCREEN_STATUS_PTR DispProcessingApp_GetStatus(void);
 static DISPLAY_DEBUG_PTR     DispProcessingApp_GetDebug(void);
 static void                  DispProcessingApp_SendNewMonData(
@@ -629,6 +629,16 @@ void DispProcessingApp_InitStrings(void)
       case EVENT_DBLCLICK:
         snprintf((char *)pButtons->name, pButtons->size + 1, "EE");
         break;
+      case UNUSED1_BUTTON:
+        // lint - fallthrough
+      case UNUSED2_BUTTON:
+        // lint - fallthrough
+      case UNUSED1_DBLCLICK:
+        // lint - fallthrough
+      case UNUSED2_DBLCLICK:
+        // lint - fallthrough
+      case DISPLAY_BUTTONS_COUNT:
+        // lint - fallthrough
       default:
         break;
     }
@@ -967,7 +977,7 @@ void DispProcessingApp_SendNewMonData(CHAR characterString[])
 * Notes:       None
 *
 *****************************************************************************/
-static BOOLEAN DispAction_InvalidButtonInput()
+static BOOLEAN DispAction_InvalidButtonInput(void)
 {
   DISPLAY_SCREEN_STATUS_PTR pStatus;
   DISPLAY_ACTION_TABLE_PTR  pAction;
@@ -1056,7 +1066,7 @@ static BOOLEAN DispAction_InvalidButtonInput()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_GetConfig()
+static BOOLEAN DispAction_GetConfig(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_STATE_PTR          pScreen;
@@ -1091,7 +1101,7 @@ static BOOLEAN DispAction_GetConfig()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallDate()
+static BOOLEAN DispAction_RecallDate(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_VARIABLE_TABLE_PTR pVar;
@@ -1132,7 +1142,7 @@ static BOOLEAN DispAction_RecallDate()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallNextDate()
+static BOOLEAN DispAction_RecallNextDate(void)
 {
   return(APACMgr_IF_HistoryAdv(NULL, NULL, NULL, NULL, APAC_IF_DATE));
 }
@@ -1149,7 +1159,7 @@ static BOOLEAN DispAction_RecallNextDate()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallPreviousDate()
+static BOOLEAN DispAction_RecallPreviousDate(void)
 {
   return(APACMgr_IF_HistoryDec(NULL, NULL, NULL, NULL, APAC_IF_DATE));
 }
@@ -1166,7 +1176,7 @@ static BOOLEAN DispAction_RecallPreviousDate()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallPAC()
+static BOOLEAN DispAction_RecallPAC(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_VARIABLE_TABLE_PTR pVar;
@@ -1199,7 +1209,7 @@ static BOOLEAN DispAction_RecallPAC()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallNextPAC()
+static BOOLEAN DispAction_RecallNextPAC(void)
 {
   return(APACMgr_IF_HistoryAdv(NULL, NULL, NULL, NULL, APAC_IF_DAY));
 }
@@ -1216,7 +1226,7 @@ static BOOLEAN DispAction_RecallNextPAC()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RecallPreviousPAC()
+static BOOLEAN DispAction_RecallPreviousPAC(void)
 {
   return(APACMgr_IF_HistoryDec(NULL, NULL, NULL, NULL, APAC_IF_DAY));
 }
@@ -1234,7 +1244,7 @@ static BOOLEAN DispAction_RecallPreviousPAC()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_SavedDoubleClick()
+static BOOLEAN DispAction_SavedDoubleClick(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_APP_DATA_PTR       pData;
@@ -1287,7 +1297,7 @@ static BOOLEAN DispAction_SavedDoubleClick()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_IncDoubleClick()
+static BOOLEAN DispAction_IncDoubleClick(void)
 {
   if(scaledDCRATE < DISPLAY_DCRATE_MAX){
     scaledDCRATE++;
@@ -1309,7 +1319,7 @@ static BOOLEAN DispAction_IncDoubleClick()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_DecDoubleClick()
+static BOOLEAN DispAction_DecDoubleClick(void)
 {
   if(scaledDCRATE > (DISPLAY_DCRATE_MAX * -1)){
     scaledDCRATE--;
@@ -1330,7 +1340,7 @@ static BOOLEAN DispAction_DecDoubleClick()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_SaveDoubleClick(){
+static BOOLEAN DispAction_SaveDoubleClick(void){
   DISPLAY_APP_DATA_PTR pData;
   
   pData             = (DISPLAY_APP_DATA_PTR)&m_DispProcApp_AppData;
@@ -1356,7 +1366,7 @@ static BOOLEAN DispAction_SaveDoubleClick(){
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_ResetPAC()
+static BOOLEAN DispAction_ResetPAC(void)
 {
   return(APACMgr_IF_Reset(NULL, NULL, NULL, NULL, APAC_IF_DCLK));
 }
@@ -1374,7 +1384,7 @@ static BOOLEAN DispAction_ResetPAC()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_CorrectSetup()
+static BOOLEAN DispAction_CorrectSetup(void)
 {
   return(APACMgr_IF_Setup(NULL,NULL,NULL,NULL,APAC_IF_MAX));
 }
@@ -1392,7 +1402,7 @@ static BOOLEAN DispAction_CorrectSetup()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_ValidateMenu()
+static BOOLEAN DispAction_ValidateMenu(void)
 { 
   bValidatePAC = APACMgr_IF_ValidateManual(NULL,NULL,NULL,NULL,APAC_IF_MAX);
   return(bValidatePAC);
@@ -1411,7 +1421,7 @@ static BOOLEAN DispAction_ValidateMenu()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_RunningPAC()
+static BOOLEAN DispAction_RunningPAC(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_VARIABLE_TABLE_PTR pVar;
@@ -1446,7 +1456,7 @@ static BOOLEAN DispAction_RunningPAC()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_PACResult()
+static BOOLEAN DispAction_PACResult(void)
 { 
   m_DispProcApp_Status.bAPACProcessing = FALSE;
   return(APACMgr_IF_CompletedPAC(NULL,NULL,NULL,NULL,APAC_IF_MAX));
@@ -1466,7 +1476,7 @@ static BOOLEAN DispAction_PACResult()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_PACManual()
+static BOOLEAN DispAction_PACManual(void)
 { 
   return(bValidatePAC);
 }
@@ -1483,7 +1493,7 @@ static BOOLEAN DispAction_PACManual()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_ErrorMessage()
+static BOOLEAN DispAction_ErrorMessage(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_VARIABLE_TABLE_PTR pVar;
@@ -1518,7 +1528,7 @@ static BOOLEAN DispAction_ErrorMessage()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_AquirePACData()
+static BOOLEAN DispAction_AquirePACData(void)
 {
   DISPLAY_SCREEN_STATUS_PTR  pStatus;
   DISPLAY_VARIABLE_TABLE_PTR pVar;
@@ -1561,7 +1571,7 @@ static BOOLEAN DispAction_AquirePACData()
  * Notes:       None
  *
  *****************************************************************************/
-static BOOLEAN DispAction_PACDecision()
+static BOOLEAN DispAction_PACDecision(void)
 {
   APAC_IF_ENUM decision;
 
@@ -1586,7 +1596,7 @@ static BOOLEAN DispAction_PACDecision()
 * Notes:       None
 *
 *****************************************************************************/
-static BOOLEAN DispAction_PACAcceptOrValidate()
+static BOOLEAN DispAction_PACAcceptOrValidate(void)
 {
   bPACDecision = TRUE;
   return(bPACDecision);
@@ -1604,7 +1614,7 @@ static BOOLEAN DispAction_PACAcceptOrValidate()
 * Notes:       None
 *
 *****************************************************************************/
-static BOOLEAN DispAction_PACRejectORInvalidate()
+static BOOLEAN DispAction_PACRejectORInvalidate(void)
 {
     bPACDecision = FALSE;
     return(bPACDecision);
@@ -2205,6 +2215,11 @@ void DispProcApp_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: DispProcessingApp.c $
+ * 
+ * *****************  Version 19  *****************
+ * User: John Omalley Date: 5/31/16    Time: 2:13p
+ * Updated in $/software/control processor/code/application
+ * SCR 1303 Code Review Updates
  * 
  * *****************  Version 18  *****************
  * User: John Omalley Date: 5/23/16    Time: 3:34p
