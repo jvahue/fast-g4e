@@ -15,7 +15,7 @@
                   events.
 
     VERSION
-    $Revision: 35 $  $Date: 5/31/16 2:28p $
+    $Revision: 36 $  $Date: 6/02/16 3:16p $
 
 ******************************************************************************/
 
@@ -41,7 +41,7 @@
 #define FAST_TXTEST_VPNSTA_FAIL_STR "Fail: VPN connect timeout"
 
 #define SW_VERSION_LEN      32
-#define SYS_ETM_NAME_LEN    28
+#define SYS_ETM_NAME_LEN    29
 
 /******************************************************************************
                                  Package Typedefs                             *
@@ -98,6 +98,11 @@ EXPORT void                 FAST_GetETMName          (INT8* nameStr);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: FASTMgr.h $
+ * 
+ * *****************  Version 36  *****************
+ * User: John Omalley Date: 6/02/16    Time: 3:16p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Requirements Update
  * 
  * *****************  Version 35  *****************
  * User: John Omalley Date: 5/31/16    Time: 2:28p

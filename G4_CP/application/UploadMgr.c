@@ -14,7 +14,7 @@
                   micro-server and ground server.
 
    VERSION
-   $Revision: 191 $  $Date: 5/31/16 2:39p $
+   $Revision: 193 $  $Date: 6/02/16 3:16p $
 
 ******************************************************************************/
 
@@ -1539,13 +1539,13 @@ void UploadMgr_FileCollectionTask(void *pParam)
         if(LOG_TYPE_SYSTEM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
             FAST_GetSYSName(fileName);
-            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-SYS-%s-%s-%d.dtu",
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-SYS%s-%s-%d.dtu",
                      fileName, boxStr, timestamp.Timestamp);
         }
         else if (LOG_TYPE_ETM == UploadOrderTbl[pTask->UploadOrderIdx].Type)
         {
             FAST_GetETMName(fileName);
-            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-ETM-%s-%s-%d.dtu",
+            snprintf(pTask->FN, sizeof(pTask->FN), "FAST-ETM%s-%s-%d.dtu",
                      fileName, boxStr, timestamp.Timestamp);
         }
         else
@@ -3561,8 +3561,13 @@ void UploadMgr_PrintInstallationInfo()
  *  MODIFICATIONS
  *    $History: UploadMgr.c $
  * 
- * *****************  Version 191  *****************
- * User: John Omalley Date: 5/31/16    Time: 2:39p
+ * *****************  Version 193  *****************
+ * User: John Omalley Date: 6/02/16    Time: 3:16p
+ * Updated in $/software/control processor/code/application
+ * SCR 1334 - Requirements Update
+ * 
+ * *****************  Version 192  *****************
+ * User: John Omalley Date: 6/02/16    Time: 1:32p
  * Updated in $/software/control processor/code/application
  * SCR 1334 - Code Review Update
  * 
