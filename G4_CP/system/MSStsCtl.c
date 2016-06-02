@@ -1,6 +1,6 @@
 #define MSSC_BODY
 /******************************************************************************
-            Copyright (C) 2008-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2008-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:         9D991
@@ -10,7 +10,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 68 $  $Date: 5/31/16 9:36a $
+      $Revision: 69 $  $Date: 6/02/16 8:15a $
 
 ******************************************************************************/
 
@@ -645,8 +645,10 @@ void MSSC_SendHeartbeatCmd(void)
                              &cmd,
                              sizeof(cmd),
                              // Set response timeout for the heartbeat to 1/4 of cfg timeout
-                             // Causes Heartbeat to retry up to 4 times before failing                             
-                             m_HeartbeatTimer/4,   
+                             // Causes Heartbeat to retry up to 4 times before failing
+                             // Note: divide by 4 ensures the UINT32 doesn't loose precision
+                             //       when cast into an INT32
+                             (INT32)(m_HeartbeatTimer / 4),   
                              MSSC_MSRspCallback,TRUE))
   {
     m_SendHeartbeat = FALSE;
@@ -1022,6 +1024,11 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 69  *****************
+ * User: John Omalley Date: 6/02/16    Time: 8:15a
+ * Updated in $/software/control processor/code/system
+ * SCR 1329 - Code Review Update
  * 
  * *****************  Version 68  *****************
  * User: John Omalley Date: 5/31/16    Time: 9:36a
