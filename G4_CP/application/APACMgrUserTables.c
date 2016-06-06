@@ -10,7 +10,7 @@
     Description: Routines to support the user commands for APAC Mgr CSC
 
     VERSION
-    $Revision: 23 $  $Date: 5/19/16 5:51p $
+    $Revision: 24 $  $Date: 6/03/16 10:23a $
 
 ******************************************************************************/
 #ifndef APAC_MGR_BODY
@@ -487,8 +487,10 @@ static USER_MSG_TBL apacMgrStatusTbl[] =
   {"TEST_STATE",   NO_NEXT_TABLE,         APACMgr_Status,    USER_TYPE_ENUM,    USER_RO,   (void *) &statusAPACTemp.run_state, -1,-1,       NO_LIMIT,    apacRunStateStrs},
   {"ENG_UUT",      NO_NEXT_TABLE,         APACMgr_Status,    USER_TYPE_ENUM,    USER_RO,   (void *) &statusAPACTemp.eng_uut,   -1,-1,       NO_LIMIT,    apacEngUUTStrs},
   {"NR_SEL",       NO_NEXT_TABLE,         APACMgr_Status,    USER_TYPE_ENUM,    USER_RO,   (void *) &statusAPACTemp.nr_sel,    -1,-1,       NO_LIMIT,    apacNrSelStrs},
+#ifdef APAC_TEST_DBG  
   {"CFG_STATE",    NO_NEXT_TABLE,         APACMgr_Status,    USER_TYPE_ENUM,    USER_RO,   (void *) &statusAPACTemp.cfg_state, -1,-1,       NO_LIMIT,    apacCfgStateStrs},
   {"CFG_ERR",      NO_NEXT_TABLE,         APACMgr_Status,    USER_TYPE_STR,     USER_RO,   (void *) statusAPACTemp.cfg_err,    -1,-1,       NO_LIMIT,    NULL},
+#endif  
   {"ENG",          apacMgr_EngStatusTbl,  NULL,              NO_HANDLER_DATA },
   {NULL,NULL,NULL,NO_HANDLER_DATA}
 };
@@ -1577,6 +1579,12 @@ USER_HANDLER_RESULT APACMgr_ShowConfigSubItem(USER_MSG_TBL* MsgTbl, INT16 tbl_ma
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgrUserTables.c $
+ * 
+ * *****************  Version 24  *****************
+ * User: Peter Lee    Date: 6/03/16    Time: 10:23a
+ * Updated in $/software/control processor/code/application
+ * SCR #1331 Code Coverage Updates - TrendAppStartTrend() func param
+ * changed.
  * 
  * *****************  Version 23  *****************
  * User: Jeff Vahue   Date: 5/19/16    Time: 5:51p

@@ -1,6 +1,6 @@
 #define ARINC429MGR_BODY
 /******************************************************************************
-            Copyright (C) 2009-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2009-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
     ECCN:         9D991
@@ -11,7 +11,7 @@
                   data received on ARINC429.
 
 VERSION
-     $Revision: 65 $  $Date: 6/01/16 2:02p $
+     $Revision: 66 $  $Date: 6/03/16 1:50p $
 
 ******************************************************************************/
 
@@ -1430,12 +1430,12 @@ BOOLEAN Arinc429MgrSensorTest (UINT16 nIndex)
             strcat(SSMFailLog.FailMsg, TempStr);
 
 #ifdef ARINC429_DEBUG_COMPILE
-            /*vcast_dont_instrument_start*/
+/*vcast_dont_instrument_start*/
             // Debug testing
             snprintf (GSE_OutLine, sizeof(GSE_OutLine), 
                       "Arinc429_SensorTest: %s", SSMFailLog.FailMsg);
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-            /*vcast_dont_instrument_end*/
+/*vcast_dont_instrument_end*/
 #endif
             // Log CBIT Here only on transition from data rx to no data rx
             LogWriteSystem( SYS_ID_A429_CBIT_SSM_FAIL, LOG_PRIORITY_LOW,
@@ -2123,7 +2123,7 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
               m_Arinc429BCDInvDigit[label][Chan] = TRUE;
            }
 #ifdef ARINC429_DEBUG_COMPILE
-            /*vcast_dont_instrument_start*/
+/*vcast_dont_instrument_start*/
             // Debug testing
             snprintf ( GSE_OutLine, sizeof(GSE_OutLine),
             "Arinc429_ParseBCD: Word-0x%08x Data-0x%05x Digit-%d",
@@ -2131,7 +2131,7 @@ SINT32 Arinc429MgrParseBCD ( UINT32 raw, UINT32 Chan, UINT8 Size, BOOLEAN *pWord
             bcdData,
             digit);
             GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-            /*vcast_dont_instrument_end*/
+/*vcast_dont_instrument_end*/
 #endif
            // Return previous good value
            *pWordValid = FALSE;
@@ -2445,7 +2445,7 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                bSave = Arinc429MgrInvalidateParameter ( pSdiData, pWordInfo, pDataRecord );
 
 #ifdef ARINC429_DEBUG_COMPILE
-               /*vcast_dont_instrument_start*/
+/*vcast_dont_instrument_start*/
                if ( FALSE == pProtocol->bFailedOnce )
                {
                   ARINC429_SYS_CBIT_SSM_FAIL_LOG SSMFailLog;
@@ -2464,9 +2464,9 @@ static BOOLEAN Arinc429MgrDataReduction( ARINC429_RX_CFG_PTR pCfg,
                             "Arinc429_ParameterTest: %s",
                            SSMFailLog.FailMsg);
                   GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-                  /*vcast_dont_instrument_end*/
                   pProtocol->bFailedOnce = TRUE;
                }
+/*vcast_dont_instrument_end*/
 #endif
             }
          }
@@ -2621,7 +2621,7 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
             }
 
 #ifdef ARINC429_DEBUG_COMPILE
-            /*vcast_dont_instrument_start*/
+/*vcast_dont_instrument_start*/
             // If this failure hasn't been reported yet - do it now
             if ( FALSE == pProtocol->bFailedOnce )
             {
@@ -2640,9 +2640,9 @@ static void Arinc429MgrChkParamLostTimeout ( ARINC429_RX_CFG_PTR pCfg,
                snprintf (GSE_OutLine, sizeof(GSE_OutLine),
                          "Arinc429_ParamTest: %s", SSMFailLog.FailMsg);
                GSE_DebugStr(NORMAL,TRUE,GSE_OutLine);
-               /*vcast_dont_instrument_end*/
                pProtocol->bFailedOnce = TRUE;
             }
+/*vcast_dont_instrument_end*/
 #endif
          }
       }
@@ -3716,6 +3716,11 @@ void Arinc429MgrDisplayFmtedLine ( BOOLEAN isFormatted, UINT32 ArincMsg )
  /*************************************************************************
  *  MODIFICATIONS
  *    $History: ARINC429Mgr.c $
+ * 
+ * *****************  Version 66  *****************
+ * User: John Omalley Date: 6/03/16    Time: 1:50p
+ * Updated in $/software/control processor/code/system
+ * SCR 1331 - Code Review Update
  * 
  * *****************  Version 65  *****************
  * User: Jeff Vahue   Date: 6/01/16    Time: 2:02p
