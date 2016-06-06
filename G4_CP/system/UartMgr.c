@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the UART Mgr CSC
 
     VERSION
-      $Revision: 75 $  $Date: 3/16/16 11:19a $
+      $Revision: 76 $  $Date: 6/06/16 1:54p $
 
 ******************************************************************************/
 
@@ -2204,7 +2204,7 @@ FLOAT32 UartMgr_ConvertToEngUnits ( UARTMGR_RUNTIME_DATA_PTR runtime_data_ptr )
   SINT16 *sval_ptr;
 
   // Determine if "BNR" or DISC param value
-  if ( runtime_data_ptr->scale == DR_NO_RANGE_SCALE )
+  if ( runtime_data_ptr->scale == (FLOAT32) DR_NO_RANGE_SCALE )
   {
     // DISC Param, just convert from raw to eng unit
     fval = (FLOAT32) runtime_data_ptr->val_raw;
@@ -2326,6 +2326,11 @@ BOOLEAN UartMgr_Get_ESN_NoneHndl ( UINT16 ch, CHAR *esn_ptr, UINT16 cnt )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.c $
+ * 
+ * *****************  Version 76  *****************
+ * User: Peter Lee    Date: 6/06/16    Time: 1:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1297 - UARTMGR_RUNTIME_DATA.scale s/b FLOAT32 
  * 
  * *****************  Version 75  *****************
  * User: John Omalley Date: 3/16/16    Time: 11:19a

@@ -11,7 +11,7 @@
     Description: Contains data structures related to the Uart Mgr CSC
 
     VERSION
-      $Revision: 26 $  $Date: 2/10/16 9:18a $
+      $Revision: 27 $  $Date: 6/06/16 1:54p $
 
 ******************************************************************************/
 
@@ -139,7 +139,7 @@ typedef UARTMGR_CFG UARTMGR_CFGS[UART_NUM_OF_UARTS];
 typedef struct
 {
   UINT16    id;
-  UINT16    scale;
+  FLOAT32   scale;
   FLOAT32   scale_lsb;          // lsb value (from scale) of the integer val for
                                 //    conversion to and from eng val.
   UINT16    val_raw;
@@ -467,6 +467,11 @@ EXPORT void    UartMgr_Write(void *pDest, UINT32 port, UINT16 Direction,
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: UartMgr.h $
+ * 
+ * *****************  Version 27  *****************
+ * User: Peter Lee    Date: 6/06/16    Time: 1:54p
+ * Updated in $/software/control processor/code/system
+ * SCR #1297 - UARTMGR_RUNTIME_DATA.scale s/b FLOAT32 
  * 
  * *****************  Version 26  *****************
  * User: John Omalley Date: 2/10/16    Time: 9:18a
