@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 29 $  $Date: 5/17/16 9:06a $     
+      $Revision: 30 $  $Date: 6/10/16 11:21a $     
 
 ******************************************************************************/
 
@@ -1634,6 +1634,7 @@ BOOLEAN F7XProtocol_DumpListRecognized (UINT16 ch)
     newDLFoundLog.prev.chksum = m_F7X_DumplistCfg[index].AddrChksum; 
   }
 
+  newDLFoundLog.ch     = ch;
   // If recognized, update F7X App Data in EEPROM 
   if ( bRecognized == TRUE ) 
   {
@@ -1642,7 +1643,6 @@ BOOLEAN F7XProtocol_DumpListRecognized (UINT16 ch)
     
       // Record Log that Update Has been made
       newDLFoundLog.result = SYS_UART_F7X_NEW_DL_FOUND;
-      newDLFoundLog.ch     = ch;
       
       index = pStatus->nIndexCfg;
       newDLFoundLog.current.index = index; 
@@ -2183,6 +2183,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 30  *****************
+ * User: John Omalley Date: 6/10/16    Time: 11:21a
+ * Updated in $/software/control processor/code/system
+ * SCR 1338 - Fixed Uninitialized ch variable
  * 
  * *****************  Version 29  *****************
  * User: Peter Lee    Date: 5/17/16    Time: 9:06a
