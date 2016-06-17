@@ -1,7 +1,7 @@
 #ifndef VERSION_H
 #define VERSION_H
 /******************************************************************************
-            Copyright (C) 2007-2015 Pratt & Whitney Engine Services, Inc.
+            Copyright (C) 2007-2016 Pratt & Whitney Engine Services, Inc.
                All Rights Reserved. Proprietary and Confidential.
 
   ECCN:        9D991
@@ -11,7 +11,7 @@
   Description: Build related external references.
 
     VERSION
-      $Revision: 73 $  $Date: 12/18/15 11:27a $
+      $Revision: 74 $  $Date: 6/14/16 4:34p $
 
 ******************************************************************************/
 /*****************************************************************************/
@@ -28,7 +28,7 @@
 #define VER_FUNC    "3"       // FN - Functional Build
 #define VER_MAJOR   "0"       // MJ - Major Functional Change
 #define VER_MINOR   "0"       // MN - Minor Functional Change
-#define DEV_BUILD   "ER20151218"   // ER - Development Build = "" for release
+#define DEV_BUILD   ""        // ER - Development Build = "" for release
 
 /******************************************************************************
                                  Package Typedefs
@@ -68,6 +68,10 @@ EXPORT BOOLEAN Ver_CheckVerAndDateMatch(void);
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: Version.h $
+ * 
+ * *****************  Version 74  *****************
+ * User: John Omalley Date: 6/14/16    Time: 4:34p
+ * Updated in $/software/control processor/code/drivers
  * 
  * *****************  Version 73  *****************
  * User: John Omalley Date: 12/18/15   Time: 11:27a

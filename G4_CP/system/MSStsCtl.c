@@ -10,7 +10,7 @@
     Description:  MicroServer Status and Control
 
     VERSION
-      $Revision: 69 $  $Date: 6/02/16 8:15a $
+      $Revision: 71 $  $Date: 6/14/16 3:47p $
 
 ******************************************************************************/
 
@@ -37,7 +37,7 @@
 /*****************************************************************************/
 /* Local Defines                                                             */
 /*****************************************************************************/
-#define MSSC_MIN_MSSIM_VER "2.1.0"
+#define MSSC_MIN_MSSIM_VER "2.1.4"
 /*****************************************************************************/
 /* Local Typedefs                                                            */
 /*****************************************************************************/
@@ -897,7 +897,7 @@ void MSSC_MSRspCallback(UINT16 Id, void* PacketData, UINT16 Size,
           m_HeartbeatTimer =
             (UINT32)CfgMgr_ConfigPtr()->MsscConfig.heartBeatLoss_s * MILLISECONDS_PER_SECOND;
         }
-        //MSSIM version less than 2.1.0 or decode
+        //MSSIM version less than 2.1.4 or decode
         else
         {
           strncpy_safe(log.sMssimVer, sizeof(log.sMssimVer),
@@ -1024,6 +1024,16 @@ void MSSC_GetMSInfoRspHandler(UINT16 Id, void* PacketData, UINT16 Size,
 /*************************************************************************
  *  MODIFICATIONS
  *    $History: MSStsCtl.c $
+ * 
+ * *****************  Version 71  *****************
+ * User: John Omalley Date: 6/14/16    Time: 3:47p
+ * Updated in $/software/control processor/code/system
+ * SCR 1334 - Updated ccomment from 2.1.0 to 2.1.4
+ * 
+ * *****************  Version 70  *****************
+ * User: John Omalley Date: 6/14/16    Time: 2:57p
+ * Updated in $/software/control processor/code/system
+ * SCR 1334 - Updated the MSSIM version to 2.1.4
  * 
  * *****************  Version 69  *****************
  * User: John Omalley Date: 6/02/16    Time: 8:15a
