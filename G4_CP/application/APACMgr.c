@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 34 $  $Date: 5/25/16 6:28p $
+      $Revision: 35 $  $Date: 6/21/16 10:13a $
 
 ******************************************************************************/
 
@@ -1237,7 +1237,7 @@ static void APACMgr_LogSummary ( APAC_COMMIT_ENUM commit )
   alog.reason = eng_ptr->vld.reason;
   alog.reason_summary = eng_ptr->vld.reason_summary; 
   alog.engHrs_prev_s = eng_ptr->hrs.prev_s;
-  alog.engHrs_curr_s = eng_ptr->hrs.curr_s;
+  alog.engHrs_curr_s = eng_ptr->hrs.start_s;
   alog.ittMargin = eng_ptr->itt.margin;
   alog.ittMax = eng_ptr->itt.max;
   alog.ittAvg = eng_ptr->itt.avgVal;
@@ -2529,6 +2529,12 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 35  *****************
+ * User: Peter Lee    Date: 6/21/16    Time: 10:13a
+ * Updated in $/software/control processor/code/application
+ * SCR #1317 Item #16 Update summary log field ".engHrs_curr_s" to be eng
+ * hrs @ start of APAC, not "free/running" current eng hrs. 
  * 
  * *****************  Version 34  *****************
  * User: Peter Lee    Date: 5/25/16    Time: 6:28p
