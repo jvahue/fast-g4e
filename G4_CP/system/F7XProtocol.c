@@ -12,7 +12,7 @@
                  Handler 
     
     VERSION
-      $Revision: 30 $  $Date: 6/10/16 11:21a $     
+      $Revision: 31 $  $Date: 6/23/16 6:59p $     
 
 ******************************************************************************/
 
@@ -751,9 +751,9 @@ BOOLEAN  F7XProtocol_Handler ( UINT8 *data, UINT16 cnt, UINT16 ch,
       F7XProtocol_UpdateUartMgrData( ch, data_ptr, word_info_ptr); 
  
       // Currently only one option. In future if more options, decode in init and set flags. 
-	  if ( status_ptr->optionRunTime.esn_enb == TRUE ) {
-         F7XProtocol_ESN_Decode( ch, (F7X_OPTION_CFG_PTR) &status_ptr->optionRunTime );
-	  }
+	    if ( status_ptr->optionRunTime.esn_enb == TRUE ) {
+           F7XProtocol_ESN_Decode( ch, (F7X_OPTION_CFG_PTR) &status_ptr->optionRunTime );
+	    }
     }
     
     // If no new frame update individual data loss calculation and update Uart Mgr 
@@ -2102,11 +2102,11 @@ F7X_OPTION_CFG F7XProtocol_ESN_Init( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr
   for (i=0;i<size;i++) 
   {	
     esn_word_loc2 = (esn_param_id2 == pCfg->ParamId[i]) ? i : esn_word_loc2;
-	esn_word_loc1 = (esn_param_id1 == pCfg->ParamId[i]) ? i : esn_word_loc1;
-	esn_word_loc0 = (esn_param_id0 == pCfg->ParamId[i]) ? i : esn_word_loc0;
+    esn_word_loc1 = (esn_param_id1 == pCfg->ParamId[i]) ? i : esn_word_loc1;
+    esn_word_loc0 = (esn_param_id0 == pCfg->ParamId[i]) ? i : esn_word_loc0;
 	
-	if ( (esn_word_loc2 != F7X_ESN_NOT_DEFINED) && (esn_word_loc1 != F7X_ESN_NOT_DEFINED) &&
-	     (esn_word_loc0 != F7X_ESN_NOT_DEFINED) ) {
+    if ( (esn_word_loc2 != F7X_ESN_NOT_DEFINED) && (esn_word_loc1 != F7X_ESN_NOT_DEFINED) &&
+         (esn_word_loc0 != F7X_ESN_NOT_DEFINED) ) {
       bAllFound = TRUE; 
       break;  // Exit early if all esn word locations found
     } 
@@ -2117,8 +2117,8 @@ F7X_OPTION_CFG F7XProtocol_ESN_Init( UINT16 ch, F7X_OPTION_CFG_PTR optionCfg_ptr
   optionRunTime.esn_gpa = optionCfg_ptr->esn_gpa & ~F7X_ESN_GPA_WORD_BITS; 
   optionRunTime.esn_gpa |= (bAllFound == TRUE) ?
 	                       ( F7X_ESN_GPA_W2_REMAP(esn_word_loc2) | 
-						     F7X_ESN_GPA_W1_REMAP(esn_word_loc1) |
-						     F7X_ESN_GPA_W0_REMAP(esn_word_loc0) ) : 0; 
+                           F7X_ESN_GPA_W1_REMAP(esn_word_loc1) |
+                           F7X_ESN_GPA_W0_REMAP(esn_word_loc0) ) : 0; 
   
   return (optionRunTime); 
 }
@@ -2152,7 +2152,7 @@ BOOLEAN F7XProtocol_FileInit(void)
 
   // Update App data
   NV_Write(NV_UART_F7X, 0, (void *) m_F7X_AppData,
-                       sizeof(F7X_APP_DATA) * UART_NUM_OF_UARTS);
+           sizeof(F7X_APP_DATA) * UART_NUM_OF_UARTS);
   return TRUE;
 }
 
@@ -2183,6 +2183,11 @@ void F7XProtocol_DisableLiveStream(void)
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: F7XProtocol.c $
+ * 
+ * *****************  Version 31  *****************
+ * User: Peter Lee    Date: 6/23/16    Time: 6:59p
+ * Updated in $/software/control processor/code/system
+ * Code Review Updates
  * 
  * *****************  Version 30  *****************
  * User: John Omalley Date: 6/10/16    Time: 11:21a

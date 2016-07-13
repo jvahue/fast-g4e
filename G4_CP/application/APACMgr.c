@@ -10,7 +10,7 @@
     Description: Contains all functions and data related to the APAC Function.
 
     VERSION
-      $Revision: 35 $  $Date: 6/21/16 10:13a $
+      $Revision: 36 $  $Date: 6/23/16 6:51p $
 
 ******************************************************************************/
 
@@ -43,7 +43,7 @@ EXPORT void DispProcessingApp_Initialize(BOOLEAN bEnable);
 /* Local Defines                                                             */
 /*****************************************************************************/
 #define APAC_CALC_BARO_CORR(x)      \
-     (1 - pow((x / 1013.25),0.190284)) * 145366.45;
+     ((1 - pow((x / 1013.25),0.190284)) * 145366.45);
 
 #define APAC_CALC_PALT_CORR(x,y) (x - y)
 
@@ -175,8 +175,8 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit );
 static void APACMgr_ClearStatus (void);
 static void APACMgr_GetDataValues (void);
 
-static BOOLEAN APACMgr_RestoreAppDataNVM ( void );
-static BOOLEAN APACMgr_RestoreAppDataHist( void );
+static void APACMgr_RestoreAppDataNVM ( void );
+static void APACMgr_RestoreAppDataHist( void );
 static void APACMgr_NVMAppendHistData( void );
 static void APACMgr_NVMHistRemoveEngData (APAC_ENG_ENUM eng );
 static void APACMgr_NVMUpdate ( APAC_ENG_ENUM eng_uut, APAC_VLD_REASON_ENUM reason,
@@ -659,9 +659,11 @@ BOOLEAN APACMgr_FileInitNVM(void)
  *               This function has the call signature required by the
  *               Fast State Manager's Task interface.
  *
- * Parameters:   [in] Param: Not used, for matching call sig. only.
+ * Parameters:   [in] param: Not used, for matching call sig. only.
  *
- * Returns:
+ * Returns:      TRUE - APAC Processing Active / Inprogress
+ * 
+ * Notes:        None
  *
  *****************************************************************************/
 BOOLEAN APACMgr_FSMGetState( INT32 param )
@@ -814,11 +816,12 @@ static void APACMgr_Running (void)
              (m_APAC_Status.run_state != APAC_RUN_STATE_FAULT)) );
   ASSERT ( m_APAC_Status.state == APAC_STATE_TEST_INPROGRESS );
   ASSERT ( m_APAC_Status.nr_sel != APAC_NR_SEL_MAX );
-
+  
   tick = CM_GetTickCount();
 
   eng_uut = m_APAC_Status.eng_uut;
   bResult1 = bResult2 = bResult3 = bResult4 = bResult5 = bResult6 = bResult7 = TRUE;
+  bResult = 0; 
 
   switch ( m_APAC_Status.run_state )
   {
@@ -1374,7 +1377,7 @@ static void APACMgr_LogAbortNCR ( APAC_COMMIT_ENUM commit )
    
   alog.reason_summary = (m_APAC_Status.eng_uut != APAC_ENG_MAX) ?
                  m_APAC_Status.eng[m_APAC_Status.eng_uut].vld.reason_summary :
-                 APAC_VLD_REASON_NONE ;
+                 (UINT16) APAC_VLD_REASON_NONE ;
    
   LogWriteETM (APP_ID_APAC_ABORT_NCR, LOG_PRIORITY_LOW, &alog, sizeof(alog), NULL);
 }
@@ -1410,7 +1413,7 @@ static void APACMgr_ClearStatus (void)
     memset ( (void *) &m_APAC_Status.eng[i].ng,  0, sizeof(APAC_ENG_CALC_DATA) );
   }
   snsr_status_ptr = (APAC_SNSR_STATUS_PTR) &m_APAC_Snsr_Status[0];
-  for (i=0;i<APAC_SNSR_MAX;i++) {
+  for (i=0;i< (UINT16) APAC_SNSR_MAX;i++) {
     snsr_status_ptr->bNotOk = FALSE; 
     snsr_status_ptr++; 
   }
@@ -1509,19 +1512,14 @@ static void APACMgr_GetDataValues (void)
  *
  * Parameters:  None
  *
- * Returns:     True always returned
+ * Returns:     None
  *
  * Notes:       None
  *
  *****************************************************************************/
-static
-BOOLEAN APACMgr_RestoreAppDataHist( void )
+static void APACMgr_RestoreAppDataHist( void )
 {
   RESULT result;
-  BOOLEAN bOk;
-
-
-  bOk = TRUE;
 
   result = NV_Open(NV_APAC_HIST);
 
@@ -1533,8 +1531,7 @@ BOOLEAN APACMgr_RestoreAppDataHist( void )
   // If open failed, re-init app data
   if ( result != SYS_OK )
   {
-    bOk = APACMgr_FileInitHist();
-    bOk = FALSE;  // Always return fail if we have to re-init File
+    APACMgr_FileInitHist();
     // Note: m_APAC_Hist_Status already cleared at this point
   }
   else // History Data retrieved
@@ -1542,7 +1539,6 @@ BOOLEAN APACMgr_RestoreAppDataHist( void )
     APACMgr_RestoreAppDataHistOrder(); 
   } // end else History Data retrieved
 
-  return (bOk);
 }
 
 
@@ -1617,22 +1613,19 @@ void APACMgr_RestoreAppDataHistOrder( void )
  *
  * Parameters:  None
  *
- * Returns:     True always returned
+ * Returns:     None
  *
  * Notes:
  *  - m_APAC_Cfg s/b be restored from NVM before calling this func
  *
  *****************************************************************************/
-static
-BOOLEAN APACMgr_RestoreAppDataNVM ( void )
+static void APACMgr_RestoreAppDataNVM ( void )
 {
   RESULT result;
-  BOOLEAN bOk;
   APAC_ENG_ENUM i;
   APAC_VLD_REASON_ENUM reason[APAC_ENG_MAX];
   INT32 crc,prev_crc;
 
-  bOk = TRUE;
 
   result = NV_Open(NV_APAC_NVM);
   if ( result == SYS_OK )
@@ -1642,8 +1635,7 @@ BOOLEAN APACMgr_RestoreAppDataNVM ( void )
   // If open failed, re-init app data
   if ( result != SYS_OK )
   {
-    bOk = APACMgr_FileInitNVM();
-    bOk = FALSE;  // Always return fail if we have to re-init File
+    APACMgr_FileInitNVM();
   }
   else // NVM Data retrieved
   {
@@ -1670,7 +1662,6 @@ BOOLEAN APACMgr_RestoreAppDataNVM ( void )
     } // end for loop thru engs and if need to update __NVMUpdate()
   } // end else NVM Data retrieved
 
-  return (bOk);
 }
 
 
@@ -2172,7 +2163,8 @@ APAC_STATUS_PTR APACMgr_GetStatus (void)
  * Parameters:  baro_corr - baro correction constant
  *              baro_pres - baro pressue (ave over sample period)
  *              tq - current tq (ave over sample period)
- *              common_ptr - ptr to APAC_ENG_CALC_COMMON_PTR
+ *              common_ptr - ptr to APAC_ENG_CALC_COMMON
+ *              palt_coeff_ptr - ptr to APAC_PALT_COEFF_TBL
  *
  * Returns:     TRUE if tqCorr calculated
  *
@@ -2182,7 +2174,7 @@ APAC_STATUS_PTR APACMgr_GetStatus (void)
 static
 BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
                             APAC_ENG_CALC_COMMON_PTR common_ptr, 
-							APAC_PALT_COEFF_TBL_PTR palt_coeff_ptr)
+                            APAC_PALT_COEFF_TBL_PTR palt_coeff_ptr)
 {
   FLOAT64 baro_conv, palt_corr;
   FLOAT64 ax1,ax2,ay1,ay2;
@@ -2215,7 +2207,8 @@ BOOLEAN APACMgr_CalcTqCorr (FLOAT64 baro_corr, FLOAT64 baro_pres, FLOAT64 tq,
   common_ptr->calcPALT = palt_corr;
 
   GSE_DebugStr (NORMAL,TRUE,
-     "APACMgr: APACMgr_CalcTqCorr() bi=%1.1f,pi=%1.1f,ti=%1.1f,bc=%1.1f,pc=%1.1f,co=%1.4f,t=%1.1f,ok=%d\r\n",
+     "APACMgr: APACMgr_CalcTqCorr() "
+     "bi=%1.1f,pi=%1.1f,ti=%1.1f,bc=%1.1f,pc=%1.1f,co=%1.4f,t=%1.1f,ok=%d\r\n",
      baro_corr, baro_pres,tq,baro_conv,palt_corr,common_ptr->coeffPALT,common_ptr->tqCorr,ok);
 
   return (ok);
@@ -2320,8 +2313,10 @@ BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val, APAC_TBL_
 
       res = APAC_CALC_MARGIN_COEFF(c0,c1,c2,c3,c4,tqDelta);
 
-      GSE_DebugStr (NORMAL,TRUE,"APACMgr: APACMgr_CalcMargin() p=%d,c0=%1.6f,c1=%1.6f,c2=%1.6f,c3=%1.6f,c4=%1.6f\r\n",
-                        i, c0, c1, c2, c3, c4 );
+      GSE_DebugStr (NORMAL,TRUE,
+	                 "APACMgr: APACMgr_CalcMargin()"
+                   " p=%d,c0=%1.6f,c1=%1.6f,c2=%1.6f,c3=%1.6f,c4=%1.6f\r\n",
+                    i, c0, c1, c2, c3, c4 );
 
       // Calc margin within range
       if ( (res >= tbl_ptr->param_min) && (res <= tbl_ptr->param_max) ) {
@@ -2330,8 +2325,10 @@ BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val, APAC_TBL_
         break;
       }
       else {
-        GSE_DebugStr (NORMAL,TRUE,"APACMgr: APACMgr_CalcMargin() max=%1.2f Range Failed (%1.2f,%1.2f)\r\n",
-                          res,tbl_ptr->param_min,tbl_ptr->param_max);
+        GSE_DebugStr (NORMAL,TRUE,
+					            "APACMgr: APACMgr_CalcMargin()"
+                      " max=%1.2f Range Failed (%1.2f,%1.2f)\r\n",
+                      res,tbl_ptr->param_min,tbl_ptr->param_max);
         break;
       }
     }
@@ -2345,8 +2342,10 @@ BOOLEAN APACMgr_CalcMargin (FLOAT64 oat, FLOAT64 tqDelta, FLOAT64 val, APAC_TBL_
   *margin_ptr = margin;
   *max_ptr = res;
 
-  GSE_DebugStr (NORMAL,TRUE,"APACMgr: APACMgr_CalcMargin() o=%1.2f,t=%1.2f,v=%1.2f,mrg=%1.2f(%1.2f),max=%1.2f,ok=%d\r\n",
-                    oat, tqDelta, val, *margin_ptr, adj, *max_ptr, ok);
+  GSE_DebugStr (NORMAL,TRUE,
+                "APACMgr: APACMgr_CalcMargin()"
+                " o=%1.2f,t=%1.2f,v=%1.2f,mrg=%1.2f(%1.2f),mx=%1.2f,ok=%d\r\n",
+                oat, tqDelta, val, *margin_ptr, adj, *max_ptr, ok);
 
   c_ptr->c0 = c0;
   c_ptr->c1 = c1;
@@ -2529,6 +2528,11 @@ static void APACMgr_Simulate ( void )
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.c $
+ * 
+ * *****************  Version 36  *****************
+ * User: Peter Lee    Date: 6/23/16    Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates. 
  * 
  * *****************  Version 35  *****************
  * User: Peter Lee    Date: 6/21/16    Time: 10:13a
