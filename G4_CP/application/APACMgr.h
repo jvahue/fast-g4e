@@ -12,7 +12,7 @@
     Description: Contains data structures related to the APACMgr function
 
     VERSION
-      $Revision: 20 $  $Date: 5/16/16 4:33p $
+      $Revision: 21 $  $Date: 6/23/16 6:51p $
 
 ******************************************************************************/
 
@@ -122,7 +122,6 @@
 #define APAC_ERRMSG_TITLE_SETUP       "CONFIG ERROR"
 #define APAC_ERRMSG_TITLE_HIGE_LOW    "PAC NO START"
 #define APAC_ERRMSG_TITLE_STABILIZING "PAC NOT STBL"
-#define APAC_ERRMSG_TITLE_SAMPLING    "PAC NOT STBL"
 #define APAC_ERRMSG_TITLE_COMPUTE     "COMPUTE ERR "
 
 #define APAC_ENG_IDLE_SET   1.0f
@@ -386,6 +385,7 @@ typedef struct { // Calc common data used for both ITT and NG Calc
   FLOAT64 tqCorr;    // Calculated TQ Corrected Value
 } APAC_ENG_CALC_COMMON, *APAC_ENG_CALC_COMMON_PTR;
 
+#ifdef APACMGR_CYCLE_CBIT_INCR
 typedef enum {
   APAC_ENG_CYC_CHK_IDLE, // Engine is off
   APAC_ENG_CYC_CHK_MONITOR, // Check cycle is counting
@@ -399,6 +399,7 @@ typedef struct {
   UINT32 prev_cyc_cnt; // Prev cycle count
   UINT16 fail_cnt;     // # time cycle cnt not incr
 } APAC_ENG_CYC_CHK, *APAC_ENG_CYC_CHK_PTR; 
+#endif
 
 typedef struct {
   APAC_ENG_HRS_STATUS hrs;
@@ -411,7 +412,9 @@ typedef struct {
 
   APAC_ENG_CALC_DATA itt;
   APAC_ENG_CALC_DATA ng;
+#ifdef APACMGR_CYCLE_CBIT_INCR  
   APAC_ENG_CYC_CHK cyc_chk; 
+#endif  
   ENGRUN_INDEX engineRunIndex; 
 } APAC_ENG_STATUS, *APAC_ENG_STATUS_PTR;
 
@@ -453,7 +456,7 @@ typedef struct {
 #define APAC_INLET_CHART_MAX_LEN   6  //  5 + '\0'
 #define APAC_INLET_CHART_PART_LEN  40 // 39 + '\0' 
 #define APAC_INLET_CHART_REV_LEN   2  //  1 + '\0'
-#define APAC_INLET_CHART_REV_1ST_CHAR  0 
+//#define APAC_INLET_CHART_REV_1ST_CHAR  0 
 #define APAC_INLET_CHART_NR_LEN    4  //  3 + '\0'
 typedef struct {
   APAC_TBL_ENTRY p[APAC_TBL_MAX_ENTRIES];
@@ -501,11 +504,11 @@ typedef struct {
 typedef struct {
   CHAR str[APAC_ERRMSG_CHAR_MAX];
 } APAC_STATE_RUN_STR, *APAC_STATE_RUN_STR_PTR;
-
+/*
 typedef struct {
   APAC_STATE_RUN_STR entry[APAC_RUN_STATE_MAX];
 } APAC_STATE_RUN_STR_BUFF, *APAC_STATE_RUN_STR_BUFF_PTR;
-
+*/
 
 // If this enum changes then APAC_SNSR_NAMES_CFG must also be updated
 typedef enum {
@@ -528,12 +531,12 @@ typedef struct {
   BOOLEAN bNotOk;                 // Item / Object is Not Ok if TRUE
   CHAR str[APAC_ERRMSG_CHAR_MAX]; // Display Msg Name
 } APAC_SNSR_STATUS, *APAC_SNSR_STATUS_PTR;
-
+/*
 typedef struct {
   CHAR chart[APAC_MENU_DISPLAY_CHAR_MAX];
   CHAR issue[APAC_MENU_DISPLAY_CHAR_MAX];
 } APAC_INLET_CFG_STR, *APAC_AC_CFG_STR_PTR;
-
+*/
 // Need NVM status command
 
 
@@ -702,6 +705,11 @@ EXPORT BOOLEAN APACMgr_FSMGetState( INT32 param );
 /*****************************************************************************
  *  MODIFICATIONS
  *    $History: APACMgr.h $
+ * 
+ * *****************  Version 21  *****************
+ * User: Peter Lee    Date: 6/23/16    Time: 6:51p
+ * Updated in $/software/control processor/code/application
+ * Code Review Updates. 
  * 
  * *****************  Version 20  *****************
  * User: Peter Lee    Date: 5/16/16    Time: 4:33p
